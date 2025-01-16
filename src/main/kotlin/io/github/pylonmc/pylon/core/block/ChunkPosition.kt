@@ -5,8 +5,8 @@ import org.bukkit.Location
 import org.bukkit.block.Block
 
 class ChunkPosition(x: Int, z: Int) {
-    private val asLong = x.toLong().shl(32).or(z.toLong().and(0xFFFFFFFFL))
-    val x = asLong.shr(32).toInt()
+    private val asLong = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
+    val x = (asLong shr 32).toInt()
     val y = asLong.toInt()
 
     constructor(chunk: Chunk) : this(chunk.x, chunk.z)
