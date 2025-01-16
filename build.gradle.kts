@@ -74,7 +74,7 @@ tasks.runServer {
 }
 
 signing {
-    useInMemoryPgpKeys(System.getenv("PGP_ID"), System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
+    useInMemoryPgpKeys(System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
 }
 
 centralPortal {
