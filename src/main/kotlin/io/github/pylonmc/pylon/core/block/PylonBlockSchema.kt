@@ -9,7 +9,8 @@ import io.github.pylonmc.pylon.core.state.StateReader
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
-import java.lang.reflect.Constructor
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodHandles
 
 open class PylonBlockSchema(
     private val idWithoutNamespace: String,
@@ -25,18 +26,14 @@ open class PylonBlockSchema(
             return NamespacedKey(addon!!.javaPlugin, idWithoutNamespace)
         }
 
-    internal val placeConstructor: Constructor<PylonBlock<PylonBlockSchema>> = try {
-        val c = blockClass.getConstructor(PylonBlockSchema::class.java)
-        c.isAccessible = true
-        c
+    internal val placeConstructor: MethodHandle = try {
+        MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(PylonBlockSchema::class.java))
     } catch (e: NoSuchMethodException) {
         throw MissingPlaceConstructorException(idWithoutNamespace)
     }
 
-    internal val loadConstructor: Constructor<PylonBlock<PylonBlockSchema>> = try {
-        val c = blockClass.getConstructor(StateReader::class.java, Block::class.java)
-        c.isAccessible = true
-        c
+    internal val loadConstructor: MethodHandle = try {
+        MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(StateReader::class.java, Block::class.java))
     } catch (e: NoSuchMethodException) {
         throw MissingLoadConstructorException(idWithoutNamespace)
     }
