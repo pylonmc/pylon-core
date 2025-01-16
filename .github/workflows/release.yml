@@ -1,0 +1,37 @@
+name: Create new Release
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: 'Pylon artifact name'
+        required: true
+        type: string
+    secrets:
+      ACCESS_TOKEN:
+        required: true
+
+jobs:
+  release:
+    name: Create new release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.1.1
+
+    - name: Download SlimeLib
+      uses: actions/download-artifact@v4.1.7
+      with:
+        name: ${{ inputs.artifact-name }}
+
+    - name: Create Release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.ACCESS_TOKEN }}
+        draft: false
+        prerelease: false
+        automatic_release_tag: v${{ github.run_number }}
+        title: Release ${{ github.run_number }}
+        files: |
+          *.jar
