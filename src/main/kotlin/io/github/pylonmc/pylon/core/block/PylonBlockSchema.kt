@@ -14,7 +14,7 @@ import java.lang.reflect.Constructor
 open class PylonBlockSchema(
     private val idWithoutNamespace: String,
     val material: Material,
-    blockClass: Class<PylonBlock>,
+    blockClass: Class<PylonBlock<PylonBlockSchema>>,
 ) {
     private var addon: PylonAddon? = null
     val id: NamespacedKey
@@ -25,7 +25,7 @@ open class PylonBlockSchema(
             return NamespacedKey(addon!!.javaPlugin, idWithoutNamespace)
         }
 
-    internal val placeConstructor: Constructor<PylonBlock> = try {
+    internal val placeConstructor: Constructor<PylonBlock<PylonBlockSchema>> = try {
         val c = blockClass.getConstructor(PylonBlockSchema::class.java)
         c.isAccessible = true
         c
@@ -33,7 +33,7 @@ open class PylonBlockSchema(
         throw MissingPlaceConstructorException(idWithoutNamespace)
     }
 
-    internal val loadConstructor: Constructor<PylonBlock> = try {
+    internal val loadConstructor: Constructor<PylonBlock<PylonBlockSchema>> = try {
         val c = blockClass.getConstructor(StateReader::class.java, Block::class.java)
         c.isAccessible = true
         c
@@ -44,7 +44,7 @@ open class PylonBlockSchema(
     fun register(addon: PylonAddon) {
         val newId = NamespacedKey(addon.javaPlugin, idWithoutNamespace)
         if (isSchemaRegistered(newId)) {
-            throw AlreadyRegisteredException(newId)
+            throw AlreadyRegisteredException(idWithoutNamespace)
         }
         this.addon = addon
         schemas[newId] = this
@@ -57,10 +57,16 @@ open class PylonBlockSchema(
 
         fun getRegisteredSchemas(): MutableCollection<PylonBlockSchema> = schemas.values
 
-        fun getRegisteredSchemasByAddon(addon: PylonAddon): MutableCollection<PylonBlockSchema> = schemas.values
+        fun getRegisteredSchemasByAddon(addon: PylonAddon): List<PylonBlockSchema>
+            = schemas.values.filter { it.addon == addon }
 
         fun isSchemaRegistered(id: NamespacedKey): Boolean = schemas.containsKey(id)
 
-        fun unregisterSchema(id: NamespacedKey): PylonBlockSchema? = schemas.remove(id)
+        fun reloadSchema(id: NamespacedKey, newSchema: PylonBlockSchema) {
+            if (!schemas.containsKey(id)) {
+                throw NotRegisteredException(id.key)
+            }
+            schemas[id] = newSchema
+        }
     }
 }
