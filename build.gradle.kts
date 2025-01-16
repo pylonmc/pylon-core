@@ -1,9 +1,12 @@
 plugins {
     idea
+    `java-library`
     kotlin("jvm") version "2.1.0"
     id("com.gradleup.shadow") version "8.3.2"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
     id("xyz.jpenilla.run-paper") version "2.3.0"
+    signing
+    id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
 }
 
 group = "io.github.pylon-paper"
@@ -68,4 +71,25 @@ bukkit {
 tasks.runServer {
     maxHeapSize = "4G"
     minecraftVersion("1.21.4")
+}
+
+signing {
+    useInMemoryPgpKeys(System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
+}
+
+centralPortal {
+    pom {
+        url = "https://github.com/pylonmc/pylon-core"
+        licenses {
+            license {
+                name = "GNU Lesser General Public License Version 3"
+                url = "https://www.gnu.org/licenses/lgpl-3.0.txt"
+            }
+        }
+        scm {
+            connection = "scm:git:git://github.com/pylonmc/pylon-core.git"
+            developerConnection = "scm:git:ssh://github.com:pylonmc/pylon-core.git"
+            url = "https://github.com/pylonmc/pylon-core"
+        }
+    }
 }
