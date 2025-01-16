@@ -78,6 +78,8 @@ signing {
 }
 
 centralPortal {
+    username = System.getenv("SONATYPE_USERNAME")
+    password = System.getenv("SONATYPE_PASSWORD")
     pom {
         url = "https://github.com/pylonmc/pylon-core"
         licenses {
