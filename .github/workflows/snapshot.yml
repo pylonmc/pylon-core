@@ -1,4 +1,4 @@
-name: Kotlin CI with Gradle
+name: Publish -SNAPSHOT to Central Repository
 
 on:
   push:
