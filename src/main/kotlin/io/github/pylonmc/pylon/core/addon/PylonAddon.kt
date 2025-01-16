@@ -1,5 +1,8 @@
 package io.github.pylonmc.pylon.core.addon
 
+import org.bukkit.plugin.java.JavaPlugin
+
 interface PylonAddon {
-    fun name(): String;
+    val id: String
+    val javaPlugin: JavaPlugin
 }

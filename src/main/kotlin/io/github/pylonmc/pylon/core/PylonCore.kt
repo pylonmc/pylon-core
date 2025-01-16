@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core
 
+import io.github.pylonmc.pylon.core.addon.PylonAddon
 import org.bukkit.plugin.java.JavaPlugin
 
 class PylonCore : JavaPlugin() {
