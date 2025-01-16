@@ -24,3 +24,8 @@ jobs:
 
     - name: Publish snapshot
       run: ./gradlew publishToCentralPortal
+      env:
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        SIGNING_KEY: ${{ secrets.PGP_KEY }}
+        SIGNING_PASSWORD: ${{ secrets.PGP_PASSWORD }}
