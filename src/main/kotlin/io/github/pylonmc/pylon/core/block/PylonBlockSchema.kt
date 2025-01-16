@@ -44,7 +44,7 @@ open class PylonBlockSchema(
     fun register(addon: PylonAddon) {
         val newId = NamespacedKey(addon.javaPlugin, idWithoutNamespace)
         if (isSchemaRegistered(newId)) {
-            throw AlreadyRegisteredException(idWithoutNamespace)
+            throw AlreadyRegisteredException(newId.toString())
         }
         this.addon = addon
         schemas[newId] = this

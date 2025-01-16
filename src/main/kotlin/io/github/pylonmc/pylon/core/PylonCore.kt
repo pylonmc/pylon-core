@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.core
 import org.bukkit.plugin.java.JavaPlugin
 
 class PylonCore : JavaPlugin() {
-
     override fun onEnable() {
         instance = this
         logger.info("Hello, World!")
