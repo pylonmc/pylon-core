@@ -5,8 +5,46 @@ on:
     tags: ['*']
 
 jobs:
-  build:
 
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - id: env-setup
+      run: |
+        sed -i "s/version = \"UNKNOWN-SNAPSHOT\"/version = \"0.${{ github.run_number }}-SNAPSHOT\"/g" pylon-core/build.gradle.kts
+
+    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+    - name: Build with Gradle Wrapper
+      run: ./gradlew build
+
+    - name: Upload the artifact
+      uses: actions/upload-artifact@v4.3.1
+      with:
+        name: pylon
+        path: 'build/libs/pylon-core-${{ github.run_number }}.jar'
+
+  test-build:
+    needs: [build]
+    uses: ./.github/workflows/live-testing.yml
+    with:
+      artifact-name: pylon-core-${{ github.run_number }}
+
+  publish-snapshot:
+    needs: [test-build]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,3 +67,11 @@ jobs:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         SIGNING_KEY: ${{ secrets.PGP_KEY }}
         SIGNING_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+        
+  release-build:
+    needs: [test-build]
+    uses: ./.github/workflows/release.yml
+    with:
+      artifact-name: pylon-core-${{ github.run_number }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
