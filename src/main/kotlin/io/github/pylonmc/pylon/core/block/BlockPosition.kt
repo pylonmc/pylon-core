@@ -5,13 +5,13 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.lang.ref.WeakReference
 
-class BlockPosition(world: World, val x: Int, val y: Int, val z: Int) {
+class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     private val worldRef: WeakReference<World> = WeakReference(world)
     val world: World?
         get() = worldRef.get()
 
-    val chunk: ChunkPosition?
-        get() = world?.let { ChunkPosition(it, x shr 4, z shr 4) }
+    val chunk: ChunkPosition
+        get() = ChunkPosition(world, x shr 4, z shr 4)
 
     val asLong: Long
         get() = ((x and 0x3FFFFFF).toLong() shl 38)
