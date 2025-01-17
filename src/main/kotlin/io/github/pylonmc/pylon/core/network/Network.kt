@@ -16,13 +16,23 @@ abstract class Network(val origin: Location) {
     var allNodes: Set<NetworkTree> = setOf(root)
         private set
 
-    val leaves: Set<NetworkTree.Leaf>
-        get() = allNodes.filterIsInstance<NetworkTree.Leaf>().toSet()
+    var leaves: Set<NetworkTree.Leaf> = setOf(root as NetworkTree.Leaf)
+        private set
 
-    val branches: Set<NetworkTree.Branch>
-        get() = allNodes.filterIsInstance<NetworkTree.Branch>().toSet()
+    var branches: Set<NetworkTree.Branch> = emptySet()
+        private set
+
+    protected open val scanDirections: Array<BlockFace> = arrayOf(
+        BlockFace.NORTH,
+        BlockFace.EAST,
+        BlockFace.SOUTH,
+        BlockFace.WEST,
+        BlockFace.UP,
+        BlockFace.DOWN
+    )
 
     abstract fun isValidBlock(block: Block): Boolean
+    abstract fun isLeaf(block: Block): Boolean
 
     open fun scan() {
         val rootTree = MutableNetworkTree(origin.block)
@@ -35,11 +45,13 @@ abstract class Network(val origin: Location) {
             }
             val currentNode = MutableNetworkTree(block)
             parentNode.children.add(currentNode)
-            for (direction in ORTHOGONAL) {
-                repeat(checkDistance) {
-                    val relative = block.getRelative(direction, it)
-                    if (isValidBlock(relative)) {
-                        scanQueue.addLast(NextScan(relative, currentDepth + 1, currentNode))
+            if (!isLeaf(block)) {
+                for (direction in scanDirections) {
+                    repeat(checkDistance) {
+                        val relative = block.getRelative(direction, it)
+                        if (isValidBlock(relative)) {
+                            scanQueue.addLast(NextScan(relative, currentDepth + 1, currentNode))
+                        }
                     }
                 }
             }
@@ -47,6 +59,8 @@ abstract class Network(val origin: Location) {
 
         root = rootTree.toImmutable()
         allNodes = allNodes(root)
+        leaves = allNodes.filterIsInstance<NetworkTree.Leaf>().toSet()
+        branches = allNodes.filterIsInstance<NetworkTree.Branch>().toSet()
     }
 
     private fun allNodes(node: NetworkTree): Set<NetworkTree> {
@@ -71,12 +85,3 @@ abstract class Network(val origin: Location) {
         }
     }
 }
-
-private val ORTHOGONAL = arrayOf(
-    BlockFace.NORTH,
-    BlockFace.EAST,
-    BlockFace.SOUTH,
-    BlockFace.WEST,
-    BlockFace.UP,
-    BlockFace.DOWN
-)
