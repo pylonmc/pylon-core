@@ -18,13 +18,12 @@ open class PylonBlockSchema(
     blockClass: Class<PylonBlock<PylonBlockSchema>>,
 ) {
     private var addon: PylonAddon? = null
-    val id: NamespacedKey
-        get() {
-            if (addon == null) {
-                throw NotRegisteredException(idWithoutNamespace)
-            }
-            return NamespacedKey(addon!!.javaPlugin, idWithoutNamespace)
+    val id: NamespacedKey by lazy {
+        if (addon == null) {
+            throw NotRegisteredException(idWithoutNamespace)
         }
+        NamespacedKey(addon!!.javaPlugin, idWithoutNamespace)
+    }
 
     internal val placeConstructor: MethodHandle = try {
         MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(PylonBlockSchema::class.java))
