@@ -38,3 +38,6 @@ class BlockPosition(world: World, val x: Int, val y: Int, val z: Int) {
         return false
     }
 }
+
+val Block.position: BlockPosition
+    get() = BlockPosition(this)

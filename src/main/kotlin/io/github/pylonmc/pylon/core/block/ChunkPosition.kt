@@ -32,3 +32,6 @@ class ChunkPosition(world: World, val x: Int, val z: Int) {
                 && other.z == z
     }
 }
+
+val Chunk.position: ChunkPosition
+    get() = ChunkPosition(this)
