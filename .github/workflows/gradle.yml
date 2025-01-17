@@ -2,12 +2,18 @@ name: Kotlin CI with Gradle
 
 on:
   push:
-    branches: [ "*" ]
+    branches:
+    - master
+    paths:
+    - 'src/**'
   pull_request:
     branches: [ "*" ]
+    paths:
+    - 'src/**'
 
 jobs:
   build:
+    if: startsWith(github.event.head_commit.message, '[CI Skip]') == false
 
     runs-on: ubuntu-latest
     permissions:
@@ -21,6 +27,10 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
+    - id: env-setup
+      run: |
+        sed -i "s/version = \"UNKNOWN-SNAPSHOT\"/version = \"0.${{ github.run_number }}-SNAPSHOT\"/g" pylon-core/build.gradle.kts
+
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
@@ -29,8 +39,14 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
-  dependency-submission:
+    - name: Upload the artifact
+      uses: actions/upload-artifact@v4.3.1
+      with:
+        name: pylon
+        path: 'build/libs/pylon-core-${{ github.run_number }}.jar'
 
+  dependency-submission:
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -47,3 +63,19 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+
+  test-build:
+    needs: [build]
+    uses: ./.github/workflows/live-testing.yml
+    with:
+      artifact-name: pylon-core-${{ github.run_number }}
+
+  release-build:
+    if: startsWith(github.event.head_commit.message, '[Release]') == true
+    needs: [test-build]
+    uses: ./.github/workflows/release.yml
+    with:
+      artifact-name: pylon-core-${{ github.run_number }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
