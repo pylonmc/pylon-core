@@ -6,11 +6,15 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.lang.ref.WeakReference
 
-class ChunkPosition(world: World, x: Int, z: Int) {
-    val world: WeakReference<World> = WeakReference(world)
-    private val asLong = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
-    val x = (asLong shr 32).toInt()
-    val y = asLong.toInt()
+class ChunkPosition(world: World?, val x: Int, val z: Int) {
+    private val worldRef: WeakReference<World> = WeakReference(world)
+    val world: World?
+        get() = worldRef.get()
+
+    val asLong: Long
+        get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
+
+    constructor(world: World, asLong: Long) : this(world, (asLong shr 32).toInt(), asLong.toInt())
 
     constructor(chunk: Chunk) : this(chunk.world, chunk.x, chunk.z)
 
@@ -19,10 +23,16 @@ class ChunkPosition(world: World, x: Int, z: Int) {
     constructor(block: Block) : this(block.chunk)
 
     override fun hashCode(): Int {
-        return asLong.hashCode()
+        val prime = 31
+        return prime * (world?.hashCode() ?: 0) + prime * asLong.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {
-        return (other is ChunkPosition) && other.asLong == asLong
+        return (other is ChunkPosition)
+                && other.x == x
+                && other.z == z
     }
 }
+
+val Chunk.position: ChunkPosition
+    get() = ChunkPosition(this)
