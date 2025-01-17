@@ -6,7 +6,7 @@ import org.bukkit.block.Block
 import java.lang.ref.WeakReference
 
 class BlockPosition(world: World, x: Int, y: Int, z: Int) {
-    private val world: WeakReference<World> = WeakReference(world)
+    val world: WeakReference<World> = WeakReference(world)
     private var asLong: Long = ((x and 0x3FFFFFF).toLong() shl 38)
         .or((z and 0x3FFFFFF).toLong() shl 12)
         .or((y and 0xFFF).toLong())
@@ -19,7 +19,7 @@ class BlockPosition(world: World, x: Int, y: Int, z: Int) {
     val y: Int = ((asLong shl 52) shr 52).toInt()
     val z: Int = ((asLong shl 26) shr 38).toInt()
 
-    val chunk = ChunkPosition(x shr 4, z shr 4)
+    val chunk = ChunkPosition(world, x shr 4, z shr 4)
 
     override fun hashCode(): Int {
         val prime = 31
