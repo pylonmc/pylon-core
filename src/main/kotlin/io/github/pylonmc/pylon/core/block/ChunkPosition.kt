@@ -10,6 +10,8 @@ class ChunkPosition(world: World, val x: Int, val z: Int) {
     val world: WeakReference<World> = WeakReference(world)
     val asLong = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
 
+    constructor(world: World, asLong: Long) : this(world, (asLong shr 32).toInt(), asLong.toInt())
+
     constructor(chunk: Chunk) : this(chunk.world, chunk.x, chunk.z)
 
     constructor(location: Location) : this(location.chunk)
