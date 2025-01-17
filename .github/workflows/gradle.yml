@@ -70,12 +70,3 @@ jobs:
     uses: ./.github/workflows/live-testing.yml
     with:
       artifact-name: pylon-core-${{ github.run_number }}
-
-  release-build:
-    if: startsWith(github.event.head_commit.message, '[Release]') == true
-    needs: [test-build]
-    uses: ./.github/workflows/release.yml
-    with:
-      artifact-name: pylon-core-${{ github.run_number }}
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
