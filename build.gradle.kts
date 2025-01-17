@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "io.github.pylon-paper"
-version = "0.1-SNAPSHOT"
+version = "UNKNOWN-SNAPSHOT"
 
 repositories {
     mavenCentral()
