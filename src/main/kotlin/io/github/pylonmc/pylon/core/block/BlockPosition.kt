@@ -5,15 +5,22 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.lang.ref.WeakReference
 
-class BlockPosition(world: World, x: Int, y: Int, z: Int) {
-    val world: WeakReference<World> = WeakReference(world)
-    private var asLong: Long = ((x and 0x3FFFFFF).toLong() shl 38)
+class BlockPosition(world: World, val x: Int, val y: Int, val z: Int) {
+    private val worldRef: WeakReference<World> = WeakReference(world)
+    val world: World?
+        get() = worldRef.get()
+
+    val chunk
+        get() = world?.let { ChunkPosition(it, x shr 4, z shr 4) }
+
+    val asLong: Long = ((x and 0x3FFFFFF).toLong() shl 38)
         .or((z and 0x3FFFFFF).toLong() shl 12)
         .or((y and 0xFFF).toLong())
-    val x: Int = (asLong shr 38).toInt()
-    val y: Int = ((asLong shl 52) shr 52).toInt()
-    val z: Int = ((asLong shl 26) shr 38).toInt()
-    val chunk = ChunkPosition(world, x shr 4, z shr 4)
+
+    constructor(world: World, asLong: Long) : this(world,
+        (asLong shr 38).toInt(),
+        ((asLong shl 52) shr 52).toInt(),
+        ((asLong shl 26) shr 38).toInt())
 
     constructor(location: Location) : this(location.world, location.blockX, location.blockY, location.blockZ)
 
@@ -21,13 +28,12 @@ class BlockPosition(world: World, x: Int, y: Int, z: Int) {
 
     override fun hashCode(): Int {
         val prime = 31
-        val ref = world.get()
-        return prime * (ref?.hashCode() ?: 0) + prime * asLong.hashCode()
+        return prime * (world?.hashCode() ?: 0) + prime * asLong.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other is BlockPosition && world.get() != null && other.world.get() != null) {
-            return other.world.get()!!.uid == world.get()!!.uid && other.asLong == asLong
+        if (other is BlockPosition && world != null && other.world != null) {
+            return other.world!!.uid == world!!.uid && other.asLong == asLong
         }
         return false
     }
