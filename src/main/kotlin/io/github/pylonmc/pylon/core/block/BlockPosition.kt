@@ -29,10 +29,8 @@ class BlockPosition(world: World, x: Int, y: Int, z: Int) {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other is BlockPosition) {
-            if (world.get() != null && other.world.get() != null) {
-                return other.world.get()!!.uid == world.get()!!.uid && other.asLong == asLong
-            }
+        if (other is BlockPosition && world.get() != null && other.world.get() != null) {
+            return other.world.get()!!.uid == world.get()!!.uid && other.asLong == asLong
         }
         return false
     }
