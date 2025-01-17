@@ -32,3 +32,6 @@ class BlockPosition(world: World, x: Int, y: Int, z: Int) {
         return false
     }
 }
+
+val Block.position: BlockPosition
+    get() = BlockPosition(this)
