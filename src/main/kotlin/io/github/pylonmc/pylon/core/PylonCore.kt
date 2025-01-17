@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.core
 import org.bukkit.plugin.java.JavaPlugin
 
 class PylonCore : JavaPlugin() {
-
     override fun onEnable() {
         instance = this
         logger.info("Hello, World!")
@@ -21,4 +20,4 @@ class PylonCore : JavaPlugin() {
 
 // for internal use so we don't have to !! all the time
 internal val pluginInstance: PylonCore
-    get() = PylonCore.instance ?: error("PyloCore instance is not initialized")
+    get() = PylonCore.instance ?: error("PylonCore instance is not initialized")
