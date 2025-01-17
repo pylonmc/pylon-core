@@ -10,7 +10,7 @@ plugins {
     id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
 }
 
-group = "io.github.pylon-paper"
+group = "io.github.pylonmc"
 version = "UNKNOWN-SNAPSHOT"
 
 
