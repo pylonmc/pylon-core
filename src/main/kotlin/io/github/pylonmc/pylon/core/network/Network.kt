@@ -13,6 +13,14 @@ abstract class Network(val origin: Location) {
     open val maxNetworkDepth: Int = Int.MAX_VALUE
 
     var root: NetworkTree = NetworkTree.Leaf(origin.block.position)
+    var allNodes: Set<NetworkTree> = setOf(root)
+        private set
+
+    val leaves: Set<NetworkTree.Leaf>
+        get() = allNodes.filterIsInstance<NetworkTree.Leaf>().toSet()
+
+    val branches: Set<NetworkTree.Branch>
+        get() = allNodes.filterIsInstance<NetworkTree.Branch>().toSet()
 
     abstract fun isValidBlock(block: Block): Boolean
 
@@ -38,6 +46,14 @@ abstract class Network(val origin: Location) {
         }
 
         root = rootTree.toImmutable()
+        allNodes = allNodes(root)
+    }
+
+    private fun allNodes(node: NetworkTree): Set<NetworkTree> {
+        return when (node) {
+            is NetworkTree.Leaf -> setOf(node)
+            is NetworkTree.Branch -> node.children.flatMap { allNodes(it) }.toSet()
+        }
     }
 
     private data class NextScan(val block: Block, val depth: Int, val parent: MutableNetworkTree)
