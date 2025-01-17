@@ -19,8 +19,7 @@ class BlockPosition(world: World, x: Int, y: Int, z: Int) {
     val y: Int = ((asLong shl 52) shr 52).toInt()
     val z: Int = ((asLong shl 26) shr 38).toInt()
 
-    val chunkX = x shr 4
-    val chunkZ = z shr 4
+    val chunk = ChunkPosition(x shr 4, z shr 4)
 
     override fun hashCode(): Int {
         val prime = 31
