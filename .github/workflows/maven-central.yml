@@ -1,8 +1,8 @@
-name: Publish -SNAPSHOT to Central Repository
+name: Publish to Central Repository
 
 on:
   push:
-    branches: [ "master" ]
+    tags: ['*']
 
 jobs:
   build:
@@ -23,4 +23,9 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Publish snapshot
-      run: ./gradlew publishToCentralPortal
+      run: ./gradlew publishToCentralPortal -Pversion=${GITHUB_REF/refs\/tags\//}
+      env:
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        SIGNING_KEY: ${{ secrets.PGP_KEY }}
+        SIGNING_PASSWORD: ${{ secrets.PGP_PASSWORD }}

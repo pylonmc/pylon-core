@@ -5,12 +5,14 @@ plugins {
     id("com.gradleup.shadow") version "8.3.2"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
     id("xyz.jpenilla.run-paper") version "2.3.0"
+    `maven-publish`
     signing
     id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
 }
 
 group = "io.github.pylon-paper"
 version = "UNKNOWN-SNAPSHOT"
+
 
 repositories {
     mavenCentral()
@@ -74,18 +76,26 @@ tasks.runServer {
 }
 
 signing {
-    useInMemoryPgpKeys(System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
+    useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
 }
 
 centralPortal {
     username = System.getenv("SONATYPE_USERNAME")
     password = System.getenv("SONATYPE_PASSWORD")
     pom {
+        description = "The core library for PylonMC plugins."
         url = "https://github.com/pylonmc/pylon-core"
         licenses {
             license {
                 name = "GNU Lesser General Public License Version 3"
                 url = "https://www.gnu.org/licenses/lgpl-3.0.txt"
+            }
+        }
+        developers {
+            developer {
+                id = "PylonMC"
+                name = "PylonMC"
+                organizationUrl = "https://github.com/pylonmc"
             }
         }
         scm {
