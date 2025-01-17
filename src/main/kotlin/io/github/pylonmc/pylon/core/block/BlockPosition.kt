@@ -10,12 +10,13 @@ class BlockPosition(world: World, val x: Int, val y: Int, val z: Int) {
     val world: World?
         get() = worldRef.get()
 
-    val chunk
+    val chunk: ChunkPosition?
         get() = world?.let { ChunkPosition(it, x shr 4, z shr 4) }
 
-    val asLong: Long = ((x and 0x3FFFFFF).toLong() shl 38)
-        .or((z and 0x3FFFFFF).toLong() shl 12)
-        .or((y and 0xFFF).toLong())
+    val asLong: Long
+        get() = ((x and 0x3FFFFFF).toLong() shl 38)
+            .or((z and 0x3FFFFFF).toLong() shl 12)
+            .or((y and 0xFFF).toLong())
 
     constructor(world: World, asLong: Long) : this(world,
         (asLong shr 38).toInt(),
