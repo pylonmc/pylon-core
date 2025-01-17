@@ -51,7 +51,7 @@ tasks.shadowJar {
 }
 
 bukkit {
-    name = rootProject.name
+    name = "Pylon-Core"
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
     authors = listOf() // TODO
@@ -59,6 +59,11 @@ bukkit {
 }
 
 tasks.runServer {
+    doFirst {
+        val runFolder = project.projectDir.resolve("run")
+        runFolder.mkdirs()
+        runFolder.resolve("eula.txt").writeText("eula=true")
+    }
     maxHeapSize = "4G"
     minecraftVersion("1.21.4")
 }
