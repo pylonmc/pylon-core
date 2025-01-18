@@ -11,8 +11,6 @@ plugins {
 }
 
 group = "io.github.pylonmc"
-version = "UNKNOWN-SNAPSHOT"
-
 
 repositories {
     mavenCentral()
