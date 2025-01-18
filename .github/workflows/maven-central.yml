@@ -21,7 +21,7 @@ jobs:
 
     - id: env-setup
       run: |
-        sed -i "s/version = \"UNKNOWN-SNAPSHOT\"/version = \"0.${{ github.run_number }}-SNAPSHOT\"/g" pylon-core/build.gradle.kts
+        sed -i "s/version=\"-SNAPSHOT\"/version=\"${{ github.run_number }}-SNAPSHOT\"/g" pylon-core/gradle.properties
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
