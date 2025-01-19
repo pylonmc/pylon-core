@@ -145,21 +145,6 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
                 // This is PylonPersistentDataContainer here because when we get to deserializing PDCs, there is no way to know
                 // which implementor of PDC to serialize to. Therefore, we will only allow Pylon PDCs to be nested.
                 PersistentDataContainer::class.java -> (primitive as PylonPersistentDataContainer).serializeToBytes()
-                // TODO remove this, I think it's deprecated lol
-                Array<PersistentDataContainer>::class.java -> {
-                    @Suppress("UNCHECKED_CAST") // No way to check this cast
-                    val pdcArray = (primitive as Array<PersistentDataContainer>)
-                    val pdcsAsbytes = pdcArray.map { it.serializeToBytes() }
-                    val bufferSize = pdcsAsbytes.fold(0) { acc, bytes -> acc + Int.SIZE_BYTES + bytes.size }
-
-                    val buffer = ByteBuffer.allocate(bufferSize)
-                    for (pdc in pdcsAsbytes) {
-                        buffer.putInt(pdc.size)
-                        buffer.put(pdc)
-                    }
-
-                    buffer.array()
-                }
                 else -> error("Unrecognized primitive type")
             }
 
@@ -193,17 +178,6 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
                     array as T
                 }
                 PersistentDataContainer::class.java -> PylonPersistentDataContainer(bytes) as T
-                Array<PersistentDataContainer>::class.java -> {
-                    val buffer = ByteBuffer.wrap(bytes)
-                    val list: MutableList<PylonPersistentDataContainer> = mutableListOf()
-                    while (buffer.hasRemaining()) {
-                        val length = buffer.getInt()
-                        val value = ByteArray(length)
-                        buffer.get(value)
-                        list.add(PylonPersistentDataContainer(bytes))
-                    }
-                    list as T
-                }
                 else -> error("Unrecognized primitive type")
             }
     }
