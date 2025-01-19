@@ -5,7 +5,7 @@ import io.github.pylonmc.pylon.core.MissingLoadConstructorException
 import io.github.pylonmc.pylon.core.MissingPlaceConstructorException
 import io.github.pylonmc.pylon.core.NotRegisteredException
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.state.StateReader
+import io.github.pylonmc.pylon.core.persistence.PylonDataReader
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
@@ -32,7 +32,7 @@ open class PylonBlockSchema(
     }
 
     internal val loadConstructor: MethodHandle = try {
-        MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(StateReader::class.java, Block::class.java))
+        MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(PylonDataReader::class.java, Block::class.java))
     } catch (e: NoSuchMethodException) {
         throw MissingLoadConstructorException(idWithoutNamespace)
     }

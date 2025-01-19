@@ -1,16 +1,16 @@
 package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.SchemaNotFoundException
-import io.github.pylonmc.pylon.core.state.StateReader
-import io.github.pylonmc.pylon.core.state.StateWriter
+import io.github.pylonmc.pylon.core.persistence.PylonDataReader
+import io.github.pylonmc.pylon.core.persistence.PylonDataWriter
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 
 open class PylonBlock<S: PylonBlockSchema> private constructor(val schema: S, val block: Block) {
-    constructor(stateReader: StateReader, block: Block)
-            : this(getSchemaOfType<S>(stateReader.id), block)
+    constructor(reader: PylonDataReader, block: Block)
+            : this(getSchemaOfType<S>(reader.id), block)
 
-    fun write(writer: StateWriter) {}
+    fun write(writer: PylonDataWriter) {}
 
     // TODO listener
     fun tick() {}
