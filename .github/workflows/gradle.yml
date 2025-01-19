@@ -39,13 +39,13 @@ jobs:
         uses: gradle/actions/setup-gradle@v4.2.2
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -Pversion=${{ inputs.version }}-SNAPSHOT
+        run: ./gradlew build -Pversion=${{ inputs.version || github.run_number }}-SNAPSHOT
 
       - name: Upload the artifact
         uses: actions/upload-artifact@v4.6.0
         with:
-          name: pylon-core-${{ inputs.version }}
-          path: 'build/libs/pylon-core-${{ inputs.version }}.jar'
+          name: pylon-core-${{ inputs.version || github.run_number }}
+          path: 'build/libs/pylon-core-${{ inputs.version || github.run_number }}.jar'
 
   dependency-submission:
     needs: [build]
@@ -71,4 +71,4 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/live-testing.yml
     with:
-      artifact-name: pylon-core-${{ inputs.version }}
+      artifact-name: pylon-core-${{ inputs.version || github.run_number }}
