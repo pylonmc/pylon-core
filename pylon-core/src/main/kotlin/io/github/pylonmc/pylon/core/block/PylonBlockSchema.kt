@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.persistence.PylonDataReader
 import io.github.pylonmc.pylon.core.registry.PylonRegistries
 import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys
-import io.github.pylonmc.pylon.core.state.StateReader
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -25,7 +25,7 @@ open class PylonBlockSchema(
     internal val loadConstructor: MethodHandle = try {
         MethodHandles.lookup().unreflectConstructor(
             blockClass.getConstructor(
-                StateReader::class.java,
+                PylonDataReader::class.java,
                 Block::class.java
             )
         )
