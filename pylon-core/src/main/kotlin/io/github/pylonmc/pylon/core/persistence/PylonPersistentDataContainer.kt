@@ -144,7 +144,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
                 // This is PylonPersistentDataContainer here because when we get to deserializing PDCs, there is no way to know
                 // which implementor of PDC to serialize to. Therefore, we will only allow Pylon PDCs to be nested.
                 PersistentDataContainer::class.java -> (primitive as PylonPersistentDataContainer).serializeToBytes()
-                else -> error("Unrecognized primitive type")
+                else -> error("Invalid primitive type '$primitiveType'")
             }
 
         // Sadly no way to 'switch' on the type T to avoid unchecked casting
@@ -177,7 +177,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
                     array as T
                 }
                 PersistentDataContainer::class.java -> PylonPersistentDataContainer(bytes) as T
-                else -> error("Unrecognized primitive type")
+                else -> error("Invalid primitive type '$primitiveType'")
             }
     }
 }
