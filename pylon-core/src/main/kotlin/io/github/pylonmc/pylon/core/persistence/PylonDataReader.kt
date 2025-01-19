@@ -4,7 +4,9 @@ import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
 
 interface PylonDataReader {
-    // ID of the holder of this reader - for example the ID of a block
+    /**
+      * ID of the holder of this reader - for example the ID of a block
+      */
     val id: NamespacedKey
 
     fun <P : Any, C : Any> has(key: NamespacedKey, type: PersistentDataType<P, C>): Boolean

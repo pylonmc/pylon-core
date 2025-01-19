@@ -7,7 +7,7 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import java.nio.ByteBuffer
 
-/*
+/**
  * Pylon implementation of PersistentDataContainers (https://docs.papermc.io/paper/dev/pdc)
  *
  * This implementation is tailored toward serializing everything into bytes for external storage on disk.
@@ -21,7 +21,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
         readFromBytes(bytes)
     }
 
-    /*
+    /**
      * Constructor that also sets the ID of this PDC's holder. This should be used for creating PDCs for
      * holders such as blocks, but not for nested PDCs (they don't need ids)
      */
