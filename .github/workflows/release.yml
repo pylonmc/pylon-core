@@ -1,29 +1,24 @@
-name: Create new Release
+name: Create GitHub Release & Publish to Maven Central
 
 on:
-  workflow_call:
-    inputs:
-      artifact-name:
-        description: 'Pylon artifact name'
-        required: true
-        type: string
-    secrets:
-      GITHUB_TOKEN:
-        required: true
+  push:
+    tags: ['*']
 
 jobs:
-  release:
-    name: Create new release
+  build:
+    uses: ./.github/workflows/gradle.yml
+    with:
+      version: ${GITHUB_REF/refs\/tags\//}
+      
+  github-release:
+    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4.1.1
-
     - name: Download Pylon
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4.1.8
       with:
-        name: ${{ inputs.artifact-name }}
+        name: pylon-core-${GITHUB_REF/refs\/tags\//}
 
     - name: Create Release
       uses: marvinpinto/action-automatic-releases@latest
@@ -31,7 +26,33 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         draft: false
         prerelease: false
-        automatic_release_tag: v${{ github.run_number }}
-        title: Release ${{ github.run_number }}
-        files: |
-          *.jar
+        automatic_release_tag: ${GITHUB_REF/refs\/tags\//}
+        title: Release ${GITHUB_REF/refs\/tags\//}
+        files: build/libs/pylon-core-*.jar
+
+  publish-snapshot:
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4.6.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4.2.2
+
+      - name: Publish snapshot
+        run: ./gradlew publishToCentralPortal -Pversion=${GITHUB_REF/refs\/tags\//}
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.PGP_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.PGP_PASSWORD }}
