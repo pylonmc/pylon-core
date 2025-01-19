@@ -45,7 +45,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
 
     override fun <P : Any, C : Any> get(key: NamespacedKey, type: PersistentDataType<P, C>): C? {
         val x = data[key] ?: return null
-        return type.fromPrimitive(bytesToPrimitive(type.primitiveType, x), PylonPersistentDataAdapterContext())
+        return type.fromPrimitive(bytesToPrimitive(type.primitiveType, x), adapterContext)
     }
 
     override fun <P : Any, C : Any> getOrDefault(
@@ -69,12 +69,11 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
         }
     }
 
-    override fun getAdapterContext(): PersistentDataAdapterContext {
-        return PylonPersistentDataAdapterContext()
-    }
+    override fun getAdapterContext(): PersistentDataAdapterContext
+        = PylonPersistentDataAdapterContext()
 
     override fun serializeToBytes(): ByteArray {
-        val keysAsBytes = data.keys.map { key -> key.toString().toByteArray(Charsets.UTF_8) }
+        val keysAsBytes = data.keys.map { key -> Serializers.NAMESPACED_KEY.toPrimitive(key, adapterContext) }
         val bufferSize = keysAsBytes.zip(data.values).fold(0) { acc, (key, value) -> acc + 2 * Int.SIZE_BYTES + key.size + value.size }
 
         val buffer = ByteBuffer.allocate(bufferSize)
@@ -90,7 +89,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
     }
 
     override fun <P : Any?, C : Any?> set(key: NamespacedKey, type: PersistentDataType<P, C>, value: C & Any) {
-        data[key] = primitiveToBytes(type.primitiveType, type.toPrimitive(value, PylonPersistentDataAdapterContext()))
+        data[key] = primitiveToBytes(type.primitiveType, type.toPrimitive(value, adapterContext))
     }
 
     override fun remove(key: NamespacedKey) {
@@ -103,7 +102,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
             val keyLength = buffer.getInt()
             val keyBytes = ByteArray(keyLength)
             buffer.get(keyBytes)
-            val key = NamespacedKey.fromString(keyBytes.toString(Charsets.UTF_8))!!
+            val key = Serializers.NAMESPACED_KEY.fromPrimitive(keyBytes, adapterContext)
 
             val valueLength = buffer.getInt()
             val value = ByteArray(valueLength)
