@@ -33,6 +33,7 @@ object Serializers {
     val BLOCK_POSITION = BlockPositionPersistentDataType()
     val CHUNK_POSITION = ChunkPositionPersistentDataType()
     val LOCATION = LocationPersistentDataType()
+    val CHAR = CharPersistentDataType()
 }
 
 class NamespacedKeyPersistentDataType : PersistentDataType<ByteArray, NamespacedKey> {
@@ -233,7 +234,7 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
     }
 }
 
-class CharacterPersistentDataType : PersistentDataType<ByteArray, Char> {
+class CharPersistentDataType : PersistentDataType<ByteArray, Char> {
     override fun getPrimitiveType(): Class<ByteArray>
         = ByteArray::class.java
 
