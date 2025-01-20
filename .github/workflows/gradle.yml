@@ -70,5 +70,3 @@ jobs:
   test-build:
     needs: [build]
     uses: ./.github/workflows/live-testing.yml
-    with:
-      artifact-name: pylon-core-${{ inputs.version || github.run_number }}
