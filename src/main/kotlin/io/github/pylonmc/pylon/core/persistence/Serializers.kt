@@ -1,7 +1,10 @@
 package io.github.pylonmc.pylon.core.persistence
 
+import io.github.pylonmc.pylon.core.block.BlockPosition
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
+import org.bukkit.World
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
@@ -81,6 +84,28 @@ class VectorPersistentDataType : PersistentDataType<ByteArray, Vector> {
         buffer.putDouble(complex.x)
         buffer.putDouble(complex.y)
         buffer.putDouble(complex.z)
+        return buffer.array()
+    }
+}
+
+class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
+    override fun getPrimitiveType(): Class<ByteArray>
+        = ByteArray::class.java
+
+    override fun getComplexType(): Class<World>
+        = World::class.java
+
+    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): World {
+        val buffer = ByteBuffer.wrap(primitive)
+        val mostSignificantBits = buffer.getLong()
+        val leastSignificantBits = buffer.getLong()
+        return Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits))!!
+    }
+
+    override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): ByteArray {
+        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES)
+        buffer.putLong(complex.uid.mostSignificantBits)
+        buffer.putLong(complex.uid.leastSignificantBits)
         return buffer.array()
     }
 }
