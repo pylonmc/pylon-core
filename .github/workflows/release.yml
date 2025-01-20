@@ -30,7 +30,7 @@ jobs:
         title: Release ${GITHUB_REF/refs\/tags\//}
         files: build/libs/pylon-core-*.jar
 
-  publish-snapshot:
+  publish:
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
