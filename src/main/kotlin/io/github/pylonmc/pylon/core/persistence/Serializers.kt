@@ -1,5 +1,8 @@
 package io.github.pylonmc.pylon.core.persistence
 
+import io.github.pylonmc.pylon.core.block.BlockPosition
+import io.github.pylonmc.pylon.core.block.ChunkPosition
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataAdapterContext
