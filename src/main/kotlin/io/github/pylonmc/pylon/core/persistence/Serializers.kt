@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.persistence
 
 import io.github.pylonmc.pylon.core.block.BlockPosition
+import io.github.pylonmc.pylon.core.block.ChunkPosition
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
@@ -107,5 +108,121 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
         buffer.putLong(complex.uid.mostSignificantBits)
         buffer.putLong(complex.uid.leastSignificantBits)
         return buffer.array()
+    }
+}
+
+class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
+    override fun getPrimitiveType(): Class<ByteArray>
+        = ByteArray::class.java
+
+    override fun getComplexType(): Class<Location>
+        = Location::class.java
+
+    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): Location {
+        val buffer = ByteBuffer.wrap(primitive)
+        val mostSignificantBits = buffer.getLong()
+        val leastSignificantBits = buffer.getLong()
+        val x = buffer.getDouble()
+        val y = buffer.getDouble()
+        val z = buffer.getDouble()
+        return Location(Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits))!!, x, y, z)
+    }
+
+    override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): ByteArray {
+        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 3 * Double.SIZE_BYTES)
+        buffer.putLong(complex.world.uid.mostSignificantBits)
+        buffer.putLong(complex.world.uid.leastSignificantBits)
+        buffer.putDouble(complex.x)
+        buffer.putDouble(complex.y)
+        buffer.putDouble(complex.z)
+        return buffer.array()
+    }
+}
+
+class BlockPositionPersistentDataType : PersistentDataType<ByteArray, BlockPosition> {
+    override fun getPrimitiveType(): Class<ByteArray>
+        = ByteArray::class.java
+
+    override fun getComplexType(): Class<BlockPosition>
+        = BlockPosition::class.java
+
+    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): BlockPosition {
+        if(primitive.size > 3 * Int.SIZE_BYTES){
+            val buffer = ByteBuffer.wrap(primitive)
+            val mostSignificantBits = buffer.getLong()
+            val leastSignificantBits = buffer.getLong()
+            val x = buffer.getInt()
+            val y = buffer.getInt()
+            val z = buffer.getInt()
+            return BlockPosition(Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits)), x, y, z)
+        }
+        else{
+            val buffer = ByteBuffer.wrap(primitive)
+            val x = buffer.getInt()
+            val y = buffer.getInt()
+            val z = buffer.getInt()
+            return BlockPosition(null, x, y, z)
+        }
+    }
+
+    override fun toPrimitive(complex: BlockPosition, context: PersistentDataAdapterContext): ByteArray {
+        if(complex.world != null){
+            val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 3 * Int.SIZE_BYTES)
+            buffer.putLong(complex.world!!.uid.mostSignificantBits)
+            buffer.putLong(complex.world!!.uid.leastSignificantBits)
+            buffer.putInt(complex.x)
+            buffer.putInt(complex.y)
+            buffer.putInt(complex.z)
+            return buffer.array()
+        }
+        else{
+            val buffer = ByteBuffer.allocate(3 * Int.SIZE_BYTES)
+            buffer.putInt(complex.x)
+            buffer.putInt(complex.y)
+            buffer.putInt(complex.z)
+            return buffer.array()
+        }
+    }
+}
+
+class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosition> {
+    override fun getPrimitiveType(): Class<ByteArray>
+        = ByteArray::class.java
+
+    override fun getComplexType(): Class<ChunkPosition>
+        = ChunkPosition::class.java
+
+    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): ChunkPosition {
+        if(primitive.size > 2 * Int.SIZE_BYTES){
+            val buffer = ByteBuffer.wrap(primitive)
+            val mostSignificantBits = buffer.getLong()
+            val leastSignificantBits = buffer.getLong()
+            val x = buffer.getInt()
+            val z = buffer.getInt()
+            return ChunkPosition(Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits)), x, z)
+        }
+        else{
+            val buffer = ByteBuffer.wrap(primitive)
+            val x = buffer.getInt()
+            val z = buffer.getInt()
+            return ChunkPosition(null, x, z)
+        }
+    }
+
+    override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): ByteArray {
+        if(complex.world != null){
+            val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 2 * Int.SIZE_BYTES)
+            buffer.putLong(complex.world!!.uid.mostSignificantBits)
+            buffer.putLong(complex.world!!.uid.leastSignificantBits)
+            buffer.putInt(complex.x)
+            buffer.putInt(complex.z)
+            return buffer.array()
+        }
+        else{
+            val buffer = ByteBuffer.allocate(2 * Int.SIZE_BYTES)
+            buffer.putInt(complex.x)
+            buffer.putInt(complex.z)
+            return buffer.array()
+        }
     }
 }
