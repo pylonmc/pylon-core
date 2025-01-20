@@ -28,4 +28,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v4.2.2
 
       - name: Run server
-        run: ./gradlew runServer
+        run: ./gradlew :pylon-test:runServer
