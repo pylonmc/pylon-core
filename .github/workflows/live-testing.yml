@@ -2,10 +2,6 @@ name: Live Testing
 
 on:
   workflow_call:
-    inputs:
-      artifact-name:
-        required: true
-        type: string
 
 jobs:
   live-testing:
@@ -27,12 +23,6 @@ jobs:
         run: |
           echo 'eula=true' > eula.txt
           mkdir plugins
-
-      - name: Download Pylon
-        uses: actions/download-artifact@v4.1.8
-        with:
-          name: ${{ inputs.artifact-name }}
-          path: plugins/
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.2.2
