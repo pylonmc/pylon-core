@@ -223,7 +223,6 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
             buffer.putLong(complex.world!!.uid.leastSignificantBits)
             buffer.putInt(complex.x)
             buffer.putInt(complex.z)
-            complex.asLong
             return buffer.array()
         }
         else{
