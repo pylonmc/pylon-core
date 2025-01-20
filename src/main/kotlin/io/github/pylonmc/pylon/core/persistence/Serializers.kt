@@ -10,6 +10,10 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import java.nio.ByteBuffer
 import java.util.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 
 object Serializers {
     val BYTE = PersistentDataType.BYTE!!
@@ -33,6 +37,7 @@ object Serializers {
     val CHUNK_POSITION = ChunkPositionPersistentDataType()
     val LOCATION = LocationPersistentDataType()
     val CHAR = CharPersistentDataType()
+    val MAP = MapPersistentDataType()
 }
 
 class NamespacedKeyPersistentDataType : PersistentDataType<ByteArray, NamespacedKey> {
@@ -222,6 +227,7 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
             buffer.putLong(complex.world!!.uid.leastSignificantBits)
             buffer.putInt(complex.x)
             buffer.putInt(complex.z)
+            complex.asLong
             return buffer.array()
         }
         else{
@@ -249,5 +255,27 @@ class CharPersistentDataType : PersistentDataType<ByteArray, Char> {
         val buffer = ByteBuffer.allocate(Char.SIZE_BYTES)
         buffer.putChar(complex)
         return buffer.array()
+    }
+}
+
+class MapPersistentDataType : PersistentDataType<ByteArray, Map<*, *>> {
+    override fun getPrimitiveType(): Class<ByteArray>
+        = ByteArray::class.java
+
+    override fun getComplexType(): Class<Map<*, *>>
+        = Map::class.java
+
+    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): Map<*, *> {
+        val bytesIn = ByteArrayInputStream(primitive)
+        val input = ObjectInputStream(bytesIn)
+        return input.readObject() as Map<*, *>
+    }
+
+    override fun toPrimitive(complex: Map<*, *>, context: PersistentDataAdapterContext): ByteArray {
+        val bytesOut = ByteArrayOutputStream()
+        val outputStream = ObjectOutputStream(bytesOut)
+        outputStream.writeObject(complex)
+        outputStream.flush()
+        return bytesOut.toByteArray()
     }
 }
