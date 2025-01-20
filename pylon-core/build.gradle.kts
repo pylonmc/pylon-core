@@ -46,7 +46,8 @@ tasks.shadowJar {
         relocate(lib, "io.github.pylonmc.pylon.core.shadowlibs.$lib")
     }
 
-    archiveBaseName = rootProject.name
+    archiveBaseName = project.name
+    archiveClassifier = null
 }
 
 bukkit {
