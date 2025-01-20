@@ -71,6 +71,7 @@ bukkit {
 tasks.runServer {
     maxHeapSize = "4G"
     minecraftVersion("1.21.4")
+    timeout = Duration.ofMinutes(1)
 }
 
 signing {
