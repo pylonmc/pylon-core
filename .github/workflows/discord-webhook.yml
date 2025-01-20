@@ -1,0 +1,39 @@
+name: Discord Webhook
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'src/**'
+
+permissions:
+  contents: read
+
+jobs:
+  webhook:
+    if: startsWith(github.event.head_commit.message, '[Skip]') == false
+
+    name: Discord Webhook
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Format Commits
+        id: description
+        run: |
+          id=$(echo "${{ github.event.head_commit.message }}" | sed 's/Signed-off-by.*//')
+          echo "id<<EOF" >> $GITHUB_OUTPUT
+          echo "$id" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Announce Changes
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_TOKEN }}
+          username: Pylon
+          embed-title: Pylon Update! - ${{ github.event.repository.name }}
+          embed-description: |
+            ${{ steps.description.outputs.id }}
+          embed-color: 5301186
+          embed-timestamp: ${{ github.event.head_commit.timestamp }}
+          embed-footer-text: Enjoy the update!

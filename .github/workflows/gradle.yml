@@ -2,48 +2,71 @@ name: Kotlin CI with Gradle
 
 on:
   push:
-    branches: [ "*" ]
+    branches:
+    - master
+    paths:
+    - 'src/**'
   pull_request:
     branches: [ "*" ]
+    paths:
+    - 'src/**'
+  workflow_call:
+    inputs:
+      version:
+        default: ${{ github.run_number }}
+        required: false
+        type: string
 
 jobs:
   build:
+    if: startsWith(github.event.head_commit.message, '[Skip]') == false
 
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
 
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4.6.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
-    - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4.2.2
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build -Pversion=${{ inputs.version || github.run_number }}-SNAPSHOT
+
+      - name: Upload the artifact
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: pylon-core-${{ inputs.version || github.run_number }}
+          path: 'build/libs/pylon-core-${{ inputs.version || github.run_number }}.jar'
 
   dependency-submission:
+    needs: [build]
 
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
 
-    # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-    # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
-    - name: Generate and submit dependency graph
-      uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4.6.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v4.2.2
+
+  test-build:
+    needs: [build]
+    uses: ./.github/workflows/live-testing.yml
