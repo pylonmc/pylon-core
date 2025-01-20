@@ -51,7 +51,7 @@ tasks.shadowJar {
 }
 
 bukkit {
-    name = "Pylon-Core"
+    name = "pylon-core"
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
     authors = listOf() // TODO
