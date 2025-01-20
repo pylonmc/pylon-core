@@ -27,6 +27,12 @@ object Serializers {
     val TAG_CONTAINER = PersistentDataType.TAG_CONTAINER!!
     val LIST = PersistentDataType.LIST!!
     val NAMESPACED_KEY = NamespacedKeyPersistentDataType()
+    val UUID = UUIDPersistentDataType()
+    val VECTOR = VectorPersistentDataType()
+    val WORLD = WorldPersistentDataType()
+    val BLOCK_POSITION = BlockPositionPersistentDataType()
+    val CHUNK_POSITION = ChunkPositionPersistentDataType()
+    val LOCATION = LocationPersistentDataType()
 }
 
 class NamespacedKeyPersistentDataType : PersistentDataType<ByteArray, NamespacedKey> {
@@ -224,5 +230,24 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
             buffer.putInt(complex.z)
             return buffer.array()
         }
+    }
+}
+
+class CharacterPersistentDataType : PersistentDataType<ByteArray, Char> {
+    override fun getPrimitiveType(): Class<ByteArray>
+        = ByteArray::class.java
+
+    override fun getComplexType(): Class<Char>
+        = Char::class.java
+
+    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): Char {
+        val buffer = ByteBuffer.wrap(primitive)
+        return buffer.getChar()
+    }
+
+    override fun toPrimitive(complex: Char, context: PersistentDataAdapterContext): ByteArray {
+        val buffer = ByteBuffer.allocate(Char.SIZE_BYTES)
+        buffer.putChar(complex)
+        return buffer.array()
     }
 }
