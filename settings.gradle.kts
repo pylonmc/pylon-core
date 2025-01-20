@@ -3,4 +3,4 @@ plugins {
 }
 
 include("pylon-core")
-include("test-addon")
+include("pylon-test")

@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") version "2.1.0"
     id("com.gradleup.shadow")
     id("net.minecrell.plugin-yml.bukkit")
-    id("xyz.jpenilla.run-paper")
     idea
     `maven-publish`
     signing
@@ -56,16 +55,6 @@ bukkit {
     version = project.version.toString()
     authors = listOf() // TODO
     apiVersion = "1.21"
-}
-
-tasks.runServer {
-    doFirst {
-        val runFolder = project.projectDir.resolve("run")
-        runFolder.mkdirs()
-        runFolder.resolve("eula.txt").writeText("eula=true")
-    }
-    maxHeapSize = "4G"
-    minecraftVersion("1.21.4")
 }
 
 signing {

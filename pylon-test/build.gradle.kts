@@ -1,10 +1,10 @@
 import org.gradle.kotlin.dsl.runServer
 
 plugins {
-    id("java")
+    java
     id("com.gradleup.shadow")
     id("net.minecrell.plugin-yml.bukkit")
-    id("xyz.jpenilla.run-paper")
+    id("xyz.jpenilla.run-paper") version "2.3.0"
 }
 
 version = "TEST"
