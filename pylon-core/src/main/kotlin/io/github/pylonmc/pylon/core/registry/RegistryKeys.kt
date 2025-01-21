@@ -5,6 +5,6 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 
 object RegistryKeys {
 
-    @JvmStatic
+    @JvmField
     val BLOCKS = RegistryKey<PylonBlockSchema>(pylonKey("blocks"))
 }
