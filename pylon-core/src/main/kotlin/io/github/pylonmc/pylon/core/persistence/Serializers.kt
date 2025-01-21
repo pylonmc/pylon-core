@@ -158,6 +158,7 @@ class BlockPositionPersistentDataType : PersistentDataType<ByteArray, BlockPosit
             buffer.put(1)
             buffer.put(Serializers.WORLD.toPrimitive(complex.world!!, context))
         }
+        buffer.put(0)
         buffer.putInt(complex.x)
         buffer.putInt(complex.y)
         buffer.putInt(complex.z)
@@ -192,6 +193,7 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
             buffer.put(1)
             buffer.put(Serializers.WORLD.toPrimitive(complex.world!!, context))
         }
+        buffer.put(0)
         buffer.putInt(complex.x)
         buffer.putInt(complex.z)
         return buffer.array()
