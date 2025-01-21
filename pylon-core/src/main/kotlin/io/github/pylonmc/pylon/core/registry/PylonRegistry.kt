@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.registry
 
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import org.bukkit.Registry
 import org.bukkit.Tag
 
 class PylonRegistry<T : Keyed>(val key: RegistryKey<T>) : Iterable<T> {

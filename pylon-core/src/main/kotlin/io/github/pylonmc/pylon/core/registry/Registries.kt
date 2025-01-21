@@ -7,9 +7,13 @@ import org.bukkit.Keyed
 object Registries {
 
     @JvmStatic
-    val BLOCKS = RegistryKey<PylonBlockSchema>("blocks".pylonKey())
+    val BLOCKS = RegistryKey<PylonBlockSchema>(pylonKey("blocks"))
 
     private val registries: MutableMap<RegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
+
+    init {
+        addRegistry(PylonRegistry(BLOCKS))
+    }
 
     @JvmStatic
     fun <T : Keyed> getRegistry(key: RegistryKey<T>): PylonRegistry<T> {
