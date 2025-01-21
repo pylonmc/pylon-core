@@ -1,11 +1,18 @@
 package io.github.pylonmc.pylon.core
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.registry.Registries
 import org.bukkit.plugin.java.JavaPlugin
 
 class PylonCore : JavaPlugin() {
     override fun onEnable() {
         instance = this
         logger.info("Hello, World!")
+
+        launch {
+            // Done on first tick
+            Registries.freezeAll()
+        }
     }
 
     override fun onDisable() {
