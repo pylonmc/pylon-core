@@ -96,7 +96,7 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
         val buffer = ByteBuffer.wrap(primitive)
         val mostSignificantBits = buffer.getLong()
         val leastSignificantBits = buffer.getLong()
-        return Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits))!!
+        return Bukkit.getWorld(UUID(mostSignificantBits, leastSignificantBits))!!
     }
 
     override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): ByteArray {
@@ -120,7 +120,7 @@ class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
         val x = buffer.getDouble()
         val y = buffer.getDouble()
         val z = buffer.getDouble()
-        return Location(Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits))!!, x, y, z)
+        return Location(Bukkit.getWorld(UUID(mostSignificantBits, leastSignificantBits))!!, x, y, z)
     }
 
     override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): ByteArray {
@@ -149,7 +149,7 @@ class BlockPositionPersistentDataType : PersistentDataType<ByteArray, BlockPosit
         if(primitive.size > 3 * Int.SIZE_BYTES){
             val mostSignificantBits = buffer.getLong()
             val leastSignificantBits = buffer.getLong()
-            return BlockPosition(Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits)), x, y, z)
+            return BlockPosition(Bukkit.getWorld(UUID(mostSignificantBits, leastSignificantBits)), x, y, z)
         }
         return BlockPosition(null, x, y, z)
     }
