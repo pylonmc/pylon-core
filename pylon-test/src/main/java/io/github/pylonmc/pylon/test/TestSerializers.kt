@@ -11,8 +11,7 @@ class TestSerializers {
                     }
                 }
                 return true
-            }
-            catch(e: Exception){
+            } catch (e: Exception) {
                 return false
             }
         }
