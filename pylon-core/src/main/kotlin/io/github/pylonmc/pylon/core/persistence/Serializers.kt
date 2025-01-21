@@ -93,14 +93,12 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
             = World::class.java
 
     override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): World {
-        val serializer = UUIDPersistentDataType()
-        val uid = serializer.fromPrimitive(primitive, context)
+        val uid = Serializers.UUID.fromPrimitive(primitive, context)
         return Bukkit.getWorld(uid)!!
     }
 
     override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): ByteArray {
-        val serializer = UUIDPersistentDataType()
-        return serializer.toPrimitive(complex.uid, context)
+        return Serializers.UUID.toPrimitive(complex.uid, context)
     }
 }
 class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
@@ -112,18 +110,16 @@ class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
 
     override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): Location {
         val buffer = ByteBuffer.wrap(primitive)
-        val mostSignificantBits = buffer.getLong()
-        val leastSignificantBits = buffer.getLong()
+        val world = Serializers.WORLD.fromPrimitive(primitive, context)
         val x = buffer.getDouble()
         val y = buffer.getDouble()
         val z = buffer.getDouble()
-        return Location(Bukkit.getWorld(UUID(mostSignificantBits, leastSignificantBits))!!, x, y, z)
+        return Location(world, x, y, z)
     }
 
     override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): ByteArray {
         val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 3 * Double.SIZE_BYTES)
-        buffer.putLong(complex.world.uid.mostSignificantBits)
-        buffer.putLong(complex.world.uid.leastSignificantBits)
+        buffer.put(Serializers.WORLD.toPrimitive(complex.world, context))
         buffer.putDouble(complex.x)
         buffer.putDouble(complex.y)
         buffer.putDouble(complex.z)
@@ -158,8 +154,7 @@ class BlockPositionPersistentDataType : PersistentDataType<ByteArray, BlockPosit
         buffer.putInt(complex.z)
         val world = complex.world
         if(world != null){
-            buffer.putLong(world.uid.mostSignificantBits)
-            buffer.putLong(world.uid.leastSignificantBits)
+            buffer.put(Serializers.WORLD.toPrimitive(complex.world!!, context))
         }
         return buffer.array()
     }
@@ -190,8 +185,7 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
         buffer.putInt(complex.x)
         buffer.putInt(complex.z)
         if (world != null) {
-            buffer.putLong(world.uid.mostSignificantBits)
-            buffer.putLong(world.uid.leastSignificantBits)
+            buffer.put(Serializers.WORLD.toPrimitive(complex.world!!, context))
         }
         return buffer.array()
     }
