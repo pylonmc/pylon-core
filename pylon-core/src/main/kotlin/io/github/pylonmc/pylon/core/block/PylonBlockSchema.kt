@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.registry.Registries
+import io.github.pylonmc.pylon.core.registry.RegistryKeys
 import io.github.pylonmc.pylon.core.state.StateReader
 import org.bukkit.Keyed
 import org.bukkit.Material
@@ -36,6 +37,6 @@ open class PylonBlockSchema(
     override fun getKey(): NamespacedKey = key
 
     fun register() {
-        Registries.getRegistry(Registries.BLOCKS).register(this)
+        Registries.getRegistry(RegistryKeys.BLOCKS).register(this)
     }
 }

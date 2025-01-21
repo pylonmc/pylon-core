@@ -1,19 +1,14 @@
 package io.github.pylonmc.pylon.core.registry
 
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
-import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 
 object Registries {
 
-    @JvmStatic
-    val BLOCKS = RegistryKey<PylonBlockSchema>(pylonKey("blocks"))
-
     private val registries: MutableMap<RegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 
     init {
-        addRegistry(PylonRegistry(BLOCKS))
+        addRegistry(PylonRegistry(RegistryKeys.BLOCKS))
     }
 
     @JvmStatic
