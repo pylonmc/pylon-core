@@ -21,6 +21,7 @@ object Serializers {
     val TAG_CONTAINER = PersistentDataType.TAG_CONTAINER!!
     val LIST = PersistentDataType.LIST!!
     val NAMESPACED_KEY = NamespacedKeyPersistentDataType()
+    val UUID = UUIDPersistentDataType()
 }
 
 class NamespacedKeyPersistentDataType : PersistentDataType<ByteArray, NamespacedKey> {
