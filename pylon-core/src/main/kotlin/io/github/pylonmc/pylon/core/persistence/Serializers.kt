@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.persistence
 
+import io.github.pylonmc.pylon.core.InvalidWorldUidException
 import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.block.ChunkPosition
 import org.bukkit.Bukkit
@@ -94,7 +95,7 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
 
     override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): World {
         val uid = Serializers.UUID.fromPrimitive(primitive, context)
-        return Bukkit.getWorld(uid)!!
+        return Bukkit.getWorld(uid) ?: throw InvalidWorldUidException(uid.toString())
     }
 
     override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): ByteArray {
