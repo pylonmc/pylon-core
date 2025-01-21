@@ -38,7 +38,31 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
         }
         return false
     }
+
+    operator fun plus(other: BlockPosition): BlockPosition {
+        check(world == other.world) { "Cannot add two BlockPositions in different worlds" }
+        return BlockPosition(world, x + other.x, y + other.y, z + other.z)
+    }
+
+    operator fun minus(other: BlockPosition): BlockPosition {
+        check(world == other.world) { "Cannot subtract two BlockPositions in different worlds" }
+        return BlockPosition(world, x - other.x, y - other.y, z - other.z)
+    }
+
+    operator fun times(value: Int): BlockPosition {
+        return BlockPosition(world, x * value, y * value, z * value)
+    }
+
+    operator fun div(value: Int): BlockPosition {
+        return BlockPosition(world, x / value, y / value, z / value)
+    }
 }
 
 val Block.position: BlockPosition
     get() = BlockPosition(this)
+
+val BlockPosition.location: Location
+    get() = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+
+val BlockPosition.block: Block
+    get() = world?.getBlockAt(x, y, z) ?: error("World is null")
