@@ -19,11 +19,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Setup server
-        run: |
-          echo 'eula=true' > eula.txt
-          mkdir plugins
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.2.2
 
