@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.persistence
 
+import com.google.common.reflect.TypeToken
 import io.github.pylonmc.pylon.core.InvalidWorldUidException
 import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.block.ChunkPosition
@@ -12,10 +13,7 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import java.nio.ByteBuffer
 import java.util.*
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
+
 
 object Serializers {
     @JvmField
@@ -54,7 +52,6 @@ object Serializers {
     val CHUNK_POSITION = ChunkPositionPersistentDataType()
     val LOCATION = LocationPersistentDataType()
     val CHAR = CharPersistentDataType()
-    val MAP = MapPersistentDataType()
 }
 
 class NamespacedKeyPersistentDataType : PersistentDataType<String, NamespacedKey> {
