@@ -115,15 +115,19 @@ class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
         val x = buffer.getDouble()
         val y = buffer.getDouble()
         val z = buffer.getDouble()
-        return Location(world, x, y, z)
+        val yaw = buffer.getFloat()
+        val pitch = buffer.getFloat()
+        return Location(world, x, y, z, yaw, pitch)
     }
 
     override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): ByteArray {
-        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 3 * Double.SIZE_BYTES)
+        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 3 * Double.SIZE_BYTES + 2 * Float.SIZE_BYTES)
         buffer.put(Serializers.WORLD.toPrimitive(complex.world, context))
         buffer.putDouble(complex.x)
         buffer.putDouble(complex.y)
         buffer.putDouble(complex.z)
+        buffer.putFloat(complex.yaw)
+        buffer.putFloat(complex.pitch)
         return buffer.array()
     }
 }
