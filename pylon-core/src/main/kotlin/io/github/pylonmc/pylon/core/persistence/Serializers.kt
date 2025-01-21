@@ -205,20 +205,15 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
     }
 
     override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): ByteArray {
-        if(complex.world != null){
-            val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 2 * Int.SIZE_BYTES)
-            buffer.putLong(complex.world!!.uid.mostSignificantBits)
-            buffer.putLong(complex.world!!.uid.leastSignificantBits)
-            buffer.putInt(complex.x)
-            buffer.putInt(complex.z)
-            return buffer.array()
+        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 2 * Int.SIZE_BYTES)
+        val world = complex.world
+        if (world != null) {
+            buffer.putLong(world.uid.mostSignificantBits)
+            buffer.putLong(world.uid.leastSignificantBits)
         }
-        else{
-            val buffer = ByteBuffer.allocate(2 * Int.SIZE_BYTES)
-            buffer.putInt(complex.x)
-            buffer.putInt(complex.z)
-            return buffer.array()
-        }
+        buffer.putInt(complex.x)
+        buffer.putInt(complex.z)
+        return buffer.array()
     }
 }
 
