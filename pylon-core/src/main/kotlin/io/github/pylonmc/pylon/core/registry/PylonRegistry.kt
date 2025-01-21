@@ -11,29 +11,23 @@ class PylonRegistry<T : Keyed>(val key: RegistryKey<T>) : Iterable<T> {
     var frozen = false
         private set
 
-    fun register(value: T) {
+    fun register(vararg values: T) {
         checkFrozen()
-        values[value.key] = value
-    }
-
-    fun register(tag: Tag<T>) {
-        checkFrozen()
-        for (value in tag.values) {
-            register(value)
+        for (value in values) {
+            this.values[value.key] = value
         }
     }
 
-    fun unregister(value: T) {
-        checkFrozen()
-        values.remove(value.key)
-    }
+    fun register(tag: Tag<T>) = register(*tag.values.toTypedArray())
 
-    fun unregister(tag: Tag<T>) {
+    fun unregister(vararg values: T) {
         checkFrozen()
-        for (value in tag.values) {
-            unregister(value)
+        for (value in values) {
+            this.values.remove(value.key)
         }
     }
+
+    fun unregister(tag: Tag<T>) = unregister(*tag.values.toTypedArray())
 
     operator fun get(key: NamespacedKey): T? {
         return values[key]
@@ -51,7 +45,6 @@ class PylonRegistry<T : Keyed>(val key: RegistryKey<T>) : Iterable<T> {
         return tag.values.all { it.key in values }
     }
 
-    // TODO actually freeze registries
     fun freeze() {
         frozen = true
     }
