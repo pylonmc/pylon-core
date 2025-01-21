@@ -93,17 +93,14 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
             = World::class.java
 
     override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): World {
-        val buffer = ByteBuffer.wrap(primitive)
-        val mostSignificantBits = buffer.getLong()
-        val leastSignificantBits = buffer.getLong()
-        return Bukkit.getWorld(UUID(mostSignificantBits, leastSignificantBits))!!
+        val serializer = UUIDPersistentDataType()
+        val uid = serializer.fromPrimitive(primitive, context)
+        return Bukkit.getWorld(uid)!!
     }
 
     override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): ByteArray {
-        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES)
-        buffer.putLong(complex.uid.mostSignificantBits)
-        buffer.putLong(complex.uid.leastSignificantBits)
-        return buffer.array()
+        val serializer = UUIDPersistentDataType()
+        return serializer.toPrimitive(complex.uid, context)
     }
 }
 class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
