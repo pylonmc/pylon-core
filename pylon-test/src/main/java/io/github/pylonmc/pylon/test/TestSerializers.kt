@@ -6,7 +6,7 @@ class TestSerializers {
         fun testAllSerializers(): Boolean {
             try {
                 for (method in this.javaClass.methods) {
-                    if (method.name != "TestAllSerializers" && !(method.invoke(null, null) as Boolean)) {
+                    if (method.name != "testAllSerializers" && !(method.invoke(null, null) as Boolean)) {
                         return false
                     }
                 }
