@@ -188,20 +188,17 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
             = ChunkPosition::class.java
 
     override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): ChunkPosition {
-        if(primitive.size > 2 * Int.SIZE_BYTES){
-            val buffer = ByteBuffer.wrap(primitive)
+        val buffer = ByteBuffer.wrap(primitive)
+        val uid = if (primitive.size > 2 * Int.SIZE_BYTES) {
             val mostSignificantBits = buffer.getLong()
             val leastSignificantBits = buffer.getLong()
-            val x = buffer.getInt()
-            val z = buffer.getInt()
-            return ChunkPosition(Bukkit.getServer().getWorld(UUID(mostSignificantBits, leastSignificantBits)), x, z)
+            UUID(mostSignificantBits, leastSignificantBits)
+        } else {
+            null
         }
-        else{
-            val buffer = ByteBuffer.wrap(primitive)
-            val x = buffer.getInt()
-            val z = buffer.getInt()
-            return ChunkPosition(null, x, z)
-        }
+        val x = buffer.getInt()
+        val z = buffer.getInt()
+        return ChunkPosition(Bukkit.getWorld(uid), x, z)
     }
 
     override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): ByteArray {
