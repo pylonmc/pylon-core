@@ -12,8 +12,7 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         getLogger().info("Test addon enabled!");
         if(TestSerializers.testAllSerializers()){
             getLogger().info("All serializer tests passed!");
-        }
-        else{
+        } else {
             getLogger().severe("At least one serializer test failed!");
         }
         Bukkit.getScheduler().runTask(this, Bukkit::shutdown);

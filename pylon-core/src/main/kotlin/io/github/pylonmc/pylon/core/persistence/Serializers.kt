@@ -43,11 +43,17 @@ object Serializers {
     val NAMESPACED_KEY = NamespacedKeyPersistentDataType()
     @JvmField
     val UUID = UUIDPersistentDataType()
+    @JvmField
     val VECTOR = VectorPersistentDataType()
+    @JvmField
     val WORLD = WorldPersistentDataType()
+    @JvmField
     val BLOCK_POSITION = BlockPositionPersistentDataType()
+    @JvmField
     val CHUNK_POSITION = ChunkPositionPersistentDataType()
+    @JvmField
     val LOCATION = LocationPersistentDataType()
+    @JvmField
     val CHAR = CharPersistentDataType()
 }
 
@@ -87,6 +93,22 @@ class UUIDPersistentDataType : PersistentDataType<ByteArray, UUID> {
     }
 }
 
+class VectorPersistentDataType : PersistentDataType<DoubleArray, Vector> {
+    override fun getPrimitiveType(): Class<DoubleArray>
+            = DoubleArray::class.java
+
+    override fun getComplexType(): Class<Vector>
+            = Vector::class.java
+
+    override fun fromPrimitive(primitive: DoubleArray, context: PersistentDataAdapterContext): Vector {
+        return Vector(primitive[0], primitive[1], primitive[2])
+    }
+
+    override fun toPrimitive(complex: Vector, context: PersistentDataAdapterContext): DoubleArray {
+        return doubleArrayOf(complex.x, complex.y, complex.z)
+    }
+}
+
 class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
     override fun getPrimitiveType(): Class<ByteArray>
             = ByteArray::class.java
@@ -96,7 +118,7 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
 
     override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): World {
         val uid = Serializers.UUID.fromPrimitive(primitive, context)
-        return Bukkit.getWorld(uid) ?: throw InvalidWorldUidException(uid.toString())
+        return Bukkit.getWorld(uid) ?: throw IllegalArgumentException(uid.toString())
     }
 
     override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): ByteArray {
