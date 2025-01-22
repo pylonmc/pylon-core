@@ -6,11 +6,14 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.core.test.GameTestFailException;
-import kotlin.Unit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Powerable;
+import org.bukkit.entity.Husk;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +41,8 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         setUpGameTests();
 
         runGameTests();
+
+        Bukkit.getServerTickManager().setFrozen(true);
     }
 
     private void setUpGameTests() {
@@ -46,8 +51,13 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
                 new GameTestConfig.Builder(new NamespacedKey(this, "test"))
                         .size(2)
                         .setUp((test) -> {
-                            test.offset(0, 0, 0).getBlock().setType(Material.DIAMOND_BLOCK);
-                            return Unit.INSTANCE;
+                            Block pressurePlate = test.position(0, 0, 0).getBlock();
+                            pressurePlate.setType(Material.BAMBOO_PRESSURE_PLATE);
+                            test.getWorld().spawn(test.location(2, 0, 0), Husk.class);
+                            test.succeedWhen(() -> {
+                                Powerable powerable = (Powerable) pressurePlate.getBlockData();
+                                return powerable.isPowered();
+                            });
                         })
                         .build()
         );
@@ -57,35 +67,31 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         PylonRegistry<GameTestConfig> registry = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS);
         List<CompletableFuture<GameTestFailException>> futures = new ArrayList<>();
         for (GameTestConfig config : registry) {
-            if (config.isParallelCapable()) {
-                futures.add(config.launch(testWorld));
-            }
+            futures.add(
+                    config.launch(testWorld).thenApply((e) -> {
+                        if (e != null) {
+                            Bukkit.broadcast(
+                                    Component.text("Test %s failed!".formatted(config.getKey()))
+                                            .color(NamedTextColor.RED)
+                            );
+                            getLogger().log(Level.SEVERE, "Test failed", e);
+                        } else {
+                            Bukkit.broadcast(
+                                    Component.text("Test %s succeeded!".formatted(config.getKey()))
+                                            .color(NamedTextColor.GREEN)
+                            );
+                        }
+                        return e;
+                    })
+            );
         }
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
                 .thenRun(() -> {
-                    for (CompletableFuture<@Nullable GameTestFailException> future : futures) {
-                        reportGameTestFailure(future.join());
-                    }
-                    CompletableFuture<GameTestFailException> syncFuture = new CompletableFuture<>();
-                    for (GameTestConfig config : registry) {
-                        if (!config.isParallelCapable()) {
-                            syncFuture = syncFuture.thenCompose((e) -> {
-                                reportGameTestFailure(e);
-                                return config.launch(testWorld);
-                            });
-                        }
-                    }
-                    syncFuture.thenRun(() -> getLogger().info("All tests complete!"));
+                    getLogger().info("All tests complete!");
                     if (!Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"))) {
-                        syncFuture.thenRun(Bukkit::shutdown);
+                        Bukkit.shutdown();
                     }
                 });
-    }
-
-    private void reportGameTestFailure(@Nullable GameTestFailException exception) {
-        if (exception != null) {
-            getLogger().log(Level.SEVERE, "Test failed", exception);
-        }
     }
 
     @Override

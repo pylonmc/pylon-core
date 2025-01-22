@@ -6,7 +6,9 @@ import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.future
+import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.util.BoundingBox
@@ -38,8 +40,17 @@ class GameTest(
         return world.getNearbyEntities(boundingBox).any(predicate)
     }
 
-    fun offset(offset: BlockPosition): BlockPosition = center + offset
-    fun offset(x: Int, y: Int, z: Int): BlockPosition = center + BlockPosition(world, x, y, z)
+    fun withDelay(ticks: Int, block: Runnable) {
+        pluginInstance.scope.launch {
+            delay(ticks.ticks)
+            block.run()
+        }
+    }
+
+    fun position(offset: BlockPosition): BlockPosition = center + offset
+    fun position(x: Int, y: Int, z: Int): BlockPosition = center + BlockPosition(world, x, y, z)
+    fun location(location: Location): Location = location.clone().add(center.location)
+    fun location(x: Double, y: Double, z: Double): Location = center.location.clone().add(x, y, z)
 
     companion object {
         internal val RUNNING = mutableListOf<GameTest>()
@@ -69,6 +80,16 @@ class GameTest(
                     result = GameTestFailException(gameTest, "An exception occurred", e)
                 }
                 RUNNING.remove(gameTest)
+                for (x in gameTest.boundingBox.minX.toInt()..gameTest.boundingBox.maxX.toInt()) {
+                    for (y in gameTest.boundingBox.minY.toInt()..gameTest.boundingBox.maxY.toInt()) {
+                        for (z in gameTest.boundingBox.minZ.toInt()..gameTest.boundingBox.maxZ.toInt()) {
+                            gameTest.world.getBlockAt(x, y, z).type = org.bukkit.Material.AIR
+                        }
+                    }
+                }
+                for (entity in gameTest.world.getNearbyEntities(gameTest.boundingBox)) {
+                    entity.remove()
+                }
                 return@future result
             }
         }

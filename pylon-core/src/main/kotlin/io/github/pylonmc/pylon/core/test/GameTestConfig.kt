@@ -7,6 +7,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
 import kotlin.properties.Delegates
 
 class GameTestConfig(
@@ -14,8 +15,7 @@ class GameTestConfig(
     val size: Int,
     val setUp: (GameTest) -> Unit,
     val delay: Int,
-    val timeout: Int,
-    val isParallelCapable: Boolean
+    val timeout: Int
 ) : Keyed {
     override fun getKey(): NamespacedKey = key
 
@@ -24,16 +24,13 @@ class GameTestConfig(
         private var setUp: (GameTest) -> Unit = {}
         private var delay = 0
         private var timeout = Int.MAX_VALUE
-        private var isParallelCapable = true
 
         fun size(size: Int): Builder = apply { this.size = size }
-        fun setUp(setUp: (GameTest) -> Unit): Builder = apply { this.setUp = setUp }
+        fun setUp(setUp: Consumer<GameTest>): Builder = apply { this.setUp = setUp::accept }
         fun delay(delay: Int): Builder = apply { this.delay = delay }
         fun timeout(timeout: Int): Builder = apply { this.timeout = timeout }
-        fun isParallelCapable(isParallelCapable: Boolean): Builder =
-            apply { this.isParallelCapable = isParallelCapable }
 
-        fun build() = GameTestConfig(key, size, setUp, delay, timeout, isParallelCapable)
+        fun build() = GameTestConfig(key, size, setUp, delay, timeout)
     }
 
     fun launch(world: World): CompletableFuture<GameTestFailException?> {
@@ -52,23 +49,23 @@ class GameTestConfig(
         // x
         for (z in -size..size) {
             for (y in 0..size) {
-                gameTest.offset(size + 1, y, z).block.type = Material.BARRIER
-                gameTest.offset(-size - 1, y, z).block.type = Material.BARRIER
+                gameTest.position(size + 1, y, z).block.type = Material.BARRIER
+                gameTest.position(-size - 1, y, z).block.type = Material.BARRIER
             }
         }
 
         // z
         for (x in -size..size) {
             for (y in 0..size) {
-                gameTest.offset(x, y, size + 1).block.type = Material.BARRIER
-                gameTest.offset(x, y, -size - 1).block.type = Material.BARRIER
+                gameTest.position(x, y, size + 1).block.type = Material.BARRIER
+                gameTest.position(x, y, -size - 1).block.type = Material.BARRIER
             }
         }
 
         // roof
         for (x in -size..size) {
             for (z in -size..size) {
-                gameTest.offset(x, size + 1, z).block.type = Material.BARRIER
+                gameTest.position(x, size + 1, z).block.type = Material.BARRIER
             }
         }
 
