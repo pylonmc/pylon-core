@@ -11,7 +11,7 @@ import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 
 open class PylonBlockSchema(
-    val key: NamespacedKey,
+    private val key: NamespacedKey,
     val material: Material,
     blockClass: Class<PylonBlock<PylonBlockSchema>>,
 ) : Keyed {
