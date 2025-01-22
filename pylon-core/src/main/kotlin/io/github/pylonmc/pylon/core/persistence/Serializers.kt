@@ -71,25 +71,19 @@ class NamespacedKeyPersistentDataType : PersistentDataType<String, NamespacedKey
         = complex.toString()
 }
 
-class UUIDPersistentDataType : PersistentDataType<ByteArray, UUID> {
-    override fun getPrimitiveType(): Class<ByteArray>
-            = ByteArray::class.java
+class UUIDPersistentDataType : PersistentDataType<LongArray, UUID> {
+    override fun getPrimitiveType(): Class<LongArray>
+            = LongArray::class.java
 
     override fun getComplexType(): Class<UUID>
             = UUID::class.java
 
-    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): UUID {
-        val buffer = ByteBuffer.wrap(primitive)
-        val mostSignificantBits = buffer.getLong()
-        val leastSignificantBits = buffer.getLong()
-        return UUID(mostSignificantBits, leastSignificantBits)
+    override fun fromPrimitive(primitive: LongArray, context: PersistentDataAdapterContext): UUID {
+        return UUID(primitive[0], primitive[1])
     }
 
-    override fun toPrimitive(complex: UUID, context: PersistentDataAdapterContext): ByteArray {
-        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES)
-        buffer.putLong(complex.mostSignificantBits)
-        buffer.putLong(complex.leastSignificantBits)
-        return buffer.array()
+    override fun toPrimitive(complex: UUID, context: PersistentDataAdapterContext): LongArray {
+        return longArrayOf(complex.mostSignificantBits, complex.leastSignificantBits)
     }
 }
 

@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.persistence
 
-import io.github.pylonmc.pylon.core.InvalidPrimitiveTypeException
 import io.github.pylonmc.pylon.core.pluginInstance
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.ListPersistentDataType
@@ -171,7 +170,7 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
                 // This is PylonPersistentDataContainer here because when we get to deserializing PDCs, there is no way to know
                 // which implementor of PDC to serialize to. Therefore, we will only allow Pylon PDCs to be nested.
                 PersistentDataContainer::class.java -> (primitive as PylonPersistentDataContainer).serializeToBytes()
-                else -> throw InvalidPrimitiveTypeException(type.primitiveType)
+                else -> error("Invalid primitive type '${type.primitiveType}'")
             }
         }
 
@@ -218,7 +217,7 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
                     type.primitiveType.cast(array)
                 }
                 PersistentDataContainer::class.java -> type.primitiveType.cast(PylonPersistentDataContainer(bytes))
-                else -> throw InvalidPrimitiveTypeException(type.primitiveType)
+                else -> error("Invalid primitive type '${type.primitiveType}'")
             }
         }
     }

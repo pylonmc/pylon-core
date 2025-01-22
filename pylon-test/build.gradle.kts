@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-    compileOnly(project(":pylon-core"))
+    compileOnly(project(":pylon-core", "shadow"))
 }
 
 tasks.test {
