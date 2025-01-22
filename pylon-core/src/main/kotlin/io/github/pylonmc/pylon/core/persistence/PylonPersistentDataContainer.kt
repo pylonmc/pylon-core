@@ -127,6 +127,8 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
         val context = PylonPersistentDataAdapterContext()
 
         private fun <P: Any?, C: Any?> primitiveToBytes(type: PersistentDataType<P, C>, primitive: Any): ByteArray {
+            // Checks for the list type rather than for type.primitiveType for parity with PDC
+            // (for some reason PDC doesn't count List<P> as a primitive unless accompanied by a ListPersistentDataType)
             if (type is ListPersistentDataType<*, *>) {
                 val primitiveAsList = type.primitiveType.cast(primitive)
                 val primitivesAsBytes = primitiveAsList.map {
@@ -177,6 +179,8 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
         // Sadly no way to 'switch' on the type T to avoid unchecked casting
         // See https://stackoverflow.com/questions/73523156/how-to-overload-function-with-different-return-types-and-the-same-parameters-in
         private fun <P: Any?, C: Any?> bytesToPrimitive(type: PersistentDataType<P, C>, bytes: ByteArray): P {
+            // Checks for the list type rather than for type.primitiveType for parity with PDC
+            // (for some reason PDC doesn't count List<P> as a primitive unless accompanied by a ListPersistentDataType)
             if (type is ListPersistentDataType<*, *>) {
                 val buffer = ByteBuffer.wrap(bytes)
                 val list: MutableList<Any> = mutableListOf()
