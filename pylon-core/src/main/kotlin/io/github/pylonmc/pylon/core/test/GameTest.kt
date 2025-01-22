@@ -9,6 +9,7 @@ import kotlinx.coroutines.future.future
 import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.util.BoundingBox
@@ -76,15 +77,15 @@ class GameTest(
                 } catch (e: Exception) {
                     result = GameTestFailException(gameTest, "An exception occurred", e)
                 }
+                for (entity in gameTest.world.getNearbyEntities(gameTest.boundingBox)) {
+                    entity.remove()
+                }
                 for (x in gameTest.boundingBox.minX.toInt()..gameTest.boundingBox.maxX.toInt()) {
                     for (y in gameTest.boundingBox.minY.toInt()..gameTest.boundingBox.maxY.toInt()) {
                         for (z in gameTest.boundingBox.minZ.toInt()..gameTest.boundingBox.maxZ.toInt()) {
-                            gameTest.world.getBlockAt(x, y, z).type = org.bukkit.Material.AIR
+                            gameTest.world.getBlockAt(x, y, z).setType(Material.AIR, false)
                         }
                     }
-                }
-                for (entity in gameTest.world.getNearbyEntities(gameTest.boundingBox)) {
-                    entity.remove()
                 }
                 return@future result
             }

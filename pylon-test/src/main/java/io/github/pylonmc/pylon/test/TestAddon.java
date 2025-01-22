@@ -50,11 +50,11 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         PylonRegistry<GameTestConfig> registry = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS);
         registry.register(
                 new GameTestConfig.Builder(new NamespacedKey(this, "test"))
-                        .size(2)
+                        .size(1)
                         .setUp((test) -> {
                             Block pressurePlate = test.position(0, 0, 0).getBlock();
                             pressurePlate.setType(Material.BAMBOO_PRESSURE_PLATE);
-                            test.getWorld().spawn(test.location(2, 0, 0), Husk.class);
+                            test.getWorld().spawn(test.location(1.5, 0, 0), Husk.class);
                             test.succeedWhen(() -> {
                                 Powerable powerable = (Powerable) pressurePlate.getBlockData();
                                 return powerable.isPowered();
@@ -71,7 +71,7 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         for (GameTestConfig config : registry) {
             distance += config.getSize();
             futures.add(
-                    config.launch(new BlockPosition(testWorld, distance, 0, 0)).thenApply(
+                    config.launch(new BlockPosition(testWorld, distance, 1, 0)).thenApply(
                             (e) -> {
                                 if (e != null) {
                                     Bukkit.broadcast(

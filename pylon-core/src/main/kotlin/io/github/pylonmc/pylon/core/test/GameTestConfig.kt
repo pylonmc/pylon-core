@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.block.BlockPosition
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -76,11 +75,5 @@ class GameTestConfig(
         setUp(gameTest)
 
         return GameTest.submit(gameTest, delay)
-    }
-
-    private fun position(world: World): BlockPosition {
-        val furthestExisting = GameTest.RUNNING.maxOfOrNull { it.center.x + it.config.size } ?: 0
-        val position = BlockPosition(world, furthestExisting + size + 5, 0, 0)
-        return position
     }
 }

@@ -8,6 +8,10 @@ plugins {
     id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
 }
 
+repositories {
+    maven("https://repo.aikar.co/content/groups/aikar/")
+}
+
 dependencies {
     api(kotlin("stdlib"))
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
@@ -17,6 +21,8 @@ dependencies {
 
     api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
+
+    implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
 
     testImplementation(kotlin("test"))
 }
@@ -46,6 +52,8 @@ tasks.shadowJar {
     fun doRelocate(lib: String) {
         relocate(lib, "io.github.pylonmc.pylon.core.shadowlibs.$lib")
     }
+
+    doRelocate("co.aikar")
 
     archiveBaseName = project.name
     archiveClassifier = null
