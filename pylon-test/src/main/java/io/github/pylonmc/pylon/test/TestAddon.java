@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.test;
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon;
+import io.github.pylonmc.pylon.core.block.BlockPosition;
 import io.github.pylonmc.pylon.core.registry.PylonRegistries;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys;
@@ -64,26 +65,31 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
     }
 
     private void runGameTests() {
+        int distance = 0;
         PylonRegistry<GameTestConfig> registry = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS);
         List<CompletableFuture<GameTestFailException>> futures = new ArrayList<>();
         for (GameTestConfig config : registry) {
+            distance += config.getSize();
             futures.add(
-                    config.launch(testWorld).thenApply((e) -> {
-                        if (e != null) {
-                            Bukkit.broadcast(
-                                    Component.text("Test %s failed!".formatted(config.getKey()))
-                                            .color(NamedTextColor.RED)
-                            );
-                            getLogger().log(Level.SEVERE, "Test failed", e);
-                        } else {
-                            Bukkit.broadcast(
-                                    Component.text("Test %s succeeded!".formatted(config.getKey()))
-                                            .color(NamedTextColor.GREEN)
-                            );
-                        }
-                        return e;
-                    })
+                    config.launch(new BlockPosition(testWorld, distance, 0, 0)).thenApply(
+                            (e) -> {
+                                if (e != null) {
+                                    Bukkit.broadcast(
+                                            Component.text("Test %s failed!".formatted(config.getKey()))
+                                                    .color(NamedTextColor.RED)
+                                    );
+                                    getLogger().log(Level.SEVERE, "Test failed", e);
+                                } else {
+                                    Bukkit.broadcast(
+                                            Component.text("Test %s succeeded!".formatted(config.getKey()))
+                                                    .color(NamedTextColor.GREEN)
+                                    );
+                                }
+                                return e;
+                            }
+                    )
             );
+            distance += 5 + config.getSize();
         }
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
                 .thenRun(() -> {

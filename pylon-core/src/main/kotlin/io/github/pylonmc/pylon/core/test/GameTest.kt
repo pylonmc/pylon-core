@@ -53,10 +53,7 @@ class GameTest(
     fun location(x: Double, y: Double, z: Double): Location = center.location.clone().add(x, y, z)
 
     companion object {
-        internal val RUNNING = mutableListOf<GameTest>()
-
         internal fun submit(gameTest: GameTest, delay: Int): CompletableFuture<GameTestFailException?> {
-            RUNNING.add(gameTest)
             return pluginInstance.scope.future {
                 delay(delay.ticks)
                 var result: GameTestFailException? = null
@@ -79,7 +76,6 @@ class GameTest(
                 } catch (e: Exception) {
                     result = GameTestFailException(gameTest, "An exception occurred", e)
                 }
-                RUNNING.remove(gameTest)
                 for (x in gameTest.boundingBox.minX.toInt()..gameTest.boundingBox.maxX.toInt()) {
                     for (y in gameTest.boundingBox.minY.toInt()..gameTest.boundingBox.maxY.toInt()) {
                         for (z in gameTest.boundingBox.minZ.toInt()..gameTest.boundingBox.maxZ.toInt()) {

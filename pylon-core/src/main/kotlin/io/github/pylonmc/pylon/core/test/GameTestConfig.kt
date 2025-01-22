@@ -33,18 +33,21 @@ class GameTestConfig(
         fun build() = GameTestConfig(key, size, setUp, delay, timeout)
     }
 
-    fun launch(world: World): CompletableFuture<GameTestFailException?> {
-        val furthestExisting = GameTest.RUNNING.maxOfOrNull { it.center.x + it.config.size } ?: 0
-        val newPos = BlockPosition(world, furthestExisting + size + 5, 0, 0)
+    fun launch(position: BlockPosition): CompletableFuture<GameTestFailException?> {
         val boundingBox = BoundingBox(
-            newPos.x - size - 1.0,
-            newPos.y.toDouble(),
-            newPos.z - size - 1.0,
-            newPos.x + size + 1.0,
-            newPos.y + size + 1.0,
-            newPos.z + size + 1.0
+            position.x - size - 1.0,
+            position.y - 1.0,
+            position.z - size - 1.0,
+            position.x + size + 1.0,
+            position.y + size + 1.0,
+            position.z + size + 1.0
         )
-        val gameTest = GameTest(this, world, newPos, boundingBox)
+        val gameTest = GameTest(
+            this,
+            position.world ?: throw IllegalArgumentException("Position must have world"),
+            position,
+            boundingBox
+        )
 
         // x
         for (z in -size..size) {
@@ -62,15 +65,22 @@ class GameTestConfig(
             }
         }
 
-        // roof
+        // y
         for (x in -size..size) {
             for (z in -size..size) {
                 gameTest.position(x, size + 1, z).block.type = Material.BARRIER
+                gameTest.position(x, -1, z).block.type = Material.BEDROCK
             }
         }
 
         setUp(gameTest)
 
         return GameTest.submit(gameTest, delay)
+    }
+
+    private fun position(world: World): BlockPosition {
+        val furthestExisting = GameTest.RUNNING.maxOfOrNull { it.center.x + it.config.size } ?: 0
+        val position = BlockPosition(world, furthestExisting + size + 5, 0, 0)
+        return position
     }
 }
