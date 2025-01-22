@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core
 
 import com.github.shynixn.mccoroutine.bukkit.launch
-import io.github.pylonmc.pylon.core.registry.Registries
+import io.github.pylonmc.pylon.core.registry.PylonRegistries
 import org.bukkit.plugin.java.JavaPlugin
 
 class PylonCore : JavaPlugin() {
@@ -11,7 +11,7 @@ class PylonCore : JavaPlugin() {
 
         launch {
             // Done on first tick
-            Registries.freezeAll()
+            PylonRegistries.freezeAll()
         }
     }
 

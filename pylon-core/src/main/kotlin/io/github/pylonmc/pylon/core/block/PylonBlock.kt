@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.registry.Registries
-import io.github.pylonmc.pylon.core.registry.RegistryKeys
+import io.github.pylonmc.pylon.core.registry.PylonRegistries
+import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys
 import io.github.pylonmc.pylon.core.state.StateReader
 import io.github.pylonmc.pylon.core.state.StateWriter
 import org.bukkit.NamespacedKey
@@ -27,7 +27,7 @@ open class PylonBlock<S : PylonBlockSchema> private constructor(val schema: S, v
          * Convenience function to use in the (StateReader, Block) constructor
          */
         private fun <S : PylonBlockSchema> getSchemaOfType(key: NamespacedKey): S {
-            val schema = Registries.getRegistry(RegistryKeys.BLOCKS).getOrThrow(key)
+            val schema = PylonRegistries.getRegistry(PyonRegistryKeys.BLOCKS).getOrThrow(key)
 
             // Dealing with deserialization, so not really any way around this
             @Suppress("UNCHECKED_CAST")

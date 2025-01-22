@@ -3,16 +3,16 @@ package io.github.pylonmc.pylon.core.registry
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 
-object Registries {
+object PylonRegistries {
 
-    private val registries: MutableMap<RegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
+    private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 
     init {
-        addRegistry(PylonRegistry(RegistryKeys.BLOCKS))
+        addRegistry(PylonRegistry(PyonRegistryKeys.BLOCKS))
     }
 
     @JvmStatic
-    fun <T : Keyed> getRegistry(key: RegistryKey<T>): PylonRegistry<T> {
+    fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {
         @Suppress("UNCHECKED_CAST")
         return registries[key] as PylonRegistry<T>
     }

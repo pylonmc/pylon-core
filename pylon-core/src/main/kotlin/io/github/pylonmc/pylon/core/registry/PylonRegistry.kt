@@ -4,7 +4,7 @@ import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
 
-class PylonRegistry<T : Keyed>(val key: RegistryKey<T>) : Iterable<T> {
+class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     private val values: MutableMap<NamespacedKey, T> = mutableMapOf()
 
