@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.persistence.PylonDataReader
 import io.github.pylonmc.pylon.core.persistence.PylonDataWriter
 import io.github.pylonmc.pylon.core.registry.PylonRegistries
 import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys
-import io.github.pylonmc.pylon.core.SchemaNotFoundException
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 
