@@ -1,19 +1,17 @@
 package io.github.pylonmc.pylon.test;
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon;
-import io.github.pylonmc.pylon.core.block.BlockPosition;
+import org.bukkit.*;
 import io.github.pylonmc.pylon.core.registry.PylonRegistries;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
+import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.core.test.GameTestFailException;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import kotlin.Unit;
 import org.bukkit.*;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Fox;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,57 +37,56 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
 
         setUpGameTests();
+
         runGameTests();
     }
 
     private void setUpGameTests() {
-        PylonRegistry<GameTestConfig> registry = PylonRegistries.GAMETESTS;
+        PylonRegistry<GameTestConfig> registry = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS);
         registry.register(
                 new GameTestConfig.Builder(new NamespacedKey(this, "test"))
-                        .size(1)
+                        .size(2)
                         .setUp((test) -> {
-                            test.getWorld().spawn(test.location(1.5, 0, 0), Fox.class);
-                            test.getWorld().spawn(test.location(1.5, 0, 1), Chicken.class);
-                            test.succeedWhen(() -> !test.entityInBounds((entity) -> entity.getType() == EntityType.CHICKEN));
+                            test.offset(0, 0, 0).getBlock().setType(Material.DIAMOND_BLOCK);
+                            return Unit.INSTANCE;
                         })
                         .build()
         );
     }
 
     private void runGameTests() {
-        int distance = 0;
-        PylonRegistry<GameTestConfig> registry = PylonRegistries.GAMETESTS;
+        PylonRegistry<GameTestConfig> registry = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS);
         List<CompletableFuture<GameTestFailException>> futures = new ArrayList<>();
         for (GameTestConfig config : registry) {
-            distance += config.getSize();
-            futures.add(
-                    config.launch(new BlockPosition(testWorld, distance, 1, 0)).thenApply(
-                            (e) -> {
-                                if (e != null) {
-                                    Bukkit.broadcast(
-                                            Component.text("Test %s failed!".formatted(config.getKey()))
-                                                    .color(NamedTextColor.RED)
-                                    );
-                                    getLogger().log(Level.SEVERE, "Test failed", e);
-                                } else {
-                                    Bukkit.broadcast(
-                                            Component.text("Test %s succeeded!".formatted(config.getKey()))
-                                                    .color(NamedTextColor.GREEN)
-                                    );
-                                }
-                                return e;
-                            }
-                    )
-            );
-            distance += 5 + config.getSize();
+            if (config.isParallelCapable()) {
+                futures.add(config.launch(testWorld));
+            }
         }
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
                 .thenRun(() -> {
-                    getLogger().info("All tests complete!");
+                    for (CompletableFuture<@Nullable GameTestFailException> future : futures) {
+                        reportGameTestFailure(future.join());
+                    }
+                    CompletableFuture<GameTestFailException> syncFuture = new CompletableFuture<>();
+                    for (GameTestConfig config : registry) {
+                        if (!config.isParallelCapable()) {
+                            syncFuture = syncFuture.thenCompose((e) -> {
+                                reportGameTestFailure(e);
+                                return config.launch(testWorld);
+                            });
+                        }
+                    }
+                    syncFuture.thenRun(() -> getLogger().info("All tests complete!"));
                     if (!Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"))) {
-                        Bukkit.shutdown();
+                        syncFuture.thenRun(Bukkit::shutdown);
                     }
                 });
+    }
+
+    private void reportGameTestFailure(@Nullable GameTestFailException exception) {
+        if (exception != null) {
+            getLogger().log(Level.SEVERE, "Test failed", exception);
+        }
     }
 
     @Override
