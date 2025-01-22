@@ -42,8 +42,6 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         setUpGameTests();
 
         runGameTests();
-
-        Bukkit.getServerTickManager().setFrozen(true);
     }
 
     private void setUpGameTests() {
