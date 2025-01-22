@@ -154,14 +154,14 @@ class LocationPersistentDataType : PersistentDataType<PersistentDataContainer, L
     }
 
     override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): PersistentDataContainer {
-        val PDC = context.newPersistentDataContainer()
-        PDC.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world, context))
-        PDC.set(xKey, PersistentDataType.DOUBLE, complex.x)
-        PDC.set(yKey, PersistentDataType.DOUBLE, complex.y)
-        PDC.set(zKey, PersistentDataType.DOUBLE, complex.z)
-        PDC.set(yawKey, PersistentDataType.FLOAT, complex.yaw)
-        PDC.set(pitchKey, PersistentDataType.FLOAT, complex.pitch)
-        return PDC
+        val pdc = context.newPersistentDataContainer()
+        pdc.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world, context))
+        pdc.set(xKey, PersistentDataType.DOUBLE, complex.x)
+        pdc.set(yKey, PersistentDataType.DOUBLE, complex.y)
+        pdc.set(zKey, PersistentDataType.DOUBLE, complex.z)
+        pdc.set(yawKey, PersistentDataType.FLOAT, complex.yaw)
+        pdc.set(pitchKey, PersistentDataType.FLOAT, complex.pitch)
+        return pdc
     }
 }
 
@@ -190,14 +190,14 @@ class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContain
     }
 
     override fun toPrimitive(complex: BlockPosition, context: PersistentDataAdapterContext): PersistentDataContainer {
-        val PDC = context.newPersistentDataContainer()
-        PDC.set(xKey, PersistentDataType.INTEGER, complex.x)
-        PDC.set(yKey, PersistentDataType.INTEGER, complex.y)
-        PDC.set(zKey, PersistentDataType.INTEGER, complex.z)
+        val pdc = context.newPersistentDataContainer()
+        pdc.set(xKey, PersistentDataType.INTEGER, complex.x)
+        pdc.set(yKey, PersistentDataType.INTEGER, complex.y)
+        pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
         if(complex.world != null){
-            PDC.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
+            pdc.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
         }
-        return PDC
+        return pdc
     }
 }
 
@@ -224,13 +224,13 @@ class ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContain
     }
 
     override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): PersistentDataContainer {
-        val PDC = context.newPersistentDataContainer()
-        PDC.set(xKey, PersistentDataType.INTEGER, complex.x)
-        PDC.set(zKey, PersistentDataType.INTEGER, complex.z)
+        val pdc = context.newPersistentDataContainer()
+        pdc.set(xKey, PersistentDataType.INTEGER, complex.x)
+        pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
         if(complex.world != null){
-            PDC.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
+            pdc.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
         }
-        return PDC
+        return pdc
     }
 }
 
