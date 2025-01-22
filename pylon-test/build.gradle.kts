@@ -33,7 +33,9 @@ bukkit {
     apiVersion = "1.21"
     depend = listOf("pylon-core")
 }
-
+tasks.compileJava {
+    dependsOn(":pylon-core:jar")
+}
 tasks.runServer {
     doFirst {
         val runFolder = project.projectDir.resolve("run")
