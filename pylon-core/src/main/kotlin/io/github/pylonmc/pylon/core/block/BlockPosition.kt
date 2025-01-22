@@ -32,6 +32,14 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
         return prime * (world?.hashCode() ?: 0) + prime * asLong.hashCode()
     }
 
+    override fun toString(): String {
+        return if (world != null) {
+            "$x, $y, $z in ${world!!.name}"
+        } else {
+            "$x, $y, $z"
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other is BlockPosition && world != null && other.world != null) {
             return other.world!!.uid == world!!.uid && other.asLong == asLong

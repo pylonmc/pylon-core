@@ -6,6 +6,7 @@ import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
+import org.bukkit.util.BoundingBox
 import java.util.concurrent.Future
 import kotlin.properties.Delegates
 
@@ -35,10 +36,18 @@ data class GameTestConfig(
         fun build() = GameTestConfig(key, size, setUp, delay, timeout, canRunInParallel)
     }
 
-    fun launch(world: World): Future<Boolean> {
+    fun launch(world: World): Future<GameTestFailException?> {
         val furthestExisting = GameTest.RUNNING.maxOfOrNull { it.center.x + it.config.size } ?: 0
         val newPos = BlockPosition(world, furthestExisting + size + 5, 0, 0)
-        val gameTest = GameTest(this, world, newPos)
+        val boundingBox = BoundingBox(
+            newPos.x - size - 1.0,
+            newPos.y.toDouble(),
+            newPos.z - size - 1.0,
+            newPos.x + size + 1.0,
+            newPos.y + size + 1.0,
+            newPos.z + size + 1.0
+        )
+        val gameTest = GameTest(this, world, newPos, boundingBox)
 
         // x
         for (z in -size..size) {
@@ -65,6 +74,6 @@ data class GameTestConfig(
 
         setUp(gameTest)
 
-        return GameTest.submit(gameTest)
+        return GameTest.submit(gameTest, delay)
     }
 }
