@@ -1,22 +1,21 @@
 package io.github.pylonmc.pylon.core.test
 
 import io.github.pylonmc.pylon.core.block.BlockPosition
-import io.github.pylonmc.pylon.core.block.block
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.util.BoundingBox
-import java.util.concurrent.Future
+import java.util.concurrent.CompletableFuture
 import kotlin.properties.Delegates
 
-data class GameTestConfig(
-    val key: NamespacedKey,
+class GameTestConfig(
+    private val key: NamespacedKey,
     val size: Int,
     val setUp: (GameTest) -> Unit,
     val delay: Int,
     val timeout: Int,
-    val canRunInParallel: Boolean
+    val isParallelCapable: Boolean
 ) : Keyed {
     override fun getKey(): NamespacedKey = key
 
@@ -24,19 +23,20 @@ data class GameTestConfig(
         private var size by Delegates.notNull<Int>()
         private var setUp: (GameTest) -> Unit = {}
         private var delay = 0
-        private var timeout by Delegates.notNull<Int>()
-        private var canRunInParallel = true
+        private var timeout = Int.MAX_VALUE
+        private var isParallelCapable = true
 
         fun size(size: Int): Builder = apply { this.size = size }
         fun setUp(setUp: (GameTest) -> Unit): Builder = apply { this.setUp = setUp }
         fun delay(delay: Int): Builder = apply { this.delay = delay }
         fun timeout(timeout: Int): Builder = apply { this.timeout = timeout }
-        fun canRunInParallel(canRunInParallel: Boolean): Builder = apply { this.canRunInParallel = canRunInParallel }
+        fun isParallelCapable(isParallelCapable: Boolean): Builder =
+            apply { this.isParallelCapable = isParallelCapable }
 
-        fun build() = GameTestConfig(key, size, setUp, delay, timeout, canRunInParallel)
+        fun build() = GameTestConfig(key, size, setUp, delay, timeout, isParallelCapable)
     }
 
-    fun launch(world: World): Future<GameTestFailException?> {
+    fun launch(world: World): CompletableFuture<GameTestFailException?> {
         val furthestExisting = GameTest.RUNNING.maxOfOrNull { it.center.x + it.config.size } ?: 0
         val newPos = BlockPosition(world, furthestExisting + size + 5, 0, 0)
         val boundingBox = BoundingBox(

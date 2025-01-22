@@ -17,7 +17,7 @@ object PylonRegistries {
     @JvmStatic
     fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {
         @Suppress("UNCHECKED_CAST")
-        return registries[key] as PylonRegistry<T>
+        return registries[key] as? PylonRegistry<T> ?: throw IllegalArgumentException("Registry $key not found")
     }
 
     @JvmStatic

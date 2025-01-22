@@ -10,7 +10,7 @@ import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.util.BoundingBox
-import java.util.concurrent.Future
+import java.util.concurrent.CompletableFuture
 
 class GameTest(
     val config: GameTestConfig,
@@ -44,7 +44,7 @@ class GameTest(
     companion object {
         internal val RUNNING = mutableListOf<GameTest>()
 
-        internal fun submit(gameTest: GameTest, delay: Int): Future<GameTestFailException?> {
+        internal fun submit(gameTest: GameTest, delay: Int): CompletableFuture<GameTestFailException?> {
             RUNNING.add(gameTest)
             return pluginInstance.scope.future {
                 delay(delay.ticks)

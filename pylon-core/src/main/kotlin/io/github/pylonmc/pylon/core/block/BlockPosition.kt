@@ -64,13 +64,13 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     operator fun div(value: Int): BlockPosition {
         return BlockPosition(world, x / value, y / value, z / value)
     }
+
+    val location: Location
+        get() = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+
+    val block: Block
+        get() = world?.getBlockAt(x, y, z) ?: error("World is null")
 }
 
 val Block.position: BlockPosition
     get() = BlockPosition(this)
-
-val BlockPosition.location: Location
-    get() = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
-
-val BlockPosition.block: Block
-    get() = world?.getBlockAt(x, y, z) ?: error("World is null")

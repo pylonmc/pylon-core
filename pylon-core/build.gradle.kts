@@ -16,6 +16,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
 
     api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
 
     testImplementation(kotlin("test"))
 }
