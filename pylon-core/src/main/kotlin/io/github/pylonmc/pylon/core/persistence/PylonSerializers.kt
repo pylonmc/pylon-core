@@ -155,12 +155,12 @@ class LocationPersistentDataType : PersistentDataType<PersistentDataContainer, L
 
     override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): PersistentDataContainer {
         val PDC = context.newPersistentDataContainer()
-        PDC.set(NamespacedKey.fromString("world")!!, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world, context))
-        PDC.set(NamespacedKey.fromString("x")!!, PersistentDataType.DOUBLE, complex.x)
-        PDC.set(NamespacedKey.fromString("y")!!, PersistentDataType.DOUBLE, complex.y)
-        PDC.set(NamespacedKey.fromString("z")!!, PersistentDataType.DOUBLE, complex.z)
-        PDC.set(NamespacedKey.fromString("yaw")!!, PersistentDataType.FLOAT, complex.yaw)
-        PDC.set(NamespacedKey.fromString("pitch")!!, PersistentDataType.FLOAT, complex.pitch)
+        PDC.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world, context))
+        PDC.set(xKey, PersistentDataType.DOUBLE, complex.x)
+        PDC.set(yKey, PersistentDataType.DOUBLE, complex.y)
+        PDC.set(zKey, PersistentDataType.DOUBLE, complex.z)
+        PDC.set(yawKey, PersistentDataType.FLOAT, complex.yaw)
+        PDC.set(pitchKey, PersistentDataType.FLOAT, complex.pitch)
         return PDC
     }
 }
