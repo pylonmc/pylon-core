@@ -125,6 +125,7 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
         return Serializers.UUID.toPrimitive(complex.uid, context)
     }
 }
+
 class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
     override fun getPrimitiveType(): Class<ByteArray>
             = ByteArray::class.java
