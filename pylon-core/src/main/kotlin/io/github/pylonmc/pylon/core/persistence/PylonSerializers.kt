@@ -3,14 +3,19 @@ package io.github.pylonmc.pylon.core.persistence
 import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.block.ChunkPosition
 import org.bukkit.Bukkit
+import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.persistence.PersistentDataAdapterContext
+import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
+import org.yaml.snakeyaml.serializer.Serializer
+import java.io.Serial
 import java.nio.ByteBuffer
 import java.util.*
+import javax.xml.stream.events.Namespace
 
 object Serializers {
     @JvmField
@@ -126,105 +131,110 @@ class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
     }
 }
 
-class LocationPersistentDataType : PersistentDataType<ByteArray, Location> {
-    override fun getPrimitiveType(): Class<ByteArray>
-            = ByteArray::class.java
+class LocationPersistentDataType : PersistentDataType<PersistentDataContainer, Location> {
+    companion object {
+        val xKey = NamespacedKey.fromString("x")!!
+        val yKey = NamespacedKey.fromString("y")!!
+        val zKey = NamespacedKey.fromString("z")!!
+        val yawKey = NamespacedKey.fromString("yaw")!!
+        val pitchKey = NamespacedKey.fromString("pitch")!!
+        val worldKey = NamespacedKey.fromString("world")!!
+    }
+
+    override fun getPrimitiveType(): Class<PersistentDataContainer>
+            = PersistentDataContainer::class.java
 
     override fun getComplexType(): Class<Location>
             = Location::class.java
 
-    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): Location {
-        val buffer = ByteBuffer.wrap(primitive)
-        val world = Serializers.WORLD.fromPrimitive(primitive, context)
-        val x = buffer.getDouble()
-        val y = buffer.getDouble()
-        val z = buffer.getDouble()
-        val yaw = buffer.getFloat()
-        val pitch = buffer.getFloat()
+    override fun fromPrimitive(primitive: PersistentDataContainer, context: PersistentDataAdapterContext): Location {
+        val x = primitive.get(xKey, PersistentDataType.DOUBLE)!!
+        val y = primitive.get(yKey, PersistentDataType.DOUBLE)!!
+        val z = primitive.get(zKey, PersistentDataType.DOUBLE)!!
+        val yaw = primitive.get(yawKey, PersistentDataType.FLOAT)!!
+        val pitch = primitive.get(pitchKey, PersistentDataType.FLOAT)!!
+        val world = Serializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.BYTE_ARRAY)!!, context)
         return Location(world, x, y, z, yaw, pitch)
     }
 
-    override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): ByteArray {
-        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 3 * Double.SIZE_BYTES + 2 * Float.SIZE_BYTES)
-        buffer.put(Serializers.WORLD.toPrimitive(complex.world, context))
-        buffer.putDouble(complex.x)
-        buffer.putDouble(complex.y)
-        buffer.putDouble(complex.z)
-        buffer.putFloat(complex.yaw)
-        buffer.putFloat(complex.pitch)
-        return buffer.array()
+    override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): PersistentDataContainer {
+        val PDC = context.newPersistentDataContainer()
+        PDC.set(NamespacedKey.fromString("world")!!, PersistentDataType.BYTE_ARRAY, Serializers.WORLD.toPrimitive(complex.world, context))
+        PDC.set(NamespacedKey.fromString("x")!!, PersistentDataType.DOUBLE, complex.x)
+        PDC.set(NamespacedKey.fromString("y")!!, PersistentDataType.DOUBLE, complex.y)
+        PDC.set(NamespacedKey.fromString("z")!!, PersistentDataType.DOUBLE, complex.z)
+        PDC.set(NamespacedKey.fromString("yaw")!!, PersistentDataType.FLOAT, complex.yaw)
+        PDC.set(NamespacedKey.fromString("pitch")!!, PersistentDataType.FLOAT, complex.pitch)
+        return PDC
     }
 }
 
-class BlockPositionPersistentDataType : PersistentDataType<ByteArray, BlockPosition> {
-    override fun getPrimitiveType(): Class<ByteArray>
-            = ByteArray::class.java
+class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContainer, BlockPosition> {
+    companion object {
+        val worldKey = NamespacedKey.fromString("world")!!
+        val xKey = NamespacedKey.fromString("x")!!
+        val yKey = NamespacedKey.fromString("y")!!
+        val zKey = NamespacedKey.fromString("z")!!
+    }
+    override fun getPrimitiveType(): Class<PersistentDataContainer>
+            = PersistentDataContainer::class.java
 
     override fun getComplexType(): Class<BlockPosition>
             = BlockPosition::class.java
 
-    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): BlockPosition {
-        val buffer = ByteBuffer.wrap(primitive)
-        var world: World? = null
-        if(buffer.get() == 1.toByte()){
-            val mostSignificantBits = buffer.getLong()
-            val leastSignificantBits = buffer.getLong()
-            world = Bukkit.getWorld(UUID(mostSignificantBits, leastSignificantBits))
+    override fun fromPrimitive(primitive: PersistentDataContainer, context: PersistentDataAdapterContext): BlockPosition {
+        val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
+        val y = primitive.get(yKey, PersistentDataType.INTEGER)!!
+        val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
+        if(primitive.has(worldKey)){
+            val world = Serializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.BYTE_ARRAY)!!, context)
+            return BlockPosition(world, x, y, z)
         }
-        val x = buffer.getInt()
-        val y = buffer.getInt()
-        val z = buffer.getInt()
-        return BlockPosition(world, x, y, z)
+        return BlockPosition(null, x, y, z)
     }
 
-    override fun toPrimitive(complex: BlockPosition, context: PersistentDataAdapterContext): ByteArray {
-        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 3 * Int.SIZE_BYTES + 1)
-        val world = complex.world
-        if(world != null){
-            buffer.put(1)
-            buffer.put(Serializers.WORLD.toPrimitive(complex.world!!, context))
-        } else {
-            buffer.put(0)
+    override fun toPrimitive(complex: BlockPosition, context: PersistentDataAdapterContext): PersistentDataContainer {
+        val PDC = context.newPersistentDataContainer()
+        PDC.set(xKey, PersistentDataType.INTEGER, complex.x)
+        PDC.set(yKey, PersistentDataType.INTEGER, complex.y)
+        PDC.set(zKey, PersistentDataType.INTEGER, complex.z)
+        if(complex.world != null){
+            PDC.set(worldKey, PersistentDataType.BYTE_ARRAY, Serializers.WORLD.toPrimitive(complex.world!!, context))
         }
-        buffer.putInt(complex.x)
-        buffer.putInt(complex.y)
-        buffer.putInt(complex.z)
-        return buffer.array()
+        return PDC
     }
 }
 
-class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosition> {
-    override fun getPrimitiveType(): Class<ByteArray>
-            = ByteArray::class.java
+class ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContainer, ChunkPosition> {
+    companion object {
+        val xKey = NamespacedKey.fromString("x")!!
+        val zKey = NamespacedKey.fromString("z")!!
+        val worldKey = NamespacedKey.fromString("world")!!
+    }
+    override fun getPrimitiveType(): Class<PersistentDataContainer>
+            = PersistentDataContainer::class.java
 
     override fun getComplexType(): Class<ChunkPosition>
             = ChunkPosition::class.java
 
-    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): ChunkPosition {
-        val buffer = ByteBuffer.wrap(primitive)
-        var world: World? = null
-        if(buffer.get() == 1.toByte()){
-            val mostSignificantBits = buffer.getLong()
-            val leastSignificantBits = buffer.getLong()
-            world = Bukkit.getWorld(UUID(mostSignificantBits, leastSignificantBits))
+    override fun fromPrimitive(primitive: PersistentDataContainer, context: PersistentDataAdapterContext): ChunkPosition {
+        val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
+        val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
+        if(primitive.has(worldKey)){
+            val world = Serializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.BYTE_ARRAY)!!, context)
+            return ChunkPosition(world, x, z)
         }
-        val x = buffer.getInt()
-        val z = buffer.getInt()
-        return ChunkPosition(world, x, z)
+        return ChunkPosition(null, x, z)
     }
 
-    override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): ByteArray {
-        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES + 2 * Int.SIZE_BYTES + 1)
-        val world = complex.world
-        if (world != null) {
-            buffer.put(1)
-            buffer.put(Serializers.WORLD.toPrimitive(complex.world!!, context))
-        } else {
-            buffer.put(0)
+    override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): PersistentDataContainer {
+        val PDC = context.newPersistentDataContainer()
+        PDC.set(xKey, PersistentDataType.INTEGER, complex.x)
+        PDC.set(zKey, PersistentDataType.INTEGER, complex.z)
+        if(complex.world != null){
+            PDC.set(worldKey, PersistentDataType.BYTE_ARRAY, Serializers.WORLD.toPrimitive(complex.world!!, context))
         }
-        buffer.putInt(complex.x)
-        buffer.putInt(complex.z)
-        return buffer.array()
+        return PDC
     }
 }
 
