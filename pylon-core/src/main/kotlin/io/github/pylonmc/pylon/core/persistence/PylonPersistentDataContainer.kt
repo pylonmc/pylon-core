@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.persistence
 import io.github.pylonmc.pylon.core.InvalidPrimitiveTypeException
 import io.github.pylonmc.pylon.core.pluginInstance
 import org.bukkit.NamespacedKey
+import org.bukkit.persistence.ListPersistentDataType
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
@@ -15,12 +16,14 @@ import java.nio.ByteBuffer
  *
  * Any nested PDCs are assumed to be PylonPersistentDataContainers.
  */
-internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, PylonDataReader, PylonDataWriter {
+class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, PylonDataReader, PylonDataWriter {
     private val data: MutableMap<NamespacedKey, ByteArray> = HashMap()
 
     init {
         readFromBytes(bytes)
     }
+
+    constructor() : this(byteArrayOf())
 
     /**
      * Constructor that also sets the ID of this PDC's holder. This should be used for creating PDCs for
@@ -33,7 +36,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
     override val id
         get() = get(idKey, Serializers.NAMESPACED_KEY)!!
 
-    private class PylonPersistentDataAdapterContext : PersistentDataAdapterContext {
+    class PylonPersistentDataAdapterContext : PersistentDataAdapterContext {
         override fun newPersistentDataContainer(): PersistentDataContainer
                 = PylonPersistentDataContainer(byteArrayOf())
     }
@@ -46,7 +49,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
 
     override fun <P : Any, C : Any> get(key: NamespacedKey, type: PersistentDataType<P, C>): C? {
         val x = data[key] ?: return null
-        return type.fromPrimitive(bytesToPrimitive(type.primitiveType, x), adapterContext)
+        return type.fromPrimitive(bytesToPrimitive(type, x), adapterContext)
     }
 
     override fun <P : Any, C : Any> getOrDefault(
@@ -74,8 +77,13 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
         = PylonPersistentDataAdapterContext()
 
     override fun serializeToBytes(): ByteArray {
-        val keysAsBytes = data.keys.map { key -> Serializers.NAMESPACED_KEY.toPrimitive(key, adapterContext) }
-        val bufferSize = keysAsBytes.zip(data.values).fold(0) { acc, (key, value) -> acc + 2 * Int.SIZE_BYTES + key.size + value.size }
+        val keysAsBytes = data.keys.map {
+            key -> Serializers.NAMESPACED_KEY.toPrimitive(key, adapterContext).toByteArray(Charsets.UTF_8)
+        }
+
+        val bufferSize = keysAsBytes.zip(data.values).fold(0) {
+            acc, (key, value) -> acc + 2 * Int.SIZE_BYTES + key.size + value.size
+        }
 
         val buffer = ByteBuffer.allocate(bufferSize)
         for ((key, value) in keysAsBytes.zip(data.values)) {
@@ -90,7 +98,7 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
     }
 
     override fun <P : Any?, C : Any?> set(key: NamespacedKey, type: PersistentDataType<P, C>, value: C & Any) {
-        data[key] = primitiveToBytes(type.primitiveType, type.toPrimitive(value, adapterContext))
+        data[key] = primitiveToBytes(type, type.toPrimitive(value, adapterContext))
     }
 
     override fun remove(key: NamespacedKey) {
@@ -99,11 +107,11 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
 
     override fun readFromBytes(bytes: ByteArray, clear: Boolean) {
         val buffer = ByteBuffer.wrap(bytes)
-        while (bytes.isEmpty()) {
+        while (buffer.hasRemaining()) {
             val keyLength = buffer.getInt()
             val keyBytes = ByteArray(keyLength)
             buffer.get(keyBytes)
-            val key = Serializers.NAMESPACED_KEY.fromPrimitive(keyBytes, adapterContext)
+            val key = Serializers.NAMESPACED_KEY.fromPrimitive(keyBytes.toString(Charsets.UTF_8), adapterContext)
 
             val valueLength = buffer.getInt()
             val value = ByteArray(valueLength)
@@ -114,10 +122,28 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
     }
 
     companion object {
+        @JvmField
         val idKey = NamespacedKey(pluginInstance, "pylon_id")
+        @JvmField
+        val context = PylonPersistentDataAdapterContext()
 
-        private fun <T: Any?> primitiveToBytes(primitiveType: Class<T>, primitive: T): ByteArray
-            = when (primitiveType) {
+        private fun <P: Any?, C: Any?> primitiveToBytes(type: PersistentDataType<P, C>, primitive: Any): ByteArray {
+            if (type is ListPersistentDataType<*, *>) {
+                val primitiveAsList = type.primitiveType.cast(primitive)
+                val primitivesAsBytes = primitiveAsList.map {
+                    val x = type.elementType()
+                    primitiveToBytes(x, x.primitiveType.cast(it))
+                }
+                val bufferSize = primitivesAsBytes.fold(0) { acc, x -> acc + Int.SIZE_BYTES + x.size }
+                val buffer = ByteBuffer.allocate(bufferSize)
+                for (value in primitivesAsBytes) {
+                    buffer.putInt(value.size)
+                    buffer.put(value)
+                }
+                return buffer.array()
+            }
+
+            return when (type.primitiveType) {
                 Byte::class.java -> byteArrayOf(primitive as Byte)
                 Short::class.java -> ByteBuffer.allocate(Short.SIZE_BYTES).putShort(primitive as Short).array()
                 Integer::class.java -> ByteBuffer.allocate(Int.SIZE_BYTES).putInt(primitive as Int).array()
@@ -145,29 +171,43 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
                 // This is PylonPersistentDataContainer here because when we get to deserializing PDCs, there is no way to know
                 // which implementor of PDC to serialize to. Therefore, we will only allow Pylon PDCs to be nested.
                 PersistentDataContainer::class.java -> (primitive as PylonPersistentDataContainer).serializeToBytes()
-                else -> throw InvalidPrimitiveTypeException(primitiveType)
+                else -> throw InvalidPrimitiveTypeException(type.primitiveType)
             }
+        }
 
         // Sadly no way to 'switch' on the type T to avoid unchecked casting
         // See https://stackoverflow.com/questions/73523156/how-to-overload-function-with-different-return-types-and-the-same-parameters-in
-        @Suppress("UNCHECKED_CAST")
-        private fun <T: Any?> bytesToPrimitive(primitiveType: Class<T>, bytes: ByteArray): T
-            = when (primitiveType) {
-                Byte::class.java -> bytes[0] as T
-                Short::class.java -> ByteBuffer.wrap(bytes).getShort() as T
-                Integer::class.java -> ByteBuffer.wrap(bytes).getInt() as T
-                Long::class.java -> ByteBuffer.wrap(bytes).getLong() as T
-                Float::class.java -> ByteBuffer.wrap(bytes).getFloat() as T
-                Double::class.java -> ByteBuffer.wrap(bytes).getDouble() as T
-                String::class.java -> bytes.toString(Charsets.UTF_8) as T
-                ByteArray::class.java -> bytes as T
+        private fun <P: Any?, C: Any?> bytesToPrimitive(type: PersistentDataType<P, C>, bytes: ByteArray): P {
+            if (type is ListPersistentDataType<*, *>) {
+                val buffer = ByteBuffer.wrap(bytes)
+                val list: MutableList<Any> = mutableListOf()
+                while (buffer.hasRemaining()) {
+                    val length = buffer.getInt()
+                    val value = ByteArray(length)
+                    buffer.get(value)
+                    val primitive = bytesToPrimitive(type.elementType(), value)
+                    list.add(primitive)
+                }
+                @Suppress("UNCHECKED_CAST") // Needed to satisfy compiler but this should be safe
+                return type.primitiveType.cast(list) as P
+            }
+
+            return when (type.primitiveType) {
+                Byte::class.java -> type.primitiveType.cast(bytes[0])
+                Short::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getShort())
+                Integer::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getInt())
+                Long::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getLong())
+                Float::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getFloat())
+                Double::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getDouble())
+                String::class.java -> type.primitiveType.cast(bytes.toString(Charsets.UTF_8))
+                ByteArray::class.java -> type.primitiveType.cast(bytes)
                 IntArray::class.java -> {
                     val buffer = ByteBuffer.wrap(bytes)
                     var array = intArrayOf()
                     while (buffer.hasRemaining()) {
                         array += buffer.getInt()
                     }
-                    array as T
+                    type.primitiveType.cast(array)
                 }
                 LongArray::class.java -> {
                     val buffer = ByteBuffer.wrap(bytes)
@@ -175,10 +215,11 @@ internal class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataCo
                     while (buffer.hasRemaining()) {
                         array += buffer.getLong()
                     }
-                    array as T
+                    type.primitiveType.cast(array)
                 }
-                PersistentDataContainer::class.java -> PylonPersistentDataContainer(bytes) as T
-                else -> throw InvalidPrimitiveTypeException(primitiveType)
+                PersistentDataContainer::class.java -> type.primitiveType.cast(PylonPersistentDataContainer(bytes))
+                else -> throw InvalidPrimitiveTypeException(type.primitiveType)
             }
+        }
     }
 }
