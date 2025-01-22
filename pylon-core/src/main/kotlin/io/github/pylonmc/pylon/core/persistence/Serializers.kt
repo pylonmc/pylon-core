@@ -213,8 +213,9 @@ class ChunkPositionPersistentDataType : PersistentDataType<ByteArray, ChunkPosit
         if (world != null) {
             buffer.put(1)
             buffer.put(Serializers.WORLD.toPrimitive(complex.world!!, context))
+        } else {
+            buffer.put(0)
         }
-        buffer.put(0)
         buffer.putInt(complex.x)
         buffer.putInt(complex.z)
         return buffer.array()
