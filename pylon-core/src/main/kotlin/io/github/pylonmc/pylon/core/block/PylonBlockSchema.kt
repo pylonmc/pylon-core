@@ -33,7 +33,6 @@ open class PylonBlockSchema(
         throw NoSuchMethodException("'$key' is missing a load constructor")
     }
 
-    // WHY IS THIS NEEDED
     override fun getKey(): NamespacedKey = key
 
     fun register() {
