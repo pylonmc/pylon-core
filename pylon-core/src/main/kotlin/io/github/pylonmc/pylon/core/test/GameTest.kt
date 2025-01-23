@@ -63,7 +63,7 @@ class GameTest(
                 try {
                     while (true) {
                         val currentTick = Bukkit.getCurrentTick()
-                        if (currentTick - ticksAtStart >= gameTest.config.timeout) {
+                        if (currentTick - ticksAtStart >= gameTest.config.timeoutTicks) {
                             result = GameTestFailException(gameTest, "Test timed out")
                             break
                         }

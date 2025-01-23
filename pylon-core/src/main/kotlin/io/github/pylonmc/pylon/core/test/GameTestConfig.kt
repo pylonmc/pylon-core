@@ -13,8 +13,8 @@ class GameTestConfig(
     private val key: NamespacedKey,
     val size: Int,
     val setUp: (GameTest) -> Unit,
-    val delay: Int,
-    val timeout: Int,
+    val delayTicks: Int,
+    val timeoutTicks: Int,
     val positionOverride: BlockPosition?
 ) : Keyed {
     override fun getKey(): NamespacedKey = key
@@ -22,17 +22,17 @@ class GameTestConfig(
     class Builder(val key: NamespacedKey) {
         private var size by Delegates.notNull<Int>()
         private var setUp: (GameTest) -> Unit = {}
-        private var delay = 0
-        private var timeout = Int.MAX_VALUE
+        private var delayTicks = 0
+        private var timeoutTicks = 5 * 60 * 20
         private var positionOverride: BlockPosition? = null
 
         fun size(size: Int): Builder = apply { this.size = size }
         fun setUp(setUp: Consumer<GameTest>): Builder = apply { this.setUp = setUp::accept }
-        fun delay(delay: Int): Builder = apply { this.delay = delay }
-        fun timeout(timeout: Int): Builder = apply { this.timeout = timeout }
+        fun delayTicks(delayTicks: Int): Builder = apply { this.delayTicks = delayTicks }
+        fun timeoutTicks(timeoutTicks: Int): Builder = apply { this.timeoutTicks = timeoutTicks }
         fun positionOverride(position: BlockPosition): Builder = apply { this.positionOverride = position }
 
-        fun build() = GameTestConfig(key, size, setUp, delay, timeout, positionOverride)
+        fun build() = GameTestConfig(key, size, setUp, delayTicks, timeoutTicks, positionOverride)
     }
 
     fun launch(position: BlockPosition): CompletableFuture<GameTestFailException?> {
@@ -78,6 +78,6 @@ class GameTestConfig(
 
         setUp(gameTest)
 
-        return GameTest.submit(gameTest, delay)
+        return GameTest.submit(gameTest, delayTicks)
     }
 }

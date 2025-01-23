@@ -40,7 +40,6 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
 
         setUpGameTests();
-
         runGameTests();
     }
 
