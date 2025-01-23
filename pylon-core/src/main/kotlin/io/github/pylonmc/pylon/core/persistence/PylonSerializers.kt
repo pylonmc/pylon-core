@@ -72,25 +72,19 @@ class NamespacedKeyPersistentDataType : PersistentDataType<String, NamespacedKey
         = complex.toString()
 }
 
-class UUIDPersistentDataType : PersistentDataType<ByteArray, UUID> {
-    override fun getPrimitiveType(): Class<ByteArray>
-            = ByteArray::class.java
+class UUIDPersistentDataType : PersistentDataType<LongArray, UUID> {
+    override fun getPrimitiveType(): Class<LongArray>
+            = LongArray::class.java
 
     override fun getComplexType(): Class<UUID>
             = UUID::class.java
 
-    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): UUID {
-        val buffer = ByteBuffer.wrap(primitive)
-        val mostSignificantBits = buffer.getLong()
-        val leastSignificantBits = buffer.getLong()
-        return UUID(mostSignificantBits, leastSignificantBits)
+    override fun fromPrimitive(primitive: LongArray, context: PersistentDataAdapterContext): UUID {
+        return UUID(primitive[0], primitive[1])
     }
 
-    override fun toPrimitive(complex: UUID, context: PersistentDataAdapterContext): ByteArray {
-        val buffer = ByteBuffer.allocate(2 * Long.SIZE_BYTES)
-        buffer.putLong(complex.mostSignificantBits)
-        buffer.putLong(complex.leastSignificantBits)
-        return buffer.array()
+    override fun toPrimitive(complex: UUID, context: PersistentDataAdapterContext): LongArray {
+        return longArrayOf(complex.mostSignificantBits, complex.leastSignificantBits)
     }
 }
 
@@ -110,19 +104,19 @@ class VectorPersistentDataType : PersistentDataType<DoubleArray, Vector> {
     }
 }
 
-class WorldPersistentDataType : PersistentDataType<ByteArray, World> {
-    override fun getPrimitiveType(): Class<ByteArray>
-            = ByteArray::class.java
+class WorldPersistentDataType : PersistentDataType<LongArray, World> {
+    override fun getPrimitiveType(): Class<LongArray>
+            = LongArray::class.java
 
     override fun getComplexType(): Class<World>
             = World::class.java
 
-    override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): World {
+    override fun fromPrimitive(primitive: LongArray, context: PersistentDataAdapterContext): World {
         val uid = PylonSerializers.UUID.fromPrimitive(primitive, context)
         return Bukkit.getWorld(uid) ?: throw IllegalArgumentException(uid.toString())
     }
 
-    override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): ByteArray {
+    override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): LongArray {
         return PylonSerializers.UUID.toPrimitive(complex.uid, context)
     }
 }
@@ -149,13 +143,13 @@ class LocationPersistentDataType : PersistentDataType<PersistentDataContainer, L
         val z = primitive.get(zKey, PersistentDataType.DOUBLE)!!
         val yaw = primitive.get(yawKey, PersistentDataType.FLOAT)!!
         val pitch = primitive.get(pitchKey, PersistentDataType.FLOAT)!!
-        val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.BYTE_ARRAY)!!, context)
+        val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.LONG_ARRAY)!!, context)
         return Location(world, x, y, z, yaw, pitch)
     }
 
     override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()
-        pdc.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world, context))
+        pdc.set(worldKey, PersistentDataType.LONG_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world, context))
         pdc.set(xKey, PersistentDataType.DOUBLE, complex.x)
         pdc.set(yKey, PersistentDataType.DOUBLE, complex.y)
         pdc.set(zKey, PersistentDataType.DOUBLE, complex.z)
@@ -183,7 +177,7 @@ class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContain
         val y = primitive.get(yKey, PersistentDataType.INTEGER)!!
         val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
         if(primitive.has(worldKey)){
-            val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.BYTE_ARRAY)!!, context)
+            val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.LONG_ARRAY)!!, context)
             return BlockPosition(world, x, y, z)
         }
         return BlockPosition(null, x, y, z)
@@ -195,7 +189,7 @@ class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContain
         pdc.set(yKey, PersistentDataType.INTEGER, complex.y)
         pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
         if(complex.world != null){
-            pdc.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
+            pdc.set(worldKey, PersistentDataType.LONG_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
         }
         return pdc
     }
@@ -217,7 +211,7 @@ class ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContain
         val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
         val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
         if(primitive.has(worldKey)){
-            val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.BYTE_ARRAY)!!, context)
+            val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.LONG_ARRAY)!!, context)
             return ChunkPosition(world, x, z)
         }
         return ChunkPosition(null, x, z)
@@ -228,7 +222,7 @@ class ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContain
         pdc.set(xKey, PersistentDataType.INTEGER, complex.x)
         pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
         if(complex.world != null){
-            pdc.set(worldKey, PersistentDataType.BYTE_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
+            pdc.set(worldKey, PersistentDataType.LONG_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
         }
         return pdc
     }
