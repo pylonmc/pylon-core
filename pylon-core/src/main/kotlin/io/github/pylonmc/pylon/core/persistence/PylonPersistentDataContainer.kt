@@ -29,11 +29,11 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
      * holders such as blocks, but not for nested PDCs (they don't need ids)
      */
     constructor(id: NamespacedKey, bytes: ByteArray) : this(bytes) {
-        set(idKey, Serializers.NAMESPACED_KEY, id)
+        set(idKey, PylonSerializers.NAMESPACED_KEY, id)
     }
 
     override val id
-        get() = get(idKey, Serializers.NAMESPACED_KEY)!!
+        get() = get(idKey, PylonSerializers.NAMESPACED_KEY)!!
 
     class PylonPersistentDataAdapterContext : PersistentDataAdapterContext {
         override fun newPersistentDataContainer(): PersistentDataContainer
@@ -77,7 +77,7 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
 
     override fun serializeToBytes(): ByteArray {
         val keysAsBytes = data.keys.map {
-            key -> Serializers.NAMESPACED_KEY.toPrimitive(key, adapterContext).toByteArray(Charsets.UTF_8)
+            key -> PylonSerializers.NAMESPACED_KEY.toPrimitive(key, adapterContext).toByteArray(Charsets.UTF_8)
         }
 
         val bufferSize = keysAsBytes.zip(data.values).fold(0) {
@@ -110,7 +110,7 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
             val keyLength = buffer.getInt()
             val keyBytes = ByteArray(keyLength)
             buffer.get(keyBytes)
-            val key = Serializers.NAMESPACED_KEY.fromPrimitive(keyBytes.toString(Charsets.UTF_8), adapterContext)
+            val key = PylonSerializers.NAMESPACED_KEY.fromPrimitive(keyBytes.toString(Charsets.UTF_8), adapterContext)
 
             val valueLength = buffer.getInt()
             val value = ByteArray(valueLength)

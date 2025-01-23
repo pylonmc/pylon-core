@@ -33,7 +33,6 @@ bukkit {
     apiVersion = "1.21"
     depend = listOf("pylon-core")
 }
-
 tasks.runServer {
     doFirst {
         val runFolder = project.projectDir.resolve("run")

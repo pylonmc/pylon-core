@@ -10,7 +10,6 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
     @Override
     public void onEnable() {
         getLogger().info("Test addon enabled!");
-
         Bukkit.getScheduler().runTask(this, Bukkit::shutdown);
     }
 
