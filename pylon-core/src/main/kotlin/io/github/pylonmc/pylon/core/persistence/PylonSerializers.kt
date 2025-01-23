@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.persistence
 
 import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.block.ChunkPosition
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
@@ -143,13 +144,13 @@ class LocationPersistentDataType : PersistentDataType<PersistentDataContainer, L
         val z = primitive.get(zKey, PersistentDataType.DOUBLE)!!
         val yaw = primitive.get(yawKey, PersistentDataType.FLOAT)!!
         val pitch = primitive.get(pitchKey, PersistentDataType.FLOAT)!!
-        val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.LONG_ARRAY)!!, context)
+        val world = primitive.get(worldKey, PylonSerializers.WORLD)
         return Location(world, x, y, z, yaw, pitch)
     }
 
     override fun toPrimitive(complex: Location, context: PersistentDataAdapterContext): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()
-        pdc.set(worldKey, PersistentDataType.LONG_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world, context))
+        pdc.set(worldKey, PylonSerializers.WORLD, complex.world)
         pdc.set(xKey, PersistentDataType.DOUBLE, complex.x)
         pdc.set(yKey, PersistentDataType.DOUBLE, complex.y)
         pdc.set(zKey, PersistentDataType.DOUBLE, complex.z)
@@ -176,11 +177,8 @@ class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContain
         val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
         val y = primitive.get(yKey, PersistentDataType.INTEGER)!!
         val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
-        if(primitive.has(worldKey)){
-            val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.LONG_ARRAY)!!, context)
-            return BlockPosition(world, x, y, z)
-        }
-        return BlockPosition(null, x, y, z)
+        val world = primitive.get(worldKey, PylonSerializers.WORLD)
+        return BlockPosition(world, x, y, z)
     }
 
     override fun toPrimitive(complex: BlockPosition, context: PersistentDataAdapterContext): PersistentDataContainer {
@@ -189,7 +187,7 @@ class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContain
         pdc.set(yKey, PersistentDataType.INTEGER, complex.y)
         pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
         if(complex.world != null){
-            pdc.set(worldKey, PersistentDataType.LONG_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
+            pdc.set(worldKey, PylonSerializers.WORLD, complex.world!!)
         }
         return pdc
     }
@@ -210,11 +208,8 @@ class ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContain
     override fun fromPrimitive(primitive: PersistentDataContainer, context: PersistentDataAdapterContext): ChunkPosition {
         val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
         val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
-        if(primitive.has(worldKey)){
-            val world = PylonSerializers.WORLD.fromPrimitive(primitive.get(worldKey, PersistentDataType.LONG_ARRAY)!!, context)
-            return ChunkPosition(world, x, z)
-        }
-        return ChunkPosition(null, x, z)
+        val world = primitive.get(worldKey, PylonSerializers.WORLD)
+        return ChunkPosition(world, x, z)
     }
 
     override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): PersistentDataContainer {
@@ -222,7 +217,7 @@ class ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContain
         pdc.set(xKey, PersistentDataType.INTEGER, complex.x)
         pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
         if(complex.world != null){
-            pdc.set(worldKey, PersistentDataType.LONG_ARRAY, PylonSerializers.WORLD.toPrimitive(complex.world!!, context))
+            pdc.set(worldKey, PylonSerializers.WORLD, complex.world!!)
         }
         return pdc
     }
