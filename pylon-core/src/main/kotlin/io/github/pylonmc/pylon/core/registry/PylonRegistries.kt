@@ -7,8 +7,11 @@ object PylonRegistries {
 
     private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 
+    val BLOCKS = PylonRegistry(PylonRegistryKeys.BLOCKS)
+    val ADDONS = PylonRegistry(PylonRegistryKeys.ADDONS)
+
     init {
-        addRegistry(PylonRegistry(PyonRegistryKeys.BLOCKS))
+        addRegistry(BLOCKS)
     }
 
     @JvmStatic
