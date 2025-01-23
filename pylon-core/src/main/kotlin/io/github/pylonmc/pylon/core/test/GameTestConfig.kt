@@ -14,7 +14,8 @@ class GameTestConfig(
     val size: Int,
     val setUp: (GameTest) -> Unit,
     val delay: Int,
-    val timeout: Int
+    val timeout: Int,
+    val positionOverride: BlockPosition?
 ) : Keyed {
     override fun getKey(): NamespacedKey = key
 
@@ -23,28 +24,31 @@ class GameTestConfig(
         private var setUp: (GameTest) -> Unit = {}
         private var delay = 0
         private var timeout = Int.MAX_VALUE
+        private var positionOverride: BlockPosition? = null
 
         fun size(size: Int): Builder = apply { this.size = size }
         fun setUp(setUp: Consumer<GameTest>): Builder = apply { this.setUp = setUp::accept }
         fun delay(delay: Int): Builder = apply { this.delay = delay }
         fun timeout(timeout: Int): Builder = apply { this.timeout = timeout }
+        fun positionOverride(position: BlockPosition): Builder = apply { this.positionOverride = position }
 
-        fun build() = GameTestConfig(key, size, setUp, delay, timeout)
+        fun build() = GameTestConfig(key, size, setUp, delay, timeout, positionOverride)
     }
 
     fun launch(position: BlockPosition): CompletableFuture<GameTestFailException?> {
+        val realPosition = positionOverride ?: position
         val boundingBox = BoundingBox(
-            position.x - size - 1.0,
-            position.y - 1.0,
-            position.z - size - 1.0,
-            position.x + size + 1.0,
-            position.y + size + 1.0,
-            position.z + size + 1.0
+            realPosition.x - size - 1.0,
+            realPosition.y - 1.0,
+            realPosition.z - size - 1.0,
+            realPosition.x + size + 1.0,
+            realPosition.y + size + 1.0,
+            realPosition.z + size + 1.0
         )
         val gameTest = GameTest(
             this,
-            position.world ?: throw IllegalArgumentException("Position must have world"),
-            position,
+            realPosition.world ?: throw IllegalArgumentException("Position must have world"),
+            realPosition,
             boundingBox
         )
 
