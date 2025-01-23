@@ -10,9 +10,9 @@ import io.github.pylonmc.pylon.core.test.GameTestFailException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.Powerable;
-import org.bukkit.entity.Husk;
+import org.bukkit.entity.Chicken;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fox;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,13 +50,9 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
                 new GameTestConfig.Builder(new NamespacedKey(this, "test"))
                         .size(1)
                         .setUp((test) -> {
-                            Block pressurePlate = test.position(0, 0, 0).getBlock();
-                            pressurePlate.setType(Material.BAMBOO_PRESSURE_PLATE);
-                            test.getWorld().spawn(test.location(1.5, 0, 0), Husk.class);
-                            test.succeedWhen(() -> {
-                                Powerable powerable = (Powerable) pressurePlate.getBlockData();
-                                return powerable.isPowered();
-                            });
+                            test.getWorld().spawn(test.location(1.5, 0, 0), Fox.class);
+                            test.getWorld().spawn(test.location(1.5, 0, 1), Chicken.class);
+                            test.succeedWhen(() -> !test.entityInBounds((entity) -> entity.getType() == EntityType.CHICKEN));
                         })
                         .build()
         );

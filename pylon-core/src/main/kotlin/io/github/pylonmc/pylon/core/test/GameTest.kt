@@ -12,6 +12,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
 import java.util.concurrent.CompletableFuture
 
@@ -78,7 +79,9 @@ class GameTest(
                     result = GameTestFailException(gameTest, "An exception occurred", e)
                 }
                 for (entity in gameTest.world.getNearbyEntities(gameTest.boundingBox)) {
-                    entity.remove()
+                    if (entity !is Player) {
+                        entity.remove()
+                    }
                 }
                 for (x in gameTest.boundingBox.minX.toInt()..gameTest.boundingBox.maxX.toInt()) {
                     for (y in gameTest.boundingBox.minY.toInt()..gameTest.boundingBox.maxY.toInt()) {

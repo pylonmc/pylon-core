@@ -13,9 +13,9 @@ class PylonCore : JavaPlugin() {
     override fun onEnable() {
         instance = this
         logger.info("Hello, World!")
+        saveDefaultConfig()
 
         val manager = PaperCommandManager(this)
-        manager.registerCommand(PylonCommand)
 
         manager.commandContexts.registerContext(NamespacedKey::class.java) {
             NamespacedKey.fromString(it.popFirstArg())
@@ -24,6 +24,8 @@ class PylonCore : JavaPlugin() {
         manager.commandCompletions.registerCompletion("gametests") { _ ->
             PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS).map { it.key.toString() }.sorted()
         }
+
+        manager.registerCommand(PylonCommand)
 
         launch {
             delay(1.ticks)
