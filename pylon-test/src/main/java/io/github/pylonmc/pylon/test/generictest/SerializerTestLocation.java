@@ -4,18 +4,21 @@ import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
 import io.github.pylonmc.pylon.core.persistence.PylonSerializers;
 import io.github.pylonmc.pylon.test.GenericTest;
 import io.github.pylonmc.pylon.test.TestAddon;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SerializerTestNamespacedKey implements GenericTest {
+public class SerializerTestLocation implements GenericTest {
     @Override
     public void run() {
         NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
-        var type = PylonSerializers.NAMESPACED_KEY;
-        NamespacedKey value = new NamespacedKey(TestAddon.instance(), "value");
+        var type = PylonSerializers.LOCATION;
+        Location value = new Location(TestAddon.testWorld, 5.0, 320.3, 38904.43443);
+        value.setPitch(3.0F);
+        value.setYaw(1.04F);
 
         ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
         stack.editMeta(meta -> meta.getPersistentDataContainer()

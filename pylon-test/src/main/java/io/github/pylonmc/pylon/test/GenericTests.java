@@ -22,6 +22,7 @@ class GenericTests {
         genericTests.add(new SerializerTestChunkPosition());
         genericTests.add(new SerializerTestChar());
         genericTests.add(new SerializerTestSet());
+        genericTests.add(new SerializerTestLocation());
     }
 
     private static void onComplete(GenericTest test, Throwable e) {
