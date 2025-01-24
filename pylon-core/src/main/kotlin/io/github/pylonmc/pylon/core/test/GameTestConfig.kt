@@ -9,8 +9,8 @@ import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import kotlin.properties.Delegates
 
-data class GameTestConfig(
-    val key: NamespacedKey,
+class GameTestConfig(
+    private val key: NamespacedKey,
     val size: Int,
     val setUp: (GameTest) -> Unit,
     val delayTicks: Int,
