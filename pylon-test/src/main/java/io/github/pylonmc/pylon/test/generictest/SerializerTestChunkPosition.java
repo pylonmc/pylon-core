@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.test.generictest;
 
 import io.github.pylonmc.pylon.core.block.BlockPosition;
+import io.github.pylonmc.pylon.core.block.ChunkPosition;
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
 import io.github.pylonmc.pylon.core.persistence.PylonSerializers;
 import io.github.pylonmc.pylon.test.GenericTest;
@@ -11,14 +12,14 @@ import org.bukkit.inventory.ItemStack;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SerializerTestBlockPosition implements GenericTest {
+public class SerializerTestChunkPosition implements GenericTest {
     @Override
     public void run() {
         // With world
         {
             NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
-            var type = PylonSerializers.BLOCK_POSITION;
-            BlockPosition value = new BlockPosition(TestAddon.testWorld, 5, 10, 185);
+            var type = PylonSerializers.CHUNK_POSITION;
+            ChunkPosition value = new ChunkPosition(TestAddon.testWorld, 7, 85);
 
             ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
             stack.editMeta(meta -> meta.getPersistentDataContainer()
@@ -35,8 +36,8 @@ public class SerializerTestBlockPosition implements GenericTest {
         // Without world
         {
             NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
-            var type = PylonSerializers.BLOCK_POSITION;
-            BlockPosition value = new BlockPosition(null, 5, 10, 185);
+            var type = PylonSerializers.CHUNK_POSITION;
+            ChunkPosition value = new ChunkPosition(null, 7, 85);
 
             ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
             stack.editMeta(meta -> meta.getPersistentDataContainer()

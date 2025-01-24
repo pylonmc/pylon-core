@@ -1,9 +1,6 @@
 package io.github.pylonmc.pylon.test;
 
-import io.github.pylonmc.pylon.test.generictest.SerializerTestBlockPosition;
-import io.github.pylonmc.pylon.test.generictest.SerializerTestNamespacedKey;
-import io.github.pylonmc.pylon.test.generictest.SerializerTestUUID;
-import io.github.pylonmc.pylon.test.generictest.SerializerTestVector;
+import io.github.pylonmc.pylon.test.generictest.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -22,6 +19,7 @@ class GenericTests {
         genericTests.add(new SerializerTestNamespacedKey());
         genericTests.add(new SerializerTestVector());
         genericTests.add(new SerializerTestBlockPosition());
+        genericTests.add(new SerializerTestChunkPosition());
     }
 
     private static void onComplete(GenericTest test, Throwable e) {
