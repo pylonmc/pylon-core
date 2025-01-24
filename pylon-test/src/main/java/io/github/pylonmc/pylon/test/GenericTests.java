@@ -1,9 +1,6 @@
 package io.github.pylonmc.pylon.test;
 
 import io.github.pylonmc.pylon.test.generictest.*;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -27,26 +24,18 @@ class GenericTests {
         genericTests.add(new PylonPDCSerializationTest());
     }
 
-    private static void onComplete(GenericTest test, Throwable e) {
+    private static TestResult onComplete(GenericTest test, Throwable e) {
         if (e != null) {
-            Bukkit.broadcast(
-                    Component.text("Generic test %s failed!".formatted(test.getKey()))
-                            .color(NamedTextColor.RED)
-            );
-            TestAddon.instance().getLogger().log(Level.SEVERE, "Generic test failed", e);
-        } else {
-            Bukkit.broadcast(
-                    Component.text("Generic test %s succeeded!".formatted(test.getKey()))
-                            .color(NamedTextColor.GREEN)
-            );
+            TestAddon.instance().getLogger().log(Level.SEVERE, "Gametest %s failed!".formatted(test.getKey()), e);
         }
+        return new TestResult(test.getKey(), e == null);
     }
 
-    static @NotNull List<CompletableFuture<Void>> runGenericTests() {
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
+    static @NotNull List<CompletableFuture<TestResult>> runGenericTests() {
+        List<CompletableFuture<TestResult>> futures = new ArrayList<>();
 
         for (GenericTest test : genericTests) {
-            CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<TestResult> future = CompletableFuture.supplyAsync(() -> {
                 try {
                     test.run();
                 } catch (Throwable e) {
@@ -60,7 +49,7 @@ class GenericTests {
                 }
 
                 return null;
-            }).thenAccept(e -> onComplete(test, e));
+            }).thenApply(e -> onComplete(test, e));
 
             futures.add(future);
         }

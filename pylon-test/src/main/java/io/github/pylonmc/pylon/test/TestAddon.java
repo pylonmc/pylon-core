@@ -5,7 +5,9 @@ import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class TestAddon extends JavaPlugin implements PylonAddon {
     private static TestAddon instance;
@@ -28,14 +30,40 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
 
         GenericTests.setUpGenericTests();
-        var futures = GenericTests.runGenericTests();
+        List<CompletableFuture<TestResult>>futures = GenericTests.runGenericTests();
 
         GameTests.setUpGameTests();
         futures.addAll(GameTests.runGameTests());
 
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-                .thenRun(() -> {
-                    TestAddon.instance().getLogger().info("All gametests complete!");
+                .thenApply(ignored -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList()))
+                .thenAccept(results -> {
+                    List<NamespacedKey> succeeded = results.stream()
+                            .filter(TestResult::success)
+                            .map(TestResult::key)
+                            .toList();
+                    List<NamespacedKey> failed = results.stream()
+                            .filter(r -> !r.success())
+                            .map(TestResult::key)
+                            .toList();
+
+                    TestAddon.instance().getLogger().info("[ ===== TEST SUMMARY ===== ]");
+
+                    if (!failed.isEmpty()) {
+                        String failedString = failed.stream()
+                                .map(NamespacedKey::toString)
+                                .collect(Collectors.joining(", "));
+                        TestAddon.instance().getLogger().info("%s/%s TESTS PASSED"
+                                .formatted(succeeded.size(), succeeded.size() + failed.size()));
+                        TestAddon.instance().getLogger().info("FAILED: %s".formatted(failedString));
+                    } else {
+                        TestAddon.instance().getLogger().info("ALL TESTS PASSED");
+                    }
+
+                    TestAddon.instance().getLogger().info("Testing complete; shutting down server...");
+
                     if (!Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"))) {
                         Bukkit.shutdown();
                     }
