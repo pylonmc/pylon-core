@@ -1,10 +1,7 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
-import com.github.shynixn.mccoroutine.bukkit.launch
-import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.registry.PylonRegistries
-import kotlinx.coroutines.delay
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -24,12 +21,6 @@ class PylonCore : JavaPlugin() {
         }
 
         manager.registerCommand(PylonCommand)
-
-        launch {
-            delay(1.ticks)
-            // Done on first tick
-            PylonRegistries.freezeAll()
-        }
     }
 
     override fun onDisable() {
