@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.test;
 
+import io.github.pylonmc.pylon.test.generictest.SerializerTestNamespacedKey;
 import io.github.pylonmc.pylon.test.generictest.SerializerTestUUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -16,6 +17,7 @@ class GenericTests {
 
     static void setUpGenericTests() {
         genericTests.add(new SerializerTestUUID());
+        genericTests.add(new SerializerTestNamespacedKey());
     }
 
     private static void onComplete(GenericTest test, Throwable e) {
