@@ -5,7 +5,7 @@ import co.aikar.commands.annotation.*
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.registry.PylonRegistries
-import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys
+import io.github.pylonmc.pylon.core.registry.PylonRegistryKeys
 import io.github.pylonmc.pylon.core.util.plus
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.format.NamedTextColor
@@ -23,7 +23,7 @@ object PylonCommand : BaseCommand() {
     @Description("Run a game test")
     fun test(player: Player, test: NamespacedKey, @Optional location: Location?) {
         val spawnLocation = location ?: player.location
-        val gameTest = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS)[test]
+        val gameTest = PylonRegistries.getRegistry(PylonRegistryKeys.GAMETESTS)[test]
         if (gameTest == null) {
             player.sendMessage("Game test not found: $test")
             return

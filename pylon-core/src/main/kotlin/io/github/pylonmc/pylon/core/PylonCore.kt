@@ -4,7 +4,6 @@ import co.aikar.commands.PaperCommandManager
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.registry.PylonRegistries
-import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys
 import kotlinx.coroutines.delay
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
@@ -22,7 +21,7 @@ class PylonCore : JavaPlugin() {
         }
 
         manager.commandCompletions.registerCompletion("gametests") { _ ->
-            PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS).map { it.key.toString() }.sorted()
+            PylonRegistries.GAMETESTS.map { it.key.toString() }.sorted()
         }
 
         manager.registerCommand(PylonCommand)
