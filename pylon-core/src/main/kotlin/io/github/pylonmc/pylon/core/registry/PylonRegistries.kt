@@ -7,8 +7,14 @@ object PylonRegistries {
 
     private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 
+    @JvmField
     val BLOCKS = PylonRegistry(PylonRegistryKeys.BLOCKS)
+
+    @JvmField
     val ADDONS = PylonRegistry(PylonRegistryKeys.ADDONS)
+
+    @JvmField
+    val GAMETESTS = PylonRegistry(PylonRegistryKeys.GAMETESTS)
 
     init {
         addRegistry(BLOCKS)
@@ -17,7 +23,7 @@ object PylonRegistries {
     @JvmStatic
     fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {
         @Suppress("UNCHECKED_CAST")
-        return registries[key] as PylonRegistry<T>
+        return registries[key] as? PylonRegistry<T> ?: throw IllegalArgumentException("Registry $key not found")
     }
 
     @JvmStatic

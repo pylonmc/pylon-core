@@ -32,12 +32,44 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
         return prime * (world?.hashCode() ?: 0) + prime * asLong.hashCode()
     }
 
+    override fun toString(): String {
+        return if (world != null) {
+            "$x, $y, $z in ${world!!.name}"
+        } else {
+            "$x, $y, $z"
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other is BlockPosition && world != null && other.world != null) {
             return other.world!!.uid == world!!.uid && other.asLong == asLong
         }
         return false
     }
+
+    operator fun plus(other: BlockPosition): BlockPosition {
+        check(world == other.world) { "Cannot add two BlockPositions in different worlds" }
+        return BlockPosition(world, x + other.x, y + other.y, z + other.z)
+    }
+
+    operator fun minus(other: BlockPosition): BlockPosition {
+        check(world == other.world) { "Cannot subtract two BlockPositions in different worlds" }
+        return BlockPosition(world, x - other.x, y - other.y, z - other.z)
+    }
+
+    operator fun times(value: Int): BlockPosition {
+        return BlockPosition(world, x * value, y * value, z * value)
+    }
+
+    operator fun div(value: Int): BlockPosition {
+        return BlockPosition(world, x / value, y / value, z / value)
+    }
+
+    val location: Location
+        get() = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+
+    val block: Block
+        get() = world?.getBlockAt(x, y, z) ?: error("World is null")
 }
 
 val Block.position: BlockPosition
