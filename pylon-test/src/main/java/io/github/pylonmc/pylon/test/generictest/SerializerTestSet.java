@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.test.generictest;
 
-import io.github.pylonmc.pylon.core.block.ChunkPosition;
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
 import io.github.pylonmc.pylon.core.persistence.PylonSerializers;
 import io.github.pylonmc.pylon.test.GenericTest;
@@ -9,16 +8,18 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SerializerTestChunkPosition implements GenericTest {
+public class SerializerTestSet implements GenericTest {
     @Override
     public void run() {
-        // With world
+        // Set of integers
         {
             NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
-            var type = PylonSerializers.CHUNK_POSITION;
-            ChunkPosition value = new ChunkPosition(TestAddon.testWorld, 7, 85);
+            var type = PylonSerializers.SET.setTypeFrom(PylonSerializers.INTEGER);
+            Set<Integer> value = Set.of(1, 2, 20, 40);
 
             ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
             stack.editMeta(meta -> meta.getPersistentDataContainer()
@@ -32,11 +33,12 @@ public class SerializerTestChunkPosition implements GenericTest {
                     .isEqualTo(value);
         }
 
-        // Without world
+        // Set of set of strings
         {
             NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
-            var type = PylonSerializers.CHUNK_POSITION;
-            ChunkPosition value = new ChunkPosition(null, 7, 85);
+            var type = PylonSerializers.SET.setTypeFrom(
+                    PylonSerializers.SET.setTypeFrom(PylonSerializers.STRING));
+            Set<Set<String>> value = Set.of(Set.of("bruh", "bruuuu"), Set.of("*screaming*"), Set.of());
 
             ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
             stack.editMeta(meta -> meta.getPersistentDataContainer()
