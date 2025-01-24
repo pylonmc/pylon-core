@@ -12,7 +12,6 @@ class PylonCore : JavaPlugin() {
     override fun onEnable() {
         instance = this
         logger.info("Hello, World!")
-        saveDefaultConfig()
 
         val manager = PaperCommandManager(this)
 

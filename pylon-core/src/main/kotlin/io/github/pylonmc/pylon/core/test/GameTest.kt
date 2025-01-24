@@ -7,10 +7,7 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.launch
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
@@ -57,6 +54,14 @@ class GameTest(
     companion object {
         internal fun submit(gameTest: GameTest, delay: Int): CompletableFuture<GameTestFailException?> {
             return pluginInstance.scope.future {
+                val chunks = mutableSetOf<Chunk>()
+                for (x in gameTest.boundingBox.minX.toInt()..gameTest.boundingBox.maxX.toInt()) {
+                    for (z in gameTest.boundingBox.minZ.toInt()..gameTest.boundingBox.maxZ.toInt()) {
+                        val chunk = gameTest.world.getChunkAt(x, z)
+                        chunk.isForceLoaded = true
+                        chunks.add(chunk)
+                    }
+                }
                 delay(delay.ticks)
                 var result: GameTestFailException? = null
                 val ticksAtStart = Bukkit.getCurrentTick()
@@ -90,8 +95,12 @@ class GameTest(
                         }
                     }
                 }
+                for (chunk in chunks) {
+                    chunk.isForceLoaded = false
+                }
                 return@future result
             }
         }
+
     }
 }

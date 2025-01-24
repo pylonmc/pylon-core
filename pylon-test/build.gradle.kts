@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.runServer
-
 plugins {
     java
     id("com.gradleup.shadow")
@@ -33,6 +31,7 @@ bukkit {
     apiVersion = "1.21"
     depend = listOf("pylon-core")
 }
+
 tasks.runServer {
     doFirst {
         val runFolder = project.projectDir.resolve("run")
@@ -40,10 +39,8 @@ tasks.runServer {
         runFolder.resolve("eula.txt").writeText("eula=true")
         val pluginFolder = runFolder.resolve("plugins")
         pluginFolder.mkdirs()
-        copy {
-            from(project(":pylon-core").tasks.shadowJar.map { it.archiveFile })
-            into(pluginFolder)
-        }
+        val archive = project(":pylon-core").tasks.shadowJar.map { it.archiveFile }.get().get().asFile
+        archive.copyTo(pluginFolder.resolve(archive.name), overwrite = true)
     }
     maxHeapSize = "4G"
     minecraftVersion("1.21.4")
