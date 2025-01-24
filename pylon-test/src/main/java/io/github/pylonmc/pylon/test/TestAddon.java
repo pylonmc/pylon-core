@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class TestAddon extends JavaPlugin implements PylonAddon {
     private static TestAddon instance;
-    World testWorld;
+    public static World testWorld;
 
     @Override
     public void onEnable() {
