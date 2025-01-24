@@ -93,19 +93,32 @@ class UUIDPersistentDataType : PersistentDataType<LongArray, UUID> {
     }
 }
 
-class VectorPersistentDataType : PersistentDataType<DoubleArray, Vector> {
-    override fun getPrimitiveType(): Class<DoubleArray>
-            = DoubleArray::class.java
+class VectorPersistentDataType : PersistentDataType<PersistentDataContainer, Vector> {
+    companion object {
+        val xKey = NamespacedKey.fromString("x")!!
+        val yKey = NamespacedKey.fromString("y")!!
+        val zKey = NamespacedKey.fromString("z")!!
+    }
+
+    override fun getPrimitiveType(): Class<PersistentDataContainer>
+            = PersistentDataContainer::class.java
 
     override fun getComplexType(): Class<Vector>
             = Vector::class.java
 
-    override fun fromPrimitive(primitive: DoubleArray, context: PersistentDataAdapterContext): Vector {
-        return Vector(primitive[0], primitive[1], primitive[2])
+    override fun fromPrimitive(primitive: PersistentDataContainer, context: PersistentDataAdapterContext): Vector {
+        val x = primitive.get(xKey, PylonSerializers.DOUBLE)!!
+        val y = primitive.get(yKey, PylonSerializers.DOUBLE)!!
+        val z = primitive.get(zKey, PylonSerializers.DOUBLE)!!
+        return Vector(x, y, z)
     }
 
-    override fun toPrimitive(complex: Vector, context: PersistentDataAdapterContext): DoubleArray {
-        return doubleArrayOf(complex.x, complex.y, complex.z)
+    override fun toPrimitive(complex: Vector, context: PersistentDataAdapterContext): PersistentDataContainer {
+        val pdc = context.newPersistentDataContainer()
+        pdc.set(xKey, PylonSerializers.DOUBLE, complex.x)
+        pdc.set(yKey, PylonSerializers.DOUBLE, complex.y)
+        pdc.set(zKey, PylonSerializers.DOUBLE, complex.z)
+        return pdc
     }
 }
 

@@ -145,12 +145,12 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
             }
 
             return when (type.primitiveType) {
-                Byte::class.java -> byteArrayOf(primitive as Byte)
-                Short::class.java -> ByteBuffer.allocate(Short.SIZE_BYTES).putShort(primitive as Short).array()
-                Integer::class.java -> ByteBuffer.allocate(Int.SIZE_BYTES).putInt(primitive as Int).array()
-                Long::class.java -> ByteBuffer.allocate(Long.SIZE_BYTES).putLong(primitive as Long).array()
-                Float::class.java -> ByteBuffer.allocate(Float.SIZE_BYTES).putFloat(primitive as Float).array()
-                Double::class.java -> ByteBuffer.allocate(Double.SIZE_BYTES).putDouble(primitive as Double).array()
+                Byte::class.javaObjectType -> byteArrayOf(primitive as Byte)
+                Short::class.javaObjectType -> ByteBuffer.allocate(Short.SIZE_BYTES).putShort(primitive as Short).array()
+                Integer::class.javaObjectType -> ByteBuffer.allocate(Int.SIZE_BYTES).putInt(primitive as Int).array()
+                Long::class.javaObjectType -> ByteBuffer.allocate(Long.SIZE_BYTES).putLong(primitive as Long).array()
+                Float::class.javaObjectType -> ByteBuffer.allocate(Float.SIZE_BYTES).putFloat(primitive as Float).array()
+                Double::class.javaObjectType -> ByteBuffer.allocate(Double.SIZE_BYTES).putDouble(primitive as Double).array()
                 String::class.java -> (primitive as String).toByteArray(Charsets.UTF_8)
                 ByteArray::class.java -> primitive as ByteArray
                 IntArray::class.java -> {
@@ -196,12 +196,12 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
             }
 
             return when (type.primitiveType) {
-                Byte::class.java -> type.primitiveType.cast(bytes[0])
-                Short::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getShort())
-                Integer::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getInt())
-                Long::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getLong())
-                Float::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getFloat())
-                Double::class.java -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getDouble())
+                Byte::class.javaObjectType -> type.primitiveType.cast(bytes[0])
+                Short::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getShort())
+                Integer::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getInt())
+                Long::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getLong())
+                Float::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getFloat())
+                Double::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getDouble())
                 String::class.java -> type.primitiveType.cast(bytes.toString(Charsets.UTF_8))
                 ByteArray::class.java -> type.primitiveType.cast(bytes)
                 IntArray::class.java -> {
