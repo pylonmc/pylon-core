@@ -11,27 +11,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PylonPDCSerializationTest implements GenericTest {
     @Override
     public void run() {
-            NamespacedKey innerKey = new NamespacedKey(TestAddon.instance(), "somekey");
-            var innerType = PylonSerializers.STRING;
-            String innerValue = "iiroirimjrg";
+        NamespacedKey innerKey = new NamespacedKey(TestAddon.instance(), "somekey");
+        var innerType = PylonSerializers.STRING;
+        String innerValue = "iiroirimjrg";
 
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
-            var type = PylonSerializers.TAG_CONTAINER;
-            PylonPersistentDataContainer value = new PylonPersistentDataContainer();
-            value.set(innerKey, innerType, innerValue);
+        NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+        var type = PylonSerializers.TAG_CONTAINER;
+        PylonPersistentDataContainer value = new PylonPersistentDataContainer();
+        value.set(innerKey, innerType, innerValue);
 
 
-            PylonPersistentDataContainer pdc = new PylonPersistentDataContainer();
-            pdc.set(key, type, value);
-            byte[] bytes = pdc.serializeToBytes();
+        PylonPersistentDataContainer pdc = new PylonPersistentDataContainer();
+        pdc.set(key, type, value);
+        byte[] bytes = pdc.serializeToBytes();
 
-            PylonPersistentDataContainer newPdc = new PylonPersistentDataContainer(bytes);
+        PylonPersistentDataContainer newPdc = new PylonPersistentDataContainer(bytes);
 
-            assertThat(newPdc.get(key, type))
-                    .isNotNull()
-                    .extracting(p -> p.get(innerKey, innerType))
-                    .isNotNull()
-                    .isEqualTo(innerValue);
+        assertThat(newPdc.get(key, type))
+                .isNotNull()
+                .extracting(p -> p.get(innerKey, innerType))
+                .isNotNull()
+                .isEqualTo(innerValue);
     }
 
     @Override
