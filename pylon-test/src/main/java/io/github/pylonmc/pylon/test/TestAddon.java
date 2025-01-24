@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.core.block.BlockPosition;
 import io.github.pylonmc.pylon.core.registry.PylonRegistries;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
-import io.github.pylonmc.pylon.core.registry.PyonRegistryKeys;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.core.test.GameTestFailException;
 import net.kyori.adventure.text.Component;
@@ -44,7 +43,7 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
     }
 
     private void setUpGameTests() {
-        PylonRegistry<GameTestConfig> registry = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS);
+        PylonRegistry<GameTestConfig> registry = PylonRegistries.GAMETESTS;
         registry.register(
                 new GameTestConfig.Builder(new NamespacedKey(this, "test"))
                         .size(1)
@@ -59,7 +58,7 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
 
     private void runGameTests() {
         int distance = 0;
-        PylonRegistry<GameTestConfig> registry = PylonRegistries.getRegistry(PyonRegistryKeys.GAMETESTS);
+        PylonRegistry<GameTestConfig> registry = PylonRegistries.GAMETESTS;
         List<CompletableFuture<GameTestFailException>> futures = new ArrayList<>();
         for (GameTestConfig config : registry) {
             distance += config.getSize();
