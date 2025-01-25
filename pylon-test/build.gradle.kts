@@ -30,10 +30,13 @@ bukkit {
 }
 
 tasks.runServer {
+    val runFolder = project.projectDir.resolve("run")
+    val testsFailedFile = runFolder.resolve("tests-failed")
     doFirst {
-        val runFolder = project.projectDir.resolve("run")
         runFolder.mkdirs()
         runFolder.resolve("eula.txt").writeText("eula=true")
+        testsFailedFile.delete()
+
         val pluginFolder = runFolder.resolve("plugins")
         pluginFolder.mkdirs()
         val archive = project(":pylon-core").tasks.shadowJar.map { it.archiveFile }.get().get().asFile
@@ -41,4 +44,9 @@ tasks.runServer {
     }
     maxHeapSize = "4G"
     minecraftVersion("1.21.4")
+    doLast {
+        if (testsFailedFile.exists()) {
+            throw GradleException("Tests failed")
+        }
+    }
 }

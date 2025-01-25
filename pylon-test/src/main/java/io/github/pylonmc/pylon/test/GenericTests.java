@@ -35,23 +35,20 @@ class GenericTests {
         List<CompletableFuture<TestResult>> futures = new ArrayList<>();
 
         for (GenericTest test : genericTests) {
-            CompletableFuture<TestResult> future = CompletableFuture.supplyAsync(() -> {
-                try {
-                    test.run();
-                } catch (Throwable e) {
-                    return e;
-                }
+            Throwable result = null;
+            try {
+                test.run();
+            } catch (Throwable e) {
+                result = e;
+            }
 
-                try {
-                    test.cleanup();
-                } catch (Throwable e) {
-                    return e;
-                }
+            try {
+                test.cleanup();
+            } catch (Throwable e) {
+                result = e;
+            }
 
-                return null;
-            }).thenApply(e -> onComplete(test, e));
-
-            futures.add(future);
+            futures.add(CompletableFuture.completedFuture(onComplete(test, result)));
         }
 
         return futures;

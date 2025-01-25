@@ -7,5 +7,7 @@ public interface GenericTest {
         return new NamespacedKey(TestAddon.instance(), this.getClass().getSimpleName());
     }
     void run();
-    void cleanup();
+
+    default void cleanup() {
+    }
 }

@@ -5,6 +5,9 @@ import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -61,6 +64,14 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
                         logger.info("%s/%s TESTS PASSED"
                                 .formatted(succeeded.size(), succeeded.size() + failed.size()));
                         logger.info("FAILED: %s".formatted(failedString));
+
+                        // Communicate back to the runServer task that the tests failed
+                        File file = new File("tests-failed");
+                        try {
+                            file.createNewFile();
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
                     } else {
                         logger.info("ALL TESTS PASSED");
                     }
