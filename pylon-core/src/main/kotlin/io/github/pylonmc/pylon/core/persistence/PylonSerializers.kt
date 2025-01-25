@@ -71,7 +71,7 @@ class NamespacedKeyPersistentDataType : PersistentDataType<String, NamespacedKey
         = NamespacedKey::class.java
 
     override fun fromPrimitive(primitive: String, context: PersistentDataAdapterContext): NamespacedKey
-        = NamespacedKey(pluginInstance, primitive)
+        = NamespacedKey.fromString(primitive)!!
 
     override fun toPrimitive(complex: NamespacedKey, context: PersistentDataAdapterContext): String
         = complex.toString()
