@@ -8,11 +8,7 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     private val values: MutableMap<NamespacedKey, T> = mutableMapOf()
 
-    var frozen = false
-        private set
-
     fun register(vararg values: T) {
-        checkFrozen()
         for (value in values) {
             this.values[value.key] = value
         }
@@ -21,7 +17,6 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
     fun register(tag: Tag<T>) = register(*tag.values.toTypedArray())
 
     fun unregister(vararg values: T) {
-        checkFrozen()
         for (value in values) {
             this.values.remove(value.key)
         }
@@ -43,16 +38,6 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     operator fun contains(tag: Tag<T>): Boolean {
         return tag.values.all { it.key in values }
-    }
-
-    fun freeze() {
-        frozen = true
-    }
-
-    private fun checkFrozen() {
-        if (frozen) {
-            throw IllegalStateException("Registry $key is frozen")
-        }
     }
 
     override fun iterator(): Iterator<T> {

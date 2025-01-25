@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.registry
 
-import org.bukkit.Bukkit
 import org.bukkit.Keyed
 
 object PylonRegistries {
@@ -33,12 +32,5 @@ object PylonRegistries {
             throw IllegalArgumentException("Registry $key is already registered")
         }
         registries[key] = registry
-    }
-
-    internal fun freezeAll() {
-        for (registry in registries.values) {
-            Bukkit.getPluginManager().callEvent(PylonRegistryFreezeEvent(registry))
-            registry.freeze()
-        }
     }
 }
