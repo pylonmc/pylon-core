@@ -15,10 +15,10 @@ open class PylonBlockSchema(
     blockClass: Class<PylonBlock<PylonBlockSchema>>,
 ) : Keyed {
 
-    internal val placeConstructor: MethodHandle = try {
+    internal val createConstructor: MethodHandle = try {
         MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(PylonBlockSchema::class.java))
     } catch (_: NoSuchMethodException) {
-        throw NoSuchMethodException("'$key' is missing a place constructor")
+        throw NoSuchMethodException("Block '$key' is missing a create constructor")
     }
 
     internal val loadConstructor: MethodHandle = try {
@@ -29,12 +29,12 @@ open class PylonBlockSchema(
             )
         )
     } catch (_: NoSuchMethodException) {
-        throw NoSuchMethodException("'$key' is missing a load constructor")
+        throw NoSuchMethodException("Block '$key' is missing a load constructor")
     }
-
-    override fun getKey(): NamespacedKey = key
 
     fun register() {
         PylonRegistry.BLOCKS.register(this)
     }
+
+    override fun getKey(): NamespacedKey = key
 }
