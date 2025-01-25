@@ -17,10 +17,6 @@ dependencies {
     implementation("org.assertj:assertj-core:3.27.2")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
