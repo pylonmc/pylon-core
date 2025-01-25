@@ -33,4 +33,7 @@ open class ItemStackBuilder(private val stack: ItemStack) {
     fun reset(type: DataComponentType.NonValued) = apply {
         stack.unsetData(type)
     }
+
+    fun build()
+        = stack.clone()
 }
