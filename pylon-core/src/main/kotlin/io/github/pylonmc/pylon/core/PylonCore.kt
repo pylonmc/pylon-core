@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
-import io.github.pylonmc.pylon.core.registry.PylonRegistries
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -17,7 +17,7 @@ class PylonCore : JavaPlugin() {
         }
 
         manager.commandCompletions.registerCompletion("gametests") { _ ->
-            PylonRegistries.GAMETESTS.map { it.key.toString() }.sorted()
+            PylonRegistry.GAMETESTS.map { it.key.toString() }.sorted()
         }
 
         manager.registerCommand(PylonCommand)

@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.addon
 
-import io.github.pylonmc.pylon.core.registry.PylonRegistries
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
@@ -11,7 +11,7 @@ object PylonAddonListener : Listener {
     fun onPluginEnable(event: PluginEnableEvent) {
         val plugin = event.plugin
         if (plugin is PylonAddon) {
-            PylonRegistries.ADDONS.register(plugin)
+            PylonRegistry.ADDONS.register(plugin)
         }
     }
 
@@ -19,7 +19,7 @@ object PylonAddonListener : Listener {
     fun onPluginDisable(event: PluginDisableEvent) {
         val plugin = event.plugin
         if (plugin is PylonAddon) {
-            PylonRegistries.ADDONS.unregister(plugin)
+            PylonRegistry.ADDONS.unregister(plugin)
         }
     }
 }
