@@ -14,6 +14,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly(project(":pylon-core", "shadow"))
+    implementation("org.assertj:assertj-core:3.27.2")
 }
 
 tasks.test {

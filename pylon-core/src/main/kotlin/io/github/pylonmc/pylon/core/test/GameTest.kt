@@ -80,7 +80,7 @@ class GameTest(
                     }
                 } catch (e: GameTestFailException) {
                     result = e
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     result = GameTestFailException(gameTest, "An exception occurred", e)
                 }
                 for (entity in gameTest.world.getNearbyEntities(gameTest.boundingBox)) {

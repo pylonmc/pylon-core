@@ -93,19 +93,32 @@ class UUIDPersistentDataType : PersistentDataType<LongArray, UUID> {
     }
 }
 
-class VectorPersistentDataType : PersistentDataType<DoubleArray, Vector> {
-    override fun getPrimitiveType(): Class<DoubleArray>
-            = DoubleArray::class.java
+class VectorPersistentDataType : PersistentDataType<PersistentDataContainer, Vector> {
+    companion object {
+        val xKey = NamespacedKey(pluginInstance, "x")
+        val yKey = NamespacedKey(pluginInstance, "y")
+        val zKey = NamespacedKey(pluginInstance, "z")
+    }
+
+    override fun getPrimitiveType(): Class<PersistentDataContainer>
+            = PersistentDataContainer::class.java
 
     override fun getComplexType(): Class<Vector>
             = Vector::class.java
 
-    override fun fromPrimitive(primitive: DoubleArray, context: PersistentDataAdapterContext): Vector {
-        return Vector(primitive[0], primitive[1], primitive[2])
+    override fun fromPrimitive(primitive: PersistentDataContainer, context: PersistentDataAdapterContext): Vector {
+        val x = primitive.get(xKey, PylonSerializers.DOUBLE)!!
+        val y = primitive.get(yKey, PylonSerializers.DOUBLE)!!
+        val z = primitive.get(zKey, PylonSerializers.DOUBLE)!!
+        return Vector(x, y, z)
     }
 
-    override fun toPrimitive(complex: Vector, context: PersistentDataAdapterContext): DoubleArray {
-        return doubleArrayOf(complex.x, complex.y, complex.z)
+    override fun toPrimitive(complex: Vector, context: PersistentDataAdapterContext): PersistentDataContainer {
+        val pdc = context.newPersistentDataContainer()
+        pdc.set(xKey, PylonSerializers.DOUBLE, complex.x)
+        pdc.set(yKey, PylonSerializers.DOUBLE, complex.y)
+        pdc.set(zKey, PylonSerializers.DOUBLE, complex.z)
+        return pdc
     }
 }
 
@@ -128,12 +141,12 @@ class WorldPersistentDataType : PersistentDataType<LongArray, World> {
 
 class LocationPersistentDataType : PersistentDataType<PersistentDataContainer, Location> {
     companion object {
-        val xKey = NamespacedKey.fromString("x")!!
-        val yKey = NamespacedKey.fromString("y")!!
-        val zKey = NamespacedKey.fromString("z")!!
-        val yawKey = NamespacedKey.fromString("yaw")!!
-        val pitchKey = NamespacedKey.fromString("pitch")!!
-        val worldKey = NamespacedKey.fromString("world")!!
+        val xKey = NamespacedKey(pluginInstance, "x")
+        val yKey = NamespacedKey(pluginInstance, "y")
+        val zKey = NamespacedKey(pluginInstance, "z")
+        val yawKey = NamespacedKey(pluginInstance, "yaw")
+        val pitchKey = NamespacedKey(pluginInstance, "pitch")
+        val worldKey = NamespacedKey(pluginInstance, "world")
     }
 
     override fun getPrimitiveType(): Class<PersistentDataContainer>
@@ -166,10 +179,10 @@ class LocationPersistentDataType : PersistentDataType<PersistentDataContainer, L
 
 class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContainer, BlockPosition> {
     companion object {
-        val worldKey = NamespacedKey.fromString("world")!!
-        val xKey = NamespacedKey.fromString("x")!!
-        val yKey = NamespacedKey.fromString("y")!!
-        val zKey = NamespacedKey.fromString("z")!!
+        val worldKey = NamespacedKey(pluginInstance, "world")
+        val xKey = NamespacedKey(pluginInstance, "x")
+        val yKey = NamespacedKey(pluginInstance, "y")
+        val zKey = NamespacedKey(pluginInstance, "z")
     }
     override fun getPrimitiveType(): Class<PersistentDataContainer>
             = PersistentDataContainer::class.java
@@ -199,9 +212,9 @@ class BlockPositionPersistentDataType : PersistentDataType<PersistentDataContain
 
 class ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContainer, ChunkPosition> {
     companion object {
-        val xKey = NamespacedKey.fromString("x")!!
-        val zKey = NamespacedKey.fromString("z")!!
-        val worldKey = NamespacedKey.fromString("world")!!
+        val xKey = NamespacedKey(pluginInstance, "x")
+        val zKey = NamespacedKey(pluginInstance, "z")
+        val worldKey = NamespacedKey(pluginInstance, "world")
     }
     override fun getPrimitiveType(): Class<PersistentDataContainer>
             = PersistentDataContainer::class.java
