@@ -42,10 +42,12 @@ class GenericTests {
                 result = e;
             }
 
-            try {
-                test.cleanup();
-            } catch (Throwable e) {
-                result = e;
+            if (result == null) {
+                try {
+                    test.cleanup();
+                } catch (Throwable e) {
+                    result = e;
+                }
             }
 
             futures.add(CompletableFuture.completedFuture(onComplete(test, result)));
