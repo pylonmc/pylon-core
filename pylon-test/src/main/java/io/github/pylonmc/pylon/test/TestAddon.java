@@ -38,7 +38,7 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
                 .thenApply(ignored -> futures.stream()
                         .map(CompletableFuture::join)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .thenAccept(results -> {
                     List<NamespacedKey> succeeded = results.stream()
                             .filter(TestResult::success)
