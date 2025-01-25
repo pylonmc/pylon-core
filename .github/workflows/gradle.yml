@@ -5,11 +5,13 @@ on:
     branches:
     - master
     paths:
-    - 'src/**'
+    - 'pylon-core/**'
+    - 'pylon-test/**'
   pull_request:
     branches: [ "*" ]
     paths:
-    - 'src/**'
+    - 'pylon-core/**'
+    - 'pylon-test/**'
   workflow_call:
     inputs:
       version:
