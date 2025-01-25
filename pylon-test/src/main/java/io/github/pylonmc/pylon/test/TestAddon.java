@@ -90,4 +90,8 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
     public static TestAddon instance() {
         return instance;
     }
+
+    public static @NotNull NamespacedKey key(String key) {
+        return new NamespacedKey(instance, key);
+    }
 }
