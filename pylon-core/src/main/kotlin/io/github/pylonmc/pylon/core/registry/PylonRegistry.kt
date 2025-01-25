@@ -10,7 +10,9 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     fun register(vararg values: T) {
         for (value in values) {
-            this.values[value.key] = value
+            val key = value.key
+            check(key !in this.values) { "Value with key $key is already registered in registry $this" }
+            this.values[key] = value
         }
     }
 
@@ -18,7 +20,9 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     fun unregister(vararg values: T) {
         for (value in values) {
-            this.values.remove(value.key)
+            val key = value.key
+            check(key in this.values) { "Value with key $key is not registered in registry $this" }
+            this.values.remove(key)
         }
     }
 
