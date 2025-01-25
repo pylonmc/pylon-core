@@ -21,16 +21,19 @@ object PylonRegistries {
 
     @JvmStatic
     fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {
+        return getRegistryOrNull(key) ?: throw IllegalArgumentException("Registry $key not found")
+    }
+
+    @JvmStatic
+    fun <T : Keyed> getRegistryOrNull(key: PylonRegistryKey<T>): PylonRegistry<T>? {
         @Suppress("UNCHECKED_CAST")
-        return registries[key] as? PylonRegistry<T> ?: throw IllegalArgumentException("Registry $key not found")
+        return registries[key] as? PylonRegistry<T>
     }
 
     @JvmStatic
     fun addRegistry(registry: PylonRegistry<*>) {
         val key = registry.key
-        if (key in registries) {
-            throw IllegalArgumentException("Registry $key is already registered")
-        }
+        check(key !in registries) { "Registry $key is already registered" }
         registries[key] = registry
     }
 }
