@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class TestAddon extends JavaPlugin implements PylonAddon {
@@ -49,20 +50,22 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
                             .map(TestResult::key)
                             .toList();
 
-                    TestAddon.instance().getLogger().info("[ ===== TEST SUMMARY ===== ]");
+                    Logger logger = TestAddon.instance().getLogger();
+
+                    logger.info("[ ===== TEST SUMMARY ===== ]");
 
                     if (!failed.isEmpty()) {
                         String failedString = failed.stream()
                                 .map(NamespacedKey::toString)
                                 .collect(Collectors.joining(", "));
-                        TestAddon.instance().getLogger().info("%s/%s TESTS PASSED"
+                        logger.info("%s/%s TESTS PASSED"
                                 .formatted(succeeded.size(), succeeded.size() + failed.size()));
-                        TestAddon.instance().getLogger().info("FAILED: %s".formatted(failedString));
+                        logger.info("FAILED: %s".formatted(failedString));
                     } else {
-                        TestAddon.instance().getLogger().info("ALL TESTS PASSED");
+                        logger.info("ALL TESTS PASSED");
                     }
 
-                    TestAddon.instance().getLogger().info("Testing complete; shutting down server...");
+                    logger.info("Testing complete; shutting down server...");
 
                     if (!Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"))) {
                         Bukkit.shutdown();
