@@ -29,6 +29,7 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
 
     override fun equals(other: Any?): Boolean {
         return (other is ChunkPosition)
+                && other.world?.uid == world?.uid
                 && other.x == x
                 && other.z == z
     }
