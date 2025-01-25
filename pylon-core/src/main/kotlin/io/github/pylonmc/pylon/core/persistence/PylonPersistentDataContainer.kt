@@ -147,7 +147,7 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
             return when (type.primitiveType) {
                 Byte::class.javaObjectType -> byteArrayOf(primitive as Byte)
                 Short::class.javaObjectType -> ByteBuffer.allocate(Short.SIZE_BYTES).putShort(primitive as Short).array()
-                Integer::class.javaObjectType -> ByteBuffer.allocate(Int.SIZE_BYTES).putInt(primitive as Int).array()
+                Int::class.javaObjectType -> ByteBuffer.allocate(Int.SIZE_BYTES).putInt(primitive as Int).array()
                 Long::class.javaObjectType -> ByteBuffer.allocate(Long.SIZE_BYTES).putLong(primitive as Long).array()
                 Float::class.javaObjectType -> ByteBuffer.allocate(Float.SIZE_BYTES).putFloat(primitive as Float).array()
                 Double::class.javaObjectType -> ByteBuffer.allocate(Double.SIZE_BYTES).putDouble(primitive as Double).array()
@@ -198,7 +198,7 @@ class PylonPersistentDataContainer(bytes: ByteArray) : PersistentDataContainer, 
             return when (type.primitiveType) {
                 Byte::class.javaObjectType -> type.primitiveType.cast(bytes[0])
                 Short::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getShort())
-                Integer::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getInt())
+                Int::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getInt())
                 Long::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getLong())
                 Float::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getFloat())
                 Double::class.javaObjectType -> type.primitiveType.cast(ByteBuffer.wrap(bytes).getDouble())
