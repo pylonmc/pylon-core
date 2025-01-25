@@ -50,7 +50,4 @@ public class SerializerTestBlockPosition implements GenericTest {
                     .isEqualTo(value);
         }
     }
-
-    @Override
-    public void cleanup() {}
 }

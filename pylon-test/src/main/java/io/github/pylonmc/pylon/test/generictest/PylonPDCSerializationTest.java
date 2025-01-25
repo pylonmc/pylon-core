@@ -33,7 +33,4 @@ public class PylonPDCSerializationTest implements GenericTest {
                 .isNotNull()
                 .isEqualTo(innerValue);
     }
-
-    @Override
-    public void cleanup() {}
 }

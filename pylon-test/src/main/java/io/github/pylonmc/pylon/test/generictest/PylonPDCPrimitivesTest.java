@@ -164,7 +164,4 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         }
     }
-
-    @Override
-    public void cleanup() {}
 }

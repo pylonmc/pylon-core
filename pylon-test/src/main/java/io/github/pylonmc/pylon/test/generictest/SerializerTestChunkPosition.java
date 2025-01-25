@@ -50,7 +50,4 @@ public class SerializerTestChunkPosition implements GenericTest {
                     .isEqualTo(value);
         }
     }
-
-    @Override
-    public void cleanup() {}
 }

@@ -28,7 +28,4 @@ public class SerializerTestChar implements GenericTest {
         assertThat(pdc.get(key, type))
                 .isEqualTo(value);
     }
-
-    @Override
-    public void cleanup() {}
 }

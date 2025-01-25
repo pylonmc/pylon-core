@@ -31,7 +31,4 @@ public class SerializerTestLocation implements GenericTest {
         assertThat(pdc.get(key, type))
                 .isEqualTo(value);
     }
-
-    @Override
-    public void cleanup() {}
 }

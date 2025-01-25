@@ -52,7 +52,4 @@ public class SerializerTestSet implements GenericTest {
                     .isEqualTo(value);
         }
     }
-
-    @Override
-    public void cleanup() {}
 }
