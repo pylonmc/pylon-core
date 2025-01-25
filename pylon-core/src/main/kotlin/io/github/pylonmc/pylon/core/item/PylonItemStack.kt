@@ -5,10 +5,12 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-class PylonItemStack internal constructor(val id: NamespacedKey, stack: ItemStack) : ItemStack(stack) {
-//    constructor(id: NamespacedKey, stack: ItemStack) : this(id, stack) {
-//        itemMeta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, id)
-//    }
+open class PylonItemStack internal constructor(val id: NamespacedKey, stack: ItemStack) : ItemStack(stack) {
+    override fun equals(other: Any?): Boolean
+            = id == (other as PylonItemStack).id
+
+    override fun hashCode(): Int
+            = id.hashCode()
 
     companion object {
         val idKey = NamespacedKey(pluginInstance, "pylon_id")

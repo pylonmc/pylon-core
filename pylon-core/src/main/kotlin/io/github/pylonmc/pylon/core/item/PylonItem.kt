@@ -5,9 +5,8 @@ import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-class PylonItem(private val template: PylonItemStack) : Keyed {
-
-
+open class PylonItem(private val template: PylonItemStack) : Keyed {
+    val id = template.id
     val stack
         get() = template.clone()
 
@@ -21,10 +20,8 @@ class PylonItem(private val template: PylonItemStack) : Keyed {
         = template.id
 
     override fun equals(other: Any?): Boolean
-        = template.id == other
+        = template.id == (other as PylonItem).id
 
     override fun hashCode(): Int
         = template.id.hashCode()
-
-
 }

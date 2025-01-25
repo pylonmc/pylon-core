@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack
 
 
 @Suppress("UnstableApiUsage")
-class ItemStackBuilder(private val stack: ItemStack) {
+open class ItemStackBuilder(private val stack: ItemStack) {
     constructor(material: Material) : this(ItemStack(material))
 
     fun amount(amount: Int) = apply {
