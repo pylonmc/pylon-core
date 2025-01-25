@@ -56,13 +56,13 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
                     Logger logger = TestAddon.instance().getLogger();
 
                     logger.info("[ ===== TEST SUMMARY ===== ]");
+                    logger.info("%s/%s TESTS PASSED"
+                            .formatted(succeeded.size(), succeeded.size() + failed.size()));
 
                     if (!failed.isEmpty()) {
                         String failedString = failed.stream()
                                 .map(NamespacedKey::toString)
                                 .collect(Collectors.joining(", "));
-                        logger.info("%s/%s TESTS PASSED"
-                                .formatted(succeeded.size(), succeeded.size() + failed.size()));
                         logger.info("FAILED: %s".formatted(failedString));
 
                         // Communicate back to the runServer task that the tests failed
@@ -72,8 +72,6 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
                         } catch (IOException e) {
                             throw new UncheckedIOException(e);
                         }
-                    } else {
-                        logger.info("ALL TESTS PASSED");
                     }
 
                     logger.info("Testing complete; shutting down server...");
