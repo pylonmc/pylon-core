@@ -1,25 +1,30 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.persistence.PylonDataReader
+import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
+import io.github.pylonmc.pylon.core.persistence.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistries
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 
 open class PylonItemSchema(
-    private val template: PylonItem,
+    private val id: NamespacedKey,
+    internal val itemClass: Class<out PylonItem>,
+    private val template: ItemStack,
 ) : Keyed {
-    val id = template.id
+    init {
+        template.editMeta { meta ->
+            meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, id)
+        }
+    }
 
     val stack
         get() = template.clone()
-    internal val pylonItemClass = template.javaClass
 
     internal val loadConstructor: MethodHandle = try {
-        MethodHandles.lookup().unreflectConstructor(pylonItemClass.getConstructor(ItemStack::class.java))
+        MethodHandles.lookup().unreflectConstructor(itemClass.getConstructor(ItemStack::class.java))
     } catch (_: NoSuchMethodException) {
         throw NoSuchMethodException("Item '$key' is missing a load constructor")
     }
@@ -29,11 +34,11 @@ open class PylonItemSchema(
     }
 
     override fun getKey(): NamespacedKey
-        = template.id
+        = id
 
     override fun equals(other: Any?): Boolean
-        = template.id == (other as PylonItemSchema).id
+        = id == (other as PylonItemSchema).id
 
     override fun hashCode(): Int
-        = template.id.hashCode()
+        = id.hashCode()
 }

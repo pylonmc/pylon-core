@@ -15,12 +15,6 @@ import org.bukkit.inventory.ItemStack
 open class PylonItem protected constructor(stack: ItemStack) : ItemStack(stack) {
     val id = persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)!!
 
-    constructor(id: NamespacedKey, stack: ItemStack) : this(setId(stack, id))
-
-    fun register() {
-        PylonItemSchema(this).register()
-    }
-
     override fun equals(other: Any?): Boolean
             = id == (other as PylonItem).id
 
@@ -69,17 +63,7 @@ open class PylonItem protected constructor(stack: ItemStack) : ItemStack(stack) 
                 ?: return null
             val item = PylonRegistries.ITEMS[id]
                 ?: return null
-            return item.pylonItemClass.cast(item.loadConstructor.invoke(stack))
-        }
-
-        /**
-         * Convenience function for use in constructor
-         */
-        private fun setId(stack: ItemStack, id: NamespacedKey): ItemStack {
-            stack.editMeta { meta ->
-                meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, id)
-            }
-            return stack
+            return item.itemClass.cast(item.loadConstructor.invoke(stack))
         }
     }
 }
