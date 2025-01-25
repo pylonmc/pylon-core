@@ -18,15 +18,16 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     fun register(tag: Tag<T>) = register(*tag.values.toTypedArray())
 
-    fun unregister(vararg values: T) {
-        for (value in values) {
-            val key = value.key
+    fun unregister(vararg values: T) = unregister(*values.map { it.key }.toTypedArray())
+
+    fun unregister(tag: Tag<T>) = unregister(*tag.values.toTypedArray())
+
+    fun unregister(vararg keys: NamespacedKey) {
+        for (key in keys) {
             check(key in this.values) { "Value with key $key is not registered in registry $this" }
             this.values.remove(key)
         }
     }
-
-    fun unregister(tag: Tag<T>) = unregister(*tag.values.toTypedArray())
 
     operator fun get(key: NamespacedKey): T? {
         return values[key]
