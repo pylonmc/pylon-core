@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SerializerTestUUID implements GenericTest {
     @Override
@@ -30,7 +30,4 @@ public class SerializerTestUUID implements GenericTest {
         assertThat(pdc.get(key, type))
                 .isEqualTo(value);
     }
-
-    @Override
-    public void cleanup() {}
 }

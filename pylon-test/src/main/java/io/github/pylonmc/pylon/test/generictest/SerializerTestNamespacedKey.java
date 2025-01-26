@@ -28,7 +28,4 @@ public class SerializerTestNamespacedKey implements GenericTest {
         assertThat(pdc.get(key, type))
                 .isEqualTo(value);
     }
-
-    @Override
-    public void cleanup() {}
 }
