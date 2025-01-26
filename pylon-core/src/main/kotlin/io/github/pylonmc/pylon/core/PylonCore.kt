@@ -1,10 +1,7 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
-import com.github.shynixn.mccoroutine.bukkit.launch
-import com.github.shynixn.mccoroutine.bukkit.ticks
-import io.github.pylonmc.pylon.core.registry.PylonRegistries
-import kotlinx.coroutines.delay
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -20,16 +17,10 @@ class PylonCore : JavaPlugin() {
         }
 
         manager.commandCompletions.registerCompletion("gametests") { _ ->
-            PylonRegistries.GAMETESTS.map { it.key.toString() }.sorted()
+            PylonRegistry.GAMETESTS.map { it.key.toString() }.sorted()
         }
 
         manager.registerCommand(PylonCommand)
-
-        launch {
-            delay(1.ticks)
-            // Done on first tick
-            PylonRegistries.freezeAll()
-        }
     }
 
     override fun onDisable() {

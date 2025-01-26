@@ -8,26 +8,26 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     private val values: MutableMap<NamespacedKey, T> = mutableMapOf()
 
-    var frozen = false
-        private set
-
     fun register(vararg values: T) {
-        checkFrozen()
         for (value in values) {
-            this.values[value.key] = value
+            val key = value.key
+            check(key !in this.values) { "Value with key $key is already registered in registry $this" }
+            this.values[key] = value
         }
     }
 
     fun register(tag: Tag<T>) = register(*tag.values.toTypedArray())
 
-    fun unregister(vararg values: T) {
-        checkFrozen()
-        for (value in values) {
-            this.values.remove(value.key)
-        }
-    }
+    fun unregister(vararg values: T) = unregister(*values.map { it.key }.toTypedArray())
 
     fun unregister(tag: Tag<T>) = unregister(*tag.values.toTypedArray())
+
+    fun unregister(vararg keys: NamespacedKey) {
+        for (key in keys) {
+            check(key in this.values) { "Value with key $key is not registered in registry $this" }
+            this.values.remove(key)
+        }
+    }
 
     operator fun get(key: NamespacedKey): T? {
         return values[key]
@@ -45,17 +45,42 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         return tag.values.all { it.key in values }
     }
 
-    fun freeze() {
-        frozen = true
-    }
-
-    private fun checkFrozen() {
-        if (frozen) {
-            throw IllegalStateException("Registry $key is frozen")
-        }
-    }
-
     override fun iterator(): Iterator<T> {
         return values.values.iterator()
+    }
+
+    companion object {
+        private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
+
+        @JvmField
+        val BLOCKS = PylonRegistry(PylonRegistryKey.BLOCKS)
+
+        @JvmField
+        val ADDONS = PylonRegistry(PylonRegistryKey.ADDONS)
+
+        @JvmField
+        val GAMETESTS = PylonRegistry(PylonRegistryKey.GAMETESTS)
+
+        init {
+            addRegistry(BLOCKS)
+        }
+
+        @JvmStatic
+        fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {
+            return getRegistryOrNull(key) ?: throw IllegalArgumentException("Registry $key not found")
+        }
+
+        @JvmStatic
+        fun <T : Keyed> getRegistryOrNull(key: PylonRegistryKey<T>): PylonRegistry<T>? {
+            @Suppress("UNCHECKED_CAST")
+            return registries[key] as? PylonRegistry<T>
+        }
+
+        @JvmStatic
+        fun addRegistry(registry: PylonRegistry<*>) {
+            val key = registry.key
+            check(key !in registries) { "Registry $key is already registered" }
+            registries[key] = registry
+        }
     }
 }

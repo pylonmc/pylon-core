@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.test;
 
 import io.github.pylonmc.pylon.core.block.BlockPosition;
-import io.github.pylonmc.pylon.core.registry.PylonRegistries;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.core.test.GameTestFailException;
@@ -15,7 +14,7 @@ import java.util.logging.Level;
 
 class GameTests {
     static void setUpGameTests() {
-        PylonRegistry<GameTestConfig> registry = PylonRegistries.GAMETESTS;
+        PylonRegistry<GameTestConfig> registry = PylonRegistry.GAMETESTS;
         registry.register(GametestTest.get());
     }
 
@@ -28,7 +27,7 @@ class GameTests {
 
     static @NotNull List<CompletableFuture<TestResult>> runGameTests() {
         int distance = 0;
-        PylonRegistry<GameTestConfig> registry = PylonRegistries.GAMETESTS;
+        PylonRegistry<GameTestConfig> registry = PylonRegistry.GAMETESTS;
         List<CompletableFuture<TestResult>> futures = new ArrayList<>();
         for (GameTestConfig config : registry) {
             distance += config.getSize();
