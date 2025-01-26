@@ -6,7 +6,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistries
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-open class PylonItem protected constructor(stack: ItemStack) : ItemStack(stack) {
+open class PylonItem(stack: ItemStack) : ItemStack(stack) {
     val id = persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)!!
 
     override fun equals(other: Any?): Boolean
