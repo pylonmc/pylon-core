@@ -1,0 +1,32 @@
+- UsedToRingBell
+- Cooked
+- DispensedOntoEntity
+- Dispensed
+- CraftedInCrafter
+- StartsCookingInCampfire
+- PlacedInEnchantmentTable
+- Despawned
+- Crafted
+- Smelted
+- Smithed
+- StartsBeingSmelted
+- UsedAsBrewingStandFuel
+- ClickedInInventory
+- ClickedWhileHeldInCursor
+- DraggedInInventory
+- ExtractedFromFurnace
+-
+
+- UsedToBreakBlock
+- UsedToDamageBlock
+- UsedToLeftClickBlock
+- UsedTohitEntity
+- UsedToKillEntity
+- UsedToRightClickEntity
+- UsedToRightClickBlock
+- ArrowShotFromBow
+- ArrowHitsEntity
+- Enchanted
+- Consumed
+
+// todo placing?

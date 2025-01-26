@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.test.gametest;
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
 import io.github.pylonmc.pylon.core.item.PylonItem;
 import io.github.pylonmc.pylon.core.item.PylonItemSchema;
-import io.github.pylonmc.pylon.core.item.interfaces.UsedAsBrewingStandFuel;
+import io.github.pylonmc.pylon.core.item.interfaces.BrewingStandFuel;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.TestAddon;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class PylonItemStackInterfaceTest {
     private static boolean handlerCalled = false;
 
-    public static class OminousBlazePower extends PylonItem implements UsedAsBrewingStandFuel {
+    public static class OminousBlazePower extends PylonItem implements BrewingStandFuel {
         public OminousBlazePower(@NotNull ItemStack stack) {
             super(stack);
         }
