@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.item
 
 import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
 import io.github.pylonmc.pylon.core.persistence.PylonSerializers
-import io.github.pylonmc.pylon.core.registry.PylonRegistries
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -30,7 +30,7 @@ open class PylonItemSchema(
     }
 
     fun register() = apply {
-        PylonRegistries.ITEMS.register(this)
+        PylonRegistry.ITEMS.register(this)
     }
 
     override fun getKey(): NamespacedKey
