@@ -1,0 +1,23 @@
+package io.github.pylonmc.pylon.core.block
+
+import org.bukkit.Bukkit
+import org.bukkit.boss.BarColor
+import org.bukkit.boss.BarStyle
+import org.bukkit.boss.BossBar
+import org.bukkit.entity.Player
+
+
+open class PylonBlockHintText(open val hintText: String, open val hintColor: BarColor, open val hintStyle: BarStyle) {
+    private val activeHints: MutableMap<Player, BossBar> = HashMap()
+    fun activateFor(player: Player){
+        val bossbar = Bukkit.createBossBar(hintText, hintColor, hintStyle)
+        bossbar.addPlayer(player)
+        activeHints[player] = bossbar
+    }
+    fun deactivateFor(player: Player){
+        if(activeHints.containsKey(player)){
+            activeHints[player]!!.removeAll()
+            activeHints.remove(player)
+        }
+    }
+}
