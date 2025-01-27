@@ -37,7 +37,7 @@ open class PylonItemSchema(
         = id
 
     override fun equals(other: Any?): Boolean
-        = id == (other as PylonItemSchema).id
+        = id == (other as? PylonItemSchema)?.id
 
     override fun hashCode(): Int
         = id.hashCode()

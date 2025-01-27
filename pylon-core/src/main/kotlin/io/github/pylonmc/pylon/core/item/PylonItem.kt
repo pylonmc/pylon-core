@@ -10,7 +10,7 @@ open class PylonItem(stack: ItemStack) : ItemStack(stack) {
     val id = persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)!!
 
     override fun equals(other: Any?): Boolean
-            = id == (other as PylonItem).id
+            = id == (other as? PylonItem)?.id
 
     override fun hashCode(): Int
             = id.hashCode()
