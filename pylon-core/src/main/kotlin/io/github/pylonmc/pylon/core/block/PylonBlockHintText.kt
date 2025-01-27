@@ -7,7 +7,7 @@ import org.bukkit.boss.BossBar
 import org.bukkit.entity.Player
 
 
-open class PylonBlockHintText(open val hintText: String, open val hintColor: BarColor, open val hintStyle: BarStyle) {
+open class PylonBlockHintText(open var hintText: String, open var hintColor: BarColor, open var hintStyle: BarStyle) {
     private val activeHints: MutableMap<Player, BossBar> = HashMap()
     fun activateFor(player: Player){
         val bossBar = Bukkit.createBossBar(hintText, hintColor, hintStyle)
