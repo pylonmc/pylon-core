@@ -1,0 +1,44 @@
+package io.github.pylonmc.pylon.core.item
+
+import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
+import io.github.pylonmc.pylon.core.persistence.PylonSerializers
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import org.bukkit.Keyed
+import org.bukkit.NamespacedKey
+import org.bukkit.inventory.ItemStack
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodHandles
+
+open class PylonItemSchema(
+    private val id: NamespacedKey,
+    internal val itemClass: Class<out PylonItem>,
+    private val template: ItemStack,
+) : Keyed {
+    init {
+        template.editMeta { meta ->
+            meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, id)
+        }
+    }
+
+    val stack: ItemStack
+        get() = template.clone()
+
+    internal val loadConstructor: MethodHandle = try {
+        MethodHandles.lookup().unreflectConstructor(itemClass.getConstructor(ItemStack::class.java))
+    } catch (_: NoSuchMethodException) {
+        throw NoSuchMethodException("Item '$key' is missing a load constructor")
+    }
+
+    fun register() = apply {
+        PylonRegistry.ITEMS.register(this)
+    }
+
+    override fun getKey(): NamespacedKey
+        = id
+
+    override fun equals(other: Any?): Boolean
+        = id == (other as? PylonItemSchema)?.id
+
+    override fun hashCode(): Int
+        = id.hashCode()
+}

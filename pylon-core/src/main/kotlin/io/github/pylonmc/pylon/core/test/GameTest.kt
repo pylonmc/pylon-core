@@ -46,8 +46,10 @@ class GameTest(
         }
     }
 
+    fun position(): BlockPosition = center
     fun position(offset: BlockPosition): BlockPosition = center + offset
     fun position(x: Int, y: Int, z: Int): BlockPosition = center + BlockPosition(world, x, y, z)
+    fun location(): Location = center.location
     fun location(location: Location): Location = location.clone().add(center.location)
     fun location(x: Double, y: Double, z: Double): Location = center.location.clone().add(x, y, z)
 

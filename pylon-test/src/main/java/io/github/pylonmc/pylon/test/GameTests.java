@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.core.test.GameTestFailException;
 import io.github.pylonmc.pylon.test.gametest.GametestTest;
+import io.github.pylonmc.pylon.test.gametest.PylonItemStackInterfaceTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ class GameTests {
     static void setUpGameTests() {
         PylonRegistry<GameTestConfig> registry = PylonRegistry.GAMETESTS;
         registry.register(GametestTest.get());
+        registry.register(PylonItemStackInterfaceTest.get());
     }
 
     private static TestResult onComplete(GameTestConfig config, GameTestFailException e) {

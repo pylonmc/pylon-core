@@ -53,6 +53,9 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 
         @JvmField
+        val ITEMS = PylonRegistry(PylonRegistryKey.ITEMS)
+
+        @JvmField
         val BLOCKS = PylonRegistry(PylonRegistryKey.BLOCKS)
 
         @JvmField
