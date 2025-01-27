@@ -1,14 +1,14 @@
 package io.github.pylonmc.pylon.core.item
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
-import io.github.pylonmc.pylon.core.item.interfaces.*
+import io.github.pylonmc.pylon.core.item.base.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDamageEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause
+import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityInteractEvent
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerItemDamageEvent
 import org.bukkit.event.player.PlayerItemMendEvent
 
+@Suppress("UnstableApiUsage")
 object PylonItemListener : Listener {
     @EventHandler
     fun handle(event: PlayerReadyArrowEvent) {
@@ -149,11 +150,25 @@ object PylonItemListener : Listener {
 
     @EventHandler
     fun handle(event: EntityDamageByEntityEvent) {
-        val cause = event.damageSource
-        if ()
-        val pylonItem = PylonItem.fromStack(event.)
-        if (pylonItem is Tool) {
-            pylonItem.onUsedToBreakBlock(event)
+        val damager = event.damageSource.causingEntity
+        if (!event.damageSource.isIndirect) {
+            if (damager is Player) {
+                val pylonItem = PylonItem.fromStack(damager.activeItem)
+                if (pylonItem is Weapon) {
+                    pylonItem.onUsedToDamageEntity(event)
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    fun handle(event: EntityDeathEvent) {
+        val killer = event.damageSource.causingEntity
+        if (killer is Player) {
+            val pylonItem = PylonItem.fromStack(killer.activeItem)
+            if (pylonItem is Weapon) {
+                pylonItem.onUsedToKillEntity(event)
+            }
         }
     }
 }

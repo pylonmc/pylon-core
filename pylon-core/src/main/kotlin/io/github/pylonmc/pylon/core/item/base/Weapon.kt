@@ -1,9 +1,8 @@
-package io.github.pylonmc.pylon.core.item.interfaces
+package io.github.pylonmc.pylon.core.item.base
 
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 
-@FunctionalInterface
 interface Weapon {
     /**
      * Called when the item is used to damage an entity

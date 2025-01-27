@@ -20,7 +20,7 @@ open class PylonItemSchema(
         }
     }
 
-    val stack
+    val stack: ItemStack
         get() = template.clone()
 
     internal val loadConstructor: MethodHandle = try {

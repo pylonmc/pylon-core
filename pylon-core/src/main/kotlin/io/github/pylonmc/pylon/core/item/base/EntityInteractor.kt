@@ -1,8 +1,7 @@
-package io.github.pylonmc.pylon.core.item.interfaces
+package io.github.pylonmc.pylon.core.item.base
 
 import org.bukkit.event.entity.EntityInteractEvent
 
-@FunctionalInterface
 interface EntityInteractor {
     /**
      * Called when a player right clicks an entity while holding the item

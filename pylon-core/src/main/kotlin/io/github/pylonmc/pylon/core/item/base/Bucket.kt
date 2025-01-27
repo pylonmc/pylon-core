@@ -1,9 +1,8 @@
-package io.github.pylonmc.pylon.core.item.interfaces
+package io.github.pylonmc.pylon.core.item.base
 
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerBucketFillEvent
 
-@FunctionalInterface
 interface Bucket {
     /**
      * Called when the bucket is emptied

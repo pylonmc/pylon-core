@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.test.gametest;
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
 import io.github.pylonmc.pylon.core.item.PylonItem;
 import io.github.pylonmc.pylon.core.item.PylonItemSchema;
-import io.github.pylonmc.pylon.core.item.interfaces.BrewingStandFuel;
+import io.github.pylonmc.pylon.core.item.base.BrewingStandFuel;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.TestAddon;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -34,7 +34,7 @@ public class PylonItemStackInterfaceTest {
 
     public static @NotNull GameTestConfig get() {
         return new GameTestConfig.Builder(TestAddon.key("pylon_item_stack_interface_test"))
-                .size(1)
+                .size(0)
                 .timeoutTicks(100)
                 .setUp((test) -> {
                     PylonItemSchema ominousBlazePowder = new PylonItemSchema(

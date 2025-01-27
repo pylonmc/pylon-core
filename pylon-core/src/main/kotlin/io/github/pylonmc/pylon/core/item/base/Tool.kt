@@ -1,9 +1,8 @@
-package io.github.pylonmc.pylon.core.item.interfaces
+package io.github.pylonmc.pylon.core.item.base
 
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDamageEvent
 
-@FunctionalInterface
 interface Tool {
     /**
      * Called when the item is used to damage a block
