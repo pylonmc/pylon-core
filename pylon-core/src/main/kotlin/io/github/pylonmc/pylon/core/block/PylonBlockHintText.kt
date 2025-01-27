@@ -10,9 +10,9 @@ import org.bukkit.entity.Player
 open class PylonBlockHintText(open val hintText: String, open val hintColor: BarColor, open val hintStyle: BarStyle) {
     private val activeHints: MutableMap<Player, BossBar> = HashMap()
     fun activateFor(player: Player){
-        val bossbar = Bukkit.createBossBar(hintText, hintColor, hintStyle)
-        bossbar.addPlayer(player)
-        activeHints[player] = bossbar
+        val bossBar = Bukkit.createBossBar(hintText, hintColor, hintStyle)
+        bossBar.addPlayer(player)
+        activeHints[player] = bossBar
     }
     fun deactivateFor(player: Player){
         if(activeHints.containsKey(player)){
