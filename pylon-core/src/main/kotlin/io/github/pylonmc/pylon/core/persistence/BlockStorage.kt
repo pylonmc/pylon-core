@@ -17,7 +17,9 @@ import org.mapdb.Serializer
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.time.toKotlinDuration
 
 typealias PylonBlockSet = MutableSet<PylonBlock<PylonBlockSchema>>
@@ -40,10 +42,10 @@ typealias PylonBlockSet = MutableSet<PylonBlock<PylonBlockSchema>>
  * And when loading, we deserialize the container, figure out which block type it is, and then create
  * a new block of that type, using the container to restore the state it had when it was saved.
  *
- * Saving and loading is done using a queue system. Every time we need to save/load, the chunk in
- * question is added to the queue. A worker thread that runs every tick then picks up tasks from the
- * queues and saves/loads the chunk. This is mainly to avoid doing potentially expensive database
- * reads/writes on the main thread.
+ * Saving and loading is done using a single-threaded coroutine dispatcher. Whenever a read
+ * or write operation is done, it is handed off as a coroutine to the dispatcher. Since the
+ * dispatcher can only run one coroutine at a time, this effectively serializes all read and write
+ * operations into a queue.
  *
  * Read AND write access to the loaded block data must be synchronized, as there are multiple fields
  * for loaded blocks. If access is not synchronized, situations may occur where these fields are
@@ -70,7 +72,7 @@ object BlockStorage {
         .transactionEnable()
         .make()
 
-    private val storages: MutableMap<UUID, HTreeMap<Long, ByteArray>> = HashMap()
+    private val storages: MutableMap<UUID, HTreeMap<Long, ByteArray>> = mutableMapOf()
 
     init {
         for (world in Bukkit.getWorlds()) {
@@ -88,14 +90,16 @@ object BlockStorage {
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized to prevent them briefly going
     // out of sync
-    private val blocks: MutableMap<BlockPosition, PylonBlock<PylonBlockSchema>> = HashMap()
+    private val blockLock = ReentrantReadWriteLock()
+
+    private val blocks: MutableMap<BlockPosition, PylonBlock<PylonBlockSchema>> = ConcurrentHashMap()
 
     /**
      * Only contains chunks that have been loaded (even if they have no Pylon blocks)
      */
-    private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockSet> = HashMap()
+    private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockSet> = ConcurrentHashMap()
 
-    private val blocksById: MutableMap<NamespacedKey, PylonBlockSet> = HashMap()
+    private val blocksById: MutableMap<NamespacedKey, PylonBlockSet> = ConcurrentHashMap()
 
     init {
         pluginInstance.launch(commitDispatcher) {
@@ -107,24 +111,23 @@ object BlockStorage {
     }
 
     val loadedBlocks: Set<BlockPosition>
-        get() = blocks.keys
+        get() = lockBlockRead { blocks.keys }
 
     val loadedChunks: Set<ChunkPosition>
-        get() = blocksByChunk.keys
+        get() = lockBlockRead { blocksByChunk.keys }
 
-    fun get(blockPosition: BlockPosition): PylonBlock<PylonBlockSchema>?
-        = blocks[blockPosition]
+    fun get(blockPosition: BlockPosition): PylonBlock<PylonBlockSchema>? = lockBlockRead { blocks[blockPosition] }
 
-    inline fun <reified T: PylonBlock<out PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? {
+    inline fun <reified T : PylonBlock<out PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
         return T::class.java.cast(block)
     }
 
-    fun getByChunk(chunkPosition: ChunkPosition): Set<PylonBlock<PylonBlockSchema>>?
-        = blocksByChunk[chunkPosition]
+    fun getByChunk(chunkPosition: ChunkPosition): Set<PylonBlock<PylonBlockSchema>> =
+        lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
 
-    fun getById(id: NamespacedKey): Set<PylonBlock<PylonBlockSchema>>?
-        = if (PylonRegistry.BLOCKS.contains(id)) { blocksById[id].orEmpty() } else { null }
+    fun getById(id: NamespacedKey): Set<PylonBlock<PylonBlockSchema>> =
+        if (PylonRegistry.BLOCKS.contains(id)) lockBlockRead { blocksById[id].orEmpty() } else emptySet()
 
 
     fun exists(blockPosition: BlockPosition): Boolean
@@ -139,11 +142,11 @@ object BlockStorage {
 
         blockPosition.block.type = schema.material
 
-        synchronized(this) {
-            if (!blocksByChunk.containsKey(blockPosition.chunk)) {
-                throw IllegalStateException("Chunk must be loaded")
-            }
+        lockBlockRead {
+            check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
+        }
 
+        lockBlockWrite {
             blocks[blockPosition] = block
             blocksById.computeIfAbsent(schema.key) { ConcurrentSkipListSet() }.add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
@@ -153,19 +156,17 @@ object BlockStorage {
     /**
      * Does nothing if the block is not a Pylon block
      */
-    fun remove(blockPosition: BlockPosition) {
-        synchronized(this) {
-            val block = blocks.remove(blockPosition)
-            if (block != null) {
-                blockPosition.block.type = Material.AIR
-                blocksById[block.schema.key]?.remove(block)
-                blocksByChunk[blockPosition.chunk]?.remove(block)
-            }
+    fun remove(blockPosition: BlockPosition) = lockBlockWrite {
+        val block = blocks.remove(blockPosition)
+        if (block != null) {
+            blockPosition.block.type = Material.AIR
+            blocksById[block.schema.key]?.remove(block)
+            blocksByChunk[blockPosition.chunk]?.remove(block)
         }
     }
 
     /**
-     * Queues a chunk for loading, but does not load it yet
+     * Queues a chunk for loading
      */
     internal fun load(chunkPosition: ChunkPosition) {
         pluginInstance.launch(commitDispatcher) {
@@ -174,22 +175,20 @@ object BlockStorage {
     }
 
     /**
-     * Queues a chunk for saving, but does not save it yet.
+     * Queues a chunk for saving.
      *
      * We immediately delete the chunk's blocks from loaded blocks, and then add the chunk and
      * blocks to the queue. This is to avoid a situation where a chunk has been unloaded, but
      * its blocks are still loaded in BlockStorage.
      */
-    internal fun save(chunkPosition: ChunkPosition) {
-        synchronized(this) {
-            val chunkBlocks = blocksByChunk.remove(chunkPosition) ?: error("")
-            for (block in chunkBlocks) {
-                blocks.remove(block.block.position)
-                (blocksById[block.schema.key] ?: continue).remove(block)
-            }
-            pluginInstance.launch(commitDispatcher) {
-                commitSave(chunkPosition, chunkBlocks)
-            }
+    internal fun save(chunkPosition: ChunkPosition) = lockBlockWrite {
+        val chunkBlocks = blocksByChunk.remove(chunkPosition) ?: error("Chunk '$chunkPosition' is not loaded")
+        for (block in chunkBlocks) {
+            blocks.remove(block.block.position)
+            (blocksById[block.schema.key] ?: continue).remove(block)
+        }
+        pluginInstance.launch(commitDispatcher) {
+            commitSave(chunkPosition, chunkBlocks)
         }
     }
 
@@ -199,7 +198,7 @@ object BlockStorage {
         val chunkBytes = storage[chunkPosition.asLong] ?: error("Received load job for chunk '$chunkPosition' which has no data")
         val chunkBlocks = deserializeChunk(world, chunkPosition, chunkBytes)
 
-        synchronized(this) {
+        lockBlockWrite {
             blocksByChunk[chunkPosition] = ConcurrentSkipListSet(chunkBlocks)
             for (block in chunkBlocks) {
                 blocks[block.block.position] = block
@@ -215,9 +214,7 @@ object BlockStorage {
         storage[chunkPosition.asLong] = serializeChunk(chunkBlocks)
     }
 
-    internal fun cleanup() = synchronized(this) {
-        db.commit()
-
+    internal fun cleanup() = lockBlockWrite {
         for ((chunkPosition, blocks) in blocksByChunk) {
             commitSave(chunkPosition, blocks)
         }
@@ -318,6 +315,21 @@ object BlockStorage {
         return blocks
     }
 
-    private fun <T> hasDuplicates(collection: Collection<T>): Boolean
-        = collection.groupingBy { it }.eachCount().filter { it.value > 1 }.isNotEmpty()
+    private inline fun <T> lockBlockRead(block: () -> T): T {
+        blockLock.readLock().lock()
+        try {
+            return block()
+        } finally {
+            blockLock.readLock().unlock()
+        }
+    }
+
+    private inline fun <T> lockBlockWrite(block: () -> T): T {
+        blockLock.writeLock().lock()
+        try {
+            return block()
+        } finally {
+            blockLock.writeLock().unlock()
+        }
+    }
 }
