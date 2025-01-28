@@ -23,6 +23,7 @@ dependencies {
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
 
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
+    implementation("org.mapdb:mapdb:3.0.9")
 
     testImplementation(kotlin("test"))
 }
