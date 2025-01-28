@@ -10,12 +10,11 @@ import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.entity.Player
 
-open class PylonBlock<S: PylonBlockSchema> private constructor(val schema: S, val block: Block, hintText: String, hintColor: BarColor, hintStyle: BarStyle) {
-    open val blockHint: PylonBlockHintText = PylonBlockHintText(hintText, hintColor, hintStyle)
+open class PylonBlock<S: PylonBlockSchema> private constructor(val schema: S, val block: Block, open val blockHint: PylonBlockHintText) {
 
     constructor(reader: PylonDataReader, block: Block)
-            : this(getSchemaOfType<S>(reader.id), block, block.type.toString(), BarColor.RED, BarStyle.SOLID)
-    constructor(schema: S, block: Block) : this(schema, block, block.type.toString(), BarColor.RED, BarStyle.SOLID)
+            : this(getSchemaOfType<S>(reader.id), block, PylonBlockHintText(block.type.toString(), BarColor.RED, BarStyle.SOLID))
+    constructor(schema: S, block: Block) : this(schema, block, PylonBlockHintText(block.type.toString(), BarColor.RED, BarStyle.SOLID))
 
 
     fun write(writer: PylonDataWriter) {}
