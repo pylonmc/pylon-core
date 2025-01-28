@@ -1,9 +1,12 @@
 package io.github.pylonmc.pylon.core.persistence
 
-import com.google.common.base.Preconditions
+import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.papermc.paper.util.Tick
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -13,10 +16,9 @@ import org.mapdb.HTreeMap
 import org.mapdb.Serializer
 import java.io.File
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentSkipListSet
-import java.util.concurrent.LinkedBlockingQueue
-import kotlin.collections.HashMap
+import kotlin.time.toKotlinDuration
 
 typealias PylonBlockSet = MutableSet<PylonBlock<PylonBlockSchema>>
 
@@ -78,8 +80,11 @@ object BlockStorage {
         }
     }
 
-    private val loadQueue: LinkedBlockingQueue<ChunkPosition> = LinkedBlockingQueue()
-    private val saveQueue: LinkedBlockingQueue<Pair<ChunkPosition, PylonBlockSet>> = LinkedBlockingQueue()
+    // This dispatcher can only run one coroutine at a time, so in effect acts as a queue
+    // where coroutines must wait for an already executing coroutine to finish/suspend before
+    // they can start.
+    // The coroutines *may* run on different threads, but only one at a time.
+    private val commitDispatcher = Dispatchers.Default.limitedParallelism(1)
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized to prevent them briefly going
     // out of sync
@@ -93,7 +98,12 @@ object BlockStorage {
     private val blocksById: MutableMap<NamespacedKey, PylonBlockSet> = HashMap()
 
     init {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(pluginInstance, this::commit, 0, COMMIT_INTERVAL_TICKS)
+        pluginInstance.launch(commitDispatcher) {
+            while (true) {
+                delay(Tick.of(COMMIT_INTERVAL_TICKS).toKotlinDuration())
+                db.commit()
+            }
+        }
     }
 
     val loadedBlocks: Set<BlockPosition>
@@ -158,7 +168,9 @@ object BlockStorage {
      * Queues a chunk for loading, but does not load it yet
      */
     internal fun load(chunkPosition: ChunkPosition) {
-        loadQueue.put(chunkPosition)
+        pluginInstance.launch(commitDispatcher) {
+            commitLoad(chunkPosition)
+        }
     }
 
     /**
@@ -175,7 +187,9 @@ object BlockStorage {
                 blocks.remove(block.block.position)
                 (blocksById[block.schema.key] ?: continue).remove(block)
             }
-            saveQueue.put(Pair(chunkPosition, chunkBlocks))
+            pluginInstance.launch(commitDispatcher) {
+                commitSave(chunkPosition, chunkBlocks)
+            }
         }
     }
 
@@ -201,29 +215,8 @@ object BlockStorage {
         storage[chunkPosition.asLong] = serializeChunk(chunkBlocks)
     }
 
-    /**
-     * Commits scheduled changes to MapDB
-     */
-    private fun commit() {
-        // Sanity checks because duplicates could lead to really nasty bugs if violated
-        Preconditions.checkState(hasDuplicates(saveQueue))
-        Preconditions.checkState(hasDuplicates(loadQueue))
-
-        while (true) {
-            val (blockPosition, blocks) = saveQueue.poll() ?: break
-            commitSave(blockPosition, blocks)
-        }
-
-        while (true) {
-            val job = loadQueue.poll() ?: break
-            commitLoad(job)
-        }
-
-        db.commit()
-    }
-
     internal fun cleanup() = synchronized(this) {
-        commit()
+        db.commit()
 
         for ((chunkPosition, blocks) in blocksByChunk) {
             commitSave(chunkPosition, blocks)
