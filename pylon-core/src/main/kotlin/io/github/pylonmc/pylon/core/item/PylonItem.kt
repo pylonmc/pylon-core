@@ -8,9 +8,9 @@ import org.bukkit.inventory.ItemStack
 
 abstract class PylonItem<out S: PylonItemSchema>(
     val schema: S,
-    stack: ItemStack
-) : ItemStack(stack) {
-    val id = persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)!!
+    val stack: ItemStack
+) {
+    val id = stack.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)!!
 
     override fun equals(other: Any?): Boolean
             = id == (other as? PylonItem<*>)?.id
