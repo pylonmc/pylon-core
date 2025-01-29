@@ -6,7 +6,11 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 
-open class PylonBlock<S: PylonBlockSchema> private constructor(val schema: S, val block: Block) {
+abstract class PylonBlock<out S: PylonBlockSchema> protected constructor(
+    val schema: S,
+    val block: Block
+) {
+
     constructor(reader: PylonDataReader, block: Block)
             : this(getSchemaOfType<S>(reader.id), block)
 
