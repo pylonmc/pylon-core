@@ -3,6 +3,8 @@ package io.github.pylonmc.pylon.test;
 import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
+import io.github.pylonmc.pylon.test.test.block.SimpleBlockTest;
+import io.github.pylonmc.pylon.test.test.block.SimpleBlockWithSchemaTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackSimpleTest;
@@ -41,7 +43,16 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
 
+        tests.add(new SimpleBlockTest());
+        tests.add(new SimpleBlockWithSchemaTest());
+
+        tests.add(new PylonItemStackSimpleTest());
+        tests.add(new PylonItemStackInterfaceTest());
+
         tests.add(new GametestTest());
+
+        tests.add(new PylonPDCPrimitivesTest());
+        tests.add(new PylonPDCSerializationTest());
 
         tests.add(new SerializerTestBlockPosition());
         tests.add(new SerializerTestBlockPositionNoWorld());
@@ -56,11 +67,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new SerializerTestSetOfSetOfStrings());
         tests.add(new SerializerTestUUID());
         tests.add(new SerializerTestVector());
-
-        tests.add(new PylonPDCPrimitivesTest());
-        tests.add(new PylonPDCSerializationTest());
-        tests.add(new PylonItemStackSimpleTest());
-        tests.add(new PylonItemStackInterfaceTest());
 
         return tests;
     }
