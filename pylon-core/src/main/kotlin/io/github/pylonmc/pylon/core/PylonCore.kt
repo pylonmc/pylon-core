@@ -1,17 +1,18 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
+import io.github.pylonmc.pylon.core.persistence.BlockStorageListener
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.item.PylonItemListener
 import org.bukkit.Bukkit
+import io.github.pylonmc.pylon.core.item.PylonItemListener
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
 class PylonCore : JavaPlugin() {
     override fun onEnable() {
         instance = this
-        logger.info("Hello, World!")
 
+        Bukkit.getPluginManager().registerEvents(BlockStorageListener, pluginInstance)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
 
         val manager = PaperCommandManager(this)

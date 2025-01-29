@@ -15,7 +15,7 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
 
     val chunk: Chunk?
-            = world?.getChunkAt(x, z)
+            get() = world?.getChunkAt(x, z)
 
     constructor(world: World, asLong: Long) : this(world, (asLong shr 32).toInt(), asLong.toInt())
 

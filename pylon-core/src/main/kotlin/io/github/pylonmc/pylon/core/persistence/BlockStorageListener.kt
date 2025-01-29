@@ -19,10 +19,6 @@ import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 
 internal object BlockStorageListener : Listener {
-    init {
-        Bukkit.getPluginManager().registerEvents(BlockStorageListener, pluginInstance)
-    }
-
     @EventHandler
     fun chunkLoad(event: ChunkLoadEvent) {
         BlockStorage.load(event.chunk.position)
