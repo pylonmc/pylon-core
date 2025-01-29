@@ -192,8 +192,9 @@ object BlockStorage {
     private fun commitLoad(chunkPosition: ChunkPosition) {
         val world = chunkPosition.world ?: error("Received load job for chunk '$chunkPosition' whose world is not loaded")
         val storage = storages[world.uid] ?: error("Received load job for world '${world.name}' which has no associated storage")
-        val chunkBytes = storage[chunkPosition.asLong] ?: error("Received load job for chunk '$chunkPosition' which has no data")
-        val chunkBlocks = deserializeChunk(world, chunkPosition, chunkBytes)
+        val chunkBlocks = storage[chunkPosition.asLong]?.let {
+            deserializeChunk(world, chunkPosition, it)
+        } ?: listOf()
 
         lockBlockWrite {
             blocksByChunk[chunkPosition] = ConcurrentSkipListSet(chunkBlocks)

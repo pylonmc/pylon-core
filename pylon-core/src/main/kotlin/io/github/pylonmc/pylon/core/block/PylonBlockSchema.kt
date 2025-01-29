@@ -12,8 +12,12 @@ import java.lang.invoke.MethodHandles
 open class PylonBlockSchema(
     private val key: NamespacedKey,
     val material: Material,
-    blockClass: Class<PylonBlock<PylonBlockSchema>>,
+    blockClass: Class<out PylonBlock<PylonBlockSchema>>,
 ) : Keyed {
+
+    init {
+        check(material.isBlock)
+    }
 
     internal val createConstructor: MethodHandle = try {
         MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(PylonBlockSchema::class.java))
