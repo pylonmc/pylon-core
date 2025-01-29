@@ -138,7 +138,7 @@ object BlockStorage {
      */
     fun set(blockPosition: BlockPosition, schema: PylonBlockSchema) {
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.placeConstructor.invoke(schema) as PylonBlock<PylonBlockSchema>
+        val block = schema.createConstructor.invoke(schema) as PylonBlock<PylonBlockSchema>
 
         blockPosition.block.type = schema.material
 
