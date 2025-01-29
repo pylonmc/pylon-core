@@ -4,18 +4,19 @@ import io.github.pylonmc.pylon.core.persistence.PylonDataReader
 import io.github.pylonmc.pylon.core.persistence.PylonDataWriter
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.annotation.DoNotUse
+import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
+import org.bukkit.boss.BossBar
 import org.bukkit.entity.Player
 
-open class PylonBlock<S: PylonBlockSchema> private constructor(val schema: S, val block: Block, open val blockHint: PylonBlockHintText) {
+open class PylonBlock<S: PylonBlockSchema>private constructor(val schema: S, val block: Block, open val blockHint: BossBar) : HintText {
 
     constructor(reader: PylonDataReader, block: Block)
-            : this(getSchemaOfType<S>(reader.id), block, PylonBlockHintText(block.type.toString(), BarColor.RED, BarStyle.SOLID))
-    constructor(schema: S, block: Block) : this(schema, block, PylonBlockHintText(block.type.toString(), BarColor.RED, BarStyle.SOLID))
-
+            : this(getSchemaOfType<S>(reader.id), block, Bukkit.createBossBar(block.type.toString(), BarColor.RED, BarStyle.SOLID))
+    constructor(schema: S, block: Block) : this(schema, block, Bukkit.createBossBar(block.type.toString(), BarColor.RED, BarStyle.SOLID))
 
     fun write(writer: PylonDataWriter) {}
 
@@ -28,13 +29,8 @@ open class PylonBlock<S: PylonBlockSchema> private constructor(val schema: S, va
     // TODO listener
     fun onBreak() {}
 
-    // TODO listener
-    fun onLookAt(player: Player){
-        blockHint.activateFor(player)
-    }
-    // TODO listener
-    fun onStopLookAt(player: Player){
-        blockHint.deactivateFor(player)
+    override fun getHint() : BossBar{
+        return blockHint
     }
 
     companion object {
