@@ -142,11 +142,8 @@ object BlockStorage {
 
         blockPosition.block.type = schema.material
 
-        lockBlockRead {
-            check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
-        }
-
         lockBlockWrite {
+            check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
             blocksById.computeIfAbsent(schema.key) { ConcurrentSkipListSet() }.add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
