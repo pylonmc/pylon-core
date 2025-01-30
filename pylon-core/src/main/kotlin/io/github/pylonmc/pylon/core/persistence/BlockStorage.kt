@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.time.toKotlinDuration
 
-typealias PylonBlockSet = MutableSet<PylonBlock<PylonBlockSchema>>
+typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
 
 /**
  * Welcome to the circus!
@@ -100,9 +100,9 @@ object BlockStorage {
     /**
      * Only contains chunks that have been loaded (even if they have no Pylon blocks)
      */
-    private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockSet> = ConcurrentHashMap()
+    private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockCollection> = ConcurrentHashMap()
 
-    private val blocksById: MutableMap<NamespacedKey, PylonBlockSet> = ConcurrentHashMap()
+    private val blocksById: MutableMap<NamespacedKey, PylonBlockCollection> = ConcurrentHashMap()
 
     init {
         pluginInstance.launch(commitDispatcher) {
@@ -133,17 +133,25 @@ object BlockStorage {
             = get(location.block)
 
     @JvmStatic
-    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? {
+    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
-        return T::class.java.cast(block)
+        return clazz.cast(block)
     }
 
     @JvmStatic
-    fun getByChunk(chunkPosition: ChunkPosition): Set<PylonBlock<PylonBlockSchema>> =
+    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, block: Block): T?
+        = getAs(clazz, block.position)
+
+    @JvmStatic
+    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, location: Location): T?
+            = getAs(clazz, BlockPosition(location))
+
+    @JvmStatic
+    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<PylonBlockSchema>> =
         lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
 
     @JvmStatic
-    fun getById(id: NamespacedKey): Set<PylonBlock<PylonBlockSchema>> =
+    fun getById(id: NamespacedKey): Collection<PylonBlock<PylonBlockSchema>> =
         if (PylonRegistry.BLOCKS.contains(id)) lockBlockRead { blocksById[id].orEmpty() } else emptySet()
 
 
@@ -164,7 +172,7 @@ object BlockStorage {
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
-            blocksById.computeIfAbsent(schema.key) { ConcurrentSkipListSet() }.add(block)
+            blocksById.computeIfAbsent(schema.key) { mutableListOf() }.add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
 
@@ -248,14 +256,14 @@ object BlockStorage {
         val storage = storages[world.uid]
             ?: error("Received load job for world '${world.name}' which has no associated storage")
         val chunkBlocks = storage[chunkPosition.asLong]?.let {
-            deserializeChunk(world, chunkPosition, it)
-        } ?: listOf()
+            deserializeChunk(world, chunkPosition, it).toMutableList()
+        } ?: mutableListOf()
 
         lockBlockWrite {
-            blocksByChunk[chunkPosition] = ConcurrentSkipListSet(chunkBlocks)
+            blocksByChunk[chunkPosition] = chunkBlocks
             for (block in chunkBlocks) {
                 blocks[block.block.position] = block
-                blocksById.computeIfAbsent(block.schema.key) { ConcurrentSkipListSet() }.add(block)
+                blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
             }
         }
 
@@ -307,7 +315,9 @@ object BlockStorage {
      */
     private fun serializeChunk(blocks: Collection<PylonBlock<PylonBlockSchema>>): ByteArray {
         val blockPositionBytes: List<ByteArray> = blocks.map {
-            byteArrayOf(it.block.position.asLong.toByte())
+            val buffer = ByteBuffer.allocate(Long.SIZE_BYTES)
+            buffer.putLong(it.block.position.asLong)
+            buffer.array()
         }
 
         val blockBytes: List<ByteArray> = blocks.map {
@@ -352,7 +362,7 @@ object BlockStorage {
             } catch (e: Exception) {
                 pluginInstance.logger.severe("Error while deserializing block position from chunk $chunkPosition")
                 e.printStackTrace()
-                continue
+                break
             }
 
             val pdcLength = buffer.getInt()
@@ -380,6 +390,7 @@ object BlockStorage {
             } catch (e: Exception) {
                 pluginInstance.logger.severe("Error while loading block ${reader.id} at $blockPosition")
                 e.printStackTrace()
+                break
             }
         }
 

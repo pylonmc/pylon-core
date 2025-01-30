@@ -30,6 +30,14 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
         return prime * (world?.hashCode() ?: 0) + prime * asLong.hashCode()
     }
 
+    override fun toString(): String {
+        return if (world != null) {
+            "$x, $z in ${world!!.name}"
+        } else {
+            "$x, $z"
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         return (other is ChunkPosition)
                 && other.world?.uid == world?.uid
