@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.persistence
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.*
+import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.util.Tick
@@ -118,7 +119,7 @@ object BlockStorage {
 
     fun get(blockPosition: BlockPosition): PylonBlock<PylonBlockSchema>? = lockBlockRead { blocks[blockPosition] }
 
-    inline fun <reified T : PylonBlock<out PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? {
+    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
         return T::class.java.cast(block)
     }
@@ -148,6 +149,8 @@ object BlockStorage {
             blocksById.computeIfAbsent(schema.key) { ConcurrentSkipListSet() }.add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
+
+        PylonBlockPlaceEvent(block.block, block).callEvent()
     }
 
     /**
@@ -159,6 +162,8 @@ object BlockStorage {
             blockPosition.block.type = Material.AIR
             blocksById[block.schema.key]?.remove(block)
             blocksByChunk[blockPosition.chunk]?.remove(block)
+
+            PylonBlockBreakEvent(blockPosition.block, block).callEvent()
         }
     }
 
@@ -179,7 +184,8 @@ object BlockStorage {
      * its blocks are still loaded in BlockStorage.
      */
     internal fun save(chunkPosition: ChunkPosition) = lockBlockWrite {
-        val chunkBlocks = blocksByChunk.remove(chunkPosition) ?: error("Chunk '$chunkPosition' is not loaded")
+        val chunkBlocks = blocksByChunk.remove(chunkPosition)
+            ?: error("Chunk '$chunkPosition' is not loaded")
         for (block in chunkBlocks) {
             blocks.remove(block.block.position)
             (blocksById[block.schema.key] ?: continue).remove(block)
@@ -190,8 +196,10 @@ object BlockStorage {
     }
 
     private fun commitLoad(chunkPosition: ChunkPosition) {
-        val world = chunkPosition.world ?: error("Received load job for chunk '$chunkPosition' whose world is not loaded")
-        val storage = storages[world.uid] ?: error("Received load job for world '${world.name}' which has no associated storage")
+        val world = chunkPosition.world
+            ?: error("Received load job for chunk '$chunkPosition' whose world is not loaded")
+        val storage = storages[world.uid]
+            ?: error("Received load job for world '${world.name}' which has no associated storage")
         val chunkBlocks = storage[chunkPosition.asLong]?.let {
             deserializeChunk(world, chunkPosition, it)
         } ?: listOf()
@@ -203,13 +211,27 @@ object BlockStorage {
                 blocksById.computeIfAbsent(block.schema.key) { ConcurrentSkipListSet() }.add(block)
             }
         }
+
+        PylonChunkBlocksLoadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
+
+        for (block in chunkBlocks) {
+            PylonBlockLoadEvent(block.block, block).callEvent()
+        }
     }
 
     private fun commitSave(chunkPosition: ChunkPosition, chunkBlocks: Collection<PylonBlock<PylonBlockSchema>>) {
-        val world = chunkPosition.world ?: error("Received save job for chunk '$chunkPosition' whose world is not loaded")
-        val storage = storages[world.uid] ?: error("Received save job for world '${world.name}' which has no associated storage")
+        val world = chunkPosition.world
+            ?: error("Received save job for chunk '$chunkPosition' whose world is not loaded")
+        val storage = storages[world.uid]
+            ?: error("Received save job for world '${world.name}' which has no associated storage")
 
         storage[chunkPosition.asLong] = serializeChunk(chunkBlocks)
+
+        PylonChunkBlocksUnloadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
+
+        for (block in chunkBlocks) {
+            PylonBlockLoadEvent(block.block, block).callEvent()
+        }
     }
 
     internal fun cleanup() = lockBlockWrite {
