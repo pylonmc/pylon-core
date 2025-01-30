@@ -125,6 +125,14 @@ object BlockStorage {
     fun get(blockPosition: BlockPosition): PylonBlock<PylonBlockSchema>? = lockBlockRead { blocks[blockPosition] }
 
     @JvmStatic
+    fun get(block: Block): PylonBlock<PylonBlockSchema>?
+        = get(block.position)
+
+    @JvmStatic
+    fun get(location: Location): PylonBlock<PylonBlockSchema>?
+            = get(location.block)
+
+    @JvmStatic
     inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
         return T::class.java.cast(block)
