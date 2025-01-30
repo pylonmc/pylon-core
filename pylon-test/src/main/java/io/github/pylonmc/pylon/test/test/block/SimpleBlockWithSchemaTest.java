@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class SimpleBlockWithSchemaTest extends SyncTest {
-    static class TestBlockSchema extends PylonBlockSchema {
+    public static class TestBlockSchema extends PylonBlockSchema {
         private final int processingSpeed;
 
         public TestBlockSchema(
@@ -33,7 +33,11 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
         }
     }
 
-    static class TestBlock extends PylonBlock<TestBlockSchema> {
+    public static class TestBlock extends PylonBlock<TestBlockSchema> {
+        public TestBlock(@NotNull TestBlockSchema schema, @NotNull Block block) {
+            super(schema, block);
+        }
+
         public TestBlock(@NotNull PylonDataReader reader, @NotNull Block block) {
             super(reader, block);
         }
@@ -50,7 +54,7 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
         ).register();
 
         assertThat(PylonRegistry.BLOCKS.get(key))
-                .isInstanceOf(SimpleBlockWithSchemaTest.class)
+                .isInstanceOf(TestBlockSchema.class)
                 .extracting(schema -> (TestBlockSchema) schema)
                 .extracting(TestBlockSchema::getProcessingSpeed)
                 .isEqualTo(12);

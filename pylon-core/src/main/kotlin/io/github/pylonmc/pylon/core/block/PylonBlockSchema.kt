@@ -20,7 +20,12 @@ open class PylonBlockSchema(
     }
 
     internal val createConstructor: MethodHandle = try {
-        MethodHandles.lookup().unreflectConstructor(blockClass.getConstructor(PylonBlockSchema::class.java))
+        MethodHandles.lookup().unreflectConstructor(
+            blockClass.getConstructor(
+                javaClass,
+                Block::class.java
+            )
+        )
     } catch (_: NoSuchMethodException) {
         throw NoSuchMethodException("Block '$key' is missing a create constructor")
     }
