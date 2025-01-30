@@ -33,6 +33,7 @@ class PylonCore : JavaPlugin() {
     }
 
     companion object {
+        @JvmStatic
         var instance: PylonCore? = null
             private set
     }
