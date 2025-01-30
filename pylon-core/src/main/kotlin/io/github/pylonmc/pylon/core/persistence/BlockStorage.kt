@@ -113,32 +113,40 @@ object BlockStorage {
         }
     }
 
+    @JvmStatic
     val loadedBlocks: Set<BlockPosition>
         get() = lockBlockRead { blocks.keys }
 
+    @JvmStatic
     val loadedChunks: Set<ChunkPosition>
         get() = lockBlockRead { blocksByChunk.keys }
 
+    @JvmStatic
     fun get(blockPosition: BlockPosition): PylonBlock<PylonBlockSchema>? = lockBlockRead { blocks[blockPosition] }
 
+    @JvmStatic
     inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
         return T::class.java.cast(block)
     }
 
+    @JvmStatic
     fun getByChunk(chunkPosition: ChunkPosition): Set<PylonBlock<PylonBlockSchema>> =
         lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
 
+    @JvmStatic
     fun getById(id: NamespacedKey): Set<PylonBlock<PylonBlockSchema>> =
         if (PylonRegistry.BLOCKS.contains(id)) lockBlockRead { blocksById[id].orEmpty() } else emptySet()
 
 
+    @JvmStatic
     fun exists(blockPosition: BlockPosition): Boolean
         = get(blockPosition) != null
 
     /**
      * The block's chunk must be loaded.
      */
+    @JvmStatic
     fun set(blockPosition: BlockPosition, schema: PylonBlockSchema) {
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block) as PylonBlock<PylonBlockSchema>
@@ -158,18 +166,21 @@ object BlockStorage {
     /**
      * The block's chunk must be loaded.
      */
+    @JvmStatic
     fun set(block: Block, schema: PylonBlockSchema)
             = set(block.position, schema)
 
     /**
      * The block's chunk must be loaded.
      */
+    @JvmStatic
     fun set(location: Location, schema: PylonBlockSchema)
             = set(BlockPosition(location), schema)
 
     /**
      * Does nothing if the block is not a Pylon block
      */
+    @JvmStatic
     fun remove(blockPosition: BlockPosition) = lockBlockWrite {
         val block = blocks.remove(blockPosition)
         if (block != null) {
@@ -184,12 +195,14 @@ object BlockStorage {
     /**
      * Does nothing if the block is not a Pylon block
      */
+    @JvmStatic
     fun remove(block: Block)
             = remove(block.position)
 
     /**
      * Does nothing if the block is not a Pylon block
      */
+    @JvmStatic
     fun remove(location: Location)
             = remove(BlockPosition(location))
 
