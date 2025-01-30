@@ -141,7 +141,7 @@ object BlockStorage {
      */
     fun set(blockPosition: BlockPosition, schema: PylonBlockSchema) {
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.createConstructor.invoke(schema) as PylonBlock<PylonBlockSchema>
+        val block = schema.createConstructor.invoke(schema, blockPosition.block) as PylonBlock<PylonBlockSchema>
 
         blockPosition.block.type = schema.material
 
@@ -238,11 +238,13 @@ object BlockStorage {
             }
         }
 
-        PylonChunkBlocksLoadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
+        Bukkit.getScheduler().runTask(pluginInstance, Runnable {
+            PylonChunkBlocksLoadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
 
-        for (block in chunkBlocks) {
-            PylonBlockLoadEvent(block.block, block).callEvent()
-        }
+            for (block in chunkBlocks) {
+                PylonBlockLoadEvent(block.block, block).callEvent()
+            }
+        })
     }
 
     private fun commitSave(chunkPosition: ChunkPosition, chunkBlocks: Collection<PylonBlock<PylonBlockSchema>>) {
@@ -253,11 +255,13 @@ object BlockStorage {
 
         storage[chunkPosition.asLong] = serializeChunk(chunkBlocks)
 
-        PylonChunkBlocksUnloadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
+        Bukkit.getScheduler().runTask(pluginInstance, Runnable {
+            PylonChunkBlocksUnloadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
 
-        for (block in chunkBlocks) {
-            PylonBlockLoadEvent(block.block, block).callEvent()
-        }
+            for (block in chunkBlocks) {
+                PylonBlockLoadEvent(block.block, block).callEvent()
+            }
+        })
     }
 
     internal fun cleanup() = lockBlockWrite {
