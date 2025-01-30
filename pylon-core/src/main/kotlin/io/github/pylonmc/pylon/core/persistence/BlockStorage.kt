@@ -9,9 +9,11 @@ import io.papermc.paper.util.Tick
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
+import org.bukkit.block.Block
 import org.mapdb.DBMaker
 import org.mapdb.HTreeMap
 import org.mapdb.Serializer
@@ -154,6 +156,18 @@ object BlockStorage {
     }
 
     /**
+     * The block's chunk must be loaded.
+     */
+    fun set(block: Block, schema: PylonBlockSchema)
+            = set(block.position, schema)
+
+    /**
+     * The block's chunk must be loaded.
+     */
+    fun set(location: Location, schema: PylonBlockSchema)
+            = set(BlockPosition(location), schema)
+
+    /**
      * Does nothing if the block is not a Pylon block
      */
     fun remove(blockPosition: BlockPosition) = lockBlockWrite {
@@ -166,6 +180,18 @@ object BlockStorage {
             PylonBlockBreakEvent(blockPosition.block, block).callEvent()
         }
     }
+
+    /**
+     * Does nothing if the block is not a Pylon block
+     */
+    fun remove(block: Block)
+            = remove(block.position)
+
+    /**
+     * Does nothing if the block is not a Pylon block
+     */
+    fun remove(location: Location)
+            = remove(BlockPosition(location))
 
     /**
      * Queues a chunk for loading
