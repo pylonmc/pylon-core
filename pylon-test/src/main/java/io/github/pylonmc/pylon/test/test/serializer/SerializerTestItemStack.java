@@ -1,14 +1,14 @@
-package io.github.pylonmc.pylon.test.generictest.serializer;
+package io.github.pylonmc.pylon.test.test.serializer;
 
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
-import io.github.pylonmc.pylon.test.GenericTest;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-public class SerializerTestItemStack implements GenericTest {
-    @Override
-    public void run() {
+
+public class SerializerTestItemStack extends SerializerTest<ItemStack> {
+    private static @NotNull ItemStack getStack() {
         ItemStack value = new ItemStack(Material.ACACIA_BOAT);
         // Just random properties to test
         value.editMeta((meta) -> {
@@ -17,7 +17,10 @@ public class SerializerTestItemStack implements GenericTest {
             meta.setCustomModelData(2);
             meta.setGlider(true);
         });
+        return value;
+    }
 
-        SerializerTests.testSerializer(value, PylonSerializers.ITEM_STACK);
+    public SerializerTestItemStack() {
+        super(getStack(), PylonSerializers.ITEM_STACK);
     }
 }

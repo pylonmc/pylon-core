@@ -1,21 +1,21 @@
-package io.github.pylonmc.pylon.test.generictest;
+package io.github.pylonmc.pylon.test.test.pdc;
 
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
-import io.github.pylonmc.pylon.test.GenericTest;
-import io.github.pylonmc.pylon.test.TestAddon;
+import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.base.SyncTest;
 import org.bukkit.NamespacedKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PylonPDCSerializationTest implements GenericTest {
+public class PylonPDCSerializationTest extends SyncTest {
     @Override
-    public void run() {
-        NamespacedKey innerKey = new NamespacedKey(TestAddon.instance(), "somekey");
+    public void test() {
+        NamespacedKey innerKey = new NamespacedKey(PylonTest.instance(), "somekey");
         var innerType = PylonSerializers.STRING;
         String innerValue = "iiroirimjrg";
 
-        NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+        NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
         var type = PylonSerializers.TAG_CONTAINER;
         PylonPersistentDataContainer value = new PylonPersistentDataContainer();
         value.set(innerKey, innerType, innerValue);

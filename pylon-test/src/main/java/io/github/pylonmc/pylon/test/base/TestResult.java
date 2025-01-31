@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.test;
+package io.github.pylonmc.pylon.test.base;
 
 import org.bukkit.NamespacedKey;
 

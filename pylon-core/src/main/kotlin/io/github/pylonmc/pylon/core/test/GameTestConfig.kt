@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.test
 
 import io.github.pylonmc.pylon.core.block.BlockPosition
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -80,4 +81,7 @@ class GameTestConfig(
 
         return GameTest.submit(gameTest, delayTicks)
     }
+
+    fun register()
+            = PylonRegistry.GAMETESTS.register(this)
 }
