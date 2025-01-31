@@ -11,7 +11,7 @@ import java.lang.invoke.MethodHandles
 
 open class PylonItemSchema(
     private val id: NamespacedKey,
-    internal val itemClass: Class<out PylonItem>,
+    internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
     private val template: ItemStack,
 ) : Keyed {
     init {
@@ -24,7 +24,10 @@ open class PylonItemSchema(
         get() = template.clone()
 
     internal val loadConstructor: MethodHandle = try {
-        MethodHandles.lookup().unreflectConstructor(itemClass.getConstructor(ItemStack::class.java))
+        MethodHandles.lookup().unreflectConstructor(itemClass.getConstructor(
+            PylonItemSchema::class.java,
+            ItemStack::class.java
+        ))
     } catch (_: NoSuchMethodException) {
         throw NoSuchMethodException("Item '$key' is missing a load constructor")
     }

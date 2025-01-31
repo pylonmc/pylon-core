@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.test.generictest;
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
 import io.github.pylonmc.pylon.core.item.PylonItem;
 import io.github.pylonmc.pylon.core.item.PylonItemSchema;
+import io.github.pylonmc.pylon.core.item.SimplePylonItem;
 import io.github.pylonmc.pylon.test.GenericTest;
 import io.github.pylonmc.pylon.test.TestAddon;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -16,7 +17,7 @@ public class PylonItemStackSimpleTest implements GenericTest {
     public void run() {
         new PylonItemSchema(
                 TestAddon.key("pylon_item_stack_simple_test"),
-                PylonItem.class,
+                SimplePylonItem.class,
                 new ItemStackBuilder(Material.DIAMOND_SWORD)
                         .set(DataComponentTypes.CUSTOM_NAME, Component.text("Ominous blaze powder")
                                 .color(TextColor.color(255, 0, 0)))
@@ -27,7 +28,4 @@ public class PylonItemStackSimpleTest implements GenericTest {
                         .build()
         ).register();
     }
-
-    @Override
-    public void cleanup() {}
 }

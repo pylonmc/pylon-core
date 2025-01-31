@@ -18,11 +18,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class PylonItemStackInterfaceTest {
-    private static boolean handlerCalled = false;
+    private static boolean handlerCalled;
 
-    public static class OminousBlazePower extends PylonItem implements BrewingStandFuel {
-        public OminousBlazePower(@NotNull ItemStack stack) {
-            super(stack);
+    public static class OminousBlazePower extends PylonItem<PylonItemSchema> implements BrewingStandFuel {
+        public OminousBlazePower(@NotNull PylonItemSchema schema, @NotNull ItemStack stack) {
+            super(schema, stack);
         }
 
         @Override
