@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.test.generictest;
 
 import io.github.pylonmc.pylon.core.block.ChunkPosition;
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
-import io.github.pylonmc.pylon.core.persistence.PylonSerializers;
+import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.test.GenericTest;
 import io.github.pylonmc.pylon.test.TestAddon;
 import org.bukkit.Material;
