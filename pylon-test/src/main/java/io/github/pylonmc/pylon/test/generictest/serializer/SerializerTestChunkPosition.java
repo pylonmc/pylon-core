@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.test.generictest;
+package io.github.pylonmc.pylon.test.generictest.serializer;
 
 import io.github.pylonmc.pylon.core.block.ChunkPosition;
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;

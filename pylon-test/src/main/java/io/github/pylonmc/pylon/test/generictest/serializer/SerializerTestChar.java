@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.test.generictest;
+package io.github.pylonmc.pylon.test.generictest.serializer;
 
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
@@ -8,16 +8,14 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SerializerTestUUID implements GenericTest {
+public class SerializerTestChar implements GenericTest {
     @Override
     public void run() {
         NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
-        var type = PylonSerializers.UUID;
-        UUID value = UUID.randomUUID();
+        var type = PylonSerializers.CHAR;
+        char value = 's';
 
         ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
         stack.editMeta(meta -> meta.getPersistentDataContainer()

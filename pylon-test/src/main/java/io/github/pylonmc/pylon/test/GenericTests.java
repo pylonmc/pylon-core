@@ -1,6 +1,9 @@
 package io.github.pylonmc.pylon.test;
 
-import io.github.pylonmc.pylon.test.generictest.*;
+import io.github.pylonmc.pylon.test.generictest.PylonItemStackSimpleTest;
+import io.github.pylonmc.pylon.test.generictest.PylonPDCPrimitivesTest;
+import io.github.pylonmc.pylon.test.generictest.PylonPDCSerializationTest;
+import io.github.pylonmc.pylon.test.generictest.serializer.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
