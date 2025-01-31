@@ -14,7 +14,7 @@ abstract class PylonBlock<out S: PylonBlockSchema> protected constructor(
     constructor(reader: PylonDataReader, block: Block)
             : this(getSchemaOfType<S>(reader.id), block)
 
-    fun write(writer: PylonDataWriter) {}
+    open fun write(writer: PylonDataWriter) {}
 
     // TODO listener
     fun tick() {}
