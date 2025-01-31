@@ -1,26 +1,8 @@
 package io.github.pylonmc.pylon.core.persistence.datatypes
 
-import io.github.pylonmc.pylon.core.block.BlockPosition
-import io.github.pylonmc.pylon.core.block.ChunkPosition
-import io.github.pylonmc.pylon.core.persistence.datatypes.BlockPositionPersistentDataType
-import io.github.pylonmc.pylon.core.persistence.datatypes.CharPersistentDataType
-import io.github.pylonmc.pylon.core.persistence.datatypes.ChunkPositionPersistentDataType
-import io.github.pylonmc.pylon.core.persistence.datatypes.LocationPersistentDataType
-import io.github.pylonmc.pylon.core.persistence.datatypes.NamespacedKeyPersistentDataType
-import io.github.pylonmc.pylon.core.persistence.datatypes.UUIDPersistentDataType
-import io.github.pylonmc.pylon.core.persistence.datatypes.VectorPersistentDataType
-import io.github.pylonmc.pylon.core.persistence.datatypes.WorldPersistentDataType
-import io.github.pylonmc.pylon.core.pluginInstance
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.NamespacedKey
-import org.bukkit.World
 import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.util.Vector
 import java.nio.ByteBuffer
-import java.util.*
 
 object PylonSerializers {
     @JvmField
@@ -63,6 +45,15 @@ object PylonSerializers {
     val TAG_CONTAINER = PersistentDataType.TAG_CONTAINER!!
 
     @JvmField
+    val LIST = PersistentDataType.LIST!!
+
+    @JvmField
+    val SET = SetPersistentDataType.Companion
+
+    @JvmField
+    val MAP = MapPersistentDataType.Companion
+
+    @JvmField
     val NAMESPACED_KEY = NamespacedKeyPersistentDataType
 
     @JvmField
@@ -84,13 +75,10 @@ object PylonSerializers {
     val LOCATION = LocationPersistentDataType
 
     @JvmField
-    val LIST = PersistentDataType.LIST!!
+    val ITEM_STACK = ItemStackPersistentDataType
 
     @JvmField
-    val SET = SetPersistentDataType.Companion
-
-    @JvmField
-    val MAP = MapPersistentDataType.Companion
+    val INVENTORY = InventoryPersistentDataType
 }
 
 

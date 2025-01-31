@@ -23,6 +23,7 @@ class GenericTests {
         genericTests.add(new SerializerTestChar());
         genericTests.add(new SerializerTestSet());
         genericTests.add(new SerializerTestLocation());
+        genericTests.add(new SerializerTestItemStack());
         genericTests.add(new PylonPDCPrimitivesTest());
         genericTests.add(new PylonPDCSerializationTest());
         genericTests.add(new PylonItemStackSimpleTest());

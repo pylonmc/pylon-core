@@ -74,9 +74,8 @@ public class TestAddon extends JavaPlugin implements PylonAddon {
                         }
                     }
 
-                    logger.info("Testing complete; shutting down server...");
-
                     if (!Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"))) {
+                        logger.info("Testing complete; shutting down server...");
                         Bukkit.shutdown();
                     }
                 });
