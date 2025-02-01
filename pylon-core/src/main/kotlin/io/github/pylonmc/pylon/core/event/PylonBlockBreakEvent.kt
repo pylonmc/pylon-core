@@ -10,11 +10,14 @@ class PylonBlockBreakEvent(
     val block: Block,
     val pylonBlock: PylonBlock<PylonBlockSchema>,
 ) : Event() {
-    private val handlerList: HandlerList = HandlerList()
-
-    fun getHandlerList(): HandlerList
-        = handlerList
-
     override fun getHandlers(): HandlerList
         = handlerList
+
+    companion object {
+        private val handlerList: HandlerList = HandlerList()
+
+        @JvmStatic
+        fun getHandlerList(): HandlerList
+                = handlerList
+    }
 }
