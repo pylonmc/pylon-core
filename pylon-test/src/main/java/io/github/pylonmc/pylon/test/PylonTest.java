@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.test;
 
+import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
@@ -33,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class PylonTest extends JavaPlugin implements io.github.pylonmc.pylon.core.addon.PylonAddon {
+public class PylonTest extends JavaPlugin implements PylonAddon {
     private static PylonTest instance;
     public static World testWorld;
 
@@ -105,9 +106,9 @@ public class PylonTest extends JavaPlugin implements io.github.pylonmc.pylon.cor
             }
         }
 
-        logger.info("Testing complete; shutting down server...");
 
         if (!Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"))) {
+            logger.info("Testing complete; shutting down server...");
             Bukkit.shutdown();
         }
     }

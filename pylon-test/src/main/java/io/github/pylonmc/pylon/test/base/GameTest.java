@@ -32,6 +32,7 @@ public class GameTest implements Test {
         CompletableFuture<CompletableFuture<GameTestFailException>> testFuture = new CompletableFuture<>();
 
         Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            distance += 5 + config.getSize();
             testFuture.complete(config.launch(new BlockPosition(PylonTest.testWorld, distance, 1, 0)));
             distance += 5 + config.getSize();
         });
