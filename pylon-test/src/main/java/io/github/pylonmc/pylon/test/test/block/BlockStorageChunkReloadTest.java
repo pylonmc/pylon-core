@@ -5,7 +5,7 @@ import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
-import io.github.pylonmc.pylon.core.persistence.BlockStorage;
+import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataReader;
 import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataWriter;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;

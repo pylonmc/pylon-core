@@ -1,27 +1,16 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import io.github.pylonmc.pylon.core.block.position
-import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.world.ChunkLoadEvent
-import org.bukkit.event.world.ChunkUnloadEvent
 
-internal object BlockStorageListener : Listener {
-    @EventHandler
-    fun chunkLoad(event: ChunkLoadEvent) {
-        Bukkit.getLogger().severe("LOAD EVENT ${event.chunk.position}")
-        BlockStorage.load(event.chunk.position)
-    }
-
-    @EventHandler
-    fun chunkSave(event: ChunkUnloadEvent) {
-        Bukkit.getLogger().severe("UNLOAD EVENT ${event.chunk.position}")
-        BlockStorage.save(event.chunk.position)
-    }
-
+/**
+ * The job of this is to prevent BlockStorage from entering an inconsistent state due to
+ * various world events - for example, if a PylonBlock is pushed by a piston.
+ */
+internal object BlockStorageConsistencyListener : Listener {
     @EventHandler
     fun blockRemove(event: BlockBreakEvent) {
         BlockStorage.remove(event.block.position)

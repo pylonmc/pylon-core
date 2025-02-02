@@ -21,13 +21,15 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.time.toKotlinDuration
 
-typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
+internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
 
 /**
  * Welcome to the circus!
  *
  * BlockStorage maintains persistent storage for blocks. Why is this necessary? Due to limitations of
  * Paper/Minecraft, we cannot associate arbitrary data with blocks like we can with entities.
+ *
+ * BlockStorage guarantees that a chunk's blocks will never be loaded if the chunk is not loaded.
  *
  * We use MapDB for this, the simplest database I could find for this task (and extremely performant).
  *
@@ -52,11 +54,6 @@ typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
  * deleting the chunk from `blocksByChunk`, and deleting all of its blocks from `blocks`.
  */
 object BlockStorage {
-    private enum class BlockStorageJobType {
-        LOAD,
-        SAVE,
-    }
-
     private const val DATABASE_NAME = "blocks.mapdb"
 
     /**
@@ -79,18 +76,13 @@ object BlockStorage {
     private val storages: MutableMap<UUID, HTreeMap<Long, ByteArray>> = mutableMapOf()
 
     init {
+        // TODO Create new storages when a new world is created while the server is running
         for (world in Bukkit.getWorlds()) {
             storages[world.uid] = db.hashMap("data", Serializer.LONG, Serializer.BYTE_ARRAY)
                 .expireStoreSize(MAX_DB_CACHE_SIZE)
                 .createOrOpen()
         }
     }
-
-    // This dispatcher can only run one coroutine at a time, so in effect acts as a queue
-    // where coroutines must wait for an already executing coroutine to finish/suspend before
-    // they can start.
-    // The coroutines *may* run on different threads, but only one at a time.
-    private val commitDispatcher = Dispatchers.Default.limitedParallelism(1)
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized to prevent them briefly going
     // out of sync
@@ -104,6 +96,8 @@ object BlockStorage {
     private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockCollection> = ConcurrentHashMap()
 
     private val blocksById: MutableMap<NamespacedKey, PylonBlockCollection> = ConcurrentHashMap()
+
+    private val commitDispatcher = Dispatchers.Default
 
     init {
         pluginInstance.launch(commitDispatcher) {
@@ -227,98 +221,59 @@ object BlockStorage {
     fun remove(location: Location)
             = remove(BlockPosition(location))
 
-    /**
-     * Queues a chunk for loading
-     */
-    internal fun load(chunkPosition: ChunkPosition) {
-        pluginInstance.launch(commitDispatcher) {
-            commitLoad(chunkPosition)
+    internal fun addChunkToCache(chunkPosition: ChunkPosition, chunkBlocks: PylonBlockCollection) = lockBlockWrite {
+        blocksByChunk[chunkPosition] = chunkBlocks
+        for (block in chunkBlocks) {
+            blocks[block.block.position] = block
+            blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
         }
-
-        Bukkit.getLogger().severe("SCHEDULE LOAD ${chunkPosition}")
     }
 
-    /**
-     * Queues a chunk for saving.
-     *
-     * We immediately delete the chunk's blocks from loaded blocks, and then add the chunk and
-     * blocks to the queue. This is to avoid a situation where a chunk has been unloaded, but
-     * its blocks are still loaded in BlockStorage.
-     */
-    internal fun save(chunkPosition: ChunkPosition) = lockBlockWrite {
+    internal fun removeChunkFromCache(chunkPosition: ChunkPosition): PylonBlockCollection = lockBlockWrite {
         val chunkBlocks = blocksByChunk.remove(chunkPosition)
-            ?: error("Chunk '$chunkPosition' is not loaded")
+            ?: error("Attempt to remove chunk '$chunkPosition' from cache, but it is not stored")
         for (block in chunkBlocks) {
             blocks.remove(block.block.position)
             (blocksById[block.schema.key] ?: continue).remove(block)
         }
-
-        Bukkit.getLogger().severe("SCHEDULE SAVE ${chunkPosition}")
-
-        pluginInstance.launch(commitDispatcher) {
-            commitSave(chunkPosition, chunkBlocks)
-        }
+        return chunkBlocks
     }
 
-    private fun commitLoad(chunkPosition: ChunkPosition) {
+    internal fun writeChunkToDisk(chunkPosition: ChunkPosition, blocks: PylonBlockCollection) {
+        val world = chunkPosition.world
+            ?: error("Attempt to write chunk '$chunkPosition' to disk, but its world is not loaded")
+        val storage = storages[world.uid]
+            ?: error("Attempt to write chunk to world '${world.name}' which has no associated storage")
+
+        storage[chunkPosition.asLong] = serializeChunk(blocks)
+    }
+
+    /**
+     * Returns an empty list if the chunk has no data
+     */
+    internal fun readChunkFromDisk(chunkPosition: ChunkPosition): PylonBlockCollection {
         val world = chunkPosition.world
             ?: error("Received load job for chunk '$chunkPosition' whose world is not loaded")
         val storage = storages[world.uid]
             ?: error("Received load job for world '${world.name}' which has no associated storage")
-        val chunkBlocks = storage[chunkPosition.asLong]?.let {
+        return storage[chunkPosition.asLong]?.let {
             deserializeChunk(world, chunkPosition, it).toMutableList()
         } ?: mutableListOf()
-
-        lockBlockWrite {
-            blocksByChunk[chunkPosition] = chunkBlocks
-            for (block in chunkBlocks) {
-                blocks[block.block.position] = block
-                blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
-            }
-        }
-
-        Bukkit.getLogger().severe("COMMIT LOAD ${chunkPosition}")
-
-        Bukkit.getScheduler().runTask(pluginInstance, Runnable {
-            PylonChunkBlocksLoadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
-
-            for (block in chunkBlocks) {
-                PylonBlockLoadEvent(block.block, block).callEvent()
-            }
-        })
     }
 
-    private fun commitSave(chunkPosition: ChunkPosition, chunkBlocks: Collection<PylonBlock<PylonBlockSchema>>) {
-        val world = chunkPosition.world
-            ?: error("Received save job for chunk '$chunkPosition' whose world is not loaded")
-        val storage = storages[world.uid]
-            ?: error("Received save job for world '${world.name}' which has no associated storage")
-
-        storage[chunkPosition.asLong] = serializeChunk(chunkBlocks)
-
-        Bukkit.getLogger().severe("COMMIT SAVE ${chunkPosition}")
-
-        Bukkit.getScheduler().runTask(pluginInstance, Runnable {
-            PylonChunkBlocksUnloadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
-
-            for (block in chunkBlocks) {
-                PylonBlockUnloadEvent(block.block, block).callEvent()
-            }
-        })
-    }
-
-    internal fun cleanup() = lockBlockWrite {
-        for ((chunkPosition, blocks) in blocksByChunk) {
-            commitSave(chunkPosition, blocks)
-        }
-
-        blocks.clear()
-        blocksByChunk.clear()
-        blocksById.clear()
-
-        db.commit()
-        db.close()
-    }
+    // TODO (oh no)
+//    internal fun cleanup() = lockBlockWrite {
+//        for ((chunkPosition, blocks) in blocksByChunk) {
+//            commitSave(chunkPosition, blocks)
+//        }
+//
+//        blocks.clear()
+//        blocksByChunk.clear()
+//        blocksById.clear()
+//
+//        db.commit()
+//        db.close()
+//    }
 
     /**
      * Self-contained function for taking an entire chunk's worth of PylonBlock data and turning it into bytes
