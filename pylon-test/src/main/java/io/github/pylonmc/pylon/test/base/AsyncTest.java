@@ -20,13 +20,13 @@ public abstract class AsyncTest implements Test {
     public TestResult run() {
         CompletableFuture<TestResult> future = new CompletableFuture<>();
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(PylonTest.instance(), () -> {
             try {
                 test();
             } catch (Throwable e) {
                 future.complete(onComplete(e));
             }
-            future.complete(null);
+            future.complete(onComplete(null));
         });
 
         Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
@@ -35,6 +35,6 @@ public abstract class AsyncTest implements Test {
             }
         }, TIMEOUT_TICKS);
 
-        return onComplete(null);
+        return future.join();
     }
 }
