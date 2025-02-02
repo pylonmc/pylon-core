@@ -31,8 +31,6 @@ public class TestUtil {
             chunks.add(future.join());
         }
 
-        Chunk chunk = PylonTest.testWorld.getChunkAtAsync(20, 100, false)
-
         return chunks;
     }
 }
