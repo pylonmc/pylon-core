@@ -21,6 +21,7 @@ public abstract class SyncTest implements Test {
                 test();
             } catch (Throwable e) {
                 future.complete(onComplete(e));
+                return;
             }
             future.complete(onComplete(null));
         });

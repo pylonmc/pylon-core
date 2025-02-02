@@ -25,6 +25,7 @@ public abstract class AsyncTest implements Test {
                 test();
             } catch (Throwable e) {
                 future.complete(onComplete(e));
+                return;
             }
             future.complete(onComplete(null));
         });
