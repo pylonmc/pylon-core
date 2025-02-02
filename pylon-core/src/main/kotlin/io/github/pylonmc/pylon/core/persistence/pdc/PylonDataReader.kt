@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence
+package io.github.pylonmc.pylon.core.persistence.pdc
 
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType

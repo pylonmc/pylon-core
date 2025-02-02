@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence
+package io.github.pylonmc.pylon.core.persistence.pdc
 
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance

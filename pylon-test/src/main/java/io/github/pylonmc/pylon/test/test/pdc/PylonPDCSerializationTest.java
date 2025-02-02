@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.test.pdc;
 
-import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
+import io.github.pylonmc.pylon.core.persistence.pdc.PylonPersistentDataContainer;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;

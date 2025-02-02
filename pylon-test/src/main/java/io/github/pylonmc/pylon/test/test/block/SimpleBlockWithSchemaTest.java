@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.test.test.block;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
-import io.github.pylonmc.pylon.core.persistence.PylonDataReader;
+import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataReader;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;

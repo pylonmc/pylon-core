@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.persistence.PylonDataReader
-import io.github.pylonmc.pylon.core.persistence.PylonDataWriter
+import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataReader
+import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataWriter
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block

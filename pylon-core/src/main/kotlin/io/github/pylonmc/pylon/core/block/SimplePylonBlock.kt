@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.persistence.PylonDataReader
+import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataReader
 import org.bukkit.block.Block
 
 class SimplePylonBlock : PylonBlock<PylonBlockSchema> {
