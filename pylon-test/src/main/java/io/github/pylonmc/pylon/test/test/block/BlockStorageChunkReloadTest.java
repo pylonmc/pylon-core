@@ -1,15 +1,17 @@
-package io.github.pylonmc.pylon.test.generictest;
+package io.github.pylonmc.pylon.test.test.block;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
+import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
+import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
 import io.github.pylonmc.pylon.core.persistence.BlockStorage;
 import io.github.pylonmc.pylon.core.persistence.PylonDataReader;
 import io.github.pylonmc.pylon.core.persistence.PylonDataWriter;
-import io.github.pylonmc.pylon.core.persistence.PylonSerializers;
-import io.github.pylonmc.pylon.test.GenericTest;
-import io.github.pylonmc.pylon.test.TestAddon;
+import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
+import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.TestUtil;
+import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -17,21 +19,21 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class BlockStorageChunkReloadTest implements GenericTest {
+public class BlockStorageChunkReloadTest extends AsyncTest {
     public static class TestBlock extends PylonBlock<PylonBlockSchema> {
-        private final NamespacedKey somethingKey = TestAddon.key("something");
+        private final NamespacedKey somethingKey = PylonTest.key("something");
 
         private final int something;
 
@@ -52,49 +54,59 @@ public class BlockStorageChunkReloadTest implements GenericTest {
     }
 
     private static final PylonBlockSchema schema = new PylonBlockSchema  (
-            TestAddon.key("block_storage_chunk_reload_test"),
+            PylonTest.key("block_storage_chunk_reload_test"),
             Material.AMETHYST_BLOCK,
             TestBlock.class
     );
 
     private static final Map<Chunk, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
+    private static final Set<Chunk> stage1Chunks = new HashSet<>();
+    private static final Set<Chunk> stage2Chunks = new HashSet<>();
+    private static final Set<Chunk> stage3Chunks = new HashSet<>();
 
     private static class TestListener implements Listener {
-        private static @NotNull Block getBlockFromChunk(@NotNull Chunk chunk) {
-            return chunk.getBlock(7, 100, 7);
-        }
-
+        /**
+         * Stage 1: set the Pylon block when the Pylon data for that chunk is loaded, then unload the chunk.
+         */
         @EventHandler
-        public static void onChunkLoad(@NotNull ChunkLoadEvent e) {
-            if (!blockLoadedFutures.containsKey(e.getChunk())) {
+        public static void stage1(@NotNull PylonChunkBlocksLoadEvent e) {
+            if (!stage1Chunks.contains(e.getChunk())) {
                 return;
             }
 
-            TestAddon.instance().getLogger().severe("1");
+            stage1Chunks.remove(e.getChunk());
+            stage2Chunks.add(e.getChunk());
 
-            BlockStorage.set(getBlockFromChunk(e.getChunk()), schema);
-
-            e.getChunk().unload();
+            // Run this later to prevent stage 3 from firing early
+            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+                BlockStorage.set(e.getChunk().getBlock(7, 100, 7), schema);
+                e.getChunk().unload();
+            }, 1);
         }
 
+        /**
+         * Stage 2: When the chunk's pylon data is unloaded, load the chunk again.
+         */
         @EventHandler
-        public static void onChunkUnload(@NotNull ChunkUnloadEvent e) {
-            if (!blockLoadedFutures.containsKey(e.getChunk())) {
+        public static void stage2(@NotNull PylonChunkBlocksUnloadEvent e) {
+            if (!stage2Chunks.contains(e.getChunk())) {
                 return;
             }
 
-            TestAddon.instance().getLogger().severe("2");
+            stage2Chunks.remove(e.getChunk());
+            stage3Chunks.add(e.getChunk());
 
             e.getChunk().load();
         }
 
+        /**
+         * Stage 3: Get the pylon block data that should be loaded when the chunk isloaded.
+         */
         @EventHandler
-        public static void onBlockStorageLoad(@NotNull PylonBlockLoadEvent e) {
-            if (!blockLoadedFutures.containsKey(e.getBlock().getChunk())) {
+        public static void stage3(@NotNull PylonBlockLoadEvent e) {
+            if (!stage3Chunks.contains(e.getBlock().getChunk())) {
                 return;
             }
-
-            TestAddon.instance().getLogger().severe("3");
 
             Throwable exception = null;
             try {
@@ -111,30 +123,33 @@ public class BlockStorageChunkReloadTest implements GenericTest {
                         .isNotNull()
                         .extracting(block -> block.something)
                         .isEqualTo(130);
+
             } catch (Throwable t) {
                 exception = t;
             }
-            blockLoadedFutures.get(e.getBlock().getChunk()).complete(exception);
+
+            blockLoadedFutures.get(e.getBlock().getChunk())
+                    .complete(exception);
         }
     }
 
     @Override
-    public void run() {
+    public void test() {
         schema.register();
 
-        List<Chunk> chunks = TestUtil.getRandomChunks(TestAddon.testWorld, 256);
+        List<Chunk> chunks = TestUtil.getRandomChunks(PylonTest.testWorld, 32);
+
+        stage1Chunks.addAll(chunks);
 
         for (Chunk chunk : chunks) {
             blockLoadedFutures.put(chunk, new CompletableFuture<>());
         }
 
-        Bukkit.getPluginManager().registerEvents(new TestListener(), TestAddon.instance());
+        Bukkit.getPluginManager().registerEvents(new TestListener(), PylonTest.instance());
 
         for (Chunk chunk : chunks) {
-            chunk.unload();
-            chunk.load();
+            Bukkit.getScheduler().runTask(PylonTest.instance(), () -> chunk.load());
         }
-        TestAddon.instance().getLogger().severe("brrrrrrrrrrr");
 
         for (CompletableFuture<Throwable> future : blockLoadedFutures.values()) {
             Throwable throwable = future.join();

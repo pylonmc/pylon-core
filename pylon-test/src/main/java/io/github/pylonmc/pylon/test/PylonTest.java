@@ -3,6 +3,8 @@ package io.github.pylonmc.pylon.test;
 import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageChunkReloadTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.block.SimpleBlockTest;
 import io.github.pylonmc.pylon.test.test.block.SimpleBlockWithSchemaTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
@@ -43,6 +45,8 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
 
+        tests.add(new BlockStorageChunkReloadTest());
+        tests.add(new BlockStorageSimpleTest());
         tests.add(new SimpleBlockTest());
         tests.add(new SimpleBlockWithSchemaTest());
 

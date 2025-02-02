@@ -13,8 +13,7 @@ import java.util.concurrent.CompletableFuture;
 public class TestUtil {
     private static final Random random = new Random();
 
-    private static @NotNull CompletableFuture<Chunk> getRandomChunk(@NotNull World world) {
-        TestAddon.instance().getLogger().severe("iofhigowe2");
+    public static @NotNull CompletableFuture<Chunk> getRandomChunk(@NotNull World world) {
         double max = 10000;
         int x = (int) random.nextDouble(-max, max);
         int z = (int) random.nextDouble(-max, max);
@@ -30,9 +29,7 @@ public class TestUtil {
         List<Chunk> chunks = new ArrayList<>();
         for (CompletableFuture<Chunk> future : futures) {
             chunks.add(future.join());
-            TestAddon.instance().getLogger().severe(chunks.toString());
         }
-        TestAddon.instance().getLogger().severe("AAAAAAAA");
 
         return chunks;
     }

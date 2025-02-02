@@ -1,11 +1,12 @@
-package io.github.pylonmc.pylon.test.gametest;
+package io.github.pylonmc.pylon.test.test.block;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.persistence.BlockStorage;
 import io.github.pylonmc.pylon.core.persistence.PylonDataReader;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
-import io.github.pylonmc.pylon.test.TestAddon;
+import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.base.GameTest;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -14,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class BlockStorageSimpleTest {
+public class BlockStorageSimpleTest extends GameTest {
     public static class TestBlockSchema extends PylonBlockSchema {
         private final int processingSpeed;
 
@@ -44,14 +45,14 @@ public class BlockStorageSimpleTest {
     }
 
     private static final TestBlockSchema schema = new TestBlockSchema (
-            TestAddon.key("block_storage_simple_test"),
+            PylonTest.key("block_storage_simple_test"),
             Material.AMETHYST_BLOCK,
             TestBlock.class,
             12
     );
 
-    public static @NotNull GameTestConfig get() {
-        return new GameTestConfig.Builder(new NamespacedKey(TestAddon.instance(), "block_storage_simple_test"))
+    public BlockStorageSimpleTest() {
+        super(new GameTestConfig.Builder(new NamespacedKey(PylonTest.instance(), "block_storage_simple_test"))
                 .size(1)
                 .setUp((test) -> {
                     schema.register();
@@ -65,11 +66,14 @@ public class BlockStorageSimpleTest {
                             .isInstanceOf(TestBlock.class);
 
                     assertThat(pylonBlock.getSchema())
-                            .isInstanceOf(TestBlockSchema.class);
+                            .isInstanceOf(TestBlockSchema.class)
+                            .extracting(s -> (TestBlockSchema) s)
+                            .extracting(s -> s.processingSpeed)
+                            .isEqualTo(12);
 
                     assertThat(BlockStorage.getAs(TestBlock.class, test.location()))
                             .isNotNull();
                 })
-                .build();
+                .build());
     }
 }

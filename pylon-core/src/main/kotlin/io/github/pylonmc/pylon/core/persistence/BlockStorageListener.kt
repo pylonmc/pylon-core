@@ -21,11 +21,13 @@ import org.bukkit.event.world.ChunkUnloadEvent
 internal object BlockStorageListener : Listener {
     @EventHandler
     fun chunkLoad(event: ChunkLoadEvent) {
+        Bukkit.getLogger().severe("LOAD EVENT ${event.chunk.position}")
         BlockStorage.load(event.chunk.position)
     }
 
     @EventHandler
     fun chunkSave(event: ChunkUnloadEvent) {
+        Bukkit.getLogger().severe("UNLOAD EVENT ${event.chunk.position}")
         BlockStorage.save(event.chunk.position)
     }
 

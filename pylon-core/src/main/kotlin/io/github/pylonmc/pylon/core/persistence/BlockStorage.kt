@@ -6,8 +6,7 @@ import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.util.Tick
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -18,10 +17,10 @@ import org.mapdb.DBMaker
 import org.mapdb.HTreeMap
 import org.mapdb.Serializer
 import java.io.File
+import java.lang.Runnable
 import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.time.toKotlinDuration
 
@@ -56,6 +55,11 @@ typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
  * deleting the chunk from `blocksByChunk`, and deleting all of its blocks from `blocks`.
  */
 object BlockStorage {
+    private enum class BlockStorageJobType {
+        LOAD,
+        SAVE,
+    }
+
     private const val DATABASE_NAME = "blocks.mapdb"
 
     /**
@@ -152,7 +156,11 @@ object BlockStorage {
 
     @JvmStatic
     fun getById(id: NamespacedKey): Collection<PylonBlock<PylonBlockSchema>> =
-        if (PylonRegistry.BLOCKS.contains(id)) lockBlockRead { blocksById[id].orEmpty() } else emptySet()
+        if (PylonRegistry.BLOCKS.contains(id)) lockBlockRead {
+            blocksById[id].orEmpty()
+        } else {
+            emptySet()
+        }
 
 
     @JvmStatic
@@ -160,7 +168,7 @@ object BlockStorage {
         = get(blockPosition) != null
 
     /**
-     * The block's chunk must be loaded.
+     * The block's chunk must be loaded. Not thread safe.
      */
     @JvmStatic
     fun set(blockPosition: BlockPosition, schema: PylonBlockSchema) {
@@ -180,21 +188,21 @@ object BlockStorage {
     }
 
     /**
-     * The block's chunk must be loaded.
+     * The block's chunk must be loaded. Not thread safe.
      */
     @JvmStatic
     fun set(block: Block, schema: PylonBlockSchema)
             = set(block.position, schema)
 
     /**
-     * The block's chunk must be loaded.
+     * The block's chunk must be loaded. Not thread safe.
      */
     @JvmStatic
     fun set(location: Location, schema: PylonBlockSchema)
             = set(BlockPosition(location), schema)
 
     /**
-     * Does nothing if the block is not a Pylon block
+     * Does nothing if the block is not a Pylon block. Not thread safe.
      */
     @JvmStatic
     fun remove(blockPosition: BlockPosition) = lockBlockWrite {
@@ -209,14 +217,14 @@ object BlockStorage {
     }
 
     /**
-     * Does nothing if the block is not a Pylon block
+     * Does nothing if the block is not a Pylon block. Not thread safe.
      */
     @JvmStatic
     fun remove(block: Block)
             = remove(block.position)
 
     /**
-     * Does nothing if the block is not a Pylon block
+     * Does nothing if the block is not a Pylon block. Not thread safe.
      */
     @JvmStatic
     fun remove(location: Location)
@@ -229,6 +237,8 @@ object BlockStorage {
         pluginInstance.launch(commitDispatcher) {
             commitLoad(chunkPosition)
         }
+
+        Bukkit.getLogger().severe("SCHEDULE LOAD ${chunkPosition}")
     }
 
     /**
@@ -245,6 +255,9 @@ object BlockStorage {
             blocks.remove(block.block.position)
             (blocksById[block.schema.key] ?: continue).remove(block)
         }
+
+        Bukkit.getLogger().severe("SCHEDULE SAVE ${chunkPosition}")
+
         pluginInstance.launch(commitDispatcher) {
             commitSave(chunkPosition, chunkBlocks)
         }
@@ -267,6 +280,8 @@ object BlockStorage {
             }
         }
 
+        Bukkit.getLogger().severe("COMMIT LOAD ${chunkPosition}")
+
         Bukkit.getScheduler().runTask(pluginInstance, Runnable {
             PylonChunkBlocksLoadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
 
@@ -284,11 +299,13 @@ object BlockStorage {
 
         storage[chunkPosition.asLong] = serializeChunk(chunkBlocks)
 
+        Bukkit.getLogger().severe("COMMIT SAVE ${chunkPosition}")
+
         Bukkit.getScheduler().runTask(pluginInstance, Runnable {
             PylonChunkBlocksUnloadEvent(chunkPosition.chunk!!, chunkBlocks).callEvent()
 
             for (block in chunkBlocks) {
-                PylonBlockLoadEvent(block.block, block).callEvent()
+                PylonBlockUnloadEvent(block.block, block).callEvent()
             }
         })
     }
