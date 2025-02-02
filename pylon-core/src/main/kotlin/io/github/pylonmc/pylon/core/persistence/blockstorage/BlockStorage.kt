@@ -1,25 +1,22 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.event.*
+import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.persistence.pdc.PylonPersistentDataContainer
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.papermc.paper.util.Tick
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import org.bukkit.*
 import org.bukkit.block.Block
-import org.mapdb.DBMaker
-import org.mapdb.HTreeMap
-import org.mapdb.Serializer
-import java.io.File
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.world.ChunkLoadEvent
+import org.bukkit.event.world.ChunkUnloadEvent
+import org.bukkit.persistence.PersistentDataContainer
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import kotlin.time.toKotlinDuration
 
 internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
 
@@ -53,36 +50,11 @@ internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchem
  * briefly out of sync. For example, if we unload a chunk, there will be a short delay between
  * deleting the chunk from `blocksByChunk`, and deleting all of its blocks from `blocks`.
  */
-object BlockStorage {
-    private const val DATABASE_NAME = "blocks.mapdb"
+object BlockStorage : Listener {
 
-    /**
-     * 1MB max persistent because we are doing our own caching, so storing a cache would end up just
-     * duplicating what's already in memory. Not sure if it's safe to set to zero so just keeping it at 1MB
-     */
-    private const val MAX_DB_CACHE_SIZE: Long = 1024 * 1024
-    private const val COMMIT_INTERVAL_TICKS: Long = 200
-
-    init {
-        pluginInstance.dataFolder.mkdir()
-    }
-
-    private val db = DBMaker.fileDB(File(pluginInstance.dataFolder, DATABASE_NAME))
-        .closeOnJvmShutdown()
-        .fileMmapEnableIfSupported()
-        .transactionEnable()
-        .make()
-
-    private val storages: MutableMap<UUID, HTreeMap<Long, ByteArray>> = mutableMapOf()
-
-    init {
-        // TODO Create new storages when a new world is created while the server is running
-        for (world in Bukkit.getWorlds()) {
-            storages[world.uid] = db.hashMap("data", Serializer.LONG, Serializer.BYTE_ARRAY)
-                .expireStoreSize(MAX_DB_CACHE_SIZE)
-                .createOrOpen()
-        }
-    }
+    private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
+    private val pylonBlockIdKey = NamespacedKey(pluginInstance, "id")
+    private val pylonBlockPositionKey = NamespacedKey(pluginInstance, "position")
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized to prevent them briefly going
     // out of sync
@@ -91,22 +63,11 @@ object BlockStorage {
     private val blocks: MutableMap<BlockPosition, PylonBlock<PylonBlockSchema>> = ConcurrentHashMap()
 
     /**
-     * Only contains chunks that have been loaded (even if they have no Pylon blocks)
+     * Only contains chunks that have been loaded (including chunks with no Pylon blocks)
      */
     private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockCollection> = ConcurrentHashMap()
 
     private val blocksById: MutableMap<NamespacedKey, PylonBlockCollection> = ConcurrentHashMap()
-
-    private val commitDispatcher = Dispatchers.Default
-
-    init {
-        pluginInstance.launch(commitDispatcher) {
-            while (true) {
-                delay(Tick.of(COMMIT_INTERVAL_TICKS).toKotlinDuration())
-                db.commit()
-            }
-        }
-    }
 
     @JvmStatic
     val loadedBlocks: Set<BlockPosition>
@@ -220,6 +181,72 @@ object BlockStorage {
     @JvmStatic
     fun remove(location: Location)
             = remove(BlockPosition(location))
+
+    @EventHandler
+    private fun onChunkLoad(event: ChunkLoadEvent) {
+        val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
+        val chunkBlocks = event.chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
+            deserialize(event.world, element)
+        }?.toMutableList() ?: mutableListOf()
+
+        lockBlockWrite {
+            blocksByChunk[event.chunk.position] = chunkBlocks
+            for (block in chunkBlocks) {
+                blocks[block.block.position] = block
+                blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun onChunkUnload(event: ChunkUnloadEvent) {
+        val chunkBlocks = lockBlockWrite {
+            val chunkBlocks = blocksByChunk.remove(event.chunk.position)
+                ?: error("Attempted to save Pylon data for chunk '${event.chunk.position}' but no data is stored")
+            for (block in chunkBlocks) {
+                blocks.remove(block.block.position)
+                (blocksById[block.schema.key] ?: continue).remove(block)
+            }
+            chunkBlocks
+        }
+
+        val context = event.chunk.persistentDataContainer.adapterContext
+        val blockBytes: List<ByteArray> = blocks.map {
+            TODO()???
+            val pdc = PylonPersistentDataContainer(it.value.schema.key, byteArrayOf())
+            it.value.write(pdc)
+            pdc.serializeToBytes()
+        }
+    }
+
+    private fun deserialize(world: World, pdc: PersistentDataContainer): PylonBlock<PylonBlockSchema>? {
+        // Stored outside of the try block so they are displayed in error messages once acquired
+        var id: NamespacedKey? = null
+        var position: BlockPosition? = null
+
+        try {
+            id = pdc.get(pylonBlockIdKey, PylonSerializers.NAMESPACED_KEY)
+                ?: error("Block PDC does not contain ID")
+
+            position = pdc.get(pylonBlockPositionKey, PylonSerializers.LONG)?.let {
+                BlockPosition(world, it)
+            } ?: error("Block PDC does not contain postion")
+
+            // We fail silently here because this may trigger if an addon is removed or fails to load
+            // In this case, we don't want to delete the data, and we also don't want to spam errors
+            val schema = PylonRegistry.BLOCKS[id]
+                ?: return null
+
+            // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
+            @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
+            return schema.loadConstructor.invoke(pdc, position.block) as PylonBlock<PylonBlockSchema>
+
+        } catch (e: Exception) {
+            pluginInstance.logger.severe("Error while loading block $id at $position")
+            e.printStackTrace()
+            return null
+        }
+    }
 
     internal fun addChunkToCache(chunkPosition: ChunkPosition, chunkBlocks: PylonBlockCollection) = lockBlockWrite {
         blocksByChunk[chunkPosition] = chunkBlocks
