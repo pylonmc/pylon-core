@@ -1,6 +1,9 @@
 package io.github.pylonmc.pylon.test;
 
-import io.github.pylonmc.pylon.test.generictest.*;
+import io.github.pylonmc.pylon.test.generictest.PylonItemStackSimpleTest;
+import io.github.pylonmc.pylon.test.generictest.PylonPDCPrimitivesTest;
+import io.github.pylonmc.pylon.test.generictest.PylonPDCSerializationTest;
+import io.github.pylonmc.pylon.test.generictest.serializer.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,7 +22,9 @@ class GenericTests {
         genericTests.add(new SerializerTestChunkPosition());
         genericTests.add(new SerializerTestChar());
         genericTests.add(new SerializerTestSet());
+        genericTests.add(new SerializerTestEnum());
         genericTests.add(new SerializerTestLocation());
+        genericTests.add(new SerializerTestItemStack());
         genericTests.add(new PylonPDCPrimitivesTest());
         genericTests.add(new PylonPDCSerializationTest());
         genericTests.add(new PylonItemStackSimpleTest());
