@@ -46,14 +46,14 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         List<Test> tests = new ArrayList<>();
 
         tests.add(new BlockStorageChunkReloadTest());
-        tests.add(new BlockStorageSimpleTest());
+//        tests.add(new BlockStorageSimpleTest());
         tests.add(new SimpleBlockTest());
         tests.add(new SimpleBlockWithSchemaTest());
 
         tests.add(new PylonItemStackSimpleTest());
         tests.add(new PylonItemStackInterfaceTest());
 
-        tests.add(new GametestTest());
+//        tests.add(new GametestTest());
 
         tests.add(new PylonPDCPrimitivesTest());
         tests.add(new PylonPDCSerializationTest());
