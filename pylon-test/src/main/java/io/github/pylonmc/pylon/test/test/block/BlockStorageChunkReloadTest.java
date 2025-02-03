@@ -137,7 +137,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
     public void test() {
         schema.register();
 
-        List<Chunk> chunks = TestUtil.getChunks(PylonTest.testWorld, 20, 20);
+        List<Chunk> chunks = TestUtil.getRandomChunks(PylonTest.testWorld, 32);
 
         stage1Chunks.addAll(chunks);
 

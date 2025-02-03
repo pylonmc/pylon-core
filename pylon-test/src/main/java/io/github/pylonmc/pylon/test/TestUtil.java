@@ -20,17 +20,10 @@ public class TestUtil {
         return world.getChunkAtAsync(x, z);
     }
 
-    public static @NotNull List<Chunk> getChunks(@NotNull World world, int width, int height) {
-        double max = 10000;
-        int startX = (int) random.nextDouble(-max, max);
-        int startZ = (int) random.nextDouble(-max, max);
-
-        // Get all chunks at the same time instead of waiting for each one to finish individually
+    public static @NotNull List<Chunk> getRandomChunks(@NotNull World world, int count) {
         List<CompletableFuture<Chunk>> futures = new ArrayList<>();
-        for (int x = startX; x < width; x++) {
-            for (int z = startZ; z < width; z++) {
-                futures.add(world.getChunkAtAsync(x, z));
-            }
+        for (int i = 0; i < count; i++) {
+            futures.add(getRandomChunk(world));
         }
 
         List<Chunk> chunks = new ArrayList<>();

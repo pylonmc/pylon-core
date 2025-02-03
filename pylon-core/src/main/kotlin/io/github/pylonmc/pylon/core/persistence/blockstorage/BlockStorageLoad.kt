@@ -12,7 +12,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 
 internal object BlockStorageLoad : Listener {
-    private val commitDispatcher = Dispatchers.Default.limitedParallelism(1) // TODO
+    private val commitDispatcher = Dispatchers.Default
 
     @EventHandler
     private fun onChunkLoad(event: ChunkLoadEvent) {
