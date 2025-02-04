@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.core.persistence.blockstorage
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.persistence.pdc.PylonPersistentDataContainer
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.*
@@ -12,9 +11,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
+import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
-import java.nio.ByteBuffer
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
@@ -196,6 +194,10 @@ object BlockStorage : Listener {
                 blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
             }
         }
+
+        for (block in chunkBlocks) {
+            PylonBlockLoadEvent(block.block, block).callEvent()
+        }
     }
 
     @EventHandler
@@ -210,12 +212,17 @@ object BlockStorage : Listener {
             chunkBlocks
         }
 
-        val context = event.chunk.persistentDataContainer.adapterContext
-        val blockBytes: List<ByteArray> = blocks.map {
-            TODO()???
-            val pdc = PylonPersistentDataContainer(it.value.schema.key, byteArrayOf())
-            it.value.write(pdc)
-            pdc.serializeToBytes()
+        val pdc = event.chunk.persistentDataContainer
+        val serializedBlocks: MutableList<PersistentDataContainer> = mutableListOf()
+        for (block in chunkBlocks) {
+            serializedBlocks.add(serialize(pdc.adapterContext, block))
+        }
+
+        val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
+        pdc.set(pylonBlocksKey, type, serializedBlocks)
+
+        for (block in chunkBlocks) {
+            PylonBlockUnloadEvent(block.block, block).callEvent()
         }
     }
 
@@ -239,7 +246,7 @@ object BlockStorage : Listener {
 
             // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
             @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-            return schema.loadConstructor.invoke(pdc, position.block) as PylonBlock<PylonBlockSchema>
+            return schema.loadConstructor.invoke(schema, pdc, position.block) as PylonBlock<PylonBlockSchema>
 
         } catch (e: Exception) {
             pluginInstance.logger.severe("Error while loading block $id at $position")
@@ -248,44 +255,15 @@ object BlockStorage : Listener {
         }
     }
 
-    internal fun addChunkToCache(chunkPosition: ChunkPosition, chunkBlocks: PylonBlockCollection) = lockBlockWrite {
-        blocksByChunk[chunkPosition] = chunkBlocks
-        for (block in chunkBlocks) {
-            blocks[block.block.position] = block
-            blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
-        }
-    }
-
-    internal fun removeChunkFromCache(chunkPosition: ChunkPosition): PylonBlockCollection = lockBlockWrite {
-        val chunkBlocks = blocksByChunk.remove(chunkPosition)
-            ?: error("Attempt to remove chunk '$chunkPosition' from cache, but it is not stored")
-        for (block in chunkBlocks) {
-            blocks.remove(block.block.position)
-            (blocksById[block.schema.key] ?: continue).remove(block)
-        }
-        return chunkBlocks
-    }
-
-    internal fun writeChunkToDisk(chunkPosition: ChunkPosition, blocks: PylonBlockCollection) {
-        val world = chunkPosition.world
-            ?: error("Attempt to write chunk '$chunkPosition' to disk, but its world is not loaded")
-        val storage = storages[world.uid]
-            ?: error("Attempt to write chunk to world '${world.name}' which has no associated storage")
-
-        storage[chunkPosition.asLong] = serializeChunk(blocks)
-    }
-
-    /**
-     * Returns an empty list if the chunk has no data
-     */
-    internal fun readChunkFromDisk(chunkPosition: ChunkPosition): PylonBlockCollection {
-        val world = chunkPosition.world
-            ?: error("Received load job for chunk '$chunkPosition' whose world is not loaded")
-        val storage = storages[world.uid]
-            ?: error("Received load job for world '${world.name}' which has no associated storage")
-        return storage[chunkPosition.asLong]?.let {
-            deserializeChunk(world, chunkPosition, it).toMutableList()
-        } ?: mutableListOf()
+    private fun serialize(
+        context: PersistentDataAdapterContext,
+        block: PylonBlock<PylonBlockSchema>
+    ): PersistentDataContainer {
+        val pdc = context.newPersistentDataContainer()
+        pdc.set(pylonBlockIdKey, PylonSerializers.NAMESPACED_KEY, block.schema.key)
+        pdc.set(pylonBlockPositionKey, PylonSerializers.LONG, block.block.position.asLong)
+        block.write(pdc)
+        return pdc
     }
 
     // TODO (oh no)
@@ -301,97 +279,6 @@ object BlockStorage : Listener {
 //        db.commit()
 //        db.close()
 //    }
-
-    /**
-     * Self-contained function for taking an entire chunk's worth of PylonBlock data and turning it into bytes
-     * so that it can be saved on disk.
-     *
-     * Serialization format:
-     * <BlockPosition length> <BlockPosition> <PylonPersistentDataContainer length> <PylonPersistentDataContainer>
-     */
-    private fun serializeChunk(blocks: Collection<PylonBlock<PylonBlockSchema>>): ByteArray {
-        val blockPositionBytes: List<ByteArray> = blocks.map {
-            val buffer = ByteBuffer.allocate(Long.SIZE_BYTES)
-            buffer.putLong(it.block.position.asLong)
-            buffer.array()
-        }
-
-        val blockBytes: List<ByteArray> = blocks.map {
-            val pdc = PylonPersistentDataContainer(it.schema.key, byteArrayOf())
-            it.write(pdc)
-            pdc.serializeToBytes()
-        }
-
-        val bufferSize = blockPositionBytes.zip(blockBytes)
-            .fold(0) { acc, (position, block) -> acc + position.size + Int.SIZE_BYTES + block.size }
-
-        val buffer = ByteBuffer.allocate(bufferSize)
-        for ((position, block) in blockPositionBytes.zip(blockBytes)) {
-            buffer.put(position)
-            buffer.putInt(block.size)
-            buffer.put(block)
-        }
-
-        return buffer.array()
-    }
-
-    /**
-     * Self-contained function for taking some bytes that represent all the blocks in one chunk
-     * that has been loaded from disk, and deserializing it to a bunch of PylonBlocks.
-     *
-     * Serialization format:
-     * <BlockPosition length> <BlockPosition> <PylonPersistentDataContainer length> <PylonPersistentDataContainer>
-     */
-    private fun deserializeChunk(
-        world: World,
-        chunkPosition: ChunkPosition,
-        chunkBytes: ByteArray
-    ): Collection<PylonBlock<PylonBlockSchema>> {
-        val buffer = ByteBuffer.wrap(chunkBytes)
-
-        val blocks: MutableList<PylonBlock<PylonBlockSchema>> = mutableListOf()
-
-        while (buffer.hasRemaining()) {
-            val asLong = buffer.getLong()
-            val blockPosition: BlockPosition = try {
-                BlockPosition(world, asLong)
-            } catch (e: Exception) {
-                pluginInstance.logger.severe("Error while deserializing block position from chunk $chunkPosition")
-                e.printStackTrace()
-                break
-            }
-
-            val pdcLength = buffer.getInt()
-            val pdcBytes = ByteArray(pdcLength)
-            buffer.get(pdcBytes)
-            val reader = try {
-                PylonPersistentDataContainer(pdcBytes)
-            } catch (e: Exception) {
-                pluginInstance.logger.severe("Error while deserializing PylonPersistentDataContainer at $blockPosition")
-                e.printStackTrace()
-                continue
-            }
-
-            try {
-                // We fail silently here because this may trigger if an addon is removed or fails to load
-                // In this case, we don't want to delete the data, and we also don't want to spam errors
-                val schema = PylonRegistry.BLOCKS[reader.id]
-                    ?: continue
-
-                // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
-                @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                val block = schema.loadConstructor.invoke(reader, blockPosition.block) as PylonBlock<PylonBlockSchema>
-                blocks.add(block)
-
-            } catch (e: Exception) {
-                pluginInstance.logger.severe("Error while loading block ${reader.id} at $blockPosition")
-                e.printStackTrace()
-                break
-            }
-        }
-
-        return blocks
-    }
 
     private inline fun <T> lockBlockRead(block: () -> T): T {
         blockLock.readLock().lock()

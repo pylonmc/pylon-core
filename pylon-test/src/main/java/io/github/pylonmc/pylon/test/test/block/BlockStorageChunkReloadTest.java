@@ -3,11 +3,7 @@ package io.github.pylonmc.pylon.test.test.block;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
-import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
-import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
-import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataReader;
-import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataWriter;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.TestUtil;
@@ -19,6 +15,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -42,14 +41,18 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             something = 170;
         }
 
-        public TestBlock(@NotNull PylonDataReader reader, @NotNull Block block) {
-            super(reader, block);
-            something = reader.get(somethingKey, PylonSerializers.INTEGER);
+        public TestBlock(
+                @NotNull PylonBlockSchema schema,
+                @NotNull PersistentDataContainer pdc,
+                @NotNull Block block
+        ) {
+            super(schema, block);
+            something = pdc.get(somethingKey, PylonSerializers.INTEGER);
         }
 
         @Override
-        public void write(@NotNull PylonDataWriter writer) {
-            writer.set(somethingKey, PylonSerializers.INTEGER, something - 40);
+        public void write(@NotNull PersistentDataContainer pdc) {
+            pdc.set(somethingKey, PylonSerializers.INTEGER, something - 40);
         }
     }
 
@@ -69,7 +72,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
          * Stage 1: set the Pylon block when the Pylon data for that chunk is loaded, then unload the chunk.
          */
         @EventHandler
-        public static void stage1(@NotNull PylonChunkBlocksLoadEvent e) {
+        public static void stage1(@NotNull ChunkLoadEvent e) {
             if (!stage1Chunks.contains(e.getChunk())) {
                 return;
             }
@@ -88,7 +91,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
          * Stage 2: When the chunk's pylon data is unloaded, load the chunk again.
          */
         @EventHandler
-        public static void stage2(@NotNull PylonChunkBlocksUnloadEvent e) {
+        public static void stage2(@NotNull ChunkUnloadEvent e) {
             if (!stage2Chunks.contains(e.getChunk())) {
                 return;
             }
@@ -137,7 +140,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
     public void test() {
         schema.register();
 
-        List<Chunk> chunks = TestUtil.getRandomChunks(PylonTest.testWorld, 32);
+        List<Chunk> chunks = TestUtil.getRandomChunks(PylonTest.testWorld, 20, 20);
 
         stage1Chunks.addAll(chunks);
 

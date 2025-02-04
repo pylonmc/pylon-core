@@ -1,11 +1,11 @@
 package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataReader
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.persistence.PersistentDataContainer
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 
@@ -33,7 +33,8 @@ open class PylonBlockSchema(
     internal val loadConstructor: MethodHandle = try {
         MethodHandles.lookup().unreflectConstructor(
             blockClass.getConstructor(
-                PylonDataReader::class.java,
+                javaClass,
+                PersistentDataContainer::class.java,
                 Block::class.java
             )
         )

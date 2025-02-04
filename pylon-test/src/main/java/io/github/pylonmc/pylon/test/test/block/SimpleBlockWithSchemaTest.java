@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.test.base.SyncTest;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,8 +39,11 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
             super(schema, block);
         }
 
-        public TestBlock(@NotNull PylonDataReader reader, @NotNull Block block) {
-            super(reader, block);
+        public TestBlock(
+                @NotNull TestBlockSchema schema,
+                @NotNull PersistentDataContainer pdc,
+                @NotNull Block block) {
+            super(schema, block);
         }
     }
 

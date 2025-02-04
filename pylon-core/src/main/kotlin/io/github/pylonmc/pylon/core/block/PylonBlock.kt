@@ -1,20 +1,15 @@
 package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataReader
-import io.github.pylonmc.pylon.core.persistence.pdc.PylonDataWriter
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.persistence.PersistentDataContainer
 
 abstract class PylonBlock<out S: PylonBlockSchema> protected constructor(
     val schema: S,
     val block: Block
 ) {
-
-    constructor(reader: PylonDataReader, block: Block)
-            : this(getSchemaOfType<S>(reader.id), block)
-
-    open fun write(writer: PylonDataWriter) {}
+    open fun write(pdc: PersistentDataContainer) {}
 
     // TODO listener
     fun tick() {}
