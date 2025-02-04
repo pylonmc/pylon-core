@@ -1,19 +1,19 @@
-package io.github.pylonmc.pylon.test.generictest;
+package io.github.pylonmc.pylon.test.test.pdc;
 
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
-import io.github.pylonmc.pylon.test.GenericTest;
-import io.github.pylonmc.pylon.test.TestAddon;
+import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.base.SyncTest;
 import org.bukkit.NamespacedKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PylonPDCPrimitivesTest implements GenericTest {
+public class PylonPDCPrimitivesTest extends SyncTest {
     @Override
-    public void run() {
+    public void test() {
         // Byte
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.BYTE;
             byte value = 7;
 
@@ -25,7 +25,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Short
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.SHORT;
             short value = 32;
 
@@ -37,7 +37,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Integer
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.INTEGER;
             int value = 73823;
 
@@ -49,7 +49,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Long
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.LONG;
             long value = 9;
 
@@ -61,7 +61,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Float
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.FLOAT;
             float value = 3.59835F;
 
@@ -73,7 +73,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Double
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.DOUBLE;
             double value = 2.329;
 
@@ -85,7 +85,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Boolean
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.BOOLEAN;
             boolean value = true;
 
@@ -97,7 +97,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // String
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.STRING;
             String value = "bruh";
 
@@ -109,7 +109,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Byte array
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.BYTE_ARRAY;
             byte[] value = {1, 40, 110, 3};
 
@@ -121,7 +121,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Integer array
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.INTEGER_ARRAY;
             int[] value = {20293, 8948, -290290};
 
@@ -133,7 +133,7 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Long array
         {
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.LONG_ARRAY;
             long[] value = {498748947, 493884, -39};
 
@@ -145,11 +145,11 @@ public class PylonPDCPrimitivesTest implements GenericTest {
 
         // Tag container
         {
-            NamespacedKey innerKey = new NamespacedKey(TestAddon.instance(), "somekey");
+            NamespacedKey innerKey = new NamespacedKey(PylonTest.instance(), "somekey");
             var innerType = PylonSerializers.STRING;
             String innerValue = "iiroirimjrg";
 
-            NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+            NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
             var type = PylonSerializers.TAG_CONTAINER;
             PylonPersistentDataContainer value = new PylonPersistentDataContainer();
             value.set(innerKey, innerType, innerValue);

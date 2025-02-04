@@ -1,22 +1,21 @@
-package io.github.pylonmc.pylon.test.generictest;
+package io.github.pylonmc.pylon.test.test.item;
 
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
-import io.github.pylonmc.pylon.core.item.PylonItem;
 import io.github.pylonmc.pylon.core.item.PylonItemSchema;
 import io.github.pylonmc.pylon.core.item.SimplePylonItem;
-import io.github.pylonmc.pylon.test.GenericTest;
-import io.github.pylonmc.pylon.test.TestAddon;
+import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.base.SyncTest;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
 
-public class PylonItemStackSimpleTest implements GenericTest {
+public class PylonItemStackSimpleTest extends SyncTest {
     @Override
-    public void run() {
+    public void test() {
         new PylonItemSchema(
-                TestAddon.key("pylon_item_stack_simple_test"),
+                PylonTest.key("pylon_item_stack_simple_test"),
                 SimplePylonItem.class,
                 new ItemStackBuilder(Material.DIAMOND_SWORD)
                         .set(DataComponentTypes.CUSTOM_NAME, Component.text("Ominous blaze powder")

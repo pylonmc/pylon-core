@@ -23,7 +23,7 @@ java {
 
 bukkit {
     name = project.name
-    main = "io.github.pylonmc.pylon.test.TestAddon"
+    main = "io.github.pylonmc.pylon.test.PylonTest"
     version = project.version.toString()
     apiVersion = "1.21"
     depend = listOf("pylon-core")

@@ -1,7 +1,8 @@
-package io.github.pylonmc.pylon.test.generictest.serializer;
+package io.github.pylonmc.pylon.test.test.serializer;
 
 import io.github.pylonmc.pylon.core.persistence.PylonPersistentDataContainer;
-import io.github.pylonmc.pylon.test.TestAddon;
+import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.base.SyncTest;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -9,13 +10,20 @@ import org.bukkit.persistence.PersistentDataType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SerializerTests {
+//  static <T> void testSerializer(T value, PersistentDataType<?, T> type)
+public abstract class SerializerTest<T> extends SyncTest {
+    private final T value;
+    private final PersistentDataType<?, T> type;
 
-    private SerializerTests() {
+    protected SerializerTest(T value, PersistentDataType<?, T> type) {
+        super();
+        this.value = value;
+        this.type = type;
     }
 
-    static <T> void testSerializer(T value, PersistentDataType<?, T> type) {
-        NamespacedKey key = new NamespacedKey(TestAddon.instance(), "key");
+    @Override
+    public void test() {
+        NamespacedKey key = new NamespacedKey(PylonTest.instance(), "key");
 
         ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
         stack.editMeta(meta -> meta.getPersistentDataContainer()

@@ -1,11 +1,12 @@
-package io.github.pylonmc.pylon.test.gametest;
+package io.github.pylonmc.pylon.test.test.item;
 
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
 import io.github.pylonmc.pylon.core.item.PylonItem;
 import io.github.pylonmc.pylon.core.item.PylonItemSchema;
 import io.github.pylonmc.pylon.core.item.base.BrewingStandFuel;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
-import io.github.pylonmc.pylon.test.TestAddon;
+import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.base.GameTest;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import net.kyori.adventure.text.Component;
@@ -17,7 +18,7 @@ import org.bukkit.event.inventory.BrewingStandFuelEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class PylonItemStackInterfaceTest {
+public class PylonItemStackInterfaceTest extends GameTest {
     private static boolean handlerCalled;
 
     public static class OminousBlazePower extends PylonItem<PylonItemSchema> implements BrewingStandFuel {
@@ -32,13 +33,13 @@ public class PylonItemStackInterfaceTest {
         }
     }
 
-    public static @NotNull GameTestConfig get() {
-        return new GameTestConfig.Builder(TestAddon.key("pylon_item_stack_interface_test"))
+    public PylonItemStackInterfaceTest() {
+        super(new GameTestConfig.Builder(PylonTest.key("pylon_item_stack_interface_test"))
                 .size(0)
                 .timeoutTicks(100)
                 .setUp((test) -> {
                     PylonItemSchema ominousBlazePowder = new PylonItemSchema(
-                            TestAddon.key("pylon_item_stack_interface_test"),
+                            PylonTest.key("pylon_item_stack_interface_test"),
                             OminousBlazePower.class,
                             new ItemStackBuilder(Material.DIAMOND_SWORD)
                                     .set(DataComponentTypes.CUSTOM_NAME, Component.text("Ominous blaze powder")
@@ -58,6 +59,6 @@ public class PylonItemStackInterfaceTest {
                             new BrewingStandFuelEvent(block, ominousBlazePowder.getStack(), 1));
 
                 })
-                .build();
+                .build());
     }
 }
