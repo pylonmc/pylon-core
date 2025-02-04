@@ -12,7 +12,9 @@ import java.util.concurrent.TimeoutException;
  * Executed asynchronously on the main thread (but not asynchronously to other tests)
  */
 public abstract class AsyncTest implements Test {
-    private static final int TIMEOUT_TICKS = 30 * 20;
+    protected int getTimeoutTicks() {
+        return 30 * 20;
+    }
 
     protected abstract void test();
 
@@ -34,7 +36,7 @@ public abstract class AsyncTest implements Test {
             if (!future.isDone()) {
                 future.complete(onComplete(new TimeoutException("Test timed out")));
             }
-        }, TIMEOUT_TICKS);
+        }, getTimeoutTicks());
 
         return future.join();
     }

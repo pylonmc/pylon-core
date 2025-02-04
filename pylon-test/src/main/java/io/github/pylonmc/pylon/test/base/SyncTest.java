@@ -8,7 +8,9 @@ import java.util.concurrent.TimeoutException;
 
 
 public abstract class SyncTest implements Test {
-    private static final int TIMEOUT_TICKS = 30 * 20;
+    protected int getTimeoutTicks() {
+        return 30 * 20;
+    }
 
     protected abstract void test();
 
@@ -30,7 +32,7 @@ public abstract class SyncTest implements Test {
             if (!future.isDone()) {
                 future.complete(onComplete(new TimeoutException("Test timed out")));
             }
-        }, TIMEOUT_TICKS);
+        }, getTimeoutTicks());
 
         return future.join();
     }
