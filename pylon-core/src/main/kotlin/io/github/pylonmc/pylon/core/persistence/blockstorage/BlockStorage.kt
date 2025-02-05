@@ -104,6 +104,15 @@ object BlockStorage : Listener {
     fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, location: Location): T?
             = getAs(clazz, BlockPosition(location))
 
+    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T?
+            = getAs(T::class.java, blockPosition)
+
+    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(block: Block): T?
+            = getAs(T::class.java, block)
+
+    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(location: Location): T?
+            = getAs(T::class.java, location)
+
     @JvmStatic
     fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<PylonBlockSchema>> =
         lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
@@ -122,7 +131,7 @@ object BlockStorage : Listener {
         = get(blockPosition) != null
 
     /**
-     * The block's chunk must be loaded. Not thread safe.
+     * The block's chunk must be loaded. Only call on main thread.
      */
     @JvmStatic
     fun set(blockPosition: BlockPosition, schema: PylonBlockSchema) {
@@ -142,21 +151,21 @@ object BlockStorage : Listener {
     }
 
     /**
-     * The block's chunk must be loaded. Not thread safe.
+     * The block's chunk must be loaded. Only call on main thread.
      */
     @JvmStatic
     fun set(block: Block, schema: PylonBlockSchema)
             = set(block.position, schema)
 
     /**
-     * The block's chunk must be loaded. Not thread safe.
+     * The block's chunk must be loaded. Only call on main thread.
      */
     @JvmStatic
     fun set(location: Location, schema: PylonBlockSchema)
             = set(BlockPosition(location), schema)
 
     /**
-     * Does nothing if the block is not a Pylon block. Not thread safe.
+     * Does nothing if the block is not a Pylon block. Only call on main thread.
      */
     @JvmStatic
     fun remove(blockPosition: BlockPosition) = lockBlockWrite {
@@ -171,14 +180,14 @@ object BlockStorage : Listener {
     }
 
     /**
-     * Does nothing if the block is not a Pylon block. Not thread safe.
+     * Does nothing if the block is not a Pylon block. Only call on main thread.
      */
     @JvmStatic
     fun remove(block: Block)
             = remove(block.position)
 
     /**
-     * Does nothing if the block is not a Pylon block. Not thread safe.
+     * Does nothing if the block is not a Pylon block. Only call on main thread.
      */
     @JvmStatic
     fun remove(location: Location)
