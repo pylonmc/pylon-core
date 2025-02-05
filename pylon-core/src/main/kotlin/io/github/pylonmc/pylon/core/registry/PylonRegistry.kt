@@ -78,8 +78,15 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         @JvmField
         val GAMETESTS = PylonRegistry(PylonRegistryKey.GAMETESTS)
 
+        @JvmField
+        val RECIPE_TYPES = PylonRegistry(PylonRegistryKey.RECIPE_TYPES)
+
         init {
             addRegistry(BLOCKS)
+            addRegistry(ITEMS)
+            addRegistry(ADDONS)
+            addRegistry(GAMETESTS)
+            addRegistry(RECIPE_TYPES)
         }
 
         @JvmStatic
