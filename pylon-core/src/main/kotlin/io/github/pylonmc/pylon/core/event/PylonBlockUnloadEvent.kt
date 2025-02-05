@@ -17,10 +17,7 @@ class PylonBlockUnloadEvent(
         = handlerList
 
     companion object {
-        private val handlerList: HandlerList = HandlerList()
-
-        @JvmStatic
-        fun getHandlerList(): HandlerList
-                = handlerList
+	    @JvmStatic
+        val handlerList: HandlerList = HandlerList()
     }
 }

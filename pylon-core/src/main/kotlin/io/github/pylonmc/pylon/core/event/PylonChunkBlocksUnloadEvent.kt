@@ -14,10 +14,7 @@ class PylonChunkBlocksUnloadEvent(
         = handlerList
 
     companion object {
-        private val handlerList: HandlerList = HandlerList()
-
         @JvmStatic
-        fun getHandlerList(): HandlerList
-                = handlerList
+        val handlerList: HandlerList = HandlerList()
     }
 }
