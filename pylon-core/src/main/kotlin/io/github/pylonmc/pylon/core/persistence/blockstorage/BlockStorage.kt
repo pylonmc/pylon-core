@@ -28,22 +28,19 @@ internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchem
  *
  * BlockStorage guarantees that a chunk's blocks will never be loaded if the chunk is not loaded.
  *
- * We use MapDB for this, the simplest database I could find for this task (and extremely performant).
+ * We store blocks by chunk, in each chunk's persistent data containers.
  *
  * This works based on chunks rather than individual blocks. When a chunk is loaded, the
  * associated data for all the Pylon blocks in that chunk is loaded. And conversely, when a chunk is
  * unloaded, all the data for that chunk is saved. Additionally, there are autosaves so chunks that
  * are not ever unloaded are still saved occasionally.
  *
- * We use PylonPersistentDataContainer as the data format. When saving, we can simply ask the block
- * to write its state to the container, then we serialize that container and write it to the database.
- * And when loading, we deserialize the container, figure out which block type it is, and then create
- * a new block of that type, using the container to restore the state it had when it was saved.
+ * When saving, we can simply ask the block to write its state to a PDC, then we serialize that
+ * container and write it to the database. And when loading, we deserialize the container, figure
+ * out which block type it is, and then create a new block of that type, using the container to
+ * restore the state it had when it was saved.
  *
- * Saving and loading is done using a single-threaded coroutine dispatcher. Whenever a read
- * or write operation is done, it is handed off as a coroutine to the dispatcher. Since the
- * dispatcher can only run one coroutine at a time, this effectively serializes all read and write
- * operations into a queue.
+ * Saving and loading is done asynchronously.
  *
  * Read AND write access to the loaded block data must be synchronized, as there are multiple fields
  * for loaded blocks. If access is not synchronized, situations may occur where these fields are
@@ -119,8 +116,10 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun getById(id: NamespacedKey): Collection<PylonBlock<PylonBlockSchema>> =
-        if (PylonRegistry.BLOCKS.contains(id)) lockBlockRead {
-            blocksById[id].orEmpty()
+        if (PylonRegistry.BLOCKS.contains(id)) {
+            lockBlockRead {
+                blocksById[id].orEmpty()
+            }
         } else {
             emptySet()
         }
