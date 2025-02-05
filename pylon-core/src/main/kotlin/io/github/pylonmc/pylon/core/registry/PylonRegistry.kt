@@ -1,8 +1,10 @@
 package io.github.pylonmc.pylon.core.registry
 
+import io.github.pylonmc.pylon.core.addon.PylonAddon
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
+import java.util.Locale
 
 class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
@@ -27,6 +29,11 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
             check(key in this.values) { "Value with key $key is not registered in registry $this" }
             this.values.remove(key)
         }
+    }
+
+    fun unregisterAllFromAddon(addon: PylonAddon) {
+        val namespace = NamespacedKey(addon.javaPlugin, "").namespace
+        values.keys.removeIf { it.namespace == namespace }
     }
 
     operator fun get(key: NamespacedKey): T? {
