@@ -27,8 +27,8 @@ public class TestUtil {
 
         // Get chunks concurently
         List<CompletableFuture<Chunk>> futures = new ArrayList<>();
-        for (int x = startX; x < width; x++) {
-            for (int z = startZ; z < length; z++) {
+        for (int x = startX; x < startX + width; x++) {
+            for (int z = startZ; z < startZ + length; z++) {
                 futures.add(world.getChunkAtAsync(x, z));
             }
         }
@@ -36,6 +36,14 @@ public class TestUtil {
         List<Chunk> chunks = new ArrayList<>();
         for (CompletableFuture<Chunk> future : futures) {
             chunks.add(future.join());
+        }
+
+        while (chunks.stream().anyMatch(Chunk::isLoaded)) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return chunks;

@@ -4,14 +4,13 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.test.block.BlockStorageChunkReloadTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageSimpleTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageAddTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageRemoveTest;
 import io.github.pylonmc.pylon.test.test.block.SimpleBlockTest;
 import io.github.pylonmc.pylon.test.test.block.SimpleBlockWithSchemaTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackSimpleTest;
-import io.github.pylonmc.pylon.test.test.pdc.PylonPDCPrimitivesTest;
-import io.github.pylonmc.pylon.test.test.pdc.PylonPDCSerializationTest;
 import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPosition;
 import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPositionNoWorld;
 import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChar;
@@ -45,8 +44,9 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
 
+        tests.add(new BlockStorageAddTest());
         tests.add(new BlockStorageChunkReloadTest());
-        tests.add(new BlockStorageSimpleTest());
+        tests.add(new BlockStorageRemoveTest());
         tests.add(new SimpleBlockTest());
         tests.add(new SimpleBlockWithSchemaTest());
 
@@ -54,9 +54,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new PylonItemStackInterfaceTest());
 
         tests.add(new GametestTest());
-
-        tests.add(new PylonPDCPrimitivesTest());
-        tests.add(new PylonPDCSerializationTest());
 
         tests.add(new SerializerTestBlockPosition());
         tests.add(new SerializerTestBlockPositionNoWorld());

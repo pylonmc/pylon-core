@@ -1,10 +1,12 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import kotlinx.coroutines.Dispatchers
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -49,6 +51,8 @@ internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchem
  * deleting the chunk from `blocksByChunk`, and deleting all of its blocks from `blocks`.
  */
 object BlockStorage : Listener {
+
+    private val dispatcher = Dispatchers.Default
 
     private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
     private val pylonBlockIdKey = NamespacedKey(pluginInstance, "id")
@@ -182,47 +186,58 @@ object BlockStorage : Listener {
 
     @EventHandler
     private fun onChunkLoad(event: ChunkLoadEvent) {
-        val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
-        val chunkBlocks = event.chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
-            deserialize(event.world, element)
-        }?.toMutableList() ?: mutableListOf()
-
-        lockBlockWrite {
-            blocksByChunk[event.chunk.position] = chunkBlocks
-            for (block in chunkBlocks) {
-                blocks[block.block.position] = block
-                blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
+        pluginInstance.launch(dispatcher) {
+            val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
+            val chunkBlocks = event.chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
+                deserialize(event.world, element)
+            }?.toMutableList() ?: mutableListOf()
+            lockBlockWrite {
+                blocksByChunk[event.chunk.position] = chunkBlocks
+                for (block in chunkBlocks) {
+                    blocks[block.block.position] = block
+                    blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
+                }
             }
-        }
 
-        for (block in chunkBlocks) {
-            PylonBlockLoadEvent(block.block, block).callEvent()
+            Bukkit.getScheduler().runTask(pluginInstance, Runnable {
+                for (block in chunkBlocks) {
+                    PylonBlockLoadEvent(block.block, block).callEvent()
+                }
+
+                PylonChunkBlocksLoadEvent(event.chunk, blocks.values.toList()).callEvent()
+            })
         }
     }
 
     @EventHandler
     private fun onChunkUnload(event: ChunkUnloadEvent) {
-        val chunkBlocks = lockBlockWrite {
-            val chunkBlocks = blocksByChunk.remove(event.chunk.position)
-                ?: error("Attempted to save Pylon data for chunk '${event.chunk.position}' but no data is stored")
-            for (block in chunkBlocks) {
-                blocks.remove(block.block.position)
-                (blocksById[block.schema.key] ?: continue).remove(block)
+        pluginInstance.launch(dispatcher) {
+            val chunkBlocks = lockBlockWrite {
+                val chunkBlocks = blocksByChunk.remove(event.chunk.position)
+                    ?: error("Attempted to save Pylon data for chunk '${event.chunk.position}' but no data is stored")
+                for (block in chunkBlocks) {
+                    blocks.remove(block.block.position)
+                    (blocksById[block.schema.key] ?: continue).remove(block)
+                }
+                chunkBlocks
             }
-            chunkBlocks
-        }
 
-        val pdc = event.chunk.persistentDataContainer
-        val serializedBlocks: MutableList<PersistentDataContainer> = mutableListOf()
-        for (block in chunkBlocks) {
-            serializedBlocks.add(serialize(pdc.adapterContext, block))
-        }
+            val pdc = event.chunk.persistentDataContainer
+            val serializedBlocks: MutableList<PersistentDataContainer> = mutableListOf()
+            for (block in chunkBlocks) {
+                serializedBlocks.add(serialize(pdc.adapterContext, block))
+            }
 
-        val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
-        pdc.set(pylonBlocksKey, type, serializedBlocks)
+            val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
+            pdc.set(pylonBlocksKey, type, serializedBlocks)
 
-        for (block in chunkBlocks) {
-            PylonBlockUnloadEvent(block.block, block).callEvent()
+            Bukkit.getScheduler().runTask(pluginInstance, Runnable {
+                for (block in chunkBlocks) {
+                    PylonBlockUnloadEvent(block.block, block).callEvent()
+                }
+
+                PylonChunkBlocksUnloadEvent(event.chunk, blocks.values.toList()).callEvent()
+            })
         }
     }
 
