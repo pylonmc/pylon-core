@@ -37,6 +37,9 @@ interface RecipeType<T> : Keyed {
 
         @JvmField
         val VANILLA_STONECUTTING = vanillaRecipeWrapper<StonecuttingRecipe>("vanilla_stonecutting")
+
+        @JvmField
+        val MOB_DROP: RecipeType<MobDropRecipe> = MobDropRecipeType
     }
 }
 
