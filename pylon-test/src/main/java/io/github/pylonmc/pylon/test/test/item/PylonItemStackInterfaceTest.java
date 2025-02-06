@@ -56,7 +56,7 @@ public class PylonItemStackInterfaceTest extends GameTest {
                     Block block = test.getWorld().getBlockAt(test.location());
                     block.setType(Material.BREWING_STAND);
                     Bukkit.getPluginManager().callEvent(
-                            new BrewingStandFuelEvent(block, ominousBlazePowder.getStack(), 1));
+                            new BrewingStandFuelEvent(block, ominousBlazePowder.getItemStack(), 1));
 
                 })
                 .build());
