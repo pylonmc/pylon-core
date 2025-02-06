@@ -11,6 +11,7 @@ import io.github.pylonmc.pylon.test.test.pdc.PylonPDCPrimitivesTest;
 import io.github.pylonmc.pylon.test.test.pdc.PylonPDCSerializationTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
 import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
+import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
 import io.github.pylonmc.pylon.test.test.serializer.*;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -66,6 +67,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
         tests.add(new CraftingTest());
         tests.add(new FurnaceTest());
+        tests.add(new MobDropTest());
 
         return tests;
     }
