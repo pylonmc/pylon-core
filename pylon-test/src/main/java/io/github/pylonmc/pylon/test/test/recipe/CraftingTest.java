@@ -37,15 +37,15 @@ public class CraftingTest extends SyncTest {
     protected void test() {
         StickyStick stickyStick = new StickyStick();
         stickyStick.register();
-        ItemStack stickyStickStick = stickyStick.getStack();
-        ItemStack result = new ItemStack(Material.DIAMOND);
+        ItemStack stickyStickStick = stickyStick.getItemStack();
+        ItemStack diamond = new ItemStack(Material.DIAMOND);
         ItemStack nothing = new ItemStack(Material.AIR);
         ItemStack normalStick = new ItemStack(Material.STICK);
 
         // Shaped
         {
             RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
-                    new ShapedRecipe(PylonTest.key("sticky_stick_shapeless"), result)
+                    new ShapedRecipe(PylonTest.key("sticky_stick_shaped"), diamond)
                             .shape(
                                     " s ",
                                     "sSs",
@@ -60,23 +60,43 @@ public class CraftingTest extends SyncTest {
                     nothing, normalStick, nothing
             };
             assertThat(Bukkit.craftItem(crafting, PylonTest.testWorld))
-                    .isEqualTo(result);
+                    .isEqualTo(diamond);
         }
 
         // Shapeless
         {
             RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
-                    new ShapelessRecipe(PylonTest.key("sticky_stick_shaped"), result)
-                            .addIngredient(Material.STICK)
+                    new ShapelessRecipe(PylonTest.key("sticky_stick_shapeless"), normalStick)
+                            .addIngredient(Material.DIAMOND)
                             .addIngredient(stickyStickStick)
-                            .addIngredient(Material.STICK)
             );
             ItemStack[] crafting = new ItemStack[9];
             Arrays.fill(crafting, nothing);
             crafting[0] = stickyStickStick;
-            crafting[1] = normalStick;
+            crafting[1] = diamond;
             assertThat(Bukkit.craftItem(crafting, PylonTest.testWorld))
-                    .isEqualTo(result);
+                    .isEqualTo(normalStick);
+        }
+
+        // With custom output
+        {
+            RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
+                    new ShapedRecipe(PylonTest.key("sticky_stick_shaped_custom_output"), stickyStickStick)
+                            .shape(
+                                    " s ",
+                                    "sDs",
+                                    " s "
+                            )
+                            .setIngredient('s', Material.STICK)
+                            .setIngredient('D', diamond)
+            );
+            ItemStack[] crafting = new ItemStack[]{
+                    nothing, normalStick, nothing,
+                    normalStick, diamond, normalStick,
+                    nothing, normalStick, nothing
+            };
+            assertThat(Bukkit.craftItem(crafting, PylonTest.testWorld))
+                    .isEqualTo(stickyStickStick);
         }
     }
 }
