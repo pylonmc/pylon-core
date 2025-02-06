@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.test.recipe;
 
-import io.github.pylonmc.pylon.core.recipe.RecipeType;
+import io.github.pylonmc.pylon.core.recipe.RecipeTypes;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
@@ -20,7 +20,7 @@ public class FurnaceTest extends GameTest {
                 .setUp(test -> {
                     ItemStack stickyStick = StickyStick.INSTANCE.getItemStack();
                     ItemStack diamond = new ItemStack(Material.DIAMOND);
-                    RecipeType.VANILLA_FURNACE.addRecipe(new FurnaceRecipe(
+                    RecipeTypes.VANILLA_FURNACE.addRecipe(new FurnaceRecipe(
                             PylonTest.key("sticky_stick_furnace"),
                             diamond,
                             new RecipeChoice.ExactChoice(stickyStick),

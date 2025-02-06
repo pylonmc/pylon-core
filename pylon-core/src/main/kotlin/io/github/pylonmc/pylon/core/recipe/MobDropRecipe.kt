@@ -14,15 +14,15 @@ fun interface MobDropRecipe {
         val result: ItemStack,
         val mob: EntityType,
         val playerKill: Boolean,
-        val chance: Double = 1.0,
+        val chance: Float = 1f,
     ) : MobDropRecipe {
         override fun getResult(entity: LivingEntity, playerKill: Boolean): ItemStack? {
             return if (
                 entity.type == mob
                 && (playerKill == this.playerKill || !this.playerKill)
-                && ThreadLocalRandom.current().nextDouble() <= chance
+                && ThreadLocalRandom.current().nextFloat() <= chance
             ) {
-                result
+                result.clone()
             } else {
                 null
             }

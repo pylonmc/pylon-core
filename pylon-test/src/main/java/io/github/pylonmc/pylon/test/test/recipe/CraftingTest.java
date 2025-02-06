@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.test.recipe;
 
-import io.github.pylonmc.pylon.core.recipe.RecipeType;
+import io.github.pylonmc.pylon.core.recipe.RecipeTypes;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;
 import org.bukkit.Bukkit;
@@ -24,7 +24,7 @@ public class CraftingTest extends SyncTest {
 
         // Shaped
         {
-            RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
+            RecipeTypes.VANILLA_CRAFTING.addRecipe(
                     new ShapedRecipe(PylonTest.key("sticky_stick_shaped"), diamond)
                             .shape(
                                     " s ",
@@ -45,7 +45,7 @@ public class CraftingTest extends SyncTest {
 
         // Shapeless
         {
-            RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
+            RecipeTypes.VANILLA_CRAFTING.addRecipe(
                     new ShapelessRecipe(PylonTest.key("sticky_stick_shapeless"), normalStick)
                             .addIngredient(Material.DIAMOND)
                             .addIngredient(stickyStick)
@@ -60,7 +60,7 @@ public class CraftingTest extends SyncTest {
 
         // With custom output
         {
-            RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
+            RecipeTypes.VANILLA_CRAFTING.addRecipe(
                     new ShapedRecipe(PylonTest.key("sticky_stick_shaped_custom_output"), stickyStick)
                             .shape(
                                     " s ",
