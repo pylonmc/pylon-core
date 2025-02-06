@@ -9,6 +9,8 @@ import io.github.pylonmc.pylon.test.test.item.PylonItemStackSimpleTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.pdc.PylonPDCPrimitivesTest;
 import io.github.pylonmc.pylon.test.test.pdc.PylonPDCSerializationTest;
+import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
+import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
 import io.github.pylonmc.pylon.test.test.serializer.*;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -63,6 +65,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new PylonItemStackInterfaceTest());
 
         tests.add(new CraftingTest());
+        tests.add(new FurnaceTest());
 
         return tests;
     }
