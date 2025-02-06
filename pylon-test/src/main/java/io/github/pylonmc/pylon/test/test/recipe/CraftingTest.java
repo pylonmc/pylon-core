@@ -1,13 +1,8 @@
 package io.github.pylonmc.pylon.test.test.recipe;
 
-import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
-import io.github.pylonmc.pylon.core.item.PylonItemSchema;
-import io.github.pylonmc.pylon.core.item.SimplePylonItem;
 import io.github.pylonmc.pylon.core.recipe.RecipeType;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -18,26 +13,11 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CraftingTest extends SyncTest {
-
-    private static class StickyStick extends PylonItemSchema {
-        public StickyStick() {
-            super(
-                    PylonTest.key("sticky_stick"),
-                    SimplePylonItem.class,
-                    new ItemStackBuilder(Material.STICK)
-                            .set(DataComponentTypes.ITEM_NAME, Component.text("Sticky Stick"))
-                            .build()
-            );
-        }
-    }
 
     @Override
     protected void test() {
-        StickyStick stickyStick = new StickyStick();
-        stickyStick.register();
-        ItemStack stickyStickStick = stickyStick.getItemStack();
+        ItemStack stickyStick = StickyStick.INSTANCE.getItemStack();
         ItemStack diamond = new ItemStack(Material.DIAMOND);
         ItemStack nothing = new ItemStack(Material.AIR);
         ItemStack normalStick = new ItemStack(Material.STICK);
@@ -52,11 +32,11 @@ public class CraftingTest extends SyncTest {
                                     " s "
                             )
                             .setIngredient('s', Material.STICK)
-                            .setIngredient('S', stickyStickStick)
+                            .setIngredient('S', stickyStick)
             );
             ItemStack[] crafting = new ItemStack[]{
                     nothing, normalStick, nothing,
-                    normalStick, stickyStickStick, normalStick,
+                    normalStick, stickyStick, normalStick,
                     nothing, normalStick, nothing
             };
             assertThat(Bukkit.craftItem(crafting, PylonTest.testWorld))
@@ -68,11 +48,11 @@ public class CraftingTest extends SyncTest {
             RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
                     new ShapelessRecipe(PylonTest.key("sticky_stick_shapeless"), normalStick)
                             .addIngredient(Material.DIAMOND)
-                            .addIngredient(stickyStickStick)
+                            .addIngredient(stickyStick)
             );
             ItemStack[] crafting = new ItemStack[9];
             Arrays.fill(crafting, nothing);
-            crafting[0] = stickyStickStick;
+            crafting[0] = stickyStick;
             crafting[1] = diamond;
             assertThat(Bukkit.craftItem(crafting, PylonTest.testWorld))
                     .isEqualTo(normalStick);
@@ -81,7 +61,7 @@ public class CraftingTest extends SyncTest {
         // With custom output
         {
             RecipeType.VANILLA_CRAFTING_TABLE.addRecipe(
-                    new ShapedRecipe(PylonTest.key("sticky_stick_shaped_custom_output"), stickyStickStick)
+                    new ShapedRecipe(PylonTest.key("sticky_stick_shaped_custom_output"), stickyStick)
                             .shape(
                                     " s ",
                                     "sDs",
@@ -96,7 +76,7 @@ public class CraftingTest extends SyncTest {
                     nothing, normalStick, nothing
             };
             assertThat(Bukkit.craftItem(crafting, PylonTest.testWorld))
-                    .isEqualTo(stickyStickStick);
+                    .isEqualTo(stickyStick);
         }
     }
 }
