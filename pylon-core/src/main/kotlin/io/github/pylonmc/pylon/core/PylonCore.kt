@@ -11,6 +11,9 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
 class PylonCore : JavaPlugin() {
+
+    private lateinit var manager: PaperCommandManager
+
     override fun onEnable() {
         instance = this
 
@@ -19,15 +22,14 @@ class PylonCore : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
         Bukkit.getPluginManager().registerEvents(MobDropRecipeType, this)
 
-        val manager = PaperCommandManager(this)
+        manager = PaperCommandManager(this)
 
         manager.commandContexts.registerContext(NamespacedKey::class.java) {
             NamespacedKey.fromString(it.popFirstArg())
         }
 
-        manager.commandCompletions.registerCompletion("gametests") { _ ->
-            PylonRegistry.GAMETESTS.map { it.key.toString() }.sorted()
-        }
+        addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
+        addRegistryCompletion("items", PylonRegistry.ITEMS)
 
         manager.registerCommand(PylonCommand)
     }
@@ -36,6 +38,12 @@ class PylonCore : JavaPlugin() {
         BlockStorage.cleanupEverything()
 
         instance = null
+    }
+
+    private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {
+        manager.commandCompletions.registerCompletion(name) { _ ->
+            registry.map { it.key.toString() }.sorted()
+        }
     }
 
     companion object {
