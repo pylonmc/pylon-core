@@ -3,29 +3,13 @@ package io.github.pylonmc.pylon.test;
 import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageChunkReloadTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageAddTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageFilledChunkTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageMissingSchemaTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageRemoveTest;
-import io.github.pylonmc.pylon.test.test.block.SimpleBlockTest;
-import io.github.pylonmc.pylon.test.test.block.SimpleBlockWithSchemaTest;
-import io.github.pylonmc.pylon.test.test.misc.GametestTest;
+import io.github.pylonmc.pylon.test.test.block.*;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackSimpleTest;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPosition;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPositionNoWorld;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChar;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChunkPosition;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChunkPositionNoWorld;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestEnum;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestItemStack;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestLocation;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestNamespacedKey;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestSetOfInts;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestSetOfSetOfStrings;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestUUID;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestVector;
+import io.github.pylonmc.pylon.test.test.misc.GametestTest;
+import io.github.pylonmc.pylon.test.test.pdc.PylonPDCPrimitivesTest;
+import io.github.pylonmc.pylon.test.test.pdc.PylonPDCSerializationTest;
+import io.github.pylonmc.pylon.test.test.serializer.*;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -72,6 +56,13 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new SerializerTestSetOfSetOfStrings());
         tests.add(new SerializerTestUUID());
         tests.add(new SerializerTestVector());
+
+        tests.add(new PylonPDCPrimitivesTest());
+        tests.add(new PylonPDCSerializationTest());
+        tests.add(new PylonItemStackSimpleTest());
+        tests.add(new PylonItemStackInterfaceTest());
+
+        tests.add(new CraftingTest());
 
         return tests;
     }
