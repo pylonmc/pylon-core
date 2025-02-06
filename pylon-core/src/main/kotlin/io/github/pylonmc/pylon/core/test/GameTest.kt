@@ -59,7 +59,7 @@ class GameTest(
                 val chunks = mutableSetOf<Chunk>()
                 for (x in gameTest.boundingBox.minX.toInt()..gameTest.boundingBox.maxX.toInt()) {
                     for (z in gameTest.boundingBox.minZ.toInt()..gameTest.boundingBox.maxZ.toInt()) {
-                        val chunk = gameTest.world.getChunkAt(x, z)
+                        val chunk = gameTest.world.getBlockAt(x, 0, z).chunk
                         chunk.isForceLoaded = true
                         chunks.add(chunk)
                     }
