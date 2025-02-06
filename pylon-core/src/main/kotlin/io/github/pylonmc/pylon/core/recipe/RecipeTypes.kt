@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Bukkit
+import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.*
 
@@ -32,12 +33,24 @@ object RecipeTypes {
     val MOB_DROP: RecipeType<MobDropRecipe> = MobDropRecipeType
 }
 
-private fun <T : Recipe> vanillaRecipeWrapper(keyStr: String): RecipeType<T> {
+private fun <T> vanillaRecipeWrapper(keyStr: String): RecipeType<T>
+        where T : Keyed, T : Recipe {
     val key = pylonKey(keyStr)
     return object : RecipeType<T> {
+
+        private val recipes = mutableListOf<T>()
+
         override fun addRecipe(recipe: T) {
             Bukkit.addRecipe(recipe)
+            recipes.add(recipe)
         }
+
+        override fun removeRecipe(recipe: NamespacedKey) {
+            Bukkit.removeRecipe(recipe)
+            recipes.removeIf { it.key == recipe }
+        }
+
+        override fun iterator(): Iterator<T> = recipes.iterator()
 
         override fun getKey(): NamespacedKey = key
     }.also { it.register() }

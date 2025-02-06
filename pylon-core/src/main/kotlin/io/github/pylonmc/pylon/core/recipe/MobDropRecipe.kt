@@ -1,17 +1,19 @@
 package io.github.pylonmc.pylon.core.recipe
 
+import org.bukkit.Keyed
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ThreadLocalRandom
 
-@FunctionalInterface
-fun interface MobDropRecipe {
+interface MobDropRecipe : Keyed {
 
     fun getResult(entity: LivingEntity, playerKill: Boolean): ItemStack?
 
-    data class Simple @JvmOverloads constructor(
-        val result: ItemStack,
+    class Simple @JvmOverloads constructor(
+        private val key: NamespacedKey,
+        private val result: ItemStack,
         val mob: EntityType,
         val playerKill: Boolean,
         val chance: Float = 1f,
@@ -27,5 +29,7 @@ fun interface MobDropRecipe {
                 null
             }
         }
+
+        override fun getKey(): NamespacedKey = key
     }
 }

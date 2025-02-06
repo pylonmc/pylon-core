@@ -15,7 +15,13 @@ internal object MobDropRecipeType : RecipeType<MobDropRecipe>, Listener {
         recipes.add(recipe)
     }
 
+    override fun removeRecipe(recipe: NamespacedKey) {
+        recipes.removeIf { it.key == recipe }
+    }
+
     override fun getKey(): NamespacedKey = pylonKey("mob_drop")
+
+    override fun iterator(): Iterator<MobDropRecipe> = recipes.iterator()
 
     @EventHandler
     @Suppress("UnstableApiUsage") // DamageSource is unstable

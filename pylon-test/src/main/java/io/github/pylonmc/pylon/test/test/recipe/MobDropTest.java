@@ -22,6 +22,7 @@ public class MobDropTest extends GameTest {
                         throw new IllegalStateException("Sticky stick is air");
                     }
                     RecipeTypes.MOB_DROP.addRecipe(new MobDropRecipe.Simple(
+                            PylonTest.key("sticky_stick"),
                             stickyStick,
                             EntityType.CHICKEN,
                             false
