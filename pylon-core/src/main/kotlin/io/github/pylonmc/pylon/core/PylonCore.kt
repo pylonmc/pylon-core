@@ -27,6 +27,8 @@ class PylonCore : JavaPlugin() {
             PylonRegistry.GAMETESTS.map { it.key.toString() }.sorted()
         }
 
+        Block
+
         manager.registerCommand(PylonCommand)
     }
 

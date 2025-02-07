@@ -1,7 +1,5 @@
 package io.github.pylonmc.pylon.core.addon
 
-import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
