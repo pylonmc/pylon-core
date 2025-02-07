@@ -312,11 +312,16 @@ object BlockStorage : Listener {
         }
     }
 
-    /**
-     * Call when Pylon itself is shutting down
-     */
     internal fun cleanupEverything() {
+        val futures: MutableList<CompletableFuture<Void>> = mutableListOf()
 
+        for ((chunkPosition, chunkBlocks) in blocksByChunk) {
+            futures.add(save(chunkPosition.chunk!!, chunkBlocks))
+        }
+
+        for (future in futures) {
+            future.join()
+        }
     }
 
     private inline fun <T> lockBlockRead(block: () -> T): T {

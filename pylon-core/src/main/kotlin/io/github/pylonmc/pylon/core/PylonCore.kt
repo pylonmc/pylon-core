@@ -32,6 +32,8 @@ class PylonCore : JavaPlugin() {
     }
 
     override fun onDisable() {
+        BlockStorage.cleanupEverything()
+
         instance = null
     }
 
