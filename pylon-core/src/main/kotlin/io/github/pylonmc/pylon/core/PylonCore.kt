@@ -6,6 +6,7 @@ import org.bukkit.Bukkit
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorageConsistencyListener
+import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -26,8 +27,6 @@ class PylonCore : JavaPlugin() {
         manager.commandCompletions.registerCompletion("gametests") { _ ->
             PylonRegistry.GAMETESTS.map { it.key.toString() }.sorted()
         }
-
-        Block
 
         manager.registerCommand(PylonCommand)
     }

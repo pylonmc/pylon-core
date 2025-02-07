@@ -1,11 +1,13 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.isFromAddon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.yield
@@ -15,8 +17,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataContainer
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -55,8 +55,6 @@ object BlockStorage : Listener {
     private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
 
     private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
-    private val pylonBlockIdKey = NamespacedKey(pluginInstance, "id")
-    private val pylonBlockPositionKey = NamespacedKey(pluginInstance, "position")
 
     private val dispatcher = Dispatchers.Default
     private val autosaveJobs: MutableMap<ChunkPosition, Job> = mutableMapOf()
@@ -217,7 +215,7 @@ object BlockStorage : Listener {
         pluginInstance.launch(dispatcher) {
             val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
             val chunkBlocks = chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
-                deserialize(world, element)
+                PylonBlock.deserialize(world, element)
             }?.toMutableList() ?: mutableListOf()
 
             future.complete(chunkBlocks)
@@ -240,7 +238,7 @@ object BlockStorage : Listener {
 
         pluginInstance.launch(dispatcher) {
             val serializedBlocks = chunkBlocks.map {
-                serialize(chunk.persistentDataContainer.adapterContext, it)
+                PylonBlock.serialize(it, chunk.persistentDataContainer.adapterContext)
             }
 
             yield()
@@ -291,59 +289,35 @@ object BlockStorage : Listener {
         save(event.chunk, chunkBlocks)
     }
 
-    private fun deserialize(world: World, pdc: PersistentDataContainer): PylonBlock<PylonBlockSchema>? {
-        // Stored outside of the try block so they are displayed in error messages once acquired
-        var id: NamespacedKey? = null
-        var position: BlockPosition? = null
+    /**
+     * Unloads blocks from a specific addon.
+     * This doesn't actually delete them from memory, but instead converts them into
+     * PhantomBlocks so that they are saved. See PhantomBlock for more info.
+     */
+    internal fun cleanup(addon: PylonAddon) = lockBlockWrite {
+        val replacer: (PylonBlock<PylonBlockSchema>) -> PylonBlock<PylonBlockSchema> = { block ->
+            if (block.schema.key.isFromAddon(addon)) {
+                PhantomBlock(PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext), block.block)
+            } else {
+                block
+            }
+        }
 
-        try {
-            id = pdc.get(pylonBlockIdKey, PylonSerializers.NAMESPACED_KEY)
-                ?: error("Block PDC does not contain ID")
-
-            position = pdc.get(pylonBlockPositionKey, PylonSerializers.LONG)?.let {
-                BlockPosition(world, it)
-            } ?: error("Block PDC does not contain postion")
-
-            // We fail silently here because this may trigger if an addon is removed or fails to load
-            // In this case, we don't want to delete the data, and we also don't want to spam errors
-            val schema = PylonRegistry.BLOCKS[id]
-                ?: return null
-
-            // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
-            @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-            return schema.loadConstructor.invoke(schema, pdc, position.block) as PylonBlock<PylonBlockSchema>
-
-        } catch (e: Exception) {
-            pluginInstance.logger.severe("Error while loading block $id at $position")
-            e.printStackTrace()
-            return null
+        blocks.replaceAll { _, block -> replacer.invoke(block ) }
+        for (blocks in blocksById.values) {
+            blocks.replaceAll(replacer)
+        }
+        for (blocks in blocksByChunk.values) {
+            blocks.replaceAll(replacer)
         }
     }
 
-    private fun serialize(
-        context: PersistentDataAdapterContext,
-        block: PylonBlock<PylonBlockSchema>
-    ): PersistentDataContainer {
-        val pdc = context.newPersistentDataContainer()
-        pdc.set(pylonBlockIdKey, PylonSerializers.NAMESPACED_KEY, block.schema.key)
-        pdc.set(pylonBlockPositionKey, PylonSerializers.LONG, block.block.position.asLong)
-        block.write(pdc)
-        return pdc
-    }
+    /**
+     * Call when Pylon itself is shutting down
+     */
+    internal fun cleanupEverything() {
 
-    // TODO (oh no)
-//    internal fun cleanup() = lockBlockWrite {
-//        for ((chunkPosition, blocks) in blocksByChunk) {
-//            commitSave(chunkPosition, blocks)
-//        }
-//
-//        blocks.clear()
-//        blocksByChunk.clear()
-//        blocksById.clear()
-//
-//        db.commit()
-//        db.close()
-//    }
+    }
 
     private inline fun <T> lockBlockRead(block: () -> T): T {
         blockLock.readLock().lock()
