@@ -21,7 +21,7 @@ import org.bukkit.persistence.PersistentDataContainer
  * solution likely involves a lot more boilerplate and overhead, this is nice and intuitive and
  * unlikely to clash with any changes in the future).
  */
-internal class PhantomBlock(
+class PhantomBlock(
     val pdc: PersistentDataContainer,
     block: Block
 ) : PylonBlock<PylonBlockSchema>(schema, block) {
@@ -29,7 +29,7 @@ internal class PhantomBlock(
     // TODO implement breakable block interface and add some logic to drop an error item when this is broken
 
     // Hacky placeholder
-    constructor(schema: PylonBlockSchema, block: Block)
+    internal constructor(schema: PylonBlockSchema, block: Block)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
         throw IllegalStateException("Phantom block cannot be placed")
     }
