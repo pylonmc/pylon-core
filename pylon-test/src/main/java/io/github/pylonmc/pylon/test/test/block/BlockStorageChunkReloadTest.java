@@ -17,7 +17,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 
@@ -89,7 +88,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
         }
 
         /**
-         * Stage 2: When the chunk's pylon data is unloaded, load the chunk again.
+         * Stage 2: When the chunk's pylon data is unloaded, check the block is gone, and load the chunk again.
          */
         @EventHandler
         public static void stage2(@NotNull PylonChunkBlocksUnloadEvent e) {
@@ -99,6 +98,17 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
             stage2Chunks.remove(e.getChunk());
             stage3Chunks.add(e.getChunk());
+
+            try {
+                PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(e.getChunk().getBlock(7, 100, 7));
+
+                assertThat(pylonBlock)
+                        .isNull();
+
+            } catch (Throwable t) {
+                blockLoadedFutures.get(e.getChunk())
+                        .complete(t);
+            }
 
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
                 e.getChunk().load();

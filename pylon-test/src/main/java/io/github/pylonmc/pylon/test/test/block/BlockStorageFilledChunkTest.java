@@ -34,7 +34,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
 
     private static final Map<BlockPosition, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
     private static Chunk chunk;
-    private static int stage;
+    private static int stage = 1;
 
     private static class TestListener implements Listener {
         /**
@@ -104,7 +104,6 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
         schema.register();
 
         chunk = TestUtil.getRandomChunk(PylonTest.testWorld);
-        stage = 1;
 
         Bukkit.getPluginManager().registerEvents(new TestListener(), PylonTest.instance());
 

@@ -10,7 +10,6 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.yield
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -56,9 +55,6 @@ object BlockStorage : Listener {
 
     private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
 
-    private val dispatcher = Dispatchers.Default
-    private val autosaveJobs: MutableMap<ChunkPosition, Job> = mutableMapOf()
-
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized to prevent them briefly going
     // out of sync
     private val blockLock = ReentrantReadWriteLock()
@@ -82,12 +78,10 @@ object BlockStorage : Listener {
 
     internal fun startAutosaveTask() {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
+            // TODO this saves all chunks at once, potentially leading to large pauses
             for ((chunkPosition, chunkBlocks) in blocksByChunk.entries) {
                 chunkPosition.chunk?.let {
-                    val job = pluginInstance.launch(dispatcher) {
-                        save(it, chunkBlocks)
-                    }
-                    autosaveJobs.put(chunkPosition, job)
+                    save(it, chunkBlocks)
                 }
             }
         }, AUTOSAVE_INTERVAL_TICKS, AUTOSAVE_INTERVAL_TICKS)
@@ -209,74 +203,46 @@ object BlockStorage : Listener {
     fun remove(location: Location)
             = remove(BlockPosition(location))
 
-    private fun load(world: World, chunk: Chunk): CompletableFuture<PylonBlockCollection> {
-        val future: CompletableFuture<PylonBlockCollection> = CompletableFuture()
+    private fun load(world: World, chunk: Chunk): List<PylonBlock<PylonBlockSchema>> {
+        val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
+        val chunkBlocks = chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
+            PylonBlock.deserialize(world, element)
+        }?.toMutableList() ?: mutableListOf()
 
-        pluginInstance.launch(dispatcher) {
-            val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
-            val chunkBlocks = chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
-                PylonBlock.deserialize(world, element)
-            }?.toMutableList() ?: mutableListOf()
-
-            future.complete(chunkBlocks)
-
-            Bukkit.getScheduler().runTask(pluginInstance, Runnable {
-                for (block in chunkBlocks) {
-                    PylonBlockLoadEvent(block.block, block).callEvent()
-                }
-
-                PylonChunkBlocksLoadEvent(chunk, blocks.values.toList()).callEvent()
-
-            })
-        }
-
-        return future
+        return chunkBlocks
     }
 
-    private fun save(chunk: Chunk, chunkBlocks: PylonBlockCollection): CompletableFuture<Void> {
-        val future: CompletableFuture<Void> = CompletableFuture()
-
-        pluginInstance.launch(dispatcher) {
-            val serializedBlocks = chunkBlocks.map {
-                PylonBlock.serialize(it, chunk.persistentDataContainer.adapterContext)
-            }
-
-            yield()
-
-            val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
-            chunk.persistentDataContainer.set(pylonBlocksKey, type, serializedBlocks)
-
-            future.complete(null)
-
-            Bukkit.getScheduler().runTask(pluginInstance, Runnable {
-                for (block in chunkBlocks) {
-                    PylonBlockUnloadEvent(block.block, block).callEvent()
-                }
-
-                PylonChunkBlocksUnloadEvent(chunk, blocks.values.toList()).callEvent()
-            })
+    private fun save(chunk: Chunk, chunkBlocks: PylonBlockCollection) {
+        val serializedBlocks = chunkBlocks.map {
+            PylonBlock.serialize(it, chunk.persistentDataContainer.adapterContext)
         }
 
-        return future
+        val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
+        chunk.persistentDataContainer.set(pylonBlocksKey, type, serializedBlocks)
     }
 
     @EventHandler
     private fun onChunkLoad(event: ChunkLoadEvent) {
-        val chunkBlocks = load(event.world, event.chunk).join()
+        val chunkBlocks = load(event.world, event.chunk)
 
         lockBlockWrite {
-            blocksByChunk[event.chunk.position] = chunkBlocks
+            blocksByChunk[event.chunk.position] = chunkBlocks.toMutableList()
             for (block in chunkBlocks) {
                 blocks[block.block.position] = block
                 blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
             }
         }
+
+        for (block in chunkBlocks) {
+            PylonBlockLoadEvent(block.block, block).callEvent()
+        }
+
+        PylonChunkBlocksLoadEvent(event.chunk, blocks.values.toList()).callEvent()
     }
 
     @EventHandler
     private fun onChunkUnload(event: ChunkUnloadEvent) {
         val chunkBlocks = lockBlockWrite {
-            autosaveJobs[event.chunk.position]?.cancel()
             val chunkBlocks = blocksByChunk.remove(event.chunk.position)
                 ?: error("Attempted to save Pylon data for chunk '${event.chunk.position}' but no data is stored")
             for (block in chunkBlocks) {
@@ -287,6 +253,14 @@ object BlockStorage : Listener {
         }
 
         save(event.chunk, chunkBlocks)
+
+        Bukkit.getScheduler().runTask(pluginInstance, Runnable {
+            for (block in chunkBlocks) {
+                PylonBlockUnloadEvent(block.block, block).callEvent()
+            }
+
+            PylonChunkBlocksUnloadEvent(event.chunk, blocks.values.toList()).callEvent()
+        })
     }
 
     /**
@@ -313,14 +287,8 @@ object BlockStorage : Listener {
     }
 
     internal fun cleanupEverything() {
-        val futures: MutableList<CompletableFuture<Void>> = mutableListOf()
-
         for ((chunkPosition, chunkBlocks) in blocksByChunk) {
-            futures.add(save(chunkPosition.chunk!!, chunkBlocks))
-        }
-
-        for (future in futures) {
-            future.join()
+            save(chunkPosition.chunk!!, chunkBlocks)
         }
     }
 

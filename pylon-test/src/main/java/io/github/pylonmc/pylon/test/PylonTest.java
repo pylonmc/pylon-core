@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.test.block.BlockStorageChunkReloadTest;
 import io.github.pylonmc.pylon.test.test.block.BlockStorageAddTest;
 import io.github.pylonmc.pylon.test.test.block.BlockStorageFilledChunkTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageMissingSchemaTest;
 import io.github.pylonmc.pylon.test.test.block.BlockStorageRemoveTest;
 import io.github.pylonmc.pylon.test.test.block.SimpleBlockTest;
 import io.github.pylonmc.pylon.test.test.block.SimpleBlockWithSchemaTest;
@@ -45,10 +46,10 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
 
-//        tests.add(new BlockStorageAddonReloadTest());
         tests.add(new BlockStorageAddTest());
         tests.add(new BlockStorageChunkReloadTest());
         tests.add(new BlockStorageFilledChunkTest());
+        tests.add(new BlockStorageMissingSchemaTest());
         tests.add(new BlockStorageRemoveTest());
         tests.add(new SimpleBlockTest());
         tests.add(new SimpleBlockWithSchemaTest());
