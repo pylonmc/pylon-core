@@ -50,9 +50,11 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
 
             // Run this later to prevent stage 3 from firing early
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
-                BlockStorage.set(e.getChunk().getBlock(7, 100, 7), schema);
+                for (BlockPosition blockPosition : blockLoadedFutures.keySet()) {
+                    BlockStorage.set(blockPosition, schema);
+                }
                 e.getChunk().unload();
-            }, 1);
+            }, 10);
         }
 
         /**
@@ -66,7 +68,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
 
             stage = 3;
 
-            e.getChunk().load();
+            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> e.getChunk().load(), 10);
         }
 
         /**
@@ -74,7 +76,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
          */
         @EventHandler
         public static void stage3(@NotNull PylonBlockLoadEvent e) {
-            if (stage != 3 || !blockLoadedFutures.containsKey(new BlockPosition(e.getBlock()))) {
+            if (stage != 3 || !e.getBlock().getChunk().equals(chunk)) {
                 return;
             }
 
@@ -101,7 +103,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
     public void test() {
         schema.register();
 
-        chunk = TestUtil.getRandomChunk(PylonTest.testWorld).join();
+        chunk = TestUtil.getRandomChunk(PylonTest.testWorld);
         stage = 1;
 
         Bukkit.getPluginManager().registerEvents(new TestListener(), PylonTest.instance());

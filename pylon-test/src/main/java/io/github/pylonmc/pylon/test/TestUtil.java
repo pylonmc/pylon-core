@@ -13,11 +13,21 @@ import java.util.concurrent.CompletableFuture;
 public class TestUtil {
     private static final Random random = new Random();
 
-    public static @NotNull CompletableFuture<Chunk> getRandomChunk(@NotNull World world) {
+    public static @NotNull Chunk getRandomChunk(@NotNull World world) {
         double max = 10000;
         int x = (int) random.nextDouble(-max, max);
         int z = (int) random.nextDouble(-max, max);
-        return world.getChunkAtAsync(x, z);
+        Chunk chunk = world.getChunkAt(x, z);
+
+        while (chunk.isLoaded()) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return chunk;
     }
 
     public static @NotNull List<Chunk> getRandomChunks(@NotNull World world, int width, int length) {

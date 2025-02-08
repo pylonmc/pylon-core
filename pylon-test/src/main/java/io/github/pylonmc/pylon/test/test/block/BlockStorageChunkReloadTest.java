@@ -65,17 +65,10 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
     private static final Map<Chunk, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
     private static final Set<Chunk> stage1Chunks = new HashSet<>();
-    private static final Set<Chunk> temp = new HashSet<>();
     private static final Set<Chunk> stage2Chunks = new HashSet<>();
     private static final Set<Chunk> stage3Chunks = new HashSet<>();
 
     private static class TestListener implements Listener {
-        @EventHandler
-        public static void temp(@NotNull ChunkLoadEvent e) {
-            if (temp.contains(e.getChunk())) {
-                temp.remove(e.getChunk());
-            }
-        }
 
         /**
          * Stage 1: set the Pylon block when the Pylon data for that chunk is loaded, then unload the chunk.
@@ -89,7 +82,6 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             stage1Chunks.remove(e.getChunk());
             stage2Chunks.add(e.getChunk());
 
-            // Run this later to prevent stage 3 from firing early
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
                 BlockStorage.set(e.getChunk().getBlock(7, 100, 7), schema);
                 e.getChunk().unload();
@@ -156,7 +148,6 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
         List<Chunk> chunks = TestUtil.getRandomChunks(PylonTest.testWorld, 20, 20);
 
         stage1Chunks.addAll(chunks);
-        temp.addAll(chunks);
 
         for (Chunk chunk : chunks) {
             blockLoadedFutures.put(chunk, new CompletableFuture<>());
