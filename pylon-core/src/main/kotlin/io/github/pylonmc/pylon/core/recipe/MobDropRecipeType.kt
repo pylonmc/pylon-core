@@ -7,17 +7,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
 
-internal object MobDropRecipeType : RecipeType<MobDropRecipe>, Listener {
-
-    private val recipes = mutableListOf<MobDropRecipe>()
-
-    override fun addRecipe(recipe: MobDropRecipe) {
-        recipes.add(recipe)
-    }
-
-    override fun removeRecipe(recipe: NamespacedKey) {
-        recipes.removeIf { it.key == recipe }
-    }
+internal object MobDropRecipeType : RecipeType<MobDropRecipe>(), Listener {
 
     override fun getKey(): NamespacedKey = pylonKey("mob_drop")
 

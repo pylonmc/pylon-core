@@ -36,21 +36,17 @@ object RecipeTypes {
 private fun <T> vanillaRecipeWrapper(keyStr: String): RecipeType<T>
         where T : Keyed, T : Recipe {
     val key = pylonKey(keyStr)
-    return object : RecipeType<T> {
-
-        private val recipes = mutableListOf<T>()
+    return object : RecipeType<T>() {
 
         override fun addRecipe(recipe: T) {
+            super.addRecipe(recipe)
             Bukkit.addRecipe(recipe)
-            recipes.add(recipe)
         }
 
         override fun removeRecipe(recipe: NamespacedKey) {
+            super.removeRecipe(recipe)
             Bukkit.removeRecipe(recipe)
-            recipes.removeIf { it.key == recipe }
         }
-
-        override fun iterator(): Iterator<T> = recipes.iterator()
 
         override fun getKey(): NamespacedKey = key
     }.also { it.register() }
