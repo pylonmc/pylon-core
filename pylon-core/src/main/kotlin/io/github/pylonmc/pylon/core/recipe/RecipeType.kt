@@ -10,13 +10,18 @@ abstract class RecipeType<T : Keyed> : Keyed, Iterable<T> {
     val recipes: Collection<T>
         get() = registeredRecipes.values
 
-    open fun addRecipe(recipe: T) {
+    fun addRecipe(recipe: T) {
         registeredRecipes[recipe.key] = recipe
+        registerRecipe(recipe)
     }
 
-    open fun removeRecipe(recipe: NamespacedKey) {
-        registeredRecipes.remove(recipe)
+    fun removeRecipe(recipe: NamespacedKey) {
+        registeredRecipes.remove(recipe)?.let { unregisterRecipe(it.key) }
     }
+
+    protected open fun registerRecipe(recipe: T) {}
+
+    protected open fun unregisterRecipe(recipe: NamespacedKey) {}
 
     fun register() {
         PylonRegistry.RECIPE_TYPES.register(this)
