@@ -38,13 +38,11 @@ private fun <T> vanillaRecipeWrapper(keyStr: String): RecipeType<T>
     val key = pylonKey(keyStr)
     return object : RecipeType<T>() {
 
-        override fun addRecipe(recipe: T) {
-            super.addRecipe(recipe)
+        override fun registerRecipe(recipe: T) {
             Bukkit.addRecipe(recipe)
         }
 
-        override fun removeRecipe(recipe: NamespacedKey) {
-            super.removeRecipe(recipe)
+        override fun unregisterRecipe(recipe: NamespacedKey) {
             Bukkit.removeRecipe(recipe)
         }
 
