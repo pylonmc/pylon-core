@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.test.recipe;
 
-import io.github.pylonmc.pylon.core.recipe.MobDropRecipe;
 import io.github.pylonmc.pylon.core.recipe.RecipeTypes;
+import io.github.pylonmc.pylon.core.recipe.SimpleMobDropRecipe;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
@@ -17,7 +17,7 @@ public class MobDropTest extends GameTest {
                 .size(1)
                 .setUp((test) -> {
                     ItemStack stickyStick = StickyStick.INSTANCE.getItemStack();
-                    RecipeTypes.MOB_DROP.addRecipe(new MobDropRecipe.Simple(
+                    RecipeTypes.MOB_DROP.addRecipe(new SimpleMobDropRecipe(
                             PylonTest.key("sticky_stick"),
                             stickyStick,
                             EntityType.CHICKEN,
