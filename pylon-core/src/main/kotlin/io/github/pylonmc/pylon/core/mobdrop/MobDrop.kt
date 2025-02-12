@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.recipe
+package io.github.pylonmc.pylon.core.mobdrop
 
 import org.bukkit.Keyed
 import org.bukkit.event.entity.EntityDeathEvent

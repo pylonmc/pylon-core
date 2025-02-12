@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.recipe
+package io.github.pylonmc.pylon.core.mobdrop
 
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.EntityType
