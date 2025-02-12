@@ -4,7 +4,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 
-abstract class RecipeType<T : Keyed> : Keyed, Iterable<T> {
+open class RecipeType<T : Keyed>(private val key: NamespacedKey) : Keyed, Iterable<T> {
 
     protected val registeredRecipes = mutableMapOf<NamespacedKey, T>()
     val recipes: Collection<T>
@@ -28,4 +28,6 @@ abstract class RecipeType<T : Keyed> : Keyed, Iterable<T> {
     }
 
     override fun iterator(): Iterator<T> = registeredRecipes.values.iterator()
+
+    override fun getKey(): NamespacedKey = key
 }
