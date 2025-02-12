@@ -67,27 +67,22 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 
         @JvmField
-        val ITEMS = PylonRegistry(PylonRegistryKey.ITEMS)
+        val ITEMS = PylonRegistry(PylonRegistryKey.ITEMS).also(::addRegistry)
 
         @JvmField
-        val BLOCKS = PylonRegistry(PylonRegistryKey.BLOCKS)
+        val BLOCKS = PylonRegistry(PylonRegistryKey.BLOCKS).also(::addRegistry)
 
         @JvmField
-        val ADDONS = PylonRegistry(PylonRegistryKey.ADDONS)
+        val ADDONS = PylonRegistry(PylonRegistryKey.ADDONS).also(::addRegistry)
 
         @JvmField
-        val GAMETESTS = PylonRegistry(PylonRegistryKey.GAMETESTS)
+        val GAMETESTS = PylonRegistry(PylonRegistryKey.GAMETESTS).also(::addRegistry)
 
         @JvmField
-        val RECIPE_TYPES = PylonRegistry(PylonRegistryKey.RECIPE_TYPES)
+        val RECIPE_TYPES = PylonRegistry(PylonRegistryKey.RECIPE_TYPES).also(::addRegistry)
 
-        init {
-            addRegistry(BLOCKS)
-            addRegistry(ITEMS)
-            addRegistry(ADDONS)
-            addRegistry(GAMETESTS)
-            addRegistry(RECIPE_TYPES)
-        }
+        @JvmField
+        val MOB_DROPS = PylonRegistry(PylonRegistryKey.MOB_DROPS).also(::addRegistry)
 
         @JvmStatic
         fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {

@@ -4,7 +4,7 @@ import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorageConsistencyListener
-import io.github.pylonmc.pylon.core.recipe.MobDropRecipeType
+import io.github.pylonmc.pylon.core.recipe.MobDropListener
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
@@ -20,7 +20,7 @@ class PylonCore : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(BlockStorageConsistencyListener, pluginInstance)
         Bukkit.getPluginManager().registerEvents(BlockStorage, pluginInstance)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
-        Bukkit.getPluginManager().registerEvents(MobDropRecipeType, this)
+        Bukkit.getPluginManager().registerEvents(MobDropListener, this)
 
         manager = PaperCommandManager(this)
 
