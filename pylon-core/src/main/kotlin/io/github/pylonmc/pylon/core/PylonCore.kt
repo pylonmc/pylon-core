@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.item.PylonItemListener
-import io.github.pylonmc.pylon.core.recipe.MobDropRecipeType
+import io.github.pylonmc.pylon.core.recipe.MobDropListener
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
@@ -17,7 +17,7 @@ class PylonCore : JavaPlugin() {
         logger.info("Hello, World!")
 
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
-        Bukkit.getPluginManager().registerEvents(MobDropRecipeType, this)
+        Bukkit.getPluginManager().registerEvents(MobDropListener, this)
 
         manager = PaperCommandManager(this)
 

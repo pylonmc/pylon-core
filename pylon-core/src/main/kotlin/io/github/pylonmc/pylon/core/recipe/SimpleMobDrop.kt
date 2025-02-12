@@ -6,13 +6,13 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ThreadLocalRandom
 
-class SimpleMobDropRecipe @JvmOverloads constructor(
+class SimpleMobDrop @JvmOverloads constructor(
     private val key: NamespacedKey,
     private val result: ItemStack,
     val mob: EntityType,
     val playerKill: Boolean,
     val chance: Float = 1f,
-) : MobDropRecipe {
+) : MobDrop {
     override fun getResult(entity: LivingEntity, playerKill: Boolean): ItemStack? {
         return if (
             entity.type == mob

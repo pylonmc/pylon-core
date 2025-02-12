@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.registry
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
+import io.github.pylonmc.pylon.core.recipe.MobDrop
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.test.GameTestConfig
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -31,5 +32,8 @@ data class PylonRegistryKey<T>(val namespace: String, val path: String) {
 
         @JvmField
         val RECIPE_TYPES = PylonRegistryKey<RecipeType<*>>(pylonKey("recipe_types"))
+
+        @JvmField
+        val MOB_DROPS = PylonRegistryKey<MobDrop>(pylonKey("mob_drops"))
     }
 }
