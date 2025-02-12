@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
+import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -15,6 +16,21 @@ import org.bukkit.entity.Player
 @Suppress("unused")
 @CommandAlias("pylon|py")
 object PylonCommand : BaseCommand() {
+
+    @Subcommand("give")
+    @CommandCompletion("@players @items")
+    @Description("Give a Pylon item to a player")
+    fun give(p: OnlinePlayer, item: NamespacedKey, @Default("1") amount: Int) {
+        val player = p.player
+        val pylonItem = PylonRegistry.ITEMS[item]
+        if (pylonItem == null) {
+            player.sendMessage(NamedTextColor.RED + "Item not found: $item")
+            return
+        }
+        val stack = pylonItem.itemStack
+        stack.amount = amount
+        player.inventory.addItem(stack)
+    }
 
     @Private
     @Subcommand("test")
