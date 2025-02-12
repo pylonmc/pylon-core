@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.recipe
+package io.github.pylonmc.pylon.core.mobdrop
 
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.event.EventHandler

@@ -4,7 +4,7 @@ import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorageConsistencyListener
-import io.github.pylonmc.pylon.core.recipe.MobDropListener
+import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
