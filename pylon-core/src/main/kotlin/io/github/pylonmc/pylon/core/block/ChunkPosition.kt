@@ -14,6 +14,9 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
     val asLong: Long
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
 
+    val chunk: Chunk?
+            get() = world?.getChunkAt(x, z)
+
     constructor(world: World, asLong: Long) : this(world, (asLong shr 32).toInt(), asLong.toInt())
 
     constructor(chunk: Chunk) : this(chunk.world, chunk.x, chunk.z)
@@ -25,6 +28,14 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
     override fun hashCode(): Int {
         val prime = 31
         return prime * (world?.hashCode() ?: 0) + prime * asLong.hashCode()
+    }
+
+    override fun toString(): String {
+        return if (world != null) {
+            "$x, $z in ${world!!.name}"
+        } else {
+            "$x, $z"
+        }
     }
 
     override fun equals(other: Any?): Boolean {

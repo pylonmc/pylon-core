@@ -25,6 +25,7 @@ abstract class PylonItem<out S: PylonItemSchema>(
          * Converts a regular ItemStack to a PylonItemStack
          * Returns null if the ItemStack is not a Pylon item
          */
+        @JvmStatic
         fun fromStack(stack: ItemStack): PylonItem<*>? {
             val id = stack.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)
                 ?: return null
