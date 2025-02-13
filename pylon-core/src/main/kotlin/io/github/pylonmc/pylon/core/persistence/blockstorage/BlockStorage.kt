@@ -37,12 +37,10 @@ internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchem
  * unloaded, all the data for that chunk is saved. Additionally, there are autosaves so chunks that
  * are not ever unloaded are still saved occasionally.
  *
- * When saving, we can simply ask the block to write its state to a PDC, then we serialize that
- * container and write it to the database. And when loading, we deserialize the container, figure
- * out which block type it is, and then create a new block of that type, using the container to
- * restore the state it had when it was saved.
- *
- * Saving and loading is done asynchronously.
+ * When saving, we can simply ask the block to write its state to a PDC, then we
+ * write that PDC to the chunk. And when loading, we go through each block PDC stored in the chunk,
+ * and figure out which block type it is, and then create a new block of that type, using the container
+ * to restore the state it had when it was saved.
  *
  * Read AND write access to the loaded block data must be synchronized, as there are multiple fields
  * for loaded blocks. If access is not synchronized, situations may occur where these fields are
