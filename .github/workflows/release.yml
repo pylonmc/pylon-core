@@ -8,7 +8,7 @@ jobs:
   build:
     uses: ./.github/workflows/gradle.yml
     with:
-      version: ${GITHUB_REF/refs\/tags\//}
+      version: ${{ github.ref_name }}
       
   github-release:
     needs: [build]
@@ -18,7 +18,7 @@ jobs:
     - name: Download Pylon
       uses: actions/download-artifact@v4.1.8
       with:
-        name: pylon-core-${GITHUB_REF/refs\/tags\//}
+        name: pylon-core-${{ github.ref_name }}
 
     - name: Create Release
       uses: marvinpinto/action-automatic-releases@latest
@@ -26,8 +26,8 @@ jobs:
         repo_token: ${{ secrets.ACCESS_TOKEN }}
         draft: false
         prerelease: false
-        automatic_release_tag: ${GITHUB_REF/refs\/tags\//}
-        title: Release ${GITHUB_REF/refs\/tags\//}
+        automatic_release_tag: ${{ github.ref_name }}
+        title: Release ${{ github.ref_name }}
         files: build/libs/pylon-core-*.jar
 
   publish:
@@ -50,7 +50,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4.2.2
 
       - name: Publish snapshot
-        run: ./gradlew :pylon-core:publishToCentralPortal -Pversion=${GITHUB_REF/refs\/tags\//}
+        run: ./gradlew :pylon-core:publishToCentralPortal -Pversion=${{ github.ref_name }}
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
