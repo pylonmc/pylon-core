@@ -28,7 +28,7 @@ jobs:
         prerelease: false
         automatic_release_tag: ${{ github.ref_name }}
         title: Release ${{ github.ref_name }}
-        files: pylon-core/build/libs/pylon-core-*.jar
+        files: pylon-core-*.jar
 
   publish:
     needs: [build]

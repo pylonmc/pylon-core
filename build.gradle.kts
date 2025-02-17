@@ -3,9 +3,9 @@ plugins {
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0" apply false
 }
 
-group = "io.github.pylonmc"
+allprojects {
+    group = "io.github.pylonmc"
 
-subprojects {
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/") {
