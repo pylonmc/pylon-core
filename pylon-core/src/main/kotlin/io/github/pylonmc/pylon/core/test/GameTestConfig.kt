@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.test
 
 import io.github.pylonmc.pylon.core.block.BlockPosition
+import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.Material
@@ -77,7 +78,11 @@ class GameTestConfig(
             }
         }
 
-        setUp(gameTest)
+        try {
+            setUp(gameTest)
+        } catch (e: Throwable) {
+            return CompletableFuture.completedFuture(GameTestFailException(gameTest, "Error on setup", e))
+        }
 
         return GameTest.submit(gameTest, delayTicks)
     }

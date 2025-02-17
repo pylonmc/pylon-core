@@ -8,5 +8,5 @@ interface PylonAddon : Keyed {
     val javaPlugin: JavaPlugin
 
     override fun getKey(): NamespacedKey
-    = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
+            = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
 }

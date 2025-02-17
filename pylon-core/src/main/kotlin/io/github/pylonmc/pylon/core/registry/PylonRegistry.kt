@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.registry
 
+import io.github.pylonmc.pylon.core.addon.PylonAddon
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
@@ -29,12 +30,25 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         }
     }
 
+    fun unregisterAllFromAddon(addon: PylonAddon) {
+        val namespace = NamespacedKey(addon.javaPlugin, "").namespace
+        values.keys.removeIf { it.namespace == namespace }
+    }
+
     operator fun get(key: NamespacedKey): T? {
         return values[key]
     }
 
     fun getOrThrow(key: NamespacedKey): T {
         return values[key] ?: throw NoSuchElementException("No value found for key $key in registry $this")
+    }
+
+    fun getKeys(): Set<NamespacedKey> {
+        return values.keys
+    }
+
+    fun getValues(): Collection<T> {
+        return values.values
     }
 
     operator fun contains(key: NamespacedKey): Boolean {

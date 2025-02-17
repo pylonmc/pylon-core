@@ -19,6 +19,7 @@ public abstract class SyncTest implements Test {
         CompletableFuture<TestResult> future = new CompletableFuture<>();
 
         Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            Throwable exception = null;
             try {
                 test();
             } catch (Throwable e) {
