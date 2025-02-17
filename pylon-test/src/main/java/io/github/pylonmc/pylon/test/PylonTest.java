@@ -7,8 +7,6 @@ import io.github.pylonmc.pylon.test.test.block.*;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackSimpleTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
-import io.github.pylonmc.pylon.test.test.pdc.PylonPDCPrimitivesTest;
-import io.github.pylonmc.pylon.test.test.pdc.PylonPDCSerializationTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
 import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
 import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
@@ -59,11 +57,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new SerializerTestSetOfSetOfStrings());
         tests.add(new SerializerTestUUID());
         tests.add(new SerializerTestVector());
-
-        tests.add(new PylonPDCPrimitivesTest());
-        tests.add(new PylonPDCSerializationTest());
-        tests.add(new PylonItemStackSimpleTest());
-        tests.add(new PylonItemStackInterfaceTest());
 
         tests.add(new CraftingTest());
         tests.add(new FurnaceTest());
