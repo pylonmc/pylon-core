@@ -45,6 +45,7 @@ tasks.runServer {
     maxHeapSize = "4G"
     minecraftVersion("1.21.4")
     doLast {
+        runFolder.resolve("gametests").deleteRecursively()
         if (testsFailedFile.exists()) {
             throw GradleException("Tests failed")
         }
