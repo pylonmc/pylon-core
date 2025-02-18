@@ -6,7 +6,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-abstract class PylonItem<out S: PylonItemSchema>(
+abstract class PylonItem<out S : PylonItemSchema>(
     val schema: S,
     val stack: ItemStack
 ) {

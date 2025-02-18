@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.inventory.BrewingStandFuelEvent;
 import org.bukkit.inventory.ItemStack;
@@ -21,8 +22,14 @@ import org.jetbrains.annotations.NotNull;
 public class PylonItemStackInterfaceTest extends GameTest {
     private static boolean handlerCalled;
 
-    public static class OminousBlazePower extends PylonItem<PylonItemSchema> implements BrewingStandFuel {
-        public OminousBlazePower(@NotNull PylonItemSchema schema, @NotNull ItemStack stack) {
+    public static class OminousBlazePowderSchema extends PylonItemSchema {
+        public OminousBlazePowderSchema(@NotNull NamespacedKey id, @NotNull Class<? extends @NotNull PylonItem<? extends @NotNull PylonItemSchema>> itemClass, @NotNull ItemStack template) {
+            super(id, itemClass, template);
+        }
+    }
+
+    public static class OminousBlazePower extends PylonItem<OminousBlazePowderSchema> implements BrewingStandFuel {
+        public OminousBlazePower(@NotNull OminousBlazePowderSchema schema, @NotNull ItemStack stack) {
             super(schema, stack);
         }
 
@@ -38,7 +45,7 @@ public class PylonItemStackInterfaceTest extends GameTest {
                 .size(0)
                 .timeoutTicks(100)
                 .setUp((test) -> {
-                    PylonItemSchema ominousBlazePowder = new PylonItemSchema(
+                    PylonItemSchema ominousBlazePowder = new OminousBlazePowderSchema(
                             PylonTest.key("pylon_item_stack_interface_test"),
                             OminousBlazePower.class,
                             new ItemStackBuilder(Material.DIAMOND_SWORD)
