@@ -13,16 +13,10 @@ import org.bukkit.event.entity.EntityInteractEvent
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
-import org.bukkit.event.player.PlayerBucketEmptyEvent
-import org.bukkit.event.player.PlayerBucketFillEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerItemBreakEvent
-import org.bukkit.event.player.PlayerItemConsumeEvent
-import org.bukkit.event.player.PlayerItemDamageEvent
-import org.bukkit.event.player.PlayerItemMendEvent
+import org.bukkit.event.player.*
 
 @Suppress("UnstableApiUsage")
-object PylonItemListener : Listener {
+internal object PylonItemListener : Listener {
     @EventHandler
     fun handle(event: PlayerReadyArrowEvent) {
         val bow = PylonItem.fromStack(event.bow)
