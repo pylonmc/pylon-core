@@ -46,7 +46,7 @@ internal object PylonItemListener : Listener {
     @EventHandler
     fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) }
-        if (pylonItem is BlockInteractor) {
+        if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToRightClickBlock(event)
         }
     }
