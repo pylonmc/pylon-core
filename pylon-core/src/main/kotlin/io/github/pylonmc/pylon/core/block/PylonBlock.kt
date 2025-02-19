@@ -10,7 +10,7 @@ import org.bukkit.block.Block
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 
-abstract class PylonBlock<out S: PylonBlockSchema> protected constructor(
+abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val schema: S,
     val block: Block
 ) {

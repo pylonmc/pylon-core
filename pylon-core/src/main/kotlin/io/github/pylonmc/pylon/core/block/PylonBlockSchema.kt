@@ -1,13 +1,13 @@
 package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.persistence.PersistentDataContainer
 import java.lang.invoke.MethodHandle
-import java.lang.invoke.MethodHandles
 
 open class PylonBlockSchema(
     private val key: NamespacedKey,
@@ -19,28 +19,18 @@ open class PylonBlockSchema(
         check(material.isBlock)
     }
 
-    internal val createConstructor: MethodHandle = try {
-        MethodHandles.lookup().unreflectConstructor(
-            blockClass.getConstructor(
-                javaClass,
-                Block::class.java
-            )
-        )
-    } catch (_: NoSuchMethodException) {
-        throw NoSuchMethodException("Block '$key' is missing a create constructor")
-    }
+    internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
+        PylonBlockSchema::class.java,
+        Block::class.java
+    )
+        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block)")
 
-    internal val loadConstructor: MethodHandle = try {
-        MethodHandles.lookup().unreflectConstructor(
-            blockClass.getConstructor(
-                javaClass,
-                PersistentDataContainer::class.java,
-                Block::class.java
-            )
-        )
-    } catch (_: NoSuchMethodException) {
-        throw NoSuchMethodException("Block '$key' is missing a load constructor")
-    }
+    internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
+        javaClass,
+        PersistentDataContainer::class.java,
+        Block::class.java
+    )
+        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, PersistentDataContainer, Block)")
 
     fun register() {
         PylonRegistry.BLOCKS.register(this)
