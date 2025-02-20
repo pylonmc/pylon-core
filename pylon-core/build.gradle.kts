@@ -60,7 +60,7 @@ tasks.shadowJar {
 }
 
 bukkit {
-    name = "pylon-core"
+    name = "Pylon-Core"
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
     authors = listOf() // TODO
@@ -76,7 +76,7 @@ centralPortal {
     username = System.getenv("SONATYPE_USERNAME")
     password = System.getenv("SONATYPE_PASSWORD")
     pom {
-        description = "The core library for PylonMC plugins."
+        description = "The core library for Pylon addons."
         url = "https://github.com/pylonmc/pylon-core"
         licenses {
             license {
