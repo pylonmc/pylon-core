@@ -22,7 +22,7 @@ java {
 }
 
 bukkit {
-    name = project.name
+    name = "Pylon-Test"
     main = "io.github.pylonmc.pylon.test.PylonTest"
     version = project.version.toString()
     apiVersion = "1.21"
