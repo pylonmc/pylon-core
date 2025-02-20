@@ -26,7 +26,7 @@ bukkit {
     main = "io.github.pylonmc.pylon.test.PylonTest"
     version = project.version.toString()
     apiVersion = "1.21"
-    depend = listOf("pylon-core")
+    depend = listOf("Pylon-Core")
 }
 
 tasks.runServer {
