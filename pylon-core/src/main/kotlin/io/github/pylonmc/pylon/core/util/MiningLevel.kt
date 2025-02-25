@@ -37,7 +37,10 @@ enum class MiningLevel(val numericalLevel: Int, private val incorrectTag: Tag<Ma
             Material.BEDROCK,
             Material.STRUCTURE_BLOCK,
             Material.JIGSAW,
-            Material.END_PORTAL_FRAME
+            Material.END_PORTAL_FRAME,
+            Material.COMMAND_BLOCK,
+            Material.REPEATING_COMMAND_BLOCK,
+            Material.CHAIN_COMMAND_BLOCK,
         )
     }
 }
