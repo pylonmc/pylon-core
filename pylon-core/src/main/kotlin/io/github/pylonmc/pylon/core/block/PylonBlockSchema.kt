@@ -26,7 +26,7 @@ open class PylonBlockSchema(
         ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block)")
 
     internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
-        javaClass,
+        PylonBlockSchema::class.java,
         PersistentDataContainer::class.java,
         Block::class.java
     )
