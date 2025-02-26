@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 
@@ -16,14 +17,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 ) {
     open fun write(pdc: PersistentDataContainer) {}
 
-    // TODO listener
-    fun tick() {}
-
-    // TODO listener
-    fun onRightClick() {}
-
-    // TODO listener
-    fun onBreak() {}
+    open fun onBreak(drops: MutableList<ItemStack>) {}
 
     companion object {
         /*
