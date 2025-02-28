@@ -9,7 +9,7 @@ import org.bukkit.event.server.PluginEnableEvent
 
 internal object PylonAddonListener : Listener {
     @EventHandler
-    fun onPluginEnable(event: PluginEnableEvent) {
+    private fun onPluginEnable(event: PluginEnableEvent) {
         val plugin = event.plugin
         if (plugin is PylonAddon) {
             PylonRegistry.ADDONS.register(plugin)
@@ -17,7 +17,7 @@ internal object PylonAddonListener : Listener {
     }
 
     @EventHandler
-    fun onPluginDisable(event: PluginDisableEvent) {
+    private fun onPluginDisable(event: PluginDisableEvent) {
         val plugin = event.plugin
         if (plugin is PylonAddon) {
             PylonRegistry.ADDONS.unregister(plugin)

@@ -54,6 +54,7 @@ class GameTest(
     fun location(x: Double, y: Double, z: Double): Location = center.location.clone().add(x, y, z)
 
     companion object {
+        @JvmSynthetic
         internal fun submit(gameTest: GameTest, delay: Int): CompletableFuture<GameTestFailException?> {
             return pluginInstance.scope.future {
                 val chunks = mutableSetOf<Chunk>()

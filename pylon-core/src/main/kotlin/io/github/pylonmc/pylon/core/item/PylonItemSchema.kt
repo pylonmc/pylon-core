@@ -11,7 +11,7 @@ import java.lang.invoke.MethodHandle
 
 open class PylonItemSchema(
     private val key: NamespacedKey,
-    internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
+    @JvmSynthetic internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
     private val template: ItemStack,
 ) : Keyed {
     init {
@@ -23,6 +23,7 @@ open class PylonItemSchema(
     val itemStack: ItemStack
         get() = template.clone()
 
+    @JvmSynthetic
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(
         javaClass,
         ItemStack::class.java

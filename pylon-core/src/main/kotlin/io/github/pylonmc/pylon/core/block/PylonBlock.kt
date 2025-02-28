@@ -24,6 +24,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
         private val pylonBlockIdKey = NamespacedKey(pluginInstance, "id")
         private val pylonBlockPositionKey = NamespacedKey(pluginInstance, "position")
 
+        @JvmSynthetic
         internal fun serialize(
             block: PylonBlock<PylonBlockSchema>,
             context: PersistentDataAdapterContext
@@ -40,6 +41,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
             return pdc
         }
 
+        @JvmSynthetic
         internal fun deserialize(
             world: World,
             pdc: PersistentDataContainer

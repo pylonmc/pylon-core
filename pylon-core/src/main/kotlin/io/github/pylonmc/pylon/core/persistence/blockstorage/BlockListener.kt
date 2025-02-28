@@ -18,7 +18,7 @@ import org.bukkit.inventory.ItemStack
 internal object BlockListener : Listener {
 
     @EventHandler
-    fun onPlace(event: BlockPlaceEvent) {
+    private fun onPlace(event: BlockPlaceEvent) {
         val item = PylonItem.fromStack(event.itemInHand)?.schema ?: return
         val block = PylonRegistry.BLOCKS[item.key]
         if (block != null) {
@@ -29,18 +29,18 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler
-    fun blockRemove(event: BlockBreakEvent) {
+    private fun blockRemove(event: BlockBreakEvent) {
         val block = event.block
         dropItems(block, BlockStorage.breakBlock(block) ?: return)
     }
 
     @EventHandler
-    fun blockBurn(event: BlockBurnEvent) {
+    private fun blockBurn(event: BlockBurnEvent) {
         BlockStorage.breakBlock(event.block)
     }
 
     @EventHandler
-    fun blockRemove(event: BlockExplodeEvent) {
+    private fun blockRemove(event: BlockExplodeEvent) {
         BlockStorage.breakBlock(event.block)
         for (block in event.blockList()) {
             dropItems(block, BlockStorage.breakBlock(block) ?: continue)
@@ -48,34 +48,34 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler
-    fun blockRemove(event: EntityExplodeEvent) {
+    private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
             dropItems(block, BlockStorage.breakBlock(block) ?: continue)
         }
     }
 
     @EventHandler
-    fun blockRemove(event: BlockFadeEvent) {
+    private fun blockRemove(event: BlockFadeEvent) {
         val block = event.block
         dropItems(block, BlockStorage.breakBlock(block) ?: return)
     }
 
     @EventHandler
-    fun disallowForming(event: BlockFormEvent) {
+    private fun disallowForming(event: BlockFormEvent) {
         if (BlockStorage.exists(event.block.position)) {
             event.isCancelled = true
         }
     }
 
     @EventHandler
-    fun disallowFromTo(event: BlockFromToEvent) {
+    private fun disallowFromTo(event: BlockFromToEvent) {
         if (BlockStorage.exists(event.block.position)) {
             event.isCancelled = true
         }
     }
 
     @EventHandler
-    fun disallowMovementByPistons(event: BlockPistonExtendEvent) {
+    private fun disallowMovementByPistons(event: BlockPistonExtendEvent) {
         for (block in event.blocks) {
             if (BlockStorage.exists(block.position)) {
                 event.isCancelled = true
@@ -85,7 +85,7 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler
-    fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
+    private fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
         for (block in event.blocks) {
             if (BlockStorage.exists(block.position)) {
                 event.isCancelled = true

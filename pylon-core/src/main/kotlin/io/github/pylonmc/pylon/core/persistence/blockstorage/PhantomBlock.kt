@@ -45,6 +45,7 @@ class PhantomBlock(
         private val key = NamespacedKey(pluginInstance, "phantom_block")
 
         // Intentionally not registered to hide Pylon internals
+        @JvmSynthetic
         internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)
     }
 }
