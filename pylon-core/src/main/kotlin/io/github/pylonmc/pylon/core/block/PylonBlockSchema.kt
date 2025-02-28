@@ -20,17 +20,18 @@ open class PylonBlockSchema(
     }
 
     internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
-        PylonBlockSchema::class.java,
-        Block::class.java
+        javaClass,
+        Block::class.java,
+        BlockCreateContext::class.java
     )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block)")
+        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block, BlockCreateContext)")
 
     internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
-        PylonBlockSchema::class.java,
-        PersistentDataContainer::class.java,
-        Block::class.java
+        javaClass,
+        Block::class.java,
+        PersistentDataContainer::class.java
     )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, PersistentDataContainer, Block)")
+        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, Block, PersistentDataContainer)")
 
     fun register() {
         PylonRegistry.BLOCKS.register(this)

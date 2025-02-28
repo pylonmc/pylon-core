@@ -19,6 +19,12 @@ fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
 internal fun Class<*>.findConstructorMatching(vararg types: Class<*>): MethodHandle? {
     return declaredConstructors.firstOrNull {
         it.parameterTypes.size == types.size &&
-                types.zip(it.parameterTypes).all { (a, b) -> a.isAssignableFrom(b) }
+                it.parameterTypes.zip(types).all { (param, given) -> given.isSubclassOf(param) }
     }?.let(MethodHandles.lookup()::unreflectConstructor)
+}
+
+// I can never remember which way around `isAssignableFrom` goes,
+// so this is a helper function to make it more readable
+private fun Class<*>.isSubclassOf(other: Class<*>): Boolean {
+    return other.isAssignableFrom(this)
 }

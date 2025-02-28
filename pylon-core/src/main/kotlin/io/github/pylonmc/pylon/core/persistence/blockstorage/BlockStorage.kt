@@ -145,9 +145,15 @@ object BlockStorage : Listener {
      * @see [placeBlock]
      */
     @JvmStatic
-    fun set(blockPosition: BlockPosition, schema: PylonBlockSchema): PylonBlock<PylonBlockSchema> {
+    @JvmOverloads
+    fun set(
+        blockPosition: BlockPosition,
+        schema: PylonBlockSchema,
+        context: BlockCreateContext = BlockCreateContext.Default
+    ): PylonBlock<PylonBlockSchema> {
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.createConstructor.invoke(schema, blockPosition.block) as PylonBlock<PylonBlockSchema>
+        val block =
+            schema.createConstructor.invoke(schema, blockPosition.block, context) as PylonBlock<PylonBlockSchema>
 
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
@@ -167,8 +173,9 @@ object BlockStorage : Listener {
      * @see [placeBlock]
      */
     @JvmStatic
-    fun set(block: Block, schema: PylonBlockSchema)
-            = set(block.position, schema)
+    @JvmOverloads
+    fun set(block: Block, schema: PylonBlockSchema, context: BlockCreateContext = BlockCreateContext.Default) =
+        set(block.position, schema, context)
 
     /**
      * Sets a new Pylon block's data in the storage, but does not set the block in the world.
@@ -178,8 +185,9 @@ object BlockStorage : Listener {
      * @see [placeBlock]
      */
     @JvmStatic
-    fun set(location: Location, schema: PylonBlockSchema)
-            = set(BlockPosition(location), schema)
+    @JvmOverloads
+    fun set(location: Location, schema: PylonBlockSchema, context: BlockCreateContext = BlockCreateContext.Default) =
+        set(BlockPosition(location), schema, context)
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -187,8 +195,13 @@ object BlockStorage : Listener {
      * Only call on the main thread.
      */
     @JvmStatic
-    fun placeBlock(blockPosition: BlockPosition, schema: PylonBlockSchema): PylonBlock<PylonBlockSchema> {
-        val block = set(blockPosition, schema)
+    @JvmOverloads
+    fun placeBlock(
+        blockPosition: BlockPosition,
+        schema: PylonBlockSchema,
+        context: BlockCreateContext = BlockCreateContext.Default
+    ): PylonBlock<PylonBlockSchema> {
+        val block = set(blockPosition, schema, context)
         blockPosition.block.type = schema.material
         PylonBlockPlaceEvent(blockPosition.block, block).callEvent()
         return block
@@ -200,7 +213,9 @@ object BlockStorage : Listener {
      * Only call on the main thread.
      */
     @JvmStatic
-    fun placeBlock(block: Block, schema: PylonBlockSchema) = placeBlock(block.position, schema)
+    @JvmOverloads
+    fun placeBlock(block: Block, schema: PylonBlockSchema, context: BlockCreateContext = BlockCreateContext.Default) =
+        placeBlock(block.position, schema, context)
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -208,7 +223,12 @@ object BlockStorage : Listener {
      * Only call on the main thread.
      */
     @JvmStatic
-    fun placeBlock(location: Location, schema: PylonBlockSchema) = placeBlock(BlockPosition(location), schema)
+    @JvmOverloads
+    fun placeBlock(
+        location: Location,
+        schema: PylonBlockSchema,
+        context: BlockCreateContext = BlockCreateContext.Default
+    ) = placeBlock(BlockPosition(location), schema, context)
 
     /**
      * Removes the data for a block from the storage, but does not remove the block from the world.
