@@ -1,3 +1,5 @@
+import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
+
 plugins {
     kotlin("jvm") version "2.1.0"
     id("com.gradleup.shadow")
@@ -63,6 +65,7 @@ bukkit {
     version = project.version.toString()
     authors = listOf() // TODO
     apiVersion = "1.21"
+    load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }
 
 signing {

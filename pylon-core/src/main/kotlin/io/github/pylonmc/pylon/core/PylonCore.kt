@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
+import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockListener
@@ -17,8 +18,8 @@ class PylonCore : JavaPlugin() {
     override fun onEnable() {
         instance = this
 
-        Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
+        Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
         Bukkit.getPluginManager().registerEvents(MobDropListener, this)
 
@@ -32,6 +33,8 @@ class PylonCore : JavaPlugin() {
         addRegistryCompletion("items", PylonRegistry.ITEMS)
 
         manager.registerCommand(PylonCommand)
+
+        DebugWaxedWeatheredCutCopperStairs.register()
     }
 
     override fun onDisable() {
