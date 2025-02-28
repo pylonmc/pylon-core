@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;
 import org.bukkit.Material;
 
-
 public class SimpleBlockTest extends SyncTest {
     @Override
     public void test() {

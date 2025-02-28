@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.test.test.block;
 
+import io.github.pylonmc.pylon.core.block.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
@@ -9,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.jetbrains.annotations.NotNull;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,9 +19,9 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
         private final int processingSpeed;
 
         public TestBlockSchema(
-                @NotNull NamespacedKey key,
-                @NotNull Material material,
-                @NotNull Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
+                NamespacedKey key,
+                Material material,
+                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
             super(key, material, blockClass);
@@ -34,14 +34,14 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
     }
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> {
-        public TestBlock(@NotNull TestBlockSchema schema, @NotNull Block block) {
+        public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
         public TestBlock(
-                @NotNull TestBlockSchema schema,
-                @NotNull PersistentDataContainer pdc,
-                @NotNull Block block) {
+                TestBlockSchema schema,
+                Block block,
+                PersistentDataContainer pdc) {
             super(schema, block);
         }
     }

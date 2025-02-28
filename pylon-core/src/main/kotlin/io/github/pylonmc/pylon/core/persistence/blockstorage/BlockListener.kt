@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
+import io.github.pylonmc.pylon.core.block.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.position
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -21,7 +22,7 @@ internal object BlockListener : Listener {
         val item = PylonItem.fromStack(event.itemInHand)?.schema ?: return
         val block = PylonRegistry.BLOCKS[item.key]
         if (block != null) {
-            BlockStorage.placeBlock(event.block, block)
+            BlockStorage.placeBlock(event.block, block, BlockCreateContext.PlayerPlace(event.player, event))
         } else {
             event.setBuild(false)
         }

@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.test.test.block;
 
+import io.github.pylonmc.pylon.core.block.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
@@ -19,32 +20,29 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+@NotNullByDefault
 public class BlockStorageChunkReloadTest extends AsyncTest {
     public static class TestBlock extends PylonBlock<PylonBlockSchema> {
         private final NamespacedKey somethingKey = PylonTest.key("something");
 
         private final int something;
 
-        public TestBlock(@NotNull PylonBlockSchema schema, @NotNull Block block) {
+        public TestBlock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
             something = 170;
         }
 
         public TestBlock(
-                @NotNull PylonBlockSchema schema,
-                @NotNull PersistentDataContainer pdc,
-                @NotNull Block block
+                PylonBlockSchema schema,
+                Block block,
+                PersistentDataContainer pdc
         ) {
             super(schema, block);
             something = pdc.get(somethingKey, PylonSerializers.INTEGER);

@@ -24,7 +24,7 @@ open class PylonItemSchema(
         get() = template.clone()
 
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(
-        PylonItemSchema::class.java,
+        javaClass,
         ItemStack::class.java
     )
         ?: throw NoSuchMethodException("Item '$key' ($itemClass) is missing a load constructor (PylonItemSchema, ItemStack)")

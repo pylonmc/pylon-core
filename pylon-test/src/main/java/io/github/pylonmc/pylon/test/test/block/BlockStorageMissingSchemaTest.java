@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.test.test.block;
 
+import io.github.pylonmc.pylon.core.block.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
@@ -19,21 +20,21 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+@NotNullByDefault
 public class BlockStorageMissingSchemaTest extends AsyncTest {
     public static class TestBlockSchema extends PylonBlockSchema {
         private final int processingSpeed;
 
         public TestBlockSchema(
-                @NotNull NamespacedKey key,
-                @NotNull Material material,
-                @NotNull Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
+                NamespacedKey key,
+                Material material,
+                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
             super(key, material, blockClass);
@@ -42,14 +43,14 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
     }
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> {
-        public TestBlock(@NotNull TestBlockSchema schema, @NotNull Block block) {
+        public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
         public TestBlock(
-                @NotNull TestBlockSchema schema,
-                @NotNull PersistentDataContainer pdc,
-                @NotNull Block block) {
+                TestBlockSchema schema,
+                Block block,
+                PersistentDataContainer pdc) {
             super(schema, block);
         }
     }
@@ -71,7 +72,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
          * Stage 1: set the Pylon block when the Pylon data for that chunk is loaded, then unload the chunk
          */
         @EventHandler
-        public static void stage1(@NotNull PylonChunkBlocksLoadEvent e) {
+        public static void stage1(PylonChunkBlocksLoadEvent e) {
             if (stage != 1 || !block.getChunk().equals(e.getChunk())) {
                 return;
             }
@@ -88,7 +89,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
          * Stage 2: When the chunk's pylon data is unloaded, unregister the schema, then load the chunk again.
          */
         @EventHandler
-        public static void stage2(@NotNull PylonChunkBlocksUnloadEvent e) {
+        public static void stage2(PylonChunkBlocksUnloadEvent e) {
             if (stage != 2 || !block.getChunk().equals(e.getChunk())) {
                 return;
             }
@@ -105,7 +106,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
          * Stage 3: Get the pylon block data and check it's a phantom block, then unload the chunk
          */
         @EventHandler
-        public static void stage3(@NotNull PylonBlockLoadEvent e) {
+        public static void stage3(PylonBlockLoadEvent e) {
             if (stage != 3 || !block.equals(e.getBlock())) {
                 return;
             }
@@ -131,7 +132,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
          * Stage 4: When the chunk's pylon data is unloaded, reregister the schema, then load the chunk again.
          */
         @EventHandler
-        public static void stage4(@NotNull PylonChunkBlocksUnloadEvent e) {
+        public static void stage4(PylonChunkBlocksUnloadEvent e) {
             if (stage != 4 || !block.getChunk().equals(e.getChunk())) {
                 return;
             }
@@ -148,7 +149,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
          * Stage 5: Get the pylon block data and check it's back to a TestBlock
          */
         @EventHandler
-        public static void stage5(@NotNull PylonBlockLoadEvent e) {
+        public static void stage5(PylonBlockLoadEvent e) {
             if (stage != 5 || !block.equals(e.getBlock())) {
                 return;
             }
