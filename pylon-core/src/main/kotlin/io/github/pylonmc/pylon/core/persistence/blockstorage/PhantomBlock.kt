@@ -71,6 +71,7 @@ class PhantomBlock(
             .build()
 
         // Intentionally not registered to hide Pylon internals
+        @JvmSynthetic
         internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)
     }
 }

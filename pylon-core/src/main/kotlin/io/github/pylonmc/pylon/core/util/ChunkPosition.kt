@@ -1,3 +1,5 @@
+@file:JvmSynthetic // Hide the ugly `ChunkPositionKt.getPosition` function in Java
+
 package io.github.pylonmc.pylon.core.util
 
 import org.bukkit.Chunk

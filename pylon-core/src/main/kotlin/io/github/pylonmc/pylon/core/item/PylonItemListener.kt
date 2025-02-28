@@ -18,7 +18,7 @@ import org.bukkit.event.player.*
 @Suppress("UnstableApiUsage")
 internal object PylonItemListener : Listener {
     @EventHandler
-    fun handle(event: PlayerReadyArrowEvent) {
+    private fun handle(event: PlayerReadyArrowEvent) {
         val bow = PylonItem.fromStack(event.bow)
         if (bow is Bow) {
             bow.onBowReady(event)
@@ -31,7 +31,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityShootBowEvent) {
+    private fun handle(event: EntityShootBowEvent) {
         val bow = event.bow?.let { PylonItem.fromStack(it) }
         if (bow is Bow) {
             bow.onBowFired(event)
@@ -44,7 +44,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerInteractEvent) {
+    private fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) }
         if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToClickBlock(event)
@@ -55,7 +55,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: BrewingStandFuelEvent) {
+    private fun handle(event: BrewingStandFuelEvent) {
         val pylonItem = PylonItem.fromStack(event.fuel)
         if (pylonItem is BrewingStandFuel) {
             pylonItem.onUsedAsBrewingStandFuel(event)
@@ -63,7 +63,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerBucketEmptyEvent) {
+    private fun handle(event: PlayerBucketEmptyEvent) {
         val pylonItem = event.itemStack?.let { PylonItem.fromStack(it) }
         if (pylonItem is Bucket) {
             pylonItem.onBucketEmptied(event)
@@ -71,7 +71,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerBucketFillEvent) {
+    private fun handle(event: PlayerBucketFillEvent) {
         val pylonItem = event.itemStack?.let { PylonItem.fromStack(it) }
         if (pylonItem is Bucket) {
             pylonItem.onBucketFilled(event)
@@ -79,7 +79,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerItemConsumeEvent) {
+    private fun handle(event: PlayerItemConsumeEvent) {
         val pylonItem = PylonItem.fromStack(event.item)
         if (pylonItem is Consumable) {
             pylonItem.onConsumed(event)
@@ -87,7 +87,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerItemDamageEvent) {
+    private fun handle(event: PlayerItemDamageEvent) {
         val pylonItem = PylonItem.fromStack(event.item)
         if (pylonItem is Damageable) {
             pylonItem.onItemDamaged(event)
@@ -95,7 +95,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerItemBreakEvent) {
+    private fun handle(event: PlayerItemBreakEvent) {
         val pylonItem = PylonItem.fromStack(event.brokenItem)
         if (pylonItem is Damageable) {
             pylonItem.onItemBreaks(event)
@@ -103,7 +103,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerItemMendEvent) {
+    private fun handle(event: PlayerItemMendEvent) {
         val pylonItem = PylonItem.fromStack(event.item)
         if (pylonItem is Damageable) {
             pylonItem.onItemMended(event)
@@ -111,7 +111,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityInteractEvent) {
+    private fun handle(event: EntityInteractEvent) {
         val entity = event.entity
         if (entity is Player) {
             val pylonItem = PylonItem.fromStack(entity.activeItem)
@@ -122,7 +122,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: FurnaceBurnEvent) {
+    private fun handle(event: FurnaceBurnEvent) {
         val pylonItem = PylonItem.fromStack(event.fuel)
         if (pylonItem is FurnaceFuel) {
             pylonItem.onBurntAsFuel(event)
@@ -130,7 +130,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: BlockDamageEvent) {
+    private fun handle(event: BlockDamageEvent) {
         val pylonItem = PylonItem.fromStack(event.itemInHand)
         if (pylonItem is Tool) {
             pylonItem.onUsedToDamageBlock(event)
@@ -138,7 +138,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: BlockBreakEvent) {
+    private fun handle(event: BlockBreakEvent) {
         val pylonItem = PylonItem.fromStack(event.player.activeItem)
         if (pylonItem is Tool) {
             pylonItem.onUsedToBreakBlock(event)
@@ -146,7 +146,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityDamageByEntityEvent) {
+    private fun handle(event: EntityDamageByEntityEvent) {
         val damager = event.damageSource.causingEntity
         if (!event.damageSource.isIndirect) {
             if (damager is Player) {
@@ -159,7 +159,7 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityDeathEvent) {
+    private fun handle(event: EntityDeathEvent) {
         val killer = event.damageSource.causingEntity
         if (killer is Player) {
             val pylonItem = PylonItem.fromStack(killer.activeItem)
