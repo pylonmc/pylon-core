@@ -38,6 +38,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new BlockStorageRemoveTest());
         tests.add(new SimpleBlockTest());
         tests.add(new SimpleBlockWithSchemaTest());
+        tests.add(new TickingBlockTest());
 
         tests.add(new PylonItemStackSimpleTest());
         tests.add(new PylonItemStackInterfaceTest());

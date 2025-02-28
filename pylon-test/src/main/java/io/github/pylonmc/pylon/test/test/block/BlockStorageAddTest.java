@@ -11,7 +11,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.NotNullByDefault;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,9 +21,9 @@ public class BlockStorageAddTest extends GameTest {
         private final int processingSpeed;
 
         public TestBlockSchema(
-                @NotNull NamespacedKey key,
-                @NotNull Material material,
-                @NotNull Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
+                NamespacedKey key,
+                Material material,
+                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
             super(key, material, blockClass);

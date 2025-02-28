@@ -73,6 +73,10 @@ object BlockStorage : Listener {
     val loadedChunks: Set<ChunkPosition>
         get() = lockBlockRead { blocksByChunk.keys }
 
+    @JvmStatic
+    val loadedPylonBlocks: Collection<PylonBlock<PylonBlockSchema>>
+        get() = lockBlockRead { blocks.values }
+
     internal fun startAutosaveTask() {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
             // TODO this saves all chunks at once, potentially leading to large pauses
