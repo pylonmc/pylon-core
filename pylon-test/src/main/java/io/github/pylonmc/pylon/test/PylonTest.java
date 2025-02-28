@@ -38,6 +38,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new BlockStorageRemoveTest());
         tests.add(new SimpleBlockTest());
         tests.add(new SimpleBlockWithSchemaTest());
+        tests.add(new TickingBlockTest());
 
         tests.add(new PylonItemStackSimpleTest());
         tests.add(new PylonItemStackInterfaceTest());
@@ -119,18 +120,20 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
         instance = this;
 
-        testWorld = new WorldCreator("gametests")
-                .generator(new BedrockWorldGenerator())
-                .environment(World.Environment.NORMAL)
-                .createWorld();
+        if (!Boolean.parseBoolean(System.getenv("NO_TEST"))) {
+            testWorld = new WorldCreator("gametests")
+                    .generator(new BedrockWorldGenerator())
+                    .environment(World.Environment.NORMAL)
+                    .createWorld();
 
-        assert testWorld != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
+            assert testWorld != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
 
-        testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
-        testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+            testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+            testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+            testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::run, 1);
+            Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::run, 1);
+        }
     }
 
     @Override

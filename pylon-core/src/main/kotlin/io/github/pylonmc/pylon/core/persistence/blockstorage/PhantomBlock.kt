@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
+import io.github.pylonmc.pylon.core.block.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -29,13 +30,13 @@ class PhantomBlock(
     // TODO implement breakable block interface and add some logic to drop an error item when this is broken
 
     // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block)
+    constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
         throw IllegalStateException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
-    constructor(schema: PylonBlockSchema, pdc: PersistentDataContainer, block: Block)
+    constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
         throw IllegalStateException("Phantom block cannot be loaded")
     }
