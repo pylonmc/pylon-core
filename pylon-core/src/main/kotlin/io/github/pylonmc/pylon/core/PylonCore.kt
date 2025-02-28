@@ -1,3 +1,5 @@
+@file:JvmSynthetic // Hide `PylonCoreKt.getPluginInstance` from Java
+
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
@@ -5,6 +7,7 @@ import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
+import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.Ticking
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -33,6 +36,7 @@ class PylonCore : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
         Bukkit.getPluginManager().registerEvents(MobDropListener, this)
+        Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
 
         manager = PaperCommandManager(this)
         manager.commandContexts.registerContext(NamespacedKey::class.java) {
