@@ -11,7 +11,7 @@ import org.bukkit.NamespacedKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BlockStorageRemoveTest  extends GameTest {
+public class BlockStorageRemoveTest extends GameTest {
     private static final PylonBlockSchema schema = new PylonBlockSchema(
             PylonTest.key("block_storage_remove_test"),
             Material.AMETHYST_BLOCK,
