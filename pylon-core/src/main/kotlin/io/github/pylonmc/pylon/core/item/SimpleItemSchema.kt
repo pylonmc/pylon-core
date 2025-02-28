@@ -15,8 +15,23 @@ class SimpleItemSchema<R : Keyed> @JvmOverloads constructor(
     private val recipe: (ItemStack) -> R,
     private val block: PylonBlockSchema? = null
 ) : PylonItemSchema(id, SimplePylonItem::class.java, template), RegistryHandler<SimpleItemSchema<R>> {
+
+    private var recipeKey: NamespacedKey? = null
+
     override fun onRegister(registry: PylonRegistry<SimpleItemSchema<R>>) {
-        recipeType.addRecipe(recipe(itemStack))
+        val recipeInstance = recipe(itemStack)
+        recipeKey = recipeInstance.key
+        recipeType.addRecipe(recipeInstance)
         block?.register()
+    }
+
+    override fun onUnregister(registry: PylonRegistry<SimpleItemSchema<R>>) {
+        if (recipeKey != null) {
+            recipeType.removeRecipe(recipeKey!!)
+            recipeKey = null
+        }
+        if (block != null) {
+            PylonRegistry.BLOCKS.unregister(block.key)
+        }
     }
 }
