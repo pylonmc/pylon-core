@@ -20,7 +20,7 @@ open class PylonItemSchema(
     private val key: NamespacedKey,
     internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
     private val template: ItemStack,
-) : Keyed, RegistryHandler<PylonItemSchema> {
+) : Keyed, RegistryHandler {
 
     private var alreadyRegistered = false
 
@@ -44,7 +44,7 @@ open class PylonItemSchema(
     }
 
     @MustBeInvokedByOverriders
-    override fun onRegister(registry: PylonRegistry<PylonItemSchema>) {
+    override fun onRegister(registry: PylonRegistry<*>) {
         if (registry.key == PylonRegistryKey.ITEMS && !alreadyRegistered) {
             alreadyRegistered = true
             template.editMeta { meta ->
