@@ -17,7 +17,12 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 ) {
     open fun write(pdc: PersistentDataContainer) {}
 
-    open fun onBreak(drops: MutableList<ItemStack>) {}
+    open fun onBreak(drops: MutableList<ItemStack>) {
+        val item = PylonRegistry.ITEMS[schema.key]
+        if (item != null) {
+            drops.add(item.itemStack)
+        }
+    }
 
     companion object {
 

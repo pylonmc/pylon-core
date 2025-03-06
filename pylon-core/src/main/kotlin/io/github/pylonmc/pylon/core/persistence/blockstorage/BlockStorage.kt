@@ -286,10 +286,6 @@ object BlockStorage : Listener {
     fun breakBlock(blockPosition: BlockPosition): List<ItemStack>? {
         val block = get(blockPosition) ?: return null
         val drops = mutableListOf<ItemStack>()
-        val item = PylonRegistry.ITEMS[block.schema.key]
-        if (item != null) {
-            drops.add(item.itemStack)
-        }
         block.onBreak(drops)
         remove(blockPosition)
         return drops
