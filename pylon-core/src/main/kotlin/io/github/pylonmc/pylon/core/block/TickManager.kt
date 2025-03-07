@@ -25,9 +25,8 @@ object TickManager : Listener {
     private val tickingBlocks: MutableMap<PylonBlock<PylonBlockSchema>, Job> = ConcurrentHashMap()
 
     @JvmStatic
-    fun <T> hasStoppedTicker(block: T): Boolean
-            where T : PylonBlock<*>, T : Ticking {
-        return tickingBlocks[block]?.isCompleted != false
+    fun isTicking(block: PylonBlock<*>): Boolean {
+        return tickingBlocks[block]?.isActive == true
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
