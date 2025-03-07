@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.block.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.BlockItemReason
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.block.base.BreakHandler
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -202,8 +203,13 @@ object BlockStorage : Listener {
         reason: BlockItemReason = BlockItemReason.PluginBreak
     ): List<ItemStack>? {
         val block = get(blockPosition) ?: return null
+
         val drops = mutableListOf<ItemStack>()
-        block.onDestroy(drops, reason)
+        block.getItem(reason)?.let { drops.add(it) }
+        if (block is BreakHandler) {
+            block.onBreak(drops, reason)
+        }
+
         lockBlockWrite {
             blocks.remove(blockPosition)
             blocksById[block.schema.key]?.remove(block)
