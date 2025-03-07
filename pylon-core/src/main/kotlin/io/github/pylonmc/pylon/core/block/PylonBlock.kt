@@ -6,9 +6,11 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.BlockPosition
 import io.github.pylonmc.pylon.core.util.position
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.entity.BlockDisplay
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
@@ -17,6 +19,9 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val schema: S,
     val block: Block
 ) {
+
+    @JvmSynthetic
+    internal var errorBlock: BlockDisplay? = null
 
     open fun getItem(reason: BlockItemReason): ItemStack? {
         return if (reason.normallyDrops) PylonRegistry.ITEMS[schema.key]?.itemStack else null
@@ -33,8 +38,9 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 
     companion object {
 
-        private val pylonBlockIdKey = NamespacedKey(pluginInstance, "id")
-        private val pylonBlockPositionKey = NamespacedKey(pluginInstance, "position")
+        private val pylonBlockKeyKey = pylonKey("key")
+        private val pylonBlockPositionKey = pylonKey("position")
+        private val pylonBlockErrorKey = pylonKey("error")
 
         internal fun serialize(
             block: PylonBlock<PylonBlockSchema>,
@@ -46,8 +52,14 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
             }
 
             val pdc = context.newPersistentDataContainer()
-            pdc.set(pylonBlockIdKey, PylonSerializers.NAMESPACED_KEY, block.schema.key)
+            pdc.set(pylonBlockKeyKey, PylonSerializers.NAMESPACED_KEY, block.schema.key)
             pdc.set(pylonBlockPositionKey, PylonSerializers.LONG, block.block.position.asLong)
+
+            val errorBlock = block.errorBlock
+            if (errorBlock != null) {
+                pdc.set(pylonBlockErrorKey, PylonSerializers.UUID, errorBlock.uniqueId)
+            }
+
             block.write(pdc)
             return pdc
         }
@@ -61,7 +73,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
             var position: BlockPosition? = null
 
             try {
-                id = pdc.get(pylonBlockIdKey, PylonSerializers.NAMESPACED_KEY)
+                id = pdc.get(pylonBlockKeyKey, PylonSerializers.NAMESPACED_KEY)
                     ?: error("Block PDC does not contain ID")
 
                 position = pdc.get(pylonBlockPositionKey, PylonSerializers.LONG)?.let {
@@ -76,7 +88,12 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 
                 // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                return schema.loadConstructor.invoke(schema, position.block, pdc) as PylonBlock<PylonBlockSchema>
+                val block = schema.loadConstructor.invoke(schema, position.block, pdc) as PylonBlock<PylonBlockSchema>
+
+                block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
+                    ?.let { world.getEntity(it) as? BlockDisplay }
+
+                return block
             } catch (t: Throwable) {
                 pluginInstance.logger.severe("Error while loading block $id at $position")
                 t.printStackTrace()

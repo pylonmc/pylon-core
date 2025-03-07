@@ -56,7 +56,7 @@ object BlockStorage : Listener {
 
     private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
 
-    // Access to blocks, blocksByChunk, blocksById, tickerJobs fields must be synchronized
+    // Access to blocks, blocksByChunk, blocksById fields must be synchronized
     // to prevent them briefly going out of sync
     private val blockLock = ReentrantReadWriteLock()
 
