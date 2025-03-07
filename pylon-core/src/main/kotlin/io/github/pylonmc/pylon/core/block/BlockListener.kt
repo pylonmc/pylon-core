@@ -1,10 +1,9 @@
-package io.github.pylonmc.pylon.core.persistence.blockstorage
+package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.BlockItemReason
-import io.github.pylonmc.pylon.core.block.position
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.position
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -19,8 +18,8 @@ internal object BlockListener : Listener {
 
     @EventHandler
     fun onPlace(event: BlockPlaceEvent) {
-        val item = PylonItem.fromStack(event.itemInHand)?.schema ?: return
-        val block = PylonRegistry.BLOCKS[item.key]
+        val item = PylonItem.Companion.fromStack(event.itemInHand)?.schema ?: return
+        val block = PylonRegistry.Companion.BLOCKS[item.key]
         if (block != null) {
             BlockStorage.placeBlock(event.block, block, BlockCreateContext.PlayerPlace(event.player, event))
         } else {

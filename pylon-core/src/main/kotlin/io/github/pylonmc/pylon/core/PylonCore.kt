@@ -1,10 +1,11 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
+import io.github.pylonmc.pylon.core.block.BlockListener
+import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
-import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
@@ -14,7 +15,12 @@ import org.bukkit.plugin.java.JavaPlugin
 class PylonCore : JavaPlugin() {
 
     private lateinit var manager: PaperCommandManager
-    var tickDelay = 1
+
+    // TODO make a proper config system
+    var tickDelay = -1
+        private set
+
+    var allowedBlockErrors = -1
         private set
 
     override fun onEnable() {
@@ -22,11 +28,13 @@ class PylonCore : JavaPlugin() {
 
         saveDefaultConfig()
         tickDelay = config.getInt("tick-delay", 10)
+        allowedBlockErrors = config.getInt("allowed-block-errors", 5)
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
         Bukkit.getPluginManager().registerEvents(MobDropListener, this)
+        Bukkit.getPluginManager().registerEvents(TickManager, this)
 
         manager = PaperCommandManager(this)
         manager.commandContexts.registerContext(NamespacedKey::class.java) {

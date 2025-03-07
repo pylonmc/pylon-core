@@ -4,6 +4,8 @@ import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.BlockPosition
+import io.github.pylonmc.pylon.core.util.position
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block

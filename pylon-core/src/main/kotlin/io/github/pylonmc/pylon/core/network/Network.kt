@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.network
 
-import io.github.pylonmc.pylon.core.block.BlockPosition
-import io.github.pylonmc.pylon.core.block.position
+import io.github.pylonmc.pylon.core.util.BlockPosition
+import io.github.pylonmc.pylon.core.util.position
 import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace

@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.test.serializer;
 
-import io.github.pylonmc.pylon.core.block.ChunkPosition;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
+import io.github.pylonmc.pylon.core.util.ChunkPosition;
 
 
 public class SerializerTestChunkPositionNoWorld extends SerializerTest<ChunkPosition> {
