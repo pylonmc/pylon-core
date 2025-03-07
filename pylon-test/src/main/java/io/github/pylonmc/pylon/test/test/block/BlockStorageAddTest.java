@@ -58,7 +58,7 @@ public class BlockStorageAddTest extends GameTest {
                 .setUp((test) -> {
                     schema.register();
 
-                    BlockStorage.set(test.location(), schema);
+                    BlockStorage.placeBlock(test.location(), schema);
 
                     PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(test.location());
 

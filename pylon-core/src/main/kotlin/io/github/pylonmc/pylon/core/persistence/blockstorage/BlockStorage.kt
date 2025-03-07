@@ -3,8 +3,6 @@ package io.github.pylonmc.pylon.core.persistence.blockstorage
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.event.*
-import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage.breakBlock
-import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage.placeBlock
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -92,12 +90,10 @@ object BlockStorage : Listener {
     fun get(blockPosition: BlockPosition): PylonBlock<PylonBlockSchema>? = lockBlockRead { blocks[blockPosition] }
 
     @JvmStatic
-    fun get(block: Block): PylonBlock<PylonBlockSchema>?
-        = get(block.position)
+    fun get(block: Block): PylonBlock<PylonBlockSchema>? = get(block.position)
 
     @JvmStatic
-    fun get(location: Location): PylonBlock<PylonBlockSchema>?
-            = get(location.block)
+    fun get(location: Location): PylonBlock<PylonBlockSchema>? = get(location.block)
 
     @JvmStatic
     fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
@@ -106,21 +102,18 @@ object BlockStorage : Listener {
     }
 
     @JvmStatic
-    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, block: Block): T?
-        = getAs(clazz, block.position)
+    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
 
     @JvmStatic
-    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, location: Location): T?
-            = getAs(clazz, BlockPosition(location))
+    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, location: Location): T? =
+        getAs(clazz, BlockPosition(location))
 
-    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T?
-            = getAs(T::class.java, blockPosition)
+    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T? =
+        getAs(T::class.java, blockPosition)
 
-    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(block: Block): T?
-            = getAs(T::class.java, block)
+    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(block: Block): T? = getAs(T::class.java, block)
 
-    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(location: Location): T?
-            = getAs(T::class.java, location)
+    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(location: Location): T? = getAs(T::class.java, location)
 
     @JvmStatic
     fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<PylonBlockSchema>> =
@@ -138,60 +131,7 @@ object BlockStorage : Listener {
 
 
     @JvmStatic
-    fun exists(blockPosition: BlockPosition): Boolean
-        = get(blockPosition) != null
-
-    /**
-     * Sets a new Pylon block's data in the storage, but does not set the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
-     *
-     * @see [placeBlock]
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun set(
-        blockPosition: BlockPosition,
-        schema: PylonBlockSchema,
-        context: BlockCreateContext = BlockCreateContext.Default
-    ): PylonBlock<PylonBlockSchema> {
-        @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block =
-            schema.createConstructor.invoke(schema, blockPosition.block, context) as PylonBlock<PylonBlockSchema>
-
-        lockBlockWrite {
-            check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
-            blocks[blockPosition] = block
-            blocksById.computeIfAbsent(schema.key) { mutableListOf() }.add(block)
-            blocksByChunk[blockPosition.chunk]!!.add(block)
-        }
-
-        return block
-    }
-
-    /**
-     * Sets a new Pylon block's data in the storage, but does not set the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
-     *
-     * @see [placeBlock]
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun set(block: Block, schema: PylonBlockSchema, context: BlockCreateContext = BlockCreateContext.Default) =
-        set(block.position, schema, context)
-
-    /**
-     * Sets a new Pylon block's data in the storage, but does not set the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
-     *
-     * @see [placeBlock]
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun set(location: Location, schema: PylonBlockSchema, context: BlockCreateContext = BlockCreateContext.Default) =
-        set(BlockPosition(location), schema, context)
+    fun exists(blockPosition: BlockPosition): Boolean = get(blockPosition) != null
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -205,7 +145,15 @@ object BlockStorage : Listener {
         schema: PylonBlockSchema,
         context: BlockCreateContext = BlockCreateContext.Default
     ): PylonBlock<PylonBlockSchema> {
-        val block = set(blockPosition, schema, context)
+        @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
+        val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
+                as PylonBlock<PylonBlockSchema>
+        lockBlockWrite {
+            check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
+            blocks[blockPosition] = block
+            blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
+            blocksByChunk[blockPosition.chunk]!!.add(block)
+        }
         blockPosition.block.type = schema.material
         PylonBlockPlaceEvent(blockPosition.block, block).callEvent()
         return block
@@ -235,47 +183,6 @@ object BlockStorage : Listener {
     ) = placeBlock(BlockPosition(location), schema, context)
 
     /**
-     * Removes the data for a block from the storage, but does not remove the block from the world.
-     * Does nothing if the block is not a Pylon block.
-     * Only call on the main thread.
-     *
-     * @see [breakBlock]
-     */
-    @JvmStatic
-    fun remove(blockPosition: BlockPosition) = lockBlockWrite {
-        val block = blocks.remove(blockPosition)
-        if (block != null) {
-            blockPosition.block.type = Material.AIR
-            blocksById[block.schema.key]?.remove(block)
-            blocksByChunk[blockPosition.chunk]?.remove(block)
-
-            PylonBlockBreakEvent(blockPosition.block, block).callEvent()
-        }
-    }
-
-    /**
-     * Removes the data for a block from the storage, but does not remove the block from the world.
-     * Does nothing if the block is not a Pylon block.
-     * Only call on the main thread.
-     *
-     * @see [breakBlock]
-     */
-    @JvmStatic
-    fun remove(block: Block)
-            = remove(block.position)
-
-    /**
-     * Removes the data for a block from the storage, but does not remove the block from the world.
-     * Does nothing if the block is not a Pylon block.
-     * Only call on the main thread.
-     *
-     * @see [breakBlock]
-     */
-    @JvmStatic
-    fun remove(location: Location)
-            = remove(BlockPosition(location))
-
-    /**
      * Removes a block from the world and the storage.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
@@ -283,11 +190,21 @@ object BlockStorage : Listener {
      * @return The list of drops, or null if the block is not a Pylon block
      */
     @JvmStatic
-    fun breakBlock(blockPosition: BlockPosition): List<ItemStack>? {
+    @JvmOverloads
+    fun breakBlock(
+        blockPosition: BlockPosition,
+        reason: BlockItemReason = BlockItemReason.PluginBreak
+    ): List<ItemStack>? {
         val block = get(blockPosition) ?: return null
         val drops = mutableListOf<ItemStack>()
-        block.onBreak(drops)
-        remove(blockPosition)
+        block.onDestroy(drops, reason)
+        lockBlockWrite {
+            blocks.remove(blockPosition)
+            blocksById[block.schema.key]?.remove(block)
+            blocksByChunk[blockPosition.chunk]?.remove(block)
+        }
+        PylonBlockBreakEvent(blockPosition.block, block).callEvent()
+        blockPosition.block.type = Material.AIR
         return drops
     }
 
@@ -299,7 +216,9 @@ object BlockStorage : Listener {
      * @return The list of drops, or null if the block is not a Pylon block
      */
     @JvmStatic
-    fun breakBlock(block: Block) = breakBlock(block.position)
+    @JvmOverloads
+    fun breakBlock(block: Block, reason: BlockItemReason = BlockItemReason.PluginBreak) =
+        breakBlock(block.position, reason)
 
     /**
      * Removes a block from the world and the storage.
@@ -309,7 +228,9 @@ object BlockStorage : Listener {
      * @return The list of drops, or null if the block is not a Pylon block
      */
     @JvmStatic
-    fun breakBlock(location: Location) = breakBlock(BlockPosition(location))
+    @JvmOverloads
+    fun breakBlock(location: Location, reason: BlockItemReason = BlockItemReason.PluginBreak) =
+        breakBlock(BlockPosition(location), reason)
 
     private fun load(world: World, chunk: Chunk): List<PylonBlock<PylonBlockSchema>> {
         val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
@@ -379,13 +300,16 @@ object BlockStorage : Listener {
     internal fun cleanup(addon: PylonAddon) = lockBlockWrite {
         val replacer: (PylonBlock<PylonBlockSchema>) -> PylonBlock<PylonBlockSchema> = { block ->
             if (block.schema.key.isFromAddon(addon)) {
-                PhantomBlock(PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext), block.block)
+                PhantomBlock(
+                    PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
+                    block.block
+                )
             } else {
                 block
             }
         }
 
-        blocks.replaceAll { _, block -> replacer.invoke(block ) }
+        blocks.replaceAll { _, block -> replacer.invoke(block) }
         for (blocks in blocksById.values) {
             blocks.replaceAll(replacer)
         }

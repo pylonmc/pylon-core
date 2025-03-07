@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import io.github.pylonmc.pylon.core.block.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.BlockItemReason
 import io.github.pylonmc.pylon.core.block.position
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -9,11 +10,10 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.inventory.ItemStack
 
 /**
- * The job of this is to prevent BlockStorage from entering an inconsistent state due to
- * various world events - for example, if a PylonBlock is pushed by a piston.
+ * This listener listens for various events that would indicate a Pylon block either
+ * being placed, removed, or moved
  */
 internal object BlockListener : Listener {
 
@@ -30,34 +30,32 @@ internal object BlockListener : Listener {
 
     @EventHandler
     fun blockRemove(event: BlockBreakEvent) {
-        val block = event.block
-        dropItems(block, BlockStorage.breakBlock(block) ?: return)
+        breakBlock(event.block, BlockItemReason.PlayerBreak(event))
     }
 
     @EventHandler
     fun blockBurn(event: BlockBurnEvent) {
-        BlockStorage.breakBlock(event.block)
+        breakBlock(event.block, BlockItemReason.Burned(event))
     }
 
     @EventHandler
     fun blockRemove(event: BlockExplodeEvent) {
-        BlockStorage.breakBlock(event.block)
+        breakBlock(event.block, BlockItemReason.Exploded(event))
         for (block in event.blockList()) {
-            dropItems(block, BlockStorage.breakBlock(block) ?: continue)
+            breakBlock(block, BlockItemReason.WasExploded)
         }
     }
 
     @EventHandler
     fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
-            dropItems(block, BlockStorage.breakBlock(block) ?: continue)
+            breakBlock(block, BlockItemReason.WasExploded)
         }
     }
 
     @EventHandler
     fun blockRemove(event: BlockFadeEvent) {
-        val block = event.block
-        dropItems(block, BlockStorage.breakBlock(block) ?: return)
+        breakBlock(event.block, BlockItemReason.Faded(event))
     }
 
     @EventHandler
@@ -94,9 +92,10 @@ internal object BlockListener : Listener {
         }
     }
 
-    private fun dropItems(block: Block, drops: List<ItemStack>) {
+    private fun breakBlock(block: Block, reason: BlockItemReason) {
+        val drops = BlockStorage.breakBlock(block, reason) ?: return
         for (drop in drops) {
-            block.world.dropItemNaturally(block.location.add(0.5, 0.0, 0.5), drop)
+            block.world.dropItemNaturally(block.location.add(0.5, 0.1, 0.5), drop)
         }
     }
 }

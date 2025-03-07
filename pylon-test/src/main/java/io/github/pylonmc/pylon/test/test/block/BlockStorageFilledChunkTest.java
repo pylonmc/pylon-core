@@ -51,7 +51,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
             // Run this later to prevent stage 3 from firing early
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
                 for (BlockPosition blockPosition : blockLoadedFutures.keySet()) {
-                    BlockStorage.set(blockPosition, schema);
+                    BlockStorage.placeBlock(blockPosition, schema);
                 }
                 e.getChunk().unload();
             }, 10);

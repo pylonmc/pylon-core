@@ -56,7 +56,7 @@ public class TickingBlockTest extends GameTest {
                     schema.register();
 
                     TestBlock.ticks = 0;
-                    BlockStorage.set(test.location(), schema);
+                    BlockStorage.placeBlock(test.location(), schema);
 
                     test.succeedWhen(() -> TestBlock.ticks >= 5);
                 })

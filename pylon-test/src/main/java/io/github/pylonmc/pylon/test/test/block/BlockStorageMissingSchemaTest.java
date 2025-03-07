@@ -80,7 +80,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
             stage = 2;
 
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
-                BlockStorage.set(e.getChunk().getBlock(7, 100, 7), schema);
+                BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), schema);
                 e.getChunk().unload();
             }, 10);
         }

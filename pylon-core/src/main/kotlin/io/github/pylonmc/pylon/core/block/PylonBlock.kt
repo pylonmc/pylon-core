@@ -15,14 +15,19 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val schema: S,
     val block: Block
 ) {
-    open fun write(pdc: PersistentDataContainer) {}
 
-    open fun onBreak(drops: MutableList<ItemStack>) {
-        val item = PylonRegistry.ITEMS[schema.key]
+    open fun getItem(reason: BlockItemReason): ItemStack? {
+        return if (reason.normallyDrops) PylonRegistry.ITEMS[schema.key]?.itemStack else null
+    }
+
+    open fun onDestroy(drops: MutableList<ItemStack>, reason: BlockItemReason) {
+        val item = getItem(reason)
         if (item != null) {
-            drops.add(item.itemStack)
+            drops.add(item)
         }
     }
+
+    open fun write(pdc: PersistentDataContainer) {}
 
     companion object {
 

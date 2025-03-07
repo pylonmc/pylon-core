@@ -80,7 +80,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             stage2Chunks.add(e.getChunk());
 
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
-                BlockStorage.set(e.getChunk().getBlock(7, 100, 7), schema);
+                BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), schema);
                 e.getChunk().unload();
             }, 10);
         }
