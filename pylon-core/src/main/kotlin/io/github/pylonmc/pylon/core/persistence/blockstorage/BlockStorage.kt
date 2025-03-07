@@ -1,5 +1,9 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
+import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
+import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.event.*
@@ -7,6 +11,8 @@ import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -16,6 +22,7 @@ import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.logging.Level
 
 internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
 
@@ -50,8 +57,8 @@ object BlockStorage : Listener {
 
     private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
 
-    // Access to blocks, blocksByChunk, blocksById fields must be synchronized to prevent them briefly going
-    // out of sync
+    // Access to blocks, blocksByChunk, blocksById, tickerJobs fields must be synchronized
+    // to prevent them briefly going out of sync
     private val blockLock = ReentrantReadWriteLock()
 
     private val blocks: MutableMap<BlockPosition, PylonBlock<PylonBlockSchema>> = ConcurrentHashMap()
@@ -62,6 +69,8 @@ object BlockStorage : Listener {
     private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockCollection> = ConcurrentHashMap()
 
     private val blocksById: MutableMap<NamespacedKey, PylonBlockCollection> = ConcurrentHashMap()
+
+    private val tickerJobs: MutableMap<PylonBlock<PylonBlockSchema>, Job> = ConcurrentHashMap()
 
     @JvmStatic
     val loadedBlocks: Set<BlockPosition>
@@ -153,6 +162,27 @@ object BlockStorage : Listener {
             blocks[blockPosition] = block
             blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
+
+            if (block is Ticking) {
+                val dispatcher =
+                    if (block.isAsync) pluginInstance.asyncDispatcher else pluginInstance.minecraftDispatcher
+                val tickDelay = block.getCustomTickRate(pluginInstance.tickDelay)
+                tickerJobs[block] = pluginInstance.launch(dispatcher) {
+                    while (true) {
+                        delay(tickDelay.ticks)
+                        try {
+                            block.tick(tickDelay / 20.0)
+                        } catch (e: Throwable) {
+                            pluginInstance.logger.log(
+                                Level.SEVERE,
+                                "An error occurred while ticking block ${block.block.position} of type ${block.schema.key}",
+                            )
+                            e.printStackTrace()
+                            break
+                        }
+                    }
+                }
+            }
         }
         blockPosition.block.type = schema.material
         PylonBlockPlaceEvent(blockPosition.block, block).callEvent()
@@ -202,6 +232,7 @@ object BlockStorage : Listener {
             blocks.remove(blockPosition)
             blocksById[block.schema.key]?.remove(block)
             blocksByChunk[blockPosition.chunk]?.remove(block)
+            tickerJobs.remove(block)?.cancel()
         }
         PylonBlockBreakEvent(blockPosition.block, block).callEvent()
         blockPosition.block.type = Material.AIR

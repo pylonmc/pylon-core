@@ -1,27 +1,21 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
-import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
-import com.github.shynixn.mccoroutine.bukkit.launch
-import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
-import com.github.shynixn.mccoroutine.bukkit.ticks
-import io.github.pylonmc.pylon.core.block.Ticking
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
-import kotlin.coroutines.CoroutineContext
 
 class PylonCore : JavaPlugin() {
 
     private lateinit var manager: PaperCommandManager
-    private var tickDelay = 10
+    var tickDelay = 1
+        private set
 
     override fun onEnable() {
         instance = this
@@ -44,9 +38,6 @@ class PylonCore : JavaPlugin() {
         manager.registerCommand(PylonCommand)
 
         DebugWaxedWeatheredCutCopperStairs.register()
-
-        runTicker(minecraftDispatcher, false)
-        runTicker(asyncDispatcher, true)
     }
 
     override fun onDisable() {
@@ -58,22 +49,6 @@ class PylonCore : JavaPlugin() {
     private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {
         manager.commandCompletions.registerCompletion(name) { _ ->
             registry.map { it.key.toString() }.sorted()
-        }
-    }
-
-    private fun runTicker(context: CoroutineContext, async: Boolean) {
-        val delayAmount = tickDelay // done sync because volatile shenanigans
-        launch(context) {
-            while (true) {
-                delay(delayAmount.ticks)
-                if (instance == null) break
-
-                for (block in BlockStorage.loadedPylonBlocks) {
-                    if (block is Ticking && block.isAsync == async) {
-                        block.tick(delayAmount / 20.0)
-                    }
-                }
-            }
         }
     }
 

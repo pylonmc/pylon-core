@@ -1,2 +1,2 @@
 # The amount of Minecraft ticks between each Pylon tick
-tick-delay: 10
+tick-delay: 1
