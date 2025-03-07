@@ -121,20 +121,20 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
         instance = this;
 
-        if (!Boolean.parseBoolean(System.getenv("NO_TEST"))) {
-            testWorld = new WorldCreator("gametests")
-                    .generator(new BedrockWorldGenerator())
-                    .environment(World.Environment.NORMAL)
-                    .createWorld();
+        if (Boolean.parseBoolean(System.getenv("NO_TEST"))) return;
 
-            assert testWorld != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
+        testWorld = new WorldCreator("gametests")
+                .generator(new BedrockWorldGenerator())
+                .environment(World.Environment.NORMAL)
+                .createWorld();
 
-            testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-            testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
-            testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+        assert testWorld != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
 
-            Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::run, 1);
-        }
+        testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+        testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+        testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::run, 1);
     }
 
     @Override

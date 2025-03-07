@@ -30,13 +30,13 @@ class PhantomBlock(
     // TODO implement breakable block interface and add some logic to drop an error item when this is broken
 
     // Hacky placeholder
-    constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
+    internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
         throw IllegalStateException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
-    constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
+    internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
         throw IllegalStateException("Phantom block cannot be loaded")
     }
