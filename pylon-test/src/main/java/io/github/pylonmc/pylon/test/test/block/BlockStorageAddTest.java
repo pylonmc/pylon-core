@@ -60,7 +60,7 @@ public class BlockStorageAddTest extends GameTest {
 
                     BlockStorage.placeBlock(test.location(), schema);
 
-                    PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(test.location());
+                    PylonBlock<?> pylonBlock = BlockStorage.get(test.location());
 
                     assertThat(pylonBlock)
                             .isNotNull()

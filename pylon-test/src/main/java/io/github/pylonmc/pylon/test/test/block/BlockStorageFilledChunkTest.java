@@ -82,7 +82,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
 
             Throwable exception = null;
             try {
-                PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(e.getBlock());
+                PylonBlock<?> pylonBlock = BlockStorage.get(e.getBlock());
 
                 assertThat(pylonBlock)
                         .isNotNull();

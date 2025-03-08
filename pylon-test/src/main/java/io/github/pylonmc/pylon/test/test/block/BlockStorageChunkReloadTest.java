@@ -98,7 +98,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             stage3Chunks.add(e.getChunk());
 
             try {
-                PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(e.getChunk().getBlock(7, 100, 7));
+                PylonBlock<?> pylonBlock = BlockStorage.get(e.getChunk().getBlock(7, 100, 7));
 
                 assertThat(pylonBlock)
                         .isNull();
@@ -126,7 +126,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
             Throwable exception = null;
             try {
-                PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(e.getBlock());
+                PylonBlock<?> pylonBlock = BlockStorage.get(e.getBlock());
 
                 assertThat(pylonBlock)
                         .isNotNull()

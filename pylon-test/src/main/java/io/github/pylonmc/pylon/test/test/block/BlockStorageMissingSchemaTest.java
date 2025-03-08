@@ -115,7 +115,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
             stage = 4;
 
             try {
-                PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(e.getBlock());
+                PylonBlock<?> pylonBlock = BlockStorage.get(e.getBlock());
 
                 assertThat(pylonBlock)
                         .isNotNull()
@@ -155,7 +155,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
             }
 
             try {
-                PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(e.getBlock());
+                PylonBlock<?> pylonBlock = BlockStorage.get(e.getBlock());
 
                 assertThat(pylonBlock)
                         .isNotNull()
