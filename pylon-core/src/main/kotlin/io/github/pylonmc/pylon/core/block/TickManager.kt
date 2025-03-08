@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
+import io.github.pylonmc.pylon.core.block.base.Ticking
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -22,7 +23,7 @@ import java.util.logging.Level.SEVERE
 
 object TickManager : Listener {
 
-    private val tickingBlocks: MutableMap<PylonBlock<PylonBlockSchema>, Job> = ConcurrentHashMap()
+    private val tickingBlocks: MutableMap<PylonBlock<*>, Job> = ConcurrentHashMap()
 
     @JvmStatic
     fun isTicking(block: PylonBlock<*>): Boolean {

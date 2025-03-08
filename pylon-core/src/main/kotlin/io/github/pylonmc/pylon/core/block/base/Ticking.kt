@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.block
+package io.github.pylonmc.pylon.core.block.base
 
 interface Ticking {
 
