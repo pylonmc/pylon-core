@@ -20,6 +20,7 @@ object PylonCommand : BaseCommand() {
     @Subcommand("give")
     @CommandCompletion("@players @items")
     @Description("Give a Pylon item to a player")
+    @CommandPermission("pylon.command.give")
     fun give(p: OnlinePlayer, item: NamespacedKey, @Default("1") amount: Int) {
         val player = p.player
         val pylonItem = PylonRegistry.ITEMS[item]
