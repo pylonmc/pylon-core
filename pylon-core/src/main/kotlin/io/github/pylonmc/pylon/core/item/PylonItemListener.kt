@@ -49,6 +49,9 @@ internal object PylonItemListener : Listener {
         if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToRightClickBlock(event)
         }
+        if (pylonItem is Interactor) {
+            pylonItem.onUsedToRightClick(event)
+        }
     }
 
     @EventHandler
