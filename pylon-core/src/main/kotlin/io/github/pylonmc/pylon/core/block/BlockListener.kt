@@ -59,14 +59,14 @@ internal object BlockListener : Listener {
 
     @EventHandler
     fun disallowForming(event: BlockFormEvent) {
-        if (BlockStorage.exists(event.block.position)) {
+        if (BlockStorage.isPylonBlock(event.block.position)) {
             event.isCancelled = true
         }
     }
 
     @EventHandler
     fun disallowFromTo(event: BlockFromToEvent) {
-        if (BlockStorage.exists(event.block.position)) {
+        if (BlockStorage.isPylonBlock(event.block.position)) {
             event.isCancelled = true
         }
     }
@@ -74,7 +74,7 @@ internal object BlockListener : Listener {
     @EventHandler
     fun disallowMovementByPistons(event: BlockPistonExtendEvent) {
         for (block in event.blocks) {
-            if (BlockStorage.exists(block.position)) {
+            if (BlockStorage.isPylonBlock(block.position)) {
                 event.isCancelled = true
                 return
             }
@@ -84,7 +84,7 @@ internal object BlockListener : Listener {
     @EventHandler
     fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
         for (block in event.blocks) {
-            if (BlockStorage.exists(block.position)) {
+            if (BlockStorage.isPylonBlock(block.position)) {
                 event.isCancelled = true
                 return
             }
