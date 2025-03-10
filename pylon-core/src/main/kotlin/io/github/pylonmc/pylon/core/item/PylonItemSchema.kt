@@ -45,19 +45,20 @@ open class PylonItemSchema(
 
     @MustBeInvokedByOverriders
     override fun onRegister(registry: PylonRegistry<*>) {
-        if (registry.key == PylonRegistryKey.ITEMS && !alreadyRegistered) {
-            alreadyRegistered = true
-            template.editMeta { meta ->
-                val plugin =
-                    Bukkit.getPluginManager().plugins.first { it.name.equals(key.namespace, ignoreCase = true) }
-                val lore = meta.lore() ?: mutableListOf()
-                lore.add(
-                    Component.text(plugin.name)
-                        .color(NamedTextColor.BLUE)
-                        .decoration(TextDecoration.ITALIC, true)
-                )
-                meta.lore(lore)
+        if (registry.key != PylonRegistryKey.ITEMS || alreadyRegistered) return
+
+        alreadyRegistered = true
+        template.editMeta { meta ->
+            val plugin = Bukkit.getPluginManager().plugins.first {
+                it.name.equals(key.namespace, ignoreCase = true)
             }
+            val lore = meta.lore() ?: mutableListOf()
+            lore.add(
+                Component.text(plugin.name)
+                    .color(NamedTextColor.BLUE)
+                    .decoration(TextDecoration.ITALIC, true)
+            )
+            meta.lore(lore)
         }
     }
 
