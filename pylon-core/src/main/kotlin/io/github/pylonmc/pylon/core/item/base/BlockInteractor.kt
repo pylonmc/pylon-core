@@ -4,7 +4,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 
 interface BlockInteractor {
     /**
-     * Called when a player right clicks a block while holding the item
+     * Called when a player clicks a block while holding the item
      */
-    fun onUsedToRightClickBlock(event: PlayerInteractEvent)
+    fun onUsedToClickBlock(event: PlayerInteractEvent)
 }
