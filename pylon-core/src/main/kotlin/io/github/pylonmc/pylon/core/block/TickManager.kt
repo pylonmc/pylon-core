@@ -6,14 +6,13 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.block.base.Ticking
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
-import org.bukkit.Color
+import kotlinx.coroutines.*
+import org.bukkit.Color.RED
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -32,8 +31,28 @@ object TickManager : Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun onPylonBlockPlace(e: PylonBlockPlaceEvent) {
-        val block = e.block
+        startTicker(e.pylonBlock)
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private fun onPylonBlockBreak(e: PylonBlockBreakEvent) {
         val pylonBlock = e.pylonBlock
+        tickingBlocks.remove(pylonBlock)?.cancel()
+        pylonBlock.errorBlock?.remove()
+        pylonBlock.errorBlock = null
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    private fun onPylonBlockLoad(e: PylonBlockLoadEvent) {
+        startTicker(e.pylonBlock)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    private fun onPylonBlockUnload(e: PylonBlockUnloadEvent) {
+        tickingBlocks.remove(e.pylonBlock)?.cancel()
+    }
+
+    private fun startTicker(pylonBlock: PylonBlock<*>) {
         if (pylonBlock is Ticking) {
             val dispatcher =
                 if (pylonBlock.isAsync) pluginInstance.asyncDispatcher else pluginInstance.minecraftDispatcher
@@ -45,38 +64,31 @@ object TickManager : Listener {
                     try {
                         pylonBlock.tick(tickDelay / 20.0)
                     } catch (e: Throwable) {
-                        // Drop onto main thread for error logging and stuff
-                        withContext(pluginInstance.minecraftDispatcher) {
-                            pluginInstance.logger.log(
-                                SEVERE,
-                                "An error occurred while ticking block ${block.position} of type ${pylonBlock.schema.key}",
-                            )
-                            e.printStackTrace()
-                            if (++errors >= pluginInstance.allowedBlockErrors) {
-                                spawnErrorBlock(pylonBlock)
-                                cancel()
-                            }
-                        }
+                        handleBlockError(pylonBlock, e, errors++)
                     }
                 }
             }
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private fun onPylonBlockBreak(e: PylonBlockBreakEvent) {
-        val pylonBlock = e.pylonBlock
-        tickingBlocks.remove(pylonBlock)?.cancel()
-        pylonBlock.errorBlock?.remove()
-        pylonBlock.errorBlock = null
-    }
+    private suspend fun CoroutineScope.handleBlockError(pylonBlock: PylonBlock<*>, error: Throwable, errors: Int) {
+        // Drop onto main thread for error logging and stuff
+        withContext(pluginInstance.minecraftDispatcher) {
+            val block = pylonBlock.block
+            pluginInstance.logger.log(
+                SEVERE,
+                "An error occurred while ticking block ${block.position} of type ${pylonBlock.schema.key}",
+            )
+            error.printStackTrace()
+            if (errors >= pluginInstance.allowedBlockErrors && pylonBlock.errorBlock == null) {
+                val display = block.world.spawn(block.location, BlockDisplay::class.java)
+                display.isInvisible = true
+                display.glowColorOverride = RED
+                display.isGlowing = true
+                pylonBlock.errorBlock = display
 
-    private fun spawnErrorBlock(pylonBlock: PylonBlock<*>) {
-        val block = pylonBlock.block
-        val display = block.world.spawn(block.location, BlockDisplay::class.java)
-        display.isInvisible = true
-        display.glowColorOverride = Color.RED
-        display.isGlowing = true
-        pylonBlock.errorBlock = display
+                cancel()
+            }
+        }
     }
 }
