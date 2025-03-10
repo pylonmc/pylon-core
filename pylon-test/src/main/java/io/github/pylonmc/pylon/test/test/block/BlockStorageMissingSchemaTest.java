@@ -110,7 +110,6 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
             if (stage != 3 || !block.equals(e.getBlock())) {
                 return;
             }
-            PylonTest.instance().getLogger().severe(PylonRegistry.BLOCKS.getKeys().toString());
 
             stage = 4;
 

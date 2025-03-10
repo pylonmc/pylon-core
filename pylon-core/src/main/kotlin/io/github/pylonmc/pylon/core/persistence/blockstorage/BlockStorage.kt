@@ -206,7 +206,7 @@ object BlockStorage : Listener {
         val block = get(blockPosition) ?: return null
 
         val drops = mutableListOf<ItemStack>()
-        block.getItem(reason)?.let { drops.add(it) }
+        block.getItem(reason)?.let { drops.add(it.clone()) }
         if (block is BreakHandler) {
             block.onBreak(drops, reason)
         }
