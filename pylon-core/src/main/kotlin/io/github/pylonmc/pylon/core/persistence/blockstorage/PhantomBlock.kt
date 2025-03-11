@@ -1,11 +1,17 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
+import io.github.pylonmc.pylon.core.block.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.BlockItemReason
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.item.ItemStackBuilder
 import io.github.pylonmc.pylon.core.pluginInstance
+import io.papermc.paper.datacomponent.DataComponentTypes
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 
 /**
@@ -26,22 +32,43 @@ class PhantomBlock(
     block: Block
 ) : PylonBlock<PylonBlockSchema>(schema, block) {
 
-    // TODO implement breakable block interface and add some logic to drop an error item when this is broken
-
     // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block)
+    internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
         throw IllegalStateException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
-    constructor(schema: PylonBlockSchema, pdc: PersistentDataContainer, block: Block)
+    internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
         throw IllegalStateException("Phantom block cannot be loaded")
     }
 
+    override fun getItem(reason: BlockItemReason): ItemStack? {
+        val item = errorItem.clone()
+        item.editMeta {
+            val lore = item.lore() ?: mutableListOf()
+            lore.add(
+                MiniMessage.miniMessage().deserialize(
+                    "<red>Errored block: <yellow>${schema.key}"
+                )
+            )
+            it.lore(lore)
+        }
+        return item
+    }
+
     companion object {
         private val key = NamespacedKey(pluginInstance, "phantom_block")
+
+        private val errorItem = ItemStackBuilder(Material.ECHO_SHARD)
+            .name("<red>Error")
+            .lore(
+                "<red>This item dropped from a",
+                "<red>block that failed to load."
+            )
+            .set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
+            .build()
 
         // Intentionally not registered to hide Pylon internals
         internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)

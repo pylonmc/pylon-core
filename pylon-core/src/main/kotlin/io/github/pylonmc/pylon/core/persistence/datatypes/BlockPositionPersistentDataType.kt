@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.persistence.datatypes
 
-import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.pluginInstance
+import io.github.pylonmc.pylon.core.util.BlockPosition
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer

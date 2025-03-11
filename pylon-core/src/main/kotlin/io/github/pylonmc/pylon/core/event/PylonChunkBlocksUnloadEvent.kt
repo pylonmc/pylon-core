@@ -1,14 +1,13 @@
 package io.github.pylonmc.pylon.core.event
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import org.bukkit.Chunk
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 class PylonChunkBlocksUnloadEvent(
     val chunk: Chunk,
-    val pylonBlocks: List<PylonBlock<PylonBlockSchema>>,
+    val pylonBlocks: List<PylonBlock<*>>,
 ) : Event() {
     override fun getHandlers(): HandlerList
         = handlerList

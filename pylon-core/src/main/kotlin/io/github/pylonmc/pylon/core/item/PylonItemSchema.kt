@@ -10,13 +10,13 @@ import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
 
 open class PylonItemSchema(
-    private val id: NamespacedKey,
+    private val key: NamespacedKey,
     internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
     private val template: ItemStack,
 ) : Keyed {
     init {
         template.editMeta { meta ->
-            meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, id)
+            meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key)
         }
     }
 
@@ -24,7 +24,7 @@ open class PylonItemSchema(
         get() = template.clone()
 
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(
-        PylonItemSchema::class.java,
+        javaClass,
         ItemStack::class.java
     )
         ?: throw NoSuchMethodException("Item '$key' ($itemClass) is missing a load constructor (PylonItemSchema, ItemStack)")
@@ -33,9 +33,9 @@ open class PylonItemSchema(
         PylonRegistry.ITEMS.register(this)
     }
 
-    override fun getKey(): NamespacedKey = id
+    override fun getKey(): NamespacedKey = key
 
-    override fun equals(other: Any?): Boolean = id == (other as? PylonItemSchema)?.id
+    override fun equals(other: Any?): Boolean = key == (other as? PylonItemSchema)?.key
 
-    override fun hashCode(): Int = id.hashCode()
+    override fun hashCode(): Int = key.hashCode()
 }

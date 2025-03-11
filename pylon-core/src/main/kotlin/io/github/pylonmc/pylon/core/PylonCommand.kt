@@ -4,8 +4,8 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
-import io.github.pylonmc.pylon.core.block.BlockPosition
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.BlockPosition
 import io.github.pylonmc.pylon.core.util.plus
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.format.NamedTextColor

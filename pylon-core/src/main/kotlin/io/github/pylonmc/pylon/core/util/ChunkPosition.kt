@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.block
+package io.github.pylonmc.pylon.core.util
 
 import org.bukkit.Chunk
 import org.bukkit.Location

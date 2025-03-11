@@ -1,26 +1,25 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
+import io.github.pylonmc.pylon.core.block.base.BreakHandler
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.BlockPosition
+import io.github.pylonmc.pylon.core.util.ChunkPosition
 import io.github.pylonmc.pylon.core.util.isFromAddon
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import io.github.pylonmc.pylon.core.util.position
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
-import java.util.concurrent.CompletableFuture
+import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
-
-internal typealias PylonBlockCollection = MutableList<PylonBlock<PylonBlockSchema>>
 
 /**
  * Welcome to the circus!
@@ -53,18 +52,18 @@ object BlockStorage : Listener {
 
     private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
 
-    // Access to blocks, blocksByChunk, blocksById fields must be synchronized to prevent them briefly going
-    // out of sync
+    // Access to blocks, blocksByChunk, blocksById fields must be synchronized
+    // to prevent them briefly going out of sync
     private val blockLock = ReentrantReadWriteLock()
 
-    private val blocks: MutableMap<BlockPosition, PylonBlock<PylonBlockSchema>> = ConcurrentHashMap()
+    private val blocks: MutableMap<BlockPosition, PylonBlock<*>> = ConcurrentHashMap()
 
     /**
      * Only contains chunks that have been loaded (including chunks with no Pylon blocks)
      */
-    private val blocksByChunk: MutableMap<ChunkPosition, PylonBlockCollection> = ConcurrentHashMap()
+    private val blocksByChunk: MutableMap<ChunkPosition, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
 
-    private val blocksById: MutableMap<NamespacedKey, PylonBlockCollection> = ConcurrentHashMap()
+    private val blocksById: MutableMap<NamespacedKey, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
 
     @JvmStatic
     val loadedBlocks: Set<BlockPosition>
@@ -73,6 +72,10 @@ object BlockStorage : Listener {
     @JvmStatic
     val loadedChunks: Set<ChunkPosition>
         get() = lockBlockRead { blocksByChunk.keys }
+
+    @JvmStatic
+    val loadedPylonBlocks: Collection<PylonBlock<*>>
+        get() = lockBlockRead { blocks.values }
 
     internal fun startAutosaveTask() {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
@@ -86,45 +89,40 @@ object BlockStorage : Listener {
     }
 
     @JvmStatic
-    fun get(blockPosition: BlockPosition): PylonBlock<PylonBlockSchema>? = lockBlockRead { blocks[blockPosition] }
+    fun get(blockPosition: BlockPosition): PylonBlock<*>? = lockBlockRead { blocks[blockPosition] }
 
     @JvmStatic
-    fun get(block: Block): PylonBlock<PylonBlockSchema>?
-        = get(block.position)
+    fun get(block: Block): PylonBlock<*>? = get(block.position)
 
     @JvmStatic
-    fun get(location: Location): PylonBlock<PylonBlockSchema>?
-            = get(location.block)
+    fun get(location: Location): PylonBlock<*>? = get(location.block)
 
     @JvmStatic
-    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
+    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
         return clazz.cast(block)
     }
 
     @JvmStatic
-    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, block: Block): T?
-        = getAs(clazz, block.position)
+    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
 
     @JvmStatic
-    fun <T : PylonBlock<PylonBlockSchema>> getAs(clazz: Class<T>, location: Location): T?
-            = getAs(clazz, BlockPosition(location))
+    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, location: Location): T? =
+        getAs(clazz, BlockPosition(location))
 
-    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(blockPosition: BlockPosition): T?
-            = getAs(T::class.java, blockPosition)
+    inline fun <reified T : PylonBlock<*>> getAs(blockPosition: BlockPosition): T? =
+        getAs(T::class.java, blockPosition)
 
-    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(block: Block): T?
-            = getAs(T::class.java, block)
+    inline fun <reified T : PylonBlock<*>> getAs(block: Block): T? = getAs(T::class.java, block)
 
-    inline fun <reified T : PylonBlock<PylonBlockSchema>> getAs(location: Location): T?
-            = getAs(T::class.java, location)
+    inline fun <reified T : PylonBlock<*>> getAs(location: Location): T? = getAs(T::class.java, location)
 
     @JvmStatic
-    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<PylonBlockSchema>> =
+    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> =
         lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
 
     @JvmStatic
-    fun getById(id: NamespacedKey): Collection<PylonBlock<PylonBlockSchema>> =
+    fun getById(id: NamespacedKey): Collection<PylonBlock<*>> =
         if (PylonRegistry.BLOCKS.contains(id)) {
             lockBlockRead {
                 blocksById[id].orEmpty()
@@ -133,75 +131,134 @@ object BlockStorage : Listener {
             emptySet()
         }
 
-
     @JvmStatic
-    fun exists(blockPosition: BlockPosition): Boolean
-        = get(blockPosition) != null
+    fun isPylonBlock(blockPosition: BlockPosition): Boolean = get(blockPosition) != null
 
     /**
-     * The block's chunk must be loaded. Only call on main thread.
+     * Sets a new Pylon block's data in the storage and sets the block in the world.
+     * The block's chunk must be loaded.
+     * Only call on the main thread.
+     *
+     * @return The block that was placed, or null if the block placement was cancelled
      */
     @JvmStatic
-    fun set(blockPosition: BlockPosition, schema: PylonBlockSchema) {
+    @JvmOverloads
+    fun placeBlock(
+        blockPosition: BlockPosition,
+        schema: PylonBlockSchema,
+        context: BlockCreateContext = BlockCreateContext.Default
+    ): PylonBlock<*>? {
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.createConstructor.invoke(schema, blockPosition.block) as PylonBlock<PylonBlockSchema>
-
-        blockPosition.block.type = schema.material
+        val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
+                as PylonBlock<*>
+        val event = PylonBlockPlaceEvent(blockPosition.block, block)
+        event.callEvent()
+        if (event.isCancelled) return null
 
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
-            blocksById.computeIfAbsent(schema.key) { mutableListOf() }.add(block)
+            blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
-
-        PylonBlockPlaceEvent(block.block, block).callEvent()
+        blockPosition.block.type = schema.getPlaceMaterial(context)
+        return block
     }
 
     /**
-     * The block's chunk must be loaded. Only call on main thread.
+     * Sets a new Pylon block's data in the storage and sets the block in the world.
+     * The block's chunk must be loaded.
+     * Only call on the main thread.
+     *
+     * @return The block that was placed, or null if the block placement was cancelled
      */
     @JvmStatic
-    fun set(block: Block, schema: PylonBlockSchema)
-            = set(block.position, schema)
+    @JvmOverloads
+    fun placeBlock(
+        block: Block,
+        schema: PylonBlockSchema,
+        context: BlockCreateContext = BlockCreateContext.Default
+    ) = placeBlock(block.position, schema, context)
 
     /**
-     * The block's chunk must be loaded. Only call on main thread.
+     * Sets a new Pylon block's data in the storage and sets the block in the world.
+     * The block's chunk must be loaded.
+     * Only call on the main thread.
+     *
+     * @return The block that was placed, or null if the block placement was cancelled
      */
     @JvmStatic
-    fun set(location: Location, schema: PylonBlockSchema)
-            = set(BlockPosition(location), schema)
+    @JvmOverloads
+    fun placeBlock(
+        location: Location,
+        schema: PylonBlockSchema,
+        context: BlockCreateContext = BlockCreateContext.Default
+    ) = placeBlock(BlockPosition(location), schema, context)
 
     /**
-     * Does nothing if the block is not a Pylon block. Only call on main thread.
+     * Removes a block from the world and the storage.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread.
+     *
+     * @return The list of drops, or null if the block is not a Pylon block or the block break was cancelled
      */
     @JvmStatic
-    fun remove(blockPosition: BlockPosition) = lockBlockWrite {
-        val block = blocks.remove(blockPosition)
-        if (block != null) {
-            blockPosition.block.type = Material.AIR
+    @JvmOverloads
+    fun breakBlock(
+        blockPosition: BlockPosition,
+        context: BlockBreakContext = BlockBreakContext.PluginBreak
+    ): List<ItemStack>? {
+        val block = get(blockPosition) ?: return null
+
+        val event = PylonBlockBreakEvent(blockPosition.block, block)
+        event.callEvent()
+        if (event.isCancelled) return null
+
+        val drops = mutableListOf<ItemStack>()
+        block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+        if (block is BreakHandler) {
+            block.onBreak(drops, context)
+        }
+
+        lockBlockWrite {
+            blocks.remove(blockPosition)
             blocksById[block.schema.key]?.remove(block)
             blocksByChunk[blockPosition.chunk]?.remove(block)
-
-            PylonBlockBreakEvent(blockPosition.block, block).callEvent()
         }
+
+        blockPosition.block.type = Material.AIR
+        if (block is BreakHandler) {
+            block.postBreak()
+        }
+
+        return drops
     }
 
     /**
-     * Does nothing if the block is not a Pylon block. Only call on main thread.
+     * Removes a block from the world and the storage.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread.
+     *
+     * @return The list of drops, or null if the block is not a Pylon block
      */
     @JvmStatic
-    fun remove(block: Block)
-            = remove(block.position)
+    @JvmOverloads
+    fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+        breakBlock(block.position, context)
 
     /**
-     * Does nothing if the block is not a Pylon block. Only call on main thread.
+     * Removes a block from the world and the storage.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread.
+     *
+     * @return The list of drops, or null if the block is not a Pylon block
      */
     @JvmStatic
-    fun remove(location: Location)
-            = remove(BlockPosition(location))
+    @JvmOverloads
+    fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+        breakBlock(BlockPosition(location), context)
 
-    private fun load(world: World, chunk: Chunk): List<PylonBlock<PylonBlockSchema>> {
+    private fun load(world: World, chunk: Chunk): List<PylonBlock<*>> {
         val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
         val chunkBlocks = chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
             PylonBlock.deserialize(world, element)
@@ -210,7 +267,7 @@ object BlockStorage : Listener {
         return chunkBlocks
     }
 
-    private fun save(chunk: Chunk, chunkBlocks: PylonBlockCollection) {
+    private fun save(chunk: Chunk, chunkBlocks: MutableList<PylonBlock<*>>) {
         val serializedBlocks = chunkBlocks.map {
             PylonBlock.serialize(it, chunk.persistentDataContainer.adapterContext)
         }
@@ -267,15 +324,18 @@ object BlockStorage : Listener {
      * PhantomBlocks so that they are saved. See PhantomBlock for more info.
      */
     internal fun cleanup(addon: PylonAddon) = lockBlockWrite {
-        val replacer: (PylonBlock<PylonBlockSchema>) -> PylonBlock<PylonBlockSchema> = { block ->
+        val replacer: (PylonBlock<*>) -> PylonBlock<*> = { block ->
             if (block.schema.key.isFromAddon(addon)) {
-                PhantomBlock(PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext), block.block)
+                PhantomBlock(
+                    PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
+                    block.block
+                )
             } else {
                 block
             }
         }
 
-        blocks.replaceAll { _, block -> replacer.invoke(block ) }
+        blocks.replaceAll { _, block -> replacer.invoke(block) }
         for (blocks in blocksById.values) {
             blocks.replaceAll(replacer)
         }
@@ -307,4 +367,6 @@ object BlockStorage : Listener {
             blockLock.writeLock().unlock()
         }
     }
+
+
 }

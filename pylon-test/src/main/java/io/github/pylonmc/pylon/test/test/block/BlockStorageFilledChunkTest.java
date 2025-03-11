@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.test.test.block;
 
-import io.github.pylonmc.pylon.core.block.BlockPosition;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.block.SimplePylonBlock;
@@ -8,6 +7,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
+import io.github.pylonmc.pylon.core.util.BlockPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
@@ -16,7 +16,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+@NotNullByDefault
 public class BlockStorageFilledChunkTest extends AsyncTest {
     private static final PylonBlockSchema schema = new PylonBlockSchema(
             PylonTest.key("block_storage_fill_chunk_test"),
@@ -41,7 +41,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
          * Stage 1: set the Pylon block when the Pylon data for that chunk is loaded, then unload the chunk.
          */
         @EventHandler
-        public static void stage1(@NotNull PylonChunkBlocksLoadEvent e) {
+        public static void stage1(PylonChunkBlocksLoadEvent e) {
             if (stage != 1 || !e.getChunk().equals(chunk)) {
                 return;
             }
@@ -51,7 +51,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
             // Run this later to prevent stage 3 from firing early
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
                 for (BlockPosition blockPosition : blockLoadedFutures.keySet()) {
-                    BlockStorage.set(blockPosition, schema);
+                    BlockStorage.placeBlock(blockPosition, schema);
                 }
                 e.getChunk().unload();
             }, 10);
@@ -61,7 +61,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
          * Stage 2: When the chunk's pylon data is unloaded, load the chunk again.
          */
         @EventHandler
-        public static void stage2(@NotNull PylonChunkBlocksUnloadEvent e) {
+        public static void stage2(PylonChunkBlocksUnloadEvent e) {
             if (stage != 2 || !e.getChunk().equals(chunk)) {
                 return;
             }
@@ -75,14 +75,14 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
          * Stage 3: Get the pylon block data that should be loaded when the chunk isloaded.
          */
         @EventHandler
-        public static void stage3(@NotNull PylonBlockLoadEvent e) {
+        public static void stage3(PylonBlockLoadEvent e) {
             if (stage != 3 || !e.getBlock().getChunk().equals(chunk)) {
                 return;
             }
 
             Throwable exception = null;
             try {
-                PylonBlock<PylonBlockSchema> pylonBlock = BlockStorage.get(e.getBlock());
+                PylonBlock<?> pylonBlock = BlockStorage.get(e.getBlock());
 
                 assertThat(pylonBlock)
                         .isNotNull();

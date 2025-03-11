@@ -38,6 +38,8 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new BlockStorageRemoveTest());
         tests.add(new SimpleBlockTest());
         tests.add(new SimpleBlockWithSchemaTest());
+        tests.add(new TickingBlockTest());
+        tests.add(new TickingBlockErrorTest());
 
         tests.add(new PylonItemStackSimpleTest());
         tests.add(new PylonItemStackInterfaceTest());
@@ -118,6 +120,8 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         getLogger().info("Test addon enabled!");
 
         instance = this;
+
+        if (Boolean.parseBoolean(System.getenv("NO_TEST"))) return;
 
         testWorld = new WorldCreator("gametests")
                 .generator(new BedrockWorldGenerator())

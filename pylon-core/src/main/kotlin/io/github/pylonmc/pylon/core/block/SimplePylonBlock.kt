@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.block
 import org.bukkit.block.Block
 import org.bukkit.persistence.PersistentDataContainer
 
-class SimplePylonBlock(schema: PylonBlockSchema, block: Block) : PylonBlock<PylonBlockSchema>(schema, block) {
-    constructor(schema: PylonBlockSchema, pdc: PersistentDataContainer, block: Block) : this(schema, block)
+class SimplePylonBlock : PylonBlock<PylonBlockSchema> {
+    constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext) : super(schema, block)
+    constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer) : super(schema, block)
 }

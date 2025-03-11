@@ -12,25 +12,30 @@ import java.lang.invoke.MethodHandle
 open class PylonBlockSchema(
     private val key: NamespacedKey,
     val material: Material,
-    blockClass: Class<out PylonBlock<PylonBlockSchema>>,
+    blockClass: Class<out PylonBlock<*>>,
 ) : Keyed {
 
     init {
-        check(material.isBlock)
+        check(material.isBlock) { "Material $material is not a block" }
     }
 
     internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
-        PylonBlockSchema::class.java,
-        Block::class.java
+        javaClass,
+        Block::class.java,
+        BlockCreateContext::class.java
     )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block)")
+        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block, BlockCreateContext)")
 
     internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
         javaClass,
-        PersistentDataContainer::class.java,
-        Block::class.java
+        Block::class.java,
+        PersistentDataContainer::class.java
     )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, PersistentDataContainer, Block)")
+        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, Block, PersistentDataContainer)")
+
+    open fun getPlaceMaterial(context: BlockCreateContext): Material {
+        return material
+    }
 
     fun register() {
         PylonRegistry.BLOCKS.register(this)
