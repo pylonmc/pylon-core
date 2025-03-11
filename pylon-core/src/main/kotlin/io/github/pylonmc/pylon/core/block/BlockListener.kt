@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -16,28 +15,25 @@ import org.bukkit.event.entity.EntityExplodeEvent
  */
 internal object BlockListener : Listener {
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun onPlace(event: BlockPlaceEvent) {
-        val item = PylonItem.Companion.fromStack(event.itemInHand)?.schema ?: return
-        val block = PylonRegistry.Companion.BLOCKS[item.key]
-        if (block != null) {
-            BlockStorage.placeBlock(event.block, block, BlockCreateContext.PlayerPlace(event.player, event))
-        } else {
+        val item = PylonItem.Companion.fromStack(event.itemInHand) ?: return
+        if (!item.doPlace(event)) {
             event.setBuild(false)
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: BlockBreakEvent) {
         breakBlock(event.block, BlockItemReason.PlayerBreak(event))
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun blockBurn(event: BlockBurnEvent) {
         breakBlock(event.block, BlockItemReason.Burned(event))
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: BlockExplodeEvent) {
         breakBlock(event.block, BlockItemReason.Exploded(event))
         for (block in event.blockList()) {
@@ -45,33 +41,33 @@ internal object BlockListener : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
             breakBlock(block, BlockItemReason.WasExploded)
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: BlockFadeEvent) {
         breakBlock(event.block, BlockItemReason.Faded(event))
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun disallowForming(event: BlockFormEvent) {
         if (BlockStorage.isPylonBlock(event.block.position)) {
             event.isCancelled = true
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun disallowFromTo(event: BlockFromToEvent) {
         if (BlockStorage.isPylonBlock(event.block.position)) {
             event.isCancelled = true
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun disallowMovementByPistons(event: BlockPistonExtendEvent) {
         for (block in event.blocks) {
             if (BlockStorage.isPylonBlock(block.position)) {
@@ -81,7 +77,7 @@ internal object BlockListener : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
         for (block in event.blocks) {
             if (BlockStorage.isPylonBlock(block.position)) {
