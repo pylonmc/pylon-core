@@ -26,9 +26,8 @@ abstract class PylonItem<out S : PylonItemSchema>(
         if (block != null) {
             BlockStorage.placeBlock(event.block, block, BlockCreateContext.PlayerPlace(event.player, event))
             return true
-        } else {
-            return false
         }
+        return false
     }
 
     companion object {
