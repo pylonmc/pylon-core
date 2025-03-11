@@ -141,6 +141,8 @@ object BlockStorage : Listener {
      * Sets a new Pylon block's data in the storage and sets the block in the world.
      * The block's chunk must be loaded.
      * Only call on the main thread.
+     *
+     * @return The block that was placed, or null if the block placement was cancelled
      */
     @JvmStatic
     @JvmOverloads
@@ -148,18 +150,21 @@ object BlockStorage : Listener {
         blockPosition: BlockPosition,
         schema: PylonBlockSchema,
         context: BlockCreateContext = BlockCreateContext.Default
-    ): PylonBlock<*> {
+    ): PylonBlock<*>? {
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
                 as PylonBlock<*>
+        val event = PylonBlockPlaceEvent(blockPosition.block, block)
+        event.callEvent()
+        if (event.isCancelled) return null
+
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
             blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
-        blockPosition.block.type = schema.material
-        PylonBlockPlaceEvent(blockPosition.block, block).callEvent()
+        blockPosition.block.type = schema.getPlaceMaterial(context)
         return block
     }
 
@@ -167,6 +172,8 @@ object BlockStorage : Listener {
      * Sets a new Pylon block's data in the storage and sets the block in the world.
      * The block's chunk must be loaded.
      * Only call on the main thread.
+     *
+     * @return The block that was placed, or null if the block placement was cancelled
      */
     @JvmStatic
     @JvmOverloads
@@ -180,6 +187,8 @@ object BlockStorage : Listener {
      * Sets a new Pylon block's data in the storage and sets the block in the world.
      * The block's chunk must be loaded.
      * Only call on the main thread.
+     *
+     * @return The block that was placed, or null if the block placement was cancelled
      */
     @JvmStatic
     @JvmOverloads
@@ -194,7 +203,7 @@ object BlockStorage : Listener {
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
-     * @return The list of drops, or null if the block is not a Pylon block
+     * @return The list of drops, or null if the block is not a Pylon block or the block break was cancelled
      */
     @JvmStatic
     @JvmOverloads
@@ -203,6 +212,10 @@ object BlockStorage : Listener {
         reason: BlockItemReason = BlockItemReason.PluginBreak
     ): List<ItemStack>? {
         val block = get(blockPosition) ?: return null
+
+        val event = PylonBlockBreakEvent(blockPosition.block, block)
+        event.callEvent()
+        if (event.isCancelled) return null
 
         val drops = mutableListOf<ItemStack>()
         block.getItem(reason)?.let { drops.add(it.clone()) }
@@ -215,7 +228,6 @@ object BlockStorage : Listener {
             blocksById[block.schema.key]?.remove(block)
             blocksByChunk[blockPosition.chunk]?.remove(block)
         }
-        PylonBlockBreakEvent(blockPosition.block, block).callEvent()
         blockPosition.block.type = Material.AIR
         return drops
     }

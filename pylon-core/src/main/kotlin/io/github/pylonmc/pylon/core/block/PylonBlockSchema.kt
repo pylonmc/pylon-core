@@ -16,7 +16,7 @@ open class PylonBlockSchema(
 ) : Keyed {
 
     init {
-        check(material.isBlock)
+        check(material.isBlock) { "Material $material is not a block" }
     }
 
     internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
@@ -32,6 +32,10 @@ open class PylonBlockSchema(
         PersistentDataContainer::class.java
     )
         ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, Block, PersistentDataContainer)")
+
+    open fun getPlaceMaterial(context: BlockCreateContext): Material {
+        return material
+    }
 
     fun register() {
         PylonRegistry.BLOCKS.register(this)
