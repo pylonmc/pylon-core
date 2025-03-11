@@ -6,4 +6,6 @@ import org.bukkit.inventory.ItemStack
 interface BreakHandler {
 
     fun onBreak(drops: MutableList<ItemStack>, reason: BlockItemReason)
+
+    fun postBreak() {}
 }

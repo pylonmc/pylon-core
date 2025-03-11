@@ -228,7 +228,12 @@ object BlockStorage : Listener {
             blocksById[block.schema.key]?.remove(block)
             blocksByChunk[blockPosition.chunk]?.remove(block)
         }
+
         blockPosition.block.type = Material.AIR
+        if (block is BreakHandler) {
+            block.postBreak()
+        }
+
         return drops
     }
 
