@@ -19,6 +19,7 @@ open class PylonBlockSchema(
         check(material.isBlock) { "Material $material is not a block" }
     }
 
+    @JvmSynthetic
     internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
         javaClass,
         Block::class.java,
@@ -26,6 +27,7 @@ open class PylonBlockSchema(
     )
         ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block, BlockCreateContext)")
 
+    @JvmSynthetic
     internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
         javaClass,
         Block::class.java,

@@ -16,7 +16,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
 internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
-    fun onPlace(event: BlockPlaceEvent) {
+    private fun onPlace(event: BlockPlaceEvent) {
         val item = PylonItem.fromStack(event.itemInHand) ?: return
         if (!item.doPlace(event)) {
             event.setBuild(false)
@@ -24,17 +24,17 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun blockRemove(event: BlockBreakEvent) {
+    private fun blockRemove(event: BlockBreakEvent) {
         breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun blockBurn(event: BlockBurnEvent) {
+    private fun blockBurn(event: BlockBurnEvent) {
         breakBlock(event.block, BlockBreakContext.Burned(event))
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun blockRemove(event: BlockExplodeEvent) {
+    private fun blockRemove(event: BlockExplodeEvent) {
         breakBlock(event.block, BlockBreakContext.Exploded(event))
         for (block in event.blockList()) {
             breakBlock(block, BlockBreakContext.WasExploded)
@@ -42,33 +42,33 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun blockRemove(event: EntityExplodeEvent) {
+    private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
             breakBlock(block, BlockBreakContext.WasExploded)
         }
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun blockRemove(event: BlockFadeEvent) {
+    private fun blockRemove(event: BlockFadeEvent) {
         breakBlock(event.block, BlockBreakContext.Faded(event))
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun disallowForming(event: BlockFormEvent) {
+    private fun disallowForming(event: BlockFormEvent) {
         if (BlockStorage.isPylonBlock(event.block.position)) {
             event.isCancelled = true
         }
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun disallowFromTo(event: BlockFromToEvent) {
+    private fun disallowFromTo(event: BlockFromToEvent) {
         if (BlockStorage.isPylonBlock(event.block.position)) {
             event.isCancelled = true
         }
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun disallowMovementByPistons(event: BlockPistonExtendEvent) {
+    private fun disallowMovementByPistons(event: BlockPistonExtendEvent) {
         for (block in event.blocks) {
             if (BlockStorage.isPylonBlock(block.position)) {
                 event.isCancelled = true
@@ -78,7 +78,7 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
+    private fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
         for (block in event.blocks) {
             if (BlockStorage.isPylonBlock(block.position)) {
                 event.isCancelled = true

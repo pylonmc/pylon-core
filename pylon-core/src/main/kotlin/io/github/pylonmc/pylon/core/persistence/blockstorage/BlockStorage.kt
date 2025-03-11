@@ -77,6 +77,7 @@ object BlockStorage : Listener {
     val loadedPylonBlocks: Collection<PylonBlock<*>>
         get() = lockBlockRead { blocks.values }
 
+    // This isn't called?
     internal fun startAutosaveTask() {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
             // TODO this saves all chunks at once, potentially leading to large pauses
@@ -323,6 +324,7 @@ object BlockStorage : Listener {
      * This doesn't actually delete them from memory, but instead converts them into
      * PhantomBlocks so that they are saved. See PhantomBlock for more info.
      */
+    @JvmSynthetic
     internal fun cleanup(addon: PylonAddon) = lockBlockWrite {
         val replacer: (PylonBlock<*>) -> PylonBlock<*> = { block ->
             if (block.schema.key.isFromAddon(addon)) {
@@ -344,6 +346,7 @@ object BlockStorage : Listener {
         }
     }
 
+    @JvmSynthetic
     internal fun cleanupEverything() {
         for ((chunkPosition, chunkBlocks) in blocksByChunk) {
             save(chunkPosition.chunk!!, chunkBlocks)
