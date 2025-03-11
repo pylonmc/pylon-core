@@ -1,10 +1,7 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.block.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.BlockItemReason
-import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.BreakHandler
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
@@ -209,7 +206,7 @@ object BlockStorage : Listener {
     @JvmOverloads
     fun breakBlock(
         blockPosition: BlockPosition,
-        reason: BlockItemReason = BlockItemReason.PluginBreak
+        context: BlockBreakContext = BlockBreakContext.PluginBreak
     ): List<ItemStack>? {
         val block = get(blockPosition) ?: return null
 
@@ -218,9 +215,9 @@ object BlockStorage : Listener {
         if (event.isCancelled) return null
 
         val drops = mutableListOf<ItemStack>()
-        block.getItem(reason)?.let { drops.add(it.clone()) }
+        block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
         if (block is BreakHandler) {
-            block.onBreak(drops, reason)
+            block.onBreak(drops, context)
         }
 
         lockBlockWrite {
@@ -246,8 +243,8 @@ object BlockStorage : Listener {
      */
     @JvmStatic
     @JvmOverloads
-    fun breakBlock(block: Block, reason: BlockItemReason = BlockItemReason.PluginBreak) =
-        breakBlock(block.position, reason)
+    fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+        breakBlock(block.position, context)
 
     /**
      * Removes a block from the world and the storage.
@@ -258,8 +255,8 @@ object BlockStorage : Listener {
      */
     @JvmStatic
     @JvmOverloads
-    fun breakBlock(location: Location, reason: BlockItemReason = BlockItemReason.PluginBreak) =
-        breakBlock(BlockPosition(location), reason)
+    fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+        breakBlock(BlockPosition(location), context)
 
     private fun load(world: World, chunk: Chunk): List<PylonBlock<*>> {
         val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)

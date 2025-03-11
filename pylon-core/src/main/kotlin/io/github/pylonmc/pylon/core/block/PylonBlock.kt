@@ -24,7 +24,16 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     internal var errorBlock: BlockDisplay? = null
 
     open fun getItem(reason: BlockItemReason): ItemStack? {
-        return if (reason.normallyDrops) PylonRegistry.ITEMS[schema.key]?.itemStack else null
+        val defaultItem = PylonRegistry.ITEMS[schema.key]?.itemStack
+        return when (reason) {
+            is BlockItemReason.Break -> if (reason.context.normallyDrops) {
+                defaultItem
+            } else {
+                null
+            }
+
+            is BlockItemReason.PickBlock -> defaultItem
+        }
     }
 
     open fun write(pdc: PersistentDataContainer) {}

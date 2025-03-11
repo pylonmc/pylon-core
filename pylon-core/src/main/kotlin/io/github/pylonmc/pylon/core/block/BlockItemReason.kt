@@ -1,45 +1,20 @@
 package io.github.pylonmc.pylon.core.block
 
 import org.bukkit.entity.Player
-import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockBurnEvent
-import org.bukkit.event.block.BlockExplodeEvent
-import org.bukkit.event.block.BlockFadeEvent
 
-interface BlockItemReason {
+/**
+ * Represents the reason why an item is being requested from a block
+ */
+sealed interface BlockItemReason {
 
     /**
-     * Determines the default behavior of the reason
+     * The item is being requested because the block is being broken
      */
-    val normallyDrops: Boolean
+    data class Break(val context: BlockBreakContext) : BlockItemReason
 
-    data object PluginBreak : BlockItemReason {
-        override val normallyDrops = true
-    }
-
-    data class PlayerBreak(val event: BlockBreakEvent) : BlockItemReason {
-        override val normallyDrops = true
-    }
-
-    // No event parameter since explosion can be either from block or entity
-    data object WasExploded : BlockItemReason {
-        override val normallyDrops = true
-    }
-
-    data class Exploded(val event: BlockExplodeEvent) : BlockItemReason {
-        override val normallyDrops = false
-    }
-
-    data class Burned(val event: BlockBurnEvent) : BlockItemReason {
-        override val normallyDrops = false
-    }
-
-    data class Faded(val event: BlockFadeEvent) : BlockItemReason {
-        override val normallyDrops = false
-    }
-
+    /**
+     * The item is being requested because a player used the pick block button
+     */
     // TODO implement
-    data class PickBlock(val player: Player) : BlockItemReason {
-        override val normallyDrops = true
-    }
+    data class PickBlock(val player: Player) : BlockItemReason
 }
