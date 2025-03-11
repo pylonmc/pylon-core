@@ -6,6 +6,8 @@ import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder
 import io.github.pylonmc.pylon.core.pluginInstance
+import io.papermc.paper.datacomponent.DataComponentTypes
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
@@ -43,18 +45,29 @@ class PhantomBlock(
     }
 
     override fun getItem(reason: BlockItemReason): ItemStack? {
-        return errorItem
+        val item = errorItem.clone()
+        item.editMeta {
+            val lore = item.lore() ?: mutableListOf()
+            lore.add(
+                MiniMessage.miniMessage().deserialize(
+                    "<red>Errored block: <yellow>${schema.key}"
+                )
+            )
+            it.lore(lore)
+        }
+        return item
     }
 
     companion object {
         private val key = NamespacedKey(pluginInstance, "phantom_block")
 
-        private val errorItem = ItemStackBuilder(Material.BARRIER)
+        private val errorItem = ItemStackBuilder(Material.ECHO_SHARD)
             .name("<red>Error")
             .lore(
                 "<red>This item dropped from a",
                 "<red>block that failed to load."
             )
+            .set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
             .build()
 
         // Intentionally not registered to hide Pylon internals
