@@ -17,7 +17,7 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun onPlace(event: BlockPlaceEvent) {
-        val item = PylonItem.Companion.fromStack(event.itemInHand) ?: return
+        val item = PylonItem.fromStack(event.itemInHand) ?: return
         if (!item.doPlace(event)) {
             event.setBuild(false)
         }
@@ -25,32 +25,32 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: BlockBreakEvent) {
-        breakBlock(event.block, BlockItemReason.PlayerBreak(event))
+        breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
     }
 
     @EventHandler(ignoreCancelled = true)
     fun blockBurn(event: BlockBurnEvent) {
-        breakBlock(event.block, BlockItemReason.Burned(event))
+        breakBlock(event.block, BlockBreakContext.Burned(event))
     }
 
     @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: BlockExplodeEvent) {
-        breakBlock(event.block, BlockItemReason.Exploded(event))
+        breakBlock(event.block, BlockBreakContext.Exploded(event))
         for (block in event.blockList()) {
-            breakBlock(block, BlockItemReason.WasExploded)
+            breakBlock(block, BlockBreakContext.WasExploded)
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
-            breakBlock(block, BlockItemReason.WasExploded)
+            breakBlock(block, BlockBreakContext.WasExploded)
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     fun blockRemove(event: BlockFadeEvent) {
-        breakBlock(event.block, BlockItemReason.Faded(event))
+        breakBlock(event.block, BlockBreakContext.Faded(event))
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -87,7 +87,7 @@ internal object BlockListener : Listener {
         }
     }
 
-    private fun breakBlock(block: Block, reason: BlockItemReason) {
+    private fun breakBlock(block: Block, reason: BlockBreakContext) {
         val drops = BlockStorage.breakBlock(block, reason) ?: return
         for (drop in drops) {
             block.world.dropItemNaturally(block.location.add(0.5, 0.1, 0.5), drop)
