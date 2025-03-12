@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.test
 import com.github.shynixn.mccoroutine.bukkit.scope
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.pluginInstance
-import io.github.pylonmc.pylon.core.util.BlockPosition
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.launch

@@ -1,6 +1,6 @@
 @file:JvmSynthetic // Hide the ugly `BlockPositionKt.getPosition` function in Java
 
-package io.github.pylonmc.pylon.core.util
+package io.github.pylonmc.pylon.core.util.position
 
 import org.bukkit.Location
 import org.bukkit.World

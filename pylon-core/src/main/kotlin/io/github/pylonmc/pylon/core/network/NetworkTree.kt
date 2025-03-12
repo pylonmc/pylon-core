@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.network
 
-import io.github.pylonmc.pylon.core.util.BlockPosition
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 
 sealed interface NetworkTree {
 

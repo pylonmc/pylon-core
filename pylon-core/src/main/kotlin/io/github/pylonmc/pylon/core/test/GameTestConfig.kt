@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.test
 
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.BlockPosition
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey

@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
-import io.github.pylonmc.pylon.core.util.position
+import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
