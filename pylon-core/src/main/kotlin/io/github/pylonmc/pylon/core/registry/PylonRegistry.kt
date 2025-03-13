@@ -37,7 +37,7 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
     }
 
     fun unregisterAllFromAddon(addon: PylonAddon) {
-        val namespace = NamespacedKey(addon.javaPlugin, "").namespace
+        val namespace = addon.key.namespace
         values.keys.removeIf { it.namespace == namespace }
     }
 

@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.test.serializer;
 
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
-import io.github.pylonmc.pylon.core.util.ChunkPosition;
+import io.github.pylonmc.pylon.core.util.position.ChunkPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
 
 

@@ -10,5 +10,5 @@ This file is for public general utils that Java can make use of. See also `Inter
  */
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
-    return namespace == NamespacedKey(addon.javaPlugin, "").namespace
+    return namespace == addon.key.namespace
 }

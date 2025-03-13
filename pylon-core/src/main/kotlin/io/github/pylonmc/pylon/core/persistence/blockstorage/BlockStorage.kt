@@ -7,10 +7,10 @@ import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.BlockPosition
-import io.github.pylonmc.pylon.core.util.ChunkPosition
 import io.github.pylonmc.pylon.core.util.isFromAddon
-import io.github.pylonmc.pylon.core.util.position
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
+import io.github.pylonmc.pylon.core.util.position.ChunkPosition
+import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
