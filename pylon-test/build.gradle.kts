@@ -22,11 +22,11 @@ java {
 }
 
 bukkit {
-    name = "Pylon-Test"
+    name = "PylonTest"
     main = "io.github.pylonmc.pylon.test.PylonTest"
     version = project.version.toString()
     apiVersion = "1.21"
-    depend = listOf("Pylon-Core")
+    depend = listOf("PylonCore")
 }
 
 tasks.runServer {

@@ -7,7 +7,6 @@ import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -22,11 +21,10 @@ public class BlockStorageAddTest extends GameTest {
 
         public TestBlockSchema(
                 NamespacedKey key,
-                Material material,
                 Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
-            super(key, material, blockClass);
+            super(key, blockClass);
             this.processingSpeed = processingSpeed;
         }
     }
@@ -47,7 +45,6 @@ public class BlockStorageAddTest extends GameTest {
 
     private static final TestBlockSchema schema = new TestBlockSchema (
             PylonTest.key("block_storage_add_test"),
-            Material.AMETHYST_BLOCK,
             TestBlock.class,
             12
     );

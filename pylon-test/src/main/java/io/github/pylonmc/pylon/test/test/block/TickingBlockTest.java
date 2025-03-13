@@ -8,7 +8,6 @@ import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -18,16 +17,15 @@ public class TickingBlockTest extends GameTest {
     public static class TestBlockSchema extends PylonBlockSchema {
         public TestBlockSchema(
                 NamespacedKey key,
-                Material material,
                 Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass
         ) {
-            super(key, material, blockClass);
+            super(key, blockClass);
         }
     }
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> implements Ticking {
 
-        public static int ticks = 0;
+        public static int ticks;
 
         public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
@@ -45,7 +43,6 @@ public class TickingBlockTest extends GameTest {
 
     private static final TestBlockSchema schema = new TestBlockSchema(
             PylonTest.key("ticking_block"),
-            Material.AMETHYST_BLOCK,
             TestBlock.class
     );
 

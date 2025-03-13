@@ -13,10 +13,9 @@ import io.github.pylonmc.pylon.test.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNullByDefault;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,15 +23,13 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@NotNullByDefault
 public class BlockStorageFilledChunkTest extends AsyncTest {
     private static final PylonBlockSchema schema = new PylonBlockSchema(
             PylonTest.key("block_storage_fill_chunk_test"),
-            Material.AMETHYST_BLOCK,
             SimplePylonBlock.class
     );
 
-    private static final Map<BlockPosition, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
+    @NotNull private static final Map<BlockPosition, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
     private static Chunk chunk;
     private static int stage = 1;
 
