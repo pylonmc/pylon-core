@@ -162,7 +162,6 @@ object BlockStorage : Listener {
             blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
-        blockPosition.block.type = schema.getPlaceMaterial(context)
         return block
     }
 
