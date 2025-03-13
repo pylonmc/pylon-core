@@ -8,7 +8,7 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.lang.ref.WeakReference
 
-open class ChunkPosition(world: World?, val x: Int, val z: Int) {
+class ChunkPosition(world: World?, val x: Int, val z: Int) {
     private val worldRef: WeakReference<World> = WeakReference(world)
     val world: World?
         get() = worldRef.get()
