@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.base.BlockPlacer
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.block.Block
@@ -18,7 +19,8 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun onPlace(event: BlockPlaceEvent) {
         val item = PylonItem.fromStack(event.itemInHand) ?: return
-        if (!item.doPlace(event)) {
+        if (item is BlockPlacer) {
+            item.doPlace(event)
             event.setBuild(false)
         }
     }

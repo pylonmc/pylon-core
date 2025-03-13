@@ -13,7 +13,6 @@ import io.github.pylonmc.pylon.test.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -56,7 +55,6 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
     private static final PylonBlockSchema schema = new PylonBlockSchema  (
             PylonTest.key("block_storage_chunk_reload_test"),
-            Material.AMETHYST_BLOCK,
             TestBlock.class
     );
 
