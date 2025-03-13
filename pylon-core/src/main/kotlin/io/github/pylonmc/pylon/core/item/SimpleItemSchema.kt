@@ -7,7 +7,7 @@ import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-class SimpleItemSchema<R : Keyed> @JvmOverloads constructor(
+open class SimpleItemSchema<R : Keyed> @JvmOverloads constructor(
     id: NamespacedKey,
     template: ItemStack,
     private val recipeType: RecipeType<R>,
