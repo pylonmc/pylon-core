@@ -7,7 +7,7 @@ import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ThreadLocalRandom
 
-class SimpleMobDrop @JvmOverloads constructor(
+open class SimpleMobDrop @JvmOverloads constructor(
     private val key: NamespacedKey,
     private val result: ItemStack,
     val mob: EntityType,

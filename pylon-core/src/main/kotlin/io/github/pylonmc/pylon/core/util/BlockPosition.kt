@@ -7,7 +7,7 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.lang.ref.WeakReference
 
-class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
+open class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     private val worldRef: WeakReference<World> = WeakReference(world)
     val world: World?
         get() = worldRef.get()

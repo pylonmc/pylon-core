@@ -10,7 +10,7 @@ import org.bukkit.persistence.PersistentDataType
 
 // O wise one, what is my purpose in life?
 // P R I N T E R
-internal class PrintingPDC(private val audience: Audience) : PersistentDataContainer {
+class PrintingPDC(private val audience: Audience) : PersistentDataContainer {
 
     private val data = mutableMapOf<NamespacedKey, Any>()
 
