@@ -10,7 +10,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.pluginInstance
-import io.github.pylonmc.pylon.core.util.position
+import io.github.pylonmc.pylon.core.util.position.position
 import kotlinx.coroutines.*
 import org.bukkit.Color.RED
 import org.bukkit.entity.BlockDisplay

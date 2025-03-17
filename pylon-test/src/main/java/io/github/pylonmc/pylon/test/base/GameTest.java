@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.test.base;
 
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.core.test.GameTestFailException;
-import io.github.pylonmc.pylon.core.util.BlockPosition;
+import io.github.pylonmc.pylon.core.util.position.BlockPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
