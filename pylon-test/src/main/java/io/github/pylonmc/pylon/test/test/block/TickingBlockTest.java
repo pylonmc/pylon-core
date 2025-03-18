@@ -27,7 +27,7 @@ public class TickingBlockTest extends GameTest {
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> implements Ticking {
 
-        public static int ticks;
+        public static int ticks = 0;
 
         public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
