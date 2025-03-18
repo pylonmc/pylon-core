@@ -2,10 +2,16 @@ package io.github.pylonmc.pylon.core.item
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
 import io.github.pylonmc.pylon.core.block.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.BlockItemReason
 import io.github.pylonmc.pylon.core.item.base.*
+import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
+import io.papermc.paper.event.player.PlayerPickItemEvent
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDamageEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
@@ -15,6 +21,7 @@ import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.player.*
+import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
 internal object PylonItemListener : Listener {
@@ -47,9 +54,9 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) }
-        if (pylonItem is BlockPlacer && event.hasBlock()) {
+        if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
             val context = BlockCreateContext.PlayerPlace(event.player, event.item!!)
-            pylonItem.doPlace(context, event.clickedBlock!!)
+            pylonItem.doPlace(context, event.clickedBlock!!.getRelative(event.blockFace))
         }
         if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToClickBlock(event)
@@ -171,6 +178,64 @@ internal object PylonItemListener : Listener {
             if (pylonItem is Weapon) {
                 pylonItem.onUsedToKillEntity(event)
             }
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: PlayerPickItemEvent) {
+        val block = event.player.getTargetBlockExact(4) ?: return
+        val pylonBlock = BlockStorage.get(block) ?: return
+        val blockItem = pylonBlock.getItem(BlockItemReason.PickBlock(event.player)) ?: return
+        val blockPylonItem = PylonItem.fromStack(blockItem) ?: return
+
+        val sourceSlot = event.sourceSlot
+        if (sourceSlot != -1) {
+            val sourceItem = event.player.inventory.getItem(event.sourceSlot)
+            if (sourceItem != null) {
+                val sourcePylonItem = PylonItem.fromStack(sourceItem)
+                if (sourcePylonItem != null) {
+                    // The source item is already of the correct Pylon type, so we shouldn't interfere with the event
+                    return
+                }
+            }
+        }
+
+        // If we reach this point, the source item is not of the correct type
+        // So we're going to search the inventory for a block of the correct type
+        val existingSlot = findPylonItemInInventory(event.player.inventory, blockPylonItem)
+        if (existingSlot != null) {
+            // If we find one, we'll set the source to that slot
+            event.sourceSlot = existingSlot
+            // And if the item is in the hotbar, that should become the target (0-8 are hotbar slots
+            if (existingSlot <= 8) {
+                event.targetSlot = existingSlot
+            }
+            return
+        }
+
+        // Otherwise, we'll just attempt to add a new item and set the source to be that item
+        if (event.player.inventory.addItem(blockItem).isNotEmpty()) {
+            // Inventory full, can't pick the item
+            event.isCancelled = true
+            return
+        }
+
+        val newSourceSlot = findPylonItemInInventory(event.player.inventory, blockPylonItem)
+        if (newSourceSlot == null) {
+            // should never happen but you never know
+            event.isCancelled = true
+            return
+        }
+
+        event.sourceSlot = newSourceSlot
+        event.targetSlot = event.player.inventory.heldItemSlot
+
+        // don't question this idk wtf is going on - seems we have to manually do the swap in the hotbar
+        if (sourceSlot <= 8) {
+            val source = event.player.inventory.getItem(event.sourceSlot)
+            val target = event.player.inventory.getItem(event.targetSlot)
+            event.player.inventory.setItem(event.sourceSlot, target)
+            event.player.inventory.setItem(event.targetSlot, source)
         }
     }
 }

@@ -216,7 +216,9 @@ object BlockStorage : Listener {
         if (event.isCancelled) return null
 
         val drops = mutableListOf<ItemStack>()
-        block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+        if (context.normallyDrops) {
+            block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+        }
         if (block is BreakHandler) {
             block.onBreak(drops, context)
         }
