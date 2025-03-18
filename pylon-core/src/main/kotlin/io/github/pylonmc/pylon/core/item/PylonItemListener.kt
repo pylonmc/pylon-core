@@ -47,7 +47,7 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) }
-        if (pylonItem is BlockPlacer && event.hasItem() && event.hasBlock()) {
+        if (pylonItem is BlockPlacer && event.hasBlock()) {
             val context = BlockCreateContext.PlayerPlace(event.player, event.item!!)
             pylonItem.doPlace(context, event.clickedBlock!!)
         }
