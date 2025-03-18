@@ -20,10 +20,11 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
 
         public TestBlockSchema(
                 NamespacedKey key,
+                Material material,
                 Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
-            super(key, blockClass);
+            super(key, material, blockClass);
             this.processingSpeed = processingSpeed;
         }
 
@@ -50,6 +51,7 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
         NamespacedKey key = PylonTest.key("simple_block_with_schema_test");
         new TestBlockSchema(
                 key,
+                Material.AMETHYST_BLOCK,
                 TestBlock.class,
                 12
         ).register();

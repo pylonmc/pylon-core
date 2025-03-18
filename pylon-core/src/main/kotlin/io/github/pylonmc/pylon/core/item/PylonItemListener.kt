@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.item
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
+import io.github.pylonmc.pylon.core.block.BlockCreateContext
 import io.github.pylonmc.pylon.core.item.base.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -46,6 +47,10 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) }
+        if (pylonItem is BlockPlacer && event.hasItem() && event.hasBlock()) {
+            val context = BlockCreateContext.PlayerPlace(event.player, event.item!!)
+            pylonItem.doPlace(context, event.clickedBlock!!)
+        }
         if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToClickBlock(event)
         }

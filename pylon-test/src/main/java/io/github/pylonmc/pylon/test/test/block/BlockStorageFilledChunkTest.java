@@ -13,6 +13,7 @@ import io.github.pylonmc.pylon.test.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BlockStorageFilledChunkTest extends AsyncTest {
     private static final PylonBlockSchema schema = new PylonBlockSchema(
             PylonTest.key("block_storage_fill_chunk_test"),
+            Material.AMETHYST_BLOCK,
             SimplePylonBlock.class
     );
 

@@ -37,7 +37,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
                 Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
-            super(key, blockClass);
+            super(key, material, blockClass);
             this.processingSpeed = processingSpeed;
         }
     }
