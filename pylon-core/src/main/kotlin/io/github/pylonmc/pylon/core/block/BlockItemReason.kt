@@ -15,6 +15,5 @@ sealed interface BlockItemReason {
     /**
      * The item is being requested because a player used the pick block button
      */
-    // TODO implement
     data class PickBlock(val player: Player) : BlockItemReason
 }

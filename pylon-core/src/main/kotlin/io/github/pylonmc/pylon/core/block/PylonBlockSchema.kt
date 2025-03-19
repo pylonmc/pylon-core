@@ -35,7 +35,7 @@ open class PylonBlockSchema(
     )
         ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, Block, PersistentDataContainer)")
 
-    open fun getPlaceMaterial(context: BlockCreateContext): Material {
+    open fun getPlaceMaterial(block: Block, context: BlockCreateContext): Material {
         return material
     }
 

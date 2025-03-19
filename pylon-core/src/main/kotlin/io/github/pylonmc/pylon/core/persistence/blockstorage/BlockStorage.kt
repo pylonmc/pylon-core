@@ -77,7 +77,7 @@ object BlockStorage : Listener {
     val loadedPylonBlocks: Collection<PylonBlock<*>>
         get() = lockBlockRead { blocks.values }
 
-    // This isn't called?
+    // TODO implement this properly and actually run it
     internal fun startAutosaveTask() {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
             // TODO this saves all chunks at once, potentially leading to large pauses
@@ -156,13 +156,13 @@ object BlockStorage : Listener {
         event.callEvent()
         if (event.isCancelled) return null
 
+        event.block.type = block.schema.getPlaceMaterial(event.block, context)
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
             blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
-        blockPosition.block.type = schema.getPlaceMaterial(context)
         return block
     }
 
@@ -216,7 +216,9 @@ object BlockStorage : Listener {
         if (event.isCancelled) return null
 
         val drops = mutableListOf<ItemStack>()
-        block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+        if (context.normallyDrops) {
+            block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+        }
         if (block is BreakHandler) {
             block.onBreak(drops, context)
         }
@@ -330,6 +332,7 @@ object BlockStorage : Listener {
             if (block.schema.key.isFromAddon(addon)) {
                 PhantomBlock(
                     PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
+                    block.schema.key,
                     block.block
                 )
             } else {

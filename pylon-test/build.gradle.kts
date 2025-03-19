@@ -1,3 +1,5 @@
+import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
+
 plugins {
     java
     id("com.gradleup.shadow")
@@ -27,6 +29,7 @@ bukkit {
     version = project.version.toString()
     apiVersion = "1.21"
     depend = listOf("PylonCore")
+    load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }
 
 tasks.runServer {

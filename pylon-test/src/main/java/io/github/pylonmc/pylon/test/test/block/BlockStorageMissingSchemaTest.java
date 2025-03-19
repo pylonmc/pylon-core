@@ -20,13 +20,13 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@NotNullByDefault
 public class BlockStorageMissingSchemaTest extends AsyncTest {
     public static class TestBlockSchema extends PylonBlockSchema {
         private final int processingSpeed;
@@ -64,7 +64,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
 
     private static Block block;
     private static int stage = 1;
-    private static final CompletableFuture<Throwable> future = new CompletableFuture<>();
+    @NotNull private static final CompletableFuture<Throwable> future = new CompletableFuture<>();
 
     private static class TestListener implements Listener {
 
