@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import javax.xml.stream.events.Namespace
 
 open class SimpleItemSchema<R : Keyed> @JvmOverloads constructor(
     id: NamespacedKey,
@@ -14,6 +15,9 @@ open class SimpleItemSchema<R : Keyed> @JvmOverloads constructor(
     private val recipe: (ItemStack) -> R,
     private val block: PylonBlockSchema? = null
 ) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
+    constructor(id: NamespacedKey, template: () -> ItemStack, recipeType: RecipeType<R>,
+                recipe: (ItemStack) -> R, block: PylonBlockSchema? = null)
+            : this(id, template.invoke(), recipeType, recipe, block)
 
     private var recipeKey: NamespacedKey? = null
 
