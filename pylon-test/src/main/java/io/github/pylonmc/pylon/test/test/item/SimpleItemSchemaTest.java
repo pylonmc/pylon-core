@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.recipe.CraftingBookCategory;
 
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,50 +25,6 @@ public class SimpleItemSchemaTest extends SyncTest {
 
     @Override
     public void test() {
-        PylonItemSchema oldformat = new SimpleItemSchema<>(
-                PylonTest.key("simple_item_schema_1"),
-                () -> new ItemStackBuilder(Material.ACACIA_BUTTON)
-                        .name("A cool item")
-                        .lore("Something cool")
-                        .set(DataComponentTypes.RARITY, ItemRarity.RARE)
-                        .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
-                        .build(),
-                RecipeTypes.VANILLA_CRAFTING,
-                testitem -> {
-                    ShapedRecipe recipe = new ShapedRecipe(PylonTest.key("simple_item_schema_1"), testitem);
-                    recipe.shape(
-                            "SSS",
-                            "SSS",
-                            "SSS"
-                    );
-                    recipe.setIngredient('S', Material.STICK);
-                    recipe.setCategory(CraftingBookCategory.MISC);
-                    return recipe;
-                }
-        );
-
-        PylonItemSchema duplicateoldformat = new SimpleItemSchema<>(
-                PylonTest.key("simple_item_schema_2"),
-                () -> new ItemStackBuilder(Material.ACACIA_BUTTON)
-                        .name("A cool item")
-                        .lore("Something cool")
-                        .set(DataComponentTypes.RARITY, ItemRarity.RARE)
-                        .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
-                        .build(),
-                RecipeTypes.VANILLA_CRAFTING,
-                testitem -> {
-                    ShapedRecipe recipe = new ShapedRecipe(PylonTest.key("simple_item_schema_1"), testitem);
-                    recipe.shape(
-                            "SSS",
-                            "SSS",
-                            "SSS"
-                    );
-                    recipe.setIngredient('S', Material.STICK);
-                    recipe.setCategory(CraftingBookCategory.MISC);
-                    return recipe;
-                }
-        );
-
         PylonItemSchema itemwithmeta = new SimpleItemSchema<>(
                 PylonTest.key("simple_item_schema_3"),
                 () -> {
@@ -95,8 +52,6 @@ public class SimpleItemSchemaTest extends SyncTest {
                     return recipe;
                 }
         );
-
-        assertThat(oldformat.getItemStack()).isEqualTo(duplicateoldformat.getItemStack());
-        assertThat(oldformat.getItemStack()).isNotEqualTo(itemwithmeta.getItemStack());
+        assertThat(((Damageable)itemwithmeta.getItemStack().getItemMeta()).getMaxDamage()).isEqualTo(200);
     }
 }
