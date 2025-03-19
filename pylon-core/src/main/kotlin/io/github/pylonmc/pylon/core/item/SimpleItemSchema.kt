@@ -6,18 +6,16 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.Callable
 import javax.xml.stream.events.Namespace
 
 open class SimpleItemSchema<R : Keyed> @JvmOverloads constructor(
     id: NamespacedKey,
-    template: ItemStack,
+    template: Callable<ItemStack>,
     private val recipeType: RecipeType<R>,
     private val recipe: (ItemStack) -> R,
     private val block: PylonBlockSchema? = null
-) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
-    constructor(id: NamespacedKey, template: () -> ItemStack, recipeType: RecipeType<R>,
-                recipe: (ItemStack) -> R, block: PylonBlockSchema? = null)
-            : this(id, template.invoke(), recipeType, recipe, block)
+) : PylonItemSchema(id, SimplePylonItem::class.java, template.call()) {
 
     private var recipeKey: NamespacedKey? = null
 
