@@ -77,7 +77,7 @@ object BlockStorage : Listener {
     val loadedPylonBlocks: Collection<PylonBlock<*>>
         get() = lockBlockRead { blocks.values }
 
-    // This isn't called?
+    // TODO implement this properly and actually run it
     internal fun startAutosaveTask() {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
             // TODO this saves all chunks at once, potentially leading to large pauses
@@ -332,6 +332,7 @@ object BlockStorage : Listener {
             if (block.schema.key.isFromAddon(addon)) {
                 PhantomBlock(
                     PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
+                    block.schema.key,
                     block.block
                 )
             } else {

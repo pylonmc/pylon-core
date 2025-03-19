@@ -73,11 +73,11 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
             pdc: PersistentDataContainer
         ): PylonBlock<*>? {
             // Stored outside of the try block so they are displayed in error messages once acquired
-            var id: NamespacedKey? = null
+            var key: NamespacedKey? = null
             var position: BlockPosition? = null
 
             try {
-                id = pdc.get(pylonBlockKeyKey, PylonSerializers.NAMESPACED_KEY)
+                key = pdc.get(pylonBlockKeyKey, PylonSerializers.NAMESPACED_KEY)
                     ?: error("Block PDC does not contain ID")
 
                 position = pdc.get(pylonBlockPositionKey, PylonSerializers.LONG)?.let {
@@ -87,8 +87,8 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
                 // We fail silently here because this may trigger if an addon is removed or fails to load.
                 // In this case, we don't want to delete the data, and we also don't want to spam errors.
                 // See PhantomBlock docs for why PhantomBlock is returned rather than null.
-                val schema = PylonRegistry.BLOCKS[id]
-                    ?: return PhantomBlock(pdc, position.block)
+                val schema = PylonRegistry.BLOCKS[key]
+                    ?: return PhantomBlock(pdc, key, position.block)
 
                 // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
@@ -99,10 +99,10 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 
                 return block
             } catch (t: Throwable) {
-                pluginInstance.logger.severe("Error while loading block $id at $position")
+                pluginInstance.logger.severe("Error while loading block $key at $position")
                 t.printStackTrace()
-                return if (position != null) {
-                    PhantomBlock(pdc, position.block)
+                return if (key != null && position != null) {
+                    PhantomBlock(pdc, key, position.block)
                 } else {
                     null
                 }
