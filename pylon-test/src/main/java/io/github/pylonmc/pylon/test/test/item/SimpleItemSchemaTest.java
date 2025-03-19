@@ -28,7 +28,7 @@ public class SimpleItemSchemaTest extends SyncTest {
         PylonItemSchema itemwithmeta = new SimpleItemSchema<>(
                 PylonTest.key("simple_item_schema_3"),
                 () -> {
-                    ItemStack item = new ItemStackBuilder(Material.ACACIA_BUTTON)
+                    ItemStack item = new ItemStackBuilder(Material.DIAMOND_SWORD)
                             .name("A cool item")
                             .lore("Something cool")
                             .set(DataComponentTypes.RARITY, ItemRarity.RARE)
