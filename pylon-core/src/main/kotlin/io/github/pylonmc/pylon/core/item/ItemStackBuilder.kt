@@ -10,6 +10,8 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
+import org.bukkit.util.Consumer
 import java.util.EnumSet
 
 
@@ -28,6 +30,10 @@ open class ItemStackBuilder(private val stack: ItemStack) {
 
     fun <T : Any> set(type: DataComponentType.Valued<T>, value: T) = apply {
         stack.setData(type, value)
+    }
+
+    fun <T: Any> set(type: MetaComponentType<T>, value: T) = apply {
+        stack.itemMeta = type.ModifyMeta(stack.itemMeta, value)
     }
 
     fun set(type: DataComponentType.NonValued) = apply {
