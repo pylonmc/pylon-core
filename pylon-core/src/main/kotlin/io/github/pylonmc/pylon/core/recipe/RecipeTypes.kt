@@ -121,17 +121,3 @@ private object SmithingRecipeType : RecipeType<SmithingRecipe>(
         }
     }
 }
-
-private fun <T> vanillaRecipeWrapper(keyStr: String): RecipeType<T>
-        where T : Keyed, T : Recipe {
-    return object : RecipeType<T>(pylonKey(keyStr)) {
-
-        override fun registerRecipe(recipe: T) {
-            Bukkit.addRecipe(recipe)
-        }
-
-        override fun unregisterRecipe(recipe: NamespacedKey) {
-            Bukkit.removeRecipe(recipe)
-        }
-    }.also { it.register() }
-}
