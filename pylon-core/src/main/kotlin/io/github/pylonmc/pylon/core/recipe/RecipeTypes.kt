@@ -11,6 +11,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.FurnaceSmeltEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
+import org.bukkit.event.inventory.PrepareSmithingEvent
 import org.bukkit.inventory.*
 
 object RecipeTypes {
@@ -31,7 +32,7 @@ object RecipeTypes {
     val VANILLA_FURNACE: RecipeType<FurnaceRecipe> = FurnaceRecipeType("furnace") as RecipeType<FurnaceRecipe>
 
     @JvmField
-    val VANILLA_SMITHING = vanillaRecipeWrapper<SmithingRecipe>("vanilla_smithing")
+    val VANILLA_SMITHING: RecipeType<SmithingRecipe> = SmithingRecipeType
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
@@ -90,6 +91,33 @@ private class FurnaceRecipeType(key: String) : RecipeType<CookingRecipe<*>>(
                 e.result = recipe.result.clone()
                 return
             }
+        }
+    }
+}
+
+private object SmithingRecipeType : RecipeType<SmithingRecipe>(
+    NamespacedKey.minecraft("smithing")
+), Listener {
+
+    init {
+        Bukkit.getPluginManager().registerEvents(this, pluginInstance)
+    }
+
+    override fun registerRecipe(recipe: SmithingRecipe) {
+        Bukkit.addRecipe(recipe)
+    }
+
+    override fun unregisterRecipe(recipe: NamespacedKey) {
+        Bukkit.removeRecipe(recipe)
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onSmith(e: PrepareSmithingEvent) {
+        val inv = e.inventory
+        val items = listOf(inv.inputMineral, inv.inputTemplate)
+        if (recipes.all { it.key != inv.recipe } && items.any { PylonItem.fromStack(it) != null }) {
+            // Prevent the erroneous smithing of vanilla items with Pylon ingredients
+            inv.result = null
         }
     }
 }
