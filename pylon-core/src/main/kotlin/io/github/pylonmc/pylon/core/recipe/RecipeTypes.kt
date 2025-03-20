@@ -37,6 +37,15 @@ object RecipeTypes {
     @JvmField
     @Suppress("UNCHECKED_CAST")
     val VANILLA_SMOKING: RecipeType<SmokingRecipe> = FurnaceRecipeType("smoking") as RecipeType<SmokingRecipe>
+
+    init {
+        VANILLA_BLASTING.register()
+        VANILLA_CAMPFIRE.register()
+        VANILLA_CRAFTING.register()
+        VANILLA_FURNACE.register()
+        VANILLA_SMITHING.register()
+        VANILLA_SMOKING.register()
+    }
 }
 
 private object CraftingRecipeType : RecipeType<CraftingRecipe>(
