@@ -36,9 +36,6 @@ object RecipeTypes {
     @JvmField
     @Suppress("UNCHECKED_CAST")
     val VANILLA_SMOKING: RecipeType<SmokingRecipe> = FurnaceRecipeType("smoking") as RecipeType<SmokingRecipe>
-
-    @JvmField
-    val VANILLA_STONECUTTING = vanillaRecipeWrapper<StonecuttingRecipe>("vanilla_stonecutting")
 }
 
 private object CraftingRecipeType : RecipeType<CraftingRecipe>(
