@@ -11,8 +11,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityInteractEvent
 import org.bukkit.event.entity.EntityShootBowEvent
-import org.bukkit.event.inventory.BrewingStandFuelEvent
-import org.bukkit.event.inventory.FurnaceBurnEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.event.player.*
 
 @Suppress("UnstableApiUsage")
@@ -100,6 +99,9 @@ internal object PylonItemListener : Listener {
         if (pylonItem is Damageable) {
             pylonItem.onItemBreaks(event)
         }
+        if(pylonItem is InventoryItem){
+            pylonItem.onExitInventory(event.player)
+        }
     }
 
     @EventHandler
@@ -166,6 +168,38 @@ internal object PylonItemListener : Listener {
             if (pylonItem is Weapon) {
                 pylonItem.onUsedToKillEntity(event)
             }
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: PlayerDropItemEvent){
+        val pylonItem = PylonItem.fromStack(event.itemDrop.itemStack)
+        if(pylonItem is InventoryItem){
+            pylonItem.onExitInventory(event.player)
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: InventoryClickEvent){
+        if(event.action == InventoryAction.CLONE_STACK){
+            val pylonItem = PylonItem.fromStack(event.cursor)
+            if(pylonItem is InventoryItem){
+                pylonItem.onEnterInventory(event.whoClicked)
+            }
+        }
+        else if(event.action == InventoryAction.MOVE_TO_OTHER_INVENTORY){
+            val pylonItem = PylonItem.fromStack(event.cursor)
+            if(pylonItem is InventoryItem){
+                pylonItem.onExitInventory(event.whoClicked)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: PlayerAttemptPickupItemEvent){
+        val pylonItem = PylonItem.fromStack(event.item.itemStack)
+        if(pylonItem is InventoryItem){
+            pylonItem.onEnterInventory(event.player)
         }
     }
 }
