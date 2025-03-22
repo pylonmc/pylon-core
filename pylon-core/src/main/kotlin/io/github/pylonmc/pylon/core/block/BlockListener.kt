@@ -16,10 +16,9 @@ import org.bukkit.event.entity.EntityExplodeEvent
 internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
-    private fun onPlace(event: BlockPlaceEvent) {
-        val item = PylonItem.fromStack(event.itemInHand) ?: return
-        if (!item.doPlace(event)) {
-            event.setBuild(false)
+    private fun blockPlace(event: BlockPlaceEvent) {
+        if (PylonItem.fromStack(event.itemInHand) != null) {
+            event.isCancelled = true
         }
     }
 

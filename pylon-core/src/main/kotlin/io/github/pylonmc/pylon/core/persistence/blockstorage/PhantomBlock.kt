@@ -29,18 +29,19 @@ import org.bukkit.persistence.PersistentDataContainer
  */
 class PhantomBlock(
     val pdc: PersistentDataContainer,
+    val key: NamespacedKey,
     block: Block
 ) : PylonBlock<PylonBlockSchema>(schema, block) {
 
     // Hacky placeholder
     internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
+            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
         throw IllegalStateException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
     internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), block) {
+            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
         throw IllegalStateException("Phantom block cannot be loaded")
     }
 
@@ -65,7 +66,8 @@ class PhantomBlock(
             .name("<red>Error")
             .lore(
                 "<red>This item dropped from a",
-                "<red>block that failed to load."
+                "<red>block that failed to load.",
+                "<red>ID:</red> <yellow>$key"
             )
             .set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
             .build()

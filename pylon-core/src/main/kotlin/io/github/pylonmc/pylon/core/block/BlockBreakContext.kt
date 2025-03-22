@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block
 
+import org.bukkit.GameMode
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockBurnEvent
 import org.bukkit.event.block.BlockExplodeEvent
@@ -17,7 +18,8 @@ interface BlockBreakContext {
     }
 
     data class PlayerBreak(val event: BlockBreakEvent) : BlockBreakContext {
-        override val normallyDrops = true
+        override val normallyDrops
+            get() = event.player.gameMode != GameMode.CREATIVE
     }
 
     // No event parameter since explosion can be either from block or entity
