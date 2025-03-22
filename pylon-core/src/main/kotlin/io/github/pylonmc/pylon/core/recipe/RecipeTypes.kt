@@ -48,48 +48,20 @@ object RecipeTypes {
     }
 }
 
-private object CraftingRecipeType : RecipeType<CraftingRecipe>(
-    NamespacedKey.minecraft("crafting")
-), Listener {
-
-    init {
-        Bukkit.getPluginManager().registerEvents(this, pluginInstance)
-    }
-
-    override fun registerRecipe(recipe: CraftingRecipe) {
-        Bukkit.addRecipe(recipe)
-    }
-
-    override fun unregisterRecipe(recipe: NamespacedKey) {
-        Bukkit.removeRecipe(recipe)
-    }
+private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onPreCraft(e: PrepareItemCraftEvent) {
-        val recipe = e.recipe
+        val recipe = e.recipe ?: return
         val inventory = e.inventory
-        if (recipes.all { it.key != recipe } && inventory.any { PylonItem.fromStack(it) != null }) {
+        if (recipes.all { it != recipe } && inventory.any { PylonItem.fromStack(it) != null }) {
             // Prevent the erroneous crafting of vanilla items with Pylon ingredients
             inventory.result = null
         }
     }
 }
 
-private class FurnaceRecipeType(key: String) : RecipeType<CookingRecipe<*>>(
-    NamespacedKey.minecraft(key)
-), Listener {
-
-    init {
-        Bukkit.getPluginManager().registerEvents(this, pluginInstance)
-    }
-
-    override fun registerRecipe(recipe: CookingRecipe<*>) {
-        Bukkit.addRecipe(recipe)
-    }
-
-    override fun unregisterRecipe(recipe: NamespacedKey) {
-        Bukkit.removeRecipe(recipe)
-    }
+private class FurnaceRecipeType(key: String) : VanillaRecipe<CookingRecipe<*>>(key) {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onFurnaceCook(e: FurnaceSmeltEvent) {
@@ -104,29 +76,32 @@ private class FurnaceRecipeType(key: String) : RecipeType<CookingRecipe<*>>(
     }
 }
 
-private object SmithingRecipeType : RecipeType<SmithingRecipe>(
-    NamespacedKey.minecraft("smithing")
-), Listener {
-
-    init {
-        Bukkit.getPluginManager().registerEvents(this, pluginInstance)
-    }
-
-    override fun registerRecipe(recipe: SmithingRecipe) {
-        Bukkit.addRecipe(recipe)
-    }
-
-    override fun unregisterRecipe(recipe: NamespacedKey) {
-        Bukkit.removeRecipe(recipe)
-    }
+private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onSmith(e: PrepareSmithingEvent) {
         val inv = e.inventory
         val items = listOf(inv.inputMineral, inv.inputTemplate)
-        if (recipes.all { it.key != inv.recipe } && items.any { PylonItem.fromStack(it) != null }) {
+        if (recipes.all { it != inv.recipe } && items.any { PylonItem.fromStack(it) != null }) {
             // Prevent the erroneous smithing of vanilla items with Pylon ingredients
             inv.result = null
         }
+    }
+}
+
+private abstract class VanillaRecipe<T>(key: String) : RecipeType<T>(
+    NamespacedKey.minecraft(key)
+), Listener where T : Keyed, T : Recipe {
+
+    init {
+        Bukkit.getPluginManager().registerEvents(this, pluginInstance)
+    }
+
+    override fun registerRecipe(recipe: T) {
+        Bukkit.addRecipe(recipe)
+    }
+
+    override fun unregisterRecipe(recipe: NamespacedKey) {
+        Bukkit.removeRecipe(recipe)
     }
 }
