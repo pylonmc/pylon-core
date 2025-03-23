@@ -7,10 +7,6 @@ import io.github.pylonmc.pylon.core.item.base.BrewingStandFuel;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemLore;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -61,12 +57,9 @@ public class PylonItemStackInterfaceTest extends GameTest {
                             PylonTest.key("pylon_item_stack_interface_test"),
                             OminousBlazePower.class,
                             new ItemStackBuilder(Material.DIAMOND_SWORD)
-                                    .set(DataComponentTypes.CUSTOM_NAME, Component.text("Ominous blaze powder")
-                                            .color(TextColor.color(255, 0, 0)))
-                                    .set(DataComponentTypes.LORE, ItemLore.lore()
-                                            .addLine(Component.text("VERY SCARY", TextColor.color(200, 0, 0)))
-                                            .addLine(Component.text("OH NO", TextColor.color(60, 60, 60)))
-                                            .build())
+                                    .name("<ff0000>OMINOUS BLAZE POWDER")
+                                    .lore("<#ff0000>VERY SCARY")
+                                    .lore("<#222222>OH NO")
                                     .build()
                     ).register();
 
