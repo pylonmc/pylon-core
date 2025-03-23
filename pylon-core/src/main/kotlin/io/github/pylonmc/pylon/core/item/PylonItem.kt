@@ -5,6 +5,9 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.annotations.Contract
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 abstract class PylonItem<out S : PylonItemSchema>(
     val schema: S,
@@ -27,7 +30,9 @@ abstract class PylonItem<out S : PylonItemSchema>(
          * Returns null if the ItemStack is not a Pylon item
          */
         @JvmStatic
-        fun fromStack(stack: ItemStack): PylonItem<*>? {
+        @Contract("null -> null")
+        fun fromStack(stack: ItemStack?): PylonItem<*>? {
+            if (stack == null || stack.isEmpty) return null
             val id = stack.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)
                 ?: return null
             val schema = PylonRegistry.ITEMS[id]

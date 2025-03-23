@@ -1,45 +1,106 @@
 package io.github.pylonmc.pylon.core.recipe
 
-import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.pluginInstance
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockCookEvent
+import org.bukkit.event.inventory.PrepareItemCraftEvent
+import org.bukkit.event.inventory.PrepareSmithingEvent
 import org.bukkit.inventory.*
 
 object RecipeTypes {
 
     @JvmField
-    val VANILLA_BLASTING = vanillaRecipeWrapper<BlastingRecipe>("vanilla_blasting")
+    @Suppress("UNCHECKED_CAST")
+    val VANILLA_BLASTING: RecipeType<BlastingRecipe> = CookingRecipeType("blasting") as RecipeType<BlastingRecipe>
 
     @JvmField
-    val VANILLA_CAMPFIRE = vanillaRecipeWrapper<CampfireRecipe>("vanilla_campfire")
+    @Suppress("UNCHECKED_CAST")
+    val VANILLA_CAMPFIRE: RecipeType<CampfireRecipe> = CookingRecipeType("campfire") as RecipeType<CampfireRecipe>
 
     @JvmField
-    val VANILLA_CRAFTING = vanillaRecipeWrapper<CraftingRecipe>("vanilla_crafting")
+    val VANILLA_CRAFTING: RecipeType<CraftingRecipe> = CraftingRecipeType
 
     @JvmField
-    val VANILLA_FURNACE = vanillaRecipeWrapper<FurnaceRecipe>("vanilla_furnace")
+    @Suppress("UNCHECKED_CAST")
+    val VANILLA_FURNACE: RecipeType<FurnaceRecipe> = CookingRecipeType("furnace") as RecipeType<FurnaceRecipe>
 
     @JvmField
-    val VANILLA_SMITHING = vanillaRecipeWrapper<SmithingRecipe>("vanilla_smithing")
+    val VANILLA_SMITHING: RecipeType<SmithingRecipe> = SmithingRecipeType
 
     @JvmField
-    val VANILLA_SMOKING = vanillaRecipeWrapper<SmokingRecipe>("vanilla_smoking")
+    @Suppress("UNCHECKED_CAST")
+    val VANILLA_SMOKING: RecipeType<SmokingRecipe> = CookingRecipeType("smoking") as RecipeType<SmokingRecipe>
 
-    @JvmField
-    val VANILLA_STONECUTTING = vanillaRecipeWrapper<StonecuttingRecipe>("vanilla_stonecutting")
+    init {
+        VANILLA_BLASTING.register()
+        VANILLA_CAMPFIRE.register()
+        VANILLA_CRAFTING.register()
+        VANILLA_FURNACE.register()
+        VANILLA_SMITHING.register()
+        VANILLA_SMOKING.register()
+    }
 }
 
-private fun <T> vanillaRecipeWrapper(keyStr: String): RecipeType<T>
-        where T : Keyed, T : Recipe {
-    return object : RecipeType<T>(pylonKey(keyStr)) {
+private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
 
-        override fun registerRecipe(recipe: T) {
-            Bukkit.addRecipe(recipe)
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onPreCraft(e: PrepareItemCraftEvent) {
+        val recipe = e.recipe ?: return
+        val inventory = e.inventory
+        if (recipes.all { it != recipe } && inventory.any { PylonItem.fromStack(it) != null }) {
+            // Prevent the erroneous crafting of vanilla items with Pylon ingredients
+            inventory.result = null
         }
+    }
+}
 
-        override fun unregisterRecipe(recipe: NamespacedKey) {
-            Bukkit.removeRecipe(recipe)
+private class CookingRecipeType(key: String) : VanillaRecipe<CookingRecipe<*>>(key) {
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onCook(e: BlockCookEvent) {
+        val input = e.source
+        if (PylonItem.fromStack(input) == null) return
+        for (recipe in recipes) {
+            if (recipe.inputChoice.test(input)) {
+                e.result = recipe.result.clone()
+                return
+            }
         }
-    }.also { it.register() }
+    }
+}
+
+private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onSmith(e: PrepareSmithingEvent) {
+        val inv = e.inventory
+        val items = listOf(inv.inputMineral, inv.inputTemplate)
+        if (recipes.all { it != inv.recipe } && items.any { PylonItem.fromStack(it) != null }) {
+            // Prevent the erroneous smithing of vanilla items with Pylon ingredients
+            inv.result = null
+        }
+    }
+}
+
+private abstract class VanillaRecipe<T>(key: String) : RecipeType<T>(
+    NamespacedKey.minecraft(key)
+), Listener where T : Keyed, T : Recipe {
+
+    init {
+        Bukkit.getPluginManager().registerEvents(this, pluginInstance)
+    }
+
+    override fun registerRecipe(recipe: T) {
+        Bukkit.addRecipe(recipe)
+    }
+
+    override fun unregisterRecipe(recipe: NamespacedKey) {
+        Bukkit.removeRecipe(recipe)
+    }
 }
