@@ -9,13 +9,15 @@ import org.bukkit.inventory.ItemStack
 
 open class SimpleItemSchema<R : Keyed> @JvmOverloads constructor(
     id: NamespacedKey,
-    template: ItemStack,
+    private val template: ItemStack,
     private val recipeType: RecipeType<R>,
     private val recipe: (ItemStack) -> R,
     private val block: PylonBlockSchema? = null
-) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
+) : PylonItemSchema(id, SimplePylonItem::class.java) {
 
     private var recipeKey: NamespacedKey? = null
+
+    override fun getTemplate() = template
 
     override fun onRegister(registry: PylonRegistry<*>) {
         super.onRegister(registry)
