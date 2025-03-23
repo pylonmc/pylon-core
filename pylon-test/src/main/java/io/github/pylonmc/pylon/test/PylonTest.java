@@ -140,6 +140,8 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
     @Override
     public void onEnable() {
+        registerWithPylon();
+
         getLogger().info("Test addon enabled!");
 
         instance = this;

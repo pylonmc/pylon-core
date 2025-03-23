@@ -7,21 +7,18 @@ import io.github.pylonmc.pylon.test.PylonTest;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 
 @SuppressWarnings("UnstableApiUsage")
 class StickyStick extends PylonItemSchema {
     public StickyStick() {
-        super(PylonTest.key("sticky_stick"), SimplePylonItem.class);
-    }
-
-    @Override
-    protected @NotNull ItemStack getTemplate() {
-        return new ItemStackBuilder(Material.STICK)
-                .set(DataComponentTypes.ITEM_NAME, Component.text("Sticky Stick"))
-                .build();
+        super(
+                PylonTest.key("sticky_stick"),
+                SimplePylonItem.class,
+                new ItemStackBuilder(Material.STICK)
+                        .set(DataComponentTypes.ITEM_NAME, Component.text("Sticky Stick"))
+                        .build()
+        );
     }
 
     static StickyStick INSTANCE = new StickyStick();

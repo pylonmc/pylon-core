@@ -20,13 +20,12 @@ import org.bukkit.inventory.ItemStack
 object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     pylonKey("debug_waxed_weathered_cut_copper_stairs"),
     ItemInstance::class.java,
-) {
-
-    override fun getTemplate() = ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
+    ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
             .name("<red>Debug Waxed Weathered Cut Copper Stairs")
             .lore("Right click a block to view its Pylon block data")
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
+) {
 
     class ItemInstance(schema: DebugWaxedWeatheredCutCopperStairs, item: ItemStack) :
         PylonItem<DebugWaxedWeatheredCutCopperStairs>(schema, item), BlockInteractor {

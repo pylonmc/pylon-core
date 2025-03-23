@@ -10,24 +10,24 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
 
-abstract class PylonItemSchema(
+open class PylonItemSchema(
     private val key: NamespacedKey,
     @JvmSynthetic internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
+    private val template: ItemStack
 ) : Keyed, RegistryHandler {
 
-    protected abstract fun getTemplate(): ItemStack
+    init {
+        val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
+        if (addon == null) {
+            throw IllegalStateException("Item does not have a corresponding addon; does your plugin implement PylonAddon?")
+        }
+        ItemStackBuilder(template) // Modifies the template directly
+            .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
+            .lore(LoreBuilder().addon(addon).build())
+    }
 
     val itemStack: ItemStack
-        get() {
-            val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
-            if (addon == null) {
-                throw IllegalStateException("Item was registered without an addon")
-            }
-            return ItemStackBuilder(getTemplate())
-                .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
-                .lore(LoreBuilder().addon(addon).build())
-                .build()
-        }
+        get() = template.clone()
 
     @JvmSynthetic
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(
