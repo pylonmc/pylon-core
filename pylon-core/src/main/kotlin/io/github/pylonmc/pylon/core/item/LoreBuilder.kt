@@ -4,7 +4,9 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.util.format
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TextComponent
+import org.bukkit.Material
 
 open class LoreBuilder {
     protected var components: MutableList<TextComponent.Builder> = mutableListOf(Component.text())
@@ -13,17 +15,22 @@ open class LoreBuilder {
         components.addAll(other.components)
     }
 
-    fun text(text: String) = text(fromMiniMessage(text))
+    open fun text(text: String) = text(fromMiniMessage(text))
 
-    fun text(text: Component) = apply {
+    fun text(text: ComponentLike) = apply {
         components.last().append(text)
     }
 
-    fun text(value: Int) = text(value.toString())
+    open fun text(value: Int) = text(value.toString())
 
-    fun text(value: Double, decimalPlaces: Int) = text(value.format(decimalPlaces))
+    open fun text(value: Double, decimalPlaces: Int) = text(value.format(decimalPlaces))
 
-    fun text(value: Float, decimalPlaces: Int) = text(value.toDouble(), decimalPlaces)
+    open fun text(value: Float, decimalPlaces: Int) = text(value.toDouble(), decimalPlaces)
+
+    /**
+     * For example: Material.BONE_BLOCK -> "bone block"
+     */
+    open fun text(value: Material) = text(value.name.replace("_", "").lowercase())
 
     open fun arrowUncolored() = text("\u2192")
 
@@ -33,10 +40,28 @@ open class LoreBuilder {
 
     open fun instruction(instruction: String) = text("<#f7e011>$instruction:</#f7e011>")
 
-    open fun quantityLine(name: String, value: Double, decimalPlaces: Int, unit: Quantity) = arrow()
+    protected fun quantityLine(name: String, value: LoreBuilder, unit: Quantity) = arrow()
             .text(" <gray>$name</gray>")
-            .text(" <white>").text(value, decimalPlaces).text("</white>")
+            .text(" <white>").append(value).text("</white>")
             .text(" ").text(unit.component)
+
+    open fun quantityLine(name: String, value: ComponentLike, unit: Quantity)
+            = quantityLine(name, LoreBuilder().text(value), unit)
+
+    open fun quantityLine(name: String, value: String, unit: Quantity)
+            = quantityLine(name, LoreBuilder().text(value), unit)
+
+    open fun quantityLine(name: String, value: Int, unit: Quantity)
+            = quantityLine(name, LoreBuilder().text(value), unit)
+
+    open fun quantityLine(name: String, value: Double, decimalPlaces: Int, unit: Quantity)
+            = quantityLine(name, LoreBuilder().text(value, decimalPlaces), unit)
+
+    open fun quantityLine(name: String, value: Float, decimalPlaces: Int, unit: Quantity)
+            = quantityLine(name, LoreBuilder().text(value, decimalPlaces), unit)
+
+    open fun quantityLine(name: String, value: Material, unit: Quantity)
+            = quantityLine(name, LoreBuilder().text(value), unit)
 
     open fun instructionLine(instruction: String, text: String) = arrow()
             .text(" ").instruction(instruction)
