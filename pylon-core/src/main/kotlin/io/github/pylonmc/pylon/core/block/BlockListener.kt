@@ -17,7 +17,8 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockPlace(event: BlockPlaceEvent) {
-        if (PylonItem.fromStack(event.itemInHand) != null) {
+        val item = event.itemInHand
+        if (PylonItem.fromStack(item) != null && item.type.isBlock) {
             event.isCancelled = true
         }
     }
