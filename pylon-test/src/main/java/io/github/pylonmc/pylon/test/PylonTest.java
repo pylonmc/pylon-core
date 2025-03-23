@@ -73,6 +73,24 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     }
 
     private void run() {
+        // Create world - can't do this on enable due to plugin loading on STARTUP rather than POSTWORLD
+        CompletableFuture<Void> worldFuture = new CompletableFuture<>();
+        Bukkit.getScheduler().runTask(this, () -> {
+            testWorld = new WorldCreator("gametests")
+                    .generator(new BedrockWorldGenerator())
+                    .environment(World.Environment.NORMAL)
+                    .createWorld();
+
+            assert testWorld != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
+
+            testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+            testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+            testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+
+            worldFuture.complete(null);
+        });
+        worldFuture.join();
+
         CompletableFuture<List<Test>> testsFuture = new CompletableFuture<>();
 
         // Tests must be initialised on main thread
@@ -127,17 +145,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         instance = this;
 
         if (Boolean.parseBoolean(System.getenv("NO_TEST"))) return;
-
-        testWorld = new WorldCreator("gametests")
-                .generator(new BedrockWorldGenerator())
-                .environment(World.Environment.NORMAL)
-                .createWorld();
-
-        assert testWorld != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
-
-        testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
-        testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::run, 1);
     }

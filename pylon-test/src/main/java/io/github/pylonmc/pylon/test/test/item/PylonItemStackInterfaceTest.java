@@ -23,8 +23,20 @@ public class PylonItemStackInterfaceTest extends GameTest {
     private static boolean handlerCalled;
 
     public static class OminousBlazePowderSchema extends PylonItemSchema {
-        public OminousBlazePowderSchema(@NotNull NamespacedKey id, @NotNull Class<? extends @NotNull PylonItem<? extends @NotNull PylonItemSchema>> itemClass, @NotNull ItemStack template) {
-            super(id, itemClass, template);
+        private final ItemStack template;
+
+        public OminousBlazePowderSchema(
+                @NotNull NamespacedKey key,
+                @NotNull Class<? extends @NotNull PylonItem<? extends @NotNull PylonItemSchema>> itemClass,
+                @NotNull ItemStack template
+        ) {
+            super(key, itemClass);
+            this.template = template;
+        }
+
+        @Override
+        protected @NotNull ItemStack getTemplate() {
+            return template;
         }
     }
 
