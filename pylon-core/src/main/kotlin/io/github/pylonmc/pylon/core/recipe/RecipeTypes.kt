@@ -2,14 +2,13 @@ package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.pluginInstance
-import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.inventory.FurnaceSmeltEvent
+import org.bukkit.event.block.BlockCookEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
 import org.bukkit.inventory.*
@@ -18,25 +17,25 @@ object RecipeTypes {
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_BLASTING: RecipeType<BlastingRecipe> = FurnaceRecipeType("blasting") as RecipeType<BlastingRecipe>
+    val VANILLA_BLASTING: RecipeType<BlastingRecipe> = CookingRecipeType("blasting") as RecipeType<BlastingRecipe>
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_CAMPFIRE: RecipeType<CampfireRecipe> = FurnaceRecipeType("campfire") as RecipeType<CampfireRecipe>
+    val VANILLA_CAMPFIRE: RecipeType<CampfireRecipe> = CookingRecipeType("campfire") as RecipeType<CampfireRecipe>
 
     @JvmField
     val VANILLA_CRAFTING: RecipeType<CraftingRecipe> = CraftingRecipeType
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_FURNACE: RecipeType<FurnaceRecipe> = FurnaceRecipeType("furnace") as RecipeType<FurnaceRecipe>
+    val VANILLA_FURNACE: RecipeType<FurnaceRecipe> = CookingRecipeType("furnace") as RecipeType<FurnaceRecipe>
 
     @JvmField
     val VANILLA_SMITHING: RecipeType<SmithingRecipe> = SmithingRecipeType
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_SMOKING: RecipeType<SmokingRecipe> = FurnaceRecipeType("smoking") as RecipeType<SmokingRecipe>
+    val VANILLA_SMOKING: RecipeType<SmokingRecipe> = CookingRecipeType("smoking") as RecipeType<SmokingRecipe>
 
     init {
         VANILLA_BLASTING.register()
@@ -61,10 +60,10 @@ private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
     }
 }
 
-private class FurnaceRecipeType(key: String) : VanillaRecipe<CookingRecipe<*>>(key) {
+private class CookingRecipeType(key: String) : VanillaRecipe<CookingRecipe<*>>(key) {
 
     @EventHandler(priority = EventPriority.LOWEST)
-    private fun onFurnaceCook(e: FurnaceSmeltEvent) {
+    private fun onCook(e: BlockCookEvent) {
         val input = e.source
         if (PylonItem.fromStack(input) == null) return
         for (recipe in recipes) {
