@@ -28,6 +28,11 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static PylonTest instance;
     public static World testWorld;
 
+    @Override
+    public @NotNull String displayName() {
+        return "Pylon Test";
+    }
+
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
 
