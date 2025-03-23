@@ -1,11 +1,8 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.util.fromMiniMessage
-import net.kyori.adventure.text.Component
-
-enum class Quantity(val component: Component) {
-    BLOCKS(fromMiniMessage("<#1eaa56>blocks</#1eaa56>")),
-    SECONDS(fromMiniMessage("<#dbd53b>seconds</#dbd53b>")),
-    HEARTS(fromMiniMessage("<#db3b43>hearts</#db3b43>")),
-    NONE(fromMiniMessage(""))
+object Quantity {
+    const val NONE = ""
+    const val BLOCKS = "<#1eaa56>blocks</#1eaa56>"
+    const val SECONDS = "<#dbd53b>seconds</#dbd53b>"
+    const val HEARTS = "<#db3b43>hearts</#db3b43>"
 }

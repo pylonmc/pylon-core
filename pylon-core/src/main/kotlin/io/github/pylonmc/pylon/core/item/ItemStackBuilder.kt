@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -56,6 +57,7 @@ open class ItemStackBuilder(private val stack: ItemStack) {
     fun lore(vararg lore: ComponentLike) = apply {
         val loreBuilder = ItemLore.lore()
         for (line in lore) {
+            io.github.pylonmc.pylon.core.pluginInstance.logger.severe(line.toString())
             loreBuilder.addLine(
                 Component.empty()
                     .decorations(EnumSet.allOf(TextDecoration::class.java), false)

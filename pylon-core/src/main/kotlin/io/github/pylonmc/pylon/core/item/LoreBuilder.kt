@@ -40,28 +40,28 @@ open class LoreBuilder {
 
     open fun instruction(instruction: String) = text("<#f7e011>$instruction:</#f7e011>")
 
-    protected fun quantityLine(name: String, value: LoreBuilder, unit: Quantity) = arrow()
-            .text(" <gray>$name</gray>")
+    protected fun attributeLine(name: String, value: LoreBuilder, quantity: String) = arrow()
+            .text(" <gray>$name:</gray>")
             .text(" <white>").append(value).text("</white>")
-            .text(" ").text(unit.component)
+            .text(" ").text(quantity)
 
-    open fun quantityLine(name: String, value: ComponentLike, unit: Quantity)
-            = quantityLine(name, LoreBuilder().text(value), unit)
+    open fun attributeLine(name: String, value: ComponentLike, quantity: String)
+            = attributeLine(name, LoreBuilder().text(value), quantity)
 
-    open fun quantityLine(name: String, value: String, unit: Quantity)
-            = quantityLine(name, LoreBuilder().text(value), unit)
+    open fun attributeLine(name: String, value: String, quantity: String)
+            = attributeLine(name, LoreBuilder().text(value), quantity)
 
-    open fun quantityLine(name: String, value: Int, unit: Quantity)
-            = quantityLine(name, LoreBuilder().text(value), unit)
+    open fun attributeLine(name: String, value: Int, quantity: String)
+            = attributeLine(name, LoreBuilder().text(value), quantity)
 
-    open fun quantityLine(name: String, value: Double, decimalPlaces: Int, unit: Quantity)
-            = quantityLine(name, LoreBuilder().text(value, decimalPlaces), unit)
+    open fun attributeLine(name: String, value: Double, decimalPlaces: Int, quantity: String)
+            = attributeLine(name, LoreBuilder().text(value, decimalPlaces), quantity)
 
-    open fun quantityLine(name: String, value: Float, decimalPlaces: Int, unit: Quantity)
-            = quantityLine(name, LoreBuilder().text(value, decimalPlaces), unit)
+    open fun attributeLine(name: String, value: Float, decimalPlaces: Int, quantity: String)
+            = attributeLine(name, LoreBuilder().text(value, decimalPlaces), quantity)
 
-    open fun quantityLine(name: String, value: Material, unit: Quantity)
-            = quantityLine(name, LoreBuilder().text(value), unit)
+    open fun attributeLine(name: String, value: Material, quantity: String)
+            = attributeLine(name, LoreBuilder().text(value), quantity)
 
     open fun instructionLine(instruction: String, text: String) = arrow()
             .text(" ").instruction(instruction)
@@ -71,9 +71,7 @@ open class LoreBuilder {
         components.add(Component.text())
     }
 
-    internal fun addon(addon: PylonAddon) = text("<#23274f>")
-        .text(addon.displayName())
-        .text("</#23274f>")
+    internal fun addon(addon: PylonAddon) = text("<#30356d>" + addon.displayName() + "</#30356d>")
 
     open fun build(): List<TextComponent.Builder> = components
 }
