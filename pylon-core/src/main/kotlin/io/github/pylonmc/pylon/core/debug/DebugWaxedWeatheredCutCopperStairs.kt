@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.debug
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.Ticking
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder
+import io.github.pylonmc.pylon.core.item.LoreBuilder
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.base.BlockInteractor
@@ -22,7 +23,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     ItemInstance::class.java,
     ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
             .name("<red>Debug Waxed Weathered Cut Copper Stairs")
-            .lore("Right click a block to view its Pylon block data")
+            .lore(LoreBuilder().instruction("Right click").text(" a block to view its Pylon block data"))
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
 ) {

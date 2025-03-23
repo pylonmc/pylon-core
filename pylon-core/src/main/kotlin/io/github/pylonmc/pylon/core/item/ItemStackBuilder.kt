@@ -68,10 +68,7 @@ open class ItemStackBuilder(private val stack: ItemStack) {
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
-    /**
-     * Convenience function for LoreBuilder
-     */
-    fun lore(lore: List<ComponentLike>) = lore(*lore.toTypedArray())
+    fun lore(loreBuilder: LoreBuilder) = lore(*loreBuilder.build().toTypedArray())
 
     fun build(): ItemStack = stack.clone()
 }

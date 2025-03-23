@@ -23,7 +23,7 @@ open class PylonItemSchema(
         }
         ItemStackBuilder(template) // Modifies the template directly
             .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
-            .lore(LoreBuilder().addon(addon).build())
+            .lore(LoreBuilder().addon(addon))
     }
 
     val itemStack: ItemStack
