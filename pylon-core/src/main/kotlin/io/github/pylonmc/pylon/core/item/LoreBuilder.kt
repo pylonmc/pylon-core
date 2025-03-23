@@ -46,5 +46,9 @@ open class LoreBuilder {
         components.add(Component.text())
     }
 
+    internal fun addon(addon: PylonAddon) = text("<#23274f>")
+        .text(addon.displayName())
+        .text("</#23274f>")
+
     open fun build(): List<TextComponent.Builder> = components
 }

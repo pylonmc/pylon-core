@@ -6,6 +6,7 @@ import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
@@ -52,7 +53,7 @@ open class ItemStackBuilder(private val stack: ItemStack) {
 
     fun name(name: String) = name(fromMiniMessage(name))
 
-    fun lore(vararg lore: Component) = apply {
+    fun lore(vararg lore: ComponentLike) = apply {
         val loreBuilder = ItemLore.lore()
         for (line in lore) {
             loreBuilder.addLine(
@@ -66,6 +67,11 @@ open class ItemStackBuilder(private val stack: ItemStack) {
     }
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
+
+    /**
+     * Convenience function for LoreBuilder
+     */
+    fun lore(lore: List<ComponentLike>) = lore(*lore.toTypedArray())
 
     fun build(): ItemStack = stack.clone()
 }

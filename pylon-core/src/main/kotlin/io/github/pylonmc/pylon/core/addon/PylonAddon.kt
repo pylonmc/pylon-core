@@ -9,4 +9,9 @@ interface PylonAddon : Keyed {
 
     override fun getKey(): NamespacedKey
             = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
+
+    /**
+     * The display name used, for example, at the bottom of items to show which addon an item is from
+     */
+    fun displayName(): String
 }
