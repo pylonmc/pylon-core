@@ -135,9 +135,11 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: FurnaceBurnEvent) {
-        val pylonItem = PylonItem.fromStack(event.fuel)
+        val pylonItem = PylonItem.fromStack(event.fuel) ?: return
         if (pylonItem is FurnaceFuel) {
             pylonItem.onBurntAsFuel(event)
+        } else {
+            event.isCancelled = true
         }
     }
 
