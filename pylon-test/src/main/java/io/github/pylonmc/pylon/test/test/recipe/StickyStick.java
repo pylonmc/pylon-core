@@ -8,7 +8,6 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 
-
 @SuppressWarnings("UnstableApiUsage")
 class StickyStick extends PylonItemSchema {
     public StickyStick() {
@@ -26,6 +25,4 @@ class StickyStick extends PylonItemSchema {
     static {
         INSTANCE.register();
     }
-
-
 }

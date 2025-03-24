@@ -27,8 +27,7 @@ public class PylonItemStackSimpleTest extends SyncTest {
                         stack,
                         new RecipeChoice.ExactChoice(new ItemStack(Material.BLAZE_POWDER)),
                         5.0F,
-                        20),
-                null
+                        20)
         ).register();
     }
 }
