@@ -19,7 +19,7 @@ open class PylonItemSchema(
     init {
         val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         if (addon == null) {
-            throw IllegalStateException("Item does not have a corresponding addon; does your plugin implement PylonAddon?")
+            throw IllegalStateException("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
         }
         ItemStackBuilder(template) // Modifies the template directly
             .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
