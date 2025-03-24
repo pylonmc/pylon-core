@@ -1,3 +1,3 @@
 package io.github.pylonmc.pylon.core.item.base
 
-interface SmithingMaterial
+interface VanillaSmithingTemplate

@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.item.base
 
 import org.bukkit.event.inventory.FurnaceBurnEvent
 
-interface FurnaceFuel {
+interface VanillaCookingFuel {
     /**
      * Called when the item is burnt as fuel in a furnace, smoker, or blast furnace.
      */

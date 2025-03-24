@@ -2,8 +2,8 @@ package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
-import io.github.pylonmc.pylon.core.item.base.SmithingMaterial
-import io.github.pylonmc.pylon.core.item.base.SmithingTemplate
+import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
+import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
 import io.github.pylonmc.pylon.core.pluginInstance
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
@@ -86,8 +86,8 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
         if (
             recipes.all { it != inv.recipe } &&
             (
-                    inv.inputMineral.isPylonAndIsNot<SmithingMaterial>() ||
-                    inv.inputTemplate.isPylonAndIsNot<SmithingTemplate>()
+                    inv.inputMineral.isPylonAndIsNot<VanillaSmithingMaterial>() ||
+                    inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
             )
         ) {
             // Prevent the erroneous smithing of vanilla items with Pylon ingredients
