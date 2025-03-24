@@ -12,7 +12,8 @@ public class SimpleBlockTest extends SyncTest {
         new PylonBlockSchema(
                 PylonTest.key("simple_block_test"),
                 Material.AMETHYST_BLOCK,
-                SimplePylonBlock.class
+                SimplePylonBlock::new,
+                SimplePylonBlock::new
         ).register();
     }
 }

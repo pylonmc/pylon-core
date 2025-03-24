@@ -1,9 +1,9 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
-import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
@@ -25,32 +25,32 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockBreakEvent) {
-        breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
+        breakBlock(BlockBreakContext.PlayerBreak(event.block, event))
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockBurn(event: BlockBurnEvent) {
-        breakBlock(event.block, BlockBreakContext.Burned(event))
+        breakBlock(BlockBreakContext.Burned(event.block, event))
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
-        breakBlock(event.block, BlockBreakContext.Exploded(event))
+        breakBlock(BlockBreakContext.Exploded(event.block, event))
         for (block in event.blockList()) {
-            breakBlock(block, BlockBreakContext.WasExploded)
+            breakBlock(BlockBreakContext.WasExploded(block))
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
-            breakBlock(block, BlockBreakContext.WasExploded)
+            breakBlock(BlockBreakContext.WasExploded(block))
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockFadeEvent) {
-        breakBlock(event.block, BlockBreakContext.Faded(event))
+        breakBlock(BlockBreakContext.Faded(event.block, event))
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -87,10 +87,10 @@ internal object BlockListener : Listener {
         }
     }
 
-    private fun breakBlock(block: Block, reason: BlockBreakContext) {
-        val drops = BlockStorage.breakBlock(block, reason) ?: return
+    private fun breakBlock(context: BlockBreakContext) {
+        val drops = BlockStorage.breakBlock(context) ?: return
         for (drop in drops) {
-            block.world.dropItemNaturally(block.location.add(0.5, 0.1, 0.5), drop)
+            context.block.world.dropItemNaturally(context.block.location.add(0.5, 0.1, 0.5), drop)
         }
     }
 }

@@ -28,17 +28,8 @@ fun pylonKeyToItem(key: NamespacedKey): ItemStack {
     }
 }
 
-var Block.pylonType: NamespacedKey
+val Block.pylonType: NamespacedKey
     get() {
         val pylonBlock = BlockStorage.get(this)
         return pylonBlock?.schema?.key ?: this.type.key
-    }
-    set(key) {
-        val schema = PylonRegistry.BLOCKS[key]
-        if (schema != null) {
-            BlockStorage.placeBlock(this, schema)
-        } else {
-            val material = keyToMaterial[key] ?: throw IllegalArgumentException("Unknown block: $key")
-            this.type = material
-        }
     }

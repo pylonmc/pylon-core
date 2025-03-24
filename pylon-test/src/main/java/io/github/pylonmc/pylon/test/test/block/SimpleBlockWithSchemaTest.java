@@ -1,15 +1,15 @@
 package io.github.pylonmc.pylon.test.test.block;
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext;
+import io.github.pylonmc.pylon.core.block.context.BlockContext;
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
+import io.github.pylonmc.pylon.core.block.context.BlockLoadContext;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
-import org.bukkit.persistence.PersistentDataContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,10 +21,11 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
         public TestBlockSchema(
                 NamespacedKey key,
                 Material material,
-                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
-            super(key, material, blockClass);
+            super(key, material,
+                    (TestBlockSchema schema, BlockCreateContext context) -> new TestBlock(schema, context),
+                    (TestBlockSchema schema, BlockLoadContext context) -> new TestBlock(schema, context));
             this.processingSpeed = processingSpeed;
         }
 
@@ -34,15 +35,8 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
     }
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> {
-        public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
-            super(schema, block);
-        }
-
-        public TestBlock(
-                TestBlockSchema schema,
-                Block block,
-                PersistentDataContainer pdc) {
-            super(schema, block);
+        public TestBlock(TestBlockSchema schema, BlockContext context) {
+            super(schema, context);
         }
     }
 
@@ -52,7 +46,6 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
         new TestBlockSchema(
                 key,
                 Material.AMETHYST_BLOCK,
-                TestBlock.class,
                 12
         ).register();
 

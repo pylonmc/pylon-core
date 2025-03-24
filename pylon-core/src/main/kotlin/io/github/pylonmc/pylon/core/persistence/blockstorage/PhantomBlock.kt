@@ -1,16 +1,15 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.BlockItemReason
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.block.context.BlockContext
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 
@@ -30,20 +29,8 @@ import org.bukkit.persistence.PersistentDataContainer
 class PhantomBlock(
     val pdc: PersistentDataContainer,
     val key: NamespacedKey,
-    block: Block
-) : PylonBlock<PylonBlockSchema>(schema, block) {
-
-    // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
-        throw IllegalStateException("Phantom block cannot be placed")
-    }
-
-    // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
-        throw IllegalStateException("Phantom block cannot be loaded")
-    }
+    context: BlockContext
+) : PylonBlock<PylonBlockSchema>(schema, context) {
 
     override fun getItem(reason: BlockItemReason): ItemStack? {
         val item = errorItem.clone()
@@ -74,6 +61,11 @@ class PhantomBlock(
 
         // Intentionally not registered to hide Pylon internals
         @JvmSynthetic
-        internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)
+        internal val schema = PylonBlockSchema(
+            key,
+            Material.BARRIER,
+            { _, _ -> throw IllegalStateException("Phantom block cannot be placed") },
+            { _, _ -> throw IllegalStateException("Phantom block cannot be placed") }
+        )
     }
 }

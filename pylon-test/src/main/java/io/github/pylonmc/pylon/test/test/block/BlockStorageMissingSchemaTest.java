@@ -1,8 +1,10 @@
 package io.github.pylonmc.pylon.test.test.block;
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext;
+import io.github.pylonmc.pylon.core.block.context.BlockContext;
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
+import io.github.pylonmc.pylon.core.block.context.BlockLoadContext;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
@@ -19,9 +21,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -34,31 +34,24 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
         public TestBlockSchema(
                 NamespacedKey key,
                 Material material,
-                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
-            super(key, material, blockClass);
+            super(key, material,
+                    (TestBlockSchema schema, BlockCreateContext context) -> new TestBlock(schema, context),
+                    (TestBlockSchema schema, BlockLoadContext context) -> new TestBlock(schema, context));
             this.processingSpeed = processingSpeed;
         }
     }
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> {
-        public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
-            super(schema, block);
-        }
-
-        public TestBlock(
-                TestBlockSchema schema,
-                Block block,
-                PersistentDataContainer pdc) {
-            super(schema, block);
+        public TestBlock(TestBlockSchema schema, BlockContext context) {
+            super(schema, context);
         }
     }
 
     private static final TestBlockSchema schema = new TestBlockSchema (
             PylonTest.key("block_storage_addon_reload_test"),
             Material.AMETHYST_BLOCK,
-            TestBlock.class,
             12
     );
 
@@ -80,7 +73,8 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
             stage = 2;
 
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
-                BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), schema);
+                Block block = e.getChunk().getBlock(7, 100, 7);
+                BlockStorage.placeBlock(schema, new BlockCreateContext.PluginPlace(block));
                 e.getChunk().unload();
             }, 10);
         }

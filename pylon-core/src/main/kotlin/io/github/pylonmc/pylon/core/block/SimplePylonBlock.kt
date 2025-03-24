@@ -1,9 +1,9 @@
 package io.github.pylonmc.pylon.core.block
 
-import org.bukkit.block.Block
-import org.bukkit.persistence.PersistentDataContainer
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.context.BlockLoadContext
 
 open class SimplePylonBlock : PylonBlock<PylonBlockSchema> {
-    constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext) : super(schema, block)
-    constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer) : super(schema, block)
+    constructor(schema: PylonBlockSchema, context: BlockCreateContext) : super(schema, context)
+    constructor(schema: PylonBlockSchema, context: BlockLoadContext) : super(schema, context)
 }

@@ -3,6 +3,8 @@ package io.github.pylonmc.pylon.core.persistence.blockstorage
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.BreakHandler
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -143,16 +145,11 @@ object BlockStorage : Listener {
      * @return The block that was placed, or null if the block placement was cancelled
      */
     @JvmStatic
-    @JvmOverloads
-    fun placeBlock(
-        blockPosition: BlockPosition,
-        schema: PylonBlockSchema,
-        context: BlockCreateContext = BlockCreateContext.Default
-    ): PylonBlock<*>? {
-        @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
-                as PylonBlock<*>
-        val event = PylonBlockPlaceEvent(blockPosition.block, block)
+    fun placeBlock(schema: PylonBlockSchema, context: BlockCreateContext): PylonBlock<*>? {
+        val blockPosition = context.block.position
+        val block = schema.createBlock.create(schema, context) ?: return null
+
+        val event = PylonBlockPlaceEvent(context.block, block)
         event.callEvent()
         if (event.isCancelled) return null
 
@@ -167,36 +164,6 @@ object BlockStorage : Listener {
     }
 
     /**
-     * Sets a new Pylon block's data in the storage and sets the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
-     *
-     * @return The block that was placed, or null if the block placement was cancelled
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun placeBlock(
-        block: Block,
-        schema: PylonBlockSchema,
-        context: BlockCreateContext = BlockCreateContext.Default
-    ) = placeBlock(block.position, schema, context)
-
-    /**
-     * Sets a new Pylon block's data in the storage and sets the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
-     *
-     * @return The block that was placed, or null if the block placement was cancelled
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun placeBlock(
-        location: Location,
-        schema: PylonBlockSchema,
-        context: BlockCreateContext = BlockCreateContext.Default
-    ) = placeBlock(BlockPosition(location), schema, context)
-
-    /**
      * Removes a block from the world and the storage.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
@@ -204,62 +171,35 @@ object BlockStorage : Listener {
      * @return The list of drops, or null if the block is not a Pylon block or the block break was cancelled
      */
     @JvmStatic
-    @JvmOverloads
-    fun breakBlock(
-        blockPosition: BlockPosition,
-        context: BlockBreakContext = BlockBreakContext.PluginBreak
-    ): List<ItemStack>? {
-        val block = get(blockPosition) ?: return null
+    fun breakBlock(context: BlockBreakContext): List<ItemStack>? {
+        val block = context.block
+        val pylonBlock = get(context.block) ?: return null
 
-        val event = PylonBlockBreakEvent(blockPosition.block, block)
+        val event = PylonBlockBreakEvent(block, pylonBlock)
         event.callEvent()
         if (event.isCancelled) return null
 
         val drops = mutableListOf<ItemStack>()
         if (context.normallyDrops) {
-            block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+            pylonBlock.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
         }
-        if (block is BreakHandler) {
-            block.onBreak(drops, context)
+        if (pylonBlock is BreakHandler) {
+            pylonBlock.onBreak(drops, context)
         }
 
         lockBlockWrite {
-            blocks.remove(blockPosition)
-            blocksById[block.schema.key]?.remove(block)
-            blocksByChunk[blockPosition.chunk]?.remove(block)
+            blocks.remove(block.position)
+            blocksById[pylonBlock.schema.key]?.remove(pylonBlock)
+            blocksByChunk[block.position.chunk]?.remove(pylonBlock)
         }
 
-        blockPosition.block.type = Material.AIR
-        if (block is BreakHandler) {
-            block.postBreak()
+        block.type = Material.AIR
+        if (pylonBlock is BreakHandler) {
+            pylonBlock.postBreak()
         }
 
         return drops
     }
-
-    /**
-     * Removes a block from the world and the storage.
-     * Does nothing if the block is not a Pylon block.
-     * Only call on the main thread.
-     *
-     * @return The list of drops, or null if the block is not a Pylon block
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
-        breakBlock(block.position, context)
-
-    /**
-     * Removes a block from the world and the storage.
-     * Does nothing if the block is not a Pylon block.
-     * Only call on the main thread.
-     *
-     * @return The list of drops, or null if the block is not a Pylon block
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
-        breakBlock(BlockPosition(location), context)
 
     private fun load(world: World, chunk: Chunk): List<PylonBlock<*>> {
         val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
@@ -333,7 +273,7 @@ object BlockStorage : Listener {
                 PhantomBlock(
                     PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
                     block.schema.key,
-                    block.block
+                    BlockCreateContext.PhantomBlockCreate(block.block)
                 )
             } else {
                 block

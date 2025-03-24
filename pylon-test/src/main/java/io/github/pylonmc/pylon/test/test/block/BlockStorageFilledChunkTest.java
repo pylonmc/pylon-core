@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.test.test.block;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.block.SimplePylonBlock;
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
@@ -28,7 +29,8 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
     private static final PylonBlockSchema schema = new PylonBlockSchema(
             PylonTest.key("block_storage_fill_chunk_test"),
             Material.AMETHYST_BLOCK,
-            SimplePylonBlock.class
+            SimplePylonBlock::new,
+            SimplePylonBlock::new
     );
 
     @NotNull private static final Map<BlockPosition, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
@@ -50,7 +52,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
             // Run this later to prevent stage 3 from firing early
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
                 for (BlockPosition blockPosition : blockLoadedFutures.keySet()) {
-                    BlockStorage.placeBlock(blockPosition, schema);
+                    BlockStorage.placeBlock(schema, new BlockCreateContext.PluginPlace(blockPosition.getBlock()));
                 }
                 e.getChunk().unload();
             }, 10);

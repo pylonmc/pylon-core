@@ -2,6 +2,8 @@ package io.github.pylonmc.pylon.test.test.block;
 
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.block.SimplePylonBlock;
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext;
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
@@ -15,7 +17,8 @@ public class BlockStorageRemoveTest extends GameTest {
     private static final PylonBlockSchema schema = new PylonBlockSchema(
             PylonTest.key("block_storage_remove_test"),
             Material.AMETHYST_BLOCK,
-            SimplePylonBlock.class
+            SimplePylonBlock::new,
+            SimplePylonBlock::new
     );
 
     public BlockStorageRemoveTest() {
@@ -24,12 +27,12 @@ public class BlockStorageRemoveTest extends GameTest {
                 .setUp((test) -> {
                     schema.register();
 
-                    BlockStorage.placeBlock(test.location(), schema);
+                    BlockStorage.placeBlock(schema, new BlockCreateContext.PluginPlace(test.location().getBlock()));
 
                     assertThat(BlockStorage.get(test.location()))
                             .isNotNull();
 
-                    BlockStorage.breakBlock(test.location());
+                    BlockStorage.breakBlock(new BlockBreakContext.PluginBreak(test.location().getBlock()));
 
                     assertThat(BlockStorage.get(test.location()))
                             .isNull();

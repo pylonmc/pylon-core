@@ -1,8 +1,9 @@
 package io.github.pylonmc.pylon.test.test.block;
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext;
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
+import io.github.pylonmc.pylon.core.block.context.BlockLoadContext;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
@@ -34,18 +35,14 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
         private final int something;
 
-        public TestBlock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-            super(schema, block);
-            something = 170;
+        public TestBlock(PylonBlockSchema schema, BlockCreateContext context) {
+            super(schema, context);
+            this.something = 170;
         }
 
-        public TestBlock(
-                PylonBlockSchema schema,
-                Block block,
-                PersistentDataContainer pdc
-        ) {
-            super(schema, block);
-            something = pdc.get(somethingKey, PylonSerializers.INTEGER);
+        public TestBlock(PylonBlockSchema schema, BlockLoadContext context) {
+            super(schema, context);
+            something = context.getPdc().get(somethingKey, PylonSerializers.INTEGER);
         }
 
         @Override
@@ -54,10 +51,11 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
         }
     }
 
-    private static final PylonBlockSchema schema = new PylonBlockSchema  (
+    private static final PylonBlockSchema schema = new PylonBlockSchema(
             PylonTest.key("block_storage_chunk_reload_test"),
             Material.AMETHYST_BLOCK,
-            TestBlock.class
+            TestBlock::new,
+            TestBlock::new
     );
 
     private static final Map<Chunk, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
@@ -80,7 +78,8 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             stage2Chunks.add(e.getChunk());
 
             Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
-                BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), schema);
+                Block block = e.getChunk().getBlock(7, 100, 7);
+                BlockStorage.placeBlock(schema, new BlockCreateContext.PluginPlace(block));
                 e.getChunk().unload();
             }, 10);
         }
@@ -108,9 +107,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
                         .complete(t);
             }
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
-                e.getChunk().load();
-            }, 10);
+            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> e.getChunk().load(), 10);
         }
 
         /**

@@ -1,5 +1,8 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.block.context.BlockContext
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.context.BlockLoadContext
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -9,7 +12,6 @@ import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.NamespacedKey
 import org.bukkit.World
-import org.bukkit.block.Block
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
@@ -17,8 +19,10 @@ import org.bukkit.persistence.PersistentDataContainer
 
 abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val schema: S,
-    val block: Block
+    context: BlockContext
 ) {
+
+    val block = context.block
 
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
@@ -88,11 +92,9 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
                 // In this case, we don't want to delete the data, and we also don't want to spam errors.
                 // See PhantomBlock docs for why PhantomBlock is returned rather than null.
                 val schema = PylonRegistry.BLOCKS[key]
-                    ?: return PhantomBlock(pdc, key, position.block)
+                    ?: return PhantomBlock(pdc, key, BlockCreateContext.PhantomBlockCreate(position.block))
 
-                // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
-                @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                val block = schema.loadConstructor.invoke(schema, position.block, pdc) as PylonBlock<*>
+                val block = schema.loadBlock.load(schema, BlockLoadContext(position.block, pdc))
 
                 block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
                     ?.let { world.getEntity(it) as? BlockDisplay }
@@ -102,7 +104,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
                 pluginInstance.logger.severe("Error while loading block $key at $position")
                 t.printStackTrace()
                 return if (key != null && position != null) {
-                    PhantomBlock(pdc, key, position.block)
+                    PhantomBlock(pdc, key, BlockCreateContext.PhantomBlockCreate(position.block))
                 } else {
                     null
                 }

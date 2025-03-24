@@ -1,16 +1,16 @@
 package io.github.pylonmc.pylon.test.test.block;
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext;
-import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
+import io.github.pylonmc.pylon.core.block.*;
+import io.github.pylonmc.pylon.core.block.context.BlockContext;
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
+import io.github.pylonmc.pylon.core.block.context.BlockLoadContext;
+import io.github.pylonmc.pylon.core.item.PylonItemSchema;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNullByDefault;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,32 +23,26 @@ public class BlockStorageAddTest extends GameTest {
         public TestBlockSchema(
                 NamespacedKey key,
                 Material material,
-                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
                 int processingSpeed
         ) {
-            super(key, material, blockClass);
+            super(key, material, TestBlock::new, TestBlock::new);
             this.processingSpeed = processingSpeed;
         }
     }
 
-    public static class TestBlock extends PylonBlock<TestBlockSchema> {
-        public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
-            super(schema, block);
+    public static class TestBlock extends PylonBlock<PylonBlockSchema> {
+        public TestBlock(PylonBlockSchema schema, BlockCreateContext context) {
+            super(schema, context);
         }
 
-        public TestBlock(
-                TestBlockSchema schema,
-                Block block,
-                PersistentDataContainer pdc
-        ) {
-            super(schema, block);
+        public TestBlock(TestBlockSchema schema, BlockLoadContext context) {
+            super(schema, context);
         }
     }
 
     private static final TestBlockSchema schema = new TestBlockSchema (
             PylonTest.key("block_storage_add_test"),
             Material.AMETHYST_BLOCK,
-            TestBlock.class,
             12
     );
 
@@ -58,7 +52,7 @@ public class BlockStorageAddTest extends GameTest {
                 .setUp((test) -> {
                     schema.register();
 
-                    BlockStorage.placeBlock(test.location(), schema);
+                    BlockStorage.placeBlock(schema, new BlockCreateContext.PluginPlace(test.location().getBlock()));
 
                     PylonBlock<?> pylonBlock = BlockStorage.get(test.location());
 

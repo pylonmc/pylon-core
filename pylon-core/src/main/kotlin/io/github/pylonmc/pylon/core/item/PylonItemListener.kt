@@ -1,13 +1,12 @@
 package io.github.pylonmc.pylon.core.item
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
-import io.github.pylonmc.pylon.core.block.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.BlockItemReason
 import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -21,7 +20,6 @@ import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.player.*
-import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
 internal object PylonItemListener : Listener {
@@ -55,8 +53,9 @@ internal object PylonItemListener : Listener {
     private fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) }
         if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
-            val context = BlockCreateContext.PlayerPlace(event.player, event.item!!)
-            pylonItem.doPlace(context, event.clickedBlock!!.getRelative(event.blockFace))
+            val block = event.clickedBlock!!.getRelative(event.blockFace)
+            val context = BlockCreateContext.PlayerPlace(block, event.player, event.item!!)
+            pylonItem.doPlace(context)
         }
         if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToClickBlock(event)
