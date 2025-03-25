@@ -18,13 +18,13 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     fun getSectionNames(): Set<String>
         = internalSection.getKeys(false)
 
-    fun getSectionMaybe(key: String): ConfigSection? {
+    fun getSection(key: String): ConfigSection? {
         val newConfig = internalSection.getConfigurationSection(key) ?: return null
         return ConfigSection(newConfig)
     }
 
-    fun getSection(key: String): ConfigSection
-        = getSectionMaybe(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
+    fun getSectionOrThrow(key: String): ConfigSection
+        = getSection(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
 
     inline fun <reified T> get(key: String): T? {
         val value = internalSection.get(key) ?: return null
