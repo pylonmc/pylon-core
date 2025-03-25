@@ -1,6 +1,9 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
+import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
+import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
 import io.github.pylonmc.pylon.core.pluginInstance
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
@@ -53,7 +56,7 @@ private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
     private fun onPreCraft(e: PrepareItemCraftEvent) {
         val recipe = e.recipe ?: return
         val inventory = e.inventory
-        if (recipes.all { it != recipe } && inventory.any { PylonItem.fromStack(it) != null }) {
+        if (recipes.all { it != recipe } && inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }) {
             // Prevent the erroneous crafting of vanilla items with Pylon ingredients
             inventory.result = null
         }
@@ -80,8 +83,13 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onSmith(e: PrepareSmithingEvent) {
         val inv = e.inventory
-        val items = listOf(inv.inputMineral, inv.inputTemplate)
-        if (recipes.all { it != inv.recipe } && items.any { PylonItem.fromStack(it) != null }) {
+        if (
+            recipes.all { it != inv.recipe } &&
+            (
+                    inv.inputMineral.isPylonAndIsNot<VanillaSmithingMaterial>() ||
+                    inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
+            )
+        ) {
             // Prevent the erroneous smithing of vanilla items with Pylon ingredients
             inv.result = null
         }
@@ -103,4 +111,9 @@ private abstract class VanillaRecipe<T>(key: String) : RecipeType<T>(
     override fun unregisterRecipe(recipe: NamespacedKey) {
         Bukkit.removeRecipe(recipe)
     }
+}
+
+private inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
+    val pylonItem = PylonItem.fromStack(this)
+    return pylonItem != null && pylonItem !is T
 }

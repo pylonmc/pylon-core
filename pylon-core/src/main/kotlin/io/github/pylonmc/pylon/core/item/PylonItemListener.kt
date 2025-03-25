@@ -7,7 +7,6 @@ import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -21,7 +20,6 @@ import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.player.*
-import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
 internal object PylonItemListener : Listener {
@@ -135,9 +133,11 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: FurnaceBurnEvent) {
-        val pylonItem = PylonItem.fromStack(event.fuel)
-        if (pylonItem is FurnaceFuel) {
+        val pylonItem = PylonItem.fromStack(event.fuel) ?: return
+        if (pylonItem is VanillaCookingFuel) {
             pylonItem.onBurntAsFuel(event)
+        } else {
+            event.isCancelled = true
         }
     }
 
