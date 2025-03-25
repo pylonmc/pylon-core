@@ -20,19 +20,10 @@ class PylonCore : JavaPlugin(), PylonAddon {
 
     private lateinit var manager: PaperCommandManager
 
-    // TODO make a proper config system
-    var tickDelay = -1
-        private set
-
-    var allowedBlockErrors = -1
-        private set
-
     override fun onEnable() {
         instance = this
 
         saveDefaultConfig()
-        tickDelay = config.getInt("tick-delay", 10)
-        allowedBlockErrors = config.getInt("allowed-block-errors", 5)
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)

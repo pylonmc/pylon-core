@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.block.base.Ticking
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
@@ -56,7 +57,7 @@ object TickManager : Listener {
         if (pylonBlock is Ticking) {
             val dispatcher =
                 if (pylonBlock.isAsync) pluginInstance.asyncDispatcher else pluginInstance.minecraftDispatcher
-            val tickDelay = pylonBlock.getCustomTickRate(pluginInstance.tickDelay)
+            val tickDelay = pylonBlock.getCustomTickRate(PylonConfig.tickDelay)
             tickingBlocks[pylonBlock] = pluginInstance.launch(dispatcher) {
                 var errors = 0
                 while (true) {
@@ -80,7 +81,7 @@ object TickManager : Listener {
                 "An error occurred while ticking block ${block.position} of type ${pylonBlock.schema.key}",
             )
             error.printStackTrace()
-            if (errors >= pluginInstance.allowedBlockErrors && pylonBlock.errorBlock == null) {
+            if (errors >= PylonConfig.allowedBlockErrors && pylonBlock.errorBlock == null) {
                 val display = block.world.spawn(block.location, BlockDisplay::class.java)
                 display.isInvisible = true
                 display.glowColorOverride = RED
