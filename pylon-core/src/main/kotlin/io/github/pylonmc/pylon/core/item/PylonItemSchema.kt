@@ -3,31 +3,27 @@ package io.github.pylonmc.pylon.core.item
 import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.registry.PylonRegistryKey
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
-import org.jetbrains.annotations.MustBeInvokedByOverriders
 import java.lang.invoke.MethodHandle
 
 open class PylonItemSchema(
     private val key: NamespacedKey,
     @JvmSynthetic internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
-    private val template: ItemStack,
+    private val template: ItemStack
 ) : Keyed, RegistryHandler {
 
-    private var alreadyRegistered = false
-
     init {
-        template.editMeta { meta ->
-            meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key)
+        val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
+        if (addon == null) {
+            throw IllegalStateException("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
         }
+        ItemStackBuilder(template) // Modifies the template directly
+            .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
+            .lore(LoreBuilder().addon(addon))
     }
 
     val itemStack: ItemStack
@@ -42,25 +38,6 @@ open class PylonItemSchema(
 
     fun register() = apply {
         PylonRegistry.ITEMS.register(this)
-    }
-
-    @MustBeInvokedByOverriders
-    override fun onRegister(registry: PylonRegistry<*>) {
-        if (registry.key != PylonRegistryKey.ITEMS || alreadyRegistered) return
-
-        alreadyRegistered = true
-        template.editMeta { meta ->
-            val plugin = Bukkit.getPluginManager().plugins.first {
-                it.name.equals(key.namespace, ignoreCase = true)
-            }
-            val lore = meta.lore() ?: mutableListOf()
-            lore.add(
-                Component.text(plugin.name)
-                    .color(NamedTextColor.BLUE)
-                    .decoration(TextDecoration.ITALIC, true)
-            )
-            meta.lore(lore)
-        }
     }
 
     override fun getKey(): NamespacedKey = key

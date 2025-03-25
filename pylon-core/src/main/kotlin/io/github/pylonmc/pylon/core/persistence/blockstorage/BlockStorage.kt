@@ -152,7 +152,7 @@ object BlockStorage : Listener {
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
                 as PylonBlock<*>
-        val event = PylonBlockPlaceEvent(blockPosition.block, block)
+        val event = PylonBlockPlaceEvent(blockPosition.block, block, context)
         event.callEvent()
         if (event.isCancelled) return null
 
@@ -211,7 +211,7 @@ object BlockStorage : Listener {
     ): List<ItemStack>? {
         val block = get(blockPosition) ?: return null
 
-        val event = PylonBlockBreakEvent(blockPosition.block, block)
+        val event = PylonBlockBreakEvent(blockPosition.block, block, context)
         event.callEvent()
         if (event.isCancelled) return null
 
