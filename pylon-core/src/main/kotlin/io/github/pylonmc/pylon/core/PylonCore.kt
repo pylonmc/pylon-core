@@ -7,7 +7,6 @@ import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.BlockListener
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
-import io.github.pylonmc.pylon.core.item.InventoryItemRunnable
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
@@ -51,7 +50,6 @@ class PylonCore : JavaPlugin() {
         manager.registerCommand(PylonCommand)
 
         DebugWaxedWeatheredCutCopperStairs.register()
-        InventoryItemRunnable().runTaskTimer(this, 0, 15)
     }
 
     override fun onDisable() {

@@ -4,7 +4,6 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
-import io.github.pylonmc.pylon.core.item.base.InventoryItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -28,9 +27,6 @@ object PylonCommand : BaseCommand() {
         if (pylonItem == null) {
             player.sendMessage(NamedTextColor.RED + "Item not found: $item")
             return
-        }
-        if(pylonItem is InventoryItem){
-            pylonItem.onEnterInventory(player)
         }
         val stack = pylonItem.itemStack
         stack.amount = amount
