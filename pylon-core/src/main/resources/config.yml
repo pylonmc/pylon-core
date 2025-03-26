@@ -5,4 +5,4 @@ tick-delay: 1
 allowed-block-errors: 5
 
 # The number of minecraft ticks between each PylonItem tick
-item-tick-rate: 15L
+item-tick-rate: 15
