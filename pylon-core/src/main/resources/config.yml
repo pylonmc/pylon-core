@@ -3,3 +3,6 @@ tick-delay: 1
 
 # The number of errors a ticking block can throw before it is disabled
 allowed-block-errors: 5
+
+# The number of minecraft ticks between each PylonItem tick
+item-tick-rate: 15L

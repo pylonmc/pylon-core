@@ -11,4 +11,7 @@ object PylonConfig {
 
     @JvmField
     val allowedBlockErrors = config.get("tick-delay", 10)
+
+    @JvmField
+    val itemTickRate = config.get("item-tick-rate", 15L)
 }

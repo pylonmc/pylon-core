@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
+import org.jetbrains.annotations.NotNull
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -38,6 +39,11 @@ abstract class PylonItem<out S : PylonItemSchema>(
             val schema = PylonRegistry.ITEMS[id]
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(schema, stack))
+        }
+
+        @JvmStatic
+        fun fromItemSchema(@NotNull schema: PylonItemSchema): PylonItem<*> {
+            return schema.itemClass.cast(schema.loadConstructor.invoke(schema, schema.itemStack))
         }
     }
 }

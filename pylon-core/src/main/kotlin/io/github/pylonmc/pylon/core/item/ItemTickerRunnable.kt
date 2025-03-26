@@ -7,7 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable
 class ItemTickerRunnable : BukkitRunnable() {
     override fun run() {
         for (itemEntry in PylonRegistry.ITEMS){
-            val pylonItem = PylonItem.fromStack(itemEntry.itemStack)
+            val pylonItem = PylonItem.fromItemSchema(itemEntry)
             if(pylonItem is TickingItem){
                 pylonItem.tick();
             }

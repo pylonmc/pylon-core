@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.BlockListener
 import io.github.pylonmc.pylon.core.block.TickManager
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.item.ItemTickerRunnable
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -45,7 +46,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         registerWithPylon()
 
         DebugWaxedWeatheredCutCopperStairs.register()
-        ItemTickerRunnable().runTaskTimer(this, 0, 15)
+        ItemTickerRunnable().runTaskTimer(this, 0, PylonConfig.itemTickRate)
     }
 
     override fun onDisable() {
