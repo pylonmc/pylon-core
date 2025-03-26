@@ -2,32 +2,25 @@
 
 package io.github.pylonmc.pylon.core.util.nbt
 
-import de.tr7zw.changeme.nbtapi.NBT
-import de.tr7zw.changeme.nbtapi.NBTType
-import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT
-import org.yaml.snakeyaml.nodes.MappingNode
-import org.yaml.snakeyaml.nodes.Node
-import org.yaml.snakeyaml.nodes.ScalarNode
-import org.yaml.snakeyaml.nodes.SequenceNode
-import org.yaml.snakeyaml.nodes.Tag
+import org.yaml.snakeyaml.nodes.*
 
 fun yamlToSnbt(node: Node): SnbtNode {
     return when (getNodeType(node)) {
-        SnbtNodeType.BOOLEAN -> SnbtNode.Boolean(node.scalarValue.toBooleanStrict())
-        SnbtNodeType.BYTE -> SnbtNode.Byte(node.scalarValue.toByte())
-        SnbtNodeType.SHORT -> SnbtNode.Short(node.scalarValue.toShort())
-        SnbtNodeType.INT -> SnbtNode.Int(node.scalarValue.toInt())
-        SnbtNodeType.LONG -> SnbtNode.Long(node.scalarValue.toLong())
-        SnbtNodeType.FLOAT -> SnbtNode.Float(node.scalarValue.toFloat())
-        SnbtNodeType.DOUBLE -> SnbtNode.Double(node.scalarValue.toDouble())
-        SnbtNodeType.STRING -> SnbtNode.String(node.scalarValue)
-        SnbtNodeType.LIST -> SnbtNode.List(node.sequenceValue.map(::yamlToSnbt))
-        SnbtNodeType.COMPOUND -> SnbtNode.Compound(
+        SnbtNode.Type.BOOLEAN -> SnbtNode.Boolean(node.scalarValue.toBooleanStrict())
+        SnbtNode.Type.BYTE -> SnbtNode.Byte(node.scalarValue.toByte())
+        SnbtNode.Type.SHORT -> SnbtNode.Short(node.scalarValue.toShort())
+        SnbtNode.Type.INT -> SnbtNode.Int(node.scalarValue.toInt())
+        SnbtNode.Type.LONG -> SnbtNode.Long(node.scalarValue.toLong())
+        SnbtNode.Type.FLOAT -> SnbtNode.Float(node.scalarValue.toFloat())
+        SnbtNode.Type.DOUBLE -> SnbtNode.Double(node.scalarValue.toDouble())
+        SnbtNode.Type.STRING -> SnbtNode.String(node.scalarValue)
+        SnbtNode.Type.LIST -> SnbtNode.List(node.sequenceValue.map(::yamlToSnbt))
+        SnbtNode.Type.COMPOUND -> SnbtNode.Compound(
             (node as MappingNode).value.associate { it.keyNode.scalarValue to yamlToSnbt(it.valueNode) }
         )
-        SnbtNodeType.BYTE_ARRAY -> SnbtNode.ByteArray(node.sequenceValue.map { it.scalarValue.toByte() }.toByteArray())
-        SnbtNodeType.INT_ARRAY -> SnbtNode.IntArray(node.sequenceValue.map { it.scalarValue.toInt() }.toIntArray())
-        SnbtNodeType.LONG_ARRAY -> SnbtNode.LongArray(node.sequenceValue.map { it.scalarValue.toLong() }.toLongArray())
+        SnbtNode.Type.BYTE_ARRAY -> SnbtNode.ByteArray(node.sequenceValue.map { it.scalarValue.toByte() }.toByteArray())
+        SnbtNode.Type.INT_ARRAY -> SnbtNode.IntArray(node.sequenceValue.map { it.scalarValue.toInt() }.toIntArray())
+        SnbtNode.Type.LONG_ARRAY -> SnbtNode.LongArray(node.sequenceValue.map { it.scalarValue.toLong() }.toLongArray())
     }
 }
 
@@ -38,45 +31,48 @@ private val Node.sequenceValue: List<Node>
     get() = (this as SequenceNode).value
 
 private val snbtTagTypes = mapOf(
-    "boolean" to SnbtNodeType.BOOLEAN,
-    "byte" to SnbtNodeType.BYTE,
-    "short" to SnbtNodeType.SHORT,
-    "int" to SnbtNodeType.INT,
-    "long" to SnbtNodeType.LONG,
-    "float" to SnbtNodeType.FLOAT,
-    "double" to SnbtNodeType.DOUBLE,
-    "string" to SnbtNodeType.STRING,
-    "list" to SnbtNodeType.LIST,
-    "compound" to SnbtNodeType.COMPOUND,
-    "bytearray" to SnbtNodeType.BYTE_ARRAY,
-    "intarray" to SnbtNodeType.INT_ARRAY,
-    "longarray" to SnbtNodeType.LONG_ARRAY
+    "boolean" to SnbtNode.Type.BOOLEAN,
+    "byte" to SnbtNode.Type.BYTE,
+    "short" to SnbtNode.Type.SHORT,
+    "int" to SnbtNode.Type.INT,
+    "long" to SnbtNode.Type.LONG,
+    "float" to SnbtNode.Type.FLOAT,
+    "double" to SnbtNode.Type.DOUBLE,
+    "string" to SnbtNode.Type.STRING,
+    "list" to SnbtNode.Type.LIST,
+    "compound" to SnbtNode.Type.COMPOUND,
+    "bytearray" to SnbtNode.Type.BYTE_ARRAY,
+    "intarray" to SnbtNode.Type.INT_ARRAY,
+    "longarray" to SnbtNode.Type.LONG_ARRAY
 )
 
-private fun getNodeType(node: Node): SnbtNodeType {
+private fun getNodeType(node: Node): SnbtNode.Type {
     val tag = node.tag
     if (!tag.startsWith(Tag.PREFIX)) {
-        val value = tag.value.removePrefix("!")
-        return snbtTagTypes[tag.value.removePrefix("!")] ?: SnbtNodeType.STRING
+        return snbtTagTypes[tag.value.removePrefix("!")] ?: SnbtNode.Type.STRING
     }
 
     // yaay type inference my favorite
     return when (node) {
-        is MappingNode -> SnbtNodeType.COMPOUND
+        is MappingNode -> SnbtNode.Type.COMPOUND
         is SequenceNode -> {
             val subtypes = node.value.map(::getNodeType)
+            val first = subtypes.firstOrNull()
+            if (first != null && subtypes.any { it != first }) {
+                throw IllegalArgumentException("Inconsistent types in list: $node")
+            }
             when {
-                subtypes.all { it == SnbtNodeType.BYTE } -> SnbtNodeType.BYTE_ARRAY
-                subtypes.all { it == SnbtNodeType.INT } -> SnbtNodeType.INT_ARRAY
-                subtypes.all { it == SnbtNodeType.LONG } -> SnbtNodeType.LONG_ARRAY
-                else -> SnbtNodeType.LIST
+                subtypes.all { it == SnbtNode.Type.BYTE } -> SnbtNode.Type.BYTE_ARRAY
+                subtypes.all { it == SnbtNode.Type.INT } -> SnbtNode.Type.INT_ARRAY
+                subtypes.all { it == SnbtNode.Type.LONG } -> SnbtNode.Type.LONG_ARRAY
+                else -> SnbtNode.Type.LIST
             }
         }
 
         is ScalarNode -> when (tag) {
-            Tag.INT -> SnbtNodeType.INT
-            Tag.FLOAT -> SnbtNodeType.DOUBLE
-            Tag.BOOL -> SnbtNodeType.BOOLEAN
+            Tag.INT -> SnbtNode.Type.INT
+            Tag.FLOAT -> SnbtNode.Type.DOUBLE
+            Tag.BOOL -> SnbtNode.Type.BOOLEAN
             else -> throw IllegalArgumentException("Unknown type: $node")
         }
 
