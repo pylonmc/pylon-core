@@ -4,7 +4,9 @@ package io.github.pylonmc.pylon.core.util
 
 import io.github.pylonmc.pylon.core.pluginInstance
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
@@ -30,3 +32,9 @@ private fun Class<*>.isSubclassOf(other: Class<*>): Boolean {
 }
 
 operator fun TextColor.plus(text: String): Component = Component.text(text).color(this)
+
+internal fun fromMiniMessage(string: String): Component = MiniMessage.miniMessage().deserialize(string)
+
+internal fun toMiniMessage(component: ComponentLike): String = MiniMessage.miniMessage().serialize(component.asComponent())
+
+fun Double.format(scale: Int) = "%.${scale}f".format(this)

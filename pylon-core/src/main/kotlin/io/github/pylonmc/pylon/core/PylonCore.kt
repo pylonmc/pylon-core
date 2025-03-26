@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
+import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.BlockListener
 import io.github.pylonmc.pylon.core.block.TickManager
@@ -16,23 +17,14 @@ import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
-class PylonCore : JavaPlugin() {
+class PylonCore : JavaPlugin(), PylonAddon {
 
     private lateinit var manager: PaperCommandManager
-
-    // TODO make a proper config system
-    var tickDelay = -1
-        private set
-
-    var allowedBlockErrors = -1
-        private set
 
     override fun onEnable() {
         instance = this
 
         saveDefaultConfig()
-        tickDelay = config.getInt("tick-delay", 10)
-        allowedBlockErrors = config.getInt("allowed-block-errors", 5)
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
@@ -49,6 +41,8 @@ class PylonCore : JavaPlugin() {
         addRegistryCompletion("items", PylonRegistry.ITEMS)
 
         manager.registerCommand(PylonCommand)
+
+        registerWithPylon()
 
         DebugWaxedWeatheredCutCopperStairs.register()
         ItemTickerRunnable().runTaskTimer(this, 0, 15)
@@ -72,6 +66,11 @@ class PylonCore : JavaPlugin() {
         var instance: PylonCore? = null
             private set
     }
+
+    override val javaPlugin: JavaPlugin
+        get() = pluginInstance
+
+    override fun displayName() = "Core"
 }
 
 // for internal use so we don't have to !! all the time
