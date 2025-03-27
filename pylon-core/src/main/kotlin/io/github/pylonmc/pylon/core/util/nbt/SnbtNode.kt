@@ -50,7 +50,7 @@ sealed interface SnbtNode {
 
         override val type = Type.DOUBLE
 
-        override fun toString() = value.toString()
+        override fun toString() = value.toString() + "d"
     }
 
     data class String(val value: kotlin.String) : SnbtNode {
