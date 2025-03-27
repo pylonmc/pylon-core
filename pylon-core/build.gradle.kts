@@ -44,7 +44,7 @@ kotlin {
     jvmToolchain(21)
     compilerOptions {
         javaParameters = true
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+        freeCompilerArgs = listOf("-Xjvm-default=all", "-Xwhen-guards")
     }
 }
 

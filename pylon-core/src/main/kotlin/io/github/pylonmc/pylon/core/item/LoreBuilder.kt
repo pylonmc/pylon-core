@@ -6,8 +6,6 @@ import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.github.pylonmc.pylon.core.util.toMiniMessage
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 
 open class LoreBuilder {

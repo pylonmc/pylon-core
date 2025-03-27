@@ -1,7 +1,7 @@
 item:
   type: waxed_copper_block
   components:
-    item_name: '"Ultra waxed copper"'
+    item_name: !mm "<gold>Ultra waxed copper"
     lore:
-      - "Shiiiiiiiinyyyyyyyy"
+      - !mm "<lore>Shiiiiiiiinyyyyyyyy"
     enchantment_glint_override: true
