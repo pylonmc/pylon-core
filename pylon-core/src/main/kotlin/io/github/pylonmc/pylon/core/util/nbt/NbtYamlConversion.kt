@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.util.nbt
 
+import io.github.pylonmc.pylon.core.util.scalarValue
 import org.yaml.snakeyaml.nodes.*
 
 fun yamlToSnbt(node: Node): SnbtNode {
@@ -18,14 +19,11 @@ fun yamlToSnbt(node: Node): SnbtNode {
         SnbtNode.Type.COMPOUND -> SnbtNode.Compound(
             (node as MappingNode).value.associate { it.keyNode.scalarValue to yamlToSnbt(it.valueNode) }
         )
-        SnbtNode.Type.BYTE_ARRAY -> SnbtNode.ByteArray(node.sequenceValue.map { it.scalarValue.toByte() }.toByteArray())
-        SnbtNode.Type.INT_ARRAY -> SnbtNode.IntArray(node.sequenceValue.map { it.scalarValue.toInt() }.toIntArray())
-        SnbtNode.Type.LONG_ARRAY -> SnbtNode.LongArray(node.sequenceValue.map { it.scalarValue.toLong() }.toLongArray())
+        SnbtNode.Type.BYTE_ARRAY -> SnbtNode.ByteArray(node.sequenceValue.map { SnbtNode.Byte(it.scalarValue.toByte()) })
+        SnbtNode.Type.INT_ARRAY -> SnbtNode.IntArray(node.sequenceValue.map { SnbtNode.Int(it.scalarValue.toInt()) })
+        SnbtNode.Type.LONG_ARRAY -> SnbtNode.LongArray(node.sequenceValue.map { SnbtNode.Long(it.scalarValue.toLong()) })
     }
 }
-
-private val Node.scalarValue: String
-    get() = (this as ScalarNode).value
 
 private val Node.sequenceValue: List<Node>
     get() = (this as SequenceNode).value
@@ -73,6 +71,7 @@ private fun getNodeType(node: Node): SnbtNode.Type {
             Tag.INT -> SnbtNode.Type.INT
             Tag.FLOAT -> SnbtNode.Type.DOUBLE
             Tag.BOOL -> SnbtNode.Type.BOOLEAN
+            Tag.STR -> SnbtNode.Type.STRING
             else -> throw IllegalArgumentException("Unknown type: $node")
         }
 
