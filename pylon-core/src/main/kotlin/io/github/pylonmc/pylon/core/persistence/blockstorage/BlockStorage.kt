@@ -135,6 +135,9 @@ object BlockStorage : Listener {
     @JvmStatic
     fun isPylonBlock(blockPosition: BlockPosition): Boolean = get(blockPosition) != null
 
+    @JvmStatic
+    fun isPylonBlock(block: Block): Boolean = get(block) != null
+
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
      * The block's chunk must be loaded.
