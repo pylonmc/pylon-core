@@ -12,6 +12,8 @@ import org.bukkit.event.entity.EntityExplodeEvent
 /**
  * This listener listens for various events that would indicate a Pylon block either
  * being placed, removed, or moved
+ * It also handles components of multiblocks being placed, removed, or moved (this
+ * includes vanilla blocks)
  */
 internal object BlockListener : Listener {
 
@@ -25,7 +27,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockBreakEvent) {
-        breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
+        if (BlockStorage.isPylonBlock(event.block)) {
+            breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
+            event.isDropItems = false
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -33,6 +38,7 @@ internal object BlockListener : Listener {
         breakBlock(event.block, BlockBreakContext.Burned(event))
     }
 
+    // TODO this might be dropping vanilla blocks in place of Pylon blocks
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
         breakBlock(event.block, BlockBreakContext.Exploded(event))
@@ -41,6 +47,7 @@ internal object BlockListener : Listener {
         }
     }
 
+    // TODO this might be dropping vanilla blocks in place of Pylon blocks
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
