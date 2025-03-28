@@ -7,16 +7,16 @@ import org.bukkit.block.Block
 import org.bukkit.util.Vector
 
 interface SimpleMultiblock : Multiblock {
-    fun interface SimpleMultiblockBlock {
+    fun interface Component {
         fun matches(block: Block): Boolean
     }
 
-    data class VanillaBlock(val material: Material) : SimpleMultiblockBlock {
+    data class VanillaComponent(val material: Material) : Component {
         override fun matches(block: Block): Boolean
             = !BlockStorage.isPylonBlock(block) && block.type == material
     }
 
-    data class PylonBlock(val key: NamespacedKey) : SimpleMultiblockBlock {
+    data class PylonComponent(val key: NamespacedKey) : Component {
         override fun matches(block: Block): Boolean
             = BlockStorage.get(block)?.let { it.schema.key == key } ?: false
     }
@@ -32,7 +32,10 @@ interface SimpleMultiblock : Multiblock {
      */
     val center: Block
 
-    val components: Map<Vector, SimpleMultiblockBlock>
+    /**
+     * Component locations are specified relative to the center
+     */
+    val components: Map<Vector, Component>
 
     override fun isComponent(block: Block): Boolean {
         val relative = center.location.toVector().subtract(block.location.toVector())

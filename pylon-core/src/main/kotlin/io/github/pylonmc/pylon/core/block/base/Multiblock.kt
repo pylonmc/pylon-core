@@ -6,7 +6,7 @@ interface Multiblock {
     val formed: Boolean
 
     /**
-     * Called when one of the components is updated
+     * Called when one of the components is updated (added, broken, or modified)
      * Should check the multiblock is still valid and update any relevant state
      */
     fun refresh()
