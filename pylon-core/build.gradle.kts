@@ -12,6 +12,7 @@ plugins {
 
 repositories {
     maven("https://repo.aikar.co/content/groups/aikar/")
+    maven("https://repo.codemc.io/repository/maven-public/")
 }
 
 dependencies {
@@ -23,6 +24,7 @@ dependencies {
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
 
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
+    implementation("de.tr7zw:item-nbt-api:2.14.1")
 
     testImplementation(kotlin("test"))
 }
@@ -42,7 +44,7 @@ kotlin {
     jvmToolchain(21)
     compilerOptions {
         javaParameters = true
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+        freeCompilerArgs = listOf("-Xjvm-default=all", "-Xwhen-guards")
     }
 }
 

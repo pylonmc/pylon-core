@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
+import de.tr7zw.changeme.nbtapi.NBT
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.BlockListener
@@ -22,6 +23,8 @@ class PylonCore : JavaPlugin(), PylonAddon {
 
     override fun onEnable() {
         instance = this
+
+        NBT.preloadApi()
 
         saveDefaultConfig()
 

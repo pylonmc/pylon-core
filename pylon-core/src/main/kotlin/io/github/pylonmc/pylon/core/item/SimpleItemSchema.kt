@@ -1,18 +1,32 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import org.bukkit.plugin.Plugin
 
 open class SimpleItemSchema<R : Keyed>(
     id: NamespacedKey,
-    template: ItemStack,
+    source: InitialItemSource,
     private val recipeType: RecipeType<R>,
     private val recipe: (ItemStack) -> R,
-) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
+) : PylonItemSchema(id, SimplePylonItem::class.java, source) {
+
+    constructor(
+        key: NamespacedKey,
+        template: ItemStack,
+        recipeType: RecipeType<R>,
+        recipe: (ItemStack) -> R,
+    ) : this(key, InitialItemSource.ItemStack(template), recipeType, recipe)
+
+    constructor(
+        key: NamespacedKey,
+        plugin: Plugin,
+        recipeType: RecipeType<R>,
+        recipe: (ItemStack) -> R,
+    ) : this(key, InitialItemSource.File(plugin), recipeType, recipe)
 
     private var recipeKey: NamespacedKey? = null
 
