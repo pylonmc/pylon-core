@@ -4,7 +4,6 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
-import io.github.pylonmc.pylon.core.config.loadItemFromYml
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -53,11 +52,5 @@ object PylonCommand : BaseCommand() {
                 player.sendMessage(NamedTextColor.GREEN + "Game test $test succeeded")
             }
         }
-    }
-
-    @Subcommand("testitem")
-    fun testItem(player: Player) {
-        val item = javaClass.getResourceAsStream("/testitem.yml")!!.use(::loadItemFromYml)
-        player.inventory.addItem(item)
     }
 }
