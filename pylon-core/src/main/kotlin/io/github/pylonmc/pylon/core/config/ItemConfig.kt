@@ -3,7 +3,7 @@
 package io.github.pylonmc.pylon.core.config
 
 import de.tr7zw.changeme.nbtapi.NBT
-import io.github.pylonmc.pylon.core.item.customMiniMessage
+import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.util.get
 import io.github.pylonmc.pylon.core.util.nbt.SnbtNode
 import io.github.pylonmc.pylon.core.util.nbt.parseSnbt

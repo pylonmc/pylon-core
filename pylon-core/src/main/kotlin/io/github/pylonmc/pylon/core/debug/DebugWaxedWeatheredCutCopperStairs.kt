@@ -2,11 +2,11 @@ package io.github.pylonmc.pylon.core.debug
 
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.Ticking
-import io.github.pylonmc.pylon.core.item.ItemStackBuilder
-import io.github.pylonmc.pylon.core.item.LoreBuilder
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.base.BlockInteractor
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.item.builder.LoreBuilder
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.pylonKey

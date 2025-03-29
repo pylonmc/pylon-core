@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.item
+package io.github.pylonmc.pylon.core.item.builder
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.util.format

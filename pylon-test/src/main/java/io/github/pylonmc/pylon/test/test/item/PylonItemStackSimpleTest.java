@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.test.item;
 
-import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
 import io.github.pylonmc.pylon.core.item.SimpleItemSchema;
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder;
 import io.github.pylonmc.pylon.core.recipe.RecipeTypes;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;
@@ -17,7 +17,7 @@ public class PylonItemStackSimpleTest extends SyncTest {
         new SimpleItemSchema<>(
                 PylonTest.key("pylon_item_stack_simple_test"),
                 new ItemStackBuilder(Material.BLAZE_POWDER)
-                        .name("<ff0000>OMINOUS BLAZE POWER")
+                        .name("<#ff0000>OMINOUS BLAZE POWER")
                         .lore("<#ff0000>VERY SCARY")
                         .lore("<#222222>OH NO")
                         .build(),
