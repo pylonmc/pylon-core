@@ -251,8 +251,3 @@ private class Parser(private val tokens: List<Token>) {
 }
 
 class ParseException(message: String, val position: Int) : RuntimeException(message)
-
-fun main() {
-    val nbt = """{"minecraft:lore": ['{"color":"gray","italic":false,"text":"Shiiiiiiiinyyyyyyyy"}'], "minecraft:enchantment_glint_override": 1b, "minecraft:item_name": '{"color":"gold","text":"Ultra waxed copper"}'}"""
-    println(parseSnbt(nbt))
-}

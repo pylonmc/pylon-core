@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core.util.nbt
 
 import io.github.pylonmc.pylon.core.util.scalarValue
+import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.nodes.*
 
 fun yamlToSnbt(node: Node): SnbtNode {
@@ -19,6 +20,7 @@ fun yamlToSnbt(node: Node): SnbtNode {
         SnbtNode.Type.COMPOUND -> SnbtNode.Compound(
             (node as MappingNode).value.associate { it.keyNode.scalarValue to yamlToSnbt(it.valueNode) }
         )
+
         SnbtNode.Type.BYTE_ARRAY -> SnbtNode.ByteArray(node.sequenceValue.map { SnbtNode.Byte(it.scalarValue.toByte()) })
         SnbtNode.Type.INT_ARRAY -> SnbtNode.IntArray(node.sequenceValue.map { SnbtNode.Int(it.scalarValue.toInt()) })
         SnbtNode.Type.LONG_ARRAY -> SnbtNode.LongArray(node.sequenceValue.map { SnbtNode.Long(it.scalarValue.toLong()) })
@@ -28,26 +30,10 @@ fun yamlToSnbt(node: Node): SnbtNode {
 private val Node.sequenceValue: List<Node>
     get() = (this as SequenceNode).value
 
-private val snbtTagTypes = mapOf(
-    "boolean" to SnbtNode.Type.BOOLEAN,
-    "byte" to SnbtNode.Type.BYTE,
-    "short" to SnbtNode.Type.SHORT,
-    "int" to SnbtNode.Type.INT,
-    "long" to SnbtNode.Type.LONG,
-    "float" to SnbtNode.Type.FLOAT,
-    "double" to SnbtNode.Type.DOUBLE,
-    "string" to SnbtNode.Type.STRING,
-    "list" to SnbtNode.Type.LIST,
-    "compound" to SnbtNode.Type.COMPOUND,
-    "bytearray" to SnbtNode.Type.BYTE_ARRAY,
-    "intarray" to SnbtNode.Type.INT_ARRAY,
-    "longarray" to SnbtNode.Type.LONG_ARRAY
-)
-
 private fun getNodeType(node: Node): SnbtNode.Type {
     val tag = node.tag
     if (!tag.startsWith(Tag.PREFIX)) {
-        return snbtTagTypes[tag.value.removePrefix("!")] ?: SnbtNode.Type.STRING
+        return SnbtNode.Type.entries.find { it.ymlTag == tag } ?: SnbtNode.Type.STRING
     }
 
     // yaay type inference my favorite
@@ -76,5 +62,61 @@ private fun getNodeType(node: Node): SnbtNode.Type {
         }
 
         else -> throw IllegalArgumentException("$node cannot be deserialized")
+    }
+}
+
+fun snbtToYaml(node: SnbtNode): Node {
+    val tag = getTag(node)
+    return when (node) {
+        is SnbtNode.Scalar<*> -> ScalarNode(
+            tag,
+            node.value.toString(),
+            null,
+            null,
+            if (node is SnbtNode.String) DumperOptions.ScalarStyle.DOUBLE_QUOTED else DumperOptions.ScalarStyle.PLAIN
+        )
+
+        is SnbtNode.List,
+        is SnbtNode.ByteArray,
+        is SnbtNode.IntArray,
+        is SnbtNode.LongArray -> SequenceNode(
+            tag,
+            node.map(::snbtToYaml),
+            DumperOptions.FlowStyle.AUTO
+        )
+
+        is SnbtNode.Compound -> MappingNode(
+            tag,
+            node.map { (key, value) ->
+                NodeTuple(ScalarNode(Tag.STR, key, null, null, DumperOptions.ScalarStyle.DOUBLE_QUOTED), snbtToYaml(value))
+            },
+            DumperOptions.FlowStyle.AUTO
+        )
+    }
+}
+
+private fun getTag(node: SnbtNode): Tag {
+    return when (node) {
+        is SnbtNode.Byte -> SnbtNode.Type.BYTE.ymlTag
+        is SnbtNode.Boolean -> Tag.BOOL
+        is SnbtNode.Short -> SnbtNode.Type.SHORT.ymlTag
+        is SnbtNode.Int -> Tag.INT
+        is SnbtNode.Long -> SnbtNode.Type.LONG.ymlTag
+        is SnbtNode.Float -> SnbtNode.Type.FLOAT.ymlTag
+        is SnbtNode.Double -> Tag.FLOAT
+        is SnbtNode.String -> Tag.STR
+        // @formatter:off
+        is SnbtNode.List -> if (node.all {
+            it.type == SnbtNode.Type.BYTE || it.type == SnbtNode.Type.INT || it.type == SnbtNode.Type.LONG
+        }) {
+            SnbtNode.Type.LIST.ymlTag // override type inference
+        } else {
+            Tag.SEQ
+        }
+        // @formatter:on
+        is SnbtNode.Compound -> Tag.MAP
+        is SnbtNode.ByteArray -> Tag.SEQ
+        is SnbtNode.IntArray -> Tag.SEQ
+        is SnbtNode.LongArray -> Tag.SEQ
     }
 }

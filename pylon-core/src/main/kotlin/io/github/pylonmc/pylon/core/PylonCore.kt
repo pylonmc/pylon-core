@@ -13,9 +13,16 @@ import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.nbt.parseSnbt
+import io.github.pylonmc.pylon.core.util.nbt.snbtToYaml
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.emitter.Emitter
+import org.yaml.snakeyaml.representer.Representer
+import java.io.PrintWriter
 
 class PylonCore : JavaPlugin(), PylonAddon {
 
@@ -25,6 +32,17 @@ class PylonCore : JavaPlugin(), PylonAddon {
         instance = this
 
         NBT.preloadApi()
+
+        val nbt =
+            """{"minecraft:lore": ['{"color":"gray","italic":false,"text":"Shiiiiiiiinyyyyyyyy"}'], "minecraft:enchantment_glint_override": 1b, "minecraft:item_name": '{"color":"gold","text":"Ultra waxed copper"}'}"""
+        val snbt = parseSnbt(nbt)
+        val options = DumperOptions()
+        options.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+        options.defaultScalarStyle = DumperOptions.ScalarStyle.PLAIN
+        val yaml = Yaml(Representer(options), options)
+        val events = yaml.serialize(snbtToYaml(snbt))
+        val emitter = Emitter(PrintWriter(System.out), options)
+        events.forEach(emitter::emit)
 
         saveDefaultConfig()
 
