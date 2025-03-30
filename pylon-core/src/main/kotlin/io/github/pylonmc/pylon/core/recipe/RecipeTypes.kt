@@ -54,7 +54,7 @@ private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onPreCraft(e: PrepareItemCraftEvent) {
-        val recipe = e.recipe ?: return
+        val recipe = e.recipe
         // All recipe types but MerchantRecipe implement Keyed
         if(recipe !is Keyed) return
         val inventory = e.inventory
@@ -86,7 +86,7 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
     private fun onSmith(e: PrepareSmithingEvent) {
         val inv = e.inventory
         val recipe = inv.recipe
-        if(recipe == null || recipe !is Keyed) return
+        if(recipe !is Keyed) return
         if (
             recipes.all { it.key != recipe.key } &&
             (
