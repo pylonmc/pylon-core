@@ -7,20 +7,24 @@ import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
-open class SimpleItemSchema<R : Keyed>(
-    id: NamespacedKey,
-    template: ItemStack,
-    private val recipeType: RecipeType<R>,
-    private val recipe: (ItemStack) -> R,
-) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
+open class SimpleItemSchema<R : Keyed>
+    @SafeVarargs
+    constructor(
+        id: NamespacedKey,
+        template: ItemStack,
+        private val recipeType: RecipeType<R>,
+        vararg val recipes: (ItemStack) -> R,
+    ) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
 
     private var recipeKey: NamespacedKey? = null
 
     override fun onRegister(registry: PylonRegistry<*>) {
         super.onRegister(registry)
-        val recipeInstance = recipe(itemStack)
-        recipeKey = recipeInstance.key
-        recipeType.addRecipe(recipeInstance)
+        for(recipe in recipes){
+            val recipeInstance = recipe(itemStack)
+            recipeKey = recipeInstance.key
+            recipeType.addRecipe(recipeInstance)
+        }
     }
 
     override fun onUnregister(registry: PylonRegistry<*>) {
