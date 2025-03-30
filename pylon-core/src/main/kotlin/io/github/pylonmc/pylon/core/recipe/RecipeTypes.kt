@@ -55,8 +55,10 @@ private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onPreCraft(e: PrepareItemCraftEvent) {
         val recipe = e.recipe ?: return
+        // All recipe types but MerchantRecipe implement Keyed
+        if(recipe !is Keyed) return
         val inventory = e.inventory
-        if (recipes.all { it != recipe } && inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }) {
+        if (recipes.all { it.key != recipe.key } && inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }){
             // Prevent the erroneous crafting of vanilla items with Pylon ingredients
             inventory.result = null
         }
