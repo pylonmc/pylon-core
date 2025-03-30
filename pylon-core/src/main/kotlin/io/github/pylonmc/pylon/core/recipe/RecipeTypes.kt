@@ -85,8 +85,10 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onSmith(e: PrepareSmithingEvent) {
         val inv = e.inventory
+        val recipe = inv.recipe
+        if(recipe == null || recipe !is Keyed) return
         if (
-            recipes.all { it != inv.recipe } &&
+            recipes.all { it.key != recipe.key } &&
             (
                     inv.inputMineral.isPylonAndIsNot<VanillaSmithingMaterial>() ||
                     inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
