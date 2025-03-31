@@ -6,9 +6,9 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.block.base.Ticking
 import io.github.pylonmc.pylon.core.config.PylonConfig
-import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
+import io.github.pylonmc.pylon.core.event.PrePylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
+import io.github.pylonmc.pylon.core.event.PrePylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.position
@@ -31,12 +31,12 @@ object TickManager : Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private fun onPylonBlockPlace(e: PylonBlockPlaceEvent) {
+    private fun onPylonBlockPlace(e: PrePylonBlockPlaceEvent) {
         startTicker(e.pylonBlock)
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private fun onPylonBlockBreak(e: PylonBlockBreakEvent) {
+    private fun onPylonBlockBreak(e: PrePylonBlockBreakEvent) {
         val pylonBlock = e.pylonBlock
         tickingBlocks.remove(pylonBlock)?.cancel()
         pylonBlock.errorBlock?.remove()
