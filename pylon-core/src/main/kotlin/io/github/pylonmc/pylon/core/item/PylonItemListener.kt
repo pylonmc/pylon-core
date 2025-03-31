@@ -151,7 +151,7 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: BlockBreakEvent) {
-        val pylonItem = PylonItem.fromStack(event.player.activeItem)
+        val pylonItem = PylonItem.fromStack(event.player.inventory.itemInMainHand)
         if (pylonItem is Tool) {
             pylonItem.onUsedToBreakBlock(event)
         }
@@ -162,7 +162,7 @@ internal object PylonItemListener : Listener {
         val damager = event.damageSource.causingEntity
         if (!event.damageSource.isIndirect) {
             if (damager is Player) {
-                val pylonItem = PylonItem.fromStack(damager.activeItem)
+                val pylonItem = PylonItem.fromStack(damager.inventory.itemInMainHand)
                 if (pylonItem is Weapon) {
                     pylonItem.onUsedToDamageEntity(event)
                 }
@@ -174,7 +174,7 @@ internal object PylonItemListener : Listener {
     private fun handle(event: EntityDeathEvent) {
         val killer = event.damageSource.causingEntity
         if (killer is Player) {
-            val pylonItem = PylonItem.fromStack(killer.activeItem)
+            val pylonItem = PylonItem.fromStack(killer.inventory.itemInMainHand)
             if (pylonItem is Weapon) {
                 pylonItem.onUsedToKillEntity(event)
             }
