@@ -8,7 +8,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.util.Vector
 import org.joml.Vector3i
-import kotlin.math.abs
 import kotlin.math.min
 
 interface SimpleMultiblock : Multiblock {
@@ -32,16 +31,16 @@ interface SimpleMultiblock : Multiblock {
 
     val minCorner: Vector3i
         get() = Vector3i(
-            abs(components.keys.minOf { it.x }),
-            abs(components.keys.minOf { it.y }),
-            abs(components.keys.minOf { it.z }),
+            components.keys.minOf { it.x },
+            components.keys.minOf { it.y },
+            components.keys.minOf { it.z },
         )
 
     val maxCorner: Vector3i
         get() = Vector3i(
-            abs(components.keys.maxOf { it.x }),
-            abs(components.keys.maxOf { it.y }),
-            abs(components.keys.maxOf { it.z }),
+            components.keys.maxOf { it.x },
+            components.keys.maxOf { it.y },
+            components.keys.maxOf { it.z },
         )
 
     fun componentAt(otherBlock: Block): Component?
@@ -50,11 +49,15 @@ interface SimpleMultiblock : Multiblock {
     override val chunksOccupied: Set<ChunkPosition>
         get() {
             val chunks: MutableSet<ChunkPosition> = HashSet()
-            for (x in minCorner.x..(maxCorner.x + 16) step 16) {
-                val realX = min(x, block.x)
-                for (z in minCorner.z..(maxCorner.z + 16) step 16) {
-                    val realZ = min(z, block.z)
-                    val otherBlock = block.location.add(realX.toDouble(), block.y.toDouble(), realZ.toDouble())
+            for (relativeX in minCorner.x..(maxCorner.x + 16) step 16) {
+                val realRelativeX = min(relativeX, maxCorner.x)
+                for (relativeZ in minCorner.z..(maxCorner.z + 16) step 16) {
+                    val realRelativeZ = min(relativeZ, maxCorner.z)
+                    val otherBlock = block.location.add(
+                        realRelativeX.toDouble(),
+                        block.y.toDouble(),
+                        realRelativeZ.toDouble()
+                    )
                     chunks.add(otherBlock.chunk.position)
                 }
             }

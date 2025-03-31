@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
+import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Chunk
@@ -18,7 +19,7 @@ import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 
 /**
- * This class does a lot and is quite dense and complicated. Here's the TLDR of what it does:
+ * This class does a lot and is quite dense and complicated. Here's the summary of what it does:
  *
  * Keeps track of what chunks every loaded multiblock has components in. This allows us
  * to quickly check whether placed/broken blocks have affected any multiblocks.
@@ -31,6 +32,14 @@ import org.bukkit.event.world.ChunkUnloadEvent
  * persisted, so it makes more sense to have it here. 2) it should be abstracted away
  * from the implementor of Multiblock, and if it was stored on the block, each
  * implementor would have to add a formed field to their class.
+ *
+ * Keeping track of whether a multiblock is formed is *rather* more complicated than
+ * you'd think, because Bukkit's events are fired before the state update takes place.
+ * This means we cannot simply re-check if the multiblock is formed whenever a component
+ * is modified, because that modification has not been reflected in the world yet. This
+ * is the reason why we keep track of 'dirty' multiblocks whose components have been
+ * modified, and re-check all the dirty multiblocks every so often. This is also more
+ * efficient because it batches checks.
  */
 internal object MultiblockCache : Listener {
 
@@ -38,12 +47,44 @@ internal object MultiblockCache : Listener {
     private val fullyLoadedMultiblocks: MutableSet<Multiblock> = HashSet()
 
     /**
+     * Multiblocks which need to be checked to make sure they're still formed next tick
+     */
+    private val dirtyMultiblocks: MutableSet<Multiblock> = HashSet()
+
+    /**
       * Subset of fullyLoadedMultiblocks
       */
     private val formedMultiblocks: MutableSet<Multiblock> = HashSet()
 
+    /**
+     * Re-checks whether the dirty multiblocks are formed this tick.
+     */
+    internal object MultiblockChecker : Runnable {
+        const val INTERVAL_TICKS: Long = 1
+
+        override fun run() {
+            for (multiblock in dirtyMultiblocks) {
+                // For a multiblock to be formed, it must be fully loaded
+                if (!fullyLoadedMultiblocks.contains(multiblock)) {
+                    formedMultiblocks.remove(multiblock)
+                    continue
+                }
+
+                if (multiblock.checkFormed()) {
+                    formedMultiblocks.add(multiblock)
+                } else {
+                    formedMultiblocks.remove(multiblock)
+                }
+            }
+            dirtyMultiblocks.clear()
+        }
+    }
+
     internal fun isFormed(multiblock: Multiblock): Boolean
             = formedMultiblocks.contains(multiblock)
+
+    private fun markDirty(multiblock: Multiblock)
+            = dirtyMultiblocks.add(multiblock)
 
     private fun refreshFullyLoaded(multiblock: Multiblock) {
         if (multiblock.chunksOccupied.all { it.chunk?.isLoaded == true }) {
@@ -54,19 +95,7 @@ internal object MultiblockCache : Listener {
 
         // Since formedMultiblocks depends on fullyLoadedMultiblocks, we will also
         // want to refresh the formed status of this multiblock
-        refreshFormed(multiblock)
-    }
-
-
-    private fun refreshFormed(multiblock: Multiblock) {
-        // For a multiblock to be formed, it must be fully loaded
-        if (!fullyLoadedMultiblocks.contains(multiblock)) {
-            formedMultiblocks.remove(multiblock)
-        } else if (multiblock.checkFormed()) {
-            formedMultiblocks.add(multiblock)
-        } else {
-            formedMultiblocks.remove(multiblock)
-        }
+        markDirty(multiblock)
     }
 
     private fun add(multiblock: Multiblock) {
@@ -92,11 +121,13 @@ internal object MultiblockCache : Listener {
 
     private fun onBlockModified(block: Block)
         = loadedMultiblocksWithComponent(block).forEach {
-            refreshFormed(it)
+            markDirty(it)
         }
 
-    private fun loadedMultiblocksWithComponent(block: Block)
-        = loadedMultiblocksWithComponentsInChunk(block.chunk).filter { it.isPartOfMultiblock(block) }
+    private fun loadedMultiblocksWithComponent(block: Block): List<Multiblock>
+        = loadedMultiblocksWithComponentsInChunk(block.chunk).filter {
+            it.isPartOfMultiblock(block)
+        }
 
     private fun loadedMultiblocksWithComponentsInChunk(chunkPosition: ChunkPosition): Set<Multiblock>
         = multiblocksWithComponentsInChunk[chunkPosition] ?: setOf()
@@ -157,8 +188,11 @@ internal object MultiblockCache : Listener {
 
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private fun blockBreak(event: BlockBreakEvent)
-            = onBlockModified(event.block)
+    private fun blockBreak(event: BlockBreakEvent) {
+        pluginInstance.logger.severe(event.block.position.toString())
+        pluginInstance.logger.severe(event.block.type.toString())
+        onBlockModified(event.block)
+    }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun blockBreak(event: PylonBlockBreakEvent)

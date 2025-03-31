@@ -34,6 +34,13 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
 
+        Bukkit.getScheduler().runTaskTimer(
+            this,
+            MultiblockCache.MultiblockChecker,
+            MultiblockCache.MultiblockChecker.INTERVAL_TICKS,
+            MultiblockCache.MultiblockChecker.INTERVAL_TICKS
+        )
+
         manager = PaperCommandManager(this)
         manager.commandContexts.registerContext(NamespacedKey::class.java) {
             NamespacedKey.fromString(it.popFirstArg())
