@@ -1,10 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import io.github.pylonmc.pylon.core.pluginInstance
-import org.bukkit.NamespacedKey
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataContainer
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 // 'Hold on, why the hell are we returning an entire PDC instead of a list of primitives???'
 // Well for some reason, lists are only counted as primitives if accompanied by a ListPersistentDataType (wtf)

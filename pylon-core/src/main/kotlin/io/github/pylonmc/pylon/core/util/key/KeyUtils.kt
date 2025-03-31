@@ -3,7 +3,7 @@
 package io.github.pylonmc.pylon.core.util.key
 
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Material
 import org.bukkit.NamespacedKey

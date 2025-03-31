@@ -1,8 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataType
-import java.nio.ByteBuffer
+package io.github.pylonmc.pylon.core.datatypes
 
 object CharPersistentDataType : PersistentDataType<ByteArray, Char> {
     override fun getPrimitiveType(): Class<ByteArray> = ByteArray::class.java

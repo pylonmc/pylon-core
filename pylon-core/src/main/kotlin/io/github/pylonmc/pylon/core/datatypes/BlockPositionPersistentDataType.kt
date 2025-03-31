@@ -1,11 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import io.github.pylonmc.pylon.core.pluginInstance
-import io.github.pylonmc.pylon.core.util.position.BlockPosition
-import org.bukkit.NamespacedKey
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataContainer
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 object BlockPositionPersistentDataType : PersistentDataType<PersistentDataContainer, BlockPosition> {
     val worldKey = NamespacedKey(pluginInstance, "world")
