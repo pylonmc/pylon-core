@@ -12,10 +12,9 @@ import io.github.pylonmc.pylon.test.base.GameTest;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3i;
 
 import java.util.Map;
 
@@ -50,14 +49,10 @@ public class MultiblockTest extends GameTest {
         }
 
         @Override
-        public @NotNull Block getCenter() {
-            return getBlock().getRelative(BlockFace.UP);
-        }
-
-        @Override
-        public @NotNull Map<Vector, Component> getComponents() {
+        public @NotNull Map<Vector3i, Component> getComponents() {
             return Map.of(
-                    new Vector(1, 0, 0), new SimpleMultiblock.PylonComponent(TEST_COMPONENT.getKey())
+                    new Vector3i(1, 1, 0), new SimpleMultiblock.PylonComponent(TEST_COMPONENT.getKey()),
+                    new Vector3i(2, -1, 0), new SimpleMultiblock.PylonComponent(TEST_COMPONENT.getKey())
             );
         }
     }
@@ -74,7 +69,6 @@ public class MultiblockTest extends GameTest {
             TestMultiblock.class
     );
 
-
     public MultiblockTest() {
         super(new GameTestConfig.Builder(PylonTest.key("simple_multiblock"))
                 .size(3)
@@ -84,14 +78,32 @@ public class MultiblockTest extends GameTest {
                     TEST_MULTIBLOCK.register();
 
                     Location multiblockLocation = test.location();
-                    Location componentLocation = test.location().add(1, 1, 0);
+                    Location component1Location = test.location().add(1, 1, 0);
+                    Location component2Location = test.location().add(2, -1, 0);
 
                     BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
                                     assertThat(block.formed).isFalse());
 
-                    BlockStorage.placeBlock(componentLocation, TEST_COMPONENT);
+                    BlockStorage.placeBlock(component1Location, TEST_COMPONENT);
+                    assertThat(BlockStorage.get(multiblockLocation))
+                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                                    assertThat(block.formed).isFalse());
+
+                    BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
+                    assertThat(BlockStorage.get(multiblockLocation))
+                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                                    assertThat(block.formed).isTrue());
+
+                    BlockStorage.breakBlock(component2Location);
+                    assertThat(BlockStorage.get(multiblockLocation))
+                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                                    assertThat(block.formed).isFalse());
+
+                    BlockStorage.breakBlock(multiblockLocation);
+
+                    BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
                                     assertThat(block.formed).isTrue());

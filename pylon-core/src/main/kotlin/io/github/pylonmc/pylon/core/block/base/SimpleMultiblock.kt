@@ -1,55 +1,86 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.pluginInstance
+import io.github.pylonmc.pylon.core.util.position.ChunkPosition
+import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.util.Vector
+import org.joml.Vector3i
+import kotlin.math.abs
+import kotlin.math.min
 
 interface SimpleMultiblock : Multiblock {
-    fun interface Component {
-        fun matches(block: Block): Boolean
+
+    @FunctionalInterface
+    interface Component {
+        fun matches(block: Block, pylonBlock: PylonBlock<*>?): Boolean
     }
 
     data class VanillaComponent(val material: Material) : Component {
-        override fun matches(block: Block): Boolean
+        override fun matches(block: Block, pylonBlock: PylonBlock<*>?): Boolean
             = !BlockStorage.isPylonBlock(block) && block.type == material
     }
 
     data class PylonComponent(val key: NamespacedKey) : Component {
-        override fun matches(block: Block): Boolean
-            = BlockStorage.get(block)?.let { it.schema.key == key } ?: false
+        override fun matches(block: Block, pylonBlock: PylonBlock<*>?): Boolean
+            = pylonBlock?.schema?.key == key
     }
 
-    /**
-     * This is a variable with set/get method so that the interface can store state on the
-     * implementing class. You are not expected to ever need to call setFormed yourself
-     */
-    override var formed: Boolean
+    val components: Map<Vector3i, Component>
 
-    /**
-     * This can be different from the position of the block implementing this interface
-     */
-    val center: Block
+    val minCorner: Vector3i
+        get() = Vector3i(
+            abs(components.keys.minOf { it.x }),
+            abs(components.keys.minOf { it.y }),
+            abs(components.keys.minOf { it.z }),
+        )
 
-    /**
-     * Component locations are specified relative to the center
-     */
-    val components: Map<Vector, Component>
+    val maxCorner: Vector3i
+        get() = Vector3i(
+            abs(components.keys.maxOf { it.x }),
+            abs(components.keys.maxOf { it.y }),
+            abs(components.keys.maxOf { it.z }),
+        )
 
-    override fun isComponent(block: Block): Boolean {
-        val relative = center.location.toVector().subtract(block.location.toVector())
-        return components[relative]?.matches(block) ?: false
-    }
+    fun componentAt(otherBlock: Block): Component?
+        = components[(otherBlock.position - block.position).vector3i]
+
+    override val chunksOccupied: Set<ChunkPosition>
+        get() {
+            val chunks: MutableSet<ChunkPosition> = HashSet()
+            for (x in minCorner.x..(maxCorner.x + 16) step 16) {
+                val realX = min(x, block.x)
+                for (z in minCorner.z..(maxCorner.z + 16) step 16) {
+                    val realZ = min(z, block.z)
+                    val otherBlock = block.location.add(realX.toDouble(), block.y.toDouble(), realZ.toDouble())
+                    chunks.add(otherBlock.chunk.position)
+                }
+            }
+            return chunks
+        }
 
     override fun refresh() {
-        for (component in components) {
-            val block = center.location.add(component.key).block
-            if (!component.value.matches(block)) {
-                formed = false
-                break
-            }
+        formed = components.all {
+            it.value.matches(block.location.add(Vector.fromJOML(it.key)).block, BlockStorage.get(block.location.add(Vector.fromJOML(it.key)).block))
         }
-        formed = true
+    }
+
+    override fun isPartOfMultiblock(otherBlock: Block): Boolean
+        = componentAt(otherBlock) != null
+
+    override fun onComponentModified(newBlock: Block, newPylonBlock: PylonBlock<*>?) {
+        pluginInstance.logger.severe("1")
+        val component = componentAt(newBlock)
+        check(component != null) { "Block passed to onComponentModified was not a component of the multiblock" }
+        if (formed) {
+            formed = formed && component.matches(newBlock, newPylonBlock)
+        } else if (component.matches(newBlock, newPylonBlock)) {
+            pluginInstance.logger.severe("2")
+            refresh()
+        }
     }
 }

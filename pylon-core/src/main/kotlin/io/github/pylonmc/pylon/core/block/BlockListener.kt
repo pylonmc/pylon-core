@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
 /**
  * This listener listens for various events that would indicate a Pylon block either
  * being placed, removed, or moved
+ *
  * It also handles components of multiblocks being placed, removed, or moved (this
  * includes vanilla blocks)
  */
