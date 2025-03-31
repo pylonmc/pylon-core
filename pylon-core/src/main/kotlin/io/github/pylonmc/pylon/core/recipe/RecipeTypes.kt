@@ -54,9 +54,11 @@ private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onPreCraft(e: PrepareItemCraftEvent) {
-        val recipe = e.recipe ?: return
+        val recipe = e.recipe
+        // All recipe types but MerchantRecipe implement Keyed
+        if(recipe !is Keyed) return
         val inventory = e.inventory
-        if (recipes.all { it != recipe } && inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }) {
+        if (recipes.all { it.key != recipe.key } && inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }) {
             // Prevent the erroneous crafting of vanilla items with Pylon ingredients
             inventory.result = null
         }
@@ -83,8 +85,10 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onSmith(e: PrepareSmithingEvent) {
         val inv = e.inventory
+        val recipe = inv.recipe
+        if(recipe !is Keyed) return
         if (
-            recipes.all { it != inv.recipe } &&
+            recipes.all { it.key != recipe.key } &&
             (
                     inv.inputMineral.isPylonAndIsNot<VanillaSmithingMaterial>() ||
                     inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
