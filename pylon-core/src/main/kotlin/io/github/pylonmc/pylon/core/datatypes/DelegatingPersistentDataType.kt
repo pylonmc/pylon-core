@@ -1,7 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 /**
  * A [PersistentDataType] that first converts the complex type

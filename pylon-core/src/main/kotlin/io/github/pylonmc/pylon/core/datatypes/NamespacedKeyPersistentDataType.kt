@@ -1,8 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import org.bukkit.NamespacedKey
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 object NamespacedKeyPersistentDataType : PersistentDataType<String, NamespacedKey> {
     override fun getPrimitiveType(): Class<String> = String::class.java

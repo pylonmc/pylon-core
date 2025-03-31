@@ -1,9 +1,10 @@
-package io.github.pylonmc.pylon.core
+package io.github.pylonmc.pylon.core.command
 
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.position.BlockPosition

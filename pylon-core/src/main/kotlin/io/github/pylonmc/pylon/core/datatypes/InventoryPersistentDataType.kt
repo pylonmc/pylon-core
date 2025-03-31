@@ -1,10 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import org.bukkit.Bukkit
-import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 object InventoryPersistentDataType : PersistentDataType<ByteArray, Inventory> {
 

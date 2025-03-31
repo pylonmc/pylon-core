@@ -1,7 +1,6 @@
-package io.github.pylonmc.pylon.core.block
+package io.github.pylonmc.pylon.core.block.context
 
 import org.bukkit.entity.Player
-import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
 
 interface BlockCreateContext {

@@ -1,7 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 class EnumPersistentDataType<E : Enum<E>>(val enumClass: Class<E>) : PersistentDataType<String, E> {
 

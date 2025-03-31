@@ -1,8 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataType
-import java.util.UUID
+package io.github.pylonmc.pylon.core.datatypes
 
 object UUIDPersistentDataType : PersistentDataType<LongArray, UUID> {
     override fun getPrimitiveType(): Class<LongArray> = LongArray::class.java

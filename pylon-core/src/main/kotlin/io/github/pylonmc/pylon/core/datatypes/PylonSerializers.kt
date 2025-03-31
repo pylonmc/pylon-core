@@ -1,6 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 object PylonSerializers {
     @JvmField

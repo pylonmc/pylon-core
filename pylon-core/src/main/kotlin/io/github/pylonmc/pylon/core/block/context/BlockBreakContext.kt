@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.block
+package io.github.pylonmc.pylon.core.block.context
 
 import org.bukkit.GameMode
 import org.bukkit.event.block.BlockBreakEvent

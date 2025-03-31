@@ -1,11 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
-
-import io.github.pylonmc.pylon.core.pluginInstance
-import org.bukkit.Location
-import org.bukkit.NamespacedKey
-import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataContainer
-import org.bukkit.persistence.PersistentDataType
+package io.github.pylonmc.pylon.core.datatypes
 
 object LocationPersistentDataType : PersistentDataType<PersistentDataContainer, Location> {
     val xKey = NamespacedKey(pluginInstance, "x")
