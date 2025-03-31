@@ -63,11 +63,9 @@ interface SimpleMultiblock : Multiblock {
         }
 
     override fun refresh() {
-        pluginInstance.logger.severe("1: $formed")
         formed = components.all {
             it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
         }
-        pluginInstance.logger.severe("2: $formed")
     }
 
     override fun isPartOfMultiblock(otherBlock: Block): Boolean

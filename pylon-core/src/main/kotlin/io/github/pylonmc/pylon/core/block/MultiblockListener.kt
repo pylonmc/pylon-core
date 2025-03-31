@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.block.base.Multiblock
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import org.bukkit.block.Block
@@ -10,22 +9,11 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
 
-object MultiblockListener : Listener {
+internal object MultiblockListener : Listener {
 
     private fun onBlockModified(block: Block)
             = MultiblockCache.loadedMultiblocksWithComponent(block).forEach { it.onComponentModified(block) }
 
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    private fun multiblockPlace(event: PylonBlockPlaceEvent) {
-        val pylonBlock = event.pylonBlock
-        if (pylonBlock is Multiblock) {
-            // If not called now, will be called when all the multiblock's chunks are loaded
-            if (pylonBlock.allChunksLoaded()) {
-                pylonBlock.refresh() // TODO should happen when all chunks get loaded
-            }
-        }
-    }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockPlace(event: BlockPlaceEvent)

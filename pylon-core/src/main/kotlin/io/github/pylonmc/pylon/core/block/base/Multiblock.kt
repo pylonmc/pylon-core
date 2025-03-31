@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import org.bukkit.block.Block
 
@@ -35,6 +36,12 @@ interface Multiblock {
      * This could be called often, so make it lightweight.
      */
     fun isPartOfMultiblock(otherBlock: Block): Boolean
+
+    /**
+     * Returns true if all the chunks that this multiblock can occupy are loaded.
+     */
+    fun isFullyLoaded(): Boolean
+        = MultiblockCache.isFullyLoaded(this)
 
     /**
      * Called when a block in any of the multiblock's chunks is modified (eg: water turning into ice).
