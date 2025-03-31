@@ -101,8 +101,12 @@ public class MultiblockTest extends GameTest {
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
                                     assertThat(block.formed).isFalse());
 
-                    BlockStorage.breakBlock(multiblockLocation);
+                    BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
+                    assertThat(BlockStorage.get(multiblockLocation))
+                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                                    assertThat(block.formed).isTrue());
 
+                    BlockStorage.breakBlock(multiblockLocation);
                     BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->

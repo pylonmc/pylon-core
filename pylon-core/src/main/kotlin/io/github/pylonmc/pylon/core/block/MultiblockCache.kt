@@ -11,40 +11,55 @@ import org.bukkit.Chunk
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.world.ChunkLoadEvent
+import org.bukkit.event.world.ChunkUnloadEvent
 
 /**
- * Keeps track of what chunks every loaded multiblock has components in
- * This allows us to quickly check whether placed/broken blocks have affected any multiblocks
+ * Keeps track of what chunks every loaded multiblock has components in. This allows us
+ * to quickly check whether placed/broken blocks have affected any multiblocks.
+ *
+ * Also keeps track of which multiblocks are fully loaded (ie, all chunks that they have
+ * components in are loaded).
  */
 object MultiblockCache : Listener {
 
-    private val cache: MutableMap<ChunkPosition, MutableSet<Multiblock>> = HashMap()
+    private val multiblocksWithComponentsInChunk: MutableMap<ChunkPosition, MutableSet<Multiblock>> = HashMap()
+    private val fullyLoadedMultiblocks: MutableSet<Multiblock> = HashSet()
+
+    private fun allChunksLoaded(multiblock: Multiblock): Boolean
+        = multiblock.chunksOccupied.all { it.chunk?.isLoaded ?: false }
 
     private fun add(multiblock: Multiblock) {
         for (chunk in multiblock.chunksOccupied) {
-            cache.getOrPut(chunk) { mutableSetOf() }.add(multiblock)
+            multiblocksWithComponentsInChunk.getOrPut(chunk) { mutableSetOf() }.add(multiblock)
+        }
+        if (allChunksLoaded(multiblock)) {
+            fullyLoadedMultiblocks.add(multiblock)
         }
     }
 
     private fun remove(multiblock: Multiblock) {
         for (chunk in multiblock.chunksOccupied) {
-            val multiblocks = cache[chunk]
+            val multiblocks = multiblocksWithComponentsInChunk[chunk]
             multiblocks?.remove(multiblock)
             if (multiblocks != null && multiblocks.isEmpty()) {
-                cache.remove(chunk)
+                multiblocksWithComponentsInChunk.remove(chunk)
             }
         }
+        fullyLoadedMultiblocks.remove(multiblock)
     }
 
     fun loadedMultiblocksWithComponent(block: Block)
         = loadedMultiblocksWithComponentsInChunk(block.chunk).filter { it.isPartOfMultiblock(block) }
 
     fun loadedMultiblocksWithComponentsInChunk(chunkPosition: ChunkPosition): Set<Multiblock>
-        = cache[chunkPosition] ?: setOf()
+        = multiblocksWithComponentsInChunk[chunkPosition] ?: setOf()
 
     fun loadedMultiblocksWithComponentsInChunk(chunk: Chunk): Set<Multiblock>
         = loadedMultiblocksWithComponentsInChunk(chunk.position)
 
+    fun isFullyLoaded(multiblock: Multiblock): Boolean
+        = fullyLoadedMultiblocks.contains(multiblock)
 
     @EventHandler
     private fun handle(event: PylonBlockLoadEvent) {
@@ -71,6 +86,22 @@ object MultiblockCache : Listener {
     private fun handle(event: PylonBlockBreakEvent) {
         if (event.pylonBlock is Multiblock) {
             remove(event.pylonBlock)
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: ChunkLoadEvent) {
+        for (multiblock in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
+            if (allChunksLoaded(multiblock)) {
+                fullyLoadedMultiblocks.add(multiblock)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: ChunkUnloadEvent) {
+        for (multiblock in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
+            fullyLoadedMultiblocks.remove(multiblock)
         }
     }
 }

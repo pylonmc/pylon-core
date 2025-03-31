@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.block.base
 
-import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
@@ -17,17 +16,17 @@ interface SimpleMultiblock : Multiblock {
 
     @FunctionalInterface
     interface Component {
-        fun matches(block: Block, pylonBlock: PylonBlock<*>?): Boolean
+        fun matches(block: Block): Boolean
     }
 
     data class VanillaComponent(val material: Material) : Component {
-        override fun matches(block: Block, pylonBlock: PylonBlock<*>?): Boolean
+        override fun matches(block: Block): Boolean
             = !BlockStorage.isPylonBlock(block) && block.type == material
     }
 
     data class PylonComponent(val key: NamespacedKey) : Component {
-        override fun matches(block: Block, pylonBlock: PylonBlock<*>?): Boolean
-            = pylonBlock?.schema?.key == key
+        override fun matches(block: Block): Boolean
+            = BlockStorage.get(block)?.schema?.key == key
     }
 
     val components: Map<Vector3i, Component>
@@ -64,22 +63,22 @@ interface SimpleMultiblock : Multiblock {
         }
 
     override fun refresh() {
+        pluginInstance.logger.severe("1: $formed")
         formed = components.all {
-            it.value.matches(block.location.add(Vector.fromJOML(it.key)).block, BlockStorage.get(block.location.add(Vector.fromJOML(it.key)).block))
+            it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
         }
+        pluginInstance.logger.severe("2: $formed")
     }
 
     override fun isPartOfMultiblock(otherBlock: Block): Boolean
         = componentAt(otherBlock) != null
 
-    override fun onComponentModified(newBlock: Block, newPylonBlock: PylonBlock<*>?) {
-        pluginInstance.logger.severe("1")
+    override fun onComponentModified(newBlock: Block) {
         val component = componentAt(newBlock)
         check(component != null) { "Block passed to onComponentModified was not a component of the multiblock" }
         if (formed) {
-            formed = formed && component.matches(newBlock, newPylonBlock)
-        } else if (component.matches(newBlock, newPylonBlock)) {
-            pluginInstance.logger.severe("2")
+            formed = formed && component.matches(newBlock)
+        } else if (component.matches(newBlock)) {
             refresh()
         }
     }

@@ -12,19 +12,18 @@ import org.bukkit.event.entity.EntityExplodeEvent
 
 object MultiblockListener : Listener {
 
-    // TODO change this logic when pre events are added
-    private fun onBlockModified(block: Block, pylonBlock: PylonBlock<*>?)
-            = MultiblockCache.loadedMultiblocksWithComponent(block).forEach { it.onComponentModified(block, pylonBlock) }
-
     private fun onBlockModified(block: Block)
-            = onBlockModified(block, null)
+            = MultiblockCache.loadedMultiblocksWithComponent(block).forEach { it.onComponentModified(block) }
 
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     private fun multiblockPlace(event: PylonBlockPlaceEvent) {
         val pylonBlock = event.pylonBlock
         if (pylonBlock is Multiblock) {
-            pylonBlock.refresh()
+            // If not called now, will be called when all the multiblock's chunks are loaded
+            if (pylonBlock.allChunksLoaded()) {
+                pylonBlock.refresh() // TODO should happen when all chunks get loaded
+            }
         }
     }
 
@@ -32,16 +31,16 @@ object MultiblockListener : Listener {
     private fun blockPlace(event: BlockPlaceEvent)
             = onBlockModified(event.block)
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     private fun blockPlace(event: PylonBlockPlaceEvent)
-            = onBlockModified(event.block, event.pylonBlock)
+            = onBlockModified(event.block)
 
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockBreak(event: BlockBreakEvent)
             = onBlockModified(event.block)
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     private fun blockBreak(event: PylonBlockBreakEvent)
             = onBlockModified(event.block)
 
