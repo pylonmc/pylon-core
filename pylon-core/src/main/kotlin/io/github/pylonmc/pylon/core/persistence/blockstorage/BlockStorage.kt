@@ -240,11 +240,11 @@ object BlockStorage : Listener {
             block.postBreak()
         }
 
-        PylonBlockBreakEvent(blockPosition.block, block, context).callEvent()
-
         for (drop in drops) {
             block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
         }
+
+        PylonBlockBreakEvent(blockPosition.block, block, context).callEvent()
     }
 
     /**
