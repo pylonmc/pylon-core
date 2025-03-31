@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Material
@@ -62,22 +61,11 @@ interface SimpleMultiblock : Multiblock {
             return chunks
         }
 
-    override fun refresh() {
-        formed = components.all {
+    override fun checkFormed(): Boolean
+        = components.all {
             it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
         }
-    }
 
     override fun isPartOfMultiblock(otherBlock: Block): Boolean
         = componentAt(otherBlock) != null
-
-    override fun onComponentModified(newBlock: Block) {
-        val component = componentAt(newBlock)
-        check(component != null) { "Block passed to onComponentModified was not a component of the multiblock" }
-        if (formed) {
-            formed = formed && component.matches(newBlock)
-        } else if (component.matches(newBlock)) {
-            refresh()
-        }
-    }
 }

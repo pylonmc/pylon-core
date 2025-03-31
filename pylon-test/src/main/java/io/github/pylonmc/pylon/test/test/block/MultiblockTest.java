@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MultiblockTest extends GameTest {
 
     public static class TestMultiblock extends PylonBlock<PylonBlockSchema> implements SimpleMultiblock {
-        private boolean formed;
 
         public TestMultiblock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
@@ -36,16 +35,6 @@ public class MultiblockTest extends GameTest {
                 PersistentDataContainer pdc
         ) {
             super(schema, block);
-        }
-
-        @Override
-        public boolean getFormed() {
-            return formed;
-        }
-
-        @Override
-        public void setFormed(boolean formed) {
-            this.formed = formed;
         }
 
         @Override
@@ -84,33 +73,33 @@ public class MultiblockTest extends GameTest {
                     BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.formed).isFalse());
+                                    assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
                     BlockStorage.placeBlock(component1Location, TEST_COMPONENT);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.formed).isFalse());
+                                    assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
                     BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.formed).isTrue());
+                                    assertThat(block.isFormedAndFullyLoaded()).isTrue());
 
                     BlockStorage.breakBlock(component2Location);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.formed).isFalse());
+                                    assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
                     BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.formed).isTrue());
+                                    assertThat(block.isFormedAndFullyLoaded()).isTrue());
 
                     BlockStorage.breakBlock(multiblockLocation);
                     BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
                     assertThat(BlockStorage.get(multiblockLocation))
                             .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.formed).isTrue());
+                                    assertThat(block.isFormedAndFullyLoaded()).isTrue());
                 })
                 .build());
     }
