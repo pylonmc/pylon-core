@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.item
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
 import io.github.pylonmc.pylon.core.block.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.BlockItemReason
+import io.github.pylonmc.pylon.core.block.BlockItemContext
 import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
@@ -185,7 +185,7 @@ internal object PylonItemListener : Listener {
     private fun handle(event: PlayerPickItemEvent) {
         val block = event.player.getTargetBlockExact(4) ?: return
         val pylonBlock = BlockStorage.get(block) ?: return
-        val blockItem = pylonBlock.getItem(BlockItemReason.PickBlock(event.player)) ?: return
+        val blockItem = pylonBlock.getItem(BlockItemContext.PickBlock(event.player)) ?: return
         val blockPylonItem = PylonItem.fromStack(blockItem) ?: return
 
         val sourceSlot = event.sourceSlot

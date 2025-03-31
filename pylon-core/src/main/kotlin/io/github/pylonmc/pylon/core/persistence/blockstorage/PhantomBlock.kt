@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import io.github.pylonmc.pylon.core.block.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.BlockItemReason
+import io.github.pylonmc.pylon.core.block.BlockItemContext
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder
@@ -45,7 +45,7 @@ class PhantomBlock(
         throw IllegalStateException("Phantom block cannot be loaded")
     }
 
-    override fun getItem(reason: BlockItemReason): ItemStack? {
+    override fun getItem(reason: BlockItemContext): ItemStack? {
         val item = errorItem.clone()
         item.editMeta {
             val lore = item.lore() ?: mutableListOf()
