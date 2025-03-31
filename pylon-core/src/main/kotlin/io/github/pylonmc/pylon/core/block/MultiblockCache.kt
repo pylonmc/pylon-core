@@ -5,10 +5,8 @@ import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
-import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -59,33 +57,17 @@ internal object MultiblockCache : Listener {
         refreshFormed(multiblock)
     }
 
-    /**
-     * 'Ummm... what the ****?' you say
-     *
-     * When we are notified of a state update - for example, ice melting into water,
-     * we often receive the notification before the state is actually updated. This
-     * means we'd actually have to account for the fact that some state in the world
-     * is about to get updated.
-     *
-     * This makes things a LOT more complicated because we cannot have a nice
-     * checkFormed() function any longer, and instead have to have logic to account
-     * for changes to individual blocks.
-     *
-     * The workaround to this is is acknowledging the state update, and then delaying
-     * any further checks to the next tick, when that state update is guaranteed to
-     * have been processed.
-     */
-    private fun refreshFormed(multiblock: Multiblock)
-        = Bukkit.getScheduler().runTaskLater(pluginInstance, Runnable {
-            // For a multiblock to be formed, it must be fully loaded
-            if (!fullyLoadedMultiblocks.contains(multiblock)) {
-                formedMultiblocks.remove(multiblock)
-            } else if (multiblock.checkFormed()) {
-                    formedMultiblocks.add(multiblock)
-                } else {
-                    formedMultiblocks.remove(multiblock)
-                }
-        }, 1)
+
+    private fun refreshFormed(multiblock: Multiblock) {
+        // For a multiblock to be formed, it must be fully loaded
+        if (!fullyLoadedMultiblocks.contains(multiblock)) {
+            formedMultiblocks.remove(multiblock)
+        } else if (multiblock.checkFormed()) {
+            formedMultiblocks.add(multiblock)
+        } else {
+            formedMultiblocks.remove(multiblock)
+        }
+    }
 
     private fun add(multiblock: Multiblock) {
         for (chunk in multiblock.chunksOccupied) {
