@@ -56,6 +56,7 @@ tasks.shadowJar {
     }
 
     doRelocate("co.aikar")
+    doRelocate("de.tr7zw.changeme.nbtapi")
 
     archiveBaseName = project.name
     archiveClassifier = null
