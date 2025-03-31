@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.item
 
+import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.loadItemFromYaml
 import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
@@ -22,25 +24,27 @@ import kotlin.io.path.reader
 open class PylonItemSchema(
     private val key: NamespacedKey,
     @JvmSynthetic internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
-    itemSource: InitialItemSource
+    itemSource: ItemSource
 ) : Keyed, RegistryHandler {
 
     constructor(
         key: NamespacedKey,
         itemClass: Class<out PylonItem<PylonItemSchema>>,
         template: ItemStack
-    ) : this(key, itemClass, InitialItemSource.ItemStack(template))
+    ) : this(key, itemClass, ItemSource.ItemStack(template))
 
     constructor(
         key: NamespacedKey,
         itemClass: Class<out PylonItem<PylonItemSchema>>,
         plugin: Plugin
-    ) : this(key, itemClass, InitialItemSource.File(plugin))
+    ) : this(key, itemClass, ItemSource.File(plugin))
 
     val template: ItemStack
 
     val itemStack: ItemStack
         get() = template.clone()
+
+    val settings: ConfigSection
 
     @JvmSynthetic
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(
@@ -55,6 +59,7 @@ open class PylonItemSchema(
             itemSource.createItemFile(key)
         }
         template = itemPath.reader().use(::loadItemFromYaml)
+        settings = Config(itemPath.toFile()).getOrCreateSection("settings")
 
         val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         checkNotNull(addon) { "Item does not have a corresponding addon; does your plugin call registerWithPylon()?" }

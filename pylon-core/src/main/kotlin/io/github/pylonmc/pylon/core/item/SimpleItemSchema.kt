@@ -9,7 +9,7 @@ import org.bukkit.plugin.Plugin
 
 open class SimpleItemSchema<R : Keyed>(
     id: NamespacedKey,
-    source: InitialItemSource,
+    source: ItemSource,
     private val recipeType: RecipeType<R>,
     private val recipe: (ItemStack) -> R,
 ) : PylonItemSchema(id, SimplePylonItem::class.java, source) {
@@ -19,14 +19,14 @@ open class SimpleItemSchema<R : Keyed>(
         template: ItemStack,
         recipeType: RecipeType<R>,
         recipe: (ItemStack) -> R,
-    ) : this(key, InitialItemSource.ItemStack(template), recipeType, recipe)
+    ) : this(key, ItemSource.ItemStack(template), recipeType, recipe)
 
     constructor(
         key: NamespacedKey,
         plugin: Plugin,
         recipeType: RecipeType<R>,
         recipe: (ItemStack) -> R,
-    ) : this(key, InitialItemSource.File(plugin), recipeType, recipe)
+    ) : this(key, ItemSource.File(plugin), recipeType, recipe)
 
     private var recipeKey: NamespacedKey? = null
 
