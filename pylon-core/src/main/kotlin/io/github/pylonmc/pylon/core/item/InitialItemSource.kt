@@ -20,7 +20,7 @@ sealed interface InitialItemSource {
 
     data class File @JvmOverloads constructor(val plugin: Plugin, val path: String? = null) : InitialItemSource {
         override fun createItemFile(key: NamespacedKey) {
-            val path = this.path ?: "/items/${key.namespace}/${key.key}.yml"
+            val path = this.path ?: "items/${key.namespace}/${key.key}.yml"
             val resource = plugin.getResource(path)
                 ?: error("Failed to load item template for $key; file not found at $path")
             val itemPath = PylonItemSchema.getItemConfigPath(key)

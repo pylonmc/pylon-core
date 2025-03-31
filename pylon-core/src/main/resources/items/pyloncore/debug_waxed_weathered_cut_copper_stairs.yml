@@ -1,0 +1,7 @@
+item:
+  id: waxed_weathered_cut_copper_stairs
+  components:
+    item_name: !mm "<red>Debug Waxed Weathered Cut Copper Stairs"
+    lore:
+      - !mm "<lore><insn>Right click</insn> a block to view its Pylon block data"
+    enchantment_glint_override: true

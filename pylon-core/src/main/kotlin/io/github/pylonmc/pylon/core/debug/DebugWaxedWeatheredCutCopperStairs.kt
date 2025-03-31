@@ -5,27 +5,19 @@ import io.github.pylonmc.pylon.core.block.base.Ticking
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.base.BlockInteractor
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.item.builder.LoreBuilder
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.Material
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
-@Suppress("UnstableApiUsage")
 object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     pylonKey("debug_waxed_weathered_cut_copper_stairs"),
     ItemInstance::class.java,
-    ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
-            .name("<red>Debug Waxed Weathered Cut Copper Stairs")
-            .lore(LoreBuilder().instruction("Right click").text(" a block to view its Pylon block data"))
-            .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
-            .build()
+    pluginInstance
 ) {
 
     class ItemInstance(schema: DebugWaxedWeatheredCutCopperStairs, item: ItemStack) :

@@ -17,22 +17,36 @@ val customMiniMessage = MiniMessage.builder()
     .editTags {
         it.tag("arrow", ::arrow)
         it.tag("lore", Tag.styling(TextDecoration.ITALIC.withState(false), NamedTextColor.GRAY))
+        it.tag(setOf("instruction", "insn")) { _, _ -> Tag.styling(TextColor.color(0xf9d104)) }
+        it.tag(setOf("attribute", "attr"), ::attr)
+        it.tag(setOf("quantity", "q"), ::quantity)
     }
     .strict(false)
     .build()
 
-private fun arrow(args: ArgumentQueue, ctx: Context): Tag {
-    var component = Component.text("\u2192")
-    val color = args.peek()?.value()
-    if (color != null) {
-        component = component.color(parseColor(color))
-    }
-    return Tag.selfClosingInserting(component)
+private fun arrow(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
+    val color = args.peek()?.value()?.let(::parseColor) ?: TextColor.color(0x666666)
+    return Tag.selfClosingInserting(Component.text("\u2192").color(color))
+}
+
+private fun attr(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
+    val name = args.popOr("Attribute name not present").value()
+    return Tag.inserting(
+        Component.text()
+            .color(NamedTextColor.WHITE)
+            .append(Component.text("$name:").color(TextColor.color(0xa9d9e8)))
+    )
+}
+
+private fun quantity(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
+    val name = args.popOr("Quantity name not present").value()
+    val quantity = Quantity.byName(name) ?: throw ctx.newException("Quantity '$name' not found", args)
+    return Tag.inserting(ctx.deserialize(quantity))
 }
 
 private fun parseColor(color: String): TextColor {
-    val theOnlyTrueWayToSpellColor = color.replace("grey", "gray")
-    return TextColor.fromHexString(theOnlyTrueWayToSpellColor)
-        ?: NamedTextColor.NAMES.value(theOnlyTrueWayToSpellColor)
+    val theOnlyTrueWayToSpellGray = color.replace("grey", "gray")
+    return TextColor.fromHexString(theOnlyTrueWayToSpellGray)
+        ?: NamedTextColor.NAMES.value(theOnlyTrueWayToSpellGray)
         ?: throw IllegalArgumentException("No such color: $color")
 }
