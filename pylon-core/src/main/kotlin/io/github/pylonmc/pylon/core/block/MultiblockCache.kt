@@ -5,7 +5,6 @@ import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Chunk
@@ -188,11 +187,8 @@ internal object MultiblockCache : Listener {
 
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private fun blockBreak(event: BlockBreakEvent) {
-        pluginInstance.logger.severe(event.block.position.toString())
-        pluginInstance.logger.severe(event.block.type.toString())
-        onBlockModified(event.block)
-    }
+    private fun blockBreak(event: BlockBreakEvent)
+            = onBlockModified(event.block)
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun blockBreak(event: PylonBlockBreakEvent)
