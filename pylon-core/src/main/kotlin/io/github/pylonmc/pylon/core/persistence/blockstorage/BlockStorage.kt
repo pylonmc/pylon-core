@@ -214,12 +214,12 @@ object BlockStorage : Listener {
     fun breakBlock(
         blockPosition: BlockPosition,
         context: BlockBreakContext = BlockBreakContext.PluginBreak
-    ): List<ItemStack>? {
-        val block = get(blockPosition) ?: return null
+    ) {
+        val block = get(blockPosition) ?: return
 
         val event = PrePylonBlockBreakEvent(blockPosition.block, block, context)
         event.callEvent()
-        if (event.isCancelled) return null
+        if (event.isCancelled) return
 
         val drops = mutableListOf<ItemStack>()
         if (context.normallyDrops) {
@@ -242,7 +242,9 @@ object BlockStorage : Listener {
 
         PylonBlockBreakEvent(blockPosition.block, block, context).callEvent()
 
-        return drops
+        for (drop in drops) {
+            block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
+        }
     }
 
     /**

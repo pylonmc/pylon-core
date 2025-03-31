@@ -29,22 +29,22 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockBreakEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
+            BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
             event.isDropItems = false
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockBurn(event: BlockBurnEvent) {
-        breakBlock(event.block, BlockBreakContext.Burned(event))
+        BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
     }
 
     // TODO this might be dropping vanilla blocks in place of Pylon blocks
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
-        breakBlock(event.block, BlockBreakContext.Exploded(event))
+        BlockStorage.breakBlock(event.block, BlockBreakContext.Exploded(event))
         for (block in event.blockList()) {
-            breakBlock(block, BlockBreakContext.WasExploded)
+            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
         }
     }
 
@@ -52,13 +52,13 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
-            breakBlock(block, BlockBreakContext.WasExploded)
+            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockFadeEvent) {
-        breakBlock(event.block, BlockBreakContext.Faded(event))
+        BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -92,13 +92,6 @@ internal object BlockListener : Listener {
                 event.isCancelled = true
                 return
             }
-        }
-    }
-
-    private fun breakBlock(block: Block, reason: BlockBreakContext) {
-        val drops = BlockStorage.breakBlock(block, reason) ?: return
-        for (drop in drops) {
-            block.world.dropItemNaturally(block.location.add(0.5, 0.1, 0.5), drop)
         }
     }
 }
