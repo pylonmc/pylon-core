@@ -7,9 +7,11 @@ import org.bukkit.block.Block
 
 /**
  * Multiblocks are more difficult than normal Pylon blocks for the simple reason that a multiblock
- * may contain some blocks that have not been loaded because they are in a different chunk. Due to
- * this, Multiblocks that implement Ticking will only be ticked when every chunk that the multiblock
- * spans has been loaded (referred to as 'fully loaded'). This is also the reason for chunksOccupied.
+ * may contain some blocks that have not been loaded because they are in a different chunk.
+ *
+ * Ticking multiblocks should only tick when isFormedAndFullyLoaded() returns true, to avoid ticking
+ * a multiblock that is either not formed, or not fully loaded (ie, not all of its components are
+ * loaded).
  */
 interface Multiblock {
     var formed: Boolean
@@ -36,6 +38,12 @@ interface Multiblock {
      * This could be called often, so make it lightweight.
      */
     fun isPartOfMultiblock(otherBlock: Block): Boolean
+
+    /**
+     * Convenience method. You should use this to check if the multiblock can be ticked.
+     */
+    fun isFormedAndFullyLoaded(): Boolean
+        = formed && isFullyLoaded()
 
     /**
      * Returns true if all the chunks that this multiblock can occupy are loaded.
