@@ -1,8 +1,13 @@
 package io.github.pylonmc.pylon.core.block
 
+import com.destroystokyo.paper.event.block.BeaconEffectEvent
+import io.github.pylonmc.pylon.core.block.base.Beacon
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
+import io.papermc.paper.event.block.BeaconActivatedEvent
+import io.papermc.paper.event.block.BeaconDeactivatedEvent
+import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -91,6 +96,38 @@ internal object BlockListener : Listener {
         val drops = BlockStorage.breakBlock(block, reason) ?: return
         for (drop in drops) {
             block.world.dropItemNaturally(block.location.add(0.5, 0.1, 0.5), drop)
+        }
+    }
+
+    @EventHandler
+    private fun onBeaconActivate(event: BeaconActivatedEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Beacon){
+            pylonBlock.onActivated(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBeaconDeactivate(event: BeaconDeactivatedEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Beacon){
+            pylonBlock.onDeactivated(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBeaconChangeEffect(event: PlayerChangeBeaconEffectEvent) {
+        val pylonBlock = BlockStorage.get(event.beacon)
+        if(pylonBlock is Beacon){
+            pylonBlock.onEffectChange(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBeaconEffectApply(event: BeaconEffectEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Beacon){
+            pylonBlock.onEffectApply(event)
         }
     }
 }
