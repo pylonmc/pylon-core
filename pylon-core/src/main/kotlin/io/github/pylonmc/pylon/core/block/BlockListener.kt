@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.BeaconActivatedEvent
 import io.papermc.paper.event.block.BeaconDeactivatedEvent
+import io.papermc.paper.event.block.TargetHitEvent
 import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -281,6 +282,14 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.block)
         if (pylonBlock is Leaf) {
             pylonBlock.onDecayNaturally(event)
+        }
+    }
+
+    @EventHandler
+    private fun onTargetHit(event: TargetHitEvent) {
+        val pylonBlock = BlockStorage.get(event.hitBlock ?: return)
+        if(pylonBlock is TargetBlock){
+            pylonBlock.onHit(event)
         }
     }
 }
