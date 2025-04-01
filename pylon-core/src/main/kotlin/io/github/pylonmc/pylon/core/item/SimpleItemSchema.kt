@@ -28,7 +28,7 @@ open class SimpleItemSchema<R : Keyed>
     }
 
     override fun onUnregister(registry: PylonRegistry<*>) {
-        for(key in recipeKeys){
+        for (key in recipeKeys) {
             recipeType.removeRecipe(key)
         }
     }
