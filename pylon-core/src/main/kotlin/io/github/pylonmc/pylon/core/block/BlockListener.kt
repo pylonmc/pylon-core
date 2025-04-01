@@ -346,4 +346,20 @@ internal object BlockListener : Listener {
             pylonBlock.onChangePage(event)
         }
     }
+
+    @EventHandler
+    private fun onPistonExtend(event: BlockPistonExtendEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Piston){
+            pylonBlock.onExtend(event)
+        }
+    }
+
+    @EventHandler
+    private fun onPistonRetract(event: BlockPistonRetractEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Piston){
+            pylonBlock.onRetract(event)
+        }
+    }
 }
