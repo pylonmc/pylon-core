@@ -4,6 +4,6 @@ import org.bukkit.event.block.BlockFertilizeEvent
 import org.bukkit.event.block.BlockGrowEvent
 
 interface Growable {
-    fun onGrow(event: BlockGrowEvent)
-    fun onFertilize(event: BlockFertilizeEvent)
+    fun onGrow(event: BlockGrowEvent) {}
+    fun onFertilize(event: BlockFertilizeEvent) {}
 }

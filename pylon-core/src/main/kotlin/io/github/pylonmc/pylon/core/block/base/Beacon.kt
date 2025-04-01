@@ -6,8 +6,8 @@ import io.papermc.paper.event.block.BeaconDeactivatedEvent
 import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 
 interface Beacon {
-    fun onActivated(event: BeaconActivatedEvent)
-    fun onDeactivated(event: BeaconDeactivatedEvent)
-    fun onEffectChange(event: PlayerChangeBeaconEffectEvent)
-    fun onEffectApply(event: BeaconEffectEvent)
+    fun onActivated(event: BeaconActivatedEvent) {}
+    fun onDeactivated(event: BeaconDeactivatedEvent) {}
+    fun onEffectChange(event: PlayerChangeBeaconEffectEvent) {}
+    fun onEffectApply(event: BeaconEffectEvent) {}
 }

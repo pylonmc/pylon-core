@@ -293,7 +293,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onTargetHit(event: TargetHitEvent) {
         val pylonBlock = BlockStorage.get(event.hitBlock ?: return)
-        if(pylonBlock is TargetBlock){
+        if (pylonBlock is TargetBlock) {
             pylonBlock.onHit(event)
         }
     }
@@ -301,7 +301,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onCompostByHopper(event: CompostItemEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Composter){
+        if (pylonBlock is Composter) {
             pylonBlock.onCompostByHopper(event)
         }
     }
@@ -309,7 +309,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onCompostByEntity(event: EntityCompostItemEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Composter){
+        if (pylonBlock is Composter) {
             pylonBlock.onCompostByEntity(event)
         }
     }
@@ -317,7 +317,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onShearBlock(event: PlayerShearBlockEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Shearable){
+        if (pylonBlock is Shearable) {
             pylonBlock.onShear(event)
         }
     }
@@ -325,7 +325,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onLecternInsertBook(event: PlayerInsertLecternBookEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Lectern){
+        if (pylonBlock is Lectern) {
             pylonBlock.onInsertBook(event)
         }
     }
@@ -333,7 +333,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onLecternRemoveBook(event: PlayerTakeLecternBookEvent) {
         val pylonBlock = BlockStorage.get(event.lectern.block)
-        if(pylonBlock is Lectern){
+        if (pylonBlock is Lectern) {
             pylonBlock.onRemoveBook(event)
         }
     }
@@ -341,7 +341,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onLecternChangePage(event: PlayerLecternPageChangeEvent) {
         val pylonBlock = BlockStorage.get(event.lectern.block)
-        if(pylonBlock is Lectern){
+        if (pylonBlock is Lectern) {
             pylonBlock.onChangePage(event)
         }
     }
@@ -349,7 +349,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPistonExtend(event: BlockPistonExtendEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Piston){
+        if (pylonBlock is Piston) {
             pylonBlock.onExtend(event)
         }
     }
@@ -357,7 +357,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPistonRetract(event: BlockPistonRetractEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Piston){
+        if (pylonBlock is Piston) {
             pylonBlock.onRetract(event)
         }
     }
@@ -365,7 +365,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPreEnchant(event: PrepareItemEnchantEvent) {
         val pylonBlock = BlockStorage.get(event.enchantBlock)
-        if(pylonBlock is EnchantingTable){
+        if (pylonBlock is EnchantingTable) {
             pylonBlock.onPrepareEnchant(event)
         }
     }
@@ -373,7 +373,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onEnchant(event: EnchantItemEvent) {
         val pylonBlock = BlockStorage.get(event.enchantBlock)
-        if(pylonBlock is EnchantingTable){
+        if (pylonBlock is EnchantingTable) {
             pylonBlock.onEnchant(event)
         }
     }
