@@ -48,7 +48,7 @@ interface SimpleMultiblock : Multiblock {
 
     override val chunksOccupied: Set<ChunkPosition>
         get() {
-            val chunks: MutableSet<ChunkPosition> = HashSet()
+            val chunks = mutableSetOf<ChunkPosition>()
             for (relativeX in minCorner.x..(maxCorner.x + 16) step 16) {
                 val realRelativeX = min(relativeX, maxCorner.x)
                 for (relativeZ in minCorner.z..(maxCorner.z + 16) step 16) {

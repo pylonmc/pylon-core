@@ -42,18 +42,18 @@ import org.bukkit.event.world.ChunkUnloadEvent
  */
 internal object MultiblockCache : Listener {
 
-    private val multiblocksWithComponentsInChunk: MutableMap<ChunkPosition, MutableSet<Multiblock>> = HashMap()
-    private val fullyLoadedMultiblocks: MutableSet<Multiblock> = HashSet()
+    private val multiblocksWithComponentsInChunk: MutableMap<ChunkPosition, MutableSet<Multiblock>> = mutableMapOf()
+    private val fullyLoadedMultiblocks: MutableSet<Multiblock> = mutableSetOf()
 
     /**
      * Multiblocks which need to be checked to make sure they're still formed next tick
      */
-    private val dirtyMultiblocks: MutableSet<Multiblock> = HashSet()
+    private val dirtyMultiblocks: MutableSet<Multiblock> = mutableSetOf()
 
     /**
       * Subset of fullyLoadedMultiblocks
       */
-    private val formedMultiblocks: MutableSet<Multiblock> = HashSet()
+    private val formedMultiblocks: MutableSet<Multiblock> = mutableSetOf()
 
     /**
      * Re-checks whether the dirty multiblocks are formed this tick.
@@ -64,7 +64,7 @@ internal object MultiblockCache : Listener {
         override fun run() {
             for (multiblock in dirtyMultiblocks) {
                 // For a multiblock to be formed, it must be fully loaded
-                if (!fullyLoadedMultiblocks.contains(multiblock)) {
+                if (multiblock !in fullyLoadedMultiblocks) {
                     formedMultiblocks.remove(multiblock)
                     continue
                 }
@@ -80,7 +80,7 @@ internal object MultiblockCache : Listener {
     }
 
     internal fun isFormed(multiblock: Multiblock): Boolean
-            = formedMultiblocks.contains(multiblock)
+            = multiblock in formedMultiblocks
 
     private fun markDirty(multiblock: Multiblock)
             = dirtyMultiblocks.add(multiblock)
@@ -129,7 +129,7 @@ internal object MultiblockCache : Listener {
         }
 
     private fun loadedMultiblocksWithComponentsInChunk(chunkPosition: ChunkPosition): Set<Multiblock>
-        = multiblocksWithComponentsInChunk[chunkPosition] ?: setOf()
+        = multiblocksWithComponentsInChunk[chunkPosition] ?: emptySet()
 
     private fun loadedMultiblocksWithComponentsInChunk(chunk: Chunk): Set<Multiblock>
         = loadedMultiblocksWithComponentsInChunk(chunk.position)
