@@ -12,11 +12,14 @@ import io.papermc.paper.event.block.PlayerShearBlockEvent
 import io.papermc.paper.event.block.TargetHitEvent
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
+import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
+import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.player.PlayerTakeLecternBookEvent
 
 /**
  * This listener listens for various events that would indicate a Pylon block either
@@ -317,6 +320,30 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.block)
         if(pylonBlock is Shearable){
             pylonBlock.onShear(event)
+        }
+    }
+
+    @EventHandler
+    private fun onLecternInsertBook(event: PlayerInsertLecternBookEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Lectern){
+            pylonBlock.onInsertBook(event)
+        }
+    }
+
+    @EventHandler
+    private fun onLecternRemoveBook(event: PlayerTakeLecternBookEvent) {
+        val pylonBlock = BlockStorage.get(event.lectern.block)
+        if(pylonBlock is Lectern){
+            pylonBlock.onRemoveBook(event)
+        }
+    }
+
+    @EventHandler
+    private fun onLecternChangePage(event: PlayerLecternPageChangeEvent) {
+        val pylonBlock = BlockStorage.get(event.lectern.block)
+        if(pylonBlock is Lectern){
+            pylonBlock.onChangePage(event)
         }
     }
 }
