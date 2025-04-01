@@ -20,7 +20,7 @@ open class SimpleItemSchema<R : Keyed>
 
     override fun onRegister(registry: PylonRegistry<*>) {
         super.onRegister(registry)
-        for(recipe in recipes){
+        for (recipe in recipes) {
             val recipeInstance = recipe(itemStack)
             recipeKeys.add(recipeInstance.key)
             recipeType.addRecipe(recipeInstance)
