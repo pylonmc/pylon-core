@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
+import io.github.pylonmc.pylon.test.item.Items;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fox;
@@ -16,7 +17,7 @@ public class MobDropTest extends GameTest {
         super(new GameTestConfig.Builder(PylonTest.key("mob_drop_test"))
                 .size(1)
                 .setUp((test) -> {
-                    ItemStack stickyStick = StickyStick.INSTANCE.getItemStack();
+                    ItemStack stickyStick = Items.STICKY_STICK.getItemStack();
                     PylonRegistry.MOB_DROPS.register(new SimpleMobDrop(
                             PylonTest.key("sticky_stick"),
                             stickyStick,

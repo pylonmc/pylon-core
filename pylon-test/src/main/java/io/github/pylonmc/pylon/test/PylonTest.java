@@ -4,9 +4,9 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.block.Blocks;
+import io.github.pylonmc.pylon.test.item.Items;
 import io.github.pylonmc.pylon.test.test.block.*;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
-import io.github.pylonmc.pylon.test.test.item.PylonItemStackSimpleTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
 import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
@@ -48,7 +48,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new TickingBlockTest());
         tests.add(new TickingBlockErrorTest());
 
-        tests.add(new PylonItemStackSimpleTest());
         tests.add(new PylonItemStackInterfaceTest());
 
         tests.add(new GametestTest());
@@ -93,6 +92,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
         try {
             Blocks.register();
+            Items.register();
         } catch (Exception e) {
             instance().getLogger().severe("Failed to set up tests");
             e.printStackTrace();

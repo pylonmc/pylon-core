@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.test.test.recipe;
 import io.github.pylonmc.pylon.core.recipe.RecipeTypes;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.SyncTest;
+import io.github.pylonmc.pylon.test.item.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +18,7 @@ public class CraftingTest extends SyncTest {
 
     @Override
     protected void test() {
-        ItemStack stickyStick = StickyStick.INSTANCE.getItemStack();
+        ItemStack stickyStick = Items.STICKY_STICK.getItemStack();
         ItemStack diamond = new ItemStack(Material.DIAMOND);
         ItemStack nothing = new ItemStack(Material.AIR);
         ItemStack normalStick = new ItemStack(Material.STICK);
