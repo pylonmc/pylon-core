@@ -2,6 +2,8 @@ package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import io.github.pylonmc.pylon.core.block.base.Beacon
+import io.github.pylonmc.pylon.core.block.base.Bell
+import io.github.pylonmc.pylon.core.block.base.TNT
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
@@ -128,6 +130,29 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.block)
         if(pylonBlock is Beacon){
             pylonBlock.onEffectApply(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBellRing(event: BellRingEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Bell){
+            pylonBlock.onRing(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBellResonate(event: BellResonateEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Bell){
+            pylonBlock.onResonate(event)
+        }
+    }
+
+    private fun onTNTIgnite(event: TNTPrimeEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is TNT){
+            pylonBlock.onIgnite(event)
         }
     }
 }
