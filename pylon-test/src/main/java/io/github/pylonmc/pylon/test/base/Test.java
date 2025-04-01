@@ -17,7 +17,9 @@ public interface Test {
 
     default @NotNull TestResult onComplete(@Nullable Throwable e) {
         if (e != null) {
-            PylonTest.instance().getLogger().log(Level.SEVERE, "Test %s failed!".formatted(getKey()), e);
+            PylonTest.instance().getLogger().log(Level.INFO, "Test %s failed!".formatted(getKey()), e);
+        } else {
+            PylonTest.instance().getLogger().log(Level.INFO, "Test %s passed!");
         }
         return new TestResult(getKey(), e == null);
     }
