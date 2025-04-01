@@ -233,6 +233,14 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler
+    private fun onDispenserShearSheep(event: BlockShearEntityEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Dispenser){
+            pylonBlock.onShearSheep(event)
+        }
+    }
+
+    @EventHandler
     private fun onBlockGrow(event: BlockGrowEvent) {
         val pylonBlock = BlockStorage.get(event.block)
         if(pylonBlock is Growable){
@@ -269,6 +277,14 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.block)
         if(pylonBlock is TrialVault){
             pylonBlock.onDisplayItem(event)
+        }
+    }
+
+    @EventHandler
+    private fun onLeafDecay(event: LeavesDecayEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Leaf){
+            pylonBlock.onDecayNaturally(event)
         }
     }
 }
