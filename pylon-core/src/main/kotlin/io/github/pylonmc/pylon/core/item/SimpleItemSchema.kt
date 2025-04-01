@@ -16,7 +16,7 @@ open class SimpleItemSchema<R : Keyed>
         vararg val recipes: (ItemStack) -> R,
     ) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
 
-    private var recipeKeys: MutableList<NamespacedKey> = mutableListOf()
+    private var recipeKeys = mutableListOf<NamespacedKey>()
 
     override fun onRegister(registry: PylonRegistry<*>) {
         super.onRegister(registry)
