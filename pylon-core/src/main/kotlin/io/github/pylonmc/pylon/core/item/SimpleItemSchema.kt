@@ -16,21 +16,20 @@ open class SimpleItemSchema<R : Keyed>
         vararg val recipes: (ItemStack) -> R,
     ) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
 
-    private var recipeKey: NamespacedKey? = null
+    private var recipeKeys: MutableList<NamespacedKey> = mutableListOf()
 
     override fun onRegister(registry: PylonRegistry<*>) {
         super.onRegister(registry)
         for(recipe in recipes){
             val recipeInstance = recipe(itemStack)
-            recipeKey = recipeInstance.key
+            recipeKeys.add(recipeInstance.key)
             recipeType.addRecipe(recipeInstance)
         }
     }
 
     override fun onUnregister(registry: PylonRegistry<*>) {
-        if (recipeKey != null) {
-            recipeType.removeRecipe(recipeKey!!)
-            recipeKey = null
+        for(key in recipeKeys){
+            recipeType.removeRecipe(key)
         }
     }
 }
