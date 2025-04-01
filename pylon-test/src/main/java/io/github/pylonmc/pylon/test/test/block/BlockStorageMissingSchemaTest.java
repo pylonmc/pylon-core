@@ -29,24 +29,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 // TODO figure out why this might be timing out
 public class BlockStorageMissingSchemaTest extends AsyncTest {
     public static class TestBlockSchema extends PylonBlockSchema {
-        private final int processingSpeed;
-
         public TestBlockSchema(
                 NamespacedKey key,
                 Material material,
-                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
-                int processingSpeed
+                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass
         ) {
             super(key, material, blockClass);
-            this.processingSpeed = processingSpeed;
         }
     }
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> {
+        @SuppressWarnings("unused")
         public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
+        @SuppressWarnings("unused")
         public TestBlock(
                 TestBlockSchema schema,
                 Block block,
@@ -58,8 +56,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
     private static final TestBlockSchema schema = new TestBlockSchema (
             PylonTest.key("block_storage_addon_reload_test"),
             Material.AMETHYST_BLOCK,
-            TestBlock.class,
-            12
+            TestBlock.class
     );
 
     private static Block block;

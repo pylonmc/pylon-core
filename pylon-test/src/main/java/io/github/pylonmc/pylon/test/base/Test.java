@@ -12,7 +12,7 @@ public interface Test {
     TestResult run();
 
     default NamespacedKey getKey() {
-        return new NamespacedKey(PylonTest.instance(), this.getClass().getSimpleName());
+        return new NamespacedKey(PylonTest.instance(), getClass().getSimpleName());
     }
 
     default @NotNull TestResult onComplete(@Nullable Throwable e) {

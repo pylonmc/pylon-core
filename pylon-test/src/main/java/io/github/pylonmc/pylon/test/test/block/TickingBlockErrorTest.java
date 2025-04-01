@@ -28,17 +28,19 @@ public class TickingBlockErrorTest extends GameTest {
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> implements Ticking {
 
+        @SuppressWarnings("unused")
         public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
+        @SuppressWarnings("unused")
         public TestBlock(TestBlockSchema schema, Block block, PersistentDataContainer pdc) {
             super(schema, block);
         }
 
         @Override
         public void tick(double deltaSeconds) {
-            throw new RuntimeException();
+            throw new RuntimeException("This exception is thrown as part of a test");
         }
     }
 

@@ -29,10 +29,12 @@ public class TickingBlockTest extends GameTest {
 
         public static int ticks = 0;
 
+        @SuppressWarnings("unused")
         public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
+        @SuppressWarnings("unused")
         public TestBlock(TestBlockSchema schema, Block block, PersistentDataContainer pdc) {
             super(schema, block);
         }

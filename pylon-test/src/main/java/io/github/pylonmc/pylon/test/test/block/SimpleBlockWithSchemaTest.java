@@ -34,10 +34,12 @@ public class SimpleBlockWithSchemaTest extends SyncTest {
     }
 
     public static class TestBlock extends PylonBlock<TestBlockSchema> {
+        @SuppressWarnings("unused")
         public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
+        @SuppressWarnings("unused")
         public TestBlock(
                 TestBlockSchema schema,
                 Block block,

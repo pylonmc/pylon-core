@@ -11,11 +11,9 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.jetbrains.annotations.NotNullByDefault;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@NotNullByDefault
 public class BlockStorageAddTest extends GameTest {
     public static class TestBlockSchema extends PylonBlockSchema {
         private final int processingSpeed;

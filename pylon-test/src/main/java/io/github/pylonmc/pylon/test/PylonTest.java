@@ -77,12 +77,12 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static void run() {
         // Create world - can't do this on enable due to plugin loading on STARTUP rather than POSTWORLD
         TestUtil.runSync(() -> {
-            testWorld = new WorldCreator("gametests")
+            World world = new WorldCreator("gametests")
                     .generator(new BedrockWorldGenerator())
                     .environment(World.Environment.NORMAL)
                     .createWorld();
-
-            assert testWorld != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
+            assert world != null; // shut up intellij // you can't make me, you fool. I will destroy you silly mortals.
+            testWorld = world;
 
             testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
             testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
@@ -140,7 +140,9 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
         instance = this;
 
-        if (Boolean.parseBoolean(System.getenv("NO_TEST"))) return;
+        if (Boolean.parseBoolean(System.getenv("NO_TEST"))) {
+            return;
+        }
 
         TestUtil.runAsync(PylonTest::run, 1);
     }

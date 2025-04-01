@@ -26,10 +26,12 @@ public class MultiblockTest extends AsyncTest {
 
     public static class TestMultiblock extends PylonBlock<PylonBlockSchema> implements SimpleMultiblock {
 
+        @SuppressWarnings("unused")
         public TestMultiblock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
+        @SuppressWarnings("unused")
         public TestMultiblock(
                 PylonBlockSchema schema,
                 Block block,

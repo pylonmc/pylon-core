@@ -1,9 +1,7 @@
 package io.github.pylonmc.pylon.test.base;
 
 
-import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.util.TestUtil;
-import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
@@ -13,7 +11,7 @@ import java.util.concurrent.TimeoutException;
  * Executed asynchronously on the main thread (but not asynchronously to other tests)
  */
 public abstract class AsyncTest implements Test {
-    protected int getTimeoutTicks() {
+    protected static int getTimeoutTicks() {
         return 30 * 20;
     }
 

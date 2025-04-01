@@ -7,7 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 
 public abstract class SyncTest implements Test {
-    protected int getTimeoutTicks() {
+    protected static int getTimeoutTicks() {
         return 30 * 20;
     }
 

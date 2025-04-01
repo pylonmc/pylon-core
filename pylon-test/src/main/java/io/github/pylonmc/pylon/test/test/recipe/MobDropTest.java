@@ -25,13 +25,9 @@ public class MobDropTest extends GameTest {
                     ));
                     test.getWorld().spawn(test.location(1.5, 0, 0), Fox.class);
                     test.getWorld().spawn(test.location(1.5, 0, 1), Chicken.class);
-                    test.succeedWhen(() -> test.entityInBounds(entity -> {
-                        if (entity instanceof Item item) {
-                            return item.getItemStack().isSimilar(stickyStick);
-                        } else {
-                            return false;
-                        }
-                    }));
+                    test.succeedWhen(() -> test.entityInBounds(entity ->
+                            entity instanceof Item item && item.getItemStack().isSimilar(stickyStick))
+                    );
                 })
                 .build());
     }

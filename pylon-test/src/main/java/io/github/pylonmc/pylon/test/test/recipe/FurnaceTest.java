@@ -38,7 +38,7 @@ public class FurnaceTest extends GameTest {
                     test.succeedWhen(() -> {
                         FurnaceInventory inv = ((Furnace) furnace.getState()).getInventory();
                         ItemStack result = inv.getResult();
-                        return result != null && result.equals(diamond);
+                        return diamond.equals(result);
                     });
                 })
                 .build()

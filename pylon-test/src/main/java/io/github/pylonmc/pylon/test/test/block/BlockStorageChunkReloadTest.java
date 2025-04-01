@@ -38,6 +38,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             something = 170;
         }
 
+        @SuppressWarnings("DataFlowIssue")
         public TestBlock(
                 PylonBlockSchema schema,
                 Block block,

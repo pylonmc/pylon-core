@@ -34,7 +34,7 @@ public class CraftingTest extends SyncTest {
                             .setIngredient('s', Material.STICK)
                             .setIngredient('S', stickyStick)
             );
-            ItemStack[] crafting = new ItemStack[]{
+            ItemStack[] crafting = {
                     nothing, normalStick, nothing,
                     normalStick, stickyStick, normalStick,
                     nothing, normalStick, nothing
@@ -70,7 +70,7 @@ public class CraftingTest extends SyncTest {
                             .setIngredient('s', Material.STICK)
                             .setIngredient('D', diamond)
             );
-            ItemStack[] crafting = new ItemStack[]{
+            ItemStack[] crafting = {
                     nothing, normalStick, nothing,
                     normalStick, diamond, normalStick,
                     nothing, normalStick, nothing
