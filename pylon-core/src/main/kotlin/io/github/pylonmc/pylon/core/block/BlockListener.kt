@@ -1,9 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
-import io.github.pylonmc.pylon.core.block.base.Beacon
-import io.github.pylonmc.pylon.core.block.base.Bell
-import io.github.pylonmc.pylon.core.block.base.TNT
+import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
@@ -20,6 +18,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
  * This listener listens for various events that would indicate a Pylon block either
  * being placed, removed, or moved
  */
+@Suppress("UnstableApiUsage")
 internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
@@ -149,10 +148,127 @@ internal object BlockListener : Listener {
         }
     }
 
+    @EventHandler
     private fun onTNTIgnite(event: TNTPrimeEvent) {
         val pylonBlock = BlockStorage.get(event.block)
         if(pylonBlock is TNT){
             pylonBlock.onIgnite(event)
+        }
+    }
+
+    @EventHandler
+    private fun onNotePlay(event: NotePlayEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is NoteBlock){
+            pylonBlock.onNotePlay(event)
+        }
+    }
+
+    @EventHandler
+    private fun onCrafterCraft(event: CrafterCraftEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Crafter){
+            pylonBlock.onCraft(event)
+        }
+    }
+
+    @EventHandler
+    private fun onSpongeAbsorb(event: SpongeAbsorbEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Sponge){
+            pylonBlock.onAbsorb(event)
+        }
+    }
+
+    @EventHandler
+    private fun onStartCook(event: InventoryBlockStartEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Furnace){
+            pylonBlock.onStartSmelting(event)
+        }
+        else if(pylonBlock is Campfire){
+            pylonBlock.onStartCooking(event)
+        }
+        else if(pylonBlock is BrewingStand){
+            pylonBlock.onStartBrewing(event)
+        }
+    }
+
+    @EventHandler
+    private fun onFinishCook(event: BlockCookEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Furnace){
+            pylonBlock.onEndSmelting(event)
+        }
+        else if(pylonBlock is Campfire){
+            pylonBlock.onEndCooking(event)
+        }
+        else if(pylonBlock is BrewingStand){
+            pylonBlock.onEndBrewing(event)
+        }
+    }
+
+    @EventHandler
+    private fun onDispenseArmor(event: BlockDispenseArmorEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Dispenser){
+            pylonBlock.onDispenseArmor(event)
+        }
+    }
+
+    @EventHandler
+    private fun onDispenseItem(event: BlockDispenseEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Dispenser){
+            pylonBlock.onDispenseItem(event)
+        }
+    }
+
+    @EventHandler
+    private fun onDispenseLoot(event: BlockDispenseLootEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Dispenser){
+            pylonBlock.onDispenseLoot(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBlockGrow(event: BlockGrowEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Growable){
+            pylonBlock.onGrow(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBlockFertilize(event: BlockFertilizeEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Growable){
+            pylonBlock.onFertilize(event)
+        }
+    }
+
+    @EventHandler
+    private fun onCauldronLevelChange(event: CauldronLevelChangeEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Cauldron){
+            pylonBlock.onLevelChange(event)
+        }
+    }
+
+    @EventHandler
+    private fun onSignChange(event: SignChangeEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Sign){
+            pylonBlock.onSignChange(event)
+        }
+    }
+
+    @EventHandler
+    private fun onVaultDisplayItem(event: VaultDisplayItemEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is TrialVault){
+            pylonBlock.onDisplayItem(event)
         }
     }
 }
