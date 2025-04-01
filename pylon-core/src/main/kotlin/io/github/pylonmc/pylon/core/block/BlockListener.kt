@@ -7,7 +7,9 @@ import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.BeaconActivatedEvent
 import io.papermc.paper.event.block.BeaconDeactivatedEvent
+import io.papermc.paper.event.block.CompostItemEvent
 import io.papermc.paper.event.block.TargetHitEvent
+import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -290,6 +292,22 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.hitBlock ?: return)
         if(pylonBlock is TargetBlock){
             pylonBlock.onHit(event)
+        }
+    }
+
+    @EventHandler
+    private fun onCompostByHopper(event: CompostItemEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Composter){
+            pylonBlock.onCompostByHopper(event)
+        }
+    }
+
+    @EventHandler
+    private fun onCompostByEntity(event: EntityCompostItemEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Composter){
+            pylonBlock.onCompostByEntity(event)
         }
     }
 }
