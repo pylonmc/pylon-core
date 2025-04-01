@@ -138,7 +138,8 @@ object BlockStorage : Listener {
         }
 
     @JvmStatic
-    fun isPylonBlock(blockPosition: BlockPosition): Boolean = get(blockPosition) != null
+    fun isPylonBlock(blockPosition: BlockPosition): Boolean
+    = (blockPosition.chunk.chunk?.isLoaded == true) && get(blockPosition) != null
 
     @JvmStatic
     fun isPylonBlock(block: Block): Boolean = get(block) != null
