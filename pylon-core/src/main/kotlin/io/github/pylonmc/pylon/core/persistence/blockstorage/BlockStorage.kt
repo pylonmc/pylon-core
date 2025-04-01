@@ -90,7 +90,10 @@ object BlockStorage : Listener {
     }
 
     @JvmStatic
-    fun get(blockPosition: BlockPosition): PylonBlock<*>? = lockBlockRead { blocks[blockPosition] }
+    fun get(blockPosition: BlockPosition): PylonBlock<*>? {
+        check(blockPosition.chunk.chunk?.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        return lockBlockRead { blocks[blockPosition] }
+    }
 
     @JvmStatic
     fun get(block: Block): PylonBlock<*>? = get(block.position)
@@ -119,8 +122,10 @@ object BlockStorage : Listener {
     inline fun <reified T : PylonBlock<*>> getAs(location: Location): T? = getAs(T::class.java, location)
 
     @JvmStatic
-    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> =
-        lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
+    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> {
+        check(chunkPosition.chunk?.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        return lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
+    }
 
     @JvmStatic
     fun getById(id: NamespacedKey): Collection<PylonBlock<*>> =
@@ -152,6 +157,8 @@ object BlockStorage : Listener {
         schema: PylonBlockSchema,
         context: BlockCreateContext = BlockCreateContext.Default
     ): PylonBlock<*>? {
+        check(blockPosition.chunk.chunk?.isLoaded == true) { "You can only place Pylon blocks in loaded chunks" }
+
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
                 as PylonBlock<*>
@@ -215,6 +222,8 @@ object BlockStorage : Listener {
         blockPosition: BlockPosition,
         context: BlockBreakContext = BlockBreakContext.PluginBreak
     ) {
+        check(blockPosition.chunk.chunk?.isLoaded == true) { "You can only break Pylon blocks in loaded chunks" }
+
         val block = get(blockPosition) ?: return
 
         val event = PrePylonBlockBreakEvent(blockPosition.block, block, context)
