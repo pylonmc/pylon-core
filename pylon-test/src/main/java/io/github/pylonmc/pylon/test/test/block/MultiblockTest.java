@@ -7,9 +7,8 @@ import io.github.pylonmc.pylon.core.block.SimplePylonBlock;
 import io.github.pylonmc.pylon.core.block.base.SimpleMultiblock;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.test.PylonTest;
-import io.github.pylonmc.pylon.test.TestUtil;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -65,59 +64,52 @@ public class MultiblockTest extends AsyncTest {
         TEST_COMPONENT.register();
         TEST_MULTIBLOCK.register();
 
-        Chunk chunk = TestUtil.getRandomChunk(PylonTest.testWorld);
+        Chunk chunk = TestUtil.getRandomChunk(false).join();
+        chunk.setForceLoaded(true);
 
         Location multiblockLocation = chunk.getBlock(4, 100, 4).getLocation();
         Location component1Location = multiblockLocation.clone().add(1, 1, 0);
         Location component2Location = multiblockLocation.clone().add(2, -1, 0);
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
-            BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
-        });
+        TestUtil.runSync(() -> BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK)).join();
         TestUtil.sleepTicks(3).join();
         assertThat(BlockStorage.get(multiblockLocation))
                 .isInstanceOfSatisfying(TestMultiblock.class, block ->
                         assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
-            BlockStorage.placeBlock(component1Location, TEST_COMPONENT);
-        });
+        TestUtil.runSync(() -> BlockStorage.placeBlock(component1Location, TEST_COMPONENT)).join();
         TestUtil.sleepTicks(3).join();
         assertThat(BlockStorage.get(multiblockLocation))
                 .isInstanceOfSatisfying(TestMultiblock.class, block ->
                         assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
-            BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
-        });
+        TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, TEST_COMPONENT)).join();
         TestUtil.sleepTicks(3).join();
         assertThat(BlockStorage.get(multiblockLocation))
                 .isInstanceOfSatisfying(TestMultiblock.class, block ->
                         assertThat(block.isFormedAndFullyLoaded()).isTrue());
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
-            BlockStorage.breakBlock(component2Location);
-        });
+        TestUtil.runSync(() -> BlockStorage.breakBlock(component2Location)).join();
         TestUtil.sleepTicks(3).join();
         assertThat(BlockStorage.get(multiblockLocation))
                 .isInstanceOfSatisfying(TestMultiblock.class, block ->
                         assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
-            BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
-        });
+        TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, TEST_COMPONENT)).join();
         TestUtil.sleepTicks(3).join();
         assertThat(BlockStorage.get(multiblockLocation))
                 .isInstanceOfSatisfying(TestMultiblock.class, block ->
                         assertThat(block.isFormedAndFullyLoaded()).isTrue());
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+        TestUtil.runSync(() -> {
             BlockStorage.breakBlock(multiblockLocation);
             BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
-        });
+        }).join();
         TestUtil.sleepTicks(3).join();
         assertThat(BlockStorage.get(multiblockLocation))
                 .isInstanceOfSatisfying(TestMultiblock.class, block ->
                         assertThat(block.isFormedAndFullyLoaded()).isTrue());
+
+        chunk.setForceLoaded(false);
     }
 }

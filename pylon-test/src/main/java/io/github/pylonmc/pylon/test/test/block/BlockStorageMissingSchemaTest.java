@@ -10,7 +10,7 @@ import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.test.PylonTest;
-import io.github.pylonmc.pylon.test.TestUtil;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -21,12 +21,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// TODO figure out why this might be timing out
 public class BlockStorageMissingSchemaTest extends AsyncTest {
     public static class TestBlockSchema extends PylonBlockSchema {
         private final int processingSpeed;
@@ -79,7 +79,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
 
             stage = 2;
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+            TestUtil.runSync(() -> {
                 BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), schema);
                 e.getChunk().unload();
             }, 10);
@@ -96,7 +96,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
 
             stage = 3;
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+            TestUtil.runSync(() -> {
                 PylonRegistry.BLOCKS.unregister(schema);
                 e.getChunk().load();
             }, 10);
@@ -124,7 +124,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
                 future.complete(t);
             }
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> e.getBlock().getChunk().unload(), 10);
+            TestUtil.runSync(() -> e.getBlock().getChunk().unload(), 10);
         }
 
         /**
@@ -138,7 +138,7 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
 
             stage = 5;
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+            TestUtil.runSync(() -> {
                 schema.register();
                 e.getChunk().load();
             }, 10);
@@ -172,12 +172,12 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
     protected void test() {
         schema.register();
 
-        Chunk chunk = TestUtil.getRandomChunk(PylonTest.testWorld);
+        Chunk chunk = TestUtil.getRandomChunk(true).join();
         block = chunk.getBlock(7, 100, 7);
 
         Bukkit.getPluginManager().registerEvents(new TestListener(), PylonTest.instance());
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> chunk.load());
+        TestUtil.runSync(() -> chunk.load()).join();
 
         Throwable t = future.join();
         if (t != null) {

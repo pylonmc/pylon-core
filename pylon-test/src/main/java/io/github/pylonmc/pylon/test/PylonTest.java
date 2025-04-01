@@ -11,6 +11,8 @@ import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
 import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
 import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
 import io.github.pylonmc.pylon.test.test.serializer.*;
+import io.github.pylonmc.pylon.test.util.BedrockWorldGenerator;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +22,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -73,10 +74,9 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         return tests;
     }
 
-    private void run() {
+    private static void run() {
         // Create world - can't do this on enable due to plugin loading on STARTUP rather than POSTWORLD
-        CompletableFuture<Void> worldFuture = new CompletableFuture<>();
-        Bukkit.getScheduler().runTask(this, () -> {
+        TestUtil.runSync(() -> {
             testWorld = new WorldCreator("gametests")
                     .generator(new BedrockWorldGenerator())
                     .environment(World.Environment.NORMAL)
@@ -87,17 +87,10 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
             testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
             testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
             testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
-
-            worldFuture.complete(null);
-        });
-        worldFuture.join();
-
-        CompletableFuture<List<Test>> testsFuture = new CompletableFuture<>();
+        }).join();
 
         // Tests must be initialised on main thread
-        Bukkit.getScheduler().runTask(this, () -> testsFuture.complete(initTests()));
-
-        List<Test> tests = testsFuture.join();
+        List<Test> tests = TestUtil.runSync(PylonTest::initTests).join();
 
         List<TestResult> results = tests.stream()
                 .map(Test::run)
@@ -149,7 +142,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
         if (Boolean.parseBoolean(System.getenv("NO_TEST"))) return;
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::run, 1);
+        TestUtil.runAsync(PylonTest::run, 1);
     }
 
     @Override

@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.test.base;
 
 
 import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Bukkit;
 
 import java.util.concurrent.CompletableFuture;
@@ -20,19 +21,16 @@ public abstract class AsyncTest implements Test {
 
     @Override
     public TestResult run() {
-        CompletableFuture<TestResult> future = new CompletableFuture<>();
-
-        Bukkit.getScheduler().runTaskAsynchronously(PylonTest.instance(), () -> {
+        CompletableFuture<TestResult> future = TestUtil.runAsync(() -> {
             try {
                 test();
             } catch (Throwable e) {
-                future.complete(onComplete(e));
-                return;
+                return onComplete(e);
             }
-            future.complete(onComplete(null));
+            return onComplete(null);
         });
 
-        Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+        TestUtil.runAsync(() -> {
             if (!future.isDone()) {
                 future.complete(onComplete(new TimeoutException("Test timed out")));
             }

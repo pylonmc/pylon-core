@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.test;
+package io.github.pylonmc.pylon.test.util;
 
 import org.bukkit.Material;
 import org.bukkit.generator.ChunkGenerator;

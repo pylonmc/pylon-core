@@ -9,7 +9,7 @@ import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.util.position.BlockPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
-import io.github.pylonmc.pylon.test.TestUtil;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -48,7 +48,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
             stage = 2;
 
             // Run this later to prevent stage 3 from firing early
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+            TestUtil.runSync(() -> {
                 for (BlockPosition blockPosition : blockLoadedFutures.keySet()) {
                     BlockStorage.placeBlock(blockPosition, schema);
                 }
@@ -67,7 +67,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
 
             stage = 3;
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> e.getChunk().load(), 10);
+            TestUtil.runSync(() -> e.getChunk().load(), 10);
         }
 
         /**
@@ -102,7 +102,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
     public void test() {
         schema.register();
 
-        chunk = TestUtil.getRandomChunk(PylonTest.testWorld);
+        chunk = TestUtil.getRandomChunk(true).join();
 
         Bukkit.getPluginManager().registerEvents(new TestListener(), PylonTest.instance());
 
@@ -115,7 +115,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
             }
         }
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> chunk.load());
+        TestUtil.runSync(() -> chunk.load()).join();
 
         for (CompletableFuture<Throwable> future : blockLoadedFutures.values()) {
             Throwable throwable = future.join();

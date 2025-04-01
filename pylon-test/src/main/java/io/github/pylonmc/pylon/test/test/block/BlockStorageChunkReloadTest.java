@@ -9,7 +9,7 @@ import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.test.PylonTest;
-import io.github.pylonmc.pylon.test.TestUtil;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -20,14 +20,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.NotNullByDefault;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@NotNullByDefault
 public class BlockStorageChunkReloadTest extends AsyncTest {
     public static class TestBlock extends PylonBlock<PylonBlockSchema> {
         private final NamespacedKey somethingKey = PylonTest.key("something");
@@ -60,7 +59,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             TestBlock.class
     );
 
-    private static final Map<Chunk, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
+    private static final Map<Chunk, CompletableFuture<@Nullable Throwable>> blockLoadedFutures = new HashMap<>();
     private static final Set<Chunk> stage1Chunks = new HashSet<>();
     private static final Set<Chunk> stage2Chunks = new HashSet<>();
     private static final Set<Chunk> stage3Chunks = new HashSet<>();
@@ -79,7 +78,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             stage1Chunks.remove(e.getChunk());
             stage2Chunks.add(e.getChunk());
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+            TestUtil.runSync(() -> {
                 BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), schema);
                 e.getChunk().unload();
             }, 10);
@@ -108,9 +107,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
                         .complete(t);
             }
 
-            Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
-                e.getChunk().load();
-            }, 10);
+            TestUtil.runSync(() -> e.getChunk().load(), 10);
         }
 
         /**
@@ -153,7 +150,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
     public void test() {
         schema.register();
 
-        List<Chunk> chunks = TestUtil.getRandomChunks(PylonTest.testWorld, 20, 20);
+        List<Chunk> chunks = TestUtil.getRandomChunks(20, 20, true).join();
 
         stage1Chunks.addAll(chunks);
 
@@ -164,10 +161,10 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
         Bukkit.getPluginManager().registerEvents(new TestListener(), PylonTest.instance());
 
         for (Chunk chunk : chunks) {
-            Bukkit.getScheduler().runTask(PylonTest.instance(), () -> chunk.load());
+            TestUtil.runSync(() -> chunk.load());
         }
 
-        for (CompletableFuture<Throwable> future : blockLoadedFutures.values()) {
+        for (CompletableFuture<@Nullable Throwable> future : blockLoadedFutures.values()) {
             Throwable throwable = future.join();
             if (throwable != null) {
                 throw new RuntimeException(throwable);
