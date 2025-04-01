@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.BeaconActivatedEvent
 import io.papermc.paper.event.block.BeaconDeactivatedEvent
 import io.papermc.paper.event.block.CompostItemEvent
+import io.papermc.paper.event.block.PlayerShearBlockEvent
 import io.papermc.paper.event.block.TargetHitEvent
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
@@ -308,6 +309,14 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.block)
         if(pylonBlock is Composter){
             pylonBlock.onCompostByEntity(event)
+        }
+    }
+
+    @EventHandler
+    private fun onShearBlock(event: PlayerShearBlockEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Shearable){
+            pylonBlock.onShear(event)
         }
     }
 }
