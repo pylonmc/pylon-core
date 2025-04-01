@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.test;
 import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
+import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.test.block.*;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackSimpleTest;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class PylonTest extends JavaPlugin implements PylonAddon {
     private static PylonTest instance;
     public static World testWorld;
+    private static final boolean MANUAL_SHUTDOWN = Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"));
 
     @Override
     public @NotNull String displayName() {
@@ -43,8 +45,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new BlockStorageMissingSchemaTest());
         tests.add(new BlockStorageRemoveTest());
         tests.add(new MultiblockTest());
-        tests.add(new SimpleBlockTest());
-        tests.add(new SimpleBlockWithSchemaTest());
         tests.add(new TickingBlockTest());
         tests.add(new TickingBlockErrorTest());
 
@@ -75,6 +75,8 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     }
 
     private static void run() {
+        Logger logger = instance.getLogger();
+
         // Create world - can't do this on enable due to plugin loading on STARTUP rather than POSTWORLD
         TestUtil.runSync(() -> {
             World world = new WorldCreator("gametests")
@@ -88,6 +90,17 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
             testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
             testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
         }).join();
+
+        try {
+            Blocks.register();
+        } catch (Exception e) {
+            instance().getLogger().severe("Failed to set up tests");
+            e.printStackTrace();
+            communicateFailure();
+            if (!MANUAL_SHUTDOWN) {
+                Bukkit.shutdown();
+            }
+        }
 
         // Tests must be initialised on main thread
         List<Test> tests = TestUtil.runSync(PylonTest::initTests).join();
@@ -105,7 +118,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
                 .map(TestResult::key)
                 .toList();
 
-        Logger logger = instance.getLogger();
 
         logger.info("[ ===== TEST SUMMARY ===== ]");
         logger.info("%s/%s TESTS PASSED"
@@ -117,18 +129,21 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
                     .collect(Collectors.joining(", "));
             logger.info("FAILED: %s".formatted(failedString));
 
-            // Communicate back to the runServer task that the tests failed
-            try {
-                new File("tests-failed").createNewFile();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            communicateFailure();
         }
 
-
-        if (!Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"))) {
+        if (!MANUAL_SHUTDOWN) {
             logger.info("Testing complete; shutting down server...");
             Bukkit.shutdown();
+        }
+    }
+
+    private static void communicateFailure() {
+        // Communicate back to the runServer task that the tests failed
+        try {
+            new File("tests-failed").createNewFile();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

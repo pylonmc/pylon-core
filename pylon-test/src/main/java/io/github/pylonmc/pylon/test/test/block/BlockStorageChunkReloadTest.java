@@ -1,24 +1,20 @@
 package io.github.pylonmc.pylon.test.test.block;
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.block.BlockWithField;
+import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,37 +24,6 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class BlockStorageChunkReloadTest extends AsyncTest {
-    public static class TestBlock extends PylonBlock<PylonBlockSchema> {
-        private final NamespacedKey somethingKey = PylonTest.key("something");
-
-        private final int something;
-
-        public TestBlock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-            super(schema, block);
-            something = 170;
-        }
-
-        @SuppressWarnings("DataFlowIssue")
-        public TestBlock(
-                PylonBlockSchema schema,
-                Block block,
-                PersistentDataContainer pdc
-        ) {
-            super(schema, block);
-            something = pdc.get(somethingKey, PylonSerializers.INTEGER);
-        }
-
-        @Override
-        public void write(@NotNull PersistentDataContainer pdc) {
-            pdc.set(somethingKey, PylonSerializers.INTEGER, something - 40);
-        }
-    }
-
-    private static final PylonBlockSchema schema = new PylonBlockSchema  (
-            PylonTest.key("block_storage_chunk_reload_test"),
-            Material.AMETHYST_BLOCK,
-            TestBlock.class
-    );
 
     private static final Map<Chunk, CompletableFuture<@Nullable Throwable>> blockLoadedFutures = new HashMap<>();
     private static final Set<Chunk> stage1Chunks = new HashSet<>();
@@ -80,7 +45,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             stage2Chunks.add(e.getChunk());
 
             TestUtil.runSync(() -> {
-                BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), schema);
+                BlockStorage.placeBlock(e.getChunk().getBlock(7, 100, 7), Blocks.BLOCK_WITH_FIELD);
                 e.getChunk().unload();
             }, 10);
         }
@@ -128,14 +93,14 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
                 assertThat(pylonBlock)
                         .isNotNull()
-                        .isInstanceOf(TestBlock.class);
+                        .isInstanceOf(BlockWithField.class);
 
                 assertThat(pylonBlock.getSchema())
                         .isInstanceOf(PylonBlockSchema.class);
 
-                assertThat(BlockStorage.getAs(TestBlock.class, e.getBlock()))
+                assertThat(BlockStorage.getAs(BlockWithField.class, e.getBlock()))
                         .isNotNull()
-                        .extracting(block -> block.something)
+                        .extracting(block -> block.getProgress())
                         .isEqualTo(130);
 
             } catch (Throwable t) {
@@ -149,8 +114,6 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
     @Override
     public void test() {
-        schema.register();
-
         List<Chunk> chunks = TestUtil.getRandomChunks(20, 20, true).join();
 
         stage1Chunks.addAll(chunks);

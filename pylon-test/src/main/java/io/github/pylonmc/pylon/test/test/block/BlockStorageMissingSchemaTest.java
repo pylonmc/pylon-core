@@ -15,7 +15,6 @@ import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,32 +27,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // TODO figure out why this might be timing out
 public class BlockStorageMissingSchemaTest extends AsyncTest {
-    public static class TestBlockSchema extends PylonBlockSchema {
-        public TestBlockSchema(
-                NamespacedKey key,
-                Material material,
-                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass
-        ) {
-            super(key, material, blockClass);
-        }
-    }
-
-    public static class TestBlock extends PylonBlock<TestBlockSchema> {
+    public static class TestBlock extends PylonBlock<PylonBlockSchema> {
         @SuppressWarnings("unused")
-        public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
+        public TestBlock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
             super(schema, block);
         }
 
         @SuppressWarnings("unused")
         public TestBlock(
-                TestBlockSchema schema,
+                PylonBlockSchema schema,
                 Block block,
                 PersistentDataContainer pdc) {
             super(schema, block);
         }
     }
 
-    private static final TestBlockSchema schema = new TestBlockSchema (
+    private static final PylonBlockSchema schema = new PylonBlockSchema (
             PylonTest.key("block_storage_addon_reload_test"),
             Material.AMETHYST_BLOCK,
             TestBlock.class

@@ -2,18 +2,17 @@ package io.github.pylonmc.pylon.test.test.block;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
-import io.github.pylonmc.pylon.core.block.SimplePylonBlock;
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent;
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.util.position.BlockPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
@@ -25,11 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class BlockStorageFilledChunkTest extends AsyncTest {
-    private static final PylonBlockSchema schema = new PylonBlockSchema(
-            PylonTest.key("block_storage_fill_chunk_test"),
-            Material.AMETHYST_BLOCK,
-            SimplePylonBlock.class
-    );
+
 
     @NotNull private static final Map<BlockPosition, CompletableFuture<Throwable>> blockLoadedFutures = new HashMap<>();
     private static Chunk chunk;
@@ -50,7 +45,7 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
             // Run this later to prevent stage 3 from firing early
             TestUtil.runSync(() -> {
                 for (BlockPosition blockPosition : blockLoadedFutures.keySet()) {
-                    BlockStorage.placeBlock(blockPosition, schema);
+                    BlockStorage.placeBlock(blockPosition, Blocks.SIMPLE_BLOCK);
                 }
                 e.getChunk().unload();
             }, 10);
@@ -87,7 +82,8 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
                         .isNotNull();
 
                 assertThat(pylonBlock.getSchema())
-                        .isEqualTo(schema);
+                        .extracting(PylonBlockSchema::getKey)
+                        .isEqualTo(Blocks.SIMPLE_BLOCK.getKey());
 
             } catch (Throwable t) {
                 exception = t;
@@ -100,8 +96,6 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
 
     @Override
     public void test() {
-        schema.register();
-
         chunk = TestUtil.getRandomChunk(true).join();
 
         Bukkit.getPluginManager().registerEvents(new TestListener(), PylonTest.instance());

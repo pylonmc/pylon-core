@@ -19,7 +19,7 @@ public interface Test {
         if (e != null) {
             PylonTest.instance().getLogger().log(Level.INFO, "Test %s failed!".formatted(getKey()), e);
         } else {
-            PylonTest.instance().getLogger().log(Level.INFO, "Test %s passed!");
+            PylonTest.instance().getLogger().log(Level.INFO, "Test %s passed!".formatted(getKey()));
         }
         return new TestResult(getKey(), e == null);
     }
