@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.test;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
@@ -57,5 +58,13 @@ public class TestUtil {
         }
 
         return chunks;
+    }
+
+    public static @NotNull CompletableFuture<Void> sleepTicks(int ticks) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+            future.complete(null);
+        }, ticks);
+        return future;
     }
 }

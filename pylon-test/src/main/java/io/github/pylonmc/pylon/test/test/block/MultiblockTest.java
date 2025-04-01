@@ -6,9 +6,11 @@ import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.block.SimplePylonBlock;
 import io.github.pylonmc.pylon.core.block.base.SimpleMultiblock;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
-import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
-import io.github.pylonmc.pylon.test.base.GameTest;
+import io.github.pylonmc.pylon.test.TestUtil;
+import io.github.pylonmc.pylon.test.base.AsyncTest;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -21,7 +23,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class MultiblockTest extends GameTest {
+public class MultiblockTest extends AsyncTest {
 
     public static class TestMultiblock extends PylonBlock<PylonBlockSchema> implements SimpleMultiblock {
 
@@ -58,49 +60,64 @@ public class MultiblockTest extends GameTest {
             TestMultiblock.class
     );
 
-    public MultiblockTest() {
-        super(new GameTestConfig.Builder(PylonTest.key("simple_multiblock"))
-                .size(3)
-                .timeoutTicks(30 * 20)
-                .setUp((test) -> {
-                    TEST_COMPONENT.register();
-                    TEST_MULTIBLOCK.register();
+    @Override
+    protected void test() {
+        TEST_COMPONENT.register();
+        TEST_MULTIBLOCK.register();
 
-                    Location multiblockLocation = test.location();
-                    Location component1Location = test.location().add(1, 1, 0);
-                    Location component2Location = test.location().add(2, -1, 0);
+        Chunk chunk = TestUtil.getRandomChunk(PylonTest.testWorld);
 
-                    BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
-                    assertThat(BlockStorage.get(multiblockLocation))
-                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.isFormedAndFullyLoaded()).isFalse());
+        Location multiblockLocation = chunk.getBlock(4, 100, 4).getLocation();
+        Location component1Location = multiblockLocation.clone().add(1, 1, 0);
+        Location component2Location = multiblockLocation.clone().add(2, -1, 0);
 
-                    BlockStorage.placeBlock(component1Location, TEST_COMPONENT);
-                    assertThat(BlockStorage.get(multiblockLocation))
-                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.isFormedAndFullyLoaded()).isFalse());
+        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
+        });
+        TestUtil.sleepTicks(3).join();
+        assertThat(BlockStorage.get(multiblockLocation))
+                .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                        assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
-                    BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
-                    assertThat(BlockStorage.get(multiblockLocation))
-                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.isFormedAndFullyLoaded()).isTrue());
+        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            BlockStorage.placeBlock(component1Location, TEST_COMPONENT);
+        });
+        TestUtil.sleepTicks(3).join();
+        assertThat(BlockStorage.get(multiblockLocation))
+                .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                        assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
-                    BlockStorage.breakBlock(component2Location);
-                    assertThat(BlockStorage.get(multiblockLocation))
-                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.isFormedAndFullyLoaded()).isFalse());
+        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
+        });
+        TestUtil.sleepTicks(3).join();
+        assertThat(BlockStorage.get(multiblockLocation))
+                .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                        assertThat(block.isFormedAndFullyLoaded()).isTrue());
 
-                    BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
-                    assertThat(BlockStorage.get(multiblockLocation))
-                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.isFormedAndFullyLoaded()).isTrue());
+        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            BlockStorage.breakBlock(component2Location);
+        });
+        TestUtil.sleepTicks(3).join();
+        assertThat(BlockStorage.get(multiblockLocation))
+                .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                        assertThat(block.isFormedAndFullyLoaded()).isFalse());
 
-                    BlockStorage.breakBlock(multiblockLocation);
-                    BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
-                    assertThat(BlockStorage.get(multiblockLocation))
-                            .isInstanceOfSatisfying(TestMultiblock.class, block ->
-                                    assertThat(block.isFormedAndFullyLoaded()).isTrue());
-                })
-                .build());
+        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            BlockStorage.placeBlock(component2Location, TEST_COMPONENT);
+        });
+        TestUtil.sleepTicks(3).join();
+        assertThat(BlockStorage.get(multiblockLocation))
+                .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                        assertThat(block.isFormedAndFullyLoaded()).isTrue());
+
+        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+            BlockStorage.breakBlock(multiblockLocation);
+            BlockStorage.placeBlock(multiblockLocation, TEST_MULTIBLOCK);
+        });
+        TestUtil.sleepTicks(3).join();
+        assertThat(BlockStorage.get(multiblockLocation))
+                .isInstanceOfSatisfying(TestMultiblock.class, block ->
+                        assertThat(block.isFormedAndFullyLoaded()).isTrue());
     }
 }
