@@ -13,6 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultiblockTest extends AsyncTest {
 
+    private static void assertMultiblockFormed(Location multiblockLocation, boolean formed) {
+        assertThat(BlockStorage.get(multiblockLocation))
+                .isInstanceOfSatisfying(SimpleTestMultiblock.class, block ->
+                        assertThat(block.isFormedAndFullyLoaded()).isEqualTo(formed)
+                );
+    }
+
     @Override
     protected void test() {
         Chunk chunk = TestUtil.getRandomChunk(false).join();
@@ -24,42 +31,30 @@ public class MultiblockTest extends AsyncTest {
 
         TestUtil.runSync(() -> BlockStorage.placeBlock(multiblockLocation, Blocks.SIMPLE_MULTIBLOCK)).join();
         TestUtil.sleepTicks(3).join();
-        assertThat(BlockStorage.get(multiblockLocation))
-                .isInstanceOfSatisfying(SimpleTestMultiblock.class, block ->
-                        assertThat(block.isFormedAndFullyLoaded()).isFalse());
+        assertMultiblockFormed(multiblockLocation, false);
 
         TestUtil.runSync(() -> BlockStorage.placeBlock(component1Location, Blocks.SIMPLE_BLOCK)).join();
         TestUtil.sleepTicks(3).join();
-        assertThat(BlockStorage.get(multiblockLocation))
-                .isInstanceOfSatisfying(SimpleTestMultiblock.class, block ->
-                        assertThat(block.isFormedAndFullyLoaded()).isFalse());
+        assertMultiblockFormed(multiblockLocation, false);
 
         TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, Blocks.SIMPLE_BLOCK)).join();
         TestUtil.sleepTicks(3).join();
-        assertThat(BlockStorage.get(multiblockLocation))
-                .isInstanceOfSatisfying(SimpleTestMultiblock.class, block ->
-                        assertThat(block.isFormedAndFullyLoaded()).isTrue());
+        assertMultiblockFormed(multiblockLocation, true);
 
         TestUtil.runSync(() -> BlockStorage.breakBlock(component2Location)).join();
         TestUtil.sleepTicks(3).join();
-        assertThat(BlockStorage.get(multiblockLocation))
-                .isInstanceOfSatisfying(SimpleTestMultiblock.class, block ->
-                        assertThat(block.isFormedAndFullyLoaded()).isFalse());
+        assertMultiblockFormed(multiblockLocation, false);
 
         TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, Blocks.SIMPLE_BLOCK)).join();
         TestUtil.sleepTicks(3).join();
-        assertThat(BlockStorage.get(multiblockLocation))
-                .isInstanceOfSatisfying(SimpleTestMultiblock.class, block ->
-                        assertThat(block.isFormedAndFullyLoaded()).isTrue());
+        assertMultiblockFormed(multiblockLocation, true);
 
         TestUtil.runSync(() -> {
             BlockStorage.breakBlock(multiblockLocation);
             BlockStorage.placeBlock(multiblockLocation, Blocks.SIMPLE_MULTIBLOCK);
         }).join();
         TestUtil.sleepTicks(3).join();
-        assertThat(BlockStorage.get(multiblockLocation))
-                .isInstanceOfSatisfying(SimpleTestMultiblock.class, block ->
-                        assertThat(block.isFormedAndFullyLoaded()).isTrue());
+        assertMultiblockFormed(multiblockLocation, true);
 
         chunk.setForceLoaded(false);
     }
