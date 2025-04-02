@@ -377,4 +377,12 @@ internal object BlockListener : Listener {
             pylonBlock.onEnchant(event)
         }
     }
+
+    @EventHandler
+    private fun onRedstoneCurrentChange(event: BlockRedstoneEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if (pylonBlock is RedstoneBlock) {
+            pylonBlock.onCurrentChange(event)
+        }
+    }
 }
