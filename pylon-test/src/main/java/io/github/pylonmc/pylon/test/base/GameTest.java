@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -28,6 +29,8 @@ public class GameTest implements Test {
 
     @Override
     public TestResult run() {
+        Instant startTime = Instant.now();
+
         GameTestFailException e = TestUtil.runSync(() -> {
             distance += 5 + config.getSize();
             CompletableFuture<GameTestFailException> completedFuture
@@ -36,6 +39,6 @@ public class GameTest implements Test {
             return completedFuture;
         }).join().join();
 
-        return onComplete(e);
+        return onComplete(e, startTime);
     }
 }

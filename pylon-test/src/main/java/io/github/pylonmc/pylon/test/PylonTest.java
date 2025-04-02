@@ -123,6 +123,13 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         logger.info("%s/%s TESTS PASSED"
                 .formatted(succeeded.size(), succeeded.size() + failed.size()));
 
+        if (failed.isEmpty()) {
+            long totalTimeTakenMillis = results.stream()
+                    .mapToLong(TestResult::timeTakenMillis)
+                    .sum();
+            logger.info("TIME TAKEN: %dms".formatted(totalTimeTakenMillis));
+        }
+
         if (!failed.isEmpty()) {
             String failedString = failed.stream()
                     .map(NamespacedKey::toString)

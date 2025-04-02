@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.test.base;
 
 import io.github.pylonmc.pylon.test.util.TestUtil;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
@@ -15,18 +16,20 @@ public abstract class SyncTest implements Test {
 
     @Override
     public TestResult run() {
+        Instant startTime = Instant.now();
+
         CompletableFuture<TestResult> future = TestUtil.runSync(() -> {
             try {
                 test();
             } catch (Throwable e) {
-                return onComplete(e);
+                return onComplete(e, startTime);
             }
-            return onComplete(null);
+            return onComplete(null, startTime);
         });
 
         TestUtil.runAsync(() -> {
             if (!future.isDone()) {
-                future.complete(onComplete(new TimeoutException("Test timed out")));
+                future.complete(onComplete(new TimeoutException("Test timed out"), startTime));
             }
         }, getTimeoutTicks());
 
