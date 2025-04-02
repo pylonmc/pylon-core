@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.papermc.paper.event.block.BlockFailedDispenseEvent
+import io.papermc.paper.event.block.BlockPreDispenseEvent
 import org.bukkit.event.block.BlockDispenseArmorEvent
 import org.bukkit.event.block.BlockDispenseEvent
 import org.bukkit.event.block.BlockDispenseLootEvent
@@ -10,4 +12,6 @@ interface Dispenser {
     fun onDispenseItem(event: BlockDispenseEvent) {}
     fun onDispenseLoot(event: BlockDispenseLootEvent) {}
     fun onShearSheep(event: BlockShearEntityEvent) {}
+    fun onPreDispense(event: BlockPreDispenseEvent) {}
+    fun onFailDispense(event: BlockFailedDispenseEvent) {}
 }

@@ -10,6 +10,7 @@ import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
+import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,6 +19,9 @@ import org.bukkit.event.block.BellRingEvent
 import org.bukkit.event.enchantment.EnchantItemEvent
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.inventory.BrewingStandFuelEvent
+import org.bukkit.event.inventory.FurnaceBurnEvent
+import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 
 /**
@@ -383,6 +387,54 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.block)
         if (pylonBlock is RedstoneBlock) {
             pylonBlock.onCurrentChange(event)
+        }
+    }
+
+    @EventHandler
+    private fun onBrewingStandFuel(event: BrewingStandFuelEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if (pylonBlock is BrewingStand) {
+            pylonBlock.onFuel(event)
+        }
+    }
+
+    @EventHandler
+    private fun onPreDispense(event: BlockPreDispenseEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Dispenser){
+            pylonBlock.onPreDispense(event)
+        }
+    }
+
+    @EventHandler
+    private fun onFailDispense(event: BlockFailedDispenseEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Dispenser){
+            pylonBlock.onFailDispense(event)
+        }
+    }
+
+    @EventHandler
+    private fun onFurnaceExtract(event: FurnaceExtractEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Furnace){
+            pylonBlock.onExtractItem(event)
+        }
+    }
+
+    @EventHandler
+    private fun onFurnaceBurnFuel(event: FurnaceBurnEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if(pylonBlock is Furnace){
+            pylonBlock.onFuelBurn(event)
+        }
+    }
+
+    @EventHandler
+    private fun onSignOpen(event: PlayerOpenSignEvent) {
+        val pylonBlock = BlockStorage.get(event.sign.block)
+        if(pylonBlock is Sign){
+            pylonBlock.onOpen(event)
         }
     }
 }
