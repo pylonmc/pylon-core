@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.item
 
+import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -8,10 +10,13 @@ import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.exists
 
 open class PylonItemSchema(
     private val key: NamespacedKey,

@@ -5,7 +5,7 @@ import org.bukkit.configuration.ConfigurationSection
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-open class ConfigSection(val internalSection: ConfigurationSection) {
+open class ConfigSection(private val internalSection: ConfigurationSection) {
 
     val keys: Set<String>
         get() = internalSection.getKeys(false)
