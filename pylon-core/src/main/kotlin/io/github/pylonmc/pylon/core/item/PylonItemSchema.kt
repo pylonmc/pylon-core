@@ -24,6 +24,9 @@ open class PylonItemSchema(
     private val template: ItemStack
 ) : Keyed, RegistryHandler {
 
+    val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
+        ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
+
     val itemStack: ItemStack
         get() = template.clone()
 
@@ -37,14 +40,6 @@ open class PylonItemSchema(
     val settings: Config
 
     init {
-        val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
-        if (addon == null) {
-            throw IllegalStateException("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
-        }
-        ItemStackBuilder(template) // Modifies the template directly
-            .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
-            .lore(LoreBuilder().addon(addon))
-
         val settingsFile = getItemFile(key)
         if (!settingsFile.exists()) {
             settingsFile.parent.createDirectories()
@@ -60,6 +55,9 @@ open class PylonItemSchema(
     }
 
     fun register() = apply {
+        ItemStackBuilder(template) // Modifies the template directly
+            .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
+            .lore(LoreBuilder().addon(addon))
         PylonRegistry.ITEMS.register(this)
     }
 
