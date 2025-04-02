@@ -2,20 +2,19 @@ package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.block.base.Multiblock
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
+import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent
+import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent
+import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
-import org.bukkit.Chunk
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.world.ChunkLoadEvent
-import org.bukkit.event.world.ChunkUnloadEvent
 
 /**
  * This class does a lot and is quite dense and complicated. Here's the summary of what it does:
@@ -42,18 +41,18 @@ import org.bukkit.event.world.ChunkUnloadEvent
  */
 internal object MultiblockCache : Listener {
 
-    private val multiblocksWithComponentsInChunk: MutableMap<ChunkPosition, MutableSet<Multiblock>> = mutableMapOf()
-    private val fullyLoadedMultiblocks: MutableSet<Multiblock> = mutableSetOf()
+    private val multiblocksWithComponentsInChunk: MutableMap<ChunkPosition, MutableSet<BlockPosition>> = mutableMapOf()
+    private val fullyLoadedMultiblocks: MutableSet<BlockPosition> = mutableSetOf()
 
     /**
      * Multiblocks which need to be checked to make sure they're still formed next tick
      */
-    private val dirtyMultiblocks: MutableSet<Multiblock> = mutableSetOf()
+    private val dirtyMultiblocks: MutableSet<BlockPosition> = mutableSetOf()
 
     /**
       * Subset of fullyLoadedMultiblocks
       */
-    private val formedMultiblocks: MutableSet<Multiblock> = mutableSetOf()
+    private val formedMultiblocks: MutableSet<BlockPosition> = mutableSetOf()
 
     /**
      * Re-checks whether the dirty multiblocks are formed this tick.
@@ -62,17 +61,17 @@ internal object MultiblockCache : Listener {
         const val INTERVAL_TICKS: Long = 1
 
         override fun run() {
-            for (multiblock in dirtyMultiblocks) {
+            for (multiblockPosition in dirtyMultiblocks) {
                 // For a multiblock to be formed, it must be fully loaded
-                if (multiblock !in fullyLoadedMultiblocks) {
-                    formedMultiblocks.remove(multiblock)
+                if (multiblockPosition !in fullyLoadedMultiblocks) {
+                    formedMultiblocks.remove(multiblockPosition)
                     continue
                 }
 
-                if (multiblock.checkFormed()) {
-                    formedMultiblocks.add(multiblock)
+                if (BlockStorage.getAs<Multiblock>(multiblockPosition)!!.checkFormed()) {
+                    formedMultiblocks.add(multiblockPosition)
                 } else {
-                    formedMultiblocks.remove(multiblock)
+                    formedMultiblocks.remove(multiblockPosition)
                 }
             }
             dirtyMultiblocks.clear()
@@ -80,102 +79,103 @@ internal object MultiblockCache : Listener {
     }
 
     internal fun isFormed(multiblock: Multiblock): Boolean
-            = multiblock in formedMultiblocks
+        = multiblock.block.position in formedMultiblocks
 
     private fun markDirty(multiblock: Multiblock)
-            = dirtyMultiblocks.add(multiblock)
+        = dirtyMultiblocks.add(multiblock.block.position)
 
     private fun refreshFullyLoaded(multiblock: Multiblock) {
-        if (multiblock.chunksOccupied.all { it.chunk?.isLoaded == true }) {
-            fullyLoadedMultiblocks.add(multiblock)
+        if (multiblock.chunksOccupied.all { it.loaded }) {
+            fullyLoadedMultiblocks.add(multiblock.block.position)
+            markDirty(multiblock)
         } else {
-            fullyLoadedMultiblocks.remove(multiblock)
+            formedMultiblocks.remove(multiblock.block.position)
+            fullyLoadedMultiblocks.remove(multiblock.block.position)
+            dirtyMultiblocks.remove(multiblock.block.position)
         }
-
-        // Since formedMultiblocks depends on fullyLoadedMultiblocks, we will also
-        // want to refresh the formed status of this multiblock
-        markDirty(multiblock)
     }
 
-    private fun add(multiblock: Multiblock) {
+    private fun onMultiblockAdded(multiblock: Multiblock) {
         for (chunk in multiblock.chunksOccupied) {
-            multiblocksWithComponentsInChunk.getOrPut(chunk) { mutableSetOf() }.add(multiblock)
+            multiblocksWithComponentsInChunk.getOrPut(chunk) { mutableSetOf() }.add(multiblock.block.position)
         }
 
         refreshFullyLoaded(multiblock)
     }
 
-    private fun remove(multiblock: Multiblock) {
+    private fun onMultiblockRemoved(multiblock: Multiblock) {
+        val multiblockPosition = multiblock.block.position
         for (chunk in multiblock.chunksOccupied) {
-            val multiblocks = multiblocksWithComponentsInChunk[chunk]
-            multiblocks?.remove(multiblock)
-            if (multiblocks != null && multiblocks.isEmpty()) {
+            val multiblocks = multiblocksWithComponentsInChunk[chunk]!!
+            multiblocks.remove(multiblockPosition)
+            if (multiblocks.isEmpty()) {
                 multiblocksWithComponentsInChunk.remove(chunk)
             }
         }
 
-        fullyLoadedMultiblocks.remove(multiblock)
-        formedMultiblocks.remove(multiblock)
+        fullyLoadedMultiblocks.remove(multiblockPosition)
+        formedMultiblocks.remove(multiblockPosition)
+        dirtyMultiblocks.remove(multiblockPosition)
     }
 
     private fun onBlockModified(block: Block)
         = loadedMultiblocksWithComponent(block).forEach {
-            markDirty(it)
+            markDirty(BlockStorage.getAs<Multiblock>(it)!!)
         }
 
-    private fun loadedMultiblocksWithComponent(block: Block): List<Multiblock>
-        = loadedMultiblocksWithComponentsInChunk(block.chunk).filter {
-            it.isPartOfMultiblock(block)
+    private fun loadedMultiblocksWithComponent(block: Block): List<BlockPosition>
+        = loadedMultiblocksWithComponentsInChunk(block.position.chunk).filter {
+            BlockStorage.getAs<Multiblock>(it)!!.isPartOfMultiblock(block)
         }
 
-    private fun loadedMultiblocksWithComponentsInChunk(chunkPosition: ChunkPosition): Set<Multiblock>
+    private fun loadedMultiblocksWithComponentsInChunk(chunkPosition: ChunkPosition): Set<BlockPosition>
         = multiblocksWithComponentsInChunk[chunkPosition] ?: emptySet()
 
-    private fun loadedMultiblocksWithComponentsInChunk(chunk: Chunk): Set<Multiblock>
-        = loadedMultiblocksWithComponentsInChunk(chunk.position)
-
     @EventHandler
-    private fun handle(event: PylonBlockLoadEvent) {
-        if (event.pylonBlock is Multiblock) {
-            add(event.pylonBlock)
+    private fun handle(event: PylonChunkBlocksLoadEvent) {
+        // Refresh existing multiblocks with a component in the chunk that was just loaded
+        for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
+            refreshFullyLoaded(BlockStorage.getAs<Multiblock>(multiblockPosition)!!)
+        }
+
+        // Add new multiblocks
+        for (pylonBlock in event.pylonBlocks) {
+            if (pylonBlock is Multiblock) {
+                onMultiblockAdded(pylonBlock)
+            }
         }
     }
 
     @EventHandler
-    private fun handle(event: PylonBlockUnloadEvent) {
-        if (event.pylonBlock is Multiblock) {
-            remove(event.pylonBlock)
+    private fun handle(event: PylonChunkBlocksUnloadEvent) {
+        // Mark existing multiblocks with components as not formed and not fully loaded
+        for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
+            formedMultiblocks.remove(multiblockPosition)
+            fullyLoadedMultiblocks.remove(multiblockPosition)
+            dirtyMultiblocks.remove(multiblockPosition)
+        }
+
+        // Remove multiblocks that were just unloaded
+        for (pylonBlock in event.pylonBlocks) {
+            if (pylonBlock is Multiblock) {
+                onMultiblockRemoved(pylonBlock)
+            }
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler
     private fun handle(event: PylonBlockPlaceEvent) {
         if (event.pylonBlock is Multiblock) {
-            add(event.pylonBlock)
+            onMultiblockAdded(event.pylonBlock)
         }
     }
 
     @EventHandler
     private fun handle(event: PylonBlockBreakEvent) {
         if (event.pylonBlock is Multiblock) {
-            remove(event.pylonBlock)
+            onMultiblockRemoved(event.pylonBlock)
         }
     }
-
-    @EventHandler
-    private fun handle(event: ChunkLoadEvent) {
-        for (multiblock in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
-            refreshFullyLoaded(multiblock)
-        }
-    }
-
-    @EventHandler
-    private fun handle(event: ChunkUnloadEvent) {
-        for (multiblock in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
-            fullyLoadedMultiblocks.remove(multiblock)
-        }
-    }
-
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockPlace(event: BlockPlaceEvent)

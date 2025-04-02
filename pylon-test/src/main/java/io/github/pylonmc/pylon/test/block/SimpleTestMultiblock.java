@@ -31,7 +31,7 @@ public class SimpleTestMultiblock extends PylonBlock<PylonBlockSchema> implement
     @Override
     public @NotNull Map<Vector3i, Component> getComponents() {
         return Map.of(
-                new Vector3i(1, 1, 0), new PylonComponent(Blocks.SIMPLE_BLOCK.getKey()),
+                new Vector3i(1, 1, 4), new PylonComponent(Blocks.SIMPLE_BLOCK.getKey()),
                 new Vector3i(2, -1, 0), new PylonComponent(Blocks.SIMPLE_BLOCK.getKey())
         );
     }

@@ -102,24 +102,24 @@ object BlockStorage : Listener {
     fun get(location: Location): PylonBlock<*>? = get(location.block)
 
     @JvmStatic
-    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
+    fun <T> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
         return clazz.cast(block)
     }
 
     @JvmStatic
-    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
+    fun <T> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
 
     @JvmStatic
-    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, location: Location): T? =
+    fun <T> getAs(clazz: Class<T>, location: Location): T? =
         getAs(clazz, BlockPosition(location))
 
-    inline fun <reified T : PylonBlock<*>> getAs(blockPosition: BlockPosition): T? =
+    inline fun <reified T> getAs(blockPosition: BlockPosition): T? =
         getAs(T::class.java, blockPosition)
 
-    inline fun <reified T : PylonBlock<*>> getAs(block: Block): T? = getAs(T::class.java, block)
+    inline fun <reified T> getAs(block: Block): T? = getAs(T::class.java, block)
 
-    inline fun <reified T : PylonBlock<*>> getAs(location: Location): T? = getAs(T::class.java, location)
+    inline fun <reified T> getAs(location: Location): T? = getAs(T::class.java, location)
 
     @JvmStatic
     fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> {
@@ -316,7 +316,7 @@ object BlockStorage : Listener {
             PylonBlockLoadEvent(block.block, block).callEvent()
         }
 
-        PylonChunkBlocksLoadEvent(event.chunk, blocks.values.toList()).callEvent()
+        PylonChunkBlocksLoadEvent(event.chunk, chunkBlocks.toList()).callEvent()
     }
 
     @EventHandler
@@ -338,7 +338,7 @@ object BlockStorage : Listener {
                 PylonBlockUnloadEvent(block.block, block).callEvent()
             }
 
-            PylonChunkBlocksUnloadEvent(event.chunk, blocks.values.toList()).callEvent()
+            PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
         })
     }
 

@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Material
@@ -8,6 +9,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.util.Vector
 import org.joml.Vector3i
+import kotlin.math.abs
 import kotlin.math.min
 
 interface SimpleMultiblock : Multiblock {
@@ -27,24 +29,35 @@ interface SimpleMultiblock : Multiblock {
             = BlockStorage.get(block)?.schema?.key == key
     }
 
+    /**
+     * Rotation will automatically be accounted for.
+     */
     val components: Map<Vector3i, Component>
 
-    val minCorner: Vector3i
-        get() = Vector3i(
-            components.keys.minOf { it.x },
-            components.keys.minOf { it.y },
-            components.keys.minOf { it.z },
+    fun validStructures(): List<Map<Vector3i, Component>> = listOf(
+        // 0 degrees
+        components,
+        // 90 degrees (anticlockwise)
+        components.mapKeys { Vector3i(-it.key.z, it.key.y, it.key.x) },
+        // 180 degrees
+        components.mapKeys { Vector3i(-it.key.x, it.key.y, -it.key.z) },
+        // 270 degrees (anticlockwise)
+        components.mapKeys { Vector3i(it.key.z, it.key.y, -it.key.x) }
+    )
+
+    val horizontalRadius
+        get() = maxOf(
+            abs(components.keys.minOf { it.x }),
+            abs(components.keys.minOf { it.z }),
+            abs(components.keys.maxOf { it.x }),
+            abs(components.keys.maxOf { it.z })
         )
+
+    val minCorner: Vector3i
+        get() = Vector3i(-horizontalRadius, components.keys.minOf { it.y }, -horizontalRadius)
 
     val maxCorner: Vector3i
-        get() = Vector3i(
-            components.keys.maxOf { it.x },
-            components.keys.maxOf { it.y },
-            components.keys.maxOf { it.z },
-        )
-
-    fun componentAt(otherBlock: Block): Component?
-        = components[(otherBlock.position - block.position).vector3i]
+        get() = Vector3i(horizontalRadius, components.keys.maxOf { it.y }, horizontalRadius)
 
     override val chunksOccupied: Set<ChunkPosition>
         get() {
@@ -53,22 +66,23 @@ interface SimpleMultiblock : Multiblock {
                 val realRelativeX = min(relativeX, maxCorner.x)
                 for (relativeZ in minCorner.z..(maxCorner.z + 16) step 16) {
                     val realRelativeZ = min(relativeZ, maxCorner.z)
-                    val otherBlock = block.location.add(
-                        realRelativeX.toDouble(),
-                        block.y.toDouble(),
-                        realRelativeZ.toDouble()
-                    )
-                    chunks.add(otherBlock.chunk.position)
+                    val otherBlock = block.position + Vector3i(realRelativeX, block.y, realRelativeZ)
+                    chunks.add(otherBlock.chunk)
                 }
             }
             return chunks
         }
 
-    override fun checkFormed(): Boolean
-        = components.all {
-            it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
+    override fun checkFormed(): Boolean {
+        return validStructures().any {
+            it.all {
+                it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
+            }
         }
+    }
 
     override fun isPartOfMultiblock(otherBlock: Block): Boolean
-        = componentAt(otherBlock) != null
+        = validStructures().any {
+            it.contains((otherBlock.position - block.position).vector3i)
+        }
 }
