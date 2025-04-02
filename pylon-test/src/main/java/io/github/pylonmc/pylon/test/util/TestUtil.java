@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.test.util;
 
+import io.github.pylonmc.pylon.core.util.position.ChunkPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BooleanSupplier;
 
 
 public final class TestUtil {
@@ -25,8 +27,8 @@ public final class TestUtil {
         Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
             try {
                 future.complete(callable.call());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                future.completeExceptionally(e);
             }
         }, delayTicks);
         return future;
@@ -56,8 +58,8 @@ public final class TestUtil {
         Bukkit.getScheduler().runTaskLaterAsynchronously(PylonTest.instance(), () -> {
             try {
                 future.complete(callable.call());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                future.completeExceptionally(e);
             }
         }, delayTicks);
         return future;
@@ -143,5 +145,38 @@ public final class TestUtil {
     @CheckReturnValue
     public static @NotNull CompletableFuture<Void> sleepTicks(int ticks) {
         return runAsync(() -> null, ticks);
+    }
+
+    @CheckReturnValue
+    public static @NotNull CompletableFuture<Void> waitUntil(BooleanSupplier supplier, int intervalTicks) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        Bukkit.getScheduler().runTaskTimer(PylonTest.instance(), () -> {
+            if (supplier.getAsBoolean()) {
+                future.complete(null);
+            }
+        }, 0, intervalTicks);
+        return future;
+    }
+
+    @CheckReturnValue
+    public static @NotNull CompletableFuture<Void> waitUntil(BooleanSupplier supplier) {
+        return waitUntil(supplier, 1);
+    }
+
+    @CheckReturnValue
+    public static @NotNull CompletableFuture<Void> loadChunk(@NotNull Chunk chunk) {
+        return runAsync(() -> {
+            runSync(() -> chunk.load()).join();
+            waitUntil(chunk::isLoaded).join();
+        });
+    }
+
+    @CheckReturnValue
+    public static @NotNull CompletableFuture<Void> unloadChunk(@NotNull Chunk chunk) {
+        return runAsync(() -> {
+            ChunkPosition chunkPosition = new ChunkPosition(chunk);
+            runSync(() -> chunk.unload()).join();
+            waitUntil(() -> !chunkPosition.getLoaded()).join();
+        });
     }
 }

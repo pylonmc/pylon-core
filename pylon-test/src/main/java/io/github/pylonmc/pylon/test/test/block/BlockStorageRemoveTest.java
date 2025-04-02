@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class BlockStorageRemoveTest extends GameTest {
 
-
     public BlockStorageRemoveTest() {
         super(new GameTestConfig.Builder(new NamespacedKey(PylonTest.instance(), "block_storage_remove_test"))
                 .size(1)
