@@ -401,7 +401,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPreDispense(event: BlockPreDispenseEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Dispenser){
+        if (pylonBlock is Dispenser) {
             pylonBlock.onPreDispense(event)
         }
     }
@@ -409,7 +409,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onFailDispense(event: BlockFailedDispenseEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Dispenser){
+        if (pylonBlock is Dispenser) {
             pylonBlock.onFailDispense(event)
         }
     }
@@ -417,7 +417,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onFurnaceExtract(event: FurnaceExtractEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Furnace){
+        if (pylonBlock is Furnace) {
             pylonBlock.onExtractItem(event)
         }
     }
@@ -425,7 +425,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onFurnaceBurnFuel(event: FurnaceBurnEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if(pylonBlock is Furnace){
+        if (pylonBlock is Furnace) {
             pylonBlock.onFuelBurn(event)
         }
     }
@@ -433,7 +433,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onSignOpen(event: PlayerOpenSignEvent) {
         val pylonBlock = BlockStorage.get(event.sign.block)
-        if(pylonBlock is Sign){
+        if (pylonBlock is Sign) {
             pylonBlock.onOpen(event)
         }
     }
