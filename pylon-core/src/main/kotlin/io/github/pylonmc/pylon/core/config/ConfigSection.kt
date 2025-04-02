@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.config
 
 import com.google.common.base.CaseFormat
 import org.bukkit.configuration.ConfigurationSection
-import kotlin.properties.Delegates
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -49,18 +48,17 @@ open class ConfigSection(private val internalSection: ConfigurationSection) {
 
     fun merge(other: ConfigSection) {
         for (key in other.keys) {
-            val section = other.getSection(key)
-            if (section != null) {
+            val otherSection = other.getSection(key)
+            if (otherSection != null) {
                 val thisSection = this.getSection(key)
                 if (thisSection != null) {
-                    thisSection.merge(section)
+                    thisSection.merge(otherSection)
                 } else {
-                    internalSection.set(key, section.internalSection)
+                    internalSection.set(key, otherSection.internalSection)
                 }
             } else if (key !in this.keys) {
                 internalSection.set(key, other.internalSection.get(key))
             }
-            Delegates
         }
     }
 
