@@ -7,6 +7,7 @@ group = "io.github.pylonmc"
 
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+    compileOnly(project(":pylon-core"))
 }
 
 kotlin {

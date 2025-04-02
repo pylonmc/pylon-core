@@ -15,16 +15,15 @@ repositories {
 }
 
 dependencies {
+    runtimeOnly(project(":translation"))
+
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
 
     api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
-
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
-
-    testImplementation(kotlin("test"))
 }
 
 idea {
