@@ -91,7 +91,7 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun get(blockPosition: BlockPosition): PylonBlock<*>? {
-        check(blockPosition.chunk.chunk?.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        check(blockPosition.chunk.loaded == true) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocks[blockPosition] }
     }
 
@@ -123,7 +123,7 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> {
-        check(chunkPosition.chunk?.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        check(chunkPosition.loaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
     }
 
@@ -139,10 +139,11 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun isPylonBlock(blockPosition: BlockPosition): Boolean
-    = (blockPosition.chunk.chunk?.isLoaded == true) && get(blockPosition) != null
+        = (blockPosition.chunk.loaded) && get(blockPosition) != null
 
     @JvmStatic
-    fun isPylonBlock(block: Block): Boolean = get(block) != null
+    fun isPylonBlock(block: Block): Boolean
+        = (block.position.chunk.loaded) && get(block) != null
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -158,7 +159,7 @@ object BlockStorage : Listener {
         schema: PylonBlockSchema,
         context: BlockCreateContext = BlockCreateContext.Default
     ): PylonBlock<*>? {
-        check(blockPosition.chunk.chunk?.isLoaded == true) { "You can only place Pylon blocks in loaded chunks" }
+        check(blockPosition.chunk.loaded) { "You can only place Pylon blocks in loaded chunks" }
 
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
@@ -223,7 +224,7 @@ object BlockStorage : Listener {
         blockPosition: BlockPosition,
         context: BlockBreakContext = BlockBreakContext.PluginBreak
     ) {
-        check(blockPosition.chunk.chunk?.isLoaded == true) { "You can only break Pylon blocks in loaded chunks" }
+        check(blockPosition.chunk.loaded) { "You can only break Pylon blocks in loaded chunks" }
 
         val block = get(blockPosition) ?: return
 
