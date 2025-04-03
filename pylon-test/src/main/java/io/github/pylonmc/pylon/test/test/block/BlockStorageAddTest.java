@@ -1,78 +1,38 @@
 package io.github.pylonmc.pylon.test.test.block;
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
-import org.bukkit.Material;
+import io.github.pylonmc.pylon.test.block.BlockWithCustomSchema;
+import io.github.pylonmc.pylon.test.block.Blocks;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.jetbrains.annotations.NotNullByDefault;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@NotNullByDefault
 public class BlockStorageAddTest extends GameTest {
-    public static class TestBlockSchema extends PylonBlockSchema {
-        private final int processingSpeed;
-
-        public TestBlockSchema(
-                NamespacedKey key,
-                Material material,
-                Class<? extends PylonBlock<? extends PylonBlockSchema>> blockClass,
-                int processingSpeed
-        ) {
-            super(key, material, blockClass);
-            this.processingSpeed = processingSpeed;
-        }
-    }
-
-    public static class TestBlock extends PylonBlock<TestBlockSchema> {
-        public TestBlock(TestBlockSchema schema, Block block, BlockCreateContext context) {
-            super(schema, block);
-        }
-
-        public TestBlock(
-                TestBlockSchema schema,
-                Block block,
-                PersistentDataContainer pdc
-        ) {
-            super(schema, block);
-        }
-    }
-
-    private static final TestBlockSchema schema = new TestBlockSchema (
-            PylonTest.key("block_storage_add_test"),
-            Material.AMETHYST_BLOCK,
-            TestBlock.class,
-            12
-    );
 
     public BlockStorageAddTest() {
         super(new GameTestConfig.Builder(new NamespacedKey(PylonTest.instance(), "block_storage_add_test"))
                 .size(1)
                 .setUp((test) -> {
-                    schema.register();
-
-                    BlockStorage.placeBlock(test.location(), schema);
+                    BlockStorage.placeBlock(test.location(), Blocks.BLOCK_WITH_CUSTOM_SCHEMA);
 
                     PylonBlock<?> pylonBlock = BlockStorage.get(test.location());
 
                     assertThat(pylonBlock)
                             .isNotNull()
-                            .isInstanceOf(TestBlock.class);
+                            .isInstanceOf(BlockWithCustomSchema.TestBlock.class);
 
+                    //noinspection Convert2MethodRef
                     assertThat(pylonBlock.getSchema())
-                            .isInstanceOf(TestBlockSchema.class)
-                            .extracting(s -> (TestBlockSchema) s)
-                            .extracting(s -> s.processingSpeed)
+                            .isInstanceOf(BlockWithCustomSchema.TestSchema.class)
+                            .extracting(s -> (BlockWithCustomSchema.TestSchema) s)
+                            .extracting(s -> s.getProcessingSpeed())
                             .isEqualTo(12);
 
-                    assertThat(BlockStorage.getAs(TestBlock.class, test.location()))
+                    assertThat(BlockStorage.getAs(BlockWithCustomSchema.TestBlock.class, test.location()))
                             .isNotNull();
                 })
                 .build());

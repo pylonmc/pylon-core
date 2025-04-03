@@ -17,15 +17,23 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
 
     val chunk: Chunk?
-            get() = world?.getChunkAt(x, z)
+        get() = world?.getChunkAt(x, z)
+
+    /**
+     * Obtaining an instance of a Chunk (eg through block.getChunk()) will
+     * often LOAD THE CHUNK ITSELF. Yes, actually. This method does not
+     * load the chunk, so it's a safe way to check if a chunk is loaded.
+     */
+    val isLoaded: Boolean
+        get() = world?.isChunkLoaded(x, z) == true
 
     constructor(world: World, asLong: Long) : this(world, (asLong shr 32).toInt(), asLong.toInt())
 
     constructor(chunk: Chunk) : this(chunk.world, chunk.x, chunk.z)
 
-    constructor(location: Location) : this(location.chunk)
+    constructor(location: Location) : this(location.world, location.blockX shr 4, location.blockZ shr 4)
 
-    constructor(block: Block) : this(block.chunk)
+    constructor(block: Block) : this(block.location)
 
     override fun hashCode(): Int {
         val prime = 31

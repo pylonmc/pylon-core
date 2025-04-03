@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.recipe.RecipeTypes;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
+import io.github.pylonmc.pylon.test.item.Items;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
@@ -18,7 +19,7 @@ public class FurnaceTest extends GameTest {
         super(new GameTestConfig.Builder(PylonTest.key("furnace_test"))
                 .size(0)
                 .setUp(test -> {
-                    ItemStack stickyStick = StickyStick.INSTANCE.getItemStack();
+                    ItemStack stickyStick = Items.STICKY_STICK.getItemStack();
                     ItemStack diamond = new ItemStack(Material.DIAMOND);
                     RecipeTypes.VANILLA_FURNACE.addRecipe(new FurnaceRecipe(
                             PylonTest.key("sticky_stick_furnace"),
@@ -38,7 +39,7 @@ public class FurnaceTest extends GameTest {
                     test.succeedWhen(() -> {
                         FurnaceInventory inv = ((Furnace) furnace.getState()).getInventory();
                         ItemStack result = inv.getResult();
-                        return result != null && result.equals(diamond);
+                        return diamond.equals(result);
                     });
                 })
                 .build()

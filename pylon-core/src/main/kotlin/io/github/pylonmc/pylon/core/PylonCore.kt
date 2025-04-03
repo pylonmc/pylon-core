@@ -6,6 +6,7 @@ import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.BlockListener
+import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -31,6 +32,14 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(MobDropListener, this)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
+        Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
+
+        Bukkit.getScheduler().runTaskTimer(
+            this,
+            MultiblockCache.MultiblockChecker,
+            MultiblockCache.MultiblockChecker.INTERVAL_TICKS,
+            MultiblockCache.MultiblockChecker.INTERVAL_TICKS
+        )
 
         manager = PaperCommandManager(this)
         manager.commandContexts.registerContext(NamespacedKey::class.java) {

@@ -4,10 +4,11 @@ import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.core.test.GameTestFailException;
 import io.github.pylonmc.pylon.core.util.position.BlockPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
-import org.bukkit.Bukkit;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -28,15 +29,16 @@ public class GameTest implements Test {
 
     @Override
     public TestResult run() {
-        // Nested futures because we need to run launch on the main thread
-        CompletableFuture<CompletableFuture<GameTestFailException>> testFuture = new CompletableFuture<>();
+        Instant startTime = Instant.now();
 
-        Bukkit.getScheduler().runTask(PylonTest.instance(), () -> {
+        GameTestFailException e = TestUtil.runSync(() -> {
             distance += 5 + config.getSize();
-            testFuture.complete(config.launch(new BlockPosition(PylonTest.testWorld, distance, 1, 0)));
+            CompletableFuture<GameTestFailException> completedFuture
+                    = config.launch(new BlockPosition(PylonTest.testWorld, distance, 1, 0));
             distance += 5 + config.getSize();
-        });
+            return completedFuture;
+        }).join().join();
 
-        return onComplete(testFuture.join().join());
+        return onComplete(e, startTime);
     }
 }
