@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.item
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
 import io.github.pylonmc.pylon.core.block.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.BlockItemReason
+import io.github.pylonmc.pylon.core.block.base.InteractableBlock
 import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
@@ -61,6 +62,10 @@ internal object PylonItemListener : Listener {
         }
         if (pylonItem is Interactor) {
             pylonItem.onUsedToRightClick(event)
+        }
+        val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
+        if(pylonBlock is InteractableBlock){
+            pylonBlock.onInteract(event)
         }
     }
 
