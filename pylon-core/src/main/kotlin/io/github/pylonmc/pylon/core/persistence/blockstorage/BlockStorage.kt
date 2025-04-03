@@ -123,7 +123,7 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> {
-        check(chunkPosition.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
+        require(chunkPosition.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
     }
 
