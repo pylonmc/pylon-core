@@ -1,22 +1,18 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.config.Config
-import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.exists
 
 open class PylonItemSchema(
     private val key: NamespacedKey,
@@ -37,22 +33,7 @@ open class PylonItemSchema(
     )
         ?: throw NoSuchMethodException("Item '$key' ($itemClass) is missing a load constructor (PylonItemSchema, ItemStack)")
 
-    val settings: Config
-
-    init {
-        val settingsFile = getItemFile(key)
-        if (!settingsFile.exists()) {
-            settingsFile.parent.createDirectories()
-            settingsFile.createFile()
-        }
-        settings = Config(settingsFile.toFile())
-        val resource = addon.javaPlugin.getResource("settings/item/${keyPath(key)}")
-        if (resource != null) {
-            val newConfig = resource.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
-            settings.merge(newConfig)
-            settings.save()
-        }
-    }
+    val settings = addon.javaPlugin.mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
 
     fun register() = apply {
         ItemStackBuilder(template) // Modifies the template directly
@@ -75,11 +56,9 @@ open class PylonItemSchema(
         }
 
         fun getItemFile(key: NamespacedKey): Path {
-            return itemsDir.resolve(keyPath(key)).also { path ->
+            return itemsDir.resolve("${key.namespace}/${key.key}.yml").also { path ->
                 path.parent.createDirectories()
             }
         }
-
-        private fun keyPath(key: NamespacedKey) = "${key.namespace}/${key.key}.yml"
     }
 }
