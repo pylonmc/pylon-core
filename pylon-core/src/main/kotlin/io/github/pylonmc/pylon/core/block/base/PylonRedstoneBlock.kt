@@ -2,6 +2,6 @@ package io.github.pylonmc.pylon.core.block.base
 
 import org.bukkit.event.block.BlockRedstoneEvent
 
-interface RedstoneBlock {
+interface PylonRedstoneBlock {
     fun onCurrentChange(event: BlockRedstoneEvent) {}
 }

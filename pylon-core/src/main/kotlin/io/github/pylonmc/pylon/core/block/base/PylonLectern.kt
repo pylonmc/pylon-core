@@ -4,7 +4,7 @@ import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 
-interface Lectern {
+interface PylonLectern {
     fun onInsertBook(event: PlayerInsertLecternBookEvent) {}
     fun onRemoveBook(event: PlayerTakeLecternBookEvent) {}
     fun onChangePage(event: PlayerLecternPageChangeEvent) {}

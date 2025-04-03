@@ -2,6 +2,6 @@ package io.github.pylonmc.pylon.core.block.base
 
 import io.papermc.paper.event.block.TargetHitEvent
 
-interface TargetBlock {
+interface PylonTargetBlock {
     fun onHit(event: TargetHitEvent) {}
 }

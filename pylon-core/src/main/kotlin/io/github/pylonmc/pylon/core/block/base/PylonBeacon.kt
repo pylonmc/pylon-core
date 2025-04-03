@@ -5,7 +5,7 @@ import io.papermc.paper.event.block.BeaconActivatedEvent
 import io.papermc.paper.event.block.BeaconDeactivatedEvent
 import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 
-interface Beacon {
+interface PylonBeacon {
     fun onActivated(event: BeaconActivatedEvent) {}
     fun onDeactivated(event: BeaconDeactivatedEvent) {}
     fun onEffectChange(event: PlayerChangeBeaconEffectEvent) {}

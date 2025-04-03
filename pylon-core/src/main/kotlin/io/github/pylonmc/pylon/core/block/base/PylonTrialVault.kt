@@ -2,6 +2,6 @@ package io.github.pylonmc.pylon.core.block.base
 
 import org.bukkit.event.block.VaultDisplayItemEvent
 
-interface TrialVault {
+interface PylonTrialVault {
     fun onDisplayItem(event: VaultDisplayItemEvent) {}
 }

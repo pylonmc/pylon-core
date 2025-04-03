@@ -7,7 +7,7 @@ import org.bukkit.event.block.BlockDispenseEvent
 import org.bukkit.event.block.BlockDispenseLootEvent
 import org.bukkit.event.block.BlockShearEntityEvent
 
-interface Dispenser {
+interface PylonDispenser {
     fun onDispenseArmor(event: BlockDispenseArmorEvent) {}
     fun onDispenseItem(event: BlockDispenseEvent) {}
     fun onDispenseLoot(event: BlockDispenseLootEvent) {}

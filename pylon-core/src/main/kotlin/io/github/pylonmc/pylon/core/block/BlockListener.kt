@@ -113,7 +113,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBeaconActivate(event: BeaconActivatedEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Beacon) {
+        if (pylonBlock is PylonBeacon) {
             pylonBlock.onActivated(event)
         }
     }
@@ -121,7 +121,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBeaconDeactivate(event: BeaconDeactivatedEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Beacon) {
+        if (pylonBlock is PylonBeacon) {
             pylonBlock.onDeactivated(event)
         }
     }
@@ -129,7 +129,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBeaconChangeEffect(event: PlayerChangeBeaconEffectEvent) {
         val pylonBlock = BlockStorage.get(event.beacon)
-        if (pylonBlock is Beacon) {
+        if (pylonBlock is PylonBeacon) {
             pylonBlock.onEffectChange(event)
         }
     }
@@ -137,7 +137,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBeaconEffectApply(event: BeaconEffectEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Beacon) {
+        if (pylonBlock is PylonBeacon) {
             pylonBlock.onEffectApply(event)
         }
     }
@@ -145,7 +145,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBellRing(event: BellRingEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Bell) {
+        if (pylonBlock is PylonBell) {
             pylonBlock.onRing(event)
         }
     }
@@ -153,7 +153,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBellResonate(event: BellResonateEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Bell) {
+        if (pylonBlock is PylonBell) {
             pylonBlock.onResonate(event)
         }
     }
@@ -161,7 +161,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onTNTIgnite(event: TNTPrimeEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is TNT) {
+        if (pylonBlock is PylonTNT) {
             pylonBlock.onIgnite(event)
         }
     }
@@ -169,7 +169,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onNotePlay(event: NotePlayEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is NoteBlock) {
+        if (pylonBlock is PylonNoteBlock) {
             pylonBlock.onNotePlay(event)
         }
     }
@@ -177,7 +177,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onCrafterCraft(event: CrafterCraftEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Crafter) {
+        if (pylonBlock is PylonCrafter) {
             pylonBlock.onCraft(event)
         }
     }
@@ -185,7 +185,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onSpongeAbsorb(event: SpongeAbsorbEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Sponge) {
+        if (pylonBlock is PylonSponge) {
             pylonBlock.onAbsorb(event)
         }
     }
@@ -193,11 +193,11 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onStartCook(event: InventoryBlockStartEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Furnace) {
+        if (pylonBlock is PylonFurnace) {
             pylonBlock.onStartSmelting(event)
-        } else if (pylonBlock is Campfire) {
+        } else if (pylonBlock is PylonCampfire) {
             pylonBlock.onStartCooking(event)
-        } else if (pylonBlock is BrewingStand) {
+        } else if (pylonBlock is PylonBrewingStand) {
             pylonBlock.onStartBrewing(event)
         }
     }
@@ -205,11 +205,11 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onFinishCook(event: BlockCookEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Furnace) {
+        if (pylonBlock is PylonFurnace) {
             pylonBlock.onEndSmelting(event)
-        } else if (pylonBlock is Campfire) {
+        } else if (pylonBlock is PylonCampfire) {
             pylonBlock.onEndCooking(event)
-        } else if (pylonBlock is BrewingStand) {
+        } else if (pylonBlock is PylonBrewingStand) {
             pylonBlock.onEndBrewing(event)
         }
     }
@@ -217,7 +217,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onDispenseArmor(event: BlockDispenseArmorEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Dispenser) {
+        if (pylonBlock is PylonDispenser) {
             pylonBlock.onDispenseArmor(event)
         }
     }
@@ -225,7 +225,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onDispenseItem(event: BlockDispenseEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Dispenser) {
+        if (pylonBlock is PylonDispenser) {
             pylonBlock.onDispenseItem(event)
         }
     }
@@ -233,7 +233,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onDispenseLoot(event: BlockDispenseLootEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Dispenser) {
+        if (pylonBlock is PylonDispenser) {
             pylonBlock.onDispenseLoot(event)
         }
     }
@@ -241,7 +241,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onDispenserShearSheep(event: BlockShearEntityEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Dispenser) {
+        if (pylonBlock is PylonDispenser) {
             pylonBlock.onShearSheep(event)
         }
     }
@@ -249,7 +249,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBlockGrow(event: BlockGrowEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Growable) {
+        if (pylonBlock is PylonGrowable) {
             pylonBlock.onGrow(event)
         }
     }
@@ -257,7 +257,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBlockFertilize(event: BlockFertilizeEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Growable) {
+        if (pylonBlock is PylonGrowable) {
             pylonBlock.onFertilize(event)
         }
     }
@@ -265,7 +265,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onCauldronLevelChange(event: CauldronLevelChangeEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Cauldron) {
+        if (pylonBlock is PylonCauldron) {
             pylonBlock.onLevelChange(event)
         }
     }
@@ -273,7 +273,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onSignChange(event: SignChangeEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Sign) {
+        if (pylonBlock is PylonSign) {
             pylonBlock.onSignChange(event)
         }
     }
@@ -281,7 +281,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onVaultDisplayItem(event: VaultDisplayItemEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is TrialVault) {
+        if (pylonBlock is PylonTrialVault) {
             pylonBlock.onDisplayItem(event)
         }
     }
@@ -289,7 +289,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onLeafDecay(event: LeavesDecayEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Leaf) {
+        if (pylonBlock is PylonLeaf) {
             pylonBlock.onDecayNaturally(event)
         }
     }
@@ -297,7 +297,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onTargetHit(event: TargetHitEvent) {
         val pylonBlock = BlockStorage.get(event.hitBlock ?: return)
-        if (pylonBlock is TargetBlock) {
+        if (pylonBlock is PylonTargetBlock) {
             pylonBlock.onHit(event)
         }
     }
@@ -305,7 +305,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onCompostByHopper(event: CompostItemEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Composter) {
+        if (pylonBlock is PylonComposter) {
             pylonBlock.onCompostByHopper(event)
         }
     }
@@ -313,7 +313,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onCompostByEntity(event: EntityCompostItemEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Composter) {
+        if (pylonBlock is PylonComposter) {
             pylonBlock.onCompostByEntity(event)
         }
     }
@@ -321,7 +321,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onShearBlock(event: PlayerShearBlockEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Shearable) {
+        if (pylonBlock is PylonShearable) {
             pylonBlock.onShear(event)
         }
     }
@@ -329,7 +329,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onLecternInsertBook(event: PlayerInsertLecternBookEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Lectern) {
+        if (pylonBlock is PylonLectern) {
             pylonBlock.onInsertBook(event)
         }
     }
@@ -337,7 +337,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onLecternRemoveBook(event: PlayerTakeLecternBookEvent) {
         val pylonBlock = BlockStorage.get(event.lectern.block)
-        if (pylonBlock is Lectern) {
+        if (pylonBlock is PylonLectern) {
             pylonBlock.onRemoveBook(event)
         }
     }
@@ -345,7 +345,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onLecternChangePage(event: PlayerLecternPageChangeEvent) {
         val pylonBlock = BlockStorage.get(event.lectern.block)
-        if (pylonBlock is Lectern) {
+        if (pylonBlock is PylonLectern) {
             pylonBlock.onChangePage(event)
         }
     }
@@ -353,7 +353,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPistonExtend(event: BlockPistonExtendEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Piston) {
+        if (pylonBlock is PylonPiston) {
             pylonBlock.onExtend(event)
         }
     }
@@ -361,7 +361,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPistonRetract(event: BlockPistonRetractEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Piston) {
+        if (pylonBlock is PylonPiston) {
             pylonBlock.onRetract(event)
         }
     }
@@ -369,7 +369,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPreEnchant(event: PrepareItemEnchantEvent) {
         val pylonBlock = BlockStorage.get(event.enchantBlock)
-        if (pylonBlock is EnchantingTable) {
+        if (pylonBlock is PylonEnchantingTable) {
             pylonBlock.onPrepareEnchant(event)
         }
     }
@@ -377,7 +377,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onEnchant(event: EnchantItemEvent) {
         val pylonBlock = BlockStorage.get(event.enchantBlock)
-        if (pylonBlock is EnchantingTable) {
+        if (pylonBlock is PylonEnchantingTable) {
             pylonBlock.onEnchant(event)
         }
     }
@@ -385,7 +385,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onRedstoneCurrentChange(event: BlockRedstoneEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is RedstoneBlock) {
+        if (pylonBlock is PylonRedstoneBlock) {
             pylonBlock.onCurrentChange(event)
         }
     }
@@ -393,7 +393,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onBrewingStandFuel(event: BrewingStandFuelEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is BrewingStand) {
+        if (pylonBlock is PylonBrewingStand) {
             pylonBlock.onFuel(event)
         }
     }
@@ -401,7 +401,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPreDispense(event: BlockPreDispenseEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Dispenser) {
+        if (pylonBlock is PylonDispenser) {
             pylonBlock.onPreDispense(event)
         }
     }
@@ -409,7 +409,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onFailDispense(event: BlockFailedDispenseEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Dispenser) {
+        if (pylonBlock is PylonDispenser) {
             pylonBlock.onFailDispense(event)
         }
     }
@@ -417,7 +417,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onFurnaceExtract(event: FurnaceExtractEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Furnace) {
+        if (pylonBlock is PylonFurnace) {
             pylonBlock.onExtractItem(event)
         }
     }
@@ -425,7 +425,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onFurnaceBurnFuel(event: FurnaceBurnEvent) {
         val pylonBlock = BlockStorage.get(event.block)
-        if (pylonBlock is Furnace) {
+        if (pylonBlock is PylonFurnace) {
             pylonBlock.onFuelBurn(event)
         }
     }
@@ -433,7 +433,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onSignOpen(event: PlayerOpenSignEvent) {
         val pylonBlock = BlockStorage.get(event.sign.block)
-        if (pylonBlock is Sign) {
+        if (pylonBlock is PylonSign) {
             pylonBlock.onOpen(event)
         }
     }
