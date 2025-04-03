@@ -91,7 +91,7 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun get(blockPosition: BlockPosition): PylonBlock<*>? {
-        check(blockPosition.chunk.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        require(blockPosition.chunk.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocks[blockPosition] }
     }
 
