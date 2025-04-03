@@ -159,7 +159,7 @@ object BlockStorage : Listener {
         schema: PylonBlockSchema,
         context: BlockCreateContext = BlockCreateContext.Default
     ): PylonBlock<*>? {
-        check(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
+        require(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
 
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
