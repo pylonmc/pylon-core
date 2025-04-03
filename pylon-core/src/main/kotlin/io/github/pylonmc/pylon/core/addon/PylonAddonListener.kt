@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.addon
 
+import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -21,6 +22,7 @@ internal object PylonAddonListener : Listener {
             PylonRegistry.RECIPE_TYPES.unregisterAllFromAddon(plugin)
             PylonRegistry.MOB_DROPS.unregisterAllFromAddon(plugin)
             PylonRegistry.ADDONS.unregister(plugin)
+            PylonLanguageService.unregister(plugin)
         }
     }
 }

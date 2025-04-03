@@ -1,8 +1,3 @@
-lang:
-  name: English
-  code: en
-
-keys:
-  item:
-    debug_waxed_weathered_cut_copper_stairs:
-      name: "Debug Waxed Weathered Cut Copper Stairs"
+item:
+  debug_waxed_weathered_cut_copper_stairs:
+    name: "Debug Waxed Weathered Cut Copper Stairs"
