@@ -85,7 +85,7 @@ internal object MultiblockCache : Listener {
         = dirtyMultiblocks.add(multiblock.block.position)
 
     private fun refreshFullyLoaded(multiblock: Multiblock) {
-        if (multiblock.chunksOccupied.all { it.loaded }) {
+        if (multiblock.chunksOccupied.all { it.isLoaded }) {
             fullyLoadedMultiblocks.add(multiblock.block.position)
             markDirty(multiblock)
         } else {

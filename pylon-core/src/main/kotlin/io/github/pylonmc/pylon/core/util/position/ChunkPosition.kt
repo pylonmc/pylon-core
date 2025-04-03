@@ -24,7 +24,7 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
      * often LOAD THE CHUNK ITSELF. Yes, actually. This method does not
      * load the chunk, so it's a safe way to check if a chunk is loaded.
      */
-    val loaded: Boolean
+    val isLoaded: Boolean
         get() = world?.isChunkLoaded(x, z) == true
 
     constructor(world: World, asLong: Long) : this(world, (asLong shr 32).toInt(), asLong.toInt())

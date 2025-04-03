@@ -176,7 +176,7 @@ public final class TestUtil {
         return runAsync(() -> {
             ChunkPosition chunkPosition = new ChunkPosition(chunk);
             runSync(() -> chunk.unload()).join();
-            waitUntil(() -> !chunkPosition.getLoaded()).join();
+            waitUntil(() -> !chunkPosition.isLoaded()).join();
         });
     }
 }
