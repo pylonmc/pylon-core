@@ -224,7 +224,7 @@ object BlockStorage : Listener {
         blockPosition: BlockPosition,
         context: BlockBreakContext = BlockBreakContext.PluginBreak
     ) {
-        check(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
+        require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
         val block = get(blockPosition) ?: return
 
