@@ -6,6 +6,7 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import org.bukkit.craftbukkit.inventory.CraftItemStack
@@ -28,9 +29,12 @@ class PlayerPacketHandler(player: ServerPlayer, private val handler: PlayerTrans
 
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
-            if (packet is ClientboundContainerSetContentPacket) {
-                packet.items.forEach(::handleItem)
-                handleItem(packet.carriedItem)
+            when (packet) {
+                is ClientboundContainerSetContentPacket -> {
+                    packet.items.forEach(::handleItem)
+                    handleItem(packet.carriedItem)
+                }
+                is ClientboundContainerSetSlotPacket -> handleItem(packet.item)
             }
             super.write(ctx, packet, promise)
         }
