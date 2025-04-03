@@ -38,7 +38,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
                 assertThat(BlockStorage.isPylonBlock(block))
                         .isFalse();
                 assertThatThrownBy(() -> BlockStorage.get(block))
-                        .isInstanceOf(IllegalStateException.class);
+                        .isInstanceOf(IllegalArgumentException.class);
 
                 TestUtil.loadChunk(chunk).join();
                 assertThat(BlockStorage.get(block))
