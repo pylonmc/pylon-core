@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
-import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -33,7 +32,7 @@ open class PylonItemSchema(
     )
         ?: throw NoSuchMethodException("Item '$key' ($itemClass) is missing a load constructor (PylonItemSchema, ItemStack)")
 
-    val settings = addon.javaPlugin.mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
+    val settings = addon.mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
 
     fun register() = apply {
         ItemStackBuilder(template) // Modifies the template directly
