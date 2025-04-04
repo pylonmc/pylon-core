@@ -136,7 +136,7 @@ object EntityStorage : Listener {
     }
 
     @JvmSynthetic
-    internal fun cleanupEverything() = {
+    internal fun cleanupEverything() {
         for (entity in entities.values) {
             entity.write()
         }
