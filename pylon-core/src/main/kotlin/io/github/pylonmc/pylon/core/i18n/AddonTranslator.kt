@@ -27,12 +27,13 @@ internal class AddonTranslator(private val addon: PylonAddon) : Translator {
         val (_, addon, key) = key.split('.', limit = 3)
         if (addon != addonNamespace) return null
         val languageRange = languageRanges.getOrPut(locale) {
-            LocaleUtils.localeLookupList(locale).reversed().mapIndexed { index, value ->
-                Locale.LanguageRange(value.toString(), index.toDouble())
+            val lookupList = LocaleUtils.localeLookupList(locale).reversed()
+            lookupList.mapIndexed { index, value ->
+                Locale.LanguageRange(value.toString().replace('_', '-'), (index + 1.0) / lookupList.size)
             }
         }
         val matchedLocale = Locale.lookup(languageRange, translations.keys) ?: return null
-        val translation = translations[matchedLocale]?.get(key) ?: return null
+        val translation = translations[matchedLocale]?.get<String>(key) ?: return null
         return MessageFormat(translation, matchedLocale)
     }
 
