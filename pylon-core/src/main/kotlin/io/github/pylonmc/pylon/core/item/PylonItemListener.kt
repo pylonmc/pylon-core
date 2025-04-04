@@ -127,13 +127,10 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    private fun handle(event: EntityInteractEvent) {
-        val entity = event.entity
-        if (entity is Player) {
-            val pylonItem = PylonItem.fromStack(entity.activeItem)
-            if (pylonItem is EntityInteractor) {
-                pylonItem.onUsedToRightClickEntity(event)
-            }
+    private fun handle(event: PlayerInteractEntityEvent) {
+        val pylonItem = PylonItem.fromStack(event.player.activeItem)
+        if (pylonItem is EntityInteractor) {
+            pylonItem.onUsedToRightClickEntity(event)
         }
     }
 
