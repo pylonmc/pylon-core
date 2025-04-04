@@ -17,8 +17,8 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
     protected constructor(schema: S, supplier: Supplier<E>): this(schema, supplier.get())
 
     /**
-     * Write all the state saved in the Pylon entity class to the entity's
-     * persistent data container.
+     * Write all the state saved in the Pylon entity class to the entity's persistent data
+     * container.
      */
     open fun write() {}
 
@@ -27,9 +27,10 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
         private val pylonEntityKeyKey = pylonKey("key")
 
         @JvmSynthetic
-        internal fun serialize(entity: PylonEntity<*, *>) {
-            entity.entity.persistentDataContainer.set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, entity.schema.key)
-            entity.write()
+        internal fun serialize(pylonEntity: PylonEntity<*, *>) {
+            pylonEntity.write()
+            pylonEntity.entity.persistentDataContainer
+                .set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, pylonEntity.schema.key)
         }
 
         @JvmSynthetic
@@ -46,7 +47,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
                 val schema = PylonRegistry.ENTITIES[key]
                     ?: return null
 
-                if (schema.entityClass.isInstance(entity)) {
+                if (!schema.entityClass.isInstance(entity)) {
                     return null
                 }
 
