@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.item.Items;
 import io.github.pylonmc.pylon.test.test.block.*;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageMissingSchemaTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
@@ -75,6 +76,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new MobDropTest());
 
         tests.add(new EntityStorageSimpleTest());
+        tests.add(new EntityStorageMissingSchemaTest());
         tests.add(new EntityStorageChunkReloadTest());
 
         return tests;
