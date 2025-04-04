@@ -46,18 +46,4 @@ open class PylonItemSchema(
     override fun equals(other: Any?): Boolean = key == (other as? PylonItemSchema)?.key
 
     override fun hashCode(): Int = key.hashCode()
-
-    companion object {
-        private val itemsDir: Path = pluginInstance.dataPath.resolve("settings/item")
-
-        init {
-            itemsDir.createDirectories()
-        }
-
-        fun getItemFile(key: NamespacedKey): Path {
-            return itemsDir.resolve("${key.namespace}/${key.key}.yml").also { path ->
-                path.parent.createDirectories()
-            }
-        }
-    }
 }
