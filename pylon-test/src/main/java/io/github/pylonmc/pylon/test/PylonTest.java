@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.item.Items;
 import io.github.pylonmc.pylon.test.test.block.*;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
@@ -70,6 +71,8 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new CraftingTest());
         tests.add(new FurnaceTest());
         tests.add(new MobDropTest());
+
+        tests.add(new EntityStorageSimpleTest());
 
         return tests;
     }

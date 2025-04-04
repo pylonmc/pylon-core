@@ -18,11 +18,11 @@ public class SimpleEntity extends PylonEntity<PylonEntitySchema, LivingEntity> {
 
     public SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull Location location) {
         super(schema, location.getWorld().spawn(location, Skeleton.class));
-        getEntity().setHealth(999);
+        getEntity().setAI(false);
         someQuantity = 69;
     }
 
-    protected SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull Skeleton entity) {
+    public SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull LivingEntity entity) {
         super(schema, entity);
         someQuantity = entity.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
     }
