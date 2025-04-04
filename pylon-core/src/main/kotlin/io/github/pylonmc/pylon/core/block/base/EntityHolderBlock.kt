@@ -15,7 +15,7 @@ import java.util.UUID
  *
  * Note that the Pylon entity may be loaded when the block is not loaded (or vice versa).
  */
-interface EntityHolderBlock<out S : PylonEntitySchema, out E: Entity> {
+interface EntityHolderBlock<out S : PylonEntitySchema, out E: Entity> : BreakHandler {
 
     /**
      * Must be set in your create constructor when you spawn in the entity.
@@ -41,6 +41,11 @@ interface EntityHolderBlock<out S : PylonEntitySchema, out E: Entity> {
      */
     fun saveEntity(pdc: PersistentDataContainer) {
         pdc.set(entityKey, PylonSerializers.UUID, entityUuid)
+    }
+
+    override fun postBreak() {
+        // Best-effort removal; unlikely to cause issues
+        entity?.entity?.remove()
     }
 
     companion object {
