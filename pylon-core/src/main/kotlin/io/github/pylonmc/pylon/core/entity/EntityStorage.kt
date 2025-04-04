@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import io.github.pylonmc.pylon.core.pluginInstance
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
@@ -17,8 +18,11 @@ object EntityStorage : Listener {
 
     private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
 
-    val entities: MutableMap<UUID, PylonEntity<*, *>> = ConcurrentHashMap()
-    val entitiesByType: MutableMap<NamespacedKey, MutableSet<PylonEntity<*, *>>> = ConcurrentHashMap()
+    private val entities: MutableMap<UUID, PylonEntity<*, *>> = ConcurrentHashMap()
+    private val entitiesById: MutableMap<NamespacedKey, MutableSet<PylonEntity<*, *>>> = ConcurrentHashMap()
+
+    val loadedEntities: Collection<PylonEntity<*, *>>
+        get() = entities.values
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized
     // to prevent them briefly going out of sync
@@ -58,10 +62,27 @@ object EntityStorage : Listener {
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 
+    fun getById(id: NamespacedKey): Collection<PylonEntity<*, *>> =
+        if (PylonRegistry.ENTITIES.contains(id)) {
+            lockBlockRead {
+                entitiesById[id].orEmpty()
+            }
+        } else {
+            emptySet()
+        }
+
+    @JvmStatic
+    fun isPylonEntity(uuid: UUID): Boolean
+        = get(uuid) != null
+
+    @JvmStatic
+    fun isPylonEntity(entity: Entity): Boolean
+            = get(entity) != null
+
     @JvmStatic
     fun add(entity: PylonEntity<*, *>) = lockBlockWrite {
         entities[entity.entity.uniqueId] = entity
-        entitiesByType.getOrPut(entity.schema.key) { mutableSetOf() }.add(entity)
+        entitiesById.getOrPut(entity.schema.key) { mutableSetOf() }.add(entity)
     }
 
     @EventHandler
@@ -81,9 +102,9 @@ object EntityStorage : Listener {
         pylonEntity.write()
         lockBlockWrite {
             entities.remove(pylonEntity.entity.uniqueId)
-            entitiesByType[pylonEntity.schema.key]!!.remove(pylonEntity)
-            if (entitiesByType[pylonEntity.schema.key]!!.isEmpty()) {
-                entitiesByType.remove(pylonEntity.schema.key)
+            entitiesById[pylonEntity.schema.key]!!.remove(pylonEntity)
+            if (entitiesById[pylonEntity.schema.key]!!.isEmpty()) {
+                entitiesById.remove(pylonEntity.schema.key)
             }
         }
     }
