@@ -57,7 +57,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
 
         override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
             val pylonEntity = EntityStorage.get(event.rightClicked) ?: return
-            event.player.sendMessage(NamedTextColor.GOLD + "Pylon block key: ${pylonEntity.schema.key}")
+            event.player.sendMessage(NamedTextColor.GOLD + "Pylon entity key: ${pylonEntity.schema.key}")
             event.player.sendMessage(
                 MiniMessage.miniMessage().deserialize(
                     when (pylonEntity) {
