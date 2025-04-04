@@ -2,6 +2,9 @@ package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
+import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
+import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
@@ -10,6 +13,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -92,6 +96,7 @@ object EntityStorage : Listener {
         for (entity in event.entities) {
             PylonEntity.deserialize(entity)?.let {
                 add(it)
+                PylonEntityLoadEvent(it).callEvent()
             }
         }
     }
@@ -109,7 +114,14 @@ object EntityStorage : Listener {
                 entitiesById.remove(pylonEntity.schema.key)
             }
         }
+        PylonEntityUnloadEvent(pylonEntity).callEvent()
     }
+
+    @EventHandler(ignoreCancelled = true)
+    private fun onEntityDeath(event: EntityDeathEvent)
+        = get(event.entity)?.let {
+            PylonEntityDeathEvent(it, event).callEvent()
+        }
 
     @JvmSynthetic
     internal fun cleanup(addon: PylonAddon) = lockEntityWrite {
