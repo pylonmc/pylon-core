@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.test.test.block;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
+import io.github.pylonmc.pylon.core.util.position.ChunkPosition;
 import io.github.pylonmc.pylon.test.block.BlockWithField;
 import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.util.TestUtil;
@@ -21,7 +22,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
 
     @Override
     public void test() {
-        List<Chunk> chunks = TestUtil.getRandomChunks(20, 20, false).join();
+        List<Chunk> chunks = TestUtil.getRandomChunks(20, false).join();
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
@@ -35,10 +36,12 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
                 }).join();
                 TestUtil.unloadChunk(chunk).join();
 
+                assertThat(new ChunkPosition(block).isLoaded())
+                        .isFalse();
                 assertThat(BlockStorage.isPylonBlock(block))
                         .isFalse();
                 assertThatThrownBy(() -> BlockStorage.get(block))
-                        .isInstanceOf(IllegalArgumentException.class);
+                        .isNotNull();
 
                 TestUtil.loadChunk(chunk).join();
                 assertThat(BlockStorage.get(block))

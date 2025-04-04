@@ -106,39 +106,17 @@ public final class TestUtil {
     }
 
     @CheckReturnValue
-    public static @NotNull CompletableFuture<List<Chunk>> getRandomChunks(
-            int width,
-            int length,
-            boolean waitForUnload
-    ) {
+    public static @NotNull CompletableFuture<List<Chunk>> getRandomChunks(int count, boolean waitForUnload) {
         return runAsync(() -> {
-            double max = 10000;
-            int startX = (int) random.nextDouble(-max, max);
-            int startZ = (int) random.nextDouble(-max, max);
-
-            // Get chunks concurently
             List<CompletableFuture<Chunk>> futures = new ArrayList<>();
-            for (int x = startX; x < startX + width; x++) {
-                for (int z = startZ; z < startZ + length; z++) {
-                    futures.add(PylonTest.testWorld.getChunkAtAsync(x, z));
-                }
+            //noinspection Convert2streamapi
+            for (int i = 0; i < count; i++) {
+                futures.add(getRandomChunk(waitForUnload));
             }
 
-            List<Chunk> chunks = futures.stream()
+            return futures.stream()
                     .map(CompletableFuture::join)
                     .toList();
-
-            if (waitForUnload) {
-                while (chunks.stream().anyMatch(Chunk::isLoaded)) {
-                    try {
-                        Thread.sleep(5);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-
-            return chunks;
         });
     }
 
