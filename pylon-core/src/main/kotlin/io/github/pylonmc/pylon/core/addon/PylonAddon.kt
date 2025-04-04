@@ -47,6 +47,8 @@ interface PylonAddon : Keyed {
         val resource = this.javaPlugin.getResource(path)
         if (resource != null) {
             val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
+            config.internalConfig.setDefaults(newConfig)
+            config.internalConfig.options().copyDefaults(true)
             config.merge(ConfigSection(newConfig))
             config.save()
         }
