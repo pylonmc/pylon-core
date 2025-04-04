@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerLocaleChangeEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.WeakHashMap
 
@@ -58,5 +59,10 @@ object PylonLanguageService : Listener {
     private fun onPlayerQuit(event: PlayerQuitEvent) {
         val player = event.player
         PacketManager.instance.unregister(player)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    private fun onPlayerChangeLanguage(event: PlayerLocaleChangeEvent) {
+        PacketManager.instance.resendInventory(event.player)
     }
 }
