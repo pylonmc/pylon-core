@@ -1,8 +1,10 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.isFromAddon
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
@@ -24,9 +26,9 @@ object EntityStorage : Listener {
     val loadedEntities: Collection<PylonEntity<*, *>>
         get() = entities.values
 
-    // Access to blocks, blocksByChunk, blocksById fields must be synchronized
-    // to prevent them briefly going out of sync
-    private val blockLock = ReentrantReadWriteLock()
+    // Access to entities, entitiesById fields must be synchronized to prevent them
+    // briefly going out of sync
+    private val entityLock = ReentrantReadWriteLock()
 
     // TODO implement this properly and actually run it
     internal fun startAutosaveTask() {
@@ -40,11 +42,11 @@ object EntityStorage : Listener {
 
     @JvmStatic
     fun get(uuid: UUID): PylonEntity<*, *>?
-        = lockBlockRead { entities[uuid] }
+        = lockEntityRead { entities[uuid] }
 
     @JvmStatic
     fun get(entity: Entity): PylonEntity<*, *>?
-        = lockBlockRead { entities[entity.uniqueId] }
+        = lockEntityRead { entities[entity.uniqueId] }
 
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, uuid: UUID): T? {
@@ -64,7 +66,7 @@ object EntityStorage : Listener {
 
     fun getById(id: NamespacedKey): Collection<PylonEntity<*, *>> =
         if (PylonRegistry.ENTITIES.contains(id)) {
-            lockBlockRead {
+            lockEntityRead {
                 entitiesById[id].orEmpty()
             }
         } else {
@@ -80,7 +82,7 @@ object EntityStorage : Listener {
             = get(entity) != null
 
     @JvmStatic
-    fun add(entity: PylonEntity<*, *>) = lockBlockWrite {
+    fun add(entity: PylonEntity<*, *>) = lockEntityWrite {
         entities[entity.entity.uniqueId] = entity
         entitiesById.getOrPut(entity.schema.key) { mutableSetOf() }.add(entity)
     }
@@ -100,7 +102,7 @@ object EntityStorage : Listener {
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
         val pylonEntity = get(event.getEntity().uniqueId) ?: return
         pylonEntity.write()
-        lockBlockWrite {
+        lockEntityWrite {
             entities.remove(pylonEntity.entity.uniqueId)
             entitiesById[pylonEntity.schema.key]!!.remove(pylonEntity)
             if (entitiesById[pylonEntity.schema.key]!!.isEmpty()) {
@@ -109,21 +111,40 @@ object EntityStorage : Listener {
         }
     }
 
-    private inline fun <T> lockBlockRead(block: () -> T): T {
-        blockLock.readLock().lock()
-        try {
-            return block()
-        } finally {
-            blockLock.readLock().unlock()
+    @JvmSynthetic
+    internal fun cleanup(addon: PylonAddon) = lockEntityWrite {
+        for ((_, value) in entitiesById.filter { it.key.isFromAddon(addon) }) {
+            for (entity in value) {
+                entity.write()
+            }
+        }
+
+        entities.values.removeIf { it.schema.key.isFromAddon(addon) }
+        entitiesById.keys.removeIf { it.isFromAddon(addon) }
+    }
+
+    @JvmSynthetic
+    internal fun cleanupEverything() = {
+        for (entity in entities.values) {
+            entity.write()
         }
     }
 
-    private inline fun <T> lockBlockWrite(block: () -> T): T {
-        blockLock.writeLock().lock()
+    private inline fun <T> lockEntityRead(block: () -> T): T {
+        entityLock.readLock().lock()
         try {
             return block()
         } finally {
-            blockLock.writeLock().unlock()
+            entityLock.readLock().unlock()
+        }
+    }
+
+    private inline fun <T> lockEntityWrite(block: () -> T): T {
+        entityLock.writeLock().lock()
+        try {
+            return block()
+        } finally {
+            entityLock.writeLock().unlock()
         }
     }
 }
