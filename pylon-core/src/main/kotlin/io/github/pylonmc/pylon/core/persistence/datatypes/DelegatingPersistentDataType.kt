@@ -6,6 +6,10 @@ import org.bukkit.persistence.PersistentDataType
 /**
  * A [PersistentDataType] that first converts the complex type
  * to another type, which then uses the delegate to convert to the primitive type.
+ *
+ * @param P the primitive type
+ * @param D the delegated type
+ * @param C the complex type
  */
 abstract class DelegatingPersistentDataType<P : Any, D : Any, C : Any>(
     val delegate: PersistentDataType<P, D>,
