@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.entity
 
+import com.google.common.base.Supplier
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -12,6 +13,8 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
     val schema: S,
     val entity: E
 ) {
+
+    protected constructor(schema: S, supplier: Supplier<E>): this(schema, supplier.get())
 
     /**
      * Write all the state saved in the Pylon entity class to the entity's
