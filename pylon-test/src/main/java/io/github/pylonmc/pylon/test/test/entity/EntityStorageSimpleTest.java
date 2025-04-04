@@ -25,16 +25,13 @@ public class EntityStorageSimpleTest extends GameTest {
 
                     assertThat(EntityStorage.isPylonEntity(uuid))
                             .isTrue();
-
                     assertThat(EntityStorage.get(uuid))
                             .isNotNull()
                             .isInstanceOf(SimpleEntity.class);
-
                     assertThat(EntityStorage.getAs(SimpleEntity.class, uuid))
                             .isNotNull()
                             .extracting(SimpleEntity::getSomeQuantity)
                             .isEqualTo(69);
-
                     assertThat(pylonEntity.getEntity().hasAI())
                             .isFalse();
 
@@ -42,7 +39,6 @@ public class EntityStorageSimpleTest extends GameTest {
 
                     assertThat(EntityStorage.isPylonEntity(uuid))
                             .isFalse();
-
                     assertThat(EntityStorage.get(uuid))
                             .isNull();
 
