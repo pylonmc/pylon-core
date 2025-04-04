@@ -46,7 +46,7 @@ object EntityStorage : Listener {
 
     @JvmStatic
     fun get(entity: Entity): PylonEntity<*, *>?
-        = lockEntityRead { entities[entity.uniqueId] }
+        = get(entity.uniqueId)
 
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, uuid: UUID): T? {
@@ -79,7 +79,7 @@ object EntityStorage : Listener {
 
     @JvmStatic
     fun isPylonEntity(entity: Entity): Boolean
-            = get(entity) != null
+        = get(entity) != null
 
     @JvmStatic
     fun add(entity: PylonEntity<*, *>) = lockEntityWrite {
@@ -101,7 +101,7 @@ object EntityStorage : Listener {
     @EventHandler
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
         val pylonEntity = get(event.getEntity().uniqueId) ?: return
-        pylonEntity.write()
+        PylonEntity.serialize(pylonEntity)
         lockEntityWrite {
             entities.remove(pylonEntity.entity.uniqueId)
             entitiesById[pylonEntity.schema.key]!!.remove(pylonEntity)
@@ -115,7 +115,7 @@ object EntityStorage : Listener {
     internal fun cleanup(addon: PylonAddon) = lockEntityWrite {
         for ((_, value) in entitiesById.filter { it.key.isFromAddon(addon) }) {
             for (entity in value) {
-                entity.write()
+                PylonEntity.serialize(entity)
             }
         }
 
