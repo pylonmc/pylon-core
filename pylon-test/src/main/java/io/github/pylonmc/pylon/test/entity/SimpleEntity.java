@@ -22,6 +22,7 @@ public class SimpleEntity extends PylonEntity<PylonEntitySchema, LivingEntity> {
         someQuantity = 69;
     }
 
+    @SuppressWarnings({"unused", "DataFlowIssue"})
     public SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull LivingEntity entity) {
         super(schema, entity);
         someQuantity = entity.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);

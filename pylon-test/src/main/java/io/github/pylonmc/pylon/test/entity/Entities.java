@@ -14,4 +14,8 @@ public final class Entities {
             LivingEntity.class,
             SimpleEntity.class
     );
+
+    public static void register() {
+        SIMPLE_ENTITY.register();
+    }
 }
