@@ -58,13 +58,18 @@ object EntityStorage : Listener {
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 
+    @JvmStatic
+    fun add(entity: PylonEntity<*, *>) = lockBlockWrite {
+        entities[entity.entity.uniqueId] = entity
+        entitiesByType.getOrPut(entity.schema.key) { mutableSetOf() }.add(entity)
+    }
+
     @EventHandler
     private fun onEntityLoad(event: EntitiesLoadEvent) {
         for (entity in event.entities) {
-            PylonEntity.deserialize(entity)?.let { pylonEntity -> lockBlockWrite {
-                entities[entity.uniqueId] = pylonEntity
-                entitiesByType.getOrPut(pylonEntity.schema.key) { mutableSetOf() }.add(pylonEntity)
-            }}
+            PylonEntity.deserialize(entity)?.let {
+                add(it)
+            }
         }
     }
 
