@@ -11,6 +11,8 @@ interface PacketManager {
 
     fun unregister(player: Player)
 
+    fun resendInventory(player: Player)
+
     companion object {
         val instance = Class.forName("io.github.pylonmc.pylon.core.i18n.packet.PacketManagerImpl")
             .getDeclaredField("INSTANCE")

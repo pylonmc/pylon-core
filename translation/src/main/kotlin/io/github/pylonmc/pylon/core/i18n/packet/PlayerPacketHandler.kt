@@ -16,7 +16,7 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack
 
 // Much inspiration has been taken from https://github.com/GuizhanCraft/SlimefunTranslation
 // with permission from the author
-class PlayerPacketHandler(player: ServerPlayer, private val handler: PlayerTranslationHandler) {
+class PlayerPacketHandler(private val player: ServerPlayer, private val handler: PlayerTranslationHandler) {
 
     private val channel = player.connection.connection.channel
 
@@ -27,6 +27,14 @@ class PlayerPacketHandler(player: ServerPlayer, private val handler: PlayerTrans
     fun unregister() {
         channel.eventLoop().submit {
             channel.pipeline().remove(HANDLER_NAME)
+        }
+    }
+
+    fun resendInventory() {
+        val inventory = player.containerMenu
+        for (slot in 0..45) {
+            val item = inventory.getSlot(slot).item
+            player.containerSynchronizer.sendSlotChange(inventory, slot, item)
         }
     }
 

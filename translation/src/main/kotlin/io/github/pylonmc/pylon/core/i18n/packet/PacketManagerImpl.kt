@@ -22,4 +22,9 @@ object PacketManagerImpl : PacketManager {
         val handler = players.remove(player.uniqueId) ?: return
         handler.unregister()
     }
+
+    override fun resendInventory(player: Player) {
+        val handler = players[player.uniqueId] ?: return
+        handler.resendInventory()
+    }
 }
