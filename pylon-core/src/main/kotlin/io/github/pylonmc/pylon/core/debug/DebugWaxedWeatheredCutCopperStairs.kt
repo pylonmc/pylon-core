@@ -36,7 +36,11 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
         PylonItem<DebugWaxedWeatheredCutCopperStairs>(schema, item), BlockInteractor, EntityInteractor {
         override fun onUsedToClickBlock(event: PlayerInteractEvent) {
             val block = event.clickedBlock ?: return
-            val pylonBlock = BlockStorage.get(block) ?: return
+            val pylonBlock = BlockStorage.get(block)
+            if (pylonBlock == null) {
+                event.player.sendMessage(NamedTextColor.RED + "This is not a Pylon block")
+                return
+            }
             val player = event.player
             player.sendMessage(NamedTextColor.GOLD + "Pylon block key: ${pylonBlock.schema.key}")
             player.sendMessage(
@@ -56,7 +60,11 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
         }
 
         override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
-            val pylonEntity = EntityStorage.get(event.rightClicked) ?: return
+            val pylonEntity = EntityStorage.get(event.rightClicked)
+            if (pylonEntity == null) {
+                event.player.sendMessage(NamedTextColor.RED + "This is not a Pylon entity")
+                return
+            }
             event.player.sendMessage(NamedTextColor.GOLD + "Pylon entity key: ${pylonEntity.schema.key}")
             event.player.sendMessage(
                 MiniMessage.miniMessage().deserialize(
