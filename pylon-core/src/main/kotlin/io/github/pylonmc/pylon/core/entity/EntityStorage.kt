@@ -68,7 +68,7 @@ object EntityStorage : Listener {
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 
-    fun getById(id: NamespacedKey): Collection<PylonEntity<*, *>> =
+    fun getByKey(id: NamespacedKey): Collection<PylonEntity<*, *>> =
         if (PylonRegistry.ENTITIES.contains(id)) {
             lockEntityRead {
                 entitiesById[id].orEmpty()
