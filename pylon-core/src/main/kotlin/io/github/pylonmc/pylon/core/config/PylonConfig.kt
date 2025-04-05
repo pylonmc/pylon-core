@@ -6,9 +6,9 @@ object PylonConfig {
 
     private val config = Config(pluginInstance, "config.yml")
 
-    @JvmField
-    val tickDelay = config.get("tick-delay", 10)
+    @JvmStatic
+    val tickDelay: Int by config
 
-    @JvmField
-    val allowedBlockErrors = config.get("tick-delay", 10)
+    @JvmStatic
+    val allowedBlockErrors: Int by config
 }
