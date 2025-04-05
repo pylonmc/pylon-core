@@ -128,7 +128,7 @@ object BlockStorage : Listener {
     }
 
     @JvmStatic
-    fun getById(id: NamespacedKey): Collection<PylonBlock<*>> =
+    fun getByKey(id: NamespacedKey): Collection<PylonBlock<*>> =
         if (PylonRegistry.BLOCKS.contains(id)) {
             lockBlockRead {
                 blocksById[id].orEmpty()
