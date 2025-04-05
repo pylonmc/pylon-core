@@ -25,7 +25,7 @@ object EntityStorage : Listener {
     private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
 
     private val entities: MutableMap<UUID, PylonEntity<*, *>> = ConcurrentHashMap()
-    private val entitiesById: MutableMap<NamespacedKey, MutableSet<PylonEntity<*, *>>> = ConcurrentHashMap()
+    private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*, *>>> = ConcurrentHashMap()
 
     val loadedEntities: Collection<PylonEntity<*, *>>
         get() = entities.values
@@ -68,10 +68,10 @@ object EntityStorage : Listener {
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 
-    fun getByKey(id: NamespacedKey): Collection<PylonEntity<*, *>> =
-        if (PylonRegistry.ENTITIES.contains(id)) {
+    fun getByKey(key: NamespacedKey): Collection<PylonEntity<*, *>> =
+        if (PylonRegistry.ENTITIES.contains(key)) {
             lockEntityRead {
-                entitiesById[id].orEmpty()
+                entitiesByKey[key].orEmpty()
             }
         } else {
             emptySet()
@@ -88,7 +88,7 @@ object EntityStorage : Listener {
     @JvmStatic
     fun add(entity: PylonEntity<*, *>) = lockEntityWrite {
         entities[entity.entity.uniqueId] = entity
-        entitiesById.getOrPut(entity.schema.key) { mutableSetOf() }.add(entity)
+        entitiesByKey.getOrPut(entity.schema.key) { mutableSetOf() }.add(entity)
     }
 
     @EventHandler
@@ -109,9 +109,9 @@ object EntityStorage : Listener {
         PylonEntity.serialize(pylonEntity)
         lockEntityWrite {
             entities.remove(pylonEntity.entity.uniqueId)
-            entitiesById[pylonEntity.schema.key]!!.remove(pylonEntity)
-            if (entitiesById[pylonEntity.schema.key]!!.isEmpty()) {
-                entitiesById.remove(pylonEntity.schema.key)
+            entitiesByKey[pylonEntity.schema.key]!!.remove(pylonEntity)
+            if (entitiesByKey[pylonEntity.schema.key]!!.isEmpty()) {
+                entitiesByKey.remove(pylonEntity.schema.key)
             }
         }
         PylonEntityUnloadEvent(pylonEntity).callEvent()
@@ -125,14 +125,14 @@ object EntityStorage : Listener {
 
     @JvmSynthetic
     internal fun cleanup(addon: PylonAddon) = lockEntityWrite {
-        for ((_, value) in entitiesById.filter { it.key.isFromAddon(addon) }) {
+        for ((_, value) in entitiesByKey.filter { it.key.isFromAddon(addon) }) {
             for (entity in value) {
                 PylonEntity.serialize(entity)
             }
         }
 
         entities.values.removeIf { it.schema.key.isFromAddon(addon) }
-        entitiesById.keys.removeIf { it.isFromAddon(addon) }
+        entitiesByKey.keys.removeIf { it.isFromAddon(addon) }
     }
 
     @JvmSynthetic
