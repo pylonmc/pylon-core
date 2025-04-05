@@ -4,8 +4,9 @@ import org.bukkit.Location
 import org.bukkit.entity.Interaction
 
 class InteractionBuilder {
-    var width: Float?
-    var height: Float?
+
+    var width: Float? = null
+    var height: Float? = null
 
     constructor(other: InteractionBuilder) {
         this.width = other.width
