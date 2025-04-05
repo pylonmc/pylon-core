@@ -27,6 +27,8 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
     fun scale(scale: Vector3d) = apply { add(Scale(scale)) }
     fun scale(x: Float, y: Float, z: Float) = apply { add(Scale(x, y, z)) }
     fun scale(x: Double, y: Double, z: Double) = apply { add(Scale(x, y, z)) }
+    fun scale(scale: Float) = apply { add(Scale(scale)) }
+    fun scale(scale: Double) = apply { add(Scale(scale)) }
 
     fun rotate(rotation: Vector3f) = apply { add(Rotation(rotation)) }
     fun rotate(rotation: Vector3d) = apply { add(Rotation(rotation)) }

@@ -12,6 +12,10 @@ class Scale(private val scale: Vector3f) : TransformComponent {
 
     constructor(x: Double, y: Double, z: Double): this(Vector3d(x, y, z))
 
+    constructor(scale: Float): this(Vector3f(scale))
+
+    constructor(scale: Double): this(Vector3d(scale))
+
     override fun apply(matrix: Matrix4f) {
         matrix.mul(Matrix4f().scale(scale))
     }
