@@ -2,51 +2,56 @@ package io.github.pylonmc.pylon.core.entity.display
 
 import org.bukkit.Color
 import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.block.data.BlockData
+import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Display
 import org.bukkit.entity.Display.Brightness
-import org.bukkit.entity.ItemDisplay
-import org.bukkit.inventory.ItemStack
 import org.joml.Matrix4f
 
-class ItemDisplayBuilder {
 
-    var itemStack: ItemStack? = null
-    var transformation: Matrix4f? = null
-    var brightness: Int? = null
-    var glowColor: Color? = null
-    var billboard: Display.Billboard? = null
-    var viewRange: Float? = null
-    var interpolationDelay: Int? = null
-    var interpolationDuration: Int? = null
+class BlockDisplayBuilder {
 
-    constructor(other: ItemDisplayBuilder) {
-        this.itemStack = other.itemStack
+    private var material: Material? = null
+    private var blockData: BlockData? = null
+    private var transformation: Matrix4f? = null
+    private var glowColor: Color? = null
+    private var brightness: Int? = null
+    private var viewRange: Float? = null
+    private var interpolationDelay: Int? = null
+    private var interpolationDuration: Int? = null
+
+    fun BlockDisplayBuilder() {}
+
+    fun BlockDisplayBuilder(other: BlockDisplayBuilder) {
+        this.material = other.material
+        this.blockData = other.blockData
         this.transformation = other.transformation
-        this.brightness = other.brightness
         this.glowColor = other.glowColor
-        this.billboard = other.billboard
+        this.brightness = other.brightness
         this.viewRange = other.viewRange
         this.interpolationDelay = other.interpolationDelay
         this.interpolationDuration = other.interpolationDuration
     }
 
-    fun build(location: Location): ItemDisplay {
+    fun build(location: Location): BlockDisplay {
         val finalLocation = location.clone()
-        finalLocation.yaw = 0.0F
-        finalLocation.pitch = 0.0F
-        return finalLocation.getWorld().spawn(finalLocation, ItemDisplay::class.java) {
+        finalLocation.yaw = 0.0f
+        finalLocation.pitch = 0.0f
+        return location.world.spawn(finalLocation, BlockDisplay::class.java) {
             update(it)
-            it.displayWidth = 0.0F
-            it.displayHeight = 0.0F
+            it.displayWidth = 0f
+            it.displayHeight = 0f
         }
     }
 
     fun update(display: Display) {
-        if (display !is ItemDisplay) {
-            throw IllegalArgumentException("Must provide an ItemDisplay")
+        require(display is BlockDisplay) { "Must provide a BlockDisplay" }
+        if (material != null) {
+            display.block = material!!.createBlockData()
         }
-        if (itemStack != null) {
-            display.setItemStack(itemStack)
+        if (blockData != null) {
+            display.block = blockData!!
         }
         if (transformation != null) {
             display.setTransformationMatrix(transformation!!)
@@ -57,9 +62,6 @@ class ItemDisplayBuilder {
         }
         if (brightness != null) {
             display.brightness = Brightness(brightness!!, 0)
-        }
-        if (billboard != null) {
-            display.billboard = billboard!!
         }
         if (viewRange != null) {
             display.viewRange = viewRange!!
