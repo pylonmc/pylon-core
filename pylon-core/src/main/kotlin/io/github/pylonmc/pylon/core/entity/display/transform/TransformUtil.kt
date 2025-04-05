@@ -6,6 +6,7 @@ import org.joml.Vector3d
 import org.joml.Vector3f
 import kotlin.math.roundToInt
 
+
 @Suppress("unused")
 object TransformUtil {
 
@@ -57,4 +58,17 @@ object TransformUtil {
     @JvmStatic
     fun getDirection(from: Vector3d, to: Vector3d): Vector3d
         = getDisplacement(from, to).normalize()
+
+    @JvmStatic
+    fun getMidpoint(from: Location, to: Location): Location {
+        return from.clone().add(to).multiply(0.5)
+    }
+    @JvmStatic
+    fun getMidpoint(from: Vector3f, to: Vector3f): Vector3f {
+        return Vector3f(from).add(to).mul(0.5f)
+    }
+    @JvmStatic
+    fun getMidpoint(from: Vector3d, to: Vector3d): Vector3d {
+        return Vector3d(from).add(to).mul(0.5)
+    }
 }
