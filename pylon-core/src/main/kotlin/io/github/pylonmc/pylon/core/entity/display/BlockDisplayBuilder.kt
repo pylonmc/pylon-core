@@ -5,12 +5,12 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.BlockDisplay
-import org.bukkit.entity.Display
 import org.bukkit.entity.Display.Brightness
 import org.joml.Matrix4f
 
 
-class BlockDisplayBuilder {
+@Suppress("unused")
+class BlockDisplayBuilder() {
 
     private var material: Material? = null
     private var blockData: BlockData? = null
@@ -21,9 +21,7 @@ class BlockDisplayBuilder {
     private var interpolationDelay: Int? = null
     private var interpolationDuration: Int? = null
 
-    fun BlockDisplayBuilder() {}
-
-    fun BlockDisplayBuilder(other: BlockDisplayBuilder) {
+    constructor(other: BlockDisplayBuilder): this() {
         this.material = other.material
         this.blockData = other.blockData
         this.transformation = other.transformation
@@ -33,6 +31,19 @@ class BlockDisplayBuilder {
         this.interpolationDelay = other.interpolationDelay
         this.interpolationDuration = other.interpolationDuration
     }
+
+    fun material(material: Material?): BlockDisplayBuilder {
+        this.material = material
+        return this
+    }
+
+    fun blockData(blockData: BlockData?): BlockDisplayBuilder = apply { this.blockData = blockData }
+    fun transformation(transformation: Matrix4f?): BlockDisplayBuilder = apply { this.transformation = transformation }
+    fun brightness(brightness: Int): BlockDisplayBuilder = apply { this.brightness = brightness }
+    fun glow(glowColor: Color?): BlockDisplayBuilder = apply { this.glowColor = glowColor }
+    fun viewRange(viewRange: Float): BlockDisplayBuilder = apply { this.viewRange = viewRange }
+    fun interpolationDelay(interpolationDelay: Int): BlockDisplayBuilder = apply { this.interpolationDelay = interpolationDelay }
+    fun interpolationDuration(interpolationDuration: Int): BlockDisplayBuilder = apply { this.interpolationDuration = interpolationDuration }
 
     fun build(location: Location): BlockDisplay {
         val finalLocation = location.clone()
@@ -45,8 +56,7 @@ class BlockDisplayBuilder {
         }
     }
 
-    fun update(display: Display) {
-        require(display is BlockDisplay) { "Must provide a BlockDisplay" }
+    fun update(display: BlockDisplay) {
         if (material != null) {
             display.block = material!!.createBlockData()
         }
