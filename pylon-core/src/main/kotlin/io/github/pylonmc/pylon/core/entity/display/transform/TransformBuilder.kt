@@ -50,7 +50,7 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
     fun lookAlong(xFrom: Double, yFrom: Double, zFrom: Double, xTo: Double, yTo: Double, zTo: Double)
         = apply { add(LookAlong(xFrom, yFrom, zFrom, xTo, yTo, zTo)) }
 
-    fun build(): Matrix4f {
+    private fun build(): Matrix4f {
         val matrix = Matrix4f()
         while (!components.isEmpty()) {
             components.removeFirst().apply(matrix)

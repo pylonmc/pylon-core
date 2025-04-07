@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.entity.display
 
+import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.Location
@@ -40,6 +41,7 @@ class TextDisplayBuilder() {
     fun text(text: String): TextDisplayBuilder = apply { this.text = Component.text(text) }
     fun text(text: Component?): TextDisplayBuilder = apply { this.text = text }
     fun transformation(transformation: Matrix4f?): TextDisplayBuilder = apply { this.transformation = transformation }
+    fun transformation(builder: TransformBuilder): TextDisplayBuilder = apply { this.transformation = builder.buildForTextDisplay() }
     fun brightness(brightness: Int): TextDisplayBuilder = apply { this.brightness = brightness }
     fun glow(glowColor: Color?): TextDisplayBuilder = apply { this.glowColor = glowColor }
     fun viewRange(viewRange: Float): TextDisplayBuilder = apply { this.viewRange = viewRange }
@@ -54,11 +56,7 @@ class TextDisplayBuilder() {
         finalLocation.yaw = 0f
         finalLocation.pitch = 0f
 
-        return finalLocation.world.spawn(finalLocation, TextDisplay::class.java) {
-            update(it)
-            it.displayWidth = 0f
-            it.displayHeight = 0f
-        }
+        return finalLocation.world.spawn(finalLocation, TextDisplay::class.java, this::update)
     }
 
     fun update(display: TextDisplay) {

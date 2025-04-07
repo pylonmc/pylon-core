@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.entity.display
 
+import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -39,6 +40,7 @@ class BlockDisplayBuilder() {
 
     fun blockData(blockData: BlockData?): BlockDisplayBuilder = apply { this.blockData = blockData }
     fun transformation(transformation: Matrix4f?): BlockDisplayBuilder = apply { this.transformation = transformation }
+    fun transformation(builder: TransformBuilder): BlockDisplayBuilder = apply { this.transformation = builder.buildForBlockDisplay() }
     fun brightness(brightness: Int): BlockDisplayBuilder = apply { this.brightness = brightness }
     fun glow(glowColor: Color?): BlockDisplayBuilder = apply { this.glowColor = glowColor }
     fun viewRange(viewRange: Float): BlockDisplayBuilder = apply { this.viewRange = viewRange }

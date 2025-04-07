@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.entity.display
 
+import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -37,6 +38,7 @@ class ItemDisplayBuilder() {
     fun material(material: Material): ItemDisplayBuilder = apply { this.itemStack = ItemStack(material) }
     fun itemStack(itemStack: ItemStack?): ItemDisplayBuilder = apply { this.itemStack = itemStack }
     fun transformation(transformation: Matrix4f?): ItemDisplayBuilder = apply { this.transformation = transformation }
+    fun transformation(builder: TransformBuilder): ItemDisplayBuilder = apply { this.transformation = builder.buildForItemDisplay() }
     fun brightness(brightness: Int): ItemDisplayBuilder = apply { this.brightness = brightness }
     fun glow(glowColor: Color?): ItemDisplayBuilder = apply { this.glowColor = glowColor }
     fun billboard(billboard: Billboard?): ItemDisplayBuilder = apply { this.billboard = billboard }
@@ -48,11 +50,7 @@ class ItemDisplayBuilder() {
         val finalLocation = location.clone()
         finalLocation.yaw = 0.0F
         finalLocation.pitch = 0.0F
-        return finalLocation.getWorld().spawn(finalLocation, ItemDisplay::class.java) {
-            update(it)
-            it.displayWidth = 0.0F
-            it.displayHeight = 0.0F
-        }
+        return finalLocation.getWorld().spawn(finalLocation, ItemDisplay::class.java, this::update)
     }
 
     fun update(display: Display) {
