@@ -11,7 +11,6 @@ import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
-import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
@@ -108,13 +107,6 @@ internal object BlockListener : Listener {
                 event.isCancelled = true
                 return
             }
-        }
-    }
-
-    private fun breakBlock(block: Block, reason: BlockBreakContext) {
-        val drops = BlockStorage.breakBlock(block, reason) ?: return
-        for (drop in drops) {
-            block.world.dropItemNaturally(block.location.add(0.5, 0.1, 0.5), drop)
         }
     }
 
