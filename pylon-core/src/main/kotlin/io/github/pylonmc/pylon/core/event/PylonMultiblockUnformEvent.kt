@@ -1,21 +1,14 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.block.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import org.bukkit.block.Block
-import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
-/**
- * Called after a pylon block has been broken.
- */
-class PylonBlockBreakEvent(
+class PylonMultiblockUnformEvent(
     val block: Block,
     val pylonBlock: PylonBlock<*>,
-    val context: BlockBreakContext,
-) : Event(){
-
+) : Event() {
     override fun getHandlers(): HandlerList
         = handlerList
 

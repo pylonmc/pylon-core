@@ -5,6 +5,7 @@ package io.github.pylonmc.pylon.core.util.position
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.joml.Vector3i
 import java.lang.ref.WeakReference
 
 class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
@@ -54,9 +55,17 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
         return BlockPosition(world, x + other.x, y + other.y, z + other.z)
     }
 
+    operator fun plus(other: Vector3i): BlockPosition {
+        return BlockPosition(world, x + other.x, y + other.y, z + other.z)
+    }
+
     operator fun minus(other: BlockPosition): BlockPosition {
         check(world == other.world) { "Cannot subtract two BlockPositions in different worlds" }
         return BlockPosition(world, x - other.x, y - other.y, z - other.z)
+    }
+
+    operator fun minus(other: Vector3i): BlockPosition {
+        return BlockPosition(world, x + other.x, y + other.y, z + other.z)
     }
 
     operator fun times(value: Int): BlockPosition {
@@ -66,6 +75,9 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     operator fun div(value: Int): BlockPosition {
         return BlockPosition(world, x / value, y / value, z / value)
     }
+
+    val vector3i: Vector3i
+        get() = Vector3i(x, y, z)
 
     val location: Location
         get() = Location(world, x.toDouble(), y.toDouble(), z.toDouble())

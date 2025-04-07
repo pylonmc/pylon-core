@@ -8,13 +8,21 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called after a pylon block has been broken.
+ * Called before a pylon block has been broken.
  */
-class PylonBlockBreakEvent(
+class PrePylonBlockBreakEvent(
     val block: Block,
     val pylonBlock: PylonBlock<*>,
     val context: BlockBreakContext,
-) : Event(){
+) : Event(), Cancellable {
+
+    private var isCancelled = false
+
+    override fun isCancelled(): Boolean = isCancelled
+
+    override fun setCancelled(cancel: Boolean) {
+        isCancelled = cancel
+    }
 
     override fun getHandlers(): HandlerList
         = handlerList

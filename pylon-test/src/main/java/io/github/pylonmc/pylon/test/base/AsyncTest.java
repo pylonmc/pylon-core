@@ -1,9 +1,9 @@
 package io.github.pylonmc.pylon.test.base;
 
 
-import io.github.pylonmc.pylon.test.PylonTest;
-import org.bukkit.Bukkit;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
  * Executed asynchronously on the main thread (but not asynchronously to other tests)
  */
 public abstract class AsyncTest implements Test {
-    protected int getTimeoutTicks() {
+    protected static int getTimeoutTicks() {
         return 30 * 20;
     }
 
@@ -20,21 +20,20 @@ public abstract class AsyncTest implements Test {
 
     @Override
     public TestResult run() {
-        CompletableFuture<TestResult> future = new CompletableFuture<>();
+        Instant startTime = Instant.now();
 
-        Bukkit.getScheduler().runTaskAsynchronously(PylonTest.instance(), () -> {
+        CompletableFuture<TestResult> future = TestUtil.runAsync(() -> {
             try {
                 test();
             } catch (Throwable e) {
-                future.complete(onComplete(e));
-                return;
+                return onComplete(e, startTime);
             }
-            future.complete(onComplete(null));
+            return onComplete(null, startTime);
         });
 
-        Bukkit.getScheduler().runTaskLater(PylonTest.instance(), () -> {
+        TestUtil.runAsync(() -> {
             if (!future.isDone()) {
-                future.complete(onComplete(new TimeoutException("Test timed out")));
+                future.complete(onComplete(new TimeoutException("Test timed out"), startTime));
             }
         }, getTimeoutTicks());
 

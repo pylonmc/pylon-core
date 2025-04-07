@@ -27,6 +27,9 @@ import org.bukkit.event.player.PlayerTakeLecternBookEvent
 /**
  * This listener listens for various events that would indicate a Pylon block either
  * being placed, removed, or moved
+ *
+ * It also handles components of multiblocks being placed, removed, or moved (this
+ * includes vanilla blocks)
  */
 @Suppress("UnstableApiUsage")
 internal object BlockListener : Listener {
@@ -41,32 +44,37 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockBreakEvent) {
-        breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    private fun blockBurn(event: BlockBurnEvent) {
-        breakBlock(event.block, BlockBreakContext.Burned(event))
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    private fun blockRemove(event: BlockExplodeEvent) {
-        breakBlock(event.block, BlockBreakContext.Exploded(event))
-        for (block in event.blockList()) {
-            breakBlock(block, BlockBreakContext.WasExploded)
+        if (BlockStorage.isPylonBlock(event.block)) {
+            BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
+            event.isDropItems = false
         }
     }
 
     @EventHandler(ignoreCancelled = true)
+    private fun blockBurn(event: BlockBurnEvent) {
+        BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
+    }
+
+    // TODO this might be dropping vanilla blocks in place of Pylon blocks
+    @EventHandler(ignoreCancelled = true)
+    private fun blockRemove(event: BlockExplodeEvent) {
+        BlockStorage.breakBlock(event.block, BlockBreakContext.Exploded(event))
+        for (block in event.blockList()) {
+            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
+        }
+    }
+
+    // TODO this might be dropping vanilla blocks in place of Pylon blocks
+    @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
-            breakBlock(block, BlockBreakContext.WasExploded)
+            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockFadeEvent) {
-        breakBlock(event.block, BlockBreakContext.Faded(event))
+        BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
     }
 
     @EventHandler(ignoreCancelled = true)

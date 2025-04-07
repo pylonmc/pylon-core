@@ -90,7 +90,10 @@ object BlockStorage : Listener {
     }
 
     @JvmStatic
-    fun get(blockPosition: BlockPosition): PylonBlock<*>? = lockBlockRead { blocks[blockPosition] }
+    fun get(blockPosition: BlockPosition): PylonBlock<*>? {
+        require(blockPosition.chunk.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        return lockBlockRead { blocks[blockPosition] }
+    }
 
     @JvmStatic
     fun get(block: Block): PylonBlock<*>? = get(block.position)
@@ -99,28 +102,30 @@ object BlockStorage : Listener {
     fun get(location: Location): PylonBlock<*>? = get(location.block)
 
     @JvmStatic
-    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
+    fun <T> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
         return clazz.cast(block)
     }
 
     @JvmStatic
-    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
+    fun <T> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
 
     @JvmStatic
-    fun <T : PylonBlock<*>> getAs(clazz: Class<T>, location: Location): T? =
+    fun <T> getAs(clazz: Class<T>, location: Location): T? =
         getAs(clazz, BlockPosition(location))
 
-    inline fun <reified T : PylonBlock<*>> getAs(blockPosition: BlockPosition): T? =
+    inline fun <reified T> getAs(blockPosition: BlockPosition): T? =
         getAs(T::class.java, blockPosition)
 
-    inline fun <reified T : PylonBlock<*>> getAs(block: Block): T? = getAs(T::class.java, block)
+    inline fun <reified T> getAs(block: Block): T? = getAs(T::class.java, block)
 
-    inline fun <reified T : PylonBlock<*>> getAs(location: Location): T? = getAs(T::class.java, location)
+    inline fun <reified T> getAs(location: Location): T? = getAs(T::class.java, location)
 
     @JvmStatic
-    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> =
-        lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
+    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> {
+        require(chunkPosition.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
+        return lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
+    }
 
     @JvmStatic
     fun getById(id: NamespacedKey): Collection<PylonBlock<*>> =
@@ -133,10 +138,12 @@ object BlockStorage : Listener {
         }
 
     @JvmStatic
-    fun isPylonBlock(blockPosition: BlockPosition): Boolean = get(blockPosition) != null
+    fun isPylonBlock(blockPosition: BlockPosition): Boolean
+        = (blockPosition.chunk.isLoaded) && get(blockPosition) != null
 
     @JvmStatic
-    fun isPylonBlock(block: Block): Boolean = get(block) != null
+    fun isPylonBlock(block: Block): Boolean
+        = (block.position.chunk.isLoaded) && get(block) != null
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -152,10 +159,12 @@ object BlockStorage : Listener {
         schema: PylonBlockSchema,
         context: BlockCreateContext = BlockCreateContext.Default
     ): PylonBlock<*>? {
+        require(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
+
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
                 as PylonBlock<*>
-        val event = PylonBlockPlaceEvent(blockPosition.block, block, context)
+        val event = PrePylonBlockPlaceEvent(blockPosition.block, block, context)
         event.callEvent()
         if (event.isCancelled) return null
 
@@ -166,6 +175,9 @@ object BlockStorage : Listener {
             blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
+
+        PylonBlockPlaceEvent(blockPosition.block, block, context).callEvent()
+
         return block
     }
 
@@ -211,12 +223,14 @@ object BlockStorage : Listener {
     fun breakBlock(
         blockPosition: BlockPosition,
         context: BlockBreakContext = BlockBreakContext.PluginBreak
-    ): List<ItemStack>? {
-        val block = get(blockPosition) ?: return null
+    ) {
+        require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
-        val event = PylonBlockBreakEvent(blockPosition.block, block, context)
+        val block = get(blockPosition) ?: return
+
+        val event = PrePylonBlockBreakEvent(blockPosition.block, block, context)
         event.callEvent()
-        if (event.isCancelled) return null
+        if (event.isCancelled) return
 
         val drops = mutableListOf<ItemStack>()
         if (context.normallyDrops) {
@@ -237,7 +251,11 @@ object BlockStorage : Listener {
             block.postBreak()
         }
 
-        return drops
+        for (drop in drops) {
+            block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
+        }
+
+        PylonBlockBreakEvent(blockPosition.block, block, context).callEvent()
     }
 
     /**
@@ -298,7 +316,7 @@ object BlockStorage : Listener {
             PylonBlockLoadEvent(block.block, block).callEvent()
         }
 
-        PylonChunkBlocksLoadEvent(event.chunk, blocks.values.toList()).callEvent()
+        PylonChunkBlocksLoadEvent(event.chunk, chunkBlocks.toList()).callEvent()
     }
 
     @EventHandler
@@ -320,7 +338,7 @@ object BlockStorage : Listener {
                 PylonBlockUnloadEvent(block.block, block).callEvent()
             }
 
-            PylonChunkBlocksUnloadEvent(event.chunk, blocks.values.toList()).callEvent()
+            PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
         })
     }
 
