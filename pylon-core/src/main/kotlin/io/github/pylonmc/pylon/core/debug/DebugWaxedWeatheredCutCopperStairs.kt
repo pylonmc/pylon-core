@@ -26,8 +26,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     ItemInstance::class.java,
     ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
             .name("<red>Debug Waxed Weathered Cut Copper Stairs")
-            .lore(LoreBuilder().instruction("Right click").text(" a block to view its Pylon data"))
-            .lore(LoreBuilder().instruction("Right click").text(" an entity to view its Pylon data"))
+            .lore(LoreBuilder().instructionLine("Right click", "a block or entity to view its Pylon data"))
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
 ) {
