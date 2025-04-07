@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.test.item;
 
-import io.github.pylonmc.pylon.core.item.ItemStackBuilder;
 import io.github.pylonmc.pylon.core.item.PylonItemSchema;
 import io.github.pylonmc.pylon.core.item.SimplePylonItem;
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;

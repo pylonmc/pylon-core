@@ -17,6 +17,11 @@ interface PylonAddon : Keyed {
 
     val languages: Set<Locale>
 
+    /**
+     * The display name used, for example, at the bottom of items to show which addon an item is from
+     */
+    val displayName: String
+
     override fun getKey(): NamespacedKey
             = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
 
@@ -27,11 +32,6 @@ interface PylonAddon : Keyed {
         PylonRegistry.ADDONS.register(this)
         PylonLanguageService.register(this)
     }
-
-    /**
-     * The display name used, for example, at the bottom of items to show which addon an item is from
-     */
-    fun displayName(): String
 
     /**
      * Merges config from resources to the Pylon config directory.

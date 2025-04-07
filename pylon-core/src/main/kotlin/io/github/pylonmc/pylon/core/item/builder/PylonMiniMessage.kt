@@ -1,6 +1,6 @@
 @file:JvmName("PylonMiniMessage")
 
-package io.github.pylonmc.pylon.core.item
+package io.github.pylonmc.pylon.core.item.builder
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor

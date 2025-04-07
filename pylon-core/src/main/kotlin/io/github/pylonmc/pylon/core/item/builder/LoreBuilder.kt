@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.item
+package io.github.pylonmc.pylon.core.item.builder
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.util.format
@@ -6,8 +6,6 @@ import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.github.pylonmc.pylon.core.util.toMiniMessage
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 
 open class LoreBuilder {
@@ -75,7 +73,7 @@ open class LoreBuilder {
         components.add("")
     }
 
-    internal fun addon(addon: PylonAddon) = text("<blue><italic>" + addon.displayName() + "</italic></blue>")
+    internal fun addon(addon: PylonAddon) = text("<blue><italic>" + addon.displayName + "</italic></blue>")
 
     open fun build(): List<Component> {
         val list = components.map { fromMiniMessage(it) }.toMutableList()

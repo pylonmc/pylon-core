@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.item
+package io.github.pylonmc.pylon.core.item.builder
 
 object Quantity {
     const val NONE = ""

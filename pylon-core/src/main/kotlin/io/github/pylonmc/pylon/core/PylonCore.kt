@@ -84,7 +84,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
     override val javaPlugin: JavaPlugin
         get() = pluginInstance
 
-    override fun displayName() = "Core"
+    override val displayName = "Core"
 
     override val languages: Set<Locale> = setOf(
         Locale.ENGLISH,
