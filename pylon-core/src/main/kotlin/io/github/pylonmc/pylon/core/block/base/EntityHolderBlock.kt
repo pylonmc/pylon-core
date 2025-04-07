@@ -15,15 +15,16 @@ import java.util.UUID
  *
  * Note that the Pylon entity may be loaded when the block is not loaded (or vice versa).
  */
-interface EntityHolderBlock<out S : PylonEntitySchema, out E: Entity> : BreakHandler {
+interface EntityHolderBlock<out E : PylonEntity<*, *>> : BreakHandler {
 
     /**
      * Must be set in your create constructor when you spawn in the entity.
      */
     var entityUuid: UUID
 
-    val entity: PylonEntity<S, E>?
-        get() = EntityStorage.getAs(entityUuid)
+    @Suppress("UNCHECKED_CAST") // Unfortunately cannot use getAs here due to reified constraints
+    val entity: E?
+        get() = EntityStorage.get(entityUuid) as E
 
     fun isEntityLoaded()
         = entity != null
