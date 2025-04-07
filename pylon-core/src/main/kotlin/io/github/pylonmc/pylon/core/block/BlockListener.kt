@@ -1,13 +1,14 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.block.base.PlayerInteractBlock
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
-import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.player.PlayerInteractEvent
 
 /**
  * This listener listens for various events that would indicate a Pylon block either
@@ -92,6 +93,15 @@ internal object BlockListener : Listener {
                 event.isCancelled = true
                 return
             }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private fun playerInteract(event: PlayerInteractEvent) {
+        val block = event.clickedBlock ?: return
+        val pylonBlock = BlockStorage.get(block) ?: return
+        if (pylonBlock is PlayerInteractBlock) {
+            pylonBlock.onInteract(event)
         }
     }
 }
