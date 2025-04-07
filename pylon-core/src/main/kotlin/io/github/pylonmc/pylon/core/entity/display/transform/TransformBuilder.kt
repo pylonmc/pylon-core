@@ -8,7 +8,7 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
 
     constructor(): this(ArrayDeque())
 
-    constructor(other: TransformBuilder): this(other.components)
+    constructor(other: TransformBuilder): this(ArrayDeque(other.components))
 
     fun add(component: TransformComponent) = apply {
         components.addLast(component)
