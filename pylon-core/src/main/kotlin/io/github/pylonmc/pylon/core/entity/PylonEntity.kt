@@ -24,7 +24,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
 
     companion object {
 
-        private val pylonEntityKeyKey = pylonKey("key")
+        private val pylonEntityKeyKey = pylonKey("entity_schema_key")
 
         @JvmSynthetic
         internal fun serialize(pylonEntity: PylonEntity<*, *>) {

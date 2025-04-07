@@ -118,10 +118,11 @@ object EntityStorage : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    private fun onEntityDeath(event: EntityDeathEvent)
-        = get(event.entity)?.let {
+    private fun onEntityDeath(event: EntityDeathEvent) {
+        get(event.entity)?.let {
             PylonEntityDeathEvent(it, event).callEvent()
         }
+    }
 
     @JvmSynthetic
     internal fun cleanup(addon: PylonAddon) = lockEntityWrite {
