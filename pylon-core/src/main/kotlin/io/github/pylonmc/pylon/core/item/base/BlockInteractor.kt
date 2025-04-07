@@ -6,5 +6,5 @@ interface BlockInteractor {
     /**
      * Called when a player clicks a block while holding the item
      */
-    fun onUsedToClickBlock(event: PlayerInteractEvent) {}
+    fun onUsedToClickBlock(event: PlayerInteractEvent)
 }
