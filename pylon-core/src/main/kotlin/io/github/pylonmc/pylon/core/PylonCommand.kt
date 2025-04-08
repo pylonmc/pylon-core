@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -31,6 +32,17 @@ object PylonCommand : BaseCommand() {
         val stack = pylonItem.itemStack
         stack.amount = amount
         player.inventory.addItem(stack)
+    }
+
+    @Subcommand("debug")
+    @Description("Gives you the pylon debugging item to view pylon data")
+    @CommandPermission("pylon.command.debug")
+    fun debug() {
+        if(!currentCommandIssuer.isPlayer){
+            currentCommandIssuer.sendMessage("This should only be run on a client!")
+            return
+        }
+        currentCommandIssuer.getIssuer<Player>().give(DebugWaxedWeatheredCutCopperStairs.itemStack)
     }
 
     @Private
