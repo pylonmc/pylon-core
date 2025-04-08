@@ -4,14 +4,18 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.World
 import org.bukkit.entity.Player
+import org.jetbrains.annotations.NotNull
 
 @Suppress("unused")
 @CommandAlias("pylon|py")
@@ -31,6 +35,22 @@ object PylonCommand : BaseCommand() {
         val stack = pylonItem.itemStack
         stack.amount = amount
         player.inventory.addItem(stack)
+    }
+
+    @Subcommand("setblock")
+    @CommandCompletion("0 0 0 @blocks @worlds")
+    @Description("Set a block to be a pylon block")
+    @CommandPermission("pylon.command.setblock")
+    fun setBlock(x: Int, y: Int, z: Int, block: NamespacedKey, @Default @NotNull world: World) {
+        val location = BlockPosition(world, x, y, z)
+        location.world!!.loadChunk(location.world!!.getChunkAt(location.block))
+        location.block.setType(Material.AIR)
+        val pylonBlock = PylonRegistry.BLOCKS[block]
+        if(pylonBlock == null) {
+            currentCommandIssuer.sendMessage("Block not found: $block")
+            return
+        }
+        BlockStorage.placeBlock(location, pylonBlock)
     }
 
     @Private
