@@ -16,6 +16,12 @@ open class PylonItemSchema(
     private val template: ItemStack
 ) : Keyed, RegistryHandler {
 
+    constructor(
+        key: NamespacedKey,
+        itemClass: Class<out PylonItem<PylonItemSchema>>,
+        templateSupplier: (NamespacedKey) -> ItemStack
+    ) : this(key, itemClass, templateSupplier(key))
+
     val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
 

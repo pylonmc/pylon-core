@@ -23,7 +23,7 @@ internal class AddonTranslator(private val addon: PylonAddon) : Translator {
         Config(pluginInstance.dataFolder.resolve(path))
     }
 
-    private val translationCache = mutableMapOf<String, Component>()
+    private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()
 
     private val languageRanges = WeakHashMap<Locale, List<Locale.LanguageRange>>()
 
@@ -31,7 +31,7 @@ internal class AddonTranslator(private val addon: PylonAddon) : Translator {
 
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
         val key = component.key()
-        val translation = translationCache.getOrPut(key) {
+        val translation = translationCache.getOrPut(locale to key) {
             if (!key.startsWith("pylon.")) return null
             val (_, addon, key) = key.split('.', limit = 3)
             if (addon != addonNamespace) return null

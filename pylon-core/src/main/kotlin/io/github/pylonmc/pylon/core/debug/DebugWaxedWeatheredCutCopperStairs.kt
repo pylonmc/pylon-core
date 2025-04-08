@@ -27,11 +27,13 @@ import org.bukkit.inventory.ItemStack
 object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     pylonKey("debug_waxed_weathered_cut_copper_stairs"),
     ItemInstance::class.java,
-    ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
-            .name("<red><lang:pylon.pyloncore.item.debug_waxed_weathered_cut_copper_stairs.name>")
-            .lore(LoreBuilder().instruction("Right click").text(" a block to view its Pylon block data"))
+    { key ->
+        ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
+            .defaultTranslatableName(key)
+            .defaultTranslatableLore(key, 2)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
+    }
 ) {
 
     class ItemInstance(schema: DebugWaxedWeatheredCutCopperStairs, item: ItemStack) :
