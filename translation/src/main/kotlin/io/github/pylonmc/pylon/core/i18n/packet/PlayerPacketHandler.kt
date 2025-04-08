@@ -1,11 +1,16 @@
+@file:Suppress("UnstableApiUsage")
+
 package io.github.pylonmc.pylon.core.i18n.packet
 
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
-import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ItemLore
+import net.kyori.adventure.text.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
@@ -13,6 +18,7 @@ import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import org.bukkit.craftbukkit.inventory.CraftItemStack
+import java.util.WeakHashMap
 
 // Much inspiration has been taken from https://github.com/GuizhanCraft/SlimefunTranslation
 // with permission from the author
@@ -65,9 +71,23 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     }
 
     private fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
-    private fun resetItem(item: ItemStack) = handleItem(item, PylonLanguageService::reset)
+    private fun resetItem(item: ItemStack) = handleItem(item, ::reset)
 
     companion object {
         private const val HANDLER_NAME = "pylon_packet_handler"
     }
+}
+
+private val names = WeakHashMap<PylonItemSchema, Component>()
+private val lores = WeakHashMap<PylonItemSchema, ItemLore>()
+
+private fun reset(item: PylonItem<*>) {
+    val name = names.getOrPut(item.schema) {
+        item.schema.itemStack.getData(DataComponentTypes.ITEM_NAME)!!
+    }
+    val lore = lores.getOrPut(item.schema) {
+        item.schema.itemStack.getData(DataComponentTypes.LORE)!!
+    }
+    item.stack.setData(DataComponentTypes.ITEM_NAME, name)
+    item.stack.setData(DataComponentTypes.LORE, lore)
 }
