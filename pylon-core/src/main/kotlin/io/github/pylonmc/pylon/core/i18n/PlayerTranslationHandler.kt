@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.i18n
 
+import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -20,11 +21,14 @@ class PlayerTranslationHandler(val player: Player) {
         val placeholders = item.getPlaceholders()
         item.stack.editData(DataComponentTypes.ITEM_NAME) { it.translateComponent(placeholders) }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
-            val newLore = lore.lines().mapTo(mutableListOf()) {
+            val translated = GlobalTranslator.render(lore.lines().singleOrNull() ?: return, player.locale())
+            val wrapped = LineWrapEncoder.encode(translated)
+            val newWrapped = wrapped.copy(text = listOf(wrapped.text.first().first().toString(), wrapped.text.first().drop(1)))
+            val newLore = newWrapped.toComponentLines().mapTo(mutableListOf()) {
                 Component.text()
                     .decoration(TextDecoration.ITALIC, false)
                     .color(NamedTextColor.GRAY)
-                    .append(it.translateComponent(placeholders))
+                    .append(it)
                     .build()
             }
             newLore.add(

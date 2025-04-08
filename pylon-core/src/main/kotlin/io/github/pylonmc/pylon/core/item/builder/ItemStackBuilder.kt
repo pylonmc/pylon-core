@@ -64,12 +64,8 @@ open class ItemStackBuilder(private val stack: ItemStack) {
 
     fun lore(loreBuilder: LoreBuilder) = lore(*loreBuilder.build().toTypedArray())
 
-    fun defaultTranslatableLore(key: NamespacedKey, lines: Int) =
-        lore(
-            *(0 until lines).map { i ->
-                Component.translatable("pylon.${key.namespace}.item.${key.key}.lore.$i")
-            }.toTypedArray()
-        )
+    fun defaultTranslatableLore(key: NamespacedKey) =
+        lore(Component.translatable("pylon.${key.namespace}.item.${key.key}.lore"))
 
     fun build(): ItemStack = stack.clone()
 }

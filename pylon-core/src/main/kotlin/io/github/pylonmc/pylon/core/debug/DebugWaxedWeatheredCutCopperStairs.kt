@@ -30,7 +30,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     { key ->
         ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
             .defaultTranslatableName(key)
-            .defaultTranslatableLore(key, 2)
+            .defaultTranslatableLore(key)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
     }
