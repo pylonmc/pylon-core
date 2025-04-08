@@ -13,12 +13,12 @@ import kotlin.math.min
 // Please do not doubt past Seggan's wisdom. All code in here has been written to
 // perfection and should not be touched again. No, present Seggan does not understand
 // how it works either, only past Seggan does. Don't touch it I said.
-data class LineWrapRepresentation(val text: List<String>, val styles: Map<Style, IntRange>) {
+data class LineWrapRepresentation(val lines: List<String>, val styles: Map<Style, IntRange>) {
 
     fun toComponentLines(): List<TextComponent> {
         val components = mutableListOf<TextComponent>()
         var pos = 0
-        for (line in text) {
+        for (line in lines) {
             val range = 0 until line.length
             val styles = getLineStyles(range + pos)
             components.add(makeComponent(line, range, Style.empty(), styles))

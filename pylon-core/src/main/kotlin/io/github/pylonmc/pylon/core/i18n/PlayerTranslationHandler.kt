@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core.i18n
 
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
+import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -17,14 +18,16 @@ import org.bukkit.inventory.ItemStack
 
 class PlayerTranslationHandler(val player: Player) {
 
+    private val wrapper = TextWrapper(limit = 64)
+
     fun handleItem(item: PylonItem<*>) {
         val placeholders = item.getPlaceholders()
         item.stack.editData(DataComponentTypes.ITEM_NAME) { it.translateComponent(placeholders) }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
-            val translated = GlobalTranslator.render(lore.lines().singleOrNull() ?: return, player.locale())
-            val wrapped = LineWrapEncoder.encode(translated)
-            val newWrapped = wrapped.copy(text = listOf(wrapped.text.first().first().toString(), wrapped.text.first().drop(1)))
-            val newLore = newWrapped.toComponentLines().mapTo(mutableListOf()) {
+            val translated = lore.lines().singleOrNull()?.translateComponent(placeholders) ?: return@editData lore
+            val encoded = LineWrapEncoder.encode(translated)
+            val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
+            val newLore = wrapped.toComponentLines().mapTo(mutableListOf()) {
                 Component.text()
                     .decoration(TextDecoration.ITALIC, false)
                     .color(NamedTextColor.GRAY)

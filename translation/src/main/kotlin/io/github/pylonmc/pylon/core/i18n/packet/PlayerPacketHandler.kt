@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.i18n.packet
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
@@ -19,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import java.util.WeakHashMap
+import java.util.logging.Level
 
 // Much inspiration has been taken from https://github.com/GuizhanCraft/SlimefunTranslation
 // with permission from the author
@@ -67,7 +69,17 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 
     private inline fun handleItem(item: ItemStack, handler: (PylonItem<*>) -> Unit) {
         if (item.isEmpty) return
-        handler(PylonItem.fromStack(CraftItemStack.asCraftMirror(item)) ?: return)
+        try {
+            handler(PylonItem.fromStack(CraftItemStack.asCraftMirror(item)) ?: return)
+        } catch (e: Throwable) {
+            // Log the error nicely instead of kicking the player off
+            // and causing two days of headache. True story.
+            PylonCore.instance?.logger?.log(
+                Level.SEVERE,
+                "An error occurred while handling item translations",
+                e
+            )
+        }
     }
 
     private fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
