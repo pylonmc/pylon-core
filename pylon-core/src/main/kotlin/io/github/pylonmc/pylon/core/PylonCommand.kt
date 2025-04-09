@@ -46,7 +46,7 @@ object PylonCommand : BaseCommand() {
         location.world!!.loadChunk(location.world!!.getChunkAt(location.block))
         location.block.setType(Material.AIR)
         val pylonBlock = PylonRegistry.BLOCKS[block]
-        if(pylonBlock == null) {
+        if (pylonBlock == null) {
             currentCommandIssuer.sendMessage("Block not found: $block")
             return
         }
