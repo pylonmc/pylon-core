@@ -16,6 +16,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.jetbrains.annotations.NotNull
+import kotlin.math.roundToInt
 
 @Suppress("unused")
 @CommandAlias("pylon|py")
@@ -51,6 +52,19 @@ object PylonCommand : BaseCommand() {
             return
         }
         BlockStorage.placeBlock(location, pylonBlock)
+    }
+
+    @Subcommand("setblock")
+    @CommandCompletion("@blocks")
+    @Description("Set a block to be a pylon block")
+    @CommandPermission("pylon.command.setblock")
+    fun setBlock(block: NamespacedKey) {
+        if (!currentCommandIssuer.isPlayer) {
+            currentCommandIssuer.sendMessage("This variant of setBlock may only be called on a client! Use /py setblock x y z $block world")
+            return
+        }
+        val player = currentCommandIssuer.getIssuer<Player>()
+        setBlock(player.x.roundToInt(), player.y.roundToInt(), player.z.roundToInt(), block, player.world)
     }
 
     @Private
