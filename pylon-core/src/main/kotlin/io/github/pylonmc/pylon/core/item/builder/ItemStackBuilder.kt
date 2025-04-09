@@ -14,9 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import java.util.function.Consumer
 
 @Suppress("UnstableApiUsage")
-open class ItemStackBuilder(private val stack: ItemStack) {
-
-    constructor(material: Material) : this(ItemStack(material))
+open class ItemStackBuilder private constructor(private val stack: ItemStack) {
 
     fun amount(amount: Int) = apply {
         stack.amount = amount
@@ -62,10 +60,30 @@ open class ItemStackBuilder(private val stack: ItemStack) {
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
-    fun lore(loreBuilder: LoreBuilder) = lore(*loreBuilder.build().toTypedArray())
-
     fun defaultTranslatableLore(key: NamespacedKey) =
         lore(Component.translatable("pylon.${key.namespace}.item.${key.key}.lore"))
 
     fun build(): ItemStack = stack.clone()
+
+    companion object {
+        @JvmStatic
+        fun of(stack: ItemStack): ItemStackBuilder {
+            return ItemStackBuilder(stack)
+        }
+
+        @JvmStatic
+        fun of(material: Material): ItemStackBuilder {
+            return of(ItemStack(material))
+        }
+
+        /**
+         * Returns an [ItemStackBuilder] with name and lore set to the default translation keys
+         */
+        @JvmStatic
+        fun defaultBuilder(material: Material, key: NamespacedKey): ItemStackBuilder {
+            return of(material)
+                .defaultTranslatableName(key)
+                .defaultTranslatableLore(key)
+        }
+    }
 }

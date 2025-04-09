@@ -9,18 +9,19 @@ import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
+import java.util.function.Function
 
 open class PylonItemSchema(
     private val key: NamespacedKey,
     @JvmSynthetic internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
-    private val template: ItemStack
+    @JvmField protected val template: ItemStack
 ) : Keyed, RegistryHandler {
 
     constructor(
         key: NamespacedKey,
         itemClass: Class<out PylonItem<PylonItemSchema>>,
-        templateSupplier: (NamespacedKey) -> ItemStack
-    ) : this(key, itemClass, templateSupplier(key))
+        templateSupplier: Function<NamespacedKey, ItemStack>
+    ) : this(key, itemClass, templateSupplier.apply(key))
 
     val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")

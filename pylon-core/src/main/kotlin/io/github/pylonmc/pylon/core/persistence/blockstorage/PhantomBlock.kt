@@ -62,7 +62,7 @@ class PhantomBlock(
     companion object {
         internal val key = NamespacedKey(pluginInstance, "phantom_block")
 
-        private val errorItem = ItemStackBuilder(Material.ECHO_SHARD)
+        private val errorItem = ItemStackBuilder.of(Material.ECHO_SHARD)
             .name("<red>Error")
             .lore(
                 "<red>This item dropped from a",

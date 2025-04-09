@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static final boolean MANUAL_SHUTDOWN = Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"));
 
     @Override
-    public @NotNull String displayName() {
+    public @NotNull String getDisplayName() {
         return "Pylon Test";
     }
 
@@ -186,6 +188,11 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     @Override
     public @NotNull JavaPlugin getJavaPlugin() {
         return this;
+    }
+
+    @Override
+    public @NotNull Set<@NotNull Locale> getLanguages() {
+        return Set.of();
     }
 
     public static @NotNull NamespacedKey key(String key) {

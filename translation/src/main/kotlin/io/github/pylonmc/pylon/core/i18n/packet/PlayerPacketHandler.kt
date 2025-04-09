@@ -26,7 +26,8 @@ import java.util.logging.Level
 // with permission from the author
 class PlayerPacketHandler(private val player: ServerPlayer, private val handler: PlayerTranslationHandler) {
 
-    private val channel = player.connection.connection.channel
+    private val connection = player.connection
+    private val channel = connection.connection.channel
 
     fun register() {
         channel.pipeline().addBefore("packet_handler", HANDLER_NAME, PacketHandler())

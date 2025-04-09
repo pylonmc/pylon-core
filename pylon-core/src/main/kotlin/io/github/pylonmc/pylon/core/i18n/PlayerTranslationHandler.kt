@@ -24,15 +24,18 @@ class PlayerTranslationHandler(val player: Player) {
         val placeholders = item.getPlaceholders()
         item.stack.editData(DataComponentTypes.ITEM_NAME) { it.translateComponent(placeholders) }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
-            val translated = lore.lines().singleOrNull()?.translateComponent(placeholders) ?: return@editData lore
-            val encoded = LineWrapEncoder.encode(translated)
-            val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
-            val newLore = wrapped.toComponentLines().mapTo(mutableListOf()) {
-                Component.text()
-                    .decoration(TextDecoration.ITALIC, false)
-                    .color(NamedTextColor.GRAY)
-                    .append(it)
-                    .build()
+            val translated = lore.lines().singleOrNull()?.translateComponent(placeholders)
+            val newLore = mutableListOf<Component>()
+            if (translated != null) {
+                val encoded = LineWrapEncoder.encode(translated)
+                val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
+                wrapped.toComponentLines().mapTo(newLore) {
+                    Component.text()
+                        .decoration(TextDecoration.ITALIC, false)
+                        .color(NamedTextColor.GRAY)
+                        .append(it)
+                        .build()
+                }
             }
             newLore.add(
                 Component.text(item.schema.addon.displayName)

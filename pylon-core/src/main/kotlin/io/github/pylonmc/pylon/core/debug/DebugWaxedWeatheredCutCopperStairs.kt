@@ -28,9 +28,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     pylonKey("debug_waxed_weathered_cut_copper_stairs"),
     ItemInstance::class.java,
     { key ->
-        ItemStackBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS)
-            .defaultTranslatableName(key)
-            .defaultTranslatableLore(key)
+        ItemStackBuilder.defaultBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, key)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
     }

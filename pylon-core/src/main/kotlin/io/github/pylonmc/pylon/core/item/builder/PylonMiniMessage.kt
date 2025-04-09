@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.Context
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.Modifying
@@ -18,10 +17,9 @@ val customMiniMessage = MiniMessage.builder()
     .tags(TagResolver.standard())
     .editTags {
         it.tag("arrow", ::arrow)
-        it.tag("lore", Tag.styling(TextDecoration.ITALIC.withState(false), NamedTextColor.GRAY))
         it.tag(setOf("instruction", "insn")) { _, _ -> Tag.styling(TextColor.color(0xf9d104)) }
         it.tag(setOf("attribute", "attr"), ::attr)
-        it.tag(setOf("quantity", "q"), ::quantity)
+        // No break space
         it.tag(setOf("nbsp", "nb"), ::nbsp)
     }
     .strict(false)
@@ -41,23 +39,18 @@ private fun attr(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
     )
 }
 
-private fun quantity(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
-    val name = args.popOr("Quantity name not present").value()
-    val quantity = Quantity.byName(name) ?: throw ctx.newException("Quantity '$name' not found", args)
-    return Tag.inserting(ctx.deserialize(quantity))
-}
-
 @Suppress("unused")
 private fun nbsp(args: ArgumentQueue, ctx: Context): Tag {
-    val replacementConfig = TextReplacementConfig.builder()
-        .match(" ")
-        .replacement(Typography.nbsp.toString())
-        .build()
     return Modifying { current, depth ->
-        if (depth != 0) Component.empty()
-        else current.replaceText(replacementConfig)
+        if (depth == 0) current.replaceText(nbspReplacement)
+        else Component.empty()
     }
 }
+
+private val nbspReplacement = TextReplacementConfig.builder()
+    .match(" ")
+    .replacement(Typography.nbsp.toString())
+    .build()
 
 private fun parseColor(color: String): TextColor {
     val theOnlyTrueWayToSpellGray = color.replace("grey", "gray")
