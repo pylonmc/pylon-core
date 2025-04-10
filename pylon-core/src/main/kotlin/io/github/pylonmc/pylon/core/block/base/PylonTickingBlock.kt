@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
-interface Ticking {
+interface PylonTickingBlock {
 
     val isAsync: Boolean
         get() = false
