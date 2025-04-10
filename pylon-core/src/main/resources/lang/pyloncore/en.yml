@@ -1,4 +1,10 @@
 item:
+  error_item:
+    name: "<red>Error"
+    lore: |-
+      <red>This item dropped from a block that, for some reason, failed to load
+      <red>Errored block:</red> <yellow>%block%
+
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
     lore: "<insn>Right click</insn> a block to view its Pylon block data"
