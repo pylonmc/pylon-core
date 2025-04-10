@@ -8,7 +8,7 @@ class LineWrapEncoder private constructor() {
 
     private var pos = 0
 
-    private val styles = mutableMapOf<Style, IntRange>()
+    private val styles = mutableMapOf<IntRange, Style>()
     private val lineBuilders = mutableListOf<StringBuilder>(StringBuilder())
 
     private fun encode(component: Component) {
@@ -24,7 +24,7 @@ class LineWrapEncoder private constructor() {
         for (child in component.children()) {
             encode(child)
         }
-        styles[component.style()] = startPos until pos
+        styles.merge(startPos until pos, component.style(), Style::merge)
     }
 
     companion object {

@@ -13,7 +13,7 @@ import kotlin.math.min
 // Please do not doubt past Seggan's wisdom. All code in here has been written to
 // perfection and should not be touched again. No, present Seggan does not understand
 // how it works either, only past Seggan does. Don't touch it I said.
-data class LineWrapRepresentation(val lines: List<String>, val styles: Map<Style, IntRange>) {
+data class LineWrapRepresentation(val lines: List<String>, val styles: Map<IntRange, Style>) {
 
     fun toComponentLines(): List<TextComponent> {
         val components = mutableListOf<TextComponent>()
@@ -32,7 +32,7 @@ data class LineWrapRepresentation(val lines: List<String>, val styles: Map<Style
         val subStyles = styles.filter { (range, style) -> range in thisRange && style != thisStyle }
         if (subStyles.isEmpty()) return component.content(line.substring(thisRange)).build()
 
-        var lastEnd = 0
+        var lastEnd = thisRange.first
         for ((subRange, subStyle) in subStyles) {
             if (lastEnd < subRange.first) {
                 component.append(Component.text(line.substring(lastEnd, subRange.first)))
@@ -40,10 +40,8 @@ data class LineWrapRepresentation(val lines: List<String>, val styles: Map<Style
             }
             if (lastEnd <= subRange.endInclusive) {
                 component.append(makeComponent(line, subRange, subStyle, styles))
-            } else {
-                continue
+                lastEnd = subRange.endInclusive + 1
             }
-            lastEnd = subRange.endInclusive + 1
         }
         if (lastEnd <= thisRange.endInclusive) {
             component.append(Component.text(line.substring(lastEnd, thisRange.endInclusive + 1)))
@@ -53,17 +51,13 @@ data class LineWrapRepresentation(val lines: List<String>, val styles: Map<Style
 
     private fun getLineStyles(lineRange: IntRange): List<Pair<IntRange, Style>> {
         return styles
-            .filterValues { it overlaps lineRange }
-            // Restrict to line
-            .mapValues { (_, range) ->
+            .filterKeys { it overlaps lineRange }
+            .mapKeys { (range, _) ->
                 max(range.start, lineRange.start)..min(range.endInclusive, lineRange.endInclusive)
             }
-            .filterValues { !it.isEmpty() }
-            // Shift back to line
-            .map { (style, range) -> (range - lineRange.first) to style }
-            // Fold overlapping ranges
-            .groupBy { it.first }
-            .map { (range, styles) -> range to styles.fold(Style.empty()) { acc, (_, style) -> acc.merge(style) }}
+            .filterKeys { !it.isEmpty() }
+            .mapKeys { (range, _) -> range - lineRange.first }
+            .toList()
             .sortedWith(compareBy<Pair<IntRange, Style>> { it.first.first }.thenByDescending { it.first.last })
     }
 }
