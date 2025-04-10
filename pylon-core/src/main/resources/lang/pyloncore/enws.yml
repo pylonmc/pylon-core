@@ -4,7 +4,7 @@ item:
     lore: "<insn>Strike with thy right hand</insn> yon block, and its Pylon lore shall be revealed"
 
 quantity:
-  blocks: "blocks"
+  blocks: " blocks"
   seconds: "s"
   hearts: "❤"
   percent: "%"

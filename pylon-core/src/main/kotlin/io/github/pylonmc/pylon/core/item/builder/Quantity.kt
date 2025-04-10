@@ -1,21 +1,30 @@
 package io.github.pylonmc.pylon.core.item.builder
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
+
 object Quantity {
-    const val NONE = ""
-    const val BLOCKS = "<#1eaa56>blocks</#1eaa56>"
-    const val SECONDS = "<#c9c786>s</#c9c786>"
-    const val HEARTS = "<#db3b43>\u2764</#db3b43>"
-    const val PERCENT = "<#a0cb29>%</#a0cb29>"
+
+    private val quantities = mutableMapOf<String, Component>()
+
+    @JvmField
+    val BLOCKS = create("blocks", "pylon.pyloncore.quantity.blocks", TextColor.color(0x1eaa56))
+
+    @JvmField
+    val SECONDS = create("seconds", "pylon.pyloncore.quantity.seconds", TextColor.color(0xc9c786))
+
+    @JvmField
+    val HEARTS = create("hearts", "pylon.pyloncore.quantity.hearts", TextColor.color(0xdb3b43))
+
+    @JvmField
+    val PERCENT = create("percent", "pylon.pyloncore.quantity.percent", TextColor.color(0xa0cb29))
 
     @JvmStatic
-    fun byName(name: String): String? {
-        return when (name) {
-            "none" -> NONE
-            "blocks" -> BLOCKS
-            "seconds" -> SECONDS
-            "hearts" -> HEARTS
-            "percent" -> PERCENT
-            else -> null
-        }
-    }
+    fun byName(name: String): Component? = quantities[name.lowercase()]
+
+    @JvmStatic
+    fun create(name: String, translationKey: String, color: TextColor): Component =
+        Component.translatable(translationKey)
+            .color(color)
+            .also { quantities[name] = it }
 }

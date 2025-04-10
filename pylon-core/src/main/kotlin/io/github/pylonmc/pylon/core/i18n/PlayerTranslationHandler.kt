@@ -47,23 +47,21 @@ class PlayerTranslationHandler(val player: Player) {
     }
 
     private fun Component.translateComponent(placeholders: Map<String, Component>): Component {
-        var translated = GlobalTranslator.render(this, player.locale())
-        if (placeholders.isNotEmpty()) {
-            val configs = placeholders.map { (key, value) ->
-                TextReplacementConfig.builder()
-                    .match("%$key%")
-                    .replacement(value)
-                    .build()
-            }
-            var oldTranslated: Component
-            do {
-                oldTranslated = translated
-                translated = configs.fold(translated) { component, config ->
-                    component.replaceText(config)
-                }
-                translated = GlobalTranslator.render(translated, player.locale())
-            } while (translated != oldTranslated)
+        val configs = placeholders.map { (key, value) ->
+            TextReplacementConfig.builder()
+                .match("%$key%")
+                .replacement(value)
+                .build()
         }
+        var translated = GlobalTranslator.render(this, player.locale())
+        var oldTranslated: Component
+        do {
+            oldTranslated = translated
+            translated = configs.fold(translated) { component, config ->
+                component.replaceText(config)
+            }
+            translated = GlobalTranslator.render(translated, player.locale())
+        } while (translated != oldTranslated)
         return translated
     }
 }

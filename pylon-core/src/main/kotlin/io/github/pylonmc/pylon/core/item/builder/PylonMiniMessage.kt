@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core.item.builder
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
@@ -32,19 +33,21 @@ private fun arrow(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
 
 private fun attr(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
     val name = args.popOr("Attribute name not present").value()
-    return Tag.inserting(
-        Component.text()
-            .color(NamedTextColor.WHITE)
+    val quantity = args.peek()?.value()?.let(Quantity::byName)
+    return Replacing {
+        val component = Component.text()
             .append(Component.text("$name: ").color(TextColor.color(0xa9d9e8)))
-    )
+            .append(it.color(NamedTextColor.WHITE))
+        if (quantity != null) {
+            component.append(quantity)
+        }
+        component
+    }
 }
 
 @Suppress("unused")
 private fun nbsp(args: ArgumentQueue, ctx: Context): Tag {
-    return Modifying { current, depth ->
-        if (depth == 0) current.replaceText(nbspReplacement)
-        else Component.empty()
-    }
+    return Replacing { it.replaceText(nbspReplacement) }
 }
 
 private val nbspReplacement = TextReplacementConfig.builder()
@@ -57,4 +60,12 @@ private fun parseColor(color: String): TextColor {
     return TextColor.fromHexString(theOnlyTrueWayToSpellGray)
         ?: NamedTextColor.NAMES.value(theOnlyTrueWayToSpellGray)
         ?: throw IllegalArgumentException("No such color: $color")
+}
+
+@Suppress("FunctionName")
+private inline fun Replacing(crossinline block: (Component) -> ComponentLike): Tag {
+    return Modifying { current, depth ->
+        if (depth == 0) block(current).asComponent()
+        else Component.empty()
+    }
 }
