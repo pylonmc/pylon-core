@@ -22,13 +22,7 @@ val customMiniMessage = MiniMessage.builder()
         it.tag(setOf("attribute", "attr"), ::attr)
         // No break space
         it.tag(setOf("nbsp", "nb"), ::nbsp)
-        it.tag("multiblock") { _, _ ->
-            Tag.inserting(
-                Component.text()
-                    .color(NamedTextColor.GRAY)
-                    .append(Component.text("★ ").color(NamedTextColor.BLUE))
-            )
-        }
+        it.tag("star", ::star)
     }
     .strict(false)
     .build()
@@ -36,6 +30,11 @@ val customMiniMessage = MiniMessage.builder()
 private fun arrow(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
     val color = args.peek()?.value()?.let(::parseColor) ?: TextColor.color(0x666666)
     return Tag.selfClosingInserting(Component.text("\u2192").color(color))
+}
+
+private fun star(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
+    val color = args.peek()?.value()?.let(::parseColor) ?: NamedTextColor.BLUE
+    return Tag.selfClosingInserting(Component.text("\u2605").color(color))
 }
 
 private fun attr(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
