@@ -69,7 +69,7 @@ object EntityStorage : Listener {
         = getAs(T::class.java, entity)
 
     fun getByKey(key: NamespacedKey): Collection<PylonEntity<*, *>> =
-        if (PylonRegistry.ENTITIES.contains(key)) {
+        if (key in PylonRegistry.ENTITIES) {
             lockEntityRead {
                 entitiesByKey[key].orEmpty()
             }
@@ -88,16 +88,15 @@ object EntityStorage : Listener {
     @JvmStatic
     fun add(entity: PylonEntity<*, *>) = lockEntityWrite {
         entities[entity.entity.uniqueId] = entity
-        entitiesByKey.getOrPut(entity.schema.key) { mutableSetOf() }.add(entity)
+        entitiesByKey.getOrPut(entity.schema.key, ::mutableSetOf).add(entity)
     }
 
     @EventHandler
     private fun onEntityLoad(event: EntitiesLoadEvent) {
         for (entity in event.entities) {
-            PylonEntity.deserialize(entity)?.let {
-                add(it)
-                PylonEntityLoadEvent(it).callEvent()
-            }
+            val pylonEntity = PylonEntity.deserialize(entity) ?: continue
+            add(pylonEntity)
+            PylonEntityLoadEvent(pylonEntity).callEvent()
         }
     }
 
@@ -119,9 +118,8 @@ object EntityStorage : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun onEntityDeath(event: EntityDeathEvent) {
-        get(event.entity)?.let {
-            PylonEntityDeathEvent(it, event).callEvent()
-        }
+        val entity = get(event.entity)?: return
+        PylonEntityDeathEvent(entity, event).callEvent()
     }
 
     @JvmSynthetic
