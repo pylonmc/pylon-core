@@ -4,11 +4,11 @@ import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
-import io.github.pylonmc.pylon.core.block.base.Ticking
+import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PrePylonBlockBreakEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PrePylonBlockPlaceEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.position
@@ -54,7 +54,7 @@ object TickManager : Listener {
     }
 
     private fun startTicker(pylonBlock: PylonBlock<*>) {
-        if (pylonBlock is Ticking) {
+        if (pylonBlock is PylonTickingBlock) {
             val dispatcher =
                 if (pylonBlock.isAsync) pluginInstance.asyncDispatcher else pluginInstance.minecraftDispatcher
             val tickDelay = pylonBlock.getCustomTickRate(PylonConfig.tickDelay)
