@@ -16,7 +16,7 @@ public final class Items {
     public static final PylonItemSchema STICKY_STICK = new PylonItemSchema(
             PylonTest.key("sticky_stick"),
             SimplePylonItem.class,
-            new ItemStackBuilder(Material.STICK)
+            ItemStackBuilder.of(Material.STICK)
                     .set(DataComponentTypes.ITEM_NAME, Component.text("Sticky Stick"))
                     .build()
     );
@@ -24,7 +24,7 @@ public final class Items {
     public static final PylonItemSchema OMINOUS_BLAZE_POWDER = new PylonItemSchema(
             PylonTest.key("ominous_blaze_powder"),
             OminousBlazePower.class,
-            new ItemStackBuilder(Material.DIAMOND_SWORD)
+            ItemStackBuilder.of(Material.DIAMOND_SWORD)
                     .name("<ff0000>OMINOUS BLAZE POWDER")
                     .lore("<#ff0000>VERY SCARY")
                     .lore("<#222222>OH NO")
