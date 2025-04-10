@@ -30,7 +30,6 @@ data class LineWrapRepresentation(val lines: List<String>, val styles: Map<IntRa
     private fun makeComponent(line: String, thisRange: IntRange, thisStyle: Style, styles: List<Pair<IntRange, Style>>): TextComponent {
         val component = Component.text().style(thisStyle)
         val subStyles = styles.filter { (range, style) -> range in thisRange && style != thisStyle }
-        if (subStyles.isEmpty()) return component.content(line.substring(thisRange)).build()
 
         var lastEnd = thisRange.first
         for ((subRange, subStyle) in subStyles) {
