@@ -22,6 +22,13 @@ val customMiniMessage = MiniMessage.builder()
         it.tag(setOf("attribute", "attr"), ::attr)
         // No break space
         it.tag(setOf("nbsp", "nb"), ::nbsp)
+        it.tag("multiblock") { _, _ ->
+            Tag.inserting(
+                Component.text()
+                    .color(NamedTextColor.GRAY)
+                    .append(Component.text("★ ").color(NamedTextColor.BLUE))
+            )
+        }
     }
     .strict(false)
     .build()
