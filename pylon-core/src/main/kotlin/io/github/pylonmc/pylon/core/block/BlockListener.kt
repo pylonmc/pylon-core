@@ -21,6 +21,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 
 /**
@@ -435,6 +436,16 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.sign.block)
         if (pylonBlock is PylonSign) {
             pylonBlock.onOpen(event)
+        }
+    }
+
+    @EventHandler
+    private fun onPlayerBlockInteract(event: PlayerInteractEvent) {
+        if (event.action != Action.RIGHT_CLICK_BLOCK) {
+            val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
+            if (pylonBlock is PylonInteractableBlock) {
+                pylonBlock.onInteract(event)
+            }
         }
     }
 }
