@@ -36,9 +36,12 @@ data class LineWrapRepresentation(val lines: List<String>, val styles: Map<Style
         for ((subRange, subStyle) in subStyles) {
             if (lastEnd < subRange.first) {
                 component.append(Component.text(line.substring(lastEnd, subRange.first)))
+                lastEnd = subRange.first
             }
             if (lastEnd <= subRange.endInclusive) {
                 component.append(makeComponent(line, subRange, subStyle, styles))
+            } else {
+                continue
             }
             lastEnd = subRange.endInclusive + 1
         }
@@ -61,7 +64,7 @@ data class LineWrapRepresentation(val lines: List<String>, val styles: Map<Style
             // Fold overlapping ranges
             .groupBy { it.first }
             .map { (range, styles) -> range to styles.fold(Style.empty()) { acc, (_, style) -> acc.merge(style) }}
-            .sortedBy { it.first.first }
+            .sortedWith(compareBy<Pair<IntRange, Style>> { it.first.first }.thenByDescending { it.first.last })
     }
 }
 

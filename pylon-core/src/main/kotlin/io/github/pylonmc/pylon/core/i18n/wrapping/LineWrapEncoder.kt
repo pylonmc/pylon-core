@@ -24,7 +24,7 @@ class LineWrapEncoder private constructor() {
         for (child in component.children()) {
             encode(child)
         }
-        styles[component.style()] = startPos..pos
+        styles[component.style()] = startPos until pos
     }
 
     companion object {

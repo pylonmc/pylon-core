@@ -35,7 +35,7 @@ private fun attr(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
     return Tag.inserting(
         Component.text()
             .color(NamedTextColor.WHITE)
-            .append(Component.text("$name:").color(TextColor.color(0xa9d9e8)))
+            .append(Component.text("$name: ").color(TextColor.color(0xa9d9e8)))
     )
 }
 
