@@ -9,6 +9,15 @@ item:
     name: "<red>Wax'd Weather'd Cutteth Copp'r Stairs of Unriddling"
     lore: "<insn>Strike with thy right hand</insn> yon block, and its Pylon lore shall be revealed"
 
+message:
+  debug:
+    block_key: "<gold>Pylon Block key: <arg:0>"
+    ticking:
+      ticking: "<gold>Ticking: <green>Yea"
+      errored: "<gold>Ticking: <red>Ticker hath errored"
+      not_ticking: "<gold>Ticking: <red>Nay"
+    pdc: "<arg:0>: <arg:1>"
+
 quantity:
   blocks: " blocks"
   seconds: "s"

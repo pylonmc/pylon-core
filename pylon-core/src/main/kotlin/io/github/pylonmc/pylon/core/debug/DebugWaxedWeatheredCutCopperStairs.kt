@@ -13,11 +13,10 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.builder.LoreBuilder
 import io.github.pylonmc.pylon.core.item.base.EntityInteractor
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
-import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -44,19 +43,17 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
                 return
             }
             val player = event.player
-            player.sendMessage(NamedTextColor.GOLD + "Pylon block key: ${pylonBlock.schema.key}")
-            player.sendMessage(
-                MiniMessage.miniMessage().deserialize(
-                    when (pylonBlock) {
-                        is PylonTickingBlock -> if (TickManager.isTicking(pylonBlock)) {
-                            "<gold>Ticking: <green>Yes"
-                        } else {
-                            "<gold>Ticking: <red>Ticker has errored"
-                        }
-
-                        else -> "<gold>Ticking: <red>No"
+            player.sendDebug("block_key", Component.text(pylonBlock.schema.key.toString()))
+            player.sendDebug(
+                when (pylonBlock) {
+                    is PylonTickingBlock -> if (TickManager.isTicking(pylonBlock)) {
+                        "ticking.ticking"
+                    } else {
+                        "ticking.error"
                     }
-                )
+
+                    else -> "ticking.not_ticking"
+                }
             )
             pylonBlock.write(PrintingPDC(player))
         }
@@ -85,4 +82,8 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
             pylonEntity.entity.persistentDataContainer.copyTo(PrintingPDC(event.player), true)
         }
     }
+}
+
+private fun Audience.sendDebug(subkey: String, vararg args: Component) {
+    return sendMessage(Component.translatable("pylon.pyloncore.message.debug.$subkey", *args))
 }

@@ -1,8 +1,7 @@
 package io.github.pylonmc.pylon.core.debug
 
-import io.github.pylonmc.pylon.core.util.plus
 import net.kyori.adventure.audience.Audience
-import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
@@ -20,7 +19,13 @@ class PrintingPDC(private val audience: Audience) : PersistentDataContainer {
         value: C
     ) {
         data[key] = value
-        audience.sendMessage(NamedTextColor.GOLD + "$key: $value")
+        audience.sendMessage(
+            Component.translatable(
+                "pylon.pyloncore.message.debug.pdc",
+                Component.text(key.toString()),
+                Component.text(value.toString())
+            )
+        )
     }
 
     override fun remove(key: NamespacedKey) {
