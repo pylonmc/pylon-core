@@ -60,7 +60,7 @@ object PylonCommand : BaseCommand() {
     @CommandPermission("pylon.command.setblock")
     fun setBlock(block: NamespacedKey) {
         if (!currentCommandIssuer.isPlayer) {
-            currentCommandIssuer.sendMessage("This variant of setBlock may only be called on a client! Use /py setblock x y z $block world")
+            currentCommandIssuer.sendMessage("This variant of setBlock may only be called on a player! Use /py setblock x y z $block world")
             return
         }
         val player = currentCommandIssuer.getIssuer<Player>()
