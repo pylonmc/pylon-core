@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.core.debug
 
 import io.github.pylonmc.pylon.core.block.TickManager
-import io.github.pylonmc.pylon.core.block.base.Ticking
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.LoreBuilder
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -45,7 +45,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
             player.sendMessage(
                 MiniMessage.miniMessage().deserialize(
                     when (pylonBlock) {
-                        is Ticking -> if (TickManager.isTicking(pylonBlock)) {
+                        is PylonTickingBlock -> if (TickManager.isTicking(pylonBlock)) {
                             "<gold>Ticking: <green>Yes"
                         } else {
                             "<gold>Ticking: <red>Ticker has errored"
@@ -69,7 +69,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
                 MiniMessage.miniMessage().deserialize(
                     when (pylonEntity) {
                         // TODO implement this once entities can tick
-                        is Ticking -> if (false) {
+                        is PylonTickingBlock -> if (false) {
                             "<gold>Ticking: <green>Yes"
                         } else {
                             "<gold>Ticking: <red>Ticker has errored"

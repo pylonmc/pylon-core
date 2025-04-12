@@ -14,7 +14,7 @@ import org.jetbrains.annotations.ApiStatus
  * ticking a multiblock that is either not formed, or not fully loaded (ie, not all of its components
  * are loaded).
  */
-interface Multiblock {
+interface PylonMultiblock {
     // This is automatically implemented by PylonBlock (lol)
     val block: Block
 

@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Material
@@ -12,7 +11,7 @@ import org.joml.Vector3i
 import kotlin.math.abs
 import kotlin.math.min
 
-interface SimpleMultiblock : Multiblock {
+interface SimplePylonMultiblock : PylonMultiblock {
 
     @FunctionalInterface
     interface Component {

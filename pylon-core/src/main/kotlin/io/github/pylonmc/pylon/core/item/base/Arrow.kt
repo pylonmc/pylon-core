@@ -7,10 +7,10 @@ interface Arrow {
     /**
      * Called when the arrow is shot from the bow of any entity
      */
-    fun onArrowReady(event: PlayerReadyArrowEvent)
+    fun onArrowReady(event: PlayerReadyArrowEvent) {}
 
     /**
      * Called when the arrow is shot from the bow of any entity
      */
-    fun onArrowShotFromBow(event: EntityShootBowEvent)
+    fun onArrowShotFromBow(event: EntityShootBowEvent) {}
 }

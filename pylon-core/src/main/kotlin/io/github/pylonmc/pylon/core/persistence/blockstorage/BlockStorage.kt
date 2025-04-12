@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
-import io.github.pylonmc.pylon.core.block.base.BreakHandler
+import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -236,7 +236,7 @@ object BlockStorage : Listener {
         if (context.normallyDrops) {
             block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
         }
-        if (block is BreakHandler) {
+        if (block is PylonBreakHandler) {
             block.onBreak(drops, context)
         }
 
@@ -247,7 +247,7 @@ object BlockStorage : Listener {
         }
 
         blockPosition.block.type = Material.AIR
-        if (block is BreakHandler) {
+        if (block is PylonBreakHandler) {
             block.postBreak()
         }
 
