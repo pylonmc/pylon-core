@@ -160,6 +160,9 @@ object BlockStorage : Listener {
         context: BlockCreateContext = BlockCreateContext.Default
     ): PylonBlock<*>? {
         require(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
+        require(PylonRegistry.BLOCKS.contains(schema.key)) {
+            "You can only place registered blocks; did you forget to register ${schema.key}?"
+        }
 
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
