@@ -20,6 +20,12 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val block: Block
 ) {
 
+    init {
+        require(PylonRegistry.BLOCKS.contains(schema.key)) {
+            "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
+        }
+    }
+
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 

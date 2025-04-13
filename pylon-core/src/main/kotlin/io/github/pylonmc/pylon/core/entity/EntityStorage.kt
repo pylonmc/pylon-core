@@ -87,9 +87,6 @@ object EntityStorage : Listener {
 
     @JvmStatic
     fun add(entity: PylonEntity<*, *>) = lockEntityWrite {
-        require(PylonRegistry.BLOCKS.contains(entity.schema.key)) {
-            "You can only add registered entities; did you forget to register ${entity.schema.key}?"
-        }
         entities[entity.entity.uniqueId] = entity
         entitiesByKey.getOrPut(entity.schema.key, ::mutableSetOf).add(entity)
     }

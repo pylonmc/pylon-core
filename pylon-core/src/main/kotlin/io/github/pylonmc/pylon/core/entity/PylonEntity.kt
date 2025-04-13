@@ -16,6 +16,12 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
 
     protected constructor(schema: S, supplier: Supplier<E>): this(schema, supplier.get())
 
+    init {
+        require(PylonRegistry.BLOCKS.contains(schema.key)) {
+            "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
+        }
+    }
+
     /**
      * Write all the state saved in the Pylon entity class to the entity's persistent data
      * container.
