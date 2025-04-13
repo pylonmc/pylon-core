@@ -10,7 +10,7 @@ import org.bukkit.persistence.PersistentDataContainer
 import java.util.UUID
 
 /**
- * A block that is tied to a Pylon entity. For example, a pedestal that uses an item
+ * A block with an associated Pylon entity. For example, a pedestal that uses an item
  * display to show the item would implement this to keep track of the item display.
  *
  * Note that the Pylon entity may be loaded when the block is not loaded (or vice versa).

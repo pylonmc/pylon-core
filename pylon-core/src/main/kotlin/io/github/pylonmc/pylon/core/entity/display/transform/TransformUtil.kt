@@ -14,7 +14,7 @@ object TransformUtil {
 
     @JvmStatic
     fun yawToCardinalDirection(yaw: Double): Double
-        = -(yaw / 90.0F).roundToInt() * (Math.PI/2)
+        = -(yaw / 90.0F).roundToInt() * (Math.PI / 2)
     @JvmStatic
     fun yawToCardinalDirection(yaw: Float): Float
         = yawToCardinalDirection(yaw.toDouble()).toFloat()
