@@ -4,8 +4,12 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.block.Blocks;
+import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.item.Items;
 import io.github.pylonmc.pylon.test.test.block.*;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageMissingSchemaTest;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
@@ -71,6 +75,10 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new FurnaceTest());
         tests.add(new MobDropTest());
 
+        tests.add(new EntityStorageSimpleTest());
+        tests.add(new EntityStorageMissingSchemaTest());
+        tests.add(new EntityStorageChunkReloadTest());
+
         return tests;
     }
 
@@ -94,6 +102,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         try {
             Blocks.register();
             Items.register();
+            Entities.register();
         } catch (Exception e) {
             instance().getLogger().severe("Failed to set up tests");
             e.printStackTrace();
