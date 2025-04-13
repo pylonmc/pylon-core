@@ -37,12 +37,8 @@ object PylonCommand : BaseCommand() {
     @Subcommand("debug")
     @Description("Gives you the pylon debugging item to view pylon data")
     @CommandPermission("pylon.command.debug")
-    fun debug() {
-        if(!currentCommandIssuer.isPlayer){
-            currentCommandIssuer.sendMessage("This should only be run on a client!")
-            return
-        }
-        currentCommandIssuer.getIssuer<Player>().give(DebugWaxedWeatheredCutCopperStairs.itemStack)
+    fun debug(player: Player) {
+        player.give(DebugWaxedWeatheredCutCopperStairs.itemStack)
     }
 
     @Private
