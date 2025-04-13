@@ -14,7 +14,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
-import kotlin.math.roundToInt
 
 @Suppress("unused")
 @CommandAlias("pylon|py")
@@ -41,8 +40,8 @@ object PylonCommand : BaseCommand() {
     @Description("Set a block to be a pylon block")
     @CommandPermission("pylon.command.setblock")
     fun setBlock(player: Player, block: NamespacedKey) {
-        val location = BlockPosition(player.world, player.x.roundToInt(), player.y.roundToInt(), player.z.roundToInt())
-        location.block.setType(Material.AIR)
+        val location = BlockPosition(player.location)
+        location.block.type = Material.AIR
         val pylonBlock = PylonRegistry.BLOCKS[block]
         if (pylonBlock == null) {
             player.sendMessage("Block not found: $block")
