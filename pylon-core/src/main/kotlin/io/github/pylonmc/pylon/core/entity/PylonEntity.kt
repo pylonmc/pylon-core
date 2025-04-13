@@ -18,7 +18,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
 
     init {
         require(PylonRegistry.ENTITIES.contains(schema.key)) {
-            "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
+            "You can only create entities using a registered schema; did you forget to register ${schema.key}?"
         }
     }
 
