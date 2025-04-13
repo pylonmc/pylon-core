@@ -54,7 +54,13 @@ internal object PylonItemListener : Listener {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) }
         if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
             val context = BlockCreateContext.PlayerPlace(event.player, event.item!!)
-            pylonItem.doPlace(context, event.clickedBlock!!.getRelative(event.blockFace))
+            val pylonBlock = pylonItem.doPlace(context, event.clickedBlock!!.getRelative(event.blockFace))
+            if (pylonBlock != null) {
+                val equipmentSlot = event.hand
+                if (equipmentSlot != null ) {
+                    event.player.inventory.getItem(equipmentSlot).subtract()
+                }
+            }
         }
         if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToClickBlock(event)
@@ -121,13 +127,10 @@ internal object PylonItemListener : Listener {
     }
 
     @EventHandler
-    private fun handle(event: EntityInteractEvent) {
-        val entity = event.entity
-        if (entity is Player) {
-            val pylonItem = PylonItem.fromStack(entity.activeItem)
-            if (pylonItem is EntityInteractor) {
-                pylonItem.onUsedToRightClickEntity(event)
-            }
+    private fun handle(event: PlayerInteractEntityEvent) {
+        val pylonItem = PylonItem.fromStack(event.player.activeItem)
+        if (pylonItem is EntityInteractor) {
+            pylonItem.onUsedToRightClickEntity(event)
         }
     }
 

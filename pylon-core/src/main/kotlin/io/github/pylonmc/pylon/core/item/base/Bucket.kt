@@ -7,10 +7,10 @@ interface Bucket {
     /**
      * Called when the bucket is emptied
      */
-    fun onBucketEmptied(event: PlayerBucketEmptyEvent)
+    fun onBucketEmptied(event: PlayerBucketEmptyEvent) {}
 
     /**
      * Called when the bucket is filled
      */
-    fun onBucketFilled(event: PlayerBucketFillEvent)
+    fun onBucketFilled(event: PlayerBucketFillEvent) {}
 }

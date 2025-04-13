@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.block.base.Multiblock
+import io.github.pylonmc.pylon.core.block.base.PylonMultiblock
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent
@@ -68,7 +68,7 @@ internal object MultiblockCache : Listener {
                     continue
                 }
 
-                if (BlockStorage.getAs<Multiblock>(multiblockPosition)!!.checkFormed()) {
+                if (BlockStorage.getAs<PylonMultiblock>(multiblockPosition)!!.checkFormed()) {
                     formedMultiblocks.add(multiblockPosition)
                 } else {
                     formedMultiblocks.remove(multiblockPosition)
@@ -78,13 +78,13 @@ internal object MultiblockCache : Listener {
         }
     }
 
-    internal fun isFormed(multiblock: Multiblock): Boolean
+    internal fun isFormed(multiblock: PylonMultiblock): Boolean
         = multiblock.block.position in formedMultiblocks
 
-    private fun markDirty(multiblock: Multiblock)
+    private fun markDirty(multiblock: PylonMultiblock)
         = dirtyMultiblocks.add(multiblock.block.position)
 
-    private fun refreshFullyLoaded(multiblock: Multiblock) {
+    private fun refreshFullyLoaded(multiblock: PylonMultiblock) {
         if (multiblock.chunksOccupied.all { it.isLoaded }) {
             fullyLoadedMultiblocks.add(multiblock.block.position)
             markDirty(multiblock)
@@ -95,7 +95,7 @@ internal object MultiblockCache : Listener {
         }
     }
 
-    private fun onMultiblockAdded(multiblock: Multiblock) {
+    private fun onMultiblockAdded(multiblock: PylonMultiblock) {
         for (chunk in multiblock.chunksOccupied) {
             multiblocksWithComponentsInChunk.getOrPut(chunk) { mutableSetOf() }.add(multiblock.block.position)
         }
@@ -103,7 +103,7 @@ internal object MultiblockCache : Listener {
         refreshFullyLoaded(multiblock)
     }
 
-    private fun onMultiblockRemoved(multiblock: Multiblock) {
+    private fun onMultiblockRemoved(multiblock: PylonMultiblock) {
         val multiblockPosition = multiblock.block.position
         for (chunk in multiblock.chunksOccupied) {
             val multiblocks = multiblocksWithComponentsInChunk[chunk]!!
@@ -120,12 +120,12 @@ internal object MultiblockCache : Listener {
 
     private fun onBlockModified(block: Block)
         = loadedMultiblocksWithComponent(block).forEach {
-            markDirty(BlockStorage.getAs<Multiblock>(it)!!)
+            markDirty(BlockStorage.getAs<PylonMultiblock>(it)!!)
         }
 
     private fun loadedMultiblocksWithComponent(block: Block): List<BlockPosition>
         = loadedMultiblocksWithComponentsInChunk(block.position.chunk).filter {
-            BlockStorage.getAs<Multiblock>(it)!!.isPartOfMultiblock(block)
+            BlockStorage.getAs<PylonMultiblock>(it)!!.isPartOfMultiblock(block)
         }
 
     private fun loadedMultiblocksWithComponentsInChunk(chunkPosition: ChunkPosition): Set<BlockPosition>
@@ -135,12 +135,12 @@ internal object MultiblockCache : Listener {
     private fun handle(event: PylonChunkBlocksLoadEvent) {
         // Refresh existing multiblocks with a component in the chunk that was just loaded
         for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
-            refreshFullyLoaded(BlockStorage.getAs<Multiblock>(multiblockPosition)!!)
+            refreshFullyLoaded(BlockStorage.getAs<PylonMultiblock>(multiblockPosition)!!)
         }
 
         // Add new multiblocks
         for (pylonBlock in event.pylonBlocks) {
-            if (pylonBlock is Multiblock) {
+            if (pylonBlock is PylonMultiblock) {
                 onMultiblockAdded(pylonBlock)
             }
         }
@@ -157,7 +157,7 @@ internal object MultiblockCache : Listener {
 
         // Remove multiblocks that were just unloaded
         for (pylonBlock in event.pylonBlocks) {
-            if (pylonBlock is Multiblock) {
+            if (pylonBlock is PylonMultiblock) {
                 onMultiblockRemoved(pylonBlock)
             }
         }
@@ -165,14 +165,14 @@ internal object MultiblockCache : Listener {
 
     @EventHandler
     private fun handle(event: PylonBlockPlaceEvent) {
-        if (event.pylonBlock is Multiblock) {
+        if (event.pylonBlock is PylonMultiblock) {
             onMultiblockAdded(event.pylonBlock)
         }
     }
 
     @EventHandler
     private fun handle(event: PylonBlockBreakEvent) {
-        if (event.pylonBlock is Multiblock) {
+        if (event.pylonBlock is PylonMultiblock) {
             onMultiblockRemoved(event.pylonBlock)
         }
     }

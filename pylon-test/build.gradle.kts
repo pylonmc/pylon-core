@@ -5,6 +5,7 @@ plugins {
     id("com.gradleup.shadow")
     id("net.minecrell.plugin-yml.bukkit")
     id("xyz.jpenilla.run-paper") version "2.3.0"
+    id("io.freefair.lombok") version "8.13.1"
 }
 
 version = "TEST"

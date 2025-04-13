@@ -60,7 +60,7 @@ class PhantomBlock(
     }
 
     companion object {
-        private val key = NamespacedKey(pluginInstance, "phantom_block")
+        internal val key = NamespacedKey(pluginInstance, "phantom_block")
 
         private val errorItem = ItemStackBuilder(Material.ECHO_SHARD)
             .name("<red>Error")

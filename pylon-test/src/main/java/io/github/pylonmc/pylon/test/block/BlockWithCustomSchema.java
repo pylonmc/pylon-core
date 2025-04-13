@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.test.block;
 import io.github.pylonmc.pylon.core.block.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -15,6 +16,7 @@ public final class BlockWithCustomSchema {
 
     public static class TestSchema extends PylonBlockSchema {
 
+        @Getter
         private final int processingSpeed;
 
         @SuppressWarnings("unused")
@@ -26,11 +28,6 @@ public final class BlockWithCustomSchema {
         ) {
             super(key, material, blockClass);
             this.processingSpeed = processingSpeed;
-        }
-
-        @SuppressWarnings("unused")
-        public int getProcessingSpeed() {
-            return processingSpeed;
         }
     }
 

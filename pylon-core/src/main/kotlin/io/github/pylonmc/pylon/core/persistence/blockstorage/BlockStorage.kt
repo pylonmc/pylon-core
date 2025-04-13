@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
-import io.github.pylonmc.pylon.core.block.base.BreakHandler
+import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -63,7 +63,7 @@ object BlockStorage : Listener {
      */
     private val blocksByChunk: MutableMap<ChunkPosition, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
 
-    private val blocksById: MutableMap<NamespacedKey, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
+    private val blocksByKey: MutableMap<NamespacedKey, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
 
     @JvmStatic
     val loadedBlocks: Set<BlockPosition>
@@ -128,10 +128,10 @@ object BlockStorage : Listener {
     }
 
     @JvmStatic
-    fun getById(id: NamespacedKey): Collection<PylonBlock<*>> =
-        if (PylonRegistry.BLOCKS.contains(id)) {
+    fun getByKey(key: NamespacedKey): Collection<PylonBlock<*>> =
+        if (PylonRegistry.BLOCKS.contains(key)) {
             lockBlockRead {
-                blocksById[id].orEmpty()
+                blocksByKey[key].orEmpty()
             }
         } else {
             emptySet()
@@ -172,7 +172,7 @@ object BlockStorage : Listener {
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
-            blocksById.getOrPut(schema.key, ::mutableListOf).add(block)
+            blocksByKey.getOrPut(schema.key, ::mutableListOf).add(block)
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
 
@@ -236,18 +236,18 @@ object BlockStorage : Listener {
         if (context.normallyDrops) {
             block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
         }
-        if (block is BreakHandler) {
+        if (block is PylonBreakHandler) {
             block.onBreak(drops, context)
         }
 
         lockBlockWrite {
             blocks.remove(blockPosition)
-            blocksById[block.schema.key]?.remove(block)
+            blocksByKey[block.schema.key]?.remove(block)
             blocksByChunk[blockPosition.chunk]?.remove(block)
         }
 
         blockPosition.block.type = Material.AIR
-        if (block is BreakHandler) {
+        if (block is PylonBreakHandler) {
             block.postBreak()
         }
 
@@ -308,7 +308,7 @@ object BlockStorage : Listener {
             blocksByChunk[event.chunk.position] = chunkBlocks.toMutableList()
             for (block in chunkBlocks) {
                 blocks[block.block.position] = block
-                blocksById.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
+                blocksByKey.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
             }
         }
 
@@ -326,7 +326,7 @@ object BlockStorage : Listener {
                 ?: error("Attempted to save Pylon data for chunk '${event.chunk.position}' but no data is stored")
             for (block in chunkBlocks) {
                 blocks.remove(block.block.position)
-                (blocksById[block.schema.key] ?: continue).remove(block)
+                (blocksByKey[block.schema.key] ?: continue).remove(block)
             }
             chunkBlocks
         }
@@ -362,7 +362,7 @@ object BlockStorage : Listener {
         }
 
         blocks.replaceAll { _, block -> replacer.invoke(block) }
-        for (blocks in blocksById.values) {
+        for (blocks in blocksByKey.values) {
             blocks.replaceAll(replacer)
         }
         for (blocks in blocksByChunk.values) {
