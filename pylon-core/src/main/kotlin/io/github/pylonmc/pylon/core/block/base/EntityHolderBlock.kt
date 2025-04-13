@@ -2,12 +2,10 @@ package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.util.pylonKey
-import org.bukkit.entity.Entity
 import org.bukkit.persistence.PersistentDataContainer
-import java.util.UUID
+import java.util.*
 
 /**
  * A block with an associated Pylon entity. For example, a pedestal that uses an item
@@ -15,7 +13,7 @@ import java.util.UUID
  *
  * Note that the Pylon entity may be loaded when the block is not loaded (or vice versa).
  */
-interface EntityHolderBlock<out E : PylonEntity<*, *>> : BreakHandler {
+interface EntityHolderBlock<out E : PylonEntity<*, *>> : PylonBreakHandler {
 
     /**
      * Must be set in your create constructor when you spawn in the entity.
