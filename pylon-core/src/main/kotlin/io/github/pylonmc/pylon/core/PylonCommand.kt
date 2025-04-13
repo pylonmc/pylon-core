@@ -13,9 +13,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.World
 import org.bukkit.entity.Player
-import org.jetbrains.annotations.NotNull
 import kotlin.math.roundToInt
 
 @Suppress("unused")
@@ -39,27 +37,18 @@ object PylonCommand : BaseCommand() {
     }
 
     @Subcommand("setblock")
-    @CommandCompletion("0 0 0 @blocks @worlds")
-    @Description("Set a block to be a pylon block")
-    @CommandPermission("pylon.command.setblock")
-    fun setBlock(x: Int, y: Int, z: Int, block: NamespacedKey, @Default @NotNull world: World) {
-        val location = BlockPosition(world, x, y, z)
-        location.world!!.loadChunk(location.world!!.getChunkAt(location.block))
-        location.block.setType(Material.AIR)
-        val pylonBlock = PylonRegistry.BLOCKS[block]
-        if (pylonBlock == null) {
-            currentCommandIssuer.sendMessage("Block not found: $block")
-            return
-        }
-        BlockStorage.placeBlock(location, pylonBlock)
-    }
-
-    @Subcommand("setblock")
     @CommandCompletion("@blocks")
     @Description("Set a block to be a pylon block")
     @CommandPermission("pylon.command.setblock")
     fun setBlock(player: Player, block: NamespacedKey) {
-        setBlock(player.x.roundToInt(), player.y.roundToInt(), player.z.roundToInt(), block, player.world)
+        val location = BlockPosition(player.world, player.x.roundToInt(), player.y.roundToInt(), player.z.roundToInt())
+        location.block.setType(Material.AIR)
+        val pylonBlock = PylonRegistry.BLOCKS[block]
+        if (pylonBlock == null) {
+            player.sendMessage("Block not found: $block")
+            return
+        }
+        BlockStorage.placeBlock(location, pylonBlock)
     }
 
     @Private
