@@ -17,7 +17,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
     protected constructor(schema: S, supplier: Supplier<E>): this(schema, supplier.get())
 
     init {
-        require(PylonRegistry.BLOCKS.contains(schema.key)) {
+        require(PylonRegistry.ENTITIES.contains(schema.key)) {
             "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
         }
     }
