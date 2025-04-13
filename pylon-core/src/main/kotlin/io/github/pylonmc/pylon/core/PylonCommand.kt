@@ -58,12 +58,7 @@ object PylonCommand : BaseCommand() {
     @CommandCompletion("@blocks")
     @Description("Set a block to be a pylon block")
     @CommandPermission("pylon.command.setblock")
-    fun setBlock(block: NamespacedKey) {
-        if (!currentCommandIssuer.isPlayer) {
-            currentCommandIssuer.sendMessage("This variant of setBlock may only be called on a player! Use /py setblock x y z $block world")
-            return
-        }
-        val player = currentCommandIssuer.getIssuer<Player>()
+    fun setBlock(player: Player, block: NamespacedKey) {
         setBlock(player.x.roundToInt(), player.y.roundToInt(), player.z.roundToInt(), block, player.world)
     }
 
