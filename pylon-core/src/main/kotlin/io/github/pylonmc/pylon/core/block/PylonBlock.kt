@@ -21,8 +21,10 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 ) {
 
     init {
-        require(PylonRegistry.BLOCKS.contains(schema.key)) {
-            "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
+        if (schema.key != PhantomBlock.key) {
+            require(PylonRegistry.BLOCKS.contains(schema.key)) {
+                "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
+            }
         }
     }
 
