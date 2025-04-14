@@ -5,12 +5,14 @@ import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
@@ -39,6 +41,21 @@ object PylonCommand : BaseCommand() {
     @CommandPermission("pylon.command.debug")
     fun debug(player: Player) {
         player.give(DebugWaxedWeatheredCutCopperStairs.itemStack)
+    }
+
+    @Subcommand("setblock")
+    @CommandCompletion("@blocks")
+    @Description("Set a block to be a pylon block")
+    @CommandPermission("pylon.command.setblock")
+    fun setBlock(player: Player, block: NamespacedKey) {
+        val location = BlockPosition(player.location)
+        location.block.type = Material.AIR
+        val pylonBlock = PylonRegistry.BLOCKS[block]
+        if (pylonBlock == null) {
+            player.sendMessage("Block not found: $block")
+            return
+        }
+        BlockStorage.placeBlock(location, pylonBlock)
     }
 
     @Private

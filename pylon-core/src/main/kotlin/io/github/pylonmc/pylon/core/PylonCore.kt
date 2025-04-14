@@ -49,6 +49,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         }
         addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
         addRegistryCompletion("items", PylonRegistry.ITEMS)
+        addRegistryCompletion("blocks", PylonRegistry.BLOCKS)
 
         manager.registerCommand(PylonCommand)
 
