@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.test.block;
 import io.github.pylonmc.pylon.core.block.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
-import io.github.pylonmc.pylon.core.block.base.SimplePylonMultiblock;
+import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
@@ -12,15 +12,15 @@ import org.joml.Vector3i;
 import java.util.Map;
 
 
-public class SimpleTestPylonMultiblock extends PylonBlock<PylonBlockSchema> implements SimplePylonMultiblock {
+public class TestPylonSimpleMultiblock extends PylonBlock<PylonBlockSchema> implements PylonSimpleMultiblock {
 
     @SuppressWarnings("unused")
-    public SimpleTestPylonMultiblock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
+    public TestPylonSimpleMultiblock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
         super(schema, block);
     }
 
     @SuppressWarnings("unused")
-    public SimpleTestPylonMultiblock(
+    public TestPylonSimpleMultiblock(
             PylonBlockSchema schema,
             Block block,
             PersistentDataContainer pdc

@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.test.test.block;
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import io.github.pylonmc.pylon.test.block.Blocks;
-import io.github.pylonmc.pylon.test.block.SimpleTestPylonMultiblock;
+import io.github.pylonmc.pylon.test.block.TestPylonSimpleMultiblock;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -15,7 +15,7 @@ public class SimpleMultiblockTest extends AsyncTest {
 
     public static void assertMultiblockFormed(Location multiblockLocation, boolean formed) {
         assertThat(BlockStorage.get(multiblockLocation))
-                .isInstanceOfSatisfying(SimpleTestPylonMultiblock.class, block ->
+                .isInstanceOfSatisfying(TestPylonSimpleMultiblock.class, block ->
                         assertThat(block.isFormedAndFullyLoaded()).isEqualTo(formed)
                 );
     }

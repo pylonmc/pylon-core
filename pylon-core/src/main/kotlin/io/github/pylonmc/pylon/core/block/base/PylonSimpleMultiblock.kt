@@ -11,7 +11,7 @@ import org.joml.Vector3i
 import kotlin.math.abs
 import kotlin.math.min
 
-interface SimplePylonMultiblock : PylonMultiblock {
+interface PylonSimpleMultiblock : PylonMultiblock {
 
     @FunctionalInterface
     interface Component {

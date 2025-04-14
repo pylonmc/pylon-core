@@ -32,7 +32,7 @@ public final class Blocks {
     public static final PylonBlockSchema SIMPLE_MULTIBLOCK = new PylonBlockSchema(
             PylonTest.key("simple_multiblock"),
             Material.AMETHYST_BLOCK,
-            SimpleTestPylonMultiblock.class
+            TestPylonSimpleMultiblock.class
     );
 
     public static final PylonBlockSchema TICKING_ERROR_BLOCK = new PylonBlockSchema(
