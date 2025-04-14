@@ -62,7 +62,7 @@ interface SimplePylonMultiblock : PylonMultiblock, EntityHolderBlock {
         override fun spawnGhostBlock(block: Block): UUID {
             val display = BlockDisplayBuilder()
                 .material(material)
-                .transformation(TransformBuilder().scale(0.7))
+                .transformation(TransformBuilder().scale(0.5))
                 .build(block.location.toCenterLocation())
             EntityStorage.add(MultiblockGhostBlock(GHOST_BLOCK_SCHEMA, display, material.name))
             return display.uniqueId
@@ -112,6 +112,14 @@ interface SimplePylonMultiblock : PylonMultiblock, EntityHolderBlock {
         }
     }
 
+    fun removeMultiblockGhosts() {
+        val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
+        for (key in toRemove) {
+            EntityStorage.get(heldEntities[key]!!)!!.entity.remove()
+            heldEntities.remove(key)
+        }
+    }
+
     val horizontalRadius
         get() = maxOf(
             abs(components.keys.minOf { it.x }),
@@ -141,11 +149,15 @@ interface SimplePylonMultiblock : PylonMultiblock, EntityHolderBlock {
         }
 
     override fun checkFormed(): Boolean {
-        return validStructures().any {
+        val formed = validStructures().any {
             it.all {
                 it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
             }
         }
+        if (formed) {
+            removeMultiblockGhosts()
+        }
+        return formed
     }
 
     override fun isPartOfMultiblock(otherBlock: Block): Boolean
