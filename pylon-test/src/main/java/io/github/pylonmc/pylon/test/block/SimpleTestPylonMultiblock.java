@@ -9,14 +9,19 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3i;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 public class SimpleTestPylonMultiblock extends PylonBlock<PylonBlockSchema> implements SimplePylonMultiblock {
 
+    private final Map<String, UUID> heldEntities;
+
     @SuppressWarnings("unused")
     public SimpleTestPylonMultiblock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
         super(schema, block);
+        heldEntities = new HashMap<>();
     }
 
     @SuppressWarnings("unused")
@@ -26,6 +31,12 @@ public class SimpleTestPylonMultiblock extends PylonBlock<PylonBlockSchema> impl
             PersistentDataContainer pdc
     ) {
         super(schema, block);
+        heldEntities = loadHeldEntities(pdc);
+    }
+
+    @Override
+    public void write(@NotNull PersistentDataContainer pdc) {
+        saveHeldEntities(pdc);
     }
 
     @Override
@@ -34,5 +45,10 @@ public class SimpleTestPylonMultiblock extends PylonBlock<PylonBlockSchema> impl
                 new Vector3i(1, 1, 4), new PylonComponent(Blocks.SIMPLE_BLOCK.getKey()),
                 new Vector3i(2, -1, 0), new PylonComponent(Blocks.SIMPLE_BLOCK.getKey())
         );
+    }
+
+    @Override
+    public @NotNull Map<String, UUID> getHeldEntities() {
+        return heldEntities;
     }
 }
