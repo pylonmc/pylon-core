@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import io.github.pylonmc.pylon.core.block.base.*
-import io.github.pylonmc.pylon.core.block.base.PlayerInteractBlock
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.position.position
@@ -109,15 +108,6 @@ internal object BlockListener : Listener {
                 event.isCancelled = true
                 return
             }
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    private fun playerInteract(event: PlayerInteractEvent) {
-        val block = event.clickedBlock ?: return
-        val pylonBlock = BlockStorage.get(block) ?: return
-        if (pylonBlock is PlayerInteractBlock) {
-            pylonBlock.onInteract(event)
         }
     }
 
