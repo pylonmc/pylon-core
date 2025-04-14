@@ -64,7 +64,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
 
         DebugWaxedWeatheredCutCopperStairs.register()
         PhantomBlock.ErrorItem.register()
-        SimplePylonMultiblock.ghostBlockSchema.register()
+        SimplePylonMultiblock.GHOST_BLOCK_SCHEMA.register()
     }
 
     override fun onDisable() {
