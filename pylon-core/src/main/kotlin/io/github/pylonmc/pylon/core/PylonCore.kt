@@ -8,7 +8,9 @@ import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.BlockListener
 import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
+import io.github.pylonmc.pylon.core.block.base.SimplePylonMultiblock
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -39,6 +41,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
         Bukkit.getPluginManager().registerEvents(PylonLanguageService, this)
+        Bukkit.getPluginManager().registerEvents(EntityListener, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,
@@ -60,7 +63,8 @@ class PylonCore : JavaPlugin(), PylonAddon {
         registerWithPylon()
 
         DebugWaxedWeatheredCutCopperStairs.register()
-        PhantomBlock.ErrorItem.Schema.register()
+        PhantomBlock.ErrorItem.register()
+        SimplePylonMultiblock.ghostBlockSchema.register()
     }
 
     override fun onDisable() {
