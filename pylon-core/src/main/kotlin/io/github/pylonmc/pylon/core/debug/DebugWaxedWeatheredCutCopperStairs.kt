@@ -1,18 +1,14 @@
 package io.github.pylonmc.pylon.core.debug
 
 import io.github.pylonmc.pylon.core.block.TickManager
-import io.github.pylonmc.pylon.core.block.base.Ticking
-import io.github.pylonmc.pylon.core.i18n.PylonArgument
-import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
-import io.github.pylonmc.pylon.core.item.ItemStackBuilder
-import io.github.pylonmc.pylon.core.item.LoreBuilder
+import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.base.BlockInteractor
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.item.builder.LoreBuilder
 import io.github.pylonmc.pylon.core.item.base.EntityInteractor
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -40,13 +36,13 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
         override fun onUsedToClickBlock(event: PlayerInteractEvent) {
             val block = event.clickedBlock ?: return
             val pylonBlock = BlockStorage.get(block)
+            val player = event.player
             if (pylonBlock == null) {
-                event.player.sendMessage(NamedTextColor.RED + "This is not a Pylon block")
+                player.sendDebug("not_a_block")
                 return
             }
-            val player = event.player
             player.sendDebug(
-                "block_key",
+                "key.block",
                 PylonArgument.of("key", Component.text(pylonBlock.schema.key.toString()))
             )
             player.sendDebug(
@@ -65,26 +61,31 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
 
         override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
             val pylonEntity = EntityStorage.get(event.rightClicked)
+            val player = event.player
             if (pylonEntity == null) {
-                event.player.sendMessage(NamedTextColor.RED + "This is not a Pylon entity")
+                player.sendDebug("not_an_entity")
                 return
             }
-            event.player.sendMessage(NamedTextColor.GOLD + "Pylon entity key: ${pylonEntity.schema.key}")
-            event.player.sendMessage(
-                MiniMessage.miniMessage().deserialize(
-                    when (pylonEntity) {
-                        // TODO implement this once entities can tick
-                        is PylonTickingBlock -> if (false) {
-                            "<gold>Ticking: <green>Yes"
-                        } else {
-                            "<gold>Ticking: <red>Ticker has errored"
-                        }
-
-                        else -> "<gold>Ticking: <red>No"
-                    }
-                )
+            player.sendDebug(
+                "key.entity",
+                PylonArgument.of("key", Component.text(pylonEntity.schema.key.toString()))
             )
-            pylonEntity.entity.persistentDataContainer.copyTo(PrintingPDC(event.player), true)
+
+            // TODO implement this once entities can tick
+//            event.player.sendMessage(
+//                MiniMessage.miniMessage().deserialize(
+//                    when (pylonEntity) {
+//                        is PylonTickingBlock -> if (false) {
+//                            "<gold>Ticking: <green>Yes"
+//                        } else {
+//                            "<gold>Ticking: <red>Ticker has errored"
+//                        }
+//
+//                        else -> "<gold>Ticking: <red>No"
+//                    }
+//                )
+//            )
+            pylonEntity.entity.persistentDataContainer.copyTo(PrintingPDC(player), true)
         }
     }
 }

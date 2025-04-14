@@ -9,8 +9,8 @@ import io.github.pylonmc.pylon.core.block.BlockListener
 import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
-import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
