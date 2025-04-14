@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.entity.base.InteractableEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -38,8 +39,19 @@ interface SimplePylonMultiblock : PylonMultiblock, EntityHolderBlock {
     class MultiblockGhostBlock(schema: PylonEntitySchema, entity: BlockDisplay, val name: String)
         : PylonEntity<PylonEntitySchema, BlockDisplay>(schema, entity), InteractableEntity {
 
+        constructor(schema: PylonEntitySchema, entity: BlockDisplay)
+            : this(schema, entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
+
         override fun onInteract(event: PlayerInteractEntityEvent) {
             event.player.sendMessage(name)
+        }
+
+        override fun write() {
+            entity.persistentDataContainer.set(NAME_KEY, PylonSerializers.STRING, name)
+        }
+
+        companion object {
+            val NAME_KEY = pylonKey("name")
         }
     }
 
@@ -93,7 +105,7 @@ interface SimplePylonMultiblock : PylonMultiblock, EntityHolderBlock {
      * Must be called in your place constructor.
      */
     fun spawnMultiblockGhosts() {
-        for ((offset, component )in components) {
+        for ((offset, component) in components) {
             val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
             val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
             heldEntities[key] = ghostBlock
