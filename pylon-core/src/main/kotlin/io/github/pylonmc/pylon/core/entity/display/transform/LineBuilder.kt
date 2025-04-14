@@ -32,7 +32,7 @@ class LineBuilder {
     fun roll(roll: Double) = roll(roll.toFloat())
 
     fun build(): TransformBuilder {
-        if ((from == null) or (to == null) or (thickness == null)) {
+        if (from == null || to == null || thickness == null) {
             throw IllegalStateException("From, to, and thickness in LineBuilder must all be specified")
         }
         val midpoint = TransformUtil.getMidpoint(from!!, to!!).add(translation)
