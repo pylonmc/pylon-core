@@ -4,7 +4,7 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.event.*
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon

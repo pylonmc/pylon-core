@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
