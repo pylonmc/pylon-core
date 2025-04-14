@@ -77,6 +77,7 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
     }
 
     companion object {
-        private val BLOCK_DISPLAY_ADJUSTMENT: Vector3f = Vector3f(-0.5F)
+        @JvmField
+        val BLOCK_DISPLAY_ADJUSTMENT: Vector3f = Vector3f(-0.5F, -0.5F, -0.5F)
     }
 }
