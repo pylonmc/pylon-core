@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import org.bukkit.block.Block
 import org.bukkit.event.Cancellable
