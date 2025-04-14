@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.debug
 
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
@@ -22,8 +23,8 @@ class PrintingPDC(private val audience: Audience) : PersistentDataContainer {
         audience.sendMessage(
             Component.translatable(
                 "pylon.pyloncore.message.debug.pdc",
-                Component.text(key.toString()),
-                Component.text(value.toString())
+                PylonArgument.of("key", Component.text(key.toString())),
+                PylonArgument.of("value", Component.text(value.toString()))
             )
         )
     }

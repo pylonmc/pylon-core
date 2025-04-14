@@ -11,12 +11,12 @@ item:
 
 message:
   debug:
-    block_key: "<gold>Pylon Block key: <arg:0>"
+    block_key: "<gold>Pylon block key: %key%"
     ticking:
       ticking: "<gold>Ticking: <green>Yes"
       errored: "<gold>Ticking: <red>Ticker has errored"
       not_ticking: "<gold>Ticking: <red>No"
-    pdc: "<arg:0>: <arg:1>"
+    pdc: "%key%: %value%"
 
 quantity:
   blocks: " blocks"

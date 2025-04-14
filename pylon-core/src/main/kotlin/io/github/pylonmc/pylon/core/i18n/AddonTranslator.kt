@@ -6,14 +6,17 @@ import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.pluginInstance
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.VirtualComponent
+import net.kyori.adventure.translation.GlobalTranslator
 import net.kyori.adventure.translation.Translator
 import org.apache.commons.lang3.LocaleUtils
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
 
-internal class AddonTranslator(private val addon: PylonAddon) : Translator {
+class AddonTranslator(private val addon: PylonAddon) : Translator {
 
     private val addonNamespace = addon.key.namespace
 
@@ -27,9 +30,27 @@ internal class AddonTranslator(private val addon: PylonAddon) : Translator {
 
     private val languageRanges = WeakHashMap<Locale, List<Locale.LanguageRange>>()
 
+    override fun name(): Key = addon.key
+
     override fun translate(key: String, locale: Locale): MessageFormat? = null
 
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
+        var translated = getTranslation(component, locale) ?: return null
+        for (arg in component.arguments()) {
+            val component = arg.asComponent()
+            if (component !is VirtualComponent) continue
+            val argument = component.renderer() as? PylonArgument ?: continue
+            val replacer = TextReplacementConfig.builder()
+                .match("%${argument.name}%")
+                .replacement(GlobalTranslator.render(argument.value, locale))
+                .build()
+            translated = translated.replaceText(replacer)
+        }
+        translated = translated.children(translated.children().map { GlobalTranslator.render(it, locale) })
+        return translated
+    }
+
+    private fun getTranslation(component: TranslatableComponent, locale: Locale): Component? {
         val key = component.key()
         val translation = translationCache.getOrPut(locale to key) {
             if (!key.startsWith("pylon.")) return null
@@ -47,7 +68,5 @@ internal class AddonTranslator(private val addon: PylonAddon) : Translator {
         }
         return Component.text().style(component.style()).append(translation).build()
     }
-
-    override fun name(): Key = addon.key
 }
 

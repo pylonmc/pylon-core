@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.debug
 
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.Ticking
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.item.ItemStackBuilder
@@ -17,6 +18,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslationArgument
 import org.bukkit.Material
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -43,7 +45,10 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
                 return
             }
             val player = event.player
-            player.sendDebug("block_key", Component.text(pylonBlock.schema.key.toString()))
+            player.sendDebug(
+                "block_key",
+                PylonArgument.of("key", Component.text(pylonBlock.schema.key.toString()))
+            )
             player.sendDebug(
                 when (pylonBlock) {
                     is PylonTickingBlock -> if (TickManager.isTicking(pylonBlock)) {
@@ -84,6 +89,6 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
     }
 }
 
-private fun Audience.sendDebug(subkey: String, vararg args: Component) {
+private fun Audience.sendDebug(subkey: String, vararg args: TranslationArgument) {
     return sendMessage(Component.translatable("pylon.pyloncore.message.debug.$subkey", *args))
 }
