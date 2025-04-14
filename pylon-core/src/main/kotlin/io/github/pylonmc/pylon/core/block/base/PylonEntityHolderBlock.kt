@@ -16,7 +16,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper
  *
  * Note that the Pylon entities may not be loaded when the block is loaded.
  */
-interface EntityHolderBlock : PylonBreakHandler {
+interface PylonEntityHolderBlock : PylonBreakHandler {
 
     /**
      * Must be set in your create constructor when you spawn in the entity.
