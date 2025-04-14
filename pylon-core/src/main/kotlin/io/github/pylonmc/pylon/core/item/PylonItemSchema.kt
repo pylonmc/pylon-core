@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.item
 
 import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
 import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
@@ -10,14 +9,19 @@ import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
-import java.nio.file.Path
-import kotlin.io.path.createDirectories
+import java.util.function.Function
 
 open class PylonItemSchema(
     private val key: NamespacedKey,
     @JvmSynthetic internal val itemClass: Class<out PylonItem<PylonItemSchema>>,
-    private val template: ItemStack
+    @JvmField protected val template: ItemStack
 ) : Keyed, RegistryHandler {
+
+    constructor(
+        key: NamespacedKey,
+        itemClass: Class<out PylonItem<PylonItemSchema>>,
+        templateSupplier: Function<NamespacedKey, ItemStack>
+    ) : this(key, itemClass, templateSupplier.apply(key))
 
     val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
@@ -35,9 +39,7 @@ open class PylonItemSchema(
     val settings = addon.mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
 
     fun register() = apply {
-        ItemStackBuilder(template) // Modifies the template directly
-            .editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
-            .lore(LoreBuilder().addon(addon))
+        template.editMeta { meta -> meta.persistentDataContainer.set(idKey, PylonSerializers.NAMESPACED_KEY, key) }
         PylonRegistry.ITEMS.register(this)
     }
 

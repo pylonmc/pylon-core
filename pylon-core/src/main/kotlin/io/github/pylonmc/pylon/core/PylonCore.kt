@@ -10,13 +10,16 @@ import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
+import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.Locale
 
 class PylonCore : JavaPlugin(), PylonAddon {
 
@@ -35,6 +38,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
+        Bukkit.getPluginManager().registerEvents(PylonLanguageService, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,
@@ -56,6 +60,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         registerWithPylon()
 
         DebugWaxedWeatheredCutCopperStairs.register()
+        PhantomBlock.ErrorItem.Schema.register()
     }
 
     override fun onDisable() {
@@ -81,7 +86,12 @@ class PylonCore : JavaPlugin(), PylonAddon {
     override val javaPlugin: JavaPlugin
         get() = pluginInstance
 
-    override fun displayName() = "Core"
+    override val displayName = "Core"
+
+    override val languages: Set<Locale> = setOf(
+        Locale.ENGLISH,
+        Locale.of("enws")
+    )
 }
 
 // for internal use so we don't have to !! all the time

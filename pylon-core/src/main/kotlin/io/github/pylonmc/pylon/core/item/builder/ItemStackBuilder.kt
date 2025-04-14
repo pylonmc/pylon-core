@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.item
+package io.github.pylonmc.pylon.core.item.builder
 
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.papermc.paper.datacomponent.DataComponentBuilder
@@ -7,19 +7,14 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
-import java.util.EnumSet
 import java.util.function.Consumer
 
-
 @Suppress("UnstableApiUsage")
-open class ItemStackBuilder(private val stack: ItemStack) {
-
-    constructor(material: Material) : this(ItemStack(material))
+open class ItemStackBuilder private constructor(private val stack: ItemStack) {
 
     fun amount(amount: Int) = apply {
         stack.amount = amount
@@ -53,23 +48,42 @@ open class ItemStackBuilder(private val stack: ItemStack) {
 
     fun name(name: String) = name(fromMiniMessage(name))
 
+    fun defaultTranslatableName(key: NamespacedKey) =
+        name(Component.translatable("pylon.${key.namespace}.item.${key.key}.name"))
+
     fun lore(vararg loreToAdd: ComponentLike) = apply {
         val lore = ItemLore.lore()
         stack.getData(DataComponentTypes.LORE)?.let { lore.addLines(it.lines()) }
-        for (line in loreToAdd) {
-            lore.addLine(
-                Component.empty()
-                    .decorations(EnumSet.allOf(TextDecoration::class.java), false)
-                    .color(NamedTextColor.GRAY)
-                    .append(line)
-            )
-        }
+        lore.addLines(loreToAdd.toList())
         stack.setData(DataComponentTypes.LORE, lore)
     }
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
-    fun lore(loreBuilder: LoreBuilder) = lore(*loreBuilder.build().toTypedArray())
+    fun defaultTranslatableLore(key: NamespacedKey) =
+        lore(Component.translatable("pylon.${key.namespace}.item.${key.key}.lore"))
 
     fun build(): ItemStack = stack.clone()
+
+    companion object {
+        @JvmStatic
+        fun of(stack: ItemStack): ItemStackBuilder {
+            return ItemStackBuilder(stack)
+        }
+
+        @JvmStatic
+        fun of(material: Material): ItemStackBuilder {
+            return of(ItemStack(material))
+        }
+
+        /**
+         * Returns an [ItemStackBuilder] with name and lore set to the default translation keys
+         */
+        @JvmStatic
+        fun defaultBuilder(material: Material, key: NamespacedKey): ItemStackBuilder {
+            return of(material)
+                .defaultTranslatableName(key)
+                .defaultTranslatableLore(key)
+        }
+    }
 }

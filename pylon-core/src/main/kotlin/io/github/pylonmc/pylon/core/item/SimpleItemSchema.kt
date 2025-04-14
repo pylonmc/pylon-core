@@ -1,11 +1,11 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import java.util.function.Function
 
 open class SimpleItemSchema<R : Keyed>
     @SafeVarargs
@@ -15,6 +15,13 @@ open class SimpleItemSchema<R : Keyed>
         private val recipeType: RecipeType<R>,
         vararg val recipes: (ItemStack) -> R,
     ) : PylonItemSchema(id, SimplePylonItem::class.java, template) {
+
+    constructor(
+        id: NamespacedKey,
+        templateSupplier: Function<NamespacedKey, ItemStack>,
+        recipeType: RecipeType<R>,
+        recipe: (ItemStack) -> R,
+    ) : this(id, templateSupplier.apply(id), recipeType, recipe)
 
     private var recipeKeys = mutableListOf<NamespacedKey>()
 
