@@ -22,7 +22,7 @@ interface EntityHolderBlock<out E : PylonEntity<*, *>> : PylonBreakHandler {
 
     @Suppress("UNCHECKED_CAST") // Unfortunately cannot use getAs here due to reified constraints
     val entity: E?
-        get() = EntityStorage.get(entityUuid) as E
+        get() = EntityStorage.get(entityUuid) as? E
 
     fun isEntityLoaded()
         = entity != null
