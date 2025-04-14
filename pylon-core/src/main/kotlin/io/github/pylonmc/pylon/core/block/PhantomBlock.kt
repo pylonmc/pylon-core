@@ -41,7 +41,7 @@ class PhantomBlock(
         throw IllegalStateException("Phantom block cannot be loaded")
     }
 
-    override fun getItem(reason: BlockItemReason): ItemStack? {
+    override fun getItem(reason: BlockItemContext): ItemStack? {
         val item = errorItem.clone()
         item.editMeta {
             val lore = item.lore() ?: mutableListOf()

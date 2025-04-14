@@ -233,7 +233,7 @@ object BlockStorage : Listener {
 
         val drops = mutableListOf<ItemStack>()
         if (context.normallyDrops) {
-            block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+            block.getItem(BlockItemContext.Break(context))?.let { drops.add(it.clone()) }
         }
         if (block is PylonBreakHandler) {
             block.onBreak(drops, context)

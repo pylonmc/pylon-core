@@ -22,16 +22,16 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    open fun getItem(reason: BlockItemReason): ItemStack? {
+    open fun getItem(reason: BlockItemContext): ItemStack? {
         val defaultItem = PylonRegistry.ITEMS[schema.key]?.itemStack
         return when (reason) {
-            is BlockItemReason.Break -> if (reason.context.normallyDrops) {
+            is BlockItemContext.Break -> if (reason.context.normallyDrops) {
                 defaultItem
             } else {
                 null
             }
 
-            is BlockItemReason.PickBlock -> defaultItem
+            is BlockItemContext.PickBlock -> defaultItem
         }
     }
 
