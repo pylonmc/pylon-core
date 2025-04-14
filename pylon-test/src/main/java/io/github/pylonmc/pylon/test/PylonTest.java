@@ -18,6 +18,8 @@ import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
 import io.github.pylonmc.pylon.test.test.serializer.*;
 import io.github.pylonmc.pylon.test.util.BedrockWorldGenerator;
 import io.github.pylonmc.pylon.test.util.TestUtil;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +33,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PylonTest extends JavaPlugin implements PylonAddon {
+    @Accessors(fluent = true)
+    @Getter
     private static PylonTest instance;
     public static World testWorld;
     private static final boolean MANUAL_SHUTDOWN = Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"));
@@ -182,10 +186,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     @Override
     public @NotNull JavaPlugin getJavaPlugin() {
         return this;
-    }
-
-    public static PylonTest instance() {
-        return instance;
     }
 
     public static @NotNull NamespacedKey key(String key) {
