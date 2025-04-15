@@ -22,15 +22,6 @@ abstract class Network(val origin: Location) {
     var branches: Set<NetworkTree.Branch> = emptySet()
         private set
 
-    protected open val scanDirections: Array<BlockFace> = arrayOf(
-        BlockFace.NORTH,
-        BlockFace.EAST,
-        BlockFace.SOUTH,
-        BlockFace.WEST,
-        BlockFace.UP,
-        BlockFace.DOWN
-    )
-
     abstract fun isValidBlock(block: Block): Boolean
     abstract fun isLeaf(block: Block): Boolean
 
@@ -46,7 +37,7 @@ abstract class Network(val origin: Location) {
             val currentNode = MutableNetworkTree(block)
             parentNode.children.add(currentNode)
             if (!isLeaf(block)) {
-                for (direction in scanDirections) {
+                for (direction in IMMEDIATE_FACES) {
                     repeat(checkDistance) {
                         val relative = block.getRelative(direction, it)
                         if (isValidBlock(relative)) {
@@ -83,5 +74,33 @@ abstract class Network(val origin: Location) {
                 NetworkTree.Branch(block.position, children.map { it.toImmutable() }.toSet())
             }
         }
+    }
+
+    companion object {
+
+        @JvmField
+        public val IMMEDIATE_FACES: Array<BlockFace> = arrayOf<BlockFace>(
+            BlockFace.UP,
+            BlockFace.DOWN,
+            BlockFace.EAST,
+            BlockFace.WEST,
+            BlockFace.SOUTH,
+            BlockFace.NORTH
+        )
+
+        @JvmField
+        public val IMMEDIATE_FACES_WITH_DIAGONALS: Array<BlockFace> = arrayOf<BlockFace>(
+            BlockFace.UP,
+            BlockFace.DOWN,
+            BlockFace.EAST,
+            BlockFace.WEST,
+            BlockFace.SOUTH,
+            BlockFace.NORTH,
+            BlockFace.NORTH_EAST,
+            BlockFace.NORTH_WEST,
+            BlockFace.SOUTH_EAST,
+            BlockFace.SOUTH_WEST,
+            BlockFace.EAST
+        )
     }
 }
