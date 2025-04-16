@@ -67,7 +67,8 @@ internal object MultiblockCache : Listener {
                     continue
                 }
 
-                if (BlockStorage.getAs<PylonMultiblock>(multiblockPosition)!!.checkFormed()) {
+                val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)!!
+                if (multiblock.checkFormed()) {
                     formedMultiblocks.add(multiblockPosition)
                 } else {
                     formedMultiblocks.remove(multiblockPosition)

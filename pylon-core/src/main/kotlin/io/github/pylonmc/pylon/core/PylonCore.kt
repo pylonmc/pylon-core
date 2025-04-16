@@ -6,18 +6,22 @@ import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.BlockListener
+import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
+import io.github.pylonmc.pylon.core.block.base.SimplePylonMultiblock
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
-import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.command.PylonCommand
+import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.Locale
 
 class PylonCore : JavaPlugin(), PylonAddon {
 
@@ -36,6 +40,8 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
+        Bukkit.getPluginManager().registerEvents(PylonLanguageService, this)
+        Bukkit.getPluginManager().registerEvents(EntityListener, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,
@@ -50,12 +56,15 @@ class PylonCore : JavaPlugin(), PylonAddon {
         }
         addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
         addRegistryCompletion("items", PylonRegistry.ITEMS)
+        addRegistryCompletion("blocks", PylonRegistry.BLOCKS)
 
         manager.registerCommand(PylonCommand)
 
         registerWithPylon()
 
         DebugWaxedWeatheredCutCopperStairs.register()
+        PhantomBlock.ErrorItem.register()
+        SimplePylonMultiblock.GHOST_BLOCK_SCHEMA.register()
     }
 
     override fun onDisable() {
@@ -81,7 +90,12 @@ class PylonCore : JavaPlugin(), PylonAddon {
     override val javaPlugin: JavaPlugin
         get() = pluginInstance
 
-    override fun displayName() = "Core"
+    override val displayName = "Core"
+
+    override val languages: Set<Locale> = setOf(
+        Locale.ENGLISH,
+        Locale.of("enws")
+    )
 }
 
 // for internal use so we don't have to !! all the time

@@ -1,7 +1,8 @@
 package io.github.pylonmc.pylon.core.addon
 
-import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -21,6 +22,7 @@ internal object PylonAddonListener : Listener {
             PylonRegistry.RECIPE_TYPES.unregisterAllFromAddon(plugin)
             PylonRegistry.MOB_DROPS.unregisterAllFromAddon(plugin)
             PylonRegistry.ADDONS.unregister(plugin)
+            PylonLanguageService.unregister(plugin)
         }
     }
 }

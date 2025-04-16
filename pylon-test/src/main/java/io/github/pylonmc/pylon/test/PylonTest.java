@@ -18,6 +18,8 @@ import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
 import io.github.pylonmc.pylon.test.test.serializer.*;
 import io.github.pylonmc.pylon.test.util.BedrockWorldGenerator;
 import io.github.pylonmc.pylon.test.util.TestUtil;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -27,16 +29,20 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PylonTest extends JavaPlugin implements PylonAddon {
+    @Accessors(fluent = true)
+    @Getter
     private static PylonTest instance;
     public static World testWorld;
     private static final boolean MANUAL_SHUTDOWN = Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"));
 
     @Override
-    public @NotNull String displayName() {
+    public @NotNull String getDisplayName() {
         return "Pylon Test";
     }
 
@@ -184,8 +190,9 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         return this;
     }
 
-    public static PylonTest instance() {
-        return instance;
+    @Override
+    public @NotNull Set<@NotNull Locale> getLanguages() {
+        return Set.of();
     }
 
     public static @NotNull NamespacedKey key(String key) {

@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.test.PylonTest;
+import lombok.Getter;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -15,6 +16,7 @@ public class BlockWithField extends PylonBlock<PylonBlockSchema> {
 
     private static final NamespacedKey PROGRESS_KEY = PylonTest.key("block_with_field_progress");
 
+    @Getter
     private final int progress;
 
     @SuppressWarnings("unused")
@@ -36,9 +38,5 @@ public class BlockWithField extends PylonBlock<PylonBlockSchema> {
     @Override
     public void write(@NotNull PersistentDataContainer pdc) {
         pdc.set(PROGRESS_KEY, PersistentDataType.INTEGER, 130);
-    }
-
-    public int getProgress() {
-        return progress;
     }
 }

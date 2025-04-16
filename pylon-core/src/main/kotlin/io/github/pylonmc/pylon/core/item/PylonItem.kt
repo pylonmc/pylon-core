@@ -3,11 +3,10 @@ package io.github.pylonmc.pylon.core.item
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 abstract class PylonItem<out S : PylonItemSchema>(
     val schema: S,
@@ -15,12 +14,11 @@ abstract class PylonItem<out S : PylonItemSchema>(
 ) {
     val id = stack.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)!!
 
-    override fun equals(other: Any?): Boolean
-            = id == (other as? PylonItem<*>)?.id
+    override fun equals(other: Any?): Boolean = id == (other as? PylonItem<*>)?.id
 
-    override fun hashCode(): Int
-            = id.hashCode()
+    override fun hashCode(): Int = id.hashCode()
 
+    open fun getPlaceholders(): Map<String, Component> = emptyMap()
 
     companion object {
         val idKey = NamespacedKey(pluginInstance, "pylon_id")

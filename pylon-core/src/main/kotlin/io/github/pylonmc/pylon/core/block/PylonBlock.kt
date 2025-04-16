@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -20,13 +21,21 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val block: Block
 ) {
 
+    init {
+        if (schema.key != PhantomBlock.key) {
+            require(PylonRegistry.BLOCKS.contains(schema.key)) {
+                "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
+            }
+        }
+    }
+
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    open fun getItem(reason: BlockItemContext): ItemStack? {
+    open fun getItem(context: BlockItemContext): ItemStack? {
         val defaultItem = PylonRegistry.ITEMS[schema.key]?.itemStack
-        return when (reason) {
-            is BlockItemContext.Break -> if (reason.context.normallyDrops) {
+        return when (context) {
+            is BlockItemContext.Break -> if (context.context.normallyDrops) {
                 defaultItem
             } else {
                 null
