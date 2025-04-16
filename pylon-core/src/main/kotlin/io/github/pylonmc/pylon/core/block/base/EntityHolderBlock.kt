@@ -21,7 +21,7 @@ interface EntityHolderBlock : PylonBreakHandler {
     /**
      * Must be set in your create constructor when you spawn in the entity.
      */
-    val heldEntities: Map<String, UUID>
+    val heldEntities: MutableMap<String, UUID>
 
     fun getHeldEntityUuid(name: String)
         = heldEntities[name] ?: throw IllegalArgumentException("Entity $name not found")

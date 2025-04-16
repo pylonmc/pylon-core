@@ -441,11 +441,9 @@ internal object BlockListener : Listener {
 
     @EventHandler
     private fun onPlayerBlockInteract(event: PlayerInteractEvent) {
-        if (event.action != Action.RIGHT_CLICK_BLOCK) {
-            val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
-            if (pylonBlock is PylonInteractableBlock) {
-                pylonBlock.onInteract(event)
-            }
+        val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
+        if (pylonBlock is PylonInteractableBlock) {
+            pylonBlock.onInteract(event)
         }
     }
 }
