@@ -64,8 +64,8 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
      */
     fun buildForBlockDisplay(): Matrix4f {
         val cloned = TransformBuilder(this)
-        cloned.add(Translation(BLOCK_DISPLAY_ADJUSTMENT))
-        return build()
+        cloned.components.addLast(Translation(BLOCK_DISPLAY_ADJUSTMENT))
+        return cloned.build()
     }
 
     fun buildForItemDisplay(): Matrix4f {

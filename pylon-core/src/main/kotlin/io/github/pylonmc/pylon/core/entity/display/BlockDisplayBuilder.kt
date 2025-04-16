@@ -51,11 +51,7 @@ class BlockDisplayBuilder() {
         val finalLocation = location.clone()
         finalLocation.yaw = 0.0f
         finalLocation.pitch = 0.0f
-        return location.world.spawn(finalLocation, BlockDisplay::class.java) {
-            update(it)
-            it.displayWidth = 0f
-            it.displayHeight = 0f
-        }
+        return location.world.spawn(finalLocation, BlockDisplay::class.java, this::update)
     }
 
     fun update(display: BlockDisplay) {
