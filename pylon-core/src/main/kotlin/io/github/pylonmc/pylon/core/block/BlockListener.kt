@@ -21,8 +21,8 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
-import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
+import org.bukkit.event.player.PlayerInteractEvent
 
 /**
  * This listener listens for various events that would indicate a Pylon block either

@@ -10,6 +10,9 @@ open class RecipeType<T : Keyed>(private val key: NamespacedKey) : Keyed, Iterab
     val recipes: Collection<T>
         get() = registeredRecipes.values
 
+    fun getRecipe(key: NamespacedKey): T?
+        = registeredRecipes[key]
+
     fun addRecipe(recipe: T) {
         registeredRecipes[recipe.key] = recipe
         registerRecipe(recipe)
