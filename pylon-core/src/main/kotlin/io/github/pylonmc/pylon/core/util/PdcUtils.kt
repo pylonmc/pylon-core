@@ -1,3 +1,5 @@
+@file:JvmName("PdcUtils")
+
 package io.github.pylonmc.pylon.core.util
 
 import org.bukkit.NamespacedKey
