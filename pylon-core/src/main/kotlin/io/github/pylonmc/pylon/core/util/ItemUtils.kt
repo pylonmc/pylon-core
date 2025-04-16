@@ -1,3 +1,5 @@
+@file:JvmName("ItemUtils")
+
 package io.github.pylonmc.pylon.core.util
 
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -16,23 +18,23 @@ fun findPylonItemInInventory(inventory: Inventory, targetItem: PylonItem<*>): In
     return null
 }
 
-fun isItemSimilar(item1: ItemStack?, item2: ItemStack?): Boolean {
+fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
     // Both items null
-    if (item1 == null && item2 == null) {
+    if (this == null && item2 == null) {
         return true
     }
 
     // One item null, one not null
-    if (!(item1 != null && item2 != null)) {
+    if (!(this != null && item2 != null)) {
         return false
     }
 
-    val pylonItem1 = PylonItem.fromStack(item1)
+    val pylonItem1 = PylonItem.fromStack(this)
     val pylonItem2 = PylonItem.fromStack(item2)
 
     // Both pylon items null
     if (pylonItem1 == null && pylonItem2 == null) {
-        return item1.isSimilar(item2)
+        return this.isSimilar(item2)
     }
 
     // One pylon item null, one not null
