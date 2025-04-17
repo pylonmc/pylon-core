@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.debug
 
+import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -9,7 +10,6 @@ import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.base.BlockInteractor
 import io.github.pylonmc.pylon.core.item.base.EntityInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.audience.Audience

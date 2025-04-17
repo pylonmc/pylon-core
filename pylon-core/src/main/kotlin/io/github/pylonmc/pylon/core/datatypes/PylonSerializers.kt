@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
+package io.github.pylonmc.pylon.core.datatypes
 
 import org.bukkit.persistence.PersistentDataType
 
@@ -46,13 +46,13 @@ object PylonSerializers {
     val LIST = PersistentDataType.LIST!!
 
     @JvmField
-    val SET = SetPersistentDataType.Companion
+    val SET = SetPersistentDataType
 
     @JvmField
-    val MAP = MapPersistentDataType.Companion
+    val MAP = MapPersistentDataType
 
     @JvmField
-    val ENUM = EnumPersistentDataType.Companion
+    val ENUM = EnumPersistentDataType
 
     @JvmField
     val NAMESPACED_KEY = NamespacedKeyPersistentDataType

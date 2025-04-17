@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.google.common.base.Supplier
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey

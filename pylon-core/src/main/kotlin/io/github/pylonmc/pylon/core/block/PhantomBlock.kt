@@ -1,13 +1,13 @@
 package io.github.pylonmc.pylon.core.persistence.blockstorage
 
-import io.github.pylonmc.pylon.core.block.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.BlockItemReason
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.context.BlockItemContext
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
@@ -48,7 +48,7 @@ class PhantomBlock(
         throw IllegalStateException("Phantom block cannot be loaded")
     }
 
-    override fun getItem(reason: BlockItemReason): ItemStack? {
+    override fun getItem(context: BlockItemContext): ItemStack? {
         val item = ErrorItem.Schema.itemStack
         item.editMeta {
             it.persistentDataContainer.set(ErrorItem.blockKey, PylonSerializers.NAMESPACED_KEY, key)

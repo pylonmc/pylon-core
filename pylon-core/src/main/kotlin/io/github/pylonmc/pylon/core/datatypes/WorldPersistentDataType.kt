@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
+package io.github.pylonmc.pylon.core.datatypes
 
 import org.bukkit.Bukkit
 import org.bukkit.World
@@ -11,11 +11,11 @@ object WorldPersistentDataType : PersistentDataType<LongArray, World> {
     override fun getComplexType(): Class<World> = World::class.java
 
     override fun fromPrimitive(primitive: LongArray, context: PersistentDataAdapterContext): World {
-        val uid = PylonSerializers.UUID.fromPrimitive(primitive, context)
+        val uid = UUIDPersistentDataType.fromPrimitive(primitive, context)
         return Bukkit.getWorld(uid) ?: throw IllegalArgumentException(uid.toString())
     }
 
     override fun toPrimitive(complex: World, context: PersistentDataAdapterContext): LongArray {
-        return PylonSerializers.UUID.toPrimitive(complex.uid, context)
+        return UUIDPersistentDataType.toPrimitive(complex.uid, context)
     }
 }

@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
+package io.github.pylonmc.pylon.core.datatypes
 
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType

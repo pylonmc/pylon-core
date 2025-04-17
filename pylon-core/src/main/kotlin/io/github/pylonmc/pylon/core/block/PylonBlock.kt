@@ -1,7 +1,8 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.block.context.BlockItemContext
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -31,16 +32,16 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    open fun getItem(reason: BlockItemReason): ItemStack? {
+    open fun getItem(context: BlockItemContext): ItemStack? {
         val defaultItem = PylonRegistry.ITEMS[schema.key]?.itemStack
-        return when (reason) {
-            is BlockItemReason.Break -> if (reason.context.normallyDrops) {
+        return when (context) {
+            is BlockItemContext.Break -> if (context.context.normallyDrops) {
                 defaultItem
             } else {
                 null
             }
 
-            is BlockItemReason.PickBlock -> defaultItem
+            is BlockItemContext.PickBlock -> defaultItem
         }
     }
 

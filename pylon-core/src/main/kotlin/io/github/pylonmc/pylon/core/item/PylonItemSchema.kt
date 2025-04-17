@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.item
 
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem.Companion.idKey
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching

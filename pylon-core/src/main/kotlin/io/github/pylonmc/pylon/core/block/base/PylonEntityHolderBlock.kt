@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.persistence.PersistentDataContainer
 import java.util.UUID
@@ -16,7 +16,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper
  *
  * Note that the Pylon entities may not be loaded when the block is loaded.
  */
-interface EntityHolderBlock : PylonBreakHandler {
+interface PylonEntityHolderBlock : PylonBreakHandler {
 
     /**
      * Must be set in your create constructor when you spawn in the entity.

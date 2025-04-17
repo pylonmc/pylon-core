@@ -1,10 +1,13 @@
-package io.github.pylonmc.pylon.core.persistence.blockstorage
+package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.event.*
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
@@ -234,7 +237,7 @@ object BlockStorage : Listener {
 
         val drops = mutableListOf<ItemStack>()
         if (context.normallyDrops) {
-            block.getItem(BlockItemReason.Break(context))?.let { drops.add(it.clone()) }
+            block.getItem(BlockItemContext.Break(context))?.let { drops.add(it.clone()) }
         }
         if (block is PylonBreakHandler) {
             block.onBreak(drops, context)

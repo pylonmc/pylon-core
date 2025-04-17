@@ -1,13 +1,13 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
 import io.github.pylonmc.pylon.core.entity.base.InteractableEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
-import io.github.pylonmc.pylon.core.persistence.blockstorage.BlockStorage
-import io.github.pylonmc.pylon.core.persistence.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -27,7 +27,7 @@ import kotlin.math.min
  * SimplePylonMultiblock implements EntityHolderBlock, so make sure you
  * remember to call loadHeldEntities and saveHeldEntities
  */
-interface SimplePylonMultiblock : PylonMultiblock, EntityHolderBlock {
+interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     override val heldEntities: MutableMap<String, UUID>
 

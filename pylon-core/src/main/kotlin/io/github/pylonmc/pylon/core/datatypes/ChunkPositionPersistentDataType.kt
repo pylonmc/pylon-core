@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.persistence.datatypes
+package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
