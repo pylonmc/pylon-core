@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.network
 
+import io.github.pylonmc.pylon.core.util.BlockUtils
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Location
@@ -37,7 +38,7 @@ abstract class Network(val origin: Location) {
             val currentNode = MutableNetworkTree(block)
             parentNode.children.add(currentNode)
             if (!isLeaf(block)) {
-                for (direction in IMMEDIATE_FACES) {
+                for (direction in BlockUtils.IMMEDIATE_FACES) {
                     repeat(checkDistance) {
                         val relative = block.getRelative(direction, it)
                         if (isValidBlock(relative)) {
@@ -74,33 +75,5 @@ abstract class Network(val origin: Location) {
                 NetworkTree.Branch(block.position, children.map { it.toImmutable() }.toSet())
             }
         }
-    }
-
-    companion object {
-
-        @JvmField
-        public val IMMEDIATE_FACES: Array<BlockFace> = arrayOf<BlockFace>(
-            BlockFace.UP,
-            BlockFace.DOWN,
-            BlockFace.EAST,
-            BlockFace.WEST,
-            BlockFace.SOUTH,
-            BlockFace.NORTH
-        )
-
-        @JvmField
-        public val IMMEDIATE_FACES_WITH_DIAGONALS: Array<BlockFace> = arrayOf<BlockFace>(
-            BlockFace.UP,
-            BlockFace.DOWN,
-            BlockFace.EAST,
-            BlockFace.WEST,
-            BlockFace.SOUTH,
-            BlockFace.NORTH,
-            BlockFace.NORTH_EAST,
-            BlockFace.NORTH_WEST,
-            BlockFace.SOUTH_EAST,
-            BlockFace.SOUTH_WEST,
-            BlockFace.EAST
-        )
     }
 }
