@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly(project(":translation"))
+    runtimeOnly(project(":nms"))
 
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 

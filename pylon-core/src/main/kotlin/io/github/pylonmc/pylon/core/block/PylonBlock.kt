@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
