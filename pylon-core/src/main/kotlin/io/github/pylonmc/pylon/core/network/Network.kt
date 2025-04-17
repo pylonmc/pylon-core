@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.network
 
+import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Location
 import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 
 abstract class Network(val origin: Location) {
 
@@ -74,33 +74,5 @@ abstract class Network(val origin: Location) {
                 NetworkTree.Branch(block.position, children.map { it.toImmutable() }.toSet())
             }
         }
-    }
-
-    companion object {
-
-        @JvmField
-        public val IMMEDIATE_FACES: Array<BlockFace> = arrayOf<BlockFace>(
-            BlockFace.UP,
-            BlockFace.DOWN,
-            BlockFace.EAST,
-            BlockFace.WEST,
-            BlockFace.SOUTH,
-            BlockFace.NORTH
-        )
-
-        @JvmField
-        public val IMMEDIATE_FACES_WITH_DIAGONALS: Array<BlockFace> = arrayOf<BlockFace>(
-            BlockFace.UP,
-            BlockFace.DOWN,
-            BlockFace.EAST,
-            BlockFace.WEST,
-            BlockFace.SOUTH,
-            BlockFace.NORTH,
-            BlockFace.NORTH_EAST,
-            BlockFace.NORTH_WEST,
-            BlockFace.SOUTH_EAST,
-            BlockFace.SOUTH_WEST,
-            BlockFace.EAST
-        )
     }
 }
