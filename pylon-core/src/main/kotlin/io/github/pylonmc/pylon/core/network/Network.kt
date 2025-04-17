@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Location
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 
 abstract class Network(val origin: Location) {
 
