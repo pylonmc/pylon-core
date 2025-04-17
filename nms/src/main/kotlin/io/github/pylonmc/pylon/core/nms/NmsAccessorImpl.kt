@@ -1,13 +1,14 @@
-package io.github.pylonmc.pylon.core.i18n.packet
+package io.github.pylonmc.pylon.core.nms
 
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
+import io.github.pylonmc.pylon.core.i18n.packet.PlayerPacketHandler
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.entity.Player
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")
-object PacketManagerImpl : PacketManager {
+object NmsAccessorImpl : NmsAccessor {
 
     private val players = ConcurrentHashMap<UUID, PlayerPacketHandler>()
 

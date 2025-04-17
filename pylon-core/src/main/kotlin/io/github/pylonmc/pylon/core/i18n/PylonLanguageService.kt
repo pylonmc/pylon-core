@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.i18n
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.i18n.packet.PacketManager
+import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -31,17 +31,17 @@ object PylonLanguageService : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
-        PacketManager.instance.register(player, PlayerTranslationHandler(player))
+        NmsAccessor.instance.register(player, PlayerTranslationHandler(player))
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onPlayerQuit(event: PlayerQuitEvent) {
         val player = event.player
-        PacketManager.instance.unregister(player)
+        NmsAccessor.instance.unregister(player)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onPlayerChangeLanguage(event: PlayerLocaleChangeEvent) {
-        PacketManager.instance.resendInventory(event.player)
+        NmsAccessor.instance.resendInventory(event.player)
     }
 }
