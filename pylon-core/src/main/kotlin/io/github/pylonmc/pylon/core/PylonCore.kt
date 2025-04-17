@@ -10,6 +10,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
+import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -42,6 +43,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
         Bukkit.getPluginManager().registerEvents(PylonLanguageService, this)
         Bukkit.getPluginManager().registerEvents(EntityListener, this)
+        Bukkit.getPluginManager().registerEvents(Waila, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,

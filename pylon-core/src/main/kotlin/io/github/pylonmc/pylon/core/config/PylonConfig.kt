@@ -11,4 +11,7 @@ object PylonConfig {
 
     @JvmStatic
     val allowedBlockErrors: Int by config
+
+    @JvmStatic
+    val waliaInterval: Int by config
 }

@@ -9,8 +9,6 @@ import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.TranslationArgument
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.translation.GlobalTranslator
@@ -22,11 +20,13 @@ class PlayerTranslationHandler(val player: Player) {
     private val wrapper = TextWrapper(limit = 64)
 
     fun handleItem(item: PylonItem<*>) {
-        val placeholders = item.getPlaceholders().map { (name, value) -> PylonArgument.of(name, value) }
-        item.stack.editData(DataComponentTypes.ITEM_NAME) { it.translate(placeholders) }
+        val attacher = PlaceholderAttacher(item.getPlaceholders())
+        item.stack.editData(DataComponentTypes.ITEM_NAME) {
+            GlobalTranslator.render(attacher.render(it, Unit), player.locale())
+        }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
             val newLore = lore.lines().flatMapTo(mutableListOf()) { line ->
-                val translated = line.translate(placeholders)
+                val translated = GlobalTranslator.render(attacher.render(line, Unit), player.locale())
                 val encoded = LineWrapEncoder.encode(translated)
                 val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
                 wrapped.toComponentLines().map {
@@ -44,15 +44,6 @@ class PlayerTranslationHandler(val player: Player) {
             )
             ItemLore.lore(newLore)
         }
-    }
-
-    private fun Component.translate(args: List<TranslationArgument>): Component {
-        val toTranslate = if (this is TranslatableComponent && args.isNotEmpty()) {
-            this.arguments(args)
-        } else {
-            this
-        }
-        return GlobalTranslator.render(toTranslate, player.locale())
     }
 }
 

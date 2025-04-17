@@ -12,7 +12,10 @@ import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.position
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.bukkit.Color.RED
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.event.EventHandler
@@ -72,7 +75,7 @@ object TickManager : Listener {
         }
     }
 
-    private suspend fun CoroutineScope.handleBlockError(pylonBlock: PylonBlock<*>, error: Throwable, errors: Int) {
+    private suspend fun handleBlockError(pylonBlock: PylonBlock<*>, error: Throwable, errors: Int) {
         // Drop onto main thread for error logging and stuff
         withContext(pluginInstance.minecraftDispatcher) {
             val block = pylonBlock.block

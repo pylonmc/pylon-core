@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
+import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.pluginInstance
@@ -8,10 +9,12 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
@@ -31,6 +34,10 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
+
+    open fun getWaila(player: Player): WailaConfig {
+        return WailaConfig(Component.translatable("pylon.${schema.key.namespace}.block.${schema.key.key}"))
+    }
 
     open fun getItem(context: BlockItemContext): ItemStack? {
         val defaultItem = PylonRegistry.ITEMS[schema.key]?.itemStack
