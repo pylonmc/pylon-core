@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.i18n
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
+import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.pluginInstance
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
@@ -12,6 +13,12 @@ import net.kyori.adventure.text.VirtualComponent
 import net.kyori.adventure.translation.GlobalTranslator
 import net.kyori.adventure.translation.Translator
 import org.apache.commons.lang3.LocaleUtils
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerLocaleChangeEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
@@ -67,6 +74,39 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
             customMiniMessage.deserialize(translation)
         }
         return Component.text().style(component.style()).append(translation).build()
+    }
+
+    companion object : Listener {
+
+        private val translators = mutableMapOf<PylonAddon, AddonTranslator>()
+
+        @JvmSynthetic
+        internal fun register(addon: PylonAddon) {
+            val translator = AddonTranslator(addon)
+            GlobalTranslator.translator().addSource(translator)
+            translators[addon] = translator
+        }
+
+        @JvmSynthetic
+        internal fun unregister(addon: PylonAddon) {
+            translators.remove(addon)?.let(GlobalTranslator.translator()::removeSource)
+        }
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        private fun onPlayerJoin(event: PlayerJoinEvent) {
+            val player = event.player
+            NmsAccessor.instance.registerTranslationHandler(player, PlayerTranslationHandler(player))
+        }
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        private fun onPlayerQuit(event: PlayerQuitEvent) {
+            NmsAccessor.instance.unregisterTranslationHandler(event.player)
+        }
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        private fun onPlayerChangeLanguage(event: PlayerLocaleChangeEvent) {
+            NmsAccessor.instance.resendInventory(event.player)
+        }
     }
 }
 

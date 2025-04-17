@@ -14,7 +14,7 @@ import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
-import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
+import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
@@ -41,7 +41,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
-        Bukkit.getPluginManager().registerEvents(PylonLanguageService, this)
+        Bukkit.getPluginManager().registerEvents(AddonTranslator, this)
         Bukkit.getPluginManager().registerEvents(EntityListener, this)
         Bukkit.getPluginManager().registerEvents(Waila, this)
 

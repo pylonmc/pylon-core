@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.addon
 
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
-import io.github.pylonmc.pylon.core.i18n.PylonLanguageService
+import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
@@ -30,7 +30,7 @@ interface PylonAddon : Keyed {
      */
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)
-        PylonLanguageService.register(this)
+        AddonTranslator.register(this)
     }
 
     /**

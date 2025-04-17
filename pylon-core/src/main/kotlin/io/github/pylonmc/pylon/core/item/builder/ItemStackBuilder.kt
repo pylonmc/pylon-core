@@ -48,7 +48,7 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) {
 
     fun name(name: String) = name(fromMiniMessage(name))
 
-    fun defaultTranslatableName(key: NamespacedKey) =
+    fun defaultLocalizedName(key: NamespacedKey) =
         name(Component.translatable("pylon.${key.namespace}.item.${key.key}.name"))
 
     fun lore(vararg loreToAdd: ComponentLike) = apply {
@@ -60,7 +60,7 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) {
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
-    fun defaultTranslatableLore(key: NamespacedKey) =
+    fun defaultLocalizedLore(key: NamespacedKey) =
         lore(Component.translatable("pylon.${key.namespace}.item.${key.key}.lore"))
 
     fun build(): ItemStack = stack.clone()
@@ -82,8 +82,8 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) {
         @JvmStatic
         fun defaultBuilder(material: Material, key: NamespacedKey): ItemStackBuilder {
             return of(material)
-                .defaultTranslatableName(key)
-                .defaultTranslatableLore(key)
+                .defaultLocalizedName(key)
+                .defaultLocalizedLore(key)
         }
     }
 }
