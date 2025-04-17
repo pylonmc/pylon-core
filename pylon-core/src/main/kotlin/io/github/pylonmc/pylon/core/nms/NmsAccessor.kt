@@ -8,9 +8,9 @@ import org.jetbrains.annotations.ApiStatus
 @ApiStatus.NonExtendable
 interface NmsAccessor {
 
-    fun register(player: Player, handler: PlayerTranslationHandler)
+    fun registerTranslationHandler(player: Player, handler: PlayerTranslationHandler)
 
-    fun unregister(player: Player)
+    fun unregisterTranslationHandler(player: Player)
 
     fun resendInventory(player: Player)
 
