@@ -9,6 +9,7 @@ class PlaceholderAttacher(placeholders: Map<String, Component>) : ComponentRende
     private val arguments = placeholders.map { (name, value) -> PylonArgument.of(name, value) }
 
     override fun render(component: Component, context: Unit): Component {
+        if (arguments.isEmpty()) return component
         var result = component
         if (component is TranslatableComponent) {
             result = component.arguments(arguments)
