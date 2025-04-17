@@ -27,7 +27,7 @@ import kotlin.math.min
  * SimplePylonMultiblock implements EntityHolderBlock, so make sure you
  * remember to call loadHeldEntities and saveHeldEntities
  */
-interface SimplePylonMultiblock : PylonMultiblock, PylonEntityHolderBlock {
+interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     override val heldEntities: MutableMap<String, UUID>
 

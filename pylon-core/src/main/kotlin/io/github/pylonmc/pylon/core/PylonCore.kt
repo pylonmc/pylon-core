@@ -9,7 +9,7 @@ import io.github.pylonmc.pylon.core.block.BlockListener
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
-import io.github.pylonmc.pylon.core.block.base.SimplePylonMultiblock
+import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -64,7 +64,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
 
         DebugWaxedWeatheredCutCopperStairs.register()
         PhantomBlock.ErrorItem.register()
-        SimplePylonMultiblock.GHOST_BLOCK_SCHEMA.register()
+        PylonSimpleMultiblock.GHOST_BLOCK_SCHEMA.register()
     }
 
     override fun onDisable() {
