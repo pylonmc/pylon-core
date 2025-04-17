@@ -60,15 +60,10 @@ object PylonCommand : BaseCommand() {
     }
 
     @Subcommand("waila")
-    @Description("Set WAILA for this player")
+    @Description("Toggle your WAILA bossbar")
     @CommandPermission("pylon.command.waila")
-    fun waila(player: Player, enabled: Boolean) {
-        Waila.setWailaEnabled(player, enabled)
-        if (enabled) {
-            Waila.addPlayer(player)
-        } else {
-            Waila.removePlayer(player)
-        }
+    fun waila(player: Player) {
+        Waila.setWailaEnabled(player, !Waila.isWailaEnabled(player))
     }
 
     @Private

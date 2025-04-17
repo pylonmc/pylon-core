@@ -9,6 +9,9 @@ item:
     name: "<red>Wax'd Weather'd Cutteth Copp'r Stairs of Unriddling"
     lore: "<insn>Strike with thy right hand</insn> yon block, and its Pylon lore shall be revealed"
 
+block:
+  phantom_block: "Phantom Block"
+
 message:
   debug:
     not_a_block: "<red>This is not a Pylon block"

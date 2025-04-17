@@ -73,6 +73,11 @@ class Waila private constructor(player: Player, private val job: Job) {
         @JvmStatic
         fun setWailaEnabled(player: Player, enabled: Boolean) {
             player.persistentDataContainer.set(wailaKey, PersistentDataType.BOOLEAN, enabled)
+            if (enabled) {
+                addPlayer(player)
+            } else {
+                removePlayer(player)
+            }
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
