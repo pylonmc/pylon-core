@@ -11,4 +11,4 @@ plugins {
 
 include("pylon-core")
 include("pylon-test")
-include("translation")
+include("nms")

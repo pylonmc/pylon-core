@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
@@ -56,6 +57,13 @@ object PylonCommand : BaseCommand() {
             return
         }
         BlockStorage.placeBlock(location, pylonBlock)
+    }
+
+    @Subcommand("waila")
+    @Description("Toggle your WAILA bossbar")
+    @CommandPermission("pylon.command.waila")
+    fun waila(player: Player) {
+        Waila.setWailaEnabled(player, !Waila.isWailaEnabled(player))
     }
 
     @Private
