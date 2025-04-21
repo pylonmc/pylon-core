@@ -25,6 +25,8 @@ message:
       not_ticking: "<gold>Ticking: <red>No"
     pdc: "%key%: %value%"
 
+  no_item_research: "<red>You do not know how to use %item%"
+
 quantity:
   blocks: " blocks"
   seconds: "s"

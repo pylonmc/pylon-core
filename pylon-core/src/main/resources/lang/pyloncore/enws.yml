@@ -25,6 +25,8 @@ message:
       not_ticking: "<gold>Ticking: <red>Nay"
     pdc: "%key%: %value%"
 
+  no_item_permission: "<red>Thou dost not possess the right to wield %item%"
+
 quantity:
   blocks: " blocks"
   seconds: "s"

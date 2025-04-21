@@ -16,6 +16,7 @@ import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItemListener
+import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -44,6 +45,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(AddonTranslator, this)
         Bukkit.getPluginManager().registerEvents(EntityListener, this)
         Bukkit.getPluginManager().registerEvents(Waila, this)
+        Bukkit.getPluginManager().registerEvents(Research, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,

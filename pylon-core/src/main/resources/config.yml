@@ -6,3 +6,6 @@ allowed-block-errors: 5
 
 # The interval, in ticks, between WALIA checks
 walia-interval: 1
+
+# Whether researches are enabled
+researches-enabled: true
