@@ -157,7 +157,7 @@ internal class PylonCommand : BaseCommand() {
             @CommandCompletion("@players")
             @Description("Set a player's research points")
             @CommandPermission("pylon.command.research.points.set")
-            fun set(p: OnlinePlayer, points: Double) {
+            fun set(p: OnlinePlayer, points: Long) {
                 val player = p.player
                 player.researchPoints = points
                 player.sendRichMessage("<green>Set research points to $points")
@@ -167,7 +167,7 @@ internal class PylonCommand : BaseCommand() {
             @CommandCompletion("@players")
             @Description("Add research points to a player")
             @CommandPermission("pylon.command.research.points.set")
-            fun add(p: OnlinePlayer, points: Double) {
+            fun add(p: OnlinePlayer, points: Long) {
                 val player = p.player
                 player.researchPoints += points
                 player.sendRichMessage("<green>Added $points research points")
@@ -177,7 +177,7 @@ internal class PylonCommand : BaseCommand() {
             @CommandCompletion("@players")
             @Description("Remove research points from a player")
             @CommandPermission("pylon.command.research.points.set")
-            fun remove(p: OnlinePlayer, points: Double) {
+            fun remove(p: OnlinePlayer, points: Long) {
                 val player = p.player
                 player.researchPoints -= points
                 player.sendRichMessage("<green>Removed $points research points")

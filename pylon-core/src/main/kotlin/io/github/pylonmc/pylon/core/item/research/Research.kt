@@ -13,7 +13,6 @@ import io.github.pylonmc.pylon.core.recipe.RecipeTypes
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.github.pylonmc.pylon.core.util.toCleanString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
@@ -35,11 +34,11 @@ import kotlin.time.Duration.Companion.seconds
 data class Research(
     private val key: NamespacedKey,
     val name: Component,
-    val cost: Double,
+    val cost: Long,
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
-    constructor(key: NamespacedKey, cost: Double, vararg unlocks: PylonItemSchema) : this(
+    constructor(key: NamespacedKey, cost: Long, vararg unlocks: PylonItemSchema) : this(
         key,
         Component.translatable("pylon.${key.namespace}.research.${key.key}"),
         cost,
@@ -58,7 +57,7 @@ data class Research(
         private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.NAMESPACED_KEY)
 
         @JvmStatic
-        var Player.researchPoints: Double by persistentData(researchPointsKey, PylonSerializers.DOUBLE, 0.0)
+        var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
         var Player.researches: Set<NamespacedKey> by persistentData(researchesKey, researchesType, emptySet())
@@ -72,8 +71,8 @@ data class Research(
                         Component.translatable(
                             "pylon.pyloncore.message.research.not_enough_points",
                             PylonArgument.of("research", research.name),
-                            PylonArgument.of("points", this.researchPoints.toCleanString()),
-                            PylonArgument.of("cost", research.cost.toCleanString())
+                            PylonArgument.of("points", Component.text(this.researchPoints)),
+                            PylonArgument.of("cost", Component.text(research.cost))
                         )
                     )
                     return
@@ -134,7 +133,7 @@ data class Research(
                         HoverEvent.showText(
                             Component.translatable(
                                 "pylon.pyloncore.message.research.click_to_research",
-                                PylonArgument.of("points", research.cost.toCleanString())
+                                PylonArgument.of("points", Component.text(research.cost))
                             )
                         )
                     )
