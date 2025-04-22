@@ -26,7 +26,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
-import org.bukkit.event.inventory.CraftItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.UUID
@@ -186,15 +185,6 @@ data class Research(
         @EventHandler
         private fun onPlayerLeave(event: PlayerQuitEvent) {
             playerCheckerJobs[event.player.uniqueId]?.cancel()
-        }
-
-        @EventHandler
-        private fun onPlayerCraft(event: CraftItemEvent) {
-            val player = event.whoClicked as Player
-            val pylonItem = PylonItem.fromStack(event.currentItem)?.schema ?: return
-            if (!player.canUse(pylonItem, sendMessage = true)) {
-                event.isCancelled = true
-            }
         }
     }
 }
