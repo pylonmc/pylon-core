@@ -29,7 +29,6 @@ import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 data class Research(
     private val key: NamespacedKey,
@@ -166,7 +165,7 @@ data class Research(
                 playerCheckerJobs[player.uniqueId] = pluginInstance.launch {
                     while (true) {
                         player.ejectUnknownItems()
-                        delay(5.seconds)
+                        delay(10.ticks)
                     }
                 }
             }
