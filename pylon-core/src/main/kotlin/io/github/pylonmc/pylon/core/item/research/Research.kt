@@ -70,8 +70,8 @@ data class Research(
                         Component.translatable(
                             "pylon.pyloncore.message.research.not_enough_points",
                             PylonArgument.of("research", research.name),
-                            PylonArgument.of("points", Component.text(this.researchPoints.withDecimals(2))),
-                            PylonArgument.of("cost", Component.text(research.cost.withDecimals(2)))
+                            PylonArgument.of("points", this.researchPoints.withDecimals(2)),
+                            PylonArgument.of("cost", research.cost.withDecimals(2))
                         )
                     )
                     return

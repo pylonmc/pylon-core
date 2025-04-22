@@ -23,8 +23,8 @@ class PrintingPDC(private val audience: Audience) : PersistentDataContainer {
         audience.sendMessage(
             Component.translatable(
                 "pylon.pyloncore.message.debug.pdc",
-                PylonArgument.of("key", Component.text(key.toString())),
-                PylonArgument.of("value", Component.text(value.toString()))
+                PylonArgument.of("key", key.toString()),
+                PylonArgument.of("value", value.toString())
             )
         )
     }

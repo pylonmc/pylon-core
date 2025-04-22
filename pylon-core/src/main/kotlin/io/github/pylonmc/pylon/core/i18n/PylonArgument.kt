@@ -16,5 +16,10 @@ class PylonArgument private constructor(val name: String, val value: Component) 
         fun of(name: String, value: Component): TranslationArgument {
             return TranslationArgument.component(Component.virtual(Unit::class.java, PylonArgument(name, value)))
         }
+
+        @JvmStatic
+        fun of(name: String, value: String): TranslationArgument {
+            return of(name, Component.text(value))
+        }
     }
 }
