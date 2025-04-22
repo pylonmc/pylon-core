@@ -40,6 +40,10 @@ class Waila private constructor(player: Player, private val job: Job) {
         private val wailaKey = pylonKey("walia")
         private val walias = mutableMapOf<UUID, Waila>()
 
+        /**
+         * Adds a WAILA bossbar to the player without consideration whether the player
+         * has WAILA enabled or not
+         */
         @JvmStatic
         fun addPlayer(player: Player) {
             walias[player.uniqueId] = Waila(player, pluginInstance.launch {
@@ -60,6 +64,10 @@ class Waila private constructor(player: Player, private val job: Job) {
             })
         }
 
+        /**
+         * Removes the WAILA bossbar from the player without consideration whether the player
+         * has WAILA enabled or not
+         */
         @JvmStatic
         fun removePlayer(player: Player) {
             walias.remove(player.uniqueId)?.destroy()
@@ -70,6 +78,9 @@ class Waila private constructor(player: Player, private val job: Job) {
             return player.persistentDataContainer.getOrDefault(wailaKey, PersistentDataType.BOOLEAN, true)
         }
 
+        /**
+         * Also automatically adds or removes the WAILA bossbar from the player
+         */
         @JvmStatic
         fun setWailaEnabled(player: Player, enabled: Boolean) {
             player.persistentDataContainer.set(wailaKey, PersistentDataType.BOOLEAN, enabled)
