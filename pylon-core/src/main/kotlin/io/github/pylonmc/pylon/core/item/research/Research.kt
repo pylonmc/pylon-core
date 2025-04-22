@@ -13,10 +13,12 @@ import io.github.pylonmc.pylon.core.recipe.RecipeTypes
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.github.pylonmc.pylon.core.util.withDecimals
+import io.github.pylonmc.pylon.core.util.toCleanString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
 import org.bukkit.GameMode
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
@@ -70,8 +72,8 @@ data class Research(
                         Component.translatable(
                             "pylon.pyloncore.message.research.not_enough_points",
                             PylonArgument.of("research", research.name),
-                            PylonArgument.of("points", this.researchPoints.withDecimals(2)),
-                            PylonArgument.of("cost", research.cost.withDecimals(2))
+                            PylonArgument.of("points", this.researchPoints.toCleanString()),
+                            PylonArgument.of("cost", research.cost.toCleanString())
                         )
                     )
                     return
@@ -127,11 +129,21 @@ data class Research(
 
             val canUse = this.hasResearch(research.key)
             if (!canUse && sendMessage) {
+                val clickableResearch = research.name
+                    .hoverEvent(
+                        HoverEvent.showText(
+                            Component.translatable(
+                                "pylon.pyloncore.message.research.click_to_research",
+                                PylonArgument.of("points", research.cost.toCleanString())
+                            )
+                        )
+                    )
+                    .clickEvent(ClickEvent.runCommand("/pylon research research ${research.key}"))
                 this.sendMessage(
                     Component.translatable(
                         "pylon.pyloncore.message.research.unknown",
                         PylonArgument.of("item", item.itemStack.effectiveName()),
-                        PylonArgument.of("research", research.name)
+                        PylonArgument.of("research", clickableResearch)
                     )
                 )
             }
@@ -153,8 +165,10 @@ data class Research(
                 // This task runs just in case a player manages to obtain an
                 // unknown item without picking it up somehow
                 playerCheckerJobs[player.uniqueId] = pluginInstance.launch {
-                    player.ejectUnknownItems()
-                    delay(5.seconds)
+                    while (true) {
+                        player.ejectUnknownItems()
+                        delay(5.seconds)
+                    }
                 }
             }
         }
@@ -178,13 +192,12 @@ data class Research(
 }
 
 private fun Player.ejectUnknownItems() {
-    inventory.removeAll { item ->
-        val pylonItem = PylonItem.fromStack(item)?.schema ?: return@removeAll false
-        if (!canUse(pylonItem, sendMessage = true)) {
-            world.dropItem(location, item)
-            true
-        } else {
-            false
-        }
+    val toRemove = inventory.contents.filterNotNull().filter { item ->
+        val pylonItem = PylonItem.fromStack(item)?.schema
+        pylonItem != null && !canUse(pylonItem, sendMessage = true)
+    }
+    for (item in toRemove) {
+        inventory.remove(item)
+        dropItem(item)
     }
 }
