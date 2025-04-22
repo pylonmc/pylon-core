@@ -11,10 +11,18 @@ import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.Locale
 
+/**
+ * All Pylon addons must implement this interface to do anything
+ */
 interface PylonAddon : Keyed {
 
     val javaPlugin: JavaPlugin
 
+    /**
+     * The languages that this addon has translation files for.
+     * These languages must either be a valid [Minecraft language code](https://minecraft.wiki/w/Language#Languages)
+     * or a sublocale of one of those languages (e.g. "en_us" or "en").
+     */
     val languages: Set<Locale>
 
     /**
@@ -26,7 +34,7 @@ interface PylonAddon : Keyed {
             = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
 
     /**
-     * Must be called as the first thing in your plugin's onEnable
+     * Must be called as the first thing in your plugin's `onEnable`
      */
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)

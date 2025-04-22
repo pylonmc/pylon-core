@@ -7,7 +7,9 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
+import org.jetbrains.annotations.ApiStatus
 
+@ApiStatus.Internal
 internal object PylonAddonListener : Listener {
     @EventHandler
     private fun onPluginDisable(event: PluginDisableEvent) {
