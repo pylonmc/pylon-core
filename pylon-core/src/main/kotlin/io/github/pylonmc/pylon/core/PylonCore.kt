@@ -11,6 +11,7 @@ import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
+import io.github.pylonmc.pylon.core.command.PylonCommand
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -61,8 +62,9 @@ class PylonCore : JavaPlugin(), PylonAddon {
         addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
         addRegistryCompletion("items", PylonRegistry.ITEMS)
         addRegistryCompletion("blocks", PylonRegistry.BLOCKS)
+        addRegistryCompletion("researches", PylonRegistry.RESEARCHES)
 
-        manager.registerCommand(PylonCommand)
+        manager.registerCommand(PylonCommand())
 
         registerWithPylon()
 

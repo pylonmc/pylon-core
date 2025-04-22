@@ -9,8 +9,11 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.pluginInstance
+import io.github.pylonmc.pylon.core.recipe.RecipeTypes
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.util.withDecimals
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
@@ -29,37 +32,74 @@ import kotlin.time.Duration.Companion.seconds
 
 data class Research(
     private val key: NamespacedKey,
-    val name: String,
-    val cost: Int,
+    val name: Component,
+    val cost: Double,
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
-    constructor(
-        key: NamespacedKey,
-        name: String,
-        cost: Int,
-        vararg unlocks: PylonItemSchema
-    ) : this(key, name, cost, unlocks.map(PylonItemSchema::getKey).toSet())
+    constructor(key: NamespacedKey, cost: Double, vararg unlocks: PylonItemSchema) : this(
+        key,
+        Component.translatable("pylon.${key.namespace}.research.${key.key}"),
+        cost,
+        unlocks.map(PylonItemSchema::getKey).toSet()
+    )
+
+    fun register() {
+        PylonRegistry.RESEARCHES.register(this)
+    }
 
     override fun getKey() = key
 
     companion object : Listener {
         private val researchesKey = pylonKey("researches")
+        private val researchPointsKey = pylonKey("research_points")
         private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.NAMESPACED_KEY)
 
         @JvmStatic
-        var Player.researches: Set<NamespacedKey>
-            get() = persistentDataContainer.getOrDefault(researchesKey, researchesType, emptySet())
-            set(value) = persistentDataContainer.set(researchesKey, researchesType, value)
+        var Player.researchPoints: Double by persistentData(researchPointsKey, PylonSerializers.DOUBLE, 0.0)
 
         @JvmStatic
-        fun Player.addResearch(research: NamespacedKey) {
-            this.researches = this.researches + research
+        var Player.researches: Set<NamespacedKey> by persistentData(researchesKey, researchesType, emptySet())
+
+        @JvmStatic
+        @JvmOverloads
+        fun Player.addResearch(research: Research, deductPoints: Boolean = true, sendMessage: Boolean = false) {
+            if (deductPoints) {
+                if (this.researchPoints < research.cost) {
+                    this.sendMessage(
+                        Component.translatable(
+                            "pylon.pyloncore.message.research.not_enough_points",
+                            PylonArgument.of("research", research.name),
+                            PylonArgument.of("points", Component.text(this.researchPoints.withDecimals(2))),
+                            PylonArgument.of("cost", Component.text(research.cost.withDecimals(2)))
+                        )
+                    )
+                    return
+                } else {
+                    this.researchPoints -= research.cost
+                }
+            }
+
+            this.researches += research.key
+            for (recipe in RecipeTypes.VANILLA_CRAFTING) {
+                val pylonItem = PylonItem.fromStack(recipe.result)?.schema ?: continue
+                if (pylonItem.key in research.unlocks) {
+                    discoverRecipe(recipe.key)
+                }
+            }
+            if (sendMessage) {
+                this.sendMessage(
+                    Component.translatable(
+                        "pylon.pyloncore.message.research.unlocked",
+                        PylonArgument.of("research", research.name)
+                    )
+                )
+            }
         }
 
         @JvmStatic
         fun Player.removeResearch(research: NamespacedKey) {
-            this.researches = this.researches - research
+            this.researches -= research
         }
 
         @JvmStatic
@@ -78,22 +118,25 @@ data class Research(
         fun Player.canUse(item: PylonItemSchema, sendMessage: Boolean = false): Boolean {
             if (
                 !PylonConfig.researchesEnabled
-                || gameMode == GameMode.CREATIVE
-                || hasPermission(item.permission)
+                || this.gameMode == GameMode.CREATIVE
+                || this.hasPermission(item.permission)
             ) return true
-            val research = item.research
-            val result = research != null && hasResearch(research.key)
 
-            if (!result && sendMessage) {
-                sendMessage(
+            val research = item.research
+            if (research == null) return true
+
+            val canUse = this.hasResearch(research.key)
+            if (!canUse && sendMessage) {
+                this.sendMessage(
                     Component.translatable(
-                        "pylon.pyloncore.message.no_item_research",
-                        PylonArgument.of("item", item.itemStack.effectiveName())
+                        "pylon.pyloncore.message.research.unknown",
+                        PylonArgument.of("item", item.itemStack.effectiveName()),
+                        PylonArgument.of("research", research.name)
                     )
                 )
             }
 
-            return result
+            return canUse
         }
 
         @JvmStatic

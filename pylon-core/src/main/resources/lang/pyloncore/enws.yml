@@ -25,7 +25,10 @@ message:
       not_ticking: "<gold>Ticking: <red>Nay"
     pdc: "%key%: %value%"
 
-  no_item_permission: "<red>Thou dost not possess the right to wield %item%"
+  research:
+    unknown: "<red>Thou knowest not how to use %item%. Prithee, ponder upon %research%"
+    unlocked: "Thou hast discovered %research%"
+    not_enough_points: "<red>Thou hast not yet gathered sufficient knowledge to discover %research% (%points%/%cost% points)"
 
 quantity:
   blocks: " blocks"
