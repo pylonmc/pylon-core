@@ -182,7 +182,7 @@ data class Research(
             }
         }
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerLeave(event: PlayerQuitEvent) {
             playerCheckerJobs[event.player.uniqueId]?.cancel()
         }
