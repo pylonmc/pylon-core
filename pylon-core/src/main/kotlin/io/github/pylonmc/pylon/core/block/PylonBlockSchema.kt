@@ -79,7 +79,7 @@ abstract class PylonBlockSchema(
         }
 
         @JvmStatic
-        fun simple(
+        fun withSimple(
             key: NamespacedKey,
             material: Material,
             constructor: (PylonBlockSchema, Block) -> PylonBlock<*>
@@ -89,6 +89,21 @@ abstract class PylonBlockSchema(
                 material,
                 { block, _ -> constructor(this, block) },
                 { block, _ -> constructor(this, block) }
+            )
+        }
+
+        @JvmStatic
+        fun withSimpleAndLoad(
+            key: NamespacedKey,
+            material: Material,
+            constructor: (PylonBlockSchema, Block) -> PylonBlock<*>,
+            loadFunction: (PylonBlockSchema, Block, PersistentDataContainer) -> PylonBlock<*>
+        ): PylonBlockSchema {
+            return SimplePylonBlockSchema(
+                key,
+                material,
+                { block, _ -> constructor(this, block) },
+                { block, pdc -> loadFunction(this, block, pdc) }
             )
         }
     }
