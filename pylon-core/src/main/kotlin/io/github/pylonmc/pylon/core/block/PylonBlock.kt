@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.block
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
+import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -19,15 +19,24 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 
+/**
+ * See [PylonBlockSchema] for an explanation of the schema/implementation distinction.
+ *
+ * Unlike [PylonItem], a `PylonBlock` is loaded when the chunk containing it loads, and
+ * it is not garbage collected until the chunk is unloaded. This means that it is perfectly
+ * safe to store data in the class instance (as long as you write it in [write]), as
+ * the object will stay alive until then.
+ */
 abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val schema: S,
     val block: Block
 ) {
 
     init {
-        if (schema.key != PhantomBlock.key) {
-            require(PylonRegistry.BLOCKS.contains(schema.key)) {
-                "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
+        val key = schema.key
+        if (key != PhantomBlock.key) {
+            require(key in PylonRegistry.BLOCKS) {
+                "You can only create blocks using a registered schema; did you forget to register $key?"
             }
         }
     }

@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.jetbrains.annotations.ApiStatus
 
 /**
  * This class does a lot and is quite dense and complicated. Here's the summary of what it does:
@@ -21,7 +22,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
  * Keeps track of what chunks every loaded multiblock has components in. This allows us
  * to quickly check whether placed/broken blocks have affected any multiblocks.
  *
- * Keeps track of which multiblocks are fully loaded (ie, all chunks that they have
+ * Keeps track of which multiblocks are fully loaded (i.e., all chunks that they have
  * components in are loaded).
  *
  * Keeps track of which multiblocks are formed. Why not keep track of this in
@@ -35,9 +36,10 @@ import org.bukkit.event.entity.EntityExplodeEvent
  * This means we cannot simply re-check if the multiblock is formed whenever a component
  * is modified, because that modification has not been reflected in the world yet. This
  * is the reason why we keep track of 'dirty' multiblocks whose components have been
- * modified, and re-check all the dirty multiblocks every so often. This is also more
+ * modified and re-check all the dirty multiblocks every so often. This is also more
  * efficient because it batches checks.
  */
+@ApiStatus.Internal
 internal object MultiblockCache : Listener {
 
     private val multiblocksWithComponentsInChunk: MutableMap<ChunkPosition, MutableSet<BlockPosition>> = mutableMapOf()

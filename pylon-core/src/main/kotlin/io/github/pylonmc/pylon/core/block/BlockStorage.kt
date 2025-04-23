@@ -5,9 +5,8 @@ import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
-import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
+import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
@@ -27,8 +26,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 /**
  * Welcome to the circus!
  *
- * BlockStorage maintains persistent storage for blocks. Why is this necessary? Due to limitations of
- * Paper/Minecraft, we cannot associate arbitrary data with blocks like we can with entities.
+ * BlockStorage maintains persistent storage for blocks. Why is this necessary? Due to the limitations
+ * of Paper/Minecraft, we cannot associate arbitrary data with blocks like we can with entities.
  *
  * BlockStorage guarantees that a chunk's blocks will never be loaded if the chunk is not loaded.
  *
@@ -36,17 +35,17 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
  *
  * This works based on chunks rather than individual blocks. When a chunk is loaded, the
  * associated data for all the Pylon blocks in that chunk is loaded. And conversely, when a chunk is
- * unloaded, all the data for that chunk is saved. Additionally, there are autosaves so chunks that
+ * unloaded, all the data for that chunk is saved. Additionally, there are autosaves, so chunks that
  * are not ever unloaded are still saved occasionally.
  *
  * When saving, we can simply ask the block to write its state to a PDC, then we
- * write that PDC to the chunk. And when loading, we go through each block PDC stored in the chunk,
- * and figure out which block type it is, and then create a new block of that type, using the container
- * to restore the state it had when it was saved.
+ * write that PDC to the chunk. When loading, we go through each block PDC stored in the chunk
+ * and figure out which block type it is and then create a new block of that type. The constructor
+ * uses the PDC to restore the state it had when it was saved.
  *
- * Read AND write access to the loaded block data must be synchronized, as there are multiple fields
- * for loaded blocks. If access is not synchronized, situations may occur where these fields are
- * briefly out of sync. For example, if we unload a chunk, there will be a short delay between
+ * Read ***and*** write access to the loaded block data must be synchronized, as there are multiple
+ * fields for loaded blocks. If access is not synchronized, situations may occur where these fields
+ * are briefly out of sync. For example, if we unload a chunk, there will be a short delay between
  * deleting the chunk from `blocksByChunk`, and deleting all of its blocks from `blocks`.
  */
 object BlockStorage : Listener {
@@ -69,18 +68,15 @@ object BlockStorage : Listener {
     private val blocksByKey: MutableMap<NamespacedKey, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
 
     @JvmStatic
-    val loadedBlocks: Set<BlockPosition>
-        get() = lockBlockRead { blocks.keys }
-
-    @JvmStatic
     val loadedChunks: Set<ChunkPosition>
         get() = lockBlockRead { blocksByChunk.keys }
 
     @JvmStatic
-    val loadedPylonBlocks: Collection<PylonBlock<*>>
+    val loadedBlocks: Collection<PylonBlock<*>>
         get() = lockBlockRead { blocks.values }
 
     // TODO implement this properly and actually run it
+    @JvmSynthetic
     internal fun startAutosaveTask() {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
             // TODO this saves all chunks at once, potentially leading to large pauses
@@ -94,7 +90,7 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun get(blockPosition: BlockPosition): PylonBlock<*>? {
-        require(blockPosition.chunk.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        require(blockPosition.chunk.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocks[blockPosition] }
     }
 
@@ -132,7 +128,7 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun getByKey(key: NamespacedKey): Collection<PylonBlock<*>> =
-        if (PylonRegistry.BLOCKS.contains(key)) {
+        if (key in PylonRegistry.BLOCKS) {
             lockBlockRead {
                 blocksByKey[key].orEmpty()
             }
@@ -142,18 +138,18 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun isPylonBlock(blockPosition: BlockPosition): Boolean
-        = (blockPosition.chunk.isLoaded) && get(blockPosition) != null
+        = blockPosition.chunk.isLoaded && get(blockPosition) != null
 
     @JvmStatic
     fun isPylonBlock(block: Block): Boolean
-        = (block.position.chunk.isLoaded) && get(block) != null
+        = block.position.chunk.isLoaded && get(block) != null
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
      * The block's chunk must be loaded.
      * Only call on the main thread.
      *
-     * @return The block that was placed, or null if the block placement was cancelled
+     * @return The block that was placed or null if the block placement was canceled
      */
     @JvmStatic
     @JvmOverloads
@@ -189,7 +185,7 @@ object BlockStorage : Listener {
      * The block's chunk must be loaded.
      * Only call on the main thread.
      *
-     * @return The block that was placed, or null if the block placement was cancelled
+     * @return The block that was placed or null if the block placement was canceled
      */
     @JvmStatic
     @JvmOverloads
@@ -204,7 +200,7 @@ object BlockStorage : Listener {
      * The block's chunk must be loaded.
      * Only call on the main thread.
      *
-     * @return The block that was placed, or null if the block placement was cancelled
+     * @return The block that was placed or null if the block placement was canceled
      */
     @JvmStatic
     @JvmOverloads
@@ -219,7 +215,7 @@ object BlockStorage : Listener {
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
-     * @return The list of drops, or null if the block is not a Pylon block or the block break was cancelled
+     * @return The list of drops, or null if the block is not a Pylon block or the block break was canceled
      */
     @JvmStatic
     @JvmOverloads

@@ -1,7 +1,5 @@
-package io.github.pylonmc.pylon.core.persistence.blockstorage
+package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -21,14 +19,14 @@ import org.bukkit.persistence.PersistentDataContainer
  * Phantom blocks are used where a block failed to load.
  *
  * The intention behind placeholder blocks is to make BlockStorage act consistently even
- * if the block is not loaded - ie, if a block is broken, its blockstorage data should also be
+ * if the block is not loaded - i.e., if a block is broken, its blockstorage data should also be
  * deleted. Additionally, phantom blocks allow us to persist data from blocks that have
- * failed to load. In such cases, the data should not be deleted, to avoid cases where an
+ * failed to load. In such cases, the data should not be deleted to avoid cases where an
  * addon fails to load and all of its blocks get deleted when their chunk is loaded.
  *
- * This is slightly hacky, but also by far the simplest way to accomplish this (a more 'clean'
- * solution likely involves a lot more boilerplate and overhead, this is nice and intuitive and
- * unlikely to clash with any changes in the future).
+ * This is slightly hacky, but also by far the simplest way to achieve this. A more 'clean'
+ * solution likely involves a lot more boilerplate and overhead; this is nice and intuitive and
+ * unlikely to clash with any changes in the future.
  */
 class PhantomBlock(
     val pdc: PersistentDataContainer,
