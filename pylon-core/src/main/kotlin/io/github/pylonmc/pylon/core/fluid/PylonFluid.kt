@@ -5,7 +5,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 
 open class PylonFluid(
-    val key: NamespacedKey,
+    private val key: NamespacedKey,
     val displayName: String,
     val material: Material,
 ) : Keyed {
