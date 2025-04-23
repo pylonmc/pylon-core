@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.persistence.blockstorage
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
-import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -36,18 +35,6 @@ class PhantomBlock(
     block: Block
 ) : PylonBlock<PylonBlockSchema>(schema, block) {
 
-    // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
-        throw IllegalStateException("Phantom block cannot be placed")
-    }
-
-    // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
-        throw IllegalStateException("Phantom block cannot be loaded")
-    }
-
     override fun getItem(context: BlockItemContext): ItemStack? {
         val item = ErrorItem.Schema.itemStack
         item.editMeta {
@@ -61,7 +48,10 @@ class PhantomBlock(
 
         // Intentionally not registered to hide Pylon internals
         @JvmSynthetic
-        internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)
+        internal val schema = PylonBlockSchema.simple(
+            key,
+            Material.BARRIER
+        ) { _, _ -> error("Phantom block cannot be created") }
     }
 
     class ErrorItem(schema: Schema, stack: ItemStack) : PylonItem<ErrorItem.Schema>(schema, stack) {

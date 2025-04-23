@@ -5,8 +5,8 @@ import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
-import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -164,9 +164,7 @@ object BlockStorage : Listener {
     ): PylonBlock<*>? {
         require(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
 
-        @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
-                as PylonBlock<*>
+        val block = schema.createBlock(blockPosition.block, context)
         val event = PrePylonBlockPlaceEvent(blockPosition.block, block, context)
         event.callEvent()
         if (event.isCancelled) return null

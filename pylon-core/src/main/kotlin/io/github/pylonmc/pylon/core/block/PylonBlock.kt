@@ -106,9 +106,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
                 val schema = PylonRegistry.BLOCKS[key]
                     ?: return PhantomBlock(pdc, key, position.block)
 
-                // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
-                @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                val block = schema.loadConstructor.invoke(schema, position.block, pdc) as PylonBlock<*>
+                val block = schema.loadBlock(position.block, pdc)
 
                 block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
                     ?.let { world.getEntity(it) as? BlockDisplay }

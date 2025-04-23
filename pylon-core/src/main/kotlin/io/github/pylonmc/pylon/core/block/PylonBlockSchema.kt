@@ -2,18 +2,16 @@ package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.persistence.PersistentDataContainer
-import java.lang.invoke.MethodHandle
+import org.jetbrains.annotations.ApiStatus
 
-open class PylonBlockSchema(
+abstract class PylonBlockSchema(
     private val key: NamespacedKey,
-    val material: Material,
-    blockClass: Class<out PylonBlock<*>>,
+    val material: Material
 ) : Keyed {
 
     init {
@@ -23,31 +21,75 @@ open class PylonBlockSchema(
     val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Block does not have a corresponding addon, does your plugin call registerWithPylon()?")
 
-    @JvmSynthetic
-    internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
-        javaClass,
-        Block::class.java,
-        BlockCreateContext::class.java
-    )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block, BlockCreateContext)")
-
-    @JvmSynthetic
-    internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
-        javaClass,
-        Block::class.java,
-        PersistentDataContainer::class.java
-    )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, Block, PersistentDataContainer)")
+    val settings = addon.mergeGlobalConfig("settings/block/${key.namespace}/${key.key}.yml")
 
     open fun getPlaceMaterial(block: Block, context: BlockCreateContext): Material {
         return material
     }
 
-    val settings = addon.mergeGlobalConfig("settings/block/${key.namespace}/${key.key}.yml")
+    @ApiStatus.OverrideOnly
+    abstract fun createBlock(block: Block, context: BlockCreateContext): PylonBlock<*>
+
+    @ApiStatus.OverrideOnly
+    abstract fun loadBlock(block: Block, pdc: PersistentDataContainer): PylonBlock<*>
 
     fun register() {
         PylonRegistry.BLOCKS.register(this)
     }
 
     override fun getKey(): NamespacedKey = key
+
+    private class SimplePylonBlockSchema(
+        key: NamespacedKey,
+        material: Material,
+        private val createFunction: PylonBlockSchema.(Block, BlockCreateContext) -> PylonBlock<*>,
+        private val loadFunction: PylonBlockSchema.(Block, PersistentDataContainer) -> PylonBlock<*>
+    ) : PylonBlockSchema(key, material) {
+
+        override fun createBlock(block: Block, context: BlockCreateContext): PylonBlock<*> {
+            return createFunction(block, context)
+        }
+
+        override fun loadBlock(block: Block, pdc: PersistentDataContainer): PylonBlock<*> {
+            return loadFunction(block, pdc)
+        }
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun withCreate(
+            key: NamespacedKey,
+            material: Material,
+            createFunction: PylonBlockSchema.(Block, BlockCreateContext) -> PylonBlock<*>
+        ): PylonBlockSchema {
+            return SimplePylonBlockSchema(key, material, createFunction) { block, _ ->
+                createFunction(block, BlockCreateContext.Default)
+            }
+        }
+
+        @JvmStatic
+        fun withCreateAndLoad(
+            key: NamespacedKey,
+            material: Material,
+            createFunction: PylonBlockSchema.(Block, BlockCreateContext) -> PylonBlock<*>,
+            loadFunction: PylonBlockSchema.(Block, PersistentDataContainer) -> PylonBlock<*>
+        ): PylonBlockSchema {
+            return SimplePylonBlockSchema(key, material, createFunction, loadFunction)
+        }
+
+        @JvmStatic
+        fun simple(
+            key: NamespacedKey,
+            material: Material,
+            constructor: (PylonBlockSchema, Block) -> PylonBlock<*>
+        ): PylonBlockSchema {
+            return SimplePylonBlockSchema(
+                key,
+                material,
+                { block, _ -> constructor(this, block) },
+                { block, _ -> constructor(this, block) }
+            )
+        }
+    }
 }
