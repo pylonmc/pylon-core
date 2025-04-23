@@ -20,6 +20,9 @@ open class PylonBlockSchema(
         check(material.isBlock) { "Material $material is not a block" }
     }
 
+    val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
+        ?: error("Block does not have a corresponding addon, does your plugin call registerWithPylon()?")
+
     @JvmSynthetic
     internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
         javaClass,
@@ -39,6 +42,8 @@ open class PylonBlockSchema(
     open fun getPlaceMaterial(block: Block, context: BlockCreateContext): Material {
         return material
     }
+
+    val settings = addon.mergeGlobalConfig("settings/block/${key.namespace}/${key.key}.yml")
 
     fun register() {
         PylonRegistry.BLOCKS.register(this)
