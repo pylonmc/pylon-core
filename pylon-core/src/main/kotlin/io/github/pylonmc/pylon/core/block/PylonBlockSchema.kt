@@ -58,52 +58,33 @@ abstract class PylonBlockSchema(
     companion object {
 
         @JvmStatic
-        fun withCreate(
-            key: NamespacedKey,
-            material: Material,
-            createFunction: PylonBlockSchema.(Block, BlockCreateContext) -> PylonBlock<*>
-        ): PylonBlockSchema {
-            return SimplePylonBlockSchema(key, material, createFunction) { block, _ ->
-                createFunction(block, BlockCreateContext.Default)
-            }
-        }
-
-        @JvmStatic
-        fun withCreateAndLoad(
+        @JvmOverloads
+        fun simpleWithContext(
             key: NamespacedKey,
             material: Material,
             createFunction: PylonBlockSchema.(Block, BlockCreateContext) -> PylonBlock<*>,
-            loadFunction: PylonBlockSchema.(Block, PersistentDataContainer) -> PylonBlock<*>
+            loadFunction: PylonBlockSchema.(Block, PersistentDataContainer) -> PylonBlock<*> = { block, _ ->
+                createFunction(block, BlockCreateContext.Default)
+            }
         ): PylonBlockSchema {
             return SimplePylonBlockSchema(key, material, createFunction, loadFunction)
         }
 
         @JvmStatic
-        fun withSimple(
+        @JvmOverloads
+        fun simple(
             key: NamespacedKey,
             material: Material,
-            constructor: (PylonBlockSchema, Block) -> PylonBlock<*>
+            createFunction: PylonBlockSchema.(Block) -> PylonBlock<*>,
+            loadFunction: PylonBlockSchema.(Block, PersistentDataContainer) -> PylonBlock<*> = { block, _ ->
+                createFunction(block)
+            }
         ): PylonBlockSchema {
             return SimplePylonBlockSchema(
                 key,
                 material,
-                { block, _ -> constructor(this, block) },
-                { block, _ -> constructor(this, block) }
-            )
-        }
-
-        @JvmStatic
-        fun withSimpleAndLoad(
-            key: NamespacedKey,
-            material: Material,
-            constructor: (PylonBlockSchema, Block) -> PylonBlock<*>,
-            loadFunction: (PylonBlockSchema, Block, PersistentDataContainer) -> PylonBlock<*>
-        ): PylonBlockSchema {
-            return SimplePylonBlockSchema(
-                key,
-                material,
-                { block, _ -> constructor(this, block) },
-                { block, pdc -> loadFunction(this, block, pdc) }
+                { block, _ -> createFunction(this, block) },
+                loadFunction
             )
         }
     }

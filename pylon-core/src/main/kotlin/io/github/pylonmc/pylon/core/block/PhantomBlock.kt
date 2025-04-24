@@ -48,7 +48,7 @@ class PhantomBlock(
 
         // Intentionally not registered to hide Pylon internals
         @JvmSynthetic
-        internal val schema = PylonBlockSchema.withSimple(
+        internal val schema = PylonBlockSchema.simple(
             key,
             Material.BARRIER
         ) { _, _ -> error("Phantom block cannot be created") }
