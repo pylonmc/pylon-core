@@ -7,7 +7,6 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
-import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.addResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.removeResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
@@ -15,16 +14,20 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.future.await
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import org.jetbrains.annotations.ApiStatus
 
 @Suppress("unused")
 @CommandAlias("pylon|py")
+@ApiStatus.Internal
 internal class PylonCommand : BaseCommand() {
 
     @Subcommand("give")
@@ -100,10 +103,26 @@ internal class PylonCommand : BaseCommand() {
         @CommandCompletion("@players @researches")
         @Description("Add a research to a player")
         @CommandPermission("pylon.command.research.modify")
-        fun add(p: OnlinePlayer, research: NamespacedKey) {
+        fun add(sender: CommandSender, p: OnlinePlayer, research: NamespacedKey) {
             val player = p.player
-            for (res in getResearches(player, research) ?: return) {
-                player.addResearch(res, deductPoints = false, sendMessage = false)
+            val res = PylonRegistry.RESEARCHES[research]
+            if (res == null) {
+                player.sendRichMessage("<red>Research not found: $research")
+                return
+            }
+            player.addResearch(res, deductPoints = false, sendMessage = false)
+            val name = MiniMessage.miniMessage().serialize(res.name)
+            sender.sendRichMessage("<green>Added research $name to ${player.name}")
+        }
+
+        @Subcommand("addall")
+        @CommandCompletion("@players")
+        @Description("Add all researches to a player")
+        @CommandPermission("pylon.command.research.modify")
+        fun addAll(p: OnlinePlayer) {
+            val player = p.player
+            for (res in PylonRegistry.RESEARCHES) {
+                player.addResearch(res, deductPoints = false, sendMessage = true)
             }
         }
 
@@ -113,9 +132,12 @@ internal class PylonCommand : BaseCommand() {
         @Description("Research a research")
         @CommandPermission("pylon.command.research.research")
         fun research(player: Player, research: NamespacedKey) {
-            for (res in getResearches(player, research) ?: return) {
-                player.addResearch(res, deductPoints = true, sendMessage = true)
+            val res = PylonRegistry.RESEARCHES[research]
+            if (res == null) {
+                player.sendRichMessage("<red>Research not found: $research")
+                return
             }
+            player.addResearch(res, deductPoints = true, sendMessage = true)
         }
 
         init {
@@ -133,21 +155,14 @@ internal class PylonCommand : BaseCommand() {
         @CommandPermission("pylon.command.research.modify")
         fun remove(p: OnlinePlayer, research: NamespacedKey) {
             val player = p.player
-            for (res in getResearches(player, research) ?: return) {
-                player.removeResearch(res.key)
-            }
-        }
-
-        private fun getResearches(player: Player, research: NamespacedKey): Iterable<Research>? {
-            val researches = if (research.key == "all") {
-                PylonRegistry.RESEARCHES
-            } else {
-                PylonRegistry.RESEARCHES[research]?.let(::listOf)
-            }
-            if (researches == null) {
+            val res = PylonRegistry.RESEARCHES[research]
+            if (res == null) {
                 player.sendRichMessage("<red>Research not found: $research")
+                return
             }
-            return researches
+            player.removeResearch(res.key)
+            val name = MiniMessage.miniMessage().serialize(res.name)
+            player.sendRichMessage("<green>Removed research $name from ${player.name}")
         }
 
         @Subcommand("points")
@@ -157,38 +172,46 @@ internal class PylonCommand : BaseCommand() {
             @CommandCompletion("@players")
             @Description("Set a player's research points")
             @CommandPermission("pylon.command.research.points.set")
-            fun set(p: OnlinePlayer, points: Long) {
+            fun set(sender: CommandSender, p: OnlinePlayer, points: Long) {
                 val player = p.player
                 player.researchPoints = points
-                player.sendRichMessage("<green>Set research points to $points")
+                sender.sendRichMessage("<green>Set research points of ${player.name} to $points")
             }
 
             @Subcommand("add")
             @CommandCompletion("@players")
             @Description("Add research points to a player")
             @CommandPermission("pylon.command.research.points.set")
-            fun add(p: OnlinePlayer, points: Long) {
+            fun add(sender: CommandSender, p: OnlinePlayer, points: Long) {
                 val player = p.player
                 player.researchPoints += points
-                player.sendRichMessage("<green>Added $points research points")
+                sender.sendRichMessage("<green>Added $points research points to ${player.name}")
             }
 
             @Subcommand("remove")
             @CommandCompletion("@players")
             @Description("Remove research points from a player")
             @CommandPermission("pylon.command.research.points.set")
-            fun remove(p: OnlinePlayer, points: Long) {
+            fun remove(sender: CommandSender, p: OnlinePlayer, points: Long) {
                 val player = p.player
                 player.researchPoints -= points
-                player.sendRichMessage("<green>Removed $points research points")
+                sender.sendRichMessage("<green>Removed $points research points from ${player.name}")
             }
 
             @Subcommand("get")
             @CommandCompletion("@players")
             @Description("Get a player's research points")
             @CommandPermission("pylon.command.research.points.get")
-            fun get(p: OnlinePlayer) {
+            fun get(sender: CommandSender, p: OnlinePlayer) {
                 val player = p.player
+                val points = player.researchPoints
+                sender.sendRichMessage("<green>Research points of ${player.name}: $points")
+            }
+
+            @Subcommand("me")
+            @Description("Get your research points")
+            @CommandPermission("pylon.command.research.points.get.self")
+            fun me(player: Player) {
                 val points = player.researchPoints
                 player.sendRichMessage("<green>Research points: $points")
             }
@@ -196,7 +219,7 @@ internal class PylonCommand : BaseCommand() {
             init {
                 Bukkit.getPluginManager().addPermission(
                     Permission(
-                        "pylon.command.research.points.get",
+                        "pylon.command.research.points.get.self",
                         PermissionDefault.TRUE
                     )
                 )

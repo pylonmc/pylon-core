@@ -64,6 +64,8 @@ data class Research(
         @JvmStatic
         @JvmOverloads
         fun Player.addResearch(research: Research, deductPoints: Boolean = true, sendMessage: Boolean = false) {
+            if (research.key in this.researches) return
+
             if (deductPoints) {
                 if (this.researchPoints < research.cost) {
                     this.sendMessage(
