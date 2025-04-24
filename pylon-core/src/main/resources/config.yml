@@ -7,5 +7,6 @@ allowed-block-errors: 5
 # The interval, in ticks, between WALIA checks
 walia-interval: 1
 
-# Whether researches are enabled
-researches-enabled: true
+# The interval, in ticks, between when Pylon checks for unresearched items in inventories
+# Set to 0 to disable researching
+research-interval: 10

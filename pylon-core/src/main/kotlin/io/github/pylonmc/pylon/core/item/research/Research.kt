@@ -117,9 +117,9 @@ data class Research(
         @JvmName("canPlayerUse")
         fun Player.canUse(item: PylonItemSchema, sendMessage: Boolean = false): Boolean {
             if (
-                !PylonConfig.researchesEnabled
+                PylonConfig.researchInterval < 1
                 || this.gameMode == GameMode.CREATIVE
-                || this.hasPermission(item.permission)
+                || this.hasPermission(item.researchBypassPermission)
             ) return true
 
             val research = item.research
@@ -158,14 +158,15 @@ data class Research(
 
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerJoin(event: PlayerJoinEvent) {
-            if (PylonConfig.researchesEnabled) {
+            val interval = PylonConfig.researchInterval
+            if (interval > 0) {
                 val player = event.player
                 // This task runs just in case a player manages to obtain an
                 // unknown item without picking it up somehow
                 playerCheckerJobs[player.uniqueId] = pluginInstance.launch {
                     while (true) {
                         player.ejectUnknownItems()
-                        delay(10.ticks)
+                        delay(interval.ticks)
                     }
                 }
             }

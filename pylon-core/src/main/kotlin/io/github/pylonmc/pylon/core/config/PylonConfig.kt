@@ -16,5 +16,5 @@ object PylonConfig {
     val waliaInterval: Int by config
 
     @JvmStatic
-    val researchesEnabled: Boolean by config
+    val researchInterval: Int by config
 }

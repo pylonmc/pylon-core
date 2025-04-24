@@ -29,7 +29,7 @@ open class PylonItemSchema(
     val itemStack: ItemStack
         get() = template.clone()
 
-    val permission = "pylon.item.${key.namespace}.${key.key}"
+    val researchBypassPermission = "pylon.item.${key.namespace}.${key.key}"
 
     @JvmSynthetic
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(
