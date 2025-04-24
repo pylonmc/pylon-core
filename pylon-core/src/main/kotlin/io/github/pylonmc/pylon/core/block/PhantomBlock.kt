@@ -50,8 +50,9 @@ class PhantomBlock(
         @JvmSynthetic
         internal val schema = PylonBlockSchema.simple(
             key,
-            Material.BARRIER
-        ) { _, _ -> error("Phantom block cannot be created") }
+            Material.BARRIER,
+            { error("Phantom block cannot be created") }
+        )
     }
 
     class ErrorItem(schema: Schema, stack: ItemStack) : PylonItem<ErrorItem.Schema>(schema, stack) {
