@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.test.block;
 
-import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.test.PylonTest;
@@ -19,13 +18,12 @@ public class BlockWithField extends PylonBlock<PylonBlockSchema> {
     @Getter
     private final int progress;
 
-    @SuppressWarnings("unused")
-    public BlockWithField(PylonBlockSchema testSchema, Block block, BlockCreateContext context) {
+    public BlockWithField(PylonBlockSchema testSchema, Block block) {
         super(testSchema, block);
         progress = 240;
     }
 
-    @SuppressWarnings({"unused", "DataFlowIssue"})
+    @SuppressWarnings("DataFlowIssue")
     public BlockWithField(
             PylonBlockSchema testSchema,
             Block block,

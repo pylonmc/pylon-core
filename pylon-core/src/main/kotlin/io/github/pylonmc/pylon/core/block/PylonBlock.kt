@@ -19,7 +19,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 
-abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
+open class PylonBlock<out S : PylonBlockSchema>(
     val schema: S,
     val block: Block
 ) {
