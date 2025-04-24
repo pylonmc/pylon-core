@@ -17,6 +17,13 @@ fun <P, C> PersistentDataContainer.setNullable(key: NamespacedKey, type: Persist
     }
 }
 
+/**
+ * Acts as a property delegate for stuff contained inside a [PersistentDataContainer]
+ * For example:
+ * ```
+ * val numberOfTimesJumped: Int by persistentData(NamespacedKey(yourPlugin, "jumped"), PersistentDataType.INTEGER) { 0 }
+ * ```
+ */
 @JvmSynthetic
 inline fun <T> persistentData(
     key: NamespacedKey,
@@ -37,6 +44,9 @@ inline fun <T> persistentData(
     }
 }
 
+/**
+ * Same as [persistentData] but with a default value that is constant
+ */
 @JvmSynthetic
 fun <T> persistentData(
     key: NamespacedKey,

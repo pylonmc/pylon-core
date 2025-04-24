@@ -70,8 +70,8 @@ data class Research(
                         Component.translatable(
                             "pylon.pyloncore.message.research.not_enough_points",
                             PylonArgument.of("research", research.name),
-                            PylonArgument.of("points", Component.text(this.researchPoints)),
-                            PylonArgument.of("cost", Component.text(research.cost))
+                            PylonArgument.of("points", this.researchPoints),
+                            PylonArgument.of("cost", research.cost)
                         )
                     )
                     return
@@ -132,7 +132,7 @@ data class Research(
                         HoverEvent.showText(
                             Component.translatable(
                                 "pylon.pyloncore.message.research.click_to_research",
-                                PylonArgument.of("points", Component.text(research.cost))
+                                PylonArgument.of("points", research.cost)
                             )
                         )
                     )

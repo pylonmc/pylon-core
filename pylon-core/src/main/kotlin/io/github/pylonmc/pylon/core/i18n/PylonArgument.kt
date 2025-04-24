@@ -21,5 +21,35 @@ class PylonArgument private constructor(val name: String, val value: Component) 
         fun of(name: String, value: String): TranslationArgument {
             return of(name, Component.text(value))
         }
+
+        @JvmStatic
+        fun of(name: String, value: Int): TranslationArgument {
+            return of(name, Component.text(value))
+        }
+
+        @JvmStatic
+        fun of(name: String, value: Long): TranslationArgument {
+            return of(name, Component.text(value))
+        }
+
+        @JvmStatic
+        fun of(name: String, value: Double): TranslationArgument {
+            return of(name, Component.text(value))
+        }
+
+        @JvmStatic
+        fun of(name: String, value: Float): TranslationArgument {
+            return of(name, Component.text(value))
+        }
+
+        @JvmStatic
+        fun of(name: String, value: Boolean): TranslationArgument {
+            return of(name, Component.text(value))
+        }
+
+        @JvmStatic
+        fun of(name: String, value: Char): TranslationArgument {
+            return of(name, Component.text(value))
+        }
     }
 }
