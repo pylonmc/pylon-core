@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -26,6 +27,15 @@ import org.bukkit.persistence.PersistentDataContainer
  * it is not garbage collected until the chunk is unloaded. This means that it is perfectly
  * safe to store data in the class instance (as long as you write it in [write]), as
  * the object will stay alive until then.
+ *
+ * A `PylonBlock` implementation is required to have two constructors: a "create constructor"
+ * with the signature `<S extends PylonBlockSchema>(S, Block, BlockCreateContext)` and
+ * a "load constructor" with the signature `<S extends PylonBlockSchema>(S, Block, PersistentDataContainer)`.
+ * The create constructor is used when the block is placed by a method specified by the supplied
+ * [BlockCreateContext]. The load constructor is used only when an existing block's chunk is loaded
+ * and the block itself is loaded. This constructor supplies a [PersistentDataContainer]
+ * in order for the block's state to get restored. These two constructors are required in those
+ * exact forms in order for the schema to successfully create the block.
  */
 abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     val schema: S,
