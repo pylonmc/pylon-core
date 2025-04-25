@@ -83,4 +83,7 @@ object PylonSerializers {
 
     @JvmField
     val PYLON_FLUID = PylonFluidPersistentDataType
+
+    @JvmField
+    val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
 }
