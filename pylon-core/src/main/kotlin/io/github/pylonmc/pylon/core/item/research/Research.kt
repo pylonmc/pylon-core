@@ -63,24 +63,8 @@ data class Research(
 
         @JvmStatic
         @JvmOverloads
-        fun Player.addResearch(research: Research, deductPoints: Boolean = true, sendMessage: Boolean = false) {
+        fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
             if (research.key in this.researches) return
-
-            if (deductPoints) {
-                if (this.researchPoints < research.cost) {
-                    this.sendMessage(
-                        Component.translatable(
-                            "pylon.pyloncore.message.research.not_enough_points",
-                            PylonArgument.of("research", research.name),
-                            PylonArgument.of("points", this.researchPoints),
-                            PylonArgument.of("cost", research.cost)
-                        )
-                    )
-                    return
-                } else {
-                    this.researchPoints -= research.cost
-                }
-            }
 
             this.researches += research.key
             for (recipe in RecipeTypes.VANILLA_CRAFTING) {

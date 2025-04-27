@@ -7,13 +7,16 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.addResearch
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.hasResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.removeResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.future.await
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -110,7 +113,7 @@ internal class PylonCommand : BaseCommand() {
                 player.sendRichMessage("<red>Research not found: $research")
                 return
             }
-            player.addResearch(res, deductPoints = false, sendMessage = false)
+            player.addResearch(res, sendMessage = false)
             val name = MiniMessage.miniMessage().serialize(res.name)
             sender.sendRichMessage("<green>Added research $name to ${player.name}")
         }
@@ -122,28 +125,46 @@ internal class PylonCommand : BaseCommand() {
         fun addAll(p: OnlinePlayer) {
             val player = p.player
             for (res in PylonRegistry.RESEARCHES) {
-                player.addResearch(res, deductPoints = false, sendMessage = true)
+                player.addResearch(res, sendMessage = true)
             }
         }
 
         // Intended for normal players to use
-        @Subcommand("research")
+        @Subcommand("discover")
         @CommandCompletion("@researches")
         @Description("Research a research")
-        @CommandPermission("pylon.command.research.research")
-        fun research(player: Player, research: NamespacedKey) {
+        @CommandPermission("pylon.command.research.discover")
+        fun discover(player: Player, research: NamespacedKey) {
             val res = PylonRegistry.RESEARCHES[research]
             if (res == null) {
                 player.sendRichMessage("<red>Research not found: $research")
                 return
             }
-            player.addResearch(res, deductPoints = true, sendMessage = true)
+            if (player.hasResearch(research)) {
+                player.sendMessage("<red>You have already discovered this research")
+                return
+            }
+            if (player.researchPoints < res.cost) {
+                player.sendMessage(
+                    // Yes, I know this is the only translated command message;
+                    // a future PR will convert all the messages to translatable
+                    Component.translatable(
+                        "pylon.pyloncore.message.research.not_enough_points",
+                        PylonArgument.of("research", res.name),
+                        PylonArgument.of("points", player.researchPoints),
+                        PylonArgument.of("cost", res.cost)
+                    )
+                )
+                return
+            }
+            player.addResearch(res, sendMessage = true)
+            player.researchPoints -= res.cost
         }
 
         init {
             Bukkit.getPluginManager().addPermission(
                 Permission(
-                    "pylon.command.research.research",
+                    "pylon.command.research.discover",
                     PermissionDefault.TRUE
                 )
             )
