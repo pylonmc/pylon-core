@@ -30,14 +30,18 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.UUID
 
+/**
+ * @property cost If null, the research cannot be unlocked using points
+ * @property unlocks the keys of the items that are unlocked by this research
+ */
 data class Research(
     private val key: NamespacedKey,
     val name: Component,
-    val cost: Long,
+    val cost: Long?,
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
-    constructor(key: NamespacedKey, cost: Long, vararg unlocks: PylonItemSchema) : this(
+    constructor(key: NamespacedKey, cost: Long?, vararg unlocks: PylonItemSchema) : this(
         key,
         Component.translatable("pylon.${key.namespace}.research.${key.key}"),
         cost,
@@ -113,21 +117,24 @@ data class Research(
 
             val canUse = this.hasResearch(research.key)
             if (!canUse && sendMessage) {
-                val clickableResearch = research.name
-                    .hoverEvent(
-                        HoverEvent.showText(
-                            Component.translatable(
-                                "pylon.pyloncore.message.research.click_to_research",
-                                PylonArgument.of("points", research.cost)
+                var researchName = research.name
+                if (research.cost != null) {
+                    researchName = researchName
+                        .hoverEvent(
+                            HoverEvent.showText(
+                                Component.translatable(
+                                    "pylon.pyloncore.message.research.click_to_research",
+                                    PylonArgument.of("points", research.cost)
+                                )
                             )
                         )
-                    )
-                    .clickEvent(ClickEvent.runCommand("/pylon research research ${research.key}"))
+                        .clickEvent(ClickEvent.runCommand("/pylon research discover ${research.key}"))
+                }
                 this.sendMessage(
                     Component.translatable(
                         "pylon.pyloncore.message.research.unknown",
                         PylonArgument.of("item", item.itemStack.effectiveName()),
-                        PylonArgument.of("research", clickableResearch)
+                        PylonArgument.of("research", researchName)
                     )
                 )
             }

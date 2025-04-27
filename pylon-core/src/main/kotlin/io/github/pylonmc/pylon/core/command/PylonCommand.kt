@@ -144,6 +144,10 @@ internal class PylonCommand : BaseCommand() {
                 player.sendMessage("<red>You have already discovered this research")
                 return
             }
+            if (res.cost == null) {
+                player.sendMessage("<red>This research cannot be unlocked using research points")
+                return
+            }
             if (player.researchPoints < res.cost) {
                 player.sendMessage(
                     // Yes, I know this is the only translated command message;
