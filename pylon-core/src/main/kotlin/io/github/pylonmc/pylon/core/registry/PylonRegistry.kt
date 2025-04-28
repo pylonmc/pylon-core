@@ -93,6 +93,9 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         @JvmField
         val MOB_DROPS = PylonRegistry(PylonRegistryKey.MOB_DROPS).also(::addRegistry)
 
+        @JvmField
+        val SUBSYSTEMS = PylonRegistry(PylonRegistryKey.SUBSYSTEMS).also(::addRegistry)
+
         @JvmStatic
         fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {
             return getRegistryOrNull(key) ?: throw IllegalArgumentException("Registry $key not found")

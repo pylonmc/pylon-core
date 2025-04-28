@@ -6,6 +6,8 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila
+import io.github.pylonmc.pylon.core.command.ReloadableSubsystem
+import io.github.pylonmc.pylon.core.command.Subsystem
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.plus
@@ -85,5 +87,12 @@ object PylonCommand : BaseCommand() {
                 player.sendMessage(NamedTextColor.GREEN + "Game test $test succeeded")
             }
         }
+    }
+
+    @Subcommand("reload")
+    @CommandCompletion("@reloadablesubsystem")
+    @Description("Reload pylon subsystems")
+    fun reload(subsystem: NamespacedKey) {
+        (PylonRegistry.SUBSYSTEMS.getOrThrow(subsystem) as ReloadableSubsystem).reload()
     }
 }

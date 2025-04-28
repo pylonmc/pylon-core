@@ -11,6 +11,9 @@ import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
+import io.github.pylonmc.pylon.core.command.ReloadableSubsystem
+import io.github.pylonmc.pylon.core.command.SimpleReloadableSubsystem
+import io.github.pylonmc.pylon.core.command.Subsystem
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -20,9 +23,11 @@ import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
+import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.Locale
+import java.util.stream.Stream
 
 class PylonCore : JavaPlugin(), PylonAddon {
 
@@ -67,6 +72,14 @@ class PylonCore : JavaPlugin(), PylonAddon {
         DebugWaxedWeatheredCutCopperStairs.register()
         PhantomBlock.ErrorItem.register()
         PylonSimpleMultiblock.GHOST_BLOCK_SCHEMA.register()
+
+        // compiler just can't find the .register method on SimpleReloadableSubsystem.CONFIGS for some reason
+        PylonRegistry.SUBSYSTEMS.register(SimpleReloadableSubsystem.CONFIGS)
+        PylonRegistry.SUBSYSTEMS.register(SimpleReloadableSubsystem.TRANSLATIONS)
+        PylonRegistry.SUBSYSTEMS.register(SimpleReloadableSubsystem.ALL)
+
+        addRegistryCompletion("subsystems", PylonRegistry.SUBSYSTEMS)
+        addListCompletion("reloadablesubsystem", PylonRegistry.SUBSYSTEMS.filter { it is ReloadableSubsystem })
     }
 
     override fun onDisable() {
@@ -79,6 +92,12 @@ class PylonCore : JavaPlugin(), PylonAddon {
     private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {
         manager.commandCompletions.registerCompletion(name) { _ ->
             registry.map { it.key.toString() }.sorted()
+        }
+    }
+
+    private fun addListCompletion(name: String, list: List<Subsystem>) {
+        manager.commandCompletions.registerCompletion(name) { _ ->
+            list.map { it.key.toString() }.sorted()
         }
     }
 
