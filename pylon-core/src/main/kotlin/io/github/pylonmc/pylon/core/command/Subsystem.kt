@@ -39,8 +39,11 @@ open class SimpleReloadableSubsystem(key: NamespacedKey, val name: String, val r
 
         @JvmField
         val ALL = SimpleReloadableSubsystem(pylonKey("sub_all"), "all", {
-            TRANSLATIONS.reload()
-            CONFIGS.reload()
+            for(subsystem in PylonRegistry.SUBSYSTEMS){
+                if(subsystem is ReloadableSubsystem){
+                    subsystem.reload()
+                }
+            }
         })
     }
 }
