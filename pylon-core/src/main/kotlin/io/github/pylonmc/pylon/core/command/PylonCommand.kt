@@ -140,7 +140,7 @@ internal class PylonCommand : BaseCommand() {
                 player.sendRichMessage("<red>Research not found: $research")
                 return
             }
-            if (player.hasResearch(research)) {
+            if (player.hasResearch(res)) {
                 player.sendMessage("<red>You have already discovered this research")
                 return
             }
@@ -185,7 +185,7 @@ internal class PylonCommand : BaseCommand() {
                 player.sendRichMessage("<red>Research not found: $research")
                 return
             }
-            player.removeResearch(res.key)
+            player.removeResearch(res)
             val name = MiniMessage.miniMessage().serialize(res.name)
             player.sendRichMessage("<green>Removed research $name from ${player.name}")
         }

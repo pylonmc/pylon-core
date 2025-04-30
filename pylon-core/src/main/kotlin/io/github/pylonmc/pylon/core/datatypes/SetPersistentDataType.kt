@@ -8,7 +8,7 @@ import org.bukkit.persistence.PersistentDataType
 
 // 'Hold on, why the hell are we returning an entire PDC instead of a list of primitives???'
 // Well for some reason, lists are only counted as primitives if accompanied by a ListPersistentDataType (wtf)
-class SetPersistentDataType<P : Any, C : Any>(
+class SetPersistentDataType<P, C>(
     val elementType: PersistentDataType<P, C>
 ) : PersistentDataType<PersistentDataContainer, Set<C>> {
 
@@ -29,7 +29,7 @@ class SetPersistentDataType<P : Any, C : Any>(
         primitive.get(setValues, PersistentDataType.LIST.listTypeFrom(elementType))!!.toSet()
 
     companion object {
-        fun <P : Any, C : Any> setTypeFrom(elementType: PersistentDataType<P, C>): SetPersistentDataType<P, C> =
+        fun <P, C> setTypeFrom(elementType: PersistentDataType<P, C>): PersistentDataType<PersistentDataContainer, Set<C>> =
             SetPersistentDataType(elementType)
     }
 }

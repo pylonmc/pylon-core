@@ -54,23 +54,27 @@ data class Research(
 
     override fun getKey() = key
 
+    override fun equals(other: Any?): Boolean = other is Research && this.key == other.key
+
+    override fun hashCode(): Int = key.hashCode()
+
     companion object : Listener {
         private val researchesKey = pylonKey("researches")
         private val researchPointsKey = pylonKey("research_points")
-        private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.NAMESPACED_KEY)
+        private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
         @JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
-        var Player.researches: Set<NamespacedKey> by persistentData(researchesKey, researchesType, emptySet())
+        var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, emptySet())
 
         @JvmStatic
         @JvmOverloads
         fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
-            if (research.key in this.researches) return
+            if (research in this.researches) return
 
-            this.researches += research.key
+            this.researches += research
             for (recipe in RecipeTypes.VANILLA_CRAFTING) {
                 val pylonItem = PylonItem.fromStack(recipe.result)?.schema ?: continue
                 if (pylonItem.key in research.unlocks) {
@@ -88,12 +92,12 @@ data class Research(
         }
 
         @JvmStatic
-        fun Player.removeResearch(research: NamespacedKey) {
+        fun Player.removeResearch(research: Research) {
             this.researches -= research
         }
 
         @JvmStatic
-        fun Player.hasResearch(research: NamespacedKey): Boolean {
+        fun Player.hasResearch(research: Research): Boolean {
             return research in this.researches
         }
 
@@ -115,7 +119,7 @@ data class Research(
             val research = item.research
             if (research == null) return true
 
-            val canUse = this.hasResearch(research.key)
+            val canUse = this.hasResearch(research)
             if (!canUse && sendMessage) {
                 var researchName = research.name
                 if (research.cost != null) {
