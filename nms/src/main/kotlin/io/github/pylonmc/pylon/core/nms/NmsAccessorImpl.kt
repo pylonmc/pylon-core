@@ -3,7 +3,9 @@ package io.github.pylonmc.pylon.core.nms
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.i18n.packet.PlayerPacketHandler
 import org.bukkit.craftbukkit.entity.CraftPlayer
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer
 import org.bukkit.entity.Player
+import org.bukkit.persistence.PersistentDataContainer
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -28,4 +30,7 @@ object NmsAccessorImpl : NmsAccessor {
         val handler = players[player.uniqueId] ?: return
         handler.resendInventory()
     }
+
+    override fun serializePdc(pdc: PersistentDataContainer): String
+        = (pdc as CraftPersistentDataContainer).serialize()
 }
