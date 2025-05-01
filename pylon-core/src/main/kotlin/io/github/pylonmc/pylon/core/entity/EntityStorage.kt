@@ -39,7 +39,7 @@ object EntityStorage : Listener {
         Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
             // TODO this saves all entities at once, potentially leading to large pauses
             for (entity in entities.values) {
-                entity.write()
+                entity.write(entity.entity.persistentDataContainer)
             }
         }, AUTOSAVE_INTERVAL_TICKS, AUTOSAVE_INTERVAL_TICKS)
     }
@@ -137,7 +137,7 @@ object EntityStorage : Listener {
     @JvmSynthetic
     internal fun cleanupEverything() {
         for (entity in entities.values) {
-            entity.write()
+            entity.write(entity.entity.persistentDataContainer)
         }
     }
 
