@@ -17,6 +17,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import org.joml.Vector3i
 import java.util.*
@@ -46,8 +47,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             event.player.sendMessage(name)
         }
 
-        override fun write() {
-            entity.persistentDataContainer.set(NAME_KEY, PylonSerializers.STRING, name)
+        override fun write(pdc: PersistentDataContainer) {
+            pdc.set(NAME_KEY, PylonSerializers.STRING, name)
         }
 
         companion object {
