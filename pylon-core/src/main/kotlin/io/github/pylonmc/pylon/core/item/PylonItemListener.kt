@@ -133,7 +133,7 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: PlayerInteractEntityEvent) {
-        val pylonItem = PylonItem.fromStack(event.player.activeItem)
+        val pylonItem = PylonItem.fromStack(event.player.inventory.itemInMainHand)
         if (pylonItem is EntityInteractor && !(event.player.getCooldown(pylonItem.stack) > 0 && pylonItem.respectCooldown)) {
             pylonItem.onUsedToRightClickEntity(event)
         }
