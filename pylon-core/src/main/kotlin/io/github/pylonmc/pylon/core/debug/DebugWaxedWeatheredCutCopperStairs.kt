@@ -85,7 +85,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
 //                    }
 //                )
 //            )
-            pylonEntity.entity.persistentDataContainer.copyTo(PrintingPDC(player), true)
+            pylonEntity.write(PrintingPDC(player))
         }
     }
 }
