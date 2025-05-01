@@ -86,7 +86,7 @@ internal class PylonCommand : BaseCommand() {
         val spawnLocation = location ?: player.location
         val gameTest = PylonRegistry.GAMETESTS[test]
         if (gameTest == null) {
-            player.sendMessage("Game test not found: $test")
+            player.sendRichMessage("<red>Game test not found: $test")
             return
         }
         pluginInstance.launch {
@@ -141,11 +141,11 @@ internal class PylonCommand : BaseCommand() {
                 return
             }
             if (player.hasResearch(res)) {
-                player.sendMessage("<red>You have already discovered this research")
+                player.sendRichMessage("<red>You have already discovered this research")
                 return
             }
             if (res.cost == null) {
-                player.sendMessage("<red>This research cannot be unlocked using research points")
+                player.sendRichMessage("<red>This research cannot be unlocked using research points")
                 return
             }
             if (player.researchPoints < res.cost) {
