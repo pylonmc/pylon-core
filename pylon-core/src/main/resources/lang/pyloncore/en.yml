@@ -27,9 +27,12 @@ message:
 
   research:
     unknown: "<red>You do not know how to use %item%. Try thinking about %research%"
-    unlocked: "You have discovered %research%"
+    unlocked: "<green>You have discovered %research%"
     not_enough_points: "<red>You do not yet know enough to discover %research% (%points%/%cost% points)"
     click_to_research: "<green>Click to research (%points% points)"
+    list:
+      none: "You have no discovered researches"
+      discovered: "You have discovered %count% researches: %list%"
 
 quantity:
   blocks: " blocks"

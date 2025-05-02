@@ -8,15 +8,18 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
+import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.addResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.hasResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.removeResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -127,6 +130,32 @@ internal class PylonCommand : BaseCommand() {
             for (res in PylonRegistry.RESEARCHES) {
                 player.addResearch(res, sendMessage = true)
             }
+        }
+
+        @Subcommand("list")
+        @Description("List all discovered researches")
+        @CommandPermission("pylon.command.research.list")
+        fun list(player: Player) {
+            val researches = player.researches
+            if (researches.isEmpty()) {
+                player.sendMessage(Component.translatable("pylon.pyloncore.message.research.list.none"))
+                return
+            }
+            val names = Component.join(JoinConfiguration.commas(true), researches.map(Research::name))
+            player.sendMessage(Component.translatable(
+                "pylon.pyloncore.message.research.list.discovered",
+                PylonArgument.of("count", researches.size),
+                PylonArgument.of("list", names)
+            ))
+        }
+
+        init {
+            Bukkit.getPluginManager().addPermission(
+                Permission(
+                    "pylon.command.research.list",
+                    PermissionDefault.TRUE
+                )
+            )
         }
 
         // Intended for normal players to use
