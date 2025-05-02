@@ -1,3 +1,5 @@
+@file:JvmSynthetic // hide the extension functions
+
 package io.github.pylonmc.pylon.core.item.research
 
 import com.github.shynixn.mccoroutine.bukkit.launch
@@ -52,6 +54,43 @@ data class Research(
         PylonRegistry.RESEARCHES.register(this)
     }
 
+    @JvmOverloads
+    fun addTo(player: Player, sendMessage: Boolean = false) {
+        if (this in player.researches) return
+
+        player.researches += this
+        for (recipe in RecipeTypes.VANILLA_CRAFTING) {
+            val pylonItem = PylonItem.fromStack(recipe.result)?.schema ?: continue
+            if (pylonItem.key in unlocks) {
+                player.discoverRecipe(recipe.key)
+            }
+        }
+        if (sendMessage) {
+            player.sendMessage(
+                Component.translatable(
+                    "pylon.pyloncore.message.research.unlocked",
+                    PylonArgument.of("research", name)
+                )
+            )
+        }
+    }
+
+    fun removeFrom(player: Player) {
+        if (this !in player.researches) return
+
+        player.researches -= this
+        for (recipe in RecipeTypes.VANILLA_CRAFTING) {
+            val pylonItem = PylonItem.fromStack(recipe.result)?.schema ?: continue
+            if (pylonItem.key in unlocks) {
+                player.undiscoverRecipe(recipe.key)
+            }
+        }
+    }
+
+    fun isResearchedBy(player: Player): Boolean {
+        return this in player.researches
+    }
+
     override fun getKey() = key
 
     override fun equals(other: Any?): Boolean = other is Research && this.key == other.key
@@ -68,38 +107,6 @@ data class Research(
 
         @JvmStatic
         var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, emptySet())
-
-        @JvmStatic
-        @JvmOverloads
-        fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
-            if (research in this.researches) return
-
-            this.researches += research
-            for (recipe in RecipeTypes.VANILLA_CRAFTING) {
-                val pylonItem = PylonItem.fromStack(recipe.result)?.schema ?: continue
-                if (pylonItem.key in research.unlocks) {
-                    discoverRecipe(recipe.key)
-                }
-            }
-            if (sendMessage) {
-                this.sendMessage(
-                    Component.translatable(
-                        "pylon.pyloncore.message.research.unlocked",
-                        PylonArgument.of("research", research.name)
-                    )
-                )
-            }
-        }
-
-        @JvmStatic
-        fun Player.removeResearch(research: Research) {
-            this.researches -= research
-        }
-
-        @JvmStatic
-        fun Player.hasResearch(research: Research): Boolean {
-            return research in this.researches
-        }
 
         @JvmStatic
         @get:JvmName("getResearchFor")
@@ -195,4 +202,16 @@ private fun Player.ejectUnknownItems() {
         inventory.remove(item)
         dropItem(item)
     }
+}
+
+fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
+    research.addTo(this, sendMessage)
+}
+
+fun Player.removeResearch(research: Research) {
+    research.removeFrom(this)
+}
+
+fun Player.hasResearch(research: Research): Boolean {
+    return research.isResearchedBy(this)
 }

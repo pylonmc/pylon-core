@@ -9,11 +9,11 @@ import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.research.Research
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.addResearch
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.hasResearch
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.removeResearch
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
+import io.github.pylonmc.pylon.core.item.research.addResearch
+import io.github.pylonmc.pylon.core.item.research.hasResearch
+import io.github.pylonmc.pylon.core.item.research.removeResearch
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
