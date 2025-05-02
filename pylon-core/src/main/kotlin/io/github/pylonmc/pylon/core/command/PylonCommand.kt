@@ -213,11 +213,11 @@ internal class PylonCommand : BaseCommand() {
                 sender.sendRichMessage("<green>Added $points research points to ${player.name}")
             }
 
-            @Subcommand("remove")
+            @Subcommand("subtract")
             @CommandCompletion("@players")
-            @Description("Remove research points from a player")
+            @Description("Subtract research points from a player")
             @CommandPermission("pylon.command.research.points.set")
-            fun remove(sender: CommandSender, p: OnlinePlayer, points: Long) {
+            fun subtract(sender: CommandSender, p: OnlinePlayer, points: Long) {
                 val player = p.player
                 player.researchPoints -= points
                 sender.sendRichMessage("<green>Removed $points research points from ${player.name}")
