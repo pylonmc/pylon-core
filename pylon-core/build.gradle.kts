@@ -24,6 +24,11 @@ dependencies {
     api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
+
+    testImplementation(kotlin("test"))
+    testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
+    testImplementation("net.kyori:adventure-api:4.20.0")
+    testImplementation("net.kyori:adventure-text-minimessage:4.20.0")
 }
 
 idea {
