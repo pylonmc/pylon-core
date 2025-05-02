@@ -7,11 +7,14 @@ object PylonConfig {
     private val config = Config(pluginInstance, "config.yml")
 
     @JvmStatic
-    val tickDelay: Int by config
+    val tickRate: Int by config
 
     @JvmStatic
     val allowedBlockErrors: Int by config
 
     @JvmStatic
-    val waliaInterval: Int by config
+    val waliaIntervalTicks: Int by config
+
+    @JvmStatic
+    val fluidIntervalTicks: Int by config
 }
