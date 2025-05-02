@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.item.base
 
 import org.bukkit.event.player.PlayerInteractEvent
 
-interface BlockInteractor {
+interface BlockInteractor : Cooldownable {
     /**
      * Called when a player clicks a block while holding the item
      */
