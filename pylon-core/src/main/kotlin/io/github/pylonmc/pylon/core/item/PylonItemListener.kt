@@ -133,9 +133,14 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: PlayerInteractEntityEvent) {
-        val pylonItem = PylonItem.fromStack(event.player.inventory.itemInMainHand)
-        if (pylonItem is EntityInteractor && !(event.player.getCooldown(pylonItem.stack) > 0 && pylonItem.respectCooldown)) {
-            pylonItem.onUsedToRightClickEntity(event)
+        val pylonItemMainHand = PylonItem.fromStack(event.player.inventory.itemInMainHand)
+        if (pylonItemMainHand is EntityInteractor && !(event.player.getCooldown(pylonItemMainHand.stack) > 0 && pylonItemMainHand.respectCooldown)) {
+            pylonItemMainHand.onUsedToRightClickEntity(event)
+        }
+
+        val pylonItemOffHand = PylonItem.fromStack(event.player.inventory.itemInOffHand)
+        if (pylonItemOffHand is EntityInteractor && !(event.player.getCooldown(pylonItemOffHand.stack) > 0 && pylonItemOffHand.respectCooldown)) {
+            pylonItemOffHand.onUsedToRightClickEntity(event)
         }
     }
 
@@ -159,9 +164,14 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: BlockBreakEvent) {
-        val pylonItem = PylonItem.fromStack(event.player.inventory.itemInMainHand)
-        if (pylonItem is Tool) {
-            pylonItem.onUsedToBreakBlock(event)
+        val pylonItemMainHand = PylonItem.fromStack(event.player.inventory.itemInMainHand)
+        if (pylonItemMainHand is Tool) {
+            pylonItemMainHand.onUsedToBreakBlock(event)
+        }
+
+        val pylonItemOffHand = PylonItem.fromStack(event.player.inventory.itemInOffHand)
+        if (pylonItemOffHand is Tool) {
+            pylonItemOffHand.onUsedToBreakBlock(event)
         }
     }
 
@@ -170,9 +180,14 @@ internal object PylonItemListener : Listener {
         val damager = event.damageSource.causingEntity
         if (!event.damageSource.isIndirect) {
             if (damager is Player) {
-                val pylonItem = PylonItem.fromStack(damager.inventory.itemInMainHand)
-                if (pylonItem is Weapon) {
-                    pylonItem.onUsedToDamageEntity(event)
+                val pylonItemMainHand = PylonItem.fromStack(damager.inventory.itemInMainHand)
+                if (pylonItemMainHand is Weapon) {
+                    pylonItemMainHand.onUsedToDamageEntity(event)
+                }
+
+                val pylonItemOffHand = PylonItem.fromStack(damager.inventory.itemInOffHand)
+                if (pylonItemOffHand is Weapon) {
+                    pylonItemOffHand.onUsedToDamageEntity(event)
                 }
             }
         }
@@ -182,9 +197,14 @@ internal object PylonItemListener : Listener {
     private fun handle(event: EntityDeathEvent) {
         val killer = event.damageSource.causingEntity
         if (killer is Player) {
-            val pylonItem = PylonItem.fromStack(killer.inventory.itemInMainHand)
-            if (pylonItem is Weapon) {
-                pylonItem.onUsedToKillEntity(event)
+            val pylonItemMainHand = PylonItem.fromStack(killer.inventory.itemInMainHand)
+            if (pylonItemMainHand is Weapon) {
+                pylonItemMainHand.onUsedToKillEntity(event)
+            }
+
+            val pylonItemOffHand = PylonItem.fromStack(killer.inventory.itemInMainHand)
+            if (pylonItemOffHand is Weapon) {
+                pylonItemOffHand.onUsedToKillEntity(event)
             }
         }
     }
