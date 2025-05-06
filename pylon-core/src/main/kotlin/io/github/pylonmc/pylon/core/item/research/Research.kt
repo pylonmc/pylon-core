@@ -55,7 +55,7 @@ data class Research(
     }
 
     @JvmOverloads
-    fun addTo(player: Player, sendMessage: Boolean = false) {
+    fun addTo(player: Player, sendMessage: Boolean = true) {
         if (this in player.researches) return
 
         player.researches += this
