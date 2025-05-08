@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import org.bukkit.Bukkit
 import java.util.*
 import kotlin.math.min
 
@@ -35,6 +36,7 @@ import kotlin.math.min
  *   first-serve. The current algorithm could also be improved to get better performance I think
  * - There is some indirection in getting requested fluids when ticking; we might be able to reduce
  *   the performance overhead here with a different program flow but needs testing
+ * - Currently not asynchronous, I think parts of this can definitely be made asynchronous
  */
 object FluidManager {
 
@@ -57,11 +59,13 @@ object FluidManager {
      * Adds the point to its stored segment, creating the segment and starting a ticker for it if it does not exist
      */
     private fun addToSegment(point: FluidConnectionPoint) {
-        if (!segments.contains(point.segment)) {
-            segments[point.segment] = mutableSetOf()
-            startTicker(point.segment)
+        synchronized(segments) {
+            if (!segments.contains(point.segment)) {
+                segments[point.segment] = mutableSetOf()
+                startTicker(point.segment)
+            }
+            segments[point.segment]!!.add(point)
         }
-        segments[point.segment]!!.add(point)
     }
 
     /**
@@ -69,11 +73,13 @@ object FluidManager {
      * now empty
      */
     private fun removeFromSegment(point: FluidConnectionPoint) {
-        segments[point.segment]!!.remove(point)
-        if (segments[point.segment]!!.isEmpty()) {
-            segments.remove(point.segment)
+        synchronized(segments) {
+            segments[point.segment]!!.remove(point)
+            if (segments[point.segment]!!.isEmpty()) {
+                segments.remove(point.segment)
+                tickers[point.segment]!!.cancel()
+            }
         }
-        tickers[point.segment]!!.cancel()
     }
 
     /**
@@ -81,15 +87,17 @@ object FluidManager {
      */
     @JvmStatic
     fun add(point: FluidConnectionPoint) {
-        check(!points.contains(point.id)) { "Duplicate connection point" }
+        synchronized(points) {
+            check(!points.contains(point.id)) { "Duplicate connection point" }
 
-        points[point.id] = point
+            points[point.id] = point
 
-        addToSegment(point)
+            addToSegment(point)
 
-        for (otherPointId in point.connectedPoints) {
-            points[otherPointId]?.let {
-                connect(point, it)
+            for (otherPointId in point.connectedPoints) {
+                points[otherPointId]?.let {
+                    connect(point, it)
+                }
             }
         }
     }
@@ -99,17 +107,19 @@ object FluidManager {
      */
     @JvmStatic
     fun remove(point: FluidConnectionPoint) {
-        check(points.contains(point.id)) { "Nonexistant connection point" }
+        synchronized(points) {
+            check(points.contains(point.id)) { "Nonexistant connection point" }
 
-        for (otherPointId in point.connectedPoints) {
-            points[otherPointId]?.let {
-                disconnect(point, it)
+            for (otherPointId in point.connectedPoints) {
+                points[otherPointId]?.let {
+                    disconnect(point, it)
+                }
             }
+
+            removeFromSegment(point)
+
+            points.remove(point.id)
         }
-
-        removeFromSegment(point)
-
-        points.remove(point.id)
     }
 
     /**
@@ -170,7 +180,7 @@ object FluidManager {
             pointsToVisit.remove(nextPoint)
             visitedPoints.add(nextPoint)
             for (uuid in nextPoint.connectedPoints) {
-                if (points[uuid] != null && !visitedPoints.contains(nextPoint)) {
+                if (points[uuid] != null && !visitedPoints.contains(points[uuid])) {
                     pointsToVisit.add(points[uuid]!!)
                 }
             }
@@ -191,7 +201,10 @@ object FluidManager {
         val block: PylonFluidBlock
         val blockSuppliedFluids: Map<PylonFluid, Int>
         try {
-            block = BlockStorage.getAs<PylonFluidBlock>(point.position)!!
+            if (!point.position.chunk.isLoaded) {
+                return setOf()
+            }
+            block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
             blockSuppliedFluids = block.getSuppliedFluids(point.name)
         } catch (t: Throwable) {
             t.printStackTrace()
@@ -224,7 +237,10 @@ object FluidManager {
         val block: PylonFluidBlock
         val blockRequestedFluids: Map<PylonFluid, Int>
         try {
-            block = BlockStorage.getAs<PylonFluidBlock>(point.position)!!
+            if (!point.position.chunk.isLoaded) {
+                return setOf()
+            }
+            block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
             blockRequestedFluids = block.getRequestedFluids(point.name)
         } catch (t: Throwable) {
             t.printStackTrace()

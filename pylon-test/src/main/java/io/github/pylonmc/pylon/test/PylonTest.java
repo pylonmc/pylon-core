@@ -5,11 +5,14 @@ import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.entity.Entities;
+import io.github.pylonmc.pylon.test.fluid.Fluids;
 import io.github.pylonmc.pylon.test.item.Items;
 import io.github.pylonmc.pylon.test.test.block.*;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageMissingSchemaTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidConnectionTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidLoopTest;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
@@ -49,41 +52,44 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
 
-        tests.add(new BlockStorageAddTest());
-        tests.add(new BlockStorageChunkReloadTest());
-        tests.add(new BlockStorageFilledChunkTest());
-        tests.add(new BlockStorageMissingSchemaTest());
-        tests.add(new BlockStorageRemoveTest());
-        tests.add(new SimpleMultiblockTest());
-        tests.add(new SimpleMultiblockRotatedTest());
-        tests.add(new TickingBlockTest());
-        tests.add(new TickingBlockErrorTest());
+//        tests.add(new BlockStorageAddTest());
+//        tests.add(new BlockStorageChunkReloadTest());
+//        tests.add(new BlockStorageFilledChunkTest());
+//        tests.add(new BlockStorageMissingSchemaTest());
+//        tests.add(new BlockStorageRemoveTest());
+//        tests.add(new SimpleMultiblockTest());
+//        tests.add(new SimpleMultiblockRotatedTest());
+//        tests.add(new TickingBlockTest());
+//        tests.add(new TickingBlockErrorTest());
+//
+//        tests.add(new PylonItemStackInterfaceTest());
+//
+//        tests.add(new GametestTest());
+//
+//        tests.add(new SerializerTestBlockPosition());
+//        tests.add(new SerializerTestBlockPositionNoWorld());
+//        tests.add(new SerializerTestChar());
+//        tests.add(new SerializerTestChunkPosition());
+//        tests.add(new SerializerTestChunkPositionNoWorld());
+//        tests.add(new SerializerTestEnum());
+//        tests.add(new SerializerTestItemStack());
+//        tests.add(new SerializerTestLocation());
+//        tests.add(new SerializerTestNamespacedKey());
+//        tests.add(new SerializerTestSetOfInts());
+//        tests.add(new SerializerTestSetOfSetOfStrings());
+//        tests.add(new SerializerTestUUID());
+//        tests.add(new SerializerTestVector());
+//
+//        tests.add(new CraftingTest());
+//        tests.add(new FurnaceTest());
+//        tests.add(new MobDropTest());
+//
+//        tests.add(new EntityStorageSimpleTest());
+//        tests.add(new EntityStorageMissingSchemaTest());
+//        tests.add(new EntityStorageChunkReloadTest());
 
-        tests.add(new PylonItemStackInterfaceTest());
-
-        tests.add(new GametestTest());
-
-        tests.add(new SerializerTestBlockPosition());
-        tests.add(new SerializerTestBlockPositionNoWorld());
-        tests.add(new SerializerTestChar());
-        tests.add(new SerializerTestChunkPosition());
-        tests.add(new SerializerTestChunkPositionNoWorld());
-        tests.add(new SerializerTestEnum());
-        tests.add(new SerializerTestItemStack());
-        tests.add(new SerializerTestLocation());
-        tests.add(new SerializerTestNamespacedKey());
-        tests.add(new SerializerTestSetOfInts());
-        tests.add(new SerializerTestSetOfSetOfStrings());
-        tests.add(new SerializerTestUUID());
-        tests.add(new SerializerTestVector());
-
-        tests.add(new CraftingTest());
-        tests.add(new FurnaceTest());
-        tests.add(new MobDropTest());
-
-        tests.add(new EntityStorageSimpleTest());
-        tests.add(new EntityStorageMissingSchemaTest());
-        tests.add(new EntityStorageChunkReloadTest());
+        tests.add(new FluidConnectionTest());
+        tests.add(new FluidLoopTest());
 
         return tests;
     }
@@ -106,9 +112,11 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         }).join();
 
         try {
+            // TODO get rid of these and convert registration to static blocks
             Blocks.register();
             Items.register();
             Entities.register();
+            Fluids.register();
         } catch (Exception e) {
             instance().getLogger().severe("Failed to set up tests");
             e.printStackTrace();

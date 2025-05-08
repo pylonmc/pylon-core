@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.block
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
@@ -11,6 +12,7 @@ import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
+import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
@@ -31,6 +33,7 @@ import org.bukkit.event.player.PlayerInteractEvent
  * It also handles components of multiblocks being placed, removed, or moved (this
  * includes vanilla blocks)
  */
+// TODO add ignoreCancelled = true, and priority monitory where relevant
 @Suppress("UnstableApiUsage")
 internal object BlockListener : Listener {
 
@@ -444,6 +447,13 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
         if (pylonBlock is PylonInteractableBlock) {
             pylonBlock.onInteract(event)
+        }
+    }
+
+    @EventHandler
+    private fun onUnload(event: PylonBlockUnloadEvent) {
+        if (event.pylonBlock is PylonUnloadBlock) {
+            event.pylonBlock.onUnload(event)
         }
     }
 }

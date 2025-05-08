@@ -47,6 +47,24 @@ public final class Blocks {
             TickingBlock.class
     );
 
+    public static final PylonBlockSchema WATER_CONSUMER = new PylonBlockSchema(
+            PylonTest.key("water_consumer"),
+            Material.AMETHYST_BLOCK,
+            WaterConsumer.class
+    );
+
+    public static final PylonBlockSchema WATER_PRODUCER = new PylonBlockSchema(
+            PylonTest.key("water_producer"),
+            Material.AMETHYST_BLOCK,
+            WaterProducer.class
+    );
+
+    public static final PylonBlockSchema FLUID_CONNECTOR = new PylonBlockSchema(
+            PylonTest.key("fluid_connector"),
+            Material.AMETHYST_BLOCK,
+            FluidConnector.class
+    );
+
     public static void register() {
         SIMPLE_BLOCK.register();
         BLOCK_WITH_CUSTOM_SCHEMA.register();
@@ -54,5 +72,8 @@ public final class Blocks {
         SIMPLE_MULTIBLOCK.register();
         TICKING_ERROR_BLOCK.register();
         TICKING_BLOCK.register();
+        WATER_CONSUMER.register();
+        WATER_PRODUCER.register();
+        FLUID_CONNECTOR.register();
     }
 }
