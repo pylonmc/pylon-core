@@ -7,12 +7,42 @@ import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.fluid.Fluids;
 import io.github.pylonmc.pylon.test.item.Items;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageAddTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageChunkReloadTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageFilledChunkTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageMissingSchemaTest;
+import io.github.pylonmc.pylon.test.test.block.BlockStorageRemoveTest;
+import io.github.pylonmc.pylon.test.test.block.SimpleMultiblockRotatedTest;
+import io.github.pylonmc.pylon.test.test.block.SimpleMultiblockTest;
+import io.github.pylonmc.pylon.test.test.block.TickingBlockErrorTest;
+import io.github.pylonmc.pylon.test.test.block.TickingBlockTest;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageMissingSchemaTest;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidConnectionTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidCyclicConnectionsTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidPartialReloadTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidTickerLoopTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTestWithMixedFluids;
+import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
+import io.github.pylonmc.pylon.test.test.misc.GametestTest;
+import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
+import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
+import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPosition;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPositionNoWorld;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChar;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChunkPosition;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChunkPositionNoWorld;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestEnum;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestItemStack;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestLocation;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestNamespacedKey;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestSetOfInts;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestSetOfSetOfStrings;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestUUID;
+import io.github.pylonmc.pylon.test.test.serializer.SerializerTestVector;
 import io.github.pylonmc.pylon.test.util.BedrockWorldGenerator;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import lombok.Getter;
@@ -46,41 +76,41 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
 
-//        tests.add(new BlockStorageAddTest());
-//        tests.add(new BlockStorageChunkReloadTest());
-//        tests.add(new BlockStorageFilledChunkTest());
-//        tests.add(new BlockStorageMissingSchemaTest());
-//        tests.add(new BlockStorageRemoveTest());
-//        tests.add(new SimpleMultiblockTest());
-//        tests.add(new SimpleMultiblockRotatedTest());
-//        tests.add(new TickingBlockTest());
-//        tests.add(new TickingBlockErrorTest());
-//
-//        tests.add(new PylonItemStackInterfaceTest());
-//
-//        tests.add(new GametestTest());
-//
-//        tests.add(new SerializerTestBlockPosition());
-//        tests.add(new SerializerTestBlockPositionNoWorld());
-//        tests.add(new SerializerTestChar());
-//        tests.add(new SerializerTestChunkPosition());
-//        tests.add(new SerializerTestChunkPositionNoWorld());
-//        tests.add(new SerializerTestEnum());
-//        tests.add(new SerializerTestItemStack());
-//        tests.add(new SerializerTestLocation());
-//        tests.add(new SerializerTestNamespacedKey());
-//        tests.add(new SerializerTestSetOfInts());
-//        tests.add(new SerializerTestSetOfSetOfStrings());
-//        tests.add(new SerializerTestUUID());
-//        tests.add(new SerializerTestVector());
-//
-//        tests.add(new CraftingTest());
-//        tests.add(new FurnaceTest());
-//        tests.add(new MobDropTest());
-//
-//        tests.add(new EntityStorageSimpleTest());
-//        tests.add(new EntityStorageMissingSchemaTest());
-//        tests.add(new EntityStorageChunkReloadTest());
+        tests.add(new BlockStorageAddTest());
+        tests.add(new BlockStorageChunkReloadTest());
+        tests.add(new BlockStorageFilledChunkTest());
+        tests.add(new BlockStorageMissingSchemaTest());
+        tests.add(new BlockStorageRemoveTest());
+        tests.add(new SimpleMultiblockTest());
+        tests.add(new SimpleMultiblockRotatedTest());
+        tests.add(new TickingBlockTest());
+        tests.add(new TickingBlockErrorTest());
+
+        tests.add(new PylonItemStackInterfaceTest());
+
+        tests.add(new GametestTest());
+
+        tests.add(new SerializerTestBlockPosition());
+        tests.add(new SerializerTestBlockPositionNoWorld());
+        tests.add(new SerializerTestChar());
+        tests.add(new SerializerTestChunkPosition());
+        tests.add(new SerializerTestChunkPositionNoWorld());
+        tests.add(new SerializerTestEnum());
+        tests.add(new SerializerTestItemStack());
+        tests.add(new SerializerTestLocation());
+        tests.add(new SerializerTestNamespacedKey());
+        tests.add(new SerializerTestSetOfInts());
+        tests.add(new SerializerTestSetOfSetOfStrings());
+        tests.add(new SerializerTestUUID());
+        tests.add(new SerializerTestVector());
+
+        tests.add(new CraftingTest());
+        tests.add(new FurnaceTest());
+        tests.add(new MobDropTest());
+
+        tests.add(new EntityStorageSimpleTest());
+        tests.add(new EntityStorageMissingSchemaTest());
+        tests.add(new EntityStorageChunkReloadTest());
 
         tests.add(new FluidConnectionTest());
         tests.add(new FluidCyclicConnectionsTest());
