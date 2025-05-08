@@ -11,7 +11,7 @@ interface PylonFluidBlock {
      * Any implementation of this method must NEVER call the same method for another connection
      * point, otherwise you risk creating infinite loops.
      */
-    fun getSuppliedFluids(connectionPoint: String): Map<PylonFluid, Int> = mapOf()
+    fun getSuppliedFluids(connectionPoint: String): Map<PylonFluid, Long> = mapOf()
 
     /**
      * Returns a map of fluid types - and their corresponding amounts - that can be *taken in* by
@@ -21,19 +21,19 @@ interface PylonFluidBlock {
      * Any implementation of this method must NEVER call the same method for another connection
      * point, otherwise you risk creating infinite loops.
      */
-    fun getRequestedFluids(connectionPoint: String): Map<PylonFluid, Int> = mapOf()
+    fun getRequestedFluids(connectionPoint: String): Map<PylonFluid, Long> = mapOf()
 
     /**
      * `amount` is always at most `getRequestedFluids(connectionPoint).get(fluid)`
      */
-    fun addFluid(connectionPoint: String, fluid: PylonFluid, amount: Int) {
+    fun addFluid(connectionPoint: String, fluid: PylonFluid, amount: Long) {
         error("Block requested fluids, but does not implement addFluid")
     }
 
     /**
      * `amount` is always at least `getSuppliedFluids(connectionPoint).get(fluid)`
      */
-    fun removeFluid(connectionPoint: String, fluid: PylonFluid, amount: Int) {
+    fun removeFluid(connectionPoint: String, fluid: PylonFluid, amount: Long) {
         error("Block supplied fluids, but does not implement removeFluid")
     }
 }

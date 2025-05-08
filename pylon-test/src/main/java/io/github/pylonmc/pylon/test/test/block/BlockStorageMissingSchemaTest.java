@@ -58,7 +58,6 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
 
         TestUtil.loadChunk(chunk).join();
         TestUtil.runSync(() -> {
-            BlockStorage.placeBlock(block, schema);
             assertThat(BlockStorage.get(block))
                     .isNotNull()
                     .isInstanceOf(SimplePylonBlock.class);

@@ -35,11 +35,11 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
     @Getter private final FluidConnectionPoint input;
     @Getter private final FluidConnectionPoint output;
     @Getter private @Nullable PylonFluid fluid;
-    @Getter private int amount;
+    @Getter private long amount;
 
     public static class Schema extends PylonBlockSchema {
 
-        @Getter private final int maxFlowRate;
+        @Getter private final long maxFlowRate;
 
         public Schema(@NotNull NamespacedKey key, @NotNull Material material, int maxFlowRate) {
             super(key, material, FluidLimiter.class);
@@ -67,7 +67,7 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
         input = pdc.get(inputKey, PylonSerializers.FLUID_CONNECTION_POINT);
         output = pdc.get(outputKey, PylonSerializers.FLUID_CONNECTION_POINT);
         fluid = pdc.get(fluidKey, PylonSerializers.PYLON_FLUID);
-        amount = pdc.get(amountKey, PylonSerializers.INTEGER);
+        amount = pdc.get(amountKey, PylonSerializers.LONG);
 
         FluidManager.add(input);
         FluidManager.add(output);
@@ -78,7 +78,7 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
         pdc.set(inputKey, PylonSerializers.FLUID_CONNECTION_POINT, input);
         pdc.set(outputKey, PylonSerializers.FLUID_CONNECTION_POINT, output);
         PdcUtils.setNullable(pdc, fluidKey, PylonSerializers.PYLON_FLUID, fluid);
-        pdc.set(amountKey, PylonSerializers.INTEGER, amount);
+        pdc.set(amountKey, PylonSerializers.LONG, amount);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Integer> getRequestedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Long> getRequestedFluids(@NotNull String connectionPoint) {
         return amount == 0
                 ? PylonRegistry.FLUIDS.getValues()
                         .stream()
@@ -97,20 +97,20 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
     }
 
     @Override
-    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, int amount) {
+    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
         this.fluid = fluid;
         this.amount += amount;
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Integer> getSuppliedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Long> getSuppliedFluids(@NotNull String connectionPoint) {
         return fluid == null
                 ? Map.of()
                 : Map.of(fluid, amount);
     }
 
     @Override
-    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, int amount) {
+    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
         this.amount -= amount;
         if (this.amount == 0) {
             this.fluid = null;

@@ -27,14 +27,14 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
     private final NamespacedKey pointKey = PylonTest.key("point");
     private final NamespacedKey amountKey = PylonTest.key("amount");
     @Getter private final FluidConnectionPoint point;
-    @Getter private int amount;
+    @Getter private long amount;
 
     public static class Schema extends PylonBlockSchema {
 
         private final PylonFluid fluid;
-        private final int capacity;
+        private final long capacity;
 
-        public Schema(@NotNull NamespacedKey key, @NotNull Material material, @NotNull PylonFluid fluid, int capacity) {
+        public Schema(@NotNull NamespacedKey key, @NotNull Material material, @NotNull PylonFluid fluid, long capacity) {
             super(key, material, FluidConsumer.class);
             this.fluid = fluid;
             this.capacity = capacity;
@@ -54,13 +54,13 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
         super(schema, block);
         point = pdc.get(pointKey, PylonSerializers.FLUID_CONNECTION_POINT);
         FluidManager.add(point);
-        amount = pdc.get(amountKey, PylonSerializers.INTEGER);
+        amount = pdc.get(amountKey, PylonSerializers.LONG);
     }
 
     @Override
     public void write(@NotNull PersistentDataContainer pdc) {
         pdc.set(pointKey, PylonSerializers.FLUID_CONNECTION_POINT, point);
-        pdc.set(amountKey, PylonSerializers.INTEGER, amount);
+        pdc.set(amountKey, PylonSerializers.LONG, amount);
     }
 
     @Override
@@ -69,14 +69,14 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Integer> getRequestedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Long> getRequestedFluids(@NotNull String connectionPoint) {
         return Map.of(
                 getSchema().fluid, getSchema().capacity - amount
         );
     }
 
     @Override
-    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, int amount) {
+    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
         this.amount += amount;
     }
 }

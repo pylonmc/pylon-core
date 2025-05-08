@@ -9,7 +9,6 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import org.bukkit.Bukkit
 import java.util.*
 import kotlin.math.min
 
@@ -186,15 +185,15 @@ object FluidManager {
     fun getPoints(segment: UUID, type: FluidConnectionPoint.Type): List<FluidConnectionPoint>
         = segments[segment]!!.filter { it.type == type }
 
-    data class FluidSupplier(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Int)
+    data class FluidSupplier(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
 
-    data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Int)
+    data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
 
     fun getSuppliedFluids(point: FluidConnectionPoint): Set<FluidSupplier> {
         check(point.type == FluidConnectionPoint.Type.OUTPUT) { "Can only get supplied fluids of output point" }
 
         val block: PylonFluidBlock
-        val blockSuppliedFluids: Map<PylonFluid, Int>
+        val blockSuppliedFluids: Map<PylonFluid, Long>
         try {
             if (!point.position.chunk.isLoaded) {
                 return setOf()
@@ -208,7 +207,7 @@ object FluidManager {
 
         val suppliedFluids: MutableSet<FluidSupplier> = mutableSetOf()
         for ((fluid, amount) in blockSuppliedFluids) {
-            if (amount != 0) {
+            if (amount != 0L) {
                 suppliedFluids.add(FluidSupplier(block, point.name, fluid, amount))
             }
         }
@@ -230,7 +229,7 @@ object FluidManager {
         check(point.type == FluidConnectionPoint.Type.INPUT) { "Can only get requested fluids of input point" }
 
         val block: PylonFluidBlock
-        val blockRequestedFluids: Map<PylonFluid, Int>
+        val blockRequestedFluids: Map<PylonFluid, Long>
         try {
             if (!point.position.chunk.isLoaded) {
                 return setOf()
@@ -245,7 +244,7 @@ object FluidManager {
         // Create requester for each request
         val requestedFluids: MutableSet<FluidRequester> = mutableSetOf()
         for ((fluid, amount) in blockRequestedFluids) {
-            if (amount != 0) {
+            if (amount != 0L) {
                 requestedFluids.add(FluidRequester(block, point.name, fluid, amount))
             }
         }
@@ -263,9 +262,9 @@ object FluidManager {
         return requestedFluids
     }
 
-    fun getFlowRate(segment: UUID): Int {
+    fun getFlowRate(segment: UUID): Long {
         check(segments.contains(segment)) { "Segment does not exist" }
-        var flowRate = Int.MAX_VALUE
+        var flowRate = Long.MAX_VALUE
         for (point in segments[segment]!!) {
             if (point.maxFlowRate != null) {
                 flowRate = min(flowRate, point.maxFlowRate)
@@ -286,13 +285,13 @@ object FluidManager {
 
             // Take fluids on a first-come-first-serve basis from suppliers
             val totalRequested = requesters.sumOf { it.amount }
-            if (totalRequested == 0) {
+            if (totalRequested == 0L) {
                 continue
             }
-            var totalSupplied = 0
+            var totalSupplied = 0L
             for (supplier in suppliers) {
                 val remaining = totalRequested - totalSupplied
-                if (remaining == 0) {
+                if (remaining == 0L) {
                     break
                 }
 
@@ -309,15 +308,15 @@ object FluidManager {
             totalSupplied = min(totalSupplied, getFlowRate(segment))
 
             // Round-robin distribute to requesters
-            while (totalSupplied != 0) {
-                val maxFluidPerRequester = if (totalSupplied / requesters.size != 0) {
+            while (totalSupplied != 0L) {
+                val maxFluidPerRequester = if (totalSupplied / requesters.size != 0L) {
                     totalSupplied / requesters.size
                 } else {
                     // eg: splitting 3 mB amongst 5 requesters
                     1
                 }
                 val iterator = requesters.iterator()
-                while (iterator.hasNext() && totalSupplied != 0) {
+                while (iterator.hasNext() && totalSupplied != 0L) {
                     val requester = iterator.next()
                     if (requester.amount < maxFluidPerRequester) {
                         requester.block.addFluid(requester.name, requester.fluid, requester.amount)

@@ -19,11 +19,11 @@ class FluidConnectionPoint @JvmOverloads constructor(
     val name: String,
     val type: Type,
     val connectedPoints: MutableSet<UUID>,
-    val maxFlowRate: Int? = null,
+    val maxFlowRate: Long? = null,
 ) {
     var segment: UUID = UUID.randomUUID()
 
-    @JvmOverloads constructor(block: Block, name: String, type: Type, flowRate: Int? = null)
+    @JvmOverloads constructor(block: Block, name: String, type: Type, flowRate: Long? = null)
             : this (UUID.randomUUID(), block.position, name, type, mutableSetOf(), flowRate)
 
     enum class Type {

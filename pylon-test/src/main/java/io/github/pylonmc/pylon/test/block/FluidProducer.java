@@ -12,7 +12,6 @@ import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.core.fluid.PylonFluid;
 import io.github.pylonmc.pylon.test.PylonTest;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -62,14 +61,14 @@ public class FluidProducer extends PylonBlock<FluidProducer.Schema> implements P
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Integer> getSuppliedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Long> getSuppliedFluids(@NotNull String connectionPoint) {
         return Map.of(
-                getSchema().fluid, 20
+                getSchema().fluid, 20L
         );
     }
 
     @Override
-    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, int amount) {
+    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
         // do nothing
     }
 }
