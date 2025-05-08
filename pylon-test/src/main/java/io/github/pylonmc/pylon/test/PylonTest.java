@@ -7,18 +7,12 @@ import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.fluid.Fluids;
 import io.github.pylonmc.pylon.test.item.Items;
-import io.github.pylonmc.pylon.test.test.block.*;
-import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
-import io.github.pylonmc.pylon.test.test.entity.EntityStorageMissingSchemaTest;
-import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidConnectionTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidLoopTest;
-import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
-import io.github.pylonmc.pylon.test.test.misc.GametestTest;
-import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
-import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
-import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
-import io.github.pylonmc.pylon.test.test.serializer.*;
+import io.github.pylonmc.pylon.test.test.fluid.FluidCyclicConnectionsTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidPartialReloadTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidTickerLoopTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTestWithMixedFluids;
 import io.github.pylonmc.pylon.test.util.BedrockWorldGenerator;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import lombok.Getter;
@@ -89,7 +83,11 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 //        tests.add(new EntityStorageChunkReloadTest());
 
         tests.add(new FluidConnectionTest());
-        tests.add(new FluidLoopTest());
+        tests.add(new FluidCyclicConnectionsTest());
+        tests.add(new FluidTickerTest());
+        tests.add(new FluidTickerTestWithMixedFluids());
+        tests.add(new FluidTickerLoopTest());
+        tests.add(new FluidPartialReloadTest());
 
         return tests;
     }

@@ -33,6 +33,7 @@ public class FluidConnector extends PylonBlock<PylonBlockSchema> implements Pylo
     public FluidConnector(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
         super(schema, block);
         point = pdc.get(pointKey, PylonSerializers.FLUID_CONNECTION_POINT);
+        FluidManager.add(point);
     }
 
     @Override

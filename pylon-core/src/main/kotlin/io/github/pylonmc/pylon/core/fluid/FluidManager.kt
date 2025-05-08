@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.bukkit.Bukkit
 import java.util.*
 import kotlin.math.min
@@ -38,6 +39,7 @@ import kotlin.math.min
  *   the performance overhead here with a different program flow but needs testing
  * - Currently not asynchronous, I think parts of this can definitely be made asynchronous
  */
+// TODO use longs instead of ints
 object FluidManager {
 
     /**
@@ -59,13 +61,11 @@ object FluidManager {
      * Adds the point to its stored segment, creating the segment and starting a ticker for it if it does not exist
      */
     private fun addToSegment(point: FluidConnectionPoint) {
-        synchronized(segments) {
-            if (!segments.contains(point.segment)) {
-                segments[point.segment] = mutableSetOf()
-                startTicker(point.segment)
-            }
-            segments[point.segment]!!.add(point)
+        if (!segments.contains(point.segment)) {
+            segments[point.segment] = mutableSetOf()
+            startTicker(point.segment)
         }
+        segments[point.segment]!!.add(point)
     }
 
     /**
@@ -73,12 +73,10 @@ object FluidManager {
      * now empty
      */
     private fun removeFromSegment(point: FluidConnectionPoint) {
-        synchronized(segments) {
-            segments[point.segment]!!.remove(point)
-            if (segments[point.segment]!!.isEmpty()) {
-                segments.remove(point.segment)
-                tickers[point.segment]!!.cancel()
-            }
+        segments[point.segment]!!.remove(point)
+        if (segments[point.segment]!!.isEmpty()) {
+            segments.remove(point.segment)
+            tickers[point.segment]!!.cancel()
         }
     }
 
@@ -87,17 +85,15 @@ object FluidManager {
      */
     @JvmStatic
     fun add(point: FluidConnectionPoint) {
-        synchronized(points) {
-            check(!points.contains(point.id)) { "Duplicate connection point" }
+        check(!points.contains(point.id)) { "Duplicate connection point" }
 
-            points[point.id] = point
+        points[point.id] = point
 
-            addToSegment(point)
+        addToSegment(point)
 
-            for (otherPointId in point.connectedPoints) {
-                points[otherPointId]?.let {
-                    connect(point, it)
-                }
+        for (otherPointId in point.connectedPoints) {
+            points[otherPointId]?.let {
+                connect(point, it)
             }
         }
     }
@@ -107,19 +103,18 @@ object FluidManager {
      */
     @JvmStatic
     fun remove(point: FluidConnectionPoint) {
-        synchronized(points) {
-            check(points.contains(point.id)) { "Nonexistant connection point" }
+        check(points.contains(point.id)) { "Nonexistant connection point" }
 
-            for (otherPointId in point.connectedPoints) {
-                points[otherPointId]?.let {
-                    disconnect(point, it)
-                }
+        // Clone to prevent ConcurrentModificationException; disconnect modifies point.connectedPoints
+        for (otherPointId in point.connectedPoints.toSet()) {
+            points[otherPointId]?.let {
+                disconnect(point, it)
             }
-
-            removeFromSegment(point)
-
-            points.remove(point.id)
         }
+
+        removeFromSegment(point)
+
+        points.remove(point.id)
     }
 
     /**
@@ -268,6 +263,17 @@ object FluidManager {
         return requestedFluids
     }
 
+    fun getFlowRate(segment: UUID): Int {
+        check(segments.contains(segment)) { "Segment does not exist" }
+        var flowRate = Int.MAX_VALUE
+        for (point in segments[segment]!!) {
+            if (point.maxFlowRate != null) {
+                flowRate = min(flowRate, point.maxFlowRate)
+            }
+        }
+        return flowRate
+    }
+
     private fun tick(segment: UUID) {
         val suppliedFluids = getSuppliedFluids(segment)
         val requestedFluids = getRequestedFluids(segment)
@@ -280,6 +286,9 @@ object FluidManager {
 
             // Take fluids on a first-come-first-serve basis from suppliers
             val totalRequested = requesters.sumOf { it.amount }
+            if (totalRequested == 0) {
+                continue
+            }
             var totalSupplied = 0
             for (supplier in suppliers) {
                 val remaining = totalRequested - totalSupplied
@@ -297,11 +306,18 @@ object FluidManager {
                 totalSupplied += toTake
             }
 
+            totalSupplied = min(totalSupplied, getFlowRate(segment))
+
             // Round-robin distribute to requesters
             while (totalSupplied != 0) {
-                val maxFluidPerRequester = totalSupplied / requesters.size
+                val maxFluidPerRequester = if (totalSupplied / requesters.size != 0) {
+                    totalSupplied / requesters.size
+                } else {
+                    // eg: splitting 3 mB amongst 5 requesters
+                    1
+                }
                 val iterator = requesters.iterator()
-                while (iterator.hasNext()) {
+                while (iterator.hasNext() && totalSupplied != 0) {
                     val requester = iterator.next()
                     if (requester.amount < maxFluidPerRequester) {
                         requester.block.addFluid(requester.name, requester.fluid, requester.amount)
@@ -324,7 +340,7 @@ object FluidManager {
 
         val dispatcher = pluginInstance.minecraftDispatcher
         tickers[segment] = pluginInstance.launch(dispatcher) {
-            while (true) {
+            while (isActive) {
                 delay(PylonConfig.fluidIntervalTicks.toLong())
                 tick(segment)
             }

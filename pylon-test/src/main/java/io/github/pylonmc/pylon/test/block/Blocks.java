@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.test.block;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.block.SimplePylonBlock;
 import io.github.pylonmc.pylon.test.PylonTest;
+import io.github.pylonmc.pylon.test.fluid.Fluids;
 import org.bukkit.Material;
 
 
@@ -47,16 +48,36 @@ public final class Blocks {
             TickingBlock.class
     );
 
-    public static final PylonBlockSchema WATER_CONSUMER = new PylonBlockSchema(
+    public static final PylonBlockSchema WATER_CONSUMER = new FluidConsumer.Schema(
             PylonTest.key("water_consumer"),
             Material.AMETHYST_BLOCK,
-            WaterConsumer.class
+            Fluids.WATER,
+            100
     );
 
-    public static final PylonBlockSchema WATER_PRODUCER = new PylonBlockSchema(
+    public static final PylonBlockSchema LAVA_CONSUMER = new FluidConsumer.Schema(
+            PylonTest.key("lava_consumer"),
+            Material.AMETHYST_BLOCK,
+            Fluids.LAVA,
+            100
+    );
+
+    public static final PylonBlockSchema WATER_PRODUCER = new FluidProducer.Schema(
             PylonTest.key("water_producer"),
             Material.AMETHYST_BLOCK,
-            WaterProducer.class
+            Fluids.WATER
+    );
+
+    public static final PylonBlockSchema LAVA_PRODUCER = new FluidProducer.Schema(
+            PylonTest.key("lava_producer"),
+            Material.AMETHYST_BLOCK,
+            Fluids.LAVA
+    );
+
+    public static final FluidLimiter.Schema FLUID_LIMITER = new FluidLimiter.Schema(
+            PylonTest.key("fluid_limiter"),
+            Material.AMETHYST_BLOCK,
+            5
     );
 
     public static final PylonBlockSchema FLUID_CONNECTOR = new PylonBlockSchema(
@@ -73,7 +94,10 @@ public final class Blocks {
         TICKING_ERROR_BLOCK.register();
         TICKING_BLOCK.register();
         WATER_CONSUMER.register();
+        LAVA_CONSUMER.register();
         WATER_PRODUCER.register();
+        LAVA_PRODUCER.register();
+        FLUID_LIMITER.register();
         FLUID_CONNECTOR.register();
     }
 }
