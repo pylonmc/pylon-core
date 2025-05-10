@@ -94,7 +94,7 @@ object BlockStorage : Listener {
 
     @JvmStatic
     fun get(blockPosition: BlockPosition): PylonBlock<*>? {
-        require(blockPosition.chunk.isLoaded == true) { "You can only get Pylon blocks in loaded chunks" }
+        require(blockPosition.chunk.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocks[blockPosition] }
     }
 
@@ -104,24 +104,45 @@ object BlockStorage : Listener {
     @JvmStatic
     fun get(location: Location): PylonBlock<*>? = get(location.block)
 
+    /**
+     * Returns null if the block is not of the expected class
+     */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
         val block = get(blockPosition) ?: return null
+        if (!clazz.isInstance(block)) {
+            return null
+        }
         return clazz.cast(block)
     }
 
+    /**
+     * Returns null if the block is not of the expected class
+     */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
 
+    /**
+     * Returns null if the block is not of the expected class
+     */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, location: Location): T? =
         getAs(clazz, BlockPosition(location))
 
+    /**
+     * Returns null if the block is not of the expected class
+     */
     inline fun <reified T> getAs(blockPosition: BlockPosition): T? =
         getAs(T::class.java, blockPosition)
 
+    /**
+     * Returns null if the block is not of the expected class
+     */
     inline fun <reified T> getAs(block: Block): T? = getAs(T::class.java, block)
 
+    /**
+     * Returns null if the block is not of the expected class
+     */
     inline fun <reified T> getAs(location: Location): T? = getAs(T::class.java, location)
 
     @JvmStatic

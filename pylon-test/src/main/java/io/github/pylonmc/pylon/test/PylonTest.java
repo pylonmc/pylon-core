@@ -21,7 +21,9 @@ import io.github.pylonmc.pylon.test.test.entity.EntityStorageMissingSchemaTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidConnectionTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidCyclicConnectionsTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidFlowRateTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidPartialReloadTest;
+import io.github.pylonmc.pylon.test.test.fluid.FluidPredicateTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidTickerLoopTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTestWithMixedFluids;
@@ -118,6 +120,8 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new FluidTickerTestWithMixedFluids());
         tests.add(new FluidTickerLoopTest());
         tests.add(new FluidPartialReloadTest());
+        tests.add(new FluidFlowRateTest());
+        tests.add(new FluidPredicateTest());
 
         return tests;
     }

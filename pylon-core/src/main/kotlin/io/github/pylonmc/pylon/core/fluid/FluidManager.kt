@@ -126,7 +126,8 @@ object FluidManager {
      * Sets the flow rate per tick for a segment. The segment will not transfer more fluid than the
      * flow rate per tick.
      *
-     * Not preserved across connects and disconnects!
+     * Preserved across disconnects and connects (when connecting two points, one of the two points
+     * being connected is selected, and its segment's flow rate is copied to the new segment).
      */
     @JvmStatic
     fun setFluidPerTick(segment: UUID, fluidPerTick: Long) {
@@ -138,7 +139,8 @@ object FluidManager {
      * Sets the fluid predicate for a segment. The segment will only transfer fluids that match the
      * predicate.
      *
-     * Not preserved across connects and disconnects!
+     * Preserved across disconnects and connects (when connecting two points, one of the two points
+     * being connected is selected, and its segment's predicate is copied to the new segment).
      */
     @JvmStatic
     fun setFluidPredicate(segment: UUID, predicate: Predicate<PylonFluid>) {
@@ -184,6 +186,12 @@ object FluidManager {
         val connectedToPoint1 = getAllConnected(point1)
         if (!connectedToPoint1.contains(point2)) { // points are still (indirectly) connected
             val newSegment = UUID.randomUUID()
+            segments[newSegment] = Segment(
+                mutableSetOf(),
+                segments[point1.segment]!!.fluidPerTick,
+                segments[point1.segment]!!.predicate
+            )
+            startTicker(newSegment)
             for (point in connectedToPoint1) {
                 point.segment = newSegment
                 addToSegment(point)
