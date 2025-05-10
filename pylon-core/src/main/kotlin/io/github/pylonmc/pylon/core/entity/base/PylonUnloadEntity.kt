@@ -1,11 +1,11 @@
 package io.github.pylonmc.pylon.core.entity.base
 
-import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 
 interface PylonUnloadEntity {
 
     /**
      * Includes entity deaths
      */
-    fun onUnload(event: EntityRemoveFromWorldEvent)
+    fun onUnload(event: PylonEntityUnloadEvent)
 }

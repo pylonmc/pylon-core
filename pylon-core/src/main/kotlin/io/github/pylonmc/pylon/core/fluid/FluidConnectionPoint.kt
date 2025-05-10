@@ -13,18 +13,17 @@ import java.util.*
  *
  * The flow rate of a segment is the lowest maxFlowRate of any point in the segment.
  */
-class FluidConnectionPoint @JvmOverloads constructor(
+class FluidConnectionPoint(
     val id: UUID,
     val position: BlockPosition,
     val name: String,
     val type: Type,
     val connectedPoints: MutableSet<UUID>,
-    val maxFlowRate: Long? = null,
 ) {
     var segment: UUID = UUID.randomUUID()
 
-    @JvmOverloads constructor(block: Block, name: String, type: Type, flowRate: Long? = null)
-            : this (UUID.randomUUID(), block.position, name, type, mutableSetOf(), flowRate)
+    constructor(block: Block, name: String, type: Type)
+            : this (UUID.randomUUID(), block.position, name, type, mutableSetOf())
 
     enum class Type {
         INPUT, // input to the attached machine

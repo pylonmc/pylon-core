@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import java.util.*
+import java.util.function.Predicate
 import kotlin.math.min
 
 /**
@@ -38,8 +39,13 @@ import kotlin.math.min
  *   the performance overhead here with a different program flow but needs testing
  * - Currently not asynchronous, I think parts of this can definitely be made asynchronous
  */
-// TODO use longs instead of ints
 object FluidManager {
+
+    private class Segment(
+        val points: MutableSet<FluidConnectionPoint> = mutableSetOf(),
+        var fluidPerTick: Long = Long.MAX_VALUE,
+        var predicate: Predicate<PylonFluid>? = null,
+    )
 
     /**
      * A point is just a connection in a fluid network, like a machine's output or the end of a pipe
@@ -49,7 +55,7 @@ object FluidManager {
     /**
      * A segment is a collection of connection points
      */
-    private val segments: MutableMap<UUID, MutableSet<FluidConnectionPoint>> = mutableMapOf()
+    private val segments: MutableMap<UUID, Segment> = mutableMapOf()
 
     /**
      * Each segment has a corresponding ticker
@@ -61,10 +67,10 @@ object FluidManager {
      */
     private fun addToSegment(point: FluidConnectionPoint) {
         if (!segments.contains(point.segment)) {
-            segments[point.segment] = mutableSetOf()
+            segments[point.segment] = Segment()
             startTicker(point.segment)
         }
-        segments[point.segment]!!.add(point)
+        segments[point.segment]!!.points.add(point)
     }
 
     /**
@@ -72,8 +78,8 @@ object FluidManager {
      * now empty
      */
     private fun removeFromSegment(point: FluidConnectionPoint) {
-        segments[point.segment]!!.remove(point)
-        if (segments[point.segment]!!.isEmpty()) {
+        segments[point.segment]!!.points.remove(point)
+        if (segments[point.segment]!!.points.isEmpty()) {
             segments.remove(point.segment)
             tickers[point.segment]!!.cancel()
         }
@@ -114,6 +120,30 @@ object FluidManager {
         removeFromSegment(point)
 
         points.remove(point.id)
+    }
+
+    /**
+     * Sets the flow rate per tick for a segment. The segment will not transfer more fluid than the
+     * flow rate per tick.
+     *
+     * Not preserved across connects and disconnects!
+     */
+    @JvmStatic
+    fun setFluidPerTick(segment: UUID, fluidPerTick: Long) {
+        check(segments.contains(segment)) { "Segment does not exist" }
+        segments[segment]!!.fluidPerTick = fluidPerTick
+    }
+
+    /**
+     * Sets the fluid predicate for a segment. The segment will only transfer fluids that match the
+     * predicate.
+     *
+     * Not preserved across connects and disconnects!
+     */
+    @JvmStatic
+    fun setFluidPredicate(segment: UUID, predicate: Predicate<PylonFluid>) {
+        check(segments.contains(segment)) { "Segment does not exist" }
+        segments[segment]!!.predicate = predicate
     }
 
     /**
@@ -182,13 +212,15 @@ object FluidManager {
         return visitedPoints
     }
 
+    @JvmStatic
     fun getPoints(segment: UUID, type: FluidConnectionPoint.Type): List<FluidConnectionPoint>
-        = segments[segment]!!.filter { it.type == type }
+        = segments[segment]!!.points.filter { it.type == type }
 
     data class FluidSupplier(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
 
     data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
 
+    @JvmStatic
     fun getSuppliedFluids(point: FluidConnectionPoint): Set<FluidSupplier> {
         check(point.type == FluidConnectionPoint.Type.OUTPUT) { "Can only get supplied fluids of output point" }
 
@@ -208,12 +240,13 @@ object FluidManager {
         val suppliedFluids: MutableSet<FluidSupplier> = mutableSetOf()
         for ((fluid, amount) in blockSuppliedFluids) {
             if (amount != 0L) {
-                suppliedFluids.add(FluidSupplier(block, point.name, fluid, amount))
+                suppliedFluids.add(FluidSupplier(block, point.name, fluid, amount * PylonConfig.fluidIntervalTicks))
             }
         }
         return suppliedFluids
     }
 
+    @JvmStatic
     fun getSuppliedFluids(segment: UUID): Map<PylonFluid, Set<FluidSupplier>> {
         val suppliedFluids: MutableMap<PylonFluid, MutableSet<FluidSupplier>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.OUTPUT)) {
@@ -225,6 +258,7 @@ object FluidManager {
         return suppliedFluids
     }
 
+    @JvmStatic
     fun getRequestedFluids(point: FluidConnectionPoint): Set<FluidRequester> {
         check(point.type == FluidConnectionPoint.Type.INPUT) { "Can only get requested fluids of input point" }
 
@@ -245,12 +279,13 @@ object FluidManager {
         val requestedFluids: MutableSet<FluidRequester> = mutableSetOf()
         for ((fluid, amount) in blockRequestedFluids) {
             if (amount != 0L) {
-                requestedFluids.add(FluidRequester(block, point.name, fluid, amount))
+                requestedFluids.add(FluidRequester(block, point.name, fluid, amount * PylonConfig.fluidIntervalTicks))
             }
         }
         return requestedFluids
     }
 
+    @JvmStatic
     fun getRequestedFluids(segment: UUID): Map<PylonFluid, Set<FluidRequester>> {
         val requestedFluids: MutableMap<PylonFluid, MutableSet<FluidRequester>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.INPUT)) {
@@ -262,29 +297,23 @@ object FluidManager {
         return requestedFluids
     }
 
-    fun getFlowRate(segment: UUID): Long {
-        check(segments.contains(segment)) { "Segment does not exist" }
-        var flowRate = Long.MAX_VALUE
-        for (point in segments[segment]!!) {
-            if (point.maxFlowRate != null) {
-                flowRate = min(flowRate, point.maxFlowRate)
-            }
-        }
-        return flowRate
-    }
-
     private fun tick(segment: UUID) {
         val suppliedFluids = getSuppliedFluids(segment)
         val requestedFluids = getRequestedFluids(segment)
 
         for ((fluid, suppliers) in suppliedFluids) {
+            val predicate = segments[segment]!!.predicate
+            if (predicate != null && !predicate.test(fluid)) {
+                continue
+            }
+
             val requesters = requestedFluids[fluid]?.toMutableSet()
             if (requesters.isNullOrEmpty()) {
                 continue
             }
 
             // Take fluids on a first-come-first-serve basis from suppliers
-            val totalRequested = requesters.sumOf { it.amount }
+            val totalRequested = min(requesters.sumOf { it.amount }, segments[segment]!!.fluidPerTick)
             if (totalRequested == 0L) {
                 continue
             }
@@ -304,8 +333,6 @@ object FluidManager {
                 }
                 totalSupplied += toTake
             }
-
-            totalSupplied = min(totalSupplied, getFlowRate(segment))
 
             // Round-robin distribute to requesters
             while (totalSupplied != 0L) {

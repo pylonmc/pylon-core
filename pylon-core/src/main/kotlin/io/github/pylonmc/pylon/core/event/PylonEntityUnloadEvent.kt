@@ -5,7 +5,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called after a Pylon entity has been unloaded
+ * Called after a Pylon entity has been unloaded. This includes the entity dying!
  */
 class PylonEntityUnloadEvent(val pylonEntity: PylonEntity<*, *>) : Event() {
 

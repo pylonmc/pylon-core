@@ -12,7 +12,6 @@ object FluidConnectionPointDataType : PersistentDataType<PersistentDataContainer
     private val POSITION_KEY = pylonKey("position")
     private val NAME_KEY = pylonKey("name")
     private val TYPE_KEY = pylonKey("type")
-    private val SEGMENT_KEY = pylonKey("segment")
     private val CONNECTED_POINTS_KEY = pylonKey("connected_points")
 
     override fun getPrimitiveType(): Class<PersistentDataContainer> = PersistentDataContainer::class.java

@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.core.entity
 
-import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonUnloadEntity
+import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -19,10 +19,9 @@ object EntityListener : Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    fun handle(event: EntityRemoveFromWorldEvent) {
-        val pylonEntity = EntityStorage.get(event.entity)
-        if (pylonEntity is PylonUnloadEntity) {
-            pylonEntity.onUnload(event)
+    fun handle(event: PylonEntityUnloadEvent) {
+        if (event.pylonEntity is PylonUnloadEntity) {
+            event.pylonEntity.onUnload(event)
         }
     }
 }
