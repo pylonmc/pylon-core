@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.i18n.wrapping
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.Style
+import java.util.TreeMap
 import kotlin.math.max
 import kotlin.math.min
 
@@ -49,15 +50,25 @@ data class LineWrapRepresentation(val lines: List<String>, val styles: Map<IntRa
     }
 
     private fun getLineStyles(lineRange: IntRange): List<Pair<IntRange, Style>> {
-        return styles
+        val ranges = styles
             .filterKeys { it overlaps lineRange }
-            .mapKeys { (range, _) ->
-                max(range.start, lineRange.start)..min(range.endInclusive, lineRange.endInclusive)
+            .toList()
+            .reversed()
+            .map { (range, style) ->
+                max(range.start, lineRange.start)..min(range.endInclusive, lineRange.endInclusive) to style
             }
-            .filterKeys { !it.isEmpty() }
+        val merged = TreeMap<IntRange, Style>(compareBy<IntRange> { it.first }.thenByDescending { it.last })
+        for ((range, style) in ranges) {
+            val existing = merged.keys.find { it == range }
+            if (existing != null) {
+                merged[existing] = merged[existing]!!.merge(style)
+            } else {
+                merged[range] = style
+            }
+        }
+        return merged.filterKeys { !it.isEmpty() }
             .mapKeys { (range, _) -> range - lineRange.first }
             .toList()
-            .sortedWith(compareBy<Pair<IntRange, Style>> { it.first.first }.thenByDescending { it.first.last })
     }
 }
 

@@ -11,7 +11,7 @@ class LineWrapEncoder private constructor() {
     private var pos = 0
 
     private val styles = mutableMapOf<IntRange, Style>()
-    private val lineBuilders = mutableListOf<StringBuilder>(StringBuilder())
+    private val lineBuilders = mutableListOf(StringBuilder())
 
     private fun encode(component: Component) {
         var comp = component
