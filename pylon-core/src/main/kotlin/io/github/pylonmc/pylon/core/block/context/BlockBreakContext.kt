@@ -5,6 +5,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockBurnEvent
 import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.block.BlockFadeEvent
+import org.bukkit.event.entity.EntityExplodeEvent
 
 interface BlockBreakContext {
 
@@ -23,11 +24,11 @@ interface BlockBreakContext {
     }
 
     // No event parameter since explosion can be either from block or entity
-    data object WasExploded : BlockBreakContext {
+    data class EntityExploded(val event: EntityExplodeEvent) : BlockBreakContext {
         override val normallyDrops = true
     }
 
-    data class Exploded(val event: BlockExplodeEvent) : BlockBreakContext {
+    data class BlockExploded(val event: BlockExplodeEvent) : BlockBreakContext {
         override val normallyDrops = false
     }
 
