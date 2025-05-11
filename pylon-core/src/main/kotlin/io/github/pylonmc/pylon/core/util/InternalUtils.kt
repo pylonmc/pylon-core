@@ -5,7 +5,6 @@ package io.github.pylonmc.pylon.core.util
 import io.github.pylonmc.pylon.core.pluginInstance
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import java.lang.invoke.MethodHandle
@@ -30,8 +29,6 @@ internal fun Class<*>.findConstructorMatching(vararg types: Class<*>): MethodHan
 private fun Class<*>.isSubclassOf(other: Class<*>): Boolean {
     return other.isAssignableFrom(this)
 }
-
-operator fun TextColor.plus(text: String): Component = Component.text(text).color(this)
 
 internal fun fromMiniMessage(string: String): Component = MiniMessage.miniMessage().deserialize(string)
 
