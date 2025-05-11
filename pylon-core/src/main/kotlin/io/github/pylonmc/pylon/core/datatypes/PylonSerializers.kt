@@ -70,6 +70,9 @@ object PylonSerializers {
     val BLOCK_POSITION = BlockPositionPersistentDataType
 
     @JvmField
+    val BLOCK_FACE = BlockFacePersistentDataType
+
+    @JvmField
     val CHUNK_POSITION = ChunkPositionPersistentDataType
 
     @JvmField
