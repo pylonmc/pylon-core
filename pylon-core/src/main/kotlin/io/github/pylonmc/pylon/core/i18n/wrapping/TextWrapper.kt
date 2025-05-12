@@ -9,6 +9,7 @@ class TextWrapper(private val limit: Int) {
 
         for (word in words) {
             if (currentLine.length + word.length + 1 > limit) {
+                currentLine.append(' ')
                 lines.add(currentLine.toString())
                 currentLine = StringBuilder()
             }

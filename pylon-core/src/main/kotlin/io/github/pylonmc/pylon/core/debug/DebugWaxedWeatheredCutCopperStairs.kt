@@ -44,7 +44,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
             }
             player.sendDebug(
                 "key.block",
-                PylonArgument.of("key", Component.text(pylonBlock.schema.key.toString()))
+                PylonArgument.of("key", pylonBlock.schema.key.toString())
             )
             player.sendDebug(
                 when (pylonBlock) {
@@ -77,7 +77,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
             }
             player.sendDebug(
                 "key.entity",
-                PylonArgument.of("key", Component.text(pylonEntity.schema.key.toString()))
+                PylonArgument.of("key", pylonEntity.schema.key.toString())
             )
 
             // TODO implement this once entities can tick

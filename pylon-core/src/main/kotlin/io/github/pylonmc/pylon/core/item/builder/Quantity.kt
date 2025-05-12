@@ -19,6 +19,9 @@ object Quantity {
     @JvmField
     val PERCENT = create("percent", "pylon.pyloncore.quantity.percent", TextColor.color(0xa0cb29))
 
+    @JvmField
+    val RESEARCH_POINTS = create("research_points", "pylon.pyloncore.quantity.research_points", TextColor.color(0x70da65))
+
     @JvmStatic
     fun byName(name: String): Component? = quantities[name.lowercase()]
 
