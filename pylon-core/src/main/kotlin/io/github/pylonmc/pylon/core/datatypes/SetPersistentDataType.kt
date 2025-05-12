@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.datatypes
 
-import io.github.pylonmc.pylon.core.pluginInstance
-import org.bukkit.NamespacedKey
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
@@ -12,7 +11,7 @@ class SetPersistentDataType<P, C>(
     val elementType: PersistentDataType<P, C>
 ) : PersistentDataType<PersistentDataContainer, Set<C>> {
 
-    private val setValues = NamespacedKey(pluginInstance, "values")
+    private val setValues = pylonKey("values")
 
     override fun getPrimitiveType(): Class<PersistentDataContainer> = PersistentDataContainer::class.java
 

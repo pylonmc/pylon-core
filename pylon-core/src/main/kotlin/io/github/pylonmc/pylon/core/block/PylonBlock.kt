@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -117,7 +117,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 
                 return block
             } catch (t: Throwable) {
-                pluginInstance.logger.severe("Error while loading block $key at $position")
+                PylonCore.logger.severe("Error while loading block $key at $position")
                 t.printStackTrace()
                 return if (key != null && position != null) {
                     PhantomBlock(pdc, key, position.block)

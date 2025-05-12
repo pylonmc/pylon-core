@@ -1,14 +1,14 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
-import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -53,7 +53,7 @@ object BlockStorage : Listener {
 
     private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
 
-    private val pylonBlocksKey = NamespacedKey(pluginInstance, "blocks")
+    private val pylonBlocksKey = NamespacedKey(PylonCore, "blocks")
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized
     // to prevent them briefly going out of sync
@@ -82,7 +82,7 @@ object BlockStorage : Listener {
 
     // TODO implement this properly and actually run it
     internal fun startAutosaveTask() {
-        Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
+        Bukkit.getScheduler().runTaskTimer(PylonCore, Runnable {
             // TODO this saves all chunks at once, potentially leading to large pauses
             for ((chunkPosition, chunkBlocks) in blocksByChunk.entries) {
                 chunkPosition.chunk?.let {
@@ -336,7 +336,7 @@ object BlockStorage : Listener {
 
         save(event.chunk, chunkBlocks)
 
-        Bukkit.getScheduler().runTask(pluginInstance, Runnable {
+        Bukkit.getScheduler().runTask(PylonCore, Runnable {
             for (block in chunkBlocks) {
                 PylonBlockUnloadEvent(block.block, block).callEvent()
             }

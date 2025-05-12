@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.item
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
@@ -21,7 +21,7 @@ abstract class PylonItem<out S : PylonItemSchema>(
     open fun getPlaceholders(): Map<String, Component> = emptyMap()
 
     companion object {
-        val idKey = NamespacedKey(pluginInstance, "pylon_id")
+        val idKey = NamespacedKey(PylonCore, "pylon_id")
 
         /**
          * Converts a regular ItemStack to a PylonItemStack

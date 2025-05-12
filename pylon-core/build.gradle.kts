@@ -3,7 +3,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 plugins {
     kotlin("jvm")
     id("com.gradleup.shadow")
-    id("net.minecrell.plugin-yml.bukkit")
+    id("de.eldoria.plugin-yml.paper") version "0.7.1"
     idea
     `maven-publish`
     signing
@@ -66,8 +66,10 @@ tasks.shadowJar {
     archiveClassifier = null
 }
 
-bukkit {
+paper {
     name = "PylonCore"
+    loader = "io.github.pylonmc.pylon.core.PylonLoader"
+    bootstrapper = "io.github.pylonmc.pylon.core.PylonBootstrapper"
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
     authors = listOf() // TODO

@@ -4,13 +4,13 @@ package io.github.pylonmc.pylon.core.item.research
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.recipe.RecipeTypes
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
@@ -166,7 +166,7 @@ data class Research(
                 val player = event.player
                 // This task runs just in case a player manages to obtain an
                 // unknown item without picking it up somehow
-                playerCheckerJobs[player.uniqueId] = pluginInstance.launch {
+                playerCheckerJobs[player.uniqueId] = PylonCore.launch {
                     while (true) {
                         player.ejectUnknownItems()
                         delay(PylonConfig.researchCheckInterval.ticks)
@@ -179,7 +179,7 @@ data class Research(
         private fun onPlayerPickup(event: EntityPickupItemEvent) {
             val entity = event.entity
             if (entity is Player) {
-                pluginInstance.launch {
+                PylonCore.launch {
                     delay(1.ticks)
                     entity.ejectUnknownItems()
                 }

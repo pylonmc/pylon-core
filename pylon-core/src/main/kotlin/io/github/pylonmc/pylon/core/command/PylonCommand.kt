@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
@@ -14,7 +15,6 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.future.await
@@ -92,7 +92,7 @@ internal class PylonCommand : BaseCommand() {
             player.sendRichMessage("<red>Game test not found: $test")
             return
         }
-        pluginInstance.launch {
+        PylonCore.launch {
             val result = gameTest.launch(BlockPosition(spawnLocation)).await()
             if (result != null) {
                 player.sendRichMessage("<red>Game test $test failed: ${result.message}")
