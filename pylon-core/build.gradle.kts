@@ -2,6 +2,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 plugins {
     kotlin("jvm")
+    `java-library`
     id("com.gradleup.shadow")
     id("de.eldoria.plugin-yml.paper") version "0.7.1"
     idea
@@ -11,22 +12,33 @@ plugins {
 }
 
 repositories {
-    maven("https://repo.aikar.co/content/groups/aikar/")
-    maven("https://repo.xenondevs.xyz/releases")
+    maven("https://repo.xenondevs.xyz/releases") {
+        name = "InvUI"
+    }
+    maven("https://repo.aikar.co/content/groups/aikar/") {
+        name = "Aikar"
+    }
 }
 
 dependencies {
+    fun paperLibraryApi(dependency: Any) {
+        paperLibrary(dependency)
+        compileOnlyApi(dependency)
+    }
+
     runtimeOnly(project(":nms"))
 
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
 
-    api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
-    implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
-    api("xyz.xenondevs.invui:invui:1.45")
-    api("xyz.xenondevs.invui:invui-kotlin:1.45")
+    paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
+    paperLibrary("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
+    paperLibrary("co.aikar:acf-paper:0.5.1-SNAPSHOT")
+    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.45")
+    // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
+    paperLibrary("xyz.xenondevs.invui:inventory-access-r22:1.45:remapped-mojang")
+    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.45")
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
@@ -56,17 +68,15 @@ kotlin {
 tasks.shadowJar {
     mergeServiceFiles()
 
-    fun doRelocate(lib: String) {
-        relocate(lib, "io.github.pylonmc.pylon.core.shadowlibs.$lib")
-    }
-
-    doRelocate("co.aikar")
+    exclude("kotlin/**")
 
     archiveBaseName = project.name
     archiveClassifier = null
 }
 
 paper {
+    generateLibrariesJson = true
+
     name = "PylonCore"
     loader = "io.github.pylonmc.pylon.core.PylonLoader"
     bootstrapper = "io.github.pylonmc.pylon.core.PylonBootstrapper"
