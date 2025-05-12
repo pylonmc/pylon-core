@@ -29,6 +29,7 @@ import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTestWithMixedFluids;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
+import io.github.pylonmc.pylon.test.test.misc.WrapTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
 import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
 import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
@@ -91,6 +92,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new PylonItemStackInterfaceTest());
 
         tests.add(new GametestTest());
+        tests.add(new WrapTest());
 
         tests.add(new SerializerTestBlockPosition());
         tests.add(new SerializerTestBlockPositionNoWorld());

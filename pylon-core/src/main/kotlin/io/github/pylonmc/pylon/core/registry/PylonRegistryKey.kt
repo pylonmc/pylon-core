@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
+import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDrop
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.test.GameTestConfig
@@ -43,5 +44,8 @@ data class PylonRegistryKey<T>(val namespace: String, val path: String) {
 
         @JvmField
         val MOB_DROPS = PylonRegistryKey<MobDrop>(pylonKey("mob_drops"))
+
+        @JvmField
+        val RESEARCHES = PylonRegistryKey<Research>(pylonKey("researches"))
     }
 }

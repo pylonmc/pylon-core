@@ -9,3 +9,8 @@ walia-interval-ticks: 1
 
 # The interval between fluid network ticks
 fluid-interval-ticks: 1
+
+research:
+  enabled: true
+  # The interval, in ticks, between when Pylon checks for unresearched items in inventories
+  interval: 1
