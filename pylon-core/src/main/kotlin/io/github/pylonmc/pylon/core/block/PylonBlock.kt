@@ -35,8 +35,10 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
+    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.block.${schema.key.key}")
+
     open fun getWaila(player: Player): WailaConfig {
-        return WailaConfig(Component.translatable("pylon.${schema.key.namespace}.block.${schema.key.key}"))
+        return WailaConfig(name)
     }
 
     open fun getItem(context: BlockItemContext): ItemStack? {

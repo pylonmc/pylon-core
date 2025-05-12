@@ -12,6 +12,7 @@ version = "TEST"
 
 repositories {
     mavenCentral()
+    maven("https://repo.xenondevs.xyz/releases")
 }
 
 dependencies {

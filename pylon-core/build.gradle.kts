@@ -12,6 +12,7 @@ plugins {
 
 repositories {
     maven("https://repo.aikar.co/content/groups/aikar/")
+    maven("https://repo.xenondevs.xyz/releases")
 }
 
 dependencies {
@@ -24,6 +25,8 @@ dependencies {
     api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
+    api("xyz.xenondevs.invui:invui:1.45")
+    api("xyz.xenondevs.invui:invui-kotlin:1.45")
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
