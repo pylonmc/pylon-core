@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
+import org.bukkit.persistence.PersistentDataContainer
 
 
 abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected constructor(
@@ -26,7 +27,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
      * Write all the state saved in the Pylon entity class to the entity's persistent data
      * container.
      */
-    open fun write() {}
+    open fun write(pdc: PersistentDataContainer) {}
 
     companion object {
 
@@ -34,7 +35,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
 
         @JvmSynthetic
         internal fun serialize(pylonEntity: PylonEntity<*, *>) {
-            pylonEntity.write()
+            pylonEntity.write(pylonEntity.entity.persistentDataContainer)
             pylonEntity.entity.persistentDataContainer
                 .set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, pylonEntity.schema.key)
         }

@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,8 +30,8 @@ public class SimpleEntity extends PylonEntity<PylonEntitySchema, LivingEntity> {
     }
 
     @Override
-    public void write() {
-        getEntity().getPersistentDataContainer().set(key, PersistentDataType.INTEGER, someQuantity);
+    public void write(@NotNull PersistentDataContainer pdc) {
+        pdc.set(key, PersistentDataType.INTEGER, someQuantity);
     }
 
     public int getSomeQuantity() {

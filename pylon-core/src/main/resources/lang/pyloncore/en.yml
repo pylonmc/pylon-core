@@ -17,13 +17,13 @@ message:
     not_a_block: "<red>This is not a Pylon block"
     not_an_entity: "<red>This is not a Pylon entity"
     key:
-      block: "<gold>Pylon block key: %key%"
-      entity: "<gold>Pylon entity key: %key%"
+      block: "<gold>Pylon block key: <white>%key%"
+      entity: "<gold>Pylon entity key: <white>%key%"
     ticking:
       ticking: "<gold>Ticking: <green>Yes"
       errored: "<gold>Ticking: <red>Ticker has errored"
       not_ticking: "<gold>Ticking: <red>No"
-    pdc: "%key%: %value%"
+    data: "<gold>Data: <white>%data%"
 
   research:
     unknown: "<red>You do not know how to use %item%. Try thinking about %research%"
