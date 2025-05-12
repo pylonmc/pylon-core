@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.item
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
+import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.item.base.*
-import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
 import org.bukkit.GameMode
@@ -51,7 +51,12 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: PlayerInteractEvent) {
-        val pylonItem = event.item?.let { PylonItem.fromStack(it) }
+        val pylonItem = event.item?.let { PylonItem.fromStack(it) } ?: return
+        if (
+            pylonItem is Cooldownable &&
+            event.player.getCooldown(pylonItem.stack) > 0 &&
+            pylonItem.respectCooldown
+        ) return
         if (pylonItem is BlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToClickBlock(event)
         }
@@ -128,8 +133,8 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: PlayerInteractEntityEvent) {
-        val pylonItem = PylonItem.fromStack(event.player.inventory.itemInMainHand)
-        if (pylonItem is EntityInteractor) {
+        val pylonItem = PylonItem.fromStack(event.player.activeItem)
+        if (pylonItem is EntityInteractor && !(event.player.getCooldown(pylonItem.stack) > 0 && pylonItem.respectCooldown)) {
             pylonItem.onUsedToRightClickEntity(event)
         }
     }
