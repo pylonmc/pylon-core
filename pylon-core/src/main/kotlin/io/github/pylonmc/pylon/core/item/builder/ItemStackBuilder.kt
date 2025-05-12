@@ -11,10 +11,11 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
 
 @Suppress("UnstableApiUsage")
-open class ItemStackBuilder private constructor(private val stack: ItemStack) {
+open class ItemStackBuilder private constructor(private val stack: ItemStack) : ItemProvider {
 
     fun amount(amount: Int) = apply {
         stack.amount = amount
@@ -64,6 +65,8 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) {
         lore(Component.translatable("pylon.${key.namespace}.item.${key.key}.lore"))
 
     fun build(): ItemStack = stack.clone()
+
+    override fun get(lang: String?): ItemStack = build()
 
     companion object {
         @JvmStatic

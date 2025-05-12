@@ -6,10 +6,12 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.MustBeInvokedByOverriders
 import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
@@ -33,13 +35,14 @@ abstract class PylonInventoryBlock<S : PylonBlockSchema>(schema: S, block: Block
 
     @MustBeInvokedByOverriders
     override fun write(pdc: PersistentDataContainer) {
-        pdc.set(inventoryKey, itemListType, inv.contents.toList())
+        pdc.set(inventoryKey, itemListType, inv.contents.map { it ?: ItemStack.empty() })
     }
 
     @MustBeInvokedByOverriders
     override fun onInteract(event: PlayerInteractEvent) {
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
-        event.isCancelled = true
+        event.setUseInteractedBlock(Event.Result.DENY)
+        event.setUseItemInHand(Event.Result.DENY)
         BlockWindow(event.player).open()
     }
 
