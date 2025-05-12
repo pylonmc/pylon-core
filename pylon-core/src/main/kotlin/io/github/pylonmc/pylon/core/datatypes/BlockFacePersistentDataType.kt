@@ -14,5 +14,5 @@ object BlockFacePersistentDataType : PersistentDataType<String, BlockFace> {
         = BlockFace.valueOf(primitive)
 
     override fun toPrimitive(complex: BlockFace, context: PersistentDataAdapterContext): String
-        = complex.name
+        = complex.toString()
 }
