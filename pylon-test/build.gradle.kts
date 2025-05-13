@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-    compileOnly(project(":pylon-core", "shadow"))
+    compileOnly(project(":pylon-core"))
     implementation("org.assertj:assertj-core:3.27.2")
 }
 
