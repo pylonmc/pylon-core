@@ -43,7 +43,9 @@ abstract class PylonInventoryBlock<S : PylonBlockSchema>(schema: S, block: Block
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
         event.setUseInteractedBlock(Event.Result.DENY)
         event.setUseItemInHand(Event.Result.DENY)
-        BlockWindow(event.player).open()
+        val window = BlockWindow(event.player)
+        window.open()
+        window.gui.getAllInventorySlots()
     }
 
     private inner class BlockWindow(player: Player) : AbstractSingleWindow(
