@@ -379,7 +379,7 @@ object FluidManager {
 
         val dispatcher = pluginInstance.minecraftDispatcher
         tickers[segment] = pluginInstance.launch(dispatcher) {
-            while (isActive) {
+            while (true) {
                 delay(PylonConfig.fluidIntervalTicks.toLong())
                 tick(segment)
             }
