@@ -11,11 +11,13 @@ import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
+import io.github.pylonmc.pylon.core.command.PylonCommand
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItemListener
+import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.persistence.blockstorage.PhantomBlock
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -44,6 +46,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(AddonTranslator, this)
         Bukkit.getPluginManager().registerEvents(EntityListener, this)
         Bukkit.getPluginManager().registerEvents(Waila, this)
+        Bukkit.getPluginManager().registerEvents(Research, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,
@@ -59,8 +62,9 @@ class PylonCore : JavaPlugin(), PylonAddon {
         addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
         addRegistryCompletion("items", PylonRegistry.ITEMS)
         addRegistryCompletion("blocks", PylonRegistry.BLOCKS)
+        addRegistryCompletion("researches", PylonRegistry.RESEARCHES)
 
-        manager.registerCommand(PylonCommand)
+        manager.registerCommand(PylonCommand())
 
         registerWithPylon()
 

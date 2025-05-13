@@ -6,3 +6,8 @@ allowed-block-errors: 5
 
 # The interval, in ticks, between WALIA checks
 walia-interval: 1
+
+research:
+  enabled: true
+  # The interval, in ticks, between when Pylon checks for unresearched items in inventories
+  interval: 1

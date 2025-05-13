@@ -10,6 +10,7 @@ import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.base.BlockInteractor
 import io.github.pylonmc.pylon.core.item.base.EntityInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.audience.Audience
@@ -43,7 +44,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
             }
             player.sendDebug(
                 "key.block",
-                PylonArgument.of("key", Component.text(pylonBlock.schema.key.toString()))
+                PylonArgument.of("key", pylonBlock.schema.key.toString())
             )
             player.sendDebug(
                 when (pylonBlock) {
@@ -56,7 +57,15 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
                     else -> "ticking.not_ticking"
                 }
             )
-            pylonBlock.write(PrintingPDC(player))
+            // Create a new PDC - doesn't matter what type because we won't be saving it, so we just use the block's
+            // chunk to get a PDC context
+            val pdc = block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer()
+            pylonBlock.write(pdc)
+            val serialized = NmsAccessor.instance.serializePdc(pdc)
+            player.sendDebug(
+                "data",
+                PylonArgument.of("data", Component.text(serialized))
+            )
         }
 
         override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
@@ -68,7 +77,7 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
             }
             player.sendDebug(
                 "key.entity",
-                PylonArgument.of("key", Component.text(pylonEntity.schema.key.toString()))
+                PylonArgument.of("key", pylonEntity.schema.key.toString())
             )
 
             // TODO implement this once entities can tick
@@ -85,7 +94,12 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
 //                    }
 //                )
 //            )
-            pylonEntity.entity.persistentDataContainer.copyTo(PrintingPDC(player), true)
+            pylonEntity.write(pylonEntity.entity.persistentDataContainer)
+            val serialized = NmsAccessor.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
+            player.sendDebug(
+                "data",
+                PylonArgument.of("data", Component.text(serialized))
+            )
         }
     }
 }
