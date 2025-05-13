@@ -66,9 +66,10 @@ internal object PylonItemListener : Listener {
             pylonItem.onUsedToRightClick(event)
         }
         if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
-            val targetBlock = event.clickedBlock!!.getRelative(event.blockFace)
+            val cliecked = event.clickedBlock!!
+            val targetBlock = cliecked.getRelative(event.blockFace)
 
-            val isInventory = targetBlock.getState(false) is InventoryHolder
+            val isInventory = cliecked.getState(false) is InventoryHolder
             val entities = targetBlock.location.toCenterLocation().getNearbyEntities(0.5, 0.5, 0.5)
             if (entities.isEmpty() && !isInventory) {
                 val context = BlockCreateContext.PlayerPlace(player, event.item!!)
