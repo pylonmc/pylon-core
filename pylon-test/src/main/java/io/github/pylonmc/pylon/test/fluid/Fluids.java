@@ -9,7 +9,7 @@ public class Fluids {
 
     public static final PylonFluid WATER = new PylonFluid(PylonTest.key("water"),  Material.CYAN_CONCRETE);
     public static final PylonFluid LAVA = new PylonFluid(PylonTest.key("lava"), Material.ORANGE_CONCRETE)
-            .withTag(new LavaTag());
+            .addTag(new LavaTag());
 
     public static void register() {
         WATER.register();

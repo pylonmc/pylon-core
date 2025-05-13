@@ -92,7 +92,7 @@ object PylonSerializers {
 
     @JvmField
     val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid> { key ->
-        PylonRegistry.FLUIDS[key] ?: throw IllegalStateException("No such fluid $key")
+        PylonRegistry.FLUIDS.getOrThrow(key)
     }
 
     @JvmField
