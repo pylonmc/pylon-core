@@ -28,6 +28,10 @@ interface BlockBreakContext {
         override val normallyDrops = true
     }
 
+    data class BlockExplosionOrigin(val event: BlockExplodeEvent) : BlockBreakContext {
+        override val normallyDrops = false
+    }
+
     data class BlockExploded(val event: BlockExplodeEvent) : BlockBreakContext {
         override val normallyDrops = false
     }
