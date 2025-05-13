@@ -8,7 +8,6 @@ import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
 import org.bukkit.GameMode
-import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -68,7 +67,7 @@ internal object PylonItemListener : Listener {
         if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
             val targetBlock = event.clickedBlock!!.getRelative(event.blockFace)
 
-            val entities = targetBlock.location.toCenterLocation().getNearbyEntities(0.5, 0.5, 0.5);
+            val entities = targetBlock.location.toCenterLocation().getNearbyEntities(0.5, 0.5, 0.5)
             if (entities.isEmpty()) {
                 val context = BlockCreateContext.PlayerPlace(player, event.item!!)
                 val pylonBlock = pylonItem.doPlace(context, targetBlock)
