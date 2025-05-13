@@ -210,7 +210,6 @@ object FluidManager {
         val visitedPoints: MutableSet<FluidConnectionPoint> = mutableSetOf()
         val pointsToVisit: MutableList<FluidConnectionPoint> = mutableListOf(point)
         while (pointsToVisit.isNotEmpty()) {
-            // why does java/kotlin not have a Set.pop method???
             val nextPoint = pointsToVisit.removeFirst()
             visitedPoints.add(nextPoint)
             for (uuid in nextPoint.connectedPoints) {
