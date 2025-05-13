@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import org.bukkit.Bukkit
 import java.util.*
 import java.util.function.Predicate
 import kotlin.math.min
@@ -184,7 +185,8 @@ object FluidManager {
         point2.connectedPoints.remove(point1.id)
 
         val connectedToPoint1 = getAllConnected(point1)
-        if (!connectedToPoint1.contains(point2)) { // points are still (indirectly) connected
+        if (!connectedToPoint1.contains(point2)) {
+            // points are still (indirectly) connected
             val newSegment = UUID.randomUUID()
             segments[newSegment] = Segment(
                 mutableSetOf(),
@@ -192,6 +194,9 @@ object FluidManager {
                 segments[point1.segment]!!.predicate
             )
             startTicker(newSegment)
+            for (point in connectedToPoint1) {
+                removeFromSegment(point)
+            }
             for (point in connectedToPoint1) {
                 point.segment = newSegment
                 addToSegment(point)
