@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.datatypes
 
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import org.bukkit.block.BlockFace
 import org.bukkit.persistence.PersistentDataType
 
 object PylonSerializers {
@@ -70,7 +72,7 @@ object PylonSerializers {
     val BLOCK_POSITION = BlockPositionPersistentDataType
 
     @JvmField
-    val BLOCK_FACE = BlockFacePersistentDataType
+    val BLOCK_FACE = EnumPersistentDataType(BlockFace::class.java)
 
     @JvmField
     val CHUNK_POSITION = ChunkPositionPersistentDataType
