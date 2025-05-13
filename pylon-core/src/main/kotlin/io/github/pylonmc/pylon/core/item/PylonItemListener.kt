@@ -20,6 +20,7 @@ import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.player.*
+import org.bukkit.inventory.InventoryHolder
 
 @Suppress("UnstableApiUsage")
 internal object PylonItemListener : Listener {
@@ -67,8 +68,9 @@ internal object PylonItemListener : Listener {
         if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
             val targetBlock = event.clickedBlock!!.getRelative(event.blockFace)
 
+            val isInventory = targetBlock.getState(false) is InventoryHolder
             val entities = targetBlock.location.toCenterLocation().getNearbyEntities(0.5, 0.5, 0.5)
-            if (entities.isEmpty()) {
+            if (entities.isEmpty() && !isInventory) {
                 val context = BlockCreateContext.PlayerPlace(player, event.item!!)
                 val pylonBlock = pylonItem.doPlace(context, targetBlock)
                 if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
