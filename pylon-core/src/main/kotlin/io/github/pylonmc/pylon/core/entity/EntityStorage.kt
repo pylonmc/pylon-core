@@ -55,6 +55,9 @@ object EntityStorage : Listener {
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, uuid: UUID): T? {
         val entity = get(uuid) ?: return null
+        if (!clazz.isInstance(entity)) {
+            return null
+        }
         return clazz.cast(entity)
     }
 

@@ -82,6 +82,9 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         val ENTITIES = PylonRegistry(PylonRegistryKey.ENTITIES).also(::addRegistry)
 
         @JvmField
+        val FLUIDS = PylonRegistry(PylonRegistryKey.FLUIDS).also(::addRegistry)
+
+        @JvmField
         val ADDONS = PylonRegistry(PylonRegistryKey.ADDONS).also(::addRegistry)
 
         @JvmField

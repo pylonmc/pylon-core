@@ -55,7 +55,7 @@ class Waila private constructor(player: Player, private val job: Job) {
                     } else {
                         walia.bossbar.isVisible = false
                     }
-                    delay(PylonConfig.waliaInterval.ticks)
+                    delay(PylonConfig.waliaIntervalTicks.ticks)
                 }
             })
         }

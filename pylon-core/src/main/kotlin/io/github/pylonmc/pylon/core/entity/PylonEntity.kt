@@ -23,6 +23,8 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
         }
     }
 
+    val uuid = entity.uniqueId
+
     /**
      * Write all the state saved in the Pylon entity class to the entity's persistent data
      * container.

@@ -5,7 +5,7 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
-import io.github.pylonmc.pylon.core.entity.base.InteractableEntity
+import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -38,7 +38,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
     }
 
     class MultiblockGhostBlock(schema: PylonEntitySchema, entity: BlockDisplay, val name: String)
-        : PylonEntity<PylonEntitySchema, BlockDisplay>(schema, entity), InteractableEntity {
+        : PylonEntity<PylonEntitySchema, BlockDisplay>(schema, entity), PylonInteractableEntity {
 
         constructor(schema: PylonEntitySchema, entity: BlockDisplay)
             : this(schema, entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)

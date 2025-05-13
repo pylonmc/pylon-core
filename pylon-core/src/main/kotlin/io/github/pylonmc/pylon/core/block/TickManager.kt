@@ -60,7 +60,7 @@ object TickManager : Listener {
         if (pylonBlock is PylonTickingBlock) {
             val dispatcher =
                 if (pylonBlock.isAsync) pluginInstance.asyncDispatcher else pluginInstance.minecraftDispatcher
-            val tickDelay = pylonBlock.getCustomTickRate(PylonConfig.tickDelay)
+            val tickDelay = pylonBlock.getCustomTickRate(PylonConfig.tickRate)
             tickingBlocks[pylonBlock] = pluginInstance.launch(dispatcher) {
                 var errors = 0
                 while (true) {
