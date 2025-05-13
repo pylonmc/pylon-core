@@ -8,8 +8,6 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import org.bukkit.Bukkit
 import java.util.*
 import java.util.function.Predicate
 import kotlin.math.min
@@ -67,7 +65,7 @@ object FluidManager {
      * Adds the point to its stored segment, creating the segment and starting a ticker for it if it does not exist
      */
     private fun addToSegment(point: FluidConnectionPoint) {
-        if (!segments.contains(point.segment)) {
+        if (point.segment !in segments) {
             segments[point.segment] = Segment()
             startTicker(point.segment)
         }
@@ -91,7 +89,7 @@ object FluidManager {
      */
     @JvmStatic
     fun add(point: FluidConnectionPoint) {
-        check(!points.contains(point.id)) { "Duplicate connection point" }
+        check(point.id !in points) { "Duplicate connection point" }
 
         points[point.id] = point
 
@@ -109,7 +107,7 @@ object FluidManager {
      */
     @JvmStatic
     fun remove(point: FluidConnectionPoint) {
-        check(points.contains(point.id)) { "Nonexistant connection point" }
+        check(point.id in points) { "Nonexistant connection point" }
 
         // Clone to prevent ConcurrentModificationException; disconnect modifies point.connectedPoints
         for (otherPointId in point.connectedPoints.toSet()) {
@@ -132,7 +130,7 @@ object FluidManager {
      */
     @JvmStatic
     fun setFluidPerTick(segment: UUID, fluidPerTick: Long) {
-        check(segments.contains(segment)) { "Segment does not exist" }
+        check(segment in segments) { "Segment does not exist" }
         segments[segment]!!.fluidPerTick = fluidPerTick
     }
 
@@ -145,7 +143,7 @@ object FluidManager {
      */
     @JvmStatic
     fun setFluidPredicate(segment: UUID, predicate: Predicate<PylonFluid>) {
-        check(segments.contains(segment)) { "Segment does not exist" }
+        check(segment in segments) { "Segment does not exist" }
         segments[segment]!!.predicate = predicate
     }
 
@@ -154,8 +152,8 @@ object FluidManager {
      */
     @JvmStatic
     fun connect(point1: FluidConnectionPoint, point2: FluidConnectionPoint) {
-        check(segments.contains(point1.segment)) { "Attempt to connect a nonexistant segment" }
-        check(segments.contains(point2.segment)) { "Attempt to connect a nonexistant segment" }
+        check(point1.segment in segments) { "Attempt to connect a nonexistant segment" }
+        check(point2.segment in segments) { "Attempt to connect a nonexistant segment" }
 
         point1.connectedPoints.add(point2.id)
         point2.connectedPoints.add(point1.id)
@@ -176,16 +174,16 @@ object FluidManager {
      */
     @JvmStatic
     fun disconnect(point1: FluidConnectionPoint, point2: FluidConnectionPoint) {
-        check(segments.contains(point1.segment)) { "Attempt to disconnect a nonexistant segment" }
-        check(segments.contains(point2.segment)) { "Attempt to disconnect a nonexistant segment" }
-        check(point1.connectedPoints.contains(point2.id)) { "Attempt to disconnect two points that are not connected" }
-        check(point2.connectedPoints.contains(point1.id)) { "Attempt to disconnect two points that are not connected" }
+        check(point1.segment in segments) { "Attempt to disconnect a nonexistant segment" }
+        check(point2.segment in segments) { "Attempt to disconnect a nonexistant segment" }
+        check(point2.id in point1.connectedPoints) { "Attempt to disconnect two points that are not connected" }
+        check(point1.id in point2.connectedPoints) { "Attempt to disconnect two points that are not connected" }
 
         point1.connectedPoints.remove(point2.id)
         point2.connectedPoints.remove(point1.id)
 
         val connectedToPoint1 = getAllConnected(point1)
-        if (!connectedToPoint1.contains(point2)) {
+        if (point2 !in connectedToPoint1) {
             // points are still (indirectly) connected
             val newSegment = UUID.randomUUID()
             segments[newSegment] = Segment(
@@ -217,7 +215,7 @@ object FluidManager {
             pointsToVisit.remove(nextPoint)
             visitedPoints.add(nextPoint)
             for (uuid in nextPoint.connectedPoints) {
-                if (points[uuid] != null && !visitedPoints.contains(points[uuid])) {
+                if (points[uuid] != null && points[uuid] !in visitedPoints) {
                     pointsToVisit.add(points[uuid]!!)
                 }
             }
@@ -375,7 +373,7 @@ object FluidManager {
     }
 
     private fun startTicker(segment: UUID) {
-        check(!tickers.contains(segment)) { "Ticker already active" }
+        check(segment !in tickers) { "Ticker already active" }
 
         val dispatcher = pluginInstance.minecraftDispatcher
         tickers[segment] = pluginInstance.launch(dispatcher) {
