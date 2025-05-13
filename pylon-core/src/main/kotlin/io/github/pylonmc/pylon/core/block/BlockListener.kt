@@ -49,16 +49,20 @@ internal object BlockListener : Listener {
     private fun blockRemove(event: BlockBreakEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
-            event.isDropItems = false
+            event.isCancelled = true
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockBurn(event: BlockBurnEvent) {
-        BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
+        if (BlockStorage.isPylonBlock(event.block)) {
+            BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
+            event.isCancelled = true
+        }
     }
 
     // TODO this might be dropping vanilla blocks in place of Pylon blocks
+    // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
         BlockStorage.breakBlock(event.block, BlockBreakContext.Exploded(event))
@@ -68,6 +72,7 @@ internal object BlockListener : Listener {
     }
 
     // TODO this might be dropping vanilla blocks in place of Pylon blocks
+    // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
@@ -77,7 +82,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockFadeEvent) {
-        BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
+        if (BlockStorage.isPylonBlock(event.block)) {
+            BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
+            event.isCancelled = true
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
