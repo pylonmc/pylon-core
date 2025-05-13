@@ -17,10 +17,7 @@ open class PylonFluid(
     override fun getKey(): NamespacedKey
         = key
 
-    fun withTag(tag: PylonFluidTag): PylonFluid
-        = apply { addTag(tag) }
-
-    fun addTag(tag: PylonFluidTag) {
+    fun addTag(tag: PylonFluidTag) = apply {
         check(!hasTag(tag.javaClass)) { "Fluid already has a tag of the same type" }
         tags.add(tag)
     }
