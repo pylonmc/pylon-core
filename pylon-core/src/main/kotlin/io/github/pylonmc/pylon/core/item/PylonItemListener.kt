@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
 import org.bukkit.GameMode
+import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -52,9 +53,10 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) } ?: return
+        val player = event.player
         if (
             pylonItem is Cooldownable &&
-            event.player.getCooldown(pylonItem.stack) > 0 &&
+            player.getCooldown(pylonItem.stack) > 0 &&
             pylonItem.respectCooldown
         ) return
         if (pylonItem is BlockInteractor && event.hasBlock()) {
@@ -64,12 +66,19 @@ internal object PylonItemListener : Listener {
             pylonItem.onUsedToRightClick(event)
         }
         if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
-            val context = BlockCreateContext.PlayerPlace(event.player, event.item!!)
-            val pylonBlock = pylonItem.doPlace(context, event.clickedBlock!!.getRelative(event.blockFace))
-            if (pylonBlock != null && event.player.gameMode != GameMode.CREATIVE) {
-                val equipmentSlot = event.hand
-                if (equipmentSlot != null ) {
-                    event.player.inventory.getItem(equipmentSlot).subtract()
+            val targetBlock = event.clickedBlock!!.getRelative(event.blockFace)
+
+            val lowerPlayerPosition = player.location.block.location
+            val upperPlayerPosition = lowerPlayerPosition.block.getRelative(BlockFace.UP).location
+
+            if (lowerPlayerPosition != targetBlock.location && upperPlayerPosition != targetBlock.location) {
+                val context = BlockCreateContext.PlayerPlace(player, event.item!!)
+                val pylonBlock = pylonItem.doPlace(context, targetBlock)
+                if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
+                    val equipmentSlot = event.hand
+                    if (equipmentSlot != null) {
+                        player.inventory.getItem(equipmentSlot).subtract()
+                    }
                 }
             }
         }
