@@ -226,8 +226,14 @@ object FluidManager {
     fun getPoints(segment: UUID, type: FluidConnectionPoint.Type): List<FluidConnectionPoint>
         = segments[segment]!!.points.filter { it.type == type }
 
+    /**
+     * A temporary representation of a block supplying a specific fluid. Exists to make ticking logic nicer.
+     */
     data class FluidSupplier(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
 
+    /**
+     * A temporary representation of a block requesting a specific fluid. Exists to make ticking logic nicer.
+     */
     data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
 
     @JvmStatic
