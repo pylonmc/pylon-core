@@ -5,6 +5,10 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.base.PylonFluidBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.event.PrePylonFluidPointConnectEvent
+import io.github.pylonmc.pylon.core.event.PrePylonFluidPointDisconnectEvent
+import io.github.pylonmc.pylon.core.event.PylonFluidPointConnectEvent
+import io.github.pylonmc.pylon.core.event.PylonFluidPointDisconnectEvent
 import io.github.pylonmc.pylon.core.pluginInstance
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -155,6 +159,10 @@ object FluidManager {
         check(point1.segment in segments) { "Attempt to connect a nonexistant segment" }
         check(point2.segment in segments) { "Attempt to connect a nonexistant segment" }
 
+        if (!PrePylonFluidPointConnectEvent(point1, point2).callEvent()) {
+            return
+        }
+
         point1.connectedPoints.add(point2.id)
         point2.connectedPoints.add(point1.id)
 
@@ -166,6 +174,8 @@ object FluidManager {
                 addToSegment(point)
             }
         }
+
+        PylonFluidPointConnectEvent(point1, point2).callEvent()
     }
 
     /**
@@ -178,6 +188,10 @@ object FluidManager {
         check(point2.segment in segments) { "Attempt to disconnect a nonexistant segment" }
         check(point2.id in point1.connectedPoints) { "Attempt to disconnect two points that are not connected" }
         check(point1.id in point2.connectedPoints) { "Attempt to disconnect two points that are not connected" }
+
+        if (!PrePylonFluidPointDisconnectEvent(point1, point2).callEvent()) {
+            return
+        }
 
         point1.connectedPoints.remove(point2.id)
         point2.connectedPoints.remove(point1.id)
@@ -200,6 +214,8 @@ object FluidManager {
                 addToSegment(point)
             }
         }
+
+        PylonFluidPointDisconnectEvent(point1, point2).callEvent()
     }
 
     /**
