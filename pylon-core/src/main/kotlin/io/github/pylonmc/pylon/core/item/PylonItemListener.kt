@@ -68,10 +68,8 @@ internal object PylonItemListener : Listener {
         if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
             val targetBlock = event.clickedBlock!!.getRelative(event.blockFace)
 
-            val lowerPlayerPosition = player.location.block.location
-            val upperPlayerPosition = lowerPlayerPosition.block.getRelative(BlockFace.UP).location
-
-            if (lowerPlayerPosition != targetBlock.location && upperPlayerPosition != targetBlock.location) {
+            val entities = targetBlock.location.toCenterLocation().getNearbyEntities(0.5, 0.5, 0.5);
+            if (entities.isEmpty()) {
                 val context = BlockCreateContext.PlayerPlace(player, event.item!!)
                 val pylonBlock = pylonItem.doPlace(context, targetBlock)
                 if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
