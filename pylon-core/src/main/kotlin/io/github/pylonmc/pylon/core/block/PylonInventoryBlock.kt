@@ -3,39 +3,40 @@ package io.github.pylonmc.pylon.core.block
 import io.github.pylonmc.pylon.core.block.base.PylonInteractableBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.util.pylonKey
-import org.bukkit.Bukkit
 import org.bukkit.block.Block
-import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.block.Action
-import org.bukkit.event.inventory.InventoryType
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.MustBeInvokedByOverriders
 import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
-import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.window.AbstractSingleWindow
+import xyz.xenondevs.invui.inventory.Inventory
+import xyz.xenondevs.invui.inventory.ObscuredInventory
+import xyz.xenondevs.invui.window.AbstractWindow
+import xyz.xenondevs.invui.window.Window
+import java.lang.invoke.MethodHandles
+import java.lang.invoke.MethodType
+import java.util.function.Consumer
 
 abstract class PylonInventoryBlock<S : PylonBlockSchema>(schema: S, block: Block) :
     PylonBlock<S>(schema, block), PylonInteractableBlock {
 
     constructor(schema: S, block: Block, pdc: PersistentDataContainer) : this(schema, block) {
-        val items = pdc.getOrDefault(inventoryKey, itemListType, emptyList())
-        for ((index, item) in items.withIndex()) {
-            inv.setItem(index, item)
+        items = pdc.getOrDefault(inventoryKey, inventoryType, emptyList()).map { inv ->
+            inv.map { item -> item.takeUnless { it.isEmpty } }
         }
     }
 
     abstract val gui: Gui
 
-    private var inv = createInv(gui)
+    private var items: List<List<ItemStack?>> = emptyList()
+    private val updateFunctions = mutableSetOf<() -> Unit>()
 
     @MustBeInvokedByOverriders
     override fun write(pdc: PersistentDataContainer) {
-        pdc.set(inventoryKey, itemListType, inv.contents.map { it ?: ItemStack.empty() })
+        pdc.set(inventoryKey, inventoryType, items.map { inv -> inv.map { it ?: ItemStack.empty() } })
     }
 
     @MustBeInvokedByOverriders
@@ -43,35 +44,65 @@ abstract class PylonInventoryBlock<S : PylonBlockSchema>(schema: S, block: Block
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
         event.setUseInteractedBlock(Event.Result.DENY)
         event.setUseItemInHand(Event.Result.DENY)
-        val window = BlockWindow(event.player)
+        val window = Window.single()
+            .setGui(gui)
+            .setTitle(AdventureComponentWrapper(name))
+            .setViewer(event.player)
+            .build()
+        val invs = window.contentInventories
+        val updateHandler = {
+            for ((old, new) in invs.zip(items)) {
+                repeat(old.size) { i ->
+                    old.setItemSilently(i, new[i])
+                }
+            }
+        }
+        updateHandler()
+        updateFunctions.add(updateHandler)
+        window.addCloseHandler {
+            updateFunctions.remove(updateHandler)
+        }
+        for (inv in invs) {
+            var realInv = inv
+            while (realInv is ObscuredInventory) {
+                realInv = realInv.backingInventory
+            }
+            realInv.postUpdateHandler = Consumer { event ->
+                inv.postUpdateHandler?.accept(event)
+                items = invs.map { it.unsafeItems.toList() }
+                updateFunctions.forEach { it() }
+            }
+        }
         window.open()
-        window.gui.getAllInventorySlots()
-    }
-
-    private inner class BlockWindow(player: Player) : AbstractSingleWindow(
-        player,
-        AdventureComponentWrapper(name),
-        gui as AbstractGui,
-        inv,
-        true
-    )
-
-    private fun createInv(gui: Gui): Inventory {
-        val type: InventoryType? = when {
-            gui.width == 9 -> null
-            gui.width == 3 && gui.height == 3 -> InventoryType.DROPPER
-            gui.width == 5 && gui.height == 1 -> InventoryType.HOPPER
-            else -> throw IllegalArgumentException("Unsupported gui size: ${gui.width}x${gui.height}")
-        }
-        return if (type == null) {
-            Bukkit.createInventory(null, gui.size, name)
-        } else {
-            Bukkit.createInventory(null, type, name)
-        }
     }
 
     companion object {
-        private val inventoryKey = pylonKey("inventory")
-        private val itemListType = PylonSerializers.LIST.listTypeFrom(PylonSerializers.ITEM_STACK)
+        private val inventoryKey = pylonKey("inventories")
+        private val inventoryType =
+            PylonSerializers.LIST.listTypeFrom(PylonSerializers.LIST.listTypeFrom(PylonSerializers.ITEM_STACK))
+
+        private val contentInventoriesHandle =
+            MethodHandles.privateLookupIn(AbstractWindow::class.java, MethodHandles.lookup())
+                .findVirtual(
+                    AbstractWindow::class.java,
+                    "getContentInventories",
+                    MethodType.methodType(List::class.java)
+                )
+
+        // why is this protected aaa
+        @Suppress("UNCHECKED_CAST")
+        private val Window.contentInventories: List<Inventory>
+            get() = contentInventoriesHandle.invoke(this) as List<Inventory>
+
+        private val backingInventoryHandle =
+            MethodHandles.privateLookupIn(ObscuredInventory::class.java, MethodHandles.lookup())
+                .findGetter(
+                    ObscuredInventory::class.java,
+                    "inventory",
+                    Inventory::class.java
+                )
+
+        private val ObscuredInventory.backingInventory: Inventory
+            get() = backingInventoryHandle.invoke(this) as Inventory
     }
 }
