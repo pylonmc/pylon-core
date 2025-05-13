@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.block.BlockFace
 import org.bukkit.persistence.PersistentDataType
 
@@ -87,11 +88,13 @@ object PylonSerializers {
     val INVENTORY = InventoryPersistentDataType
 
     @JvmField
-    val PYLON_FLUID = PylonFluidPersistentDataType
+    val KEYED = KeyedPersistentDataType
+
+    @JvmField
+    val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid> { key ->
+        PylonRegistry.FLUIDS[key] ?: throw IllegalStateException("No such fluid $key")
+    }
 
     @JvmField
     val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
-
-    @JvmField
-    val KEYED = KeyedPersistentDataType
 }
