@@ -40,8 +40,10 @@ public class FluidPartialReloadTest extends AsyncTest {
                 () -> BlockStorage.placeBlock(producerBlock, Blocks.WATER_PRODUCER)
         ).join();
 
-        FluidManager.connect(consumer.getPoint(), connector.getPoint());
-        FluidManager.connect(producer.getPoint(), connector.getPoint());
+        TestUtil.runSync(() -> {
+            FluidManager.connect(consumer.getPoint(), connector.getPoint());
+            FluidManager.connect(producer.getPoint(), connector.getPoint());
+        }).join();
 
         // All should initially have the same segment
         assertThat(consumer.getPoint().getSegment())
@@ -57,9 +59,9 @@ public class FluidPartialReloadTest extends AsyncTest {
         // When the chunk is reloaded, all should have the same segment again
         TestUtil.loadChunk(connectorChunk).join();
         connectorChunk.setForceLoaded(true);
-        connector = BlockStorage.getAs(FluidConnector.class, connectorBlock);
+        FluidConnector reloadedConnector = BlockStorage.getAs(FluidConnector.class, connectorBlock);
         assertThat(consumer.getPoint().getSegment())
-                .isEqualTo(connector.getPoint().getSegment())
+                .isEqualTo(reloadedConnector.getPoint().getSegment())
                 .isEqualTo(producer.getPoint().getSegment());
 
         producerChunk.setForceLoaded(false);
