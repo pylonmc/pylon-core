@@ -267,8 +267,7 @@ object FluidManager {
         val suppliedFluids: MutableMap<PylonFluid, MutableSet<FluidSupplier>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.OUTPUT)) {
             for (supplier in getSuppliedFluids(point)) {
-                suppliedFluids.putIfAbsent(supplier.fluid, mutableSetOf())
-                suppliedFluids[supplier.fluid]!!.add(supplier)
+                suppliedFluids.getOrPut(supplier.fluid, ::mutableSetOf).add(supplier)
             }
         }
         return suppliedFluids
@@ -306,8 +305,7 @@ object FluidManager {
         val requestedFluids: MutableMap<PylonFluid, MutableSet<FluidRequester>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.INPUT)) {
             for (requester in getRequestedFluids(point)) {
-                requestedFluids.putIfAbsent(requester.fluid, mutableSetOf())
-                requestedFluids[requester.fluid]!!.add(requester)
+                requestedFluids.getOrPut(requester.fluid, ::mutableSetOf).add(requester)
             }
         }
         return requestedFluids
