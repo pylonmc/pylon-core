@@ -26,7 +26,7 @@ import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.meta.Damageable
-import java.util.Random
+import kotlin.random.Random
 
 /**
  * This listener listens for various events that would indicate a Pylon block either
@@ -60,7 +60,7 @@ internal object BlockListener : Listener {
 
             val unbreakingLevel = tool.getEnchantmentLevel(Enchantment.UNBREAKING)
             val shouldDamage = if (unbreakingLevel > 0) {
-                Random().nextInt(unbreakingLevel + 1) == 0
+                Random.Default.nextInt(unbreakingLevel + 1) == 0
             } else true
 
             if (shouldDamage) {
