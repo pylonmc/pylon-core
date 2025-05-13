@@ -28,6 +28,9 @@ open class PylonFluid(
     fun <T: PylonFluidTag> getTag(type: Class<T>): T?
         = type.cast(tags.firstOrNull { type.isInstance(it) })
 
+    inline fun <reified T: PylonFluidTag> getTag(): T?
+        = getTag(T::class.java)
+
     fun removeTag(tag: PylonFluidTag) {
         tags.remove(tag)
     }
