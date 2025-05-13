@@ -13,7 +13,7 @@ import java.util.*
  *
  * The flow rate of a segment is the lowest maxFlowRate of any point in the segment.
  */
-class FluidConnectionPoint(
+data class FluidConnectionPoint(
     val id: UUID,
     val position: BlockPosition,
     val name: String,
