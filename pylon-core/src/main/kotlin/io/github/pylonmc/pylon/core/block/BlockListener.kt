@@ -11,8 +11,6 @@ import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
-import org.bukkit.Sound
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
@@ -25,8 +23,7 @@ import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.inventory.meta.Damageable
-import kotlin.random.Random
+
 
 /**
  * This listener listens for various events that would indicate a Pylon block either
@@ -55,23 +52,7 @@ internal object BlockListener : Listener {
             val player = event.player
             val tool = player.inventory.itemInMainHand
 
-            if (tool.type.maxDurability <= 0) return
-            val meta = tool.itemMeta as? Damageable ?: return
-
-            val unbreakingLevel = tool.getEnchantmentLevel(Enchantment.UNBREAKING)
-            val shouldDamage = if (unbreakingLevel > 0) {
-                Random.Default.nextInt(unbreakingLevel + 1) == 0
-            } else true
-
-            if (shouldDamage) {
-                meta.damage += 1
-                if (meta.damage >= tool.type.maxDurability) {
-                    player.inventory.setItemInMainHand(null)
-                    player.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f)
-                } else {
-                    tool.itemMeta = meta
-                }
-            }
+            tool.damage(1, player)
         }
     }
 
