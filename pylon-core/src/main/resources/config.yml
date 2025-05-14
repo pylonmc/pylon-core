@@ -4,7 +4,7 @@ tick-delay: 1
 # The number of errors a ticking block can throw before it is disabled
 allowed-block-errors: 5
 
-# The interval, in ticks, between WALIA checks
+# The interval, in ticks, between WAILA checks
 waila-interval: 1
 
 research:
