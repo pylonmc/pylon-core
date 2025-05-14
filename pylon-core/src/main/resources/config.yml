@@ -5,7 +5,7 @@ tick-delay: 1
 allowed-block-errors: 5
 
 # The interval, in ticks, between WALIA checks
-walia-interval: 1
+waila-interval: 1
 
 research:
   enabled: true

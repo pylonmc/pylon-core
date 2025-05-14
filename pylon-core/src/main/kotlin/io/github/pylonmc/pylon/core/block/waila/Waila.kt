@@ -39,33 +39,33 @@ class Waila private constructor(private val player: Player, private val job: Job
 
     companion object : Listener {
 
-        private val wailaKey = pylonKey("walia")
-        private val walias = mutableMapOf<UUID, Waila>()
+        private val wailaKey = pylonKey("waila")
+        private val wailas = mutableMapOf<UUID, Waila>()
 
         @JvmStatic
         fun addPlayer(player: Player) {
-            walias[player.uniqueId] = Waila(player, pluginInstance.launch {
+            wailas[player.uniqueId] = Waila(player, pluginInstance.launch {
                 delay(1.ticks)
-                val walia = walias[player.uniqueId]!!
-                walia.on()
+                val waila = wailas[player.uniqueId]!!
+                waila.on()
                 while (true) {
                     val reach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
                     val lookingAt = player.rayTraceBlocks(reach)?.hitBlock?.let(BlockStorage::get)
                     if (lookingAt != null) {
                         val config = lookingAt.getWaila(player)
-                        config.apply(walia.bossbar)
-                        walia.on()
+                        config.apply(waila.bossbar)
+                        waila.on()
                     } else {
-                        walia.off()
+                        waila.off()
                     }
-                    delay(PylonConfig.waliaInterval.ticks)
+                    delay(PylonConfig.wailaInterval.ticks)
                 }
             })
         }
 
         @JvmStatic
         fun removePlayer(player: Player) {
-            walias.remove(player.uniqueId)?.destroy()
+            wailas.remove(player.uniqueId)?.destroy()
         }
 
         @JvmStatic
