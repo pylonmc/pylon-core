@@ -24,6 +24,7 @@ import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
+
 /**
  * This listener listens for various events that would indicate a Pylon block either
  * being placed, removed, or moved
@@ -47,6 +48,11 @@ internal object BlockListener : Listener {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
             event.isDropItems = false
+
+            val player = event.player
+            val tool = player.inventory.itemInMainHand
+
+            tool.damage(1, player)
         }
     }
 
