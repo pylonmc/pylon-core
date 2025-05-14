@@ -1,12 +1,14 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.google.common.base.Supplier
+import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataContainer
 
 
@@ -22,6 +24,8 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
             "You can only create entities using a registered schema; did you forget to register ${schema.key}?"
         }
     }
+
+    open fun getWaila(player: Player): WailaConfig? = null
 
     /**
      * Write all the state saved in the Pylon entity class to the entity's persistent data

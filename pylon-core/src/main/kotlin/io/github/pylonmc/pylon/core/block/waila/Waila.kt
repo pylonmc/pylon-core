@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
@@ -22,19 +23,55 @@ import java.util.UUID
 
 class Waila private constructor(private val player: Player, private val job: Job) {
 
-    private val bossbar = BossBar.bossBar(Component.empty(), 1F, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS)
+    private val bossbar = BossBar.bossBar(
+        Component.empty(),
+        1F,
+        BossBar.Color.WHITE,
+        BossBar.Overlay.PROGRESS
+    )
 
-    fun on() {
-        bossbar.addViewer(player)
+    private fun on() {
+        val bossbars = player.activeBossBars()
+        for (bossbar in bossbars) {
+            player.hideBossBar(bossbar)
+        }
+        player.showBossBar(this.bossbar)
+        for (bossbar in bossbars) {
+            player.showBossBar(bossbar)
+        }
     }
 
-    fun off() {
-        bossbar.removeViewer(player)
+    private fun off() {
+        player.hideBossBar(bossbar)
     }
 
-    fun destroy() {
+    private fun destroy() {
+        off()
         job.cancel()
-        bossbar.removeViewer(player)
+    }
+
+    private fun updateDisplay() {
+        val entityReach = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)?.value ?: 3
+        val targetEntity = player.rayTraceEntities(entityReach.toInt())?.hitEntity
+        if (targetEntity != null) {
+            val config = EntityStorage.get(targetEntity)?.getWaila(player)
+            if (config != null) {
+                config.apply(bossbar)
+                on()
+            } else {
+                off()
+            }
+        } else {
+            val blockReach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
+            val targetBlock = player.rayTraceBlocks(blockReach)?.hitBlock?.let(BlockStorage::get)
+            if (targetBlock != null) {
+                val config = targetBlock.getWaila(player)
+                config.apply(bossbar)
+                on()
+            } else {
+                off()
+            }
+        }
     }
 
     companion object : Listener {
@@ -47,17 +84,8 @@ class Waila private constructor(private val player: Player, private val job: Job
             wailas[player.uniqueId] = Waila(player, pluginInstance.launch {
                 delay(1.ticks)
                 val waila = wailas[player.uniqueId]!!
-                waila.on()
                 while (true) {
-                    val reach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
-                    val lookingAt = player.rayTraceBlocks(reach)?.hitBlock?.let(BlockStorage::get)
-                    if (lookingAt != null) {
-                        val config = lookingAt.getWaila(player)
-                        config.apply(waila.bossbar)
-                        waila.on()
-                    } else {
-                        waila.off()
-                    }
+                    waila.updateDisplay()
                     delay(PylonConfig.wailaInterval.ticks)
                 }
             })
