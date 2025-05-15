@@ -35,6 +35,7 @@ bukkit {
 }
 
 tasks.runServer {
+    dependsOn(project(":pylon-core").tasks.shadowJar)
     val runFolder = project.projectDir.resolve("run")
     val testsFailedFile = runFolder.resolve("tests-failed")
     doFirst {
