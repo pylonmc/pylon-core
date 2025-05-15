@@ -77,7 +77,7 @@ internal class PylonCommand : BaseCommand() {
     @Subcommand("waila")
     @Description("Toggle your WAILA bossbar")
     @CommandPermission("pylon.command.waila")
-    fun waila(player: Player) {
+    fun toggleWaila(player: Player) {
         player.wailaEnabled = !player.wailaEnabled
     }
 
