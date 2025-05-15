@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.block.Block
@@ -17,7 +18,7 @@ import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.window.Window
 
 abstract class PylonInventoryBlock<S : PylonBlockSchema>(schema: S, block: Block) :
-    PylonBlock<S>(schema, block), PylonInteractableBlock {
+    PylonBlock<S>(schema, block), PylonInteractableBlock, PylonBreakHandler {
 
     constructor(schema: S, block: Block, pdc: PersistentDataContainer) : this(schema, block) {
         val items = pdc.getOrDefault(inventoryKey, inventoryType, emptyList()).map { inv ->
@@ -52,6 +53,16 @@ abstract class PylonInventoryBlock<S : PylonBlockSchema>(schema: S, block: Block
             .setViewer(event.player)
             .build()
         window.open()
+    }
+
+    override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
+        if (context.normallyDrops) {
+            for (inv in inventories) {
+                for (item in inv.unsafeItems) {
+                    item?.let(drops::add)
+                }
+            }
+        }
     }
 
     companion object {
