@@ -8,9 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin
 @Suppress("UnstableApiUsage", "unused")
 class PylonBootstrapper : PluginBootstrap {
 
-    override fun bootstrap(context: BootstrapContext) {
-        // nop
-    }
+    override fun bootstrap(context: BootstrapContext) {}
 
     override fun createPlugin(context: PluginProviderContext): JavaPlugin {
         return PylonCore
