@@ -10,7 +10,7 @@ item:
     lore: "<insn>Strike with thy right hand</insn> yon block, and its Pylon lore shall be revealed"
 
 block:
-  phantom_block: "Phantom Block"
+  phantom_block: "<red>Phantom Block (%block%)"
 
 message:
   debug:

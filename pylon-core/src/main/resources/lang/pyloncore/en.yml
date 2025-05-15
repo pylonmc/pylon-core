@@ -10,7 +10,7 @@ item:
     lore: "<insn>Right click</insn> a block to view its Pylon block data"
 
 block:
-  phantom_block: "Phantom Block"
+  phantom_block: "<red>Phantom Block (%block%)"
 
 message:
   debug:
