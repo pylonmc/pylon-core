@@ -14,6 +14,7 @@ import io.github.pylonmc.pylon.core.util.isFromAddon
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -53,7 +54,7 @@ object BlockStorage : Listener {
 
     private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
 
-    private val pylonBlocksKey = NamespacedKey(PylonCore, "blocks")
+    private val pylonBlocksKey = pylonKey("blocks")
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized
     // to prevent them briefly going out of sync
