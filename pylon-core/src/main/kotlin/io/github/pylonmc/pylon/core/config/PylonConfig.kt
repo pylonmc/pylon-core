@@ -20,4 +20,7 @@ object PylonConfig {
 
     @JvmStatic
     val researchCheckInterval: Int = config.getOrThrow("research.interval")
+
+    @JvmStatic
+    val translationWrapLimit: Int by config
 }

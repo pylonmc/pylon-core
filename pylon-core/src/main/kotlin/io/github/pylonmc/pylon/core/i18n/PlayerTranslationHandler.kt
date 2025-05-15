@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.i18n
 
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -16,7 +17,7 @@ import org.bukkit.entity.Player
 
 class PlayerTranslationHandler(val player: Player) {
 
-    private val wrapper = TextWrapper(limit = 64)
+    private val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
 
     fun handleItem(item: PylonItem<*>) {
         val attacher = PlaceholderAttacher(item.getPlaceholders())

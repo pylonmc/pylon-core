@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.item.builder
 
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper
 import io.github.pylonmc.pylon.core.util.editData
@@ -82,7 +83,7 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
             GlobalTranslator.render(it, locale)
         }
         item.editData(DataComponentTypes.LORE) {
-            val wrapper = TextWrapper(limit = 64)
+            val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
             val newLore = it.lines().flatMap { line ->
                 val translated = GlobalTranslator.render(line, locale)
                 val encoded = LineWrapEncoder.encode(translated)
