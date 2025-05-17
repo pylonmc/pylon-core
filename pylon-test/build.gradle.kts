@@ -12,11 +12,12 @@ version = "TEST"
 
 repositories {
     mavenCentral()
+    maven("https://repo.xenondevs.xyz/releases")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-    compileOnly(project(":pylon-core", "shadow"))
+    compileOnly(project(":pylon-core"))
     implementation("org.assertj:assertj-core:3.27.2")
 }
 
@@ -34,6 +35,7 @@ bukkit {
 }
 
 tasks.runServer {
+    dependsOn(project(":pylon-core").tasks.shadowJar)
     val runFolder = project.projectDir.resolve("run")
     val testsFailedFile = runFolder.resolve("tests-failed")
     doFirst {

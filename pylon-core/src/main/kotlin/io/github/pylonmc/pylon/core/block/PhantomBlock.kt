@@ -8,7 +8,6 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
@@ -57,7 +56,7 @@ class PhantomBlock(
     }
 
     companion object {
-        internal val key = NamespacedKey(pluginInstance, "phantom_block")
+        internal val key = pylonKey("phantom_block")
 
         // Intentionally not registered to hide Pylon internals
         @JvmSynthetic

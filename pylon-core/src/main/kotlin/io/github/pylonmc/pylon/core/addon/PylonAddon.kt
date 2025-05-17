@@ -1,9 +1,9 @@
 package io.github.pylonmc.pylon.core.addon
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
@@ -44,7 +44,7 @@ interface PylonAddon : Keyed {
      */
     fun mergeGlobalConfig(path: String): Config {
         require(path.endsWith(".yml")) { "Config file must be a YAML file" }
-        val globalConfig = pluginInstance.dataFolder.resolve(path)
+        val globalConfig = PylonCore.dataFolder.resolve(path)
         if (!globalConfig.exists()) {
             globalConfig.parentFile.mkdirs()
             globalConfig.createNewFile()

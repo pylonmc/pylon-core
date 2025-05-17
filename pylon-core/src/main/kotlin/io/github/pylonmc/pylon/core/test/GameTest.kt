@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.test
 
 import com.github.shynixn.mccoroutine.bukkit.scope
 import com.github.shynixn.mccoroutine.bukkit.ticks
-import io.github.pylonmc.pylon.core.pluginInstance
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.future
@@ -40,7 +40,7 @@ class GameTest(
     }
 
     fun withDelay(ticks: Int, block: Runnable) {
-        pluginInstance.scope.launch {
+        PylonCore.scope.launch {
             delay(ticks.ticks)
             block.run()
         }
@@ -56,7 +56,7 @@ class GameTest(
     companion object {
         @JvmSynthetic
         internal fun submit(gameTest: GameTest, delay: Int): CompletableFuture<GameTestFailException?> {
-            return pluginInstance.scope.future {
+            return PylonCore.scope.future {
                 val chunks = mutableSetOf<Chunk>()
                 for (x in gameTest.boundingBox.minX.toInt()..gameTest.boundingBox.maxX.toInt()) {
                     for (z in gameTest.boundingBox.minZ.toInt()..gameTest.boundingBox.maxZ.toInt()) {

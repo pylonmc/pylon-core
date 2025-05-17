@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core.util
 
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.papermc.paper.datacomponent.DataComponentType
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
@@ -43,4 +44,15 @@ fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
     }
 
     return pylonItem1.id == pylonItem2.id
+}
+
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <T : Any> ItemStack.editData(
+    type: DataComponentType.Valued<T>,
+    block: (T) -> T
+): ItemStack {
+    val data = getData(type) ?: return this
+    setData(type, block(data))
+    return this
 }

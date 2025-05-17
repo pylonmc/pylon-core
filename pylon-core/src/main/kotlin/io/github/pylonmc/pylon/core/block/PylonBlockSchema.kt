@@ -28,16 +28,18 @@ open class PylonBlockSchema(
         javaClass,
         Block::class.java,
         BlockCreateContext::class.java
+    ) ?: throw NoSuchMethodException(
+        "Block '$key' ($blockClass) is missing a create constructor (${javaClass.simpleName}, Block, BlockCreateContext)"
     )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a create constructor (PylonBlockSchema, Block, BlockCreateContext)")
 
     @JvmSynthetic
     internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
         javaClass,
         Block::class.java,
         PersistentDataContainer::class.java
+    ) ?: throw NoSuchMethodException(
+        "Block '$key' ($blockClass) is missing a load constructor (${javaClass.simpleName}, Block, PersistentDataContainer)"
     )
-        ?: throw NoSuchMethodException("Block '$key' ($blockClass) is missing a load constructor (PylonBlockSchema, Block, PersistentDataContainer)")
 
     open fun getPlaceMaterial(block: Block, context: BlockCreateContext): Material {
         return material

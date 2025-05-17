@@ -2,7 +2,7 @@
 
 package io.github.pylonmc.pylon.core.util
 
-import io.github.pylonmc.pylon.core.pluginInstance
+import io.github.pylonmc.pylon.core.PylonCore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -15,7 +15,7 @@ This file is either for internal utils or general Kotlin utils that Java won't b
 For general utils that Java *can* use, see `PylonUtils.kt`.
  */
 
-internal fun pylonKey(key: String): NamespacedKey = NamespacedKey(pluginInstance, key)
+internal fun pylonKey(key: String): NamespacedKey = NamespacedKey(PylonCore, key)
 
 internal fun Class<*>.findConstructorMatching(vararg types: Class<*>): MethodHandle? {
     return declaredConstructors.firstOrNull {

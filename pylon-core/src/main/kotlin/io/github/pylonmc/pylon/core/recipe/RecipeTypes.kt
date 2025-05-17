@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.recipe
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
-import io.github.pylonmc.pylon.core.pluginInstance
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
@@ -105,7 +105,7 @@ private abstract class VanillaRecipe<T>(key: String) : RecipeType<T>(
 ), Listener where T : Keyed, T : Recipe {
 
     init {
-        Bukkit.getPluginManager().registerEvents(this, pluginInstance)
+        Bukkit.getPluginManager().registerEvents(this, PylonCore)
     }
 
     override fun registerRecipe(recipe: T) {

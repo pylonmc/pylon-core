@@ -4,13 +4,13 @@ import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PrePylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PrePylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.position
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -59,9 +59,9 @@ object TickManager : Listener {
     private fun startTicker(pylonBlock: PylonBlock<*>) {
         if (pylonBlock is PylonTickingBlock) {
             val dispatcher =
-                if (pylonBlock.isAsync) pluginInstance.asyncDispatcher else pluginInstance.minecraftDispatcher
+                if (pylonBlock.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
             val tickDelay = pylonBlock.getCustomTickRate(PylonConfig.tickDelay)
-            tickingBlocks[pylonBlock] = pluginInstance.launch(dispatcher) {
+            tickingBlocks[pylonBlock] = PylonCore.launch(dispatcher) {
                 var errors = 0
                 while (true) {
                     delay(tickDelay.ticks)
@@ -77,9 +77,9 @@ object TickManager : Listener {
 
     private suspend fun handleBlockError(pylonBlock: PylonBlock<*>, error: Throwable, errors: Int) {
         // Drop onto main thread for error logging and stuff
-        withContext(pluginInstance.minecraftDispatcher) {
+        withContext(PylonCore.minecraftDispatcher) {
             val block = pylonBlock.block
-            pluginInstance.logger.log(
+            PylonCore.logger.log(
                 SEVERE,
                 "An error occurred while ticking block ${block.position} of type ${pylonBlock.schema.key}",
             )

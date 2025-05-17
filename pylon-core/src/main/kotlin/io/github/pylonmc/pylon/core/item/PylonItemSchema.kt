@@ -35,8 +35,9 @@ open class PylonItemSchema(
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(
         javaClass,
         ItemStack::class.java
+    ) ?: throw NoSuchMethodException(
+        "Item '$key' ($itemClass) is missing a load constructor (${javaClass.simpleName}, ItemStack)"
     )
-        ?: throw NoSuchMethodException("Item '$key' ($itemClass) is missing a load constructor (PylonItemSchema, ItemStack)")
 
     val settings = addon.mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
 

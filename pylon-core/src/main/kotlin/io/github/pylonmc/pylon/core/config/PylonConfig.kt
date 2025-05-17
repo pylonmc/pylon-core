@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.config
 
-import io.github.pylonmc.pylon.core.pluginInstance
+import io.github.pylonmc.pylon.core.PylonCore
 
 object PylonConfig {
 
-    private val config = Config(pluginInstance, "config.yml")
+    private val config = Config(PylonCore, "config.yml")
 
     @JvmStatic
     val tickDelay: Int by config
@@ -20,4 +20,7 @@ object PylonConfig {
 
     @JvmStatic
     val researchCheckInterval: Int = config.getOrThrow("research.interval")
+
+    @JvmStatic
+    val translationWrapLimit: Int by config
 }

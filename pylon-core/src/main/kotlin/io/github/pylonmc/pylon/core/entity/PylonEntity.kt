@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.google.common.base.Supplier
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.NamespacedKey
@@ -62,7 +62,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
                 return schema.loadConstructor.invoke(schema, entity) as PylonEntity<*, *>
 
             } catch (t: Throwable) {
-                pluginInstance.logger.severe("Error while loading entity $key with UUID ${entity.uniqueId}")
+                PylonCore.logger.severe("Error while loading entity $key with UUID ${entity.uniqueId}")
                 t.printStackTrace()
                 return null
             }
