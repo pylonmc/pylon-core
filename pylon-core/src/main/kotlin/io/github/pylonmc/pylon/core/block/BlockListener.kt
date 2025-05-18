@@ -12,8 +12,9 @@ import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
-import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.block.BellRingEvent
@@ -119,6 +120,14 @@ internal object BlockListener : Listener {
                 event.isCancelled = true
                 return
             }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    private fun preventReplacingStructureVoids(event: BlockPlaceEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if (pylonBlock != null && pylonBlock.schema.material == Material.STRUCTURE_VOID) {
+            event.isCancelled = true
         }
     }
 
