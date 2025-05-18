@@ -13,7 +13,7 @@ object PylonConfig {
     val allowedBlockErrors: Int by config
 
     @JvmStatic
-    val waliaIntervalTicks: Int by config
+    val wailaIntervalTicks: Int by config
 
     @JvmStatic
     val fluidIntervalTicks: Int by config

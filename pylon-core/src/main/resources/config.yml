@@ -4,8 +4,8 @@ tick-rate: 1
 # The number of errors a ticking block can throw before it is disabled
 allowed-block-errors: 5
 
-# The interval, in ticks, between WALIA checks
-walia-interval-ticks: 1
+# The interval, in ticks, between WAILA checks
+waila-interval-ticks: 1
 
 # The interval between fluid network ticks
 fluid-interval-ticks: 1

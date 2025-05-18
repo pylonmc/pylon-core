@@ -4,14 +4,14 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import org.bukkit.Bukkit
+import net.kyori.adventure.bossbar.BossBar
+import net.kyori.adventure.text.Component
 import org.bukkit.attribute.Attribute
-import org.bukkit.boss.BarColor
-import org.bukkit.boss.BarStyle
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -21,69 +21,97 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
 import java.util.UUID
 
-class Waila private constructor(player: Player, private val job: Job) {
+class Waila private constructor(private val player: Player, private val job: Job) {
 
-    private val bossbar = Bukkit.createBossBar(null, BarColor.RED, BarStyle.SOLID)
+    private val bossbar = BossBar.bossBar(
+        Component.empty(),
+        1F,
+        BossBar.Color.WHITE,
+        BossBar.Overlay.PROGRESS
+    )
 
-    init {
-        bossbar.isVisible = false
-        bossbar.addPlayer(player)
+    private fun on() {
+        val bossbars = player.activeBossBars()
+        for (bossbar in bossbars) {
+            player.hideBossBar(bossbar)
+        }
+        player.showBossBar(this.bossbar)
+        for (bossbar in bossbars) {
+            player.showBossBar(bossbar)
+        }
     }
 
-    fun destroy() {
+    private fun off() {
+        player.hideBossBar(bossbar)
+    }
+
+    private fun destroy() {
+        off()
         job.cancel()
-        bossbar.removeAll()
+    }
+
+    private fun updateDisplay() {
+        val entityReach = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)?.value ?: 3
+        val targetEntity = player.rayTraceEntities(entityReach.toInt())?.hitEntity
+        if (targetEntity != null) {
+            val config = EntityStorage.get(targetEntity)?.getWaila(player)
+            if (config != null) {
+                config.apply(bossbar)
+                on()
+            } else {
+                off()
+            }
+        } else {
+            val blockReach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
+            val targetBlock = player.rayTraceBlocks(blockReach)?.hitBlock?.let(BlockStorage::get)
+            if (targetBlock != null) {
+                val config = targetBlock.getWaila(player)
+                config.apply(bossbar)
+                on()
+            } else {
+                off()
+            }
+        }
     }
 
     companion object : Listener {
 
-        private val wailaKey = pylonKey("walia")
-        private val walias = mutableMapOf<UUID, Waila>()
+        private val wailaKey = pylonKey("waila")
+        private val wailas = mutableMapOf<UUID, Waila>()
 
         @JvmStatic
         fun addPlayer(player: Player) {
-            walias[player.uniqueId] = Waila(player, pluginInstance.launch {
+            wailas[player.uniqueId] = Waila(player, pluginInstance.launch {
                 delay(1.ticks)
+                val waila = wailas[player.uniqueId]!!
                 while (true) {
-                    val walia = walias[player.uniqueId]!!
-                    val reach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
-                    val lookingAt = player.rayTraceBlocks(reach)?.hitBlock?.let(BlockStorage::get)
-                    if (lookingAt != null) {
-                        val config = lookingAt.getWaila(player)
-                        config.apply(walia.bossbar)
-                        walia.bossbar.isVisible = true
-                    } else {
-                        walia.bossbar.isVisible = false
-                    }
-                    delay(PylonConfig.waliaIntervalTicks.ticks)
+                    waila.updateDisplay()
+                    delay(PylonConfig.wailaIntervalTicks.ticks)
                 }
             })
         }
 
         @JvmStatic
         fun removePlayer(player: Player) {
-            walias.remove(player.uniqueId)?.destroy()
+            wailas.remove(player.uniqueId)?.destroy()
         }
 
         @JvmStatic
-        fun isWailaEnabled(player: Player): Boolean {
-            return player.persistentDataContainer.getOrDefault(wailaKey, PersistentDataType.BOOLEAN, true)
-        }
-
-        @JvmStatic
-        fun setWailaEnabled(player: Player, enabled: Boolean) {
-            player.persistentDataContainer.set(wailaKey, PersistentDataType.BOOLEAN, enabled)
-            if (enabled) {
-                addPlayer(player)
-            } else {
-                removePlayer(player)
+        var Player.wailaEnabled: Boolean
+            get() = this.persistentDataContainer.getOrDefault(wailaKey, PersistentDataType.BOOLEAN, true)
+            set(value) {
+                this.persistentDataContainer.set(wailaKey, PersistentDataType.BOOLEAN, value)
+                if (value) {
+                    addPlayer(this)
+                } else {
+                    removePlayer(this)
+                }
             }
-        }
 
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerJoin(event: PlayerJoinEvent) {
             val player = event.player
-            if (isWailaEnabled(player)) {
+            if (player.wailaEnabled) {
                 addPlayer(player)
             }
         }
