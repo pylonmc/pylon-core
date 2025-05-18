@@ -34,7 +34,7 @@ fun vectorToBlockFace(vector: Vector3i): BlockFace {
     } else if (vector.x == 0 && vector.y == 0 && vector.z < 0) {
         BlockFace.NORTH
     } else {
-        throw IllegalStateException("Vector cannot be turned into a block face")
+        throw IllegalStateException("Vector $vector cannot be turned into a block face")
     }
 }
 
