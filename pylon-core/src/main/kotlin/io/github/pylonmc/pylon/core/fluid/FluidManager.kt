@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.fluid
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
+import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.base.PylonFluidBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
@@ -396,7 +397,7 @@ object FluidManager {
         val dispatcher = pluginInstance.minecraftDispatcher
         tickers[segment] = pluginInstance.launch(dispatcher) {
             while (true) {
-                delay(PylonConfig.fluidIntervalTicks.toLong())
+                delay(PylonConfig.fluidIntervalTicks.ticks)
                 tick(segment)
             }
         }
