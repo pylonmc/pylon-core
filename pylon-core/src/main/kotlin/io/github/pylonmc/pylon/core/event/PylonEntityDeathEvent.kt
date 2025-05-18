@@ -1,14 +1,14 @@
 package io.github.pylonmc.pylon.core.event
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
-import org.bukkit.event.entity.EntityDeathEvent
 
 /**
  * Called when a Pylon entity is killed
  */
-class PylonEntityDeathEvent(val pylonEntity: PylonEntity<*, *>, event: EntityDeathEvent) : Event() {
+class PylonEntityDeathEvent(val pylonEntity: PylonEntity<*, *>, event: EntityRemoveFromWorldEvent) : Event() {
 
     override fun getHandlers(): HandlerList
         = handlerList
