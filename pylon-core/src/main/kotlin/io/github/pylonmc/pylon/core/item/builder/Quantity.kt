@@ -22,6 +22,9 @@ object Quantity {
     @JvmField
     val RESEARCH_POINTS = create("research_points", "pylon.pyloncore.quantity.research_points", TextColor.color(0x70da65))
 
+    @JvmField
+    val CHUNKS = create("chunks", "pylon.pyloncore.quantity.chunks", TextColor.color(0x136D37))
+
     @JvmStatic
     fun byName(name: String): Component? = quantities[name.lowercase()]
 
