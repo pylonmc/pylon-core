@@ -11,6 +11,9 @@ interface BlockPlacer : Cooldownable {
 
     fun doPlace(context: BlockCreateContext, block: Block): PylonBlock<*>? {
         check(block.type.isBlock) { "Material ${block.type} is not a block" }
+        if (BlockStorage.isPylonBlock(block)) { // special case: you can place on top of structure blocks
+            return null
+        }
         return BlockStorage.placeBlock(block, getBlockSchema(), context)
     }
 }
