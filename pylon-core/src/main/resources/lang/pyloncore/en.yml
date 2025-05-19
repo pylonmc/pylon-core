@@ -41,6 +41,10 @@ gui:
     left: "Scroll left"
     right: "Scroll right"
 
+  page:
+    next: "Next page"
+    previous: "Previous page"
+
 quantity:
   blocks: " blocks"
   seconds: "s"

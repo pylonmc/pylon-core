@@ -38,6 +38,10 @@ gui:
     left: "Scroll left"
     right: "Scroll right"
 
+  page:
+    next: "Next leaf"
+    previous: "Former leaf"
+
 quantity:
   blocks: " blocks"
   seconds: "s"
