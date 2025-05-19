@@ -63,16 +63,6 @@ internal object PylonItemListener : Listener {
         if (pylonItem is Interactor) {
             pylonItem.onUsedToRightClick(event)
         }
-        if (pylonItem is BlockPlacer && event.action == Action.RIGHT_CLICK_BLOCK) {
-            val context = BlockCreateContext.PlayerPlace(event.player, event.item!!)
-            val pylonBlock = pylonItem.doPlace(context, event.clickedBlock!!.getRelative(event.blockFace))
-            if (pylonBlock != null && event.player.gameMode != GameMode.CREATIVE) {
-                val equipmentSlot = event.hand
-                if (equipmentSlot != null ) {
-                    event.player.inventory.getItem(equipmentSlot).subtract()
-                }
-            }
-        }
     }
 
     @EventHandler
