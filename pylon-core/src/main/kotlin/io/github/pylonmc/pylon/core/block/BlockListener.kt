@@ -64,17 +64,18 @@ internal object BlockListener : Listener {
     // TODO this might be dropping vanilla blocks in place of Pylon blocks
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
-        BlockStorage.breakBlock(event.block, BlockBreakContext.Exploded(event))
+        BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event))
         for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
+            BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event))
         }
     }
 
     // TODO this might be dropping vanilla blocks in place of Pylon blocks
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
+        val context = BlockBreakContext.EntityExploded(event);
         for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
+            BlockStorage.breakBlock(block, context)
         }
     }
 
