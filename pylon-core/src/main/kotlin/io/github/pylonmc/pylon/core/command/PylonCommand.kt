@@ -6,7 +6,7 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.block.waila.Waila
+import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.research.Research
@@ -77,8 +77,8 @@ internal class PylonCommand : BaseCommand() {
     @Subcommand("waila")
     @Description("Toggle your WAILA bossbar")
     @CommandPermission("pylon.command.waila")
-    fun waila(player: Player) {
-        Waila.setWailaEnabled(player, !Waila.isWailaEnabled(player))
+    fun toggleWaila(player: Player) {
+        player.wailaEnabled = !player.wailaEnabled
     }
 
     @Private

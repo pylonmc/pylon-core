@@ -1,18 +1,19 @@
-package io.github.pylonmc.pylon.core.persistence.blockstorage
+package io.github.pylonmc.pylon.core.block
 
-import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
+import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
+import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 
@@ -31,26 +32,34 @@ import org.bukkit.persistence.PersistentDataContainer
  */
 class PhantomBlock(
     val pdc: PersistentDataContainer,
-    val key: NamespacedKey,
+    val erroredBlockKey: NamespacedKey,
     block: Block
 ) : PylonBlock<PylonBlockSchema>(schema, block) {
 
     // Hacky placeholder
     internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
-        throw IllegalStateException("Phantom block cannot be placed")
+        throw UnsupportedOperationException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
     internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
-        throw IllegalStateException("Phantom block cannot be loaded")
+        throw UnsupportedOperationException("Phantom block cannot be loaded")
+    }
+
+    override fun getWaila(player: Player): WailaConfig {
+        return WailaConfig(
+            text = name,
+            placeholders = mapOf("block" to Component.text(erroredBlockKey.toString())),
+            color = BossBar.Color.RED
+        )
     }
 
     override fun getItem(context: BlockItemContext): ItemStack? {
         val item = ErrorItem.Schema.itemStack
         item.editMeta {
-            it.persistentDataContainer.set(ErrorItem.blockKey, PylonSerializers.NAMESPACED_KEY, key)
+            it.persistentDataContainer.set(ErrorItem.blockKey, PylonSerializers.NAMESPACED_KEY, erroredBlockKey)
         }
         return item
     }

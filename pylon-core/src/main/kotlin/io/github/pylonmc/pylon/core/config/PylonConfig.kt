@@ -13,7 +13,7 @@ object PylonConfig {
     val allowedBlockErrors: Int by config
 
     @JvmStatic
-    val waliaInterval: Int by config
+    val wailaInterval: Int by config
 
     @JvmStatic
     val researchesEnabled: Boolean = config.getOrThrow("research.enabled")
