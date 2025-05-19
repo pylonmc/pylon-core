@@ -1,16 +1,15 @@
 package io.github.pylonmc.pylon.core.datatypes
 
-import io.github.pylonmc.pylon.core.pluginInstance
-import org.bukkit.NamespacedKey
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 
 object VectorPersistentDataType : PersistentDataType<PersistentDataContainer, Vector> {
-    val xKey = NamespacedKey(pluginInstance, "x")
-    val yKey = NamespacedKey(pluginInstance, "y")
-    val zKey = NamespacedKey(pluginInstance, "z")
+    val xKey = pylonKey("x")
+    val yKey = pylonKey("y")
+    val zKey = pylonKey("z")
 
     override fun getPrimitiveType(): Class<PersistentDataContainer> = PersistentDataContainer::class.java
 

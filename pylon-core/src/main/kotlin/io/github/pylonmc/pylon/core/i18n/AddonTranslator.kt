@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.i18n
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
-import io.github.pylonmc.pylon.core.pluginInstance
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextReplacementConfig
@@ -30,7 +30,7 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
     private val translations = addon.languages.associateWith {
         val path = "lang/$addonNamespace/$it.yml"
         addon.mergeGlobalConfig(path)
-        Config(pluginInstance.dataFolder.resolve(path))
+        Config(PylonCore.dataFolder.resolve(path))
     }
 
     private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()

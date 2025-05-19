@@ -2,10 +2,10 @@ package io.github.pylonmc.pylon.core.block.waila
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.EntityStorage
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -81,7 +81,7 @@ class Waila private constructor(private val player: Player, private val job: Job
 
         @JvmStatic
         fun addPlayer(player: Player) {
-            wailas[player.uniqueId] = Waila(player, pluginInstance.launch {
+            wailas[player.uniqueId] = Waila(player, PylonCore.launch {
                 delay(1.ticks)
                 val waila = wailas[player.uniqueId]!!
                 while (true) {

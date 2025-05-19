@@ -1,5 +1,3 @@
-@file:JvmSynthetic // Hide `PylonCoreKt.getPluginInstance` from Java
-
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
@@ -20,14 +18,15 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
+import xyz.xenondevs.invui.InvUI
 import java.util.Locale
 
-class PylonCore : JavaPlugin(), PylonAddon {
+object PylonCore : JavaPlugin(), PylonAddon {
 
     private lateinit var manager: PaperCommandManager
 
     override fun onEnable() {
-        instance = this
+        InvUI.getInstance().setPlugin(this)
 
         saveDefaultConfig()
 
@@ -72,8 +71,6 @@ class PylonCore : JavaPlugin(), PylonAddon {
     override fun onDisable() {
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
-
-        instance = null
     }
 
     private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {
@@ -82,15 +79,7 @@ class PylonCore : JavaPlugin(), PylonAddon {
         }
     }
 
-    companion object {
-        @Volatile
-        @JvmStatic
-        var instance: PylonCore? = null
-            private set
-    }
-
-    override val javaPlugin: JavaPlugin
-        get() = pluginInstance
+    override val javaPlugin = this
 
     override val displayName = "Core"
 
@@ -99,7 +88,3 @@ class PylonCore : JavaPlugin(), PylonAddon {
         Locale.of("enws")
     )
 }
-
-// for internal use so we don't have to !! all the time
-internal val pluginInstance: PylonCore
-    get() = PylonCore.instance ?: error("PylonCore instance is not initialized")
