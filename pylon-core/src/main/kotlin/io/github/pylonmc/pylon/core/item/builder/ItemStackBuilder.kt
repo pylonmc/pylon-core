@@ -58,12 +58,14 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
     fun defaultTranslatableName(key: NamespacedKey) =
         name(Component.translatable("pylon.${key.namespace}.item.${key.key}.name"))
 
-    fun lore(vararg loreToAdd: ComponentLike) = apply {
+    fun lore(loreToAdd: List<ComponentLike>) = apply {
         val lore = ItemLore.lore()
         stack.getData(DataComponentTypes.LORE)?.let { lore.addLines(it.lines()) }
-        lore.addLines(loreToAdd.toList())
+        lore.addLines(loreToAdd)
         stack.setData(DataComponentTypes.LORE, lore)
     }
+
+    fun lore(vararg loreToAdd: ComponentLike) = lore(loreToAdd.toList())
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
