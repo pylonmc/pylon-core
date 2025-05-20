@@ -4,6 +4,7 @@ import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.*
+import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
@@ -44,6 +45,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(Waila, this)
         Bukkit.getPluginManager().registerEvents(Research, this)
         Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
+        Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
+        Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,

@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
@@ -9,17 +9,32 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.annotations.ApiStatus
+import org.jetbrains.annotations.MustBeInvokedByOverriders
 import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.Inventory
 import java.util.IdentityHashMap
 
-interface PylonGuiBlock {
+interface PylonGuiBlock : PylonBreakHandler {
 
     fun createGui(): Gui
 
+    @get:ApiStatus.NonExtendable
     val gui: AbstractGui
         get() = guiBlocks.getOrPut(this) { createGui() as AbstractGui }
+
+    @MustBeInvokedByOverriders
+    override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
+        guiBlocks.remove(this)
+        val invs = inventories.remove(this) ?: return
+        if (!context.normallyDrops) return
+        for (inv in invs) {
+            for (item in inv.unsafeItems) {
+                item?.let(drops::add)
+            }
+        }
+    }
 
     companion object : Listener {
         private val inventoryKey = pylonKey("inventories")
@@ -61,20 +76,6 @@ interface PylonGuiBlock {
             if (block !is PylonGuiBlock) return
             guiBlocks.remove(block)
             inventories.remove(block)
-        }
-
-        @EventHandler(ignoreCancelled = true)
-        private fun onBreak(event: PylonBlockBreakEvent) {
-            val block = event.pylonBlock
-            if (block !is PylonGuiBlock) return
-            guiBlocks.remove(block)
-            val invs = inventories.remove(block) ?: return
-            if (!event.context.normallyDrops) return
-            for (inv in invs) {
-                for (item in inv.unsafeItems) {
-                    item?.let(event.drops::add)
-                }
-            }
         }
     }
 }
