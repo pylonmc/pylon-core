@@ -4,6 +4,8 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -81,6 +83,8 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
             }
 
             block.write(pdc)
+            PylonBlockSerializeEvent(block.block, block, pdc).callEvent()
+
             return pdc
         }
 
@@ -113,6 +117,8 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
 
                 block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
                     ?.let { world.getEntity(it) as? BlockDisplay }
+
+                PylonBlockDeserializeEvent(block.block, block, pdc).callEvent()
 
                 return block
             } catch (t: Throwable) {
