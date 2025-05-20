@@ -1,11 +1,11 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
 import org.bukkit.Bukkit
@@ -13,9 +13,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityDamageEvent
-import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -38,7 +35,7 @@ object EntityStorage : Listener {
 
     // TODO implement this properly and actually run it
     internal fun startAutosaveTask() {
-        Bukkit.getScheduler().runTaskTimer(pluginInstance, Runnable {
+        Bukkit.getScheduler().runTaskTimer(PylonCore, Runnable {
             // TODO this saves all entities at once, potentially leading to large pauses
             for (entity in entities.values) {
                 entity.write(entity.entity.persistentDataContainer)

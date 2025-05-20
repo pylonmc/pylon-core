@@ -75,7 +75,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         } catch (e: Throwable) {
             // Log the error nicely instead of kicking the player off
             // and causing two days of headache. True story.
-            PylonCore.instance?.logger?.log(
+            PylonCore.logger.log(
                 Level.SEVERE,
                 "An error occurred while handling item translations",
                 e

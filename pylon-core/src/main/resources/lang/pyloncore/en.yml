@@ -38,6 +38,17 @@ message:
       none: "You have no discovered researches"
       discovered: "You have discovered %count% researches: %list%"
 
+gui:
+  scroll:
+    up: "Scroll up"
+    down: "Scroll down"
+    left: "Scroll left"
+    right: "Scroll right"
+
+  page:
+    next: "Next page (%current%/%total%)"
+    previous: "Previous page (%current%/%total%)"
+
 quantity:
   blocks: " blocks"
   seconds: "s"

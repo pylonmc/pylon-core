@@ -24,8 +24,8 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
-import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerTakeLecternBookEvent
 
 
 /**
@@ -73,9 +73,9 @@ internal object BlockListener : Listener {
     // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
-        BlockStorage.breakBlock(event.block, BlockBreakContext.Exploded(event))
+        BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event))
         for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
+            BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event))
         }
     }
 
@@ -83,8 +83,9 @@ internal object BlockListener : Listener {
     // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
+        val context = BlockBreakContext.EntityExploded(event);
         for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, BlockBreakContext.WasExploded)
+            BlockStorage.breakBlock(block, context)
         }
     }
 

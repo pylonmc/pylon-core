@@ -1,17 +1,16 @@
 package io.github.pylonmc.pylon.core.datatypes
 
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
-import org.bukkit.NamespacedKey
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
 object BlockPositionPersistentDataType : PersistentDataType<PersistentDataContainer, BlockPosition> {
-    val worldKey = NamespacedKey(pluginInstance, "world")
-    val xKey = NamespacedKey(pluginInstance, "x")
-    val yKey = NamespacedKey(pluginInstance, "y")
-    val zKey = NamespacedKey(pluginInstance, "z")
+    val worldKey = pylonKey("world")
+    val xKey = pylonKey("x")
+    val yKey = pylonKey("y")
+    val zKey = pylonKey("z")
 
     override fun getPrimitiveType(): Class<PersistentDataContainer> = PersistentDataContainer::class.java
 
