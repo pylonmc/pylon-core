@@ -31,6 +31,17 @@ message:
     not_enough_points: "<red>Thou hast not yet gathered sufficient knowledge to discover %research% (%points%/%cost% points)"
     click_to_research: "<green>Click to research (%points% points)"
 
+gui:
+  scroll:
+    up: "Scroll up"
+    down: "Scroll down"
+    left: "Scroll left"
+    right: "Scroll right"
+
+  page:
+    next: "Next leaf (%current%/%total%)"
+    previous: "Former leaf (%current%/%total%)"
+
 quantity:
   blocks: " blocks"
   seconds: "s"

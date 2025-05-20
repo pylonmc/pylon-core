@@ -11,10 +11,10 @@ object ItemStackPersistentDataType : PersistentDataType<ByteArray, ItemStack> {
     override fun getComplexType(): Class<ItemStack> = ItemStack::class.java
 
     override fun toPrimitive(complex: ItemStack, context: PersistentDataAdapterContext): ByteArray {
-        return complex.serializeAsBytes()
+        return if (complex.isEmpty) ByteArray(0) else complex.serializeAsBytes()
     }
 
     override fun fromPrimitive(primitive: ByteArray, context: PersistentDataAdapterContext): ItemStack {
-        return ItemStack.deserializeBytes(primitive)
+        return if (primitive.isEmpty()) ItemStack.empty() else ItemStack.deserializeBytes(primitive)
     }
 }

@@ -1,16 +1,15 @@
 package io.github.pylonmc.pylon.core.datatypes
 
-import io.github.pylonmc.pylon.core.pluginInstance
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
-import org.bukkit.NamespacedKey
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
 object ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContainer, ChunkPosition> {
-    val xKey = NamespacedKey(pluginInstance, "x")
-    val zKey = NamespacedKey(pluginInstance, "z")
-    val worldKey = NamespacedKey(pluginInstance, "world")
+    val xKey = pylonKey("x")
+    val zKey = pylonKey("z")
+    val worldKey = pylonKey("world")
 
     override fun getPrimitiveType(): Class<PersistentDataContainer> = PersistentDataContainer::class.java
 

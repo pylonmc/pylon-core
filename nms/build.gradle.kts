@@ -5,6 +5,11 @@ plugins {
 
 group = "io.github.pylonmc"
 
+repositories {
+    mavenCentral()
+    maven("https://repo.xenondevs.xyz/releases")
+}
+
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     compileOnly(project(":pylon-core"))
