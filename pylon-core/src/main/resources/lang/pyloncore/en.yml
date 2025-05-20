@@ -39,5 +39,5 @@ quantity:
   seconds: "s"
   hearts: "❤"
   percent: "%"
-  research_points: "points"
+  research_points: " points"
   chunks: " chunks"
