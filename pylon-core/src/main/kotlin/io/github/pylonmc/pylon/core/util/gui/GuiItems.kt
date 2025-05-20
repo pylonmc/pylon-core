@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.util.gui
 
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.Component
@@ -56,7 +57,13 @@ private class PylonPageItem(private val forward: Boolean) : PageItem(forward) {
 
     override fun getItemProvider(gui: PagedGui<*>): ItemProvider {
         val material = if (gui.canPage) Material.GREEN_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE
-        return ItemStackBuilder.of(material).name(name)
+        return ItemStackBuilder.of(material)
+            .name(
+                name.arguments(
+                    PylonArgument.of("current", gui.currentPage + 1),
+                    PylonArgument.of("total", gui.pageAmount),
+                )
+            )
     }
 
     private val PagedGui<*>.canPage: Boolean

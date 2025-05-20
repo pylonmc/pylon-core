@@ -42,8 +42,8 @@ gui:
     right: "Scroll right"
 
   page:
-    next: "Next page"
-    previous: "Previous page"
+    next: "Next page (%current%/%total%)"
+    previous: "Previous page (%current%/%total%)"
 
 quantity:
   blocks: " blocks"

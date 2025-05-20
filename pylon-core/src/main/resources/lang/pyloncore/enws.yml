@@ -39,8 +39,8 @@ gui:
     right: "Scroll right"
 
   page:
-    next: "Next leaf"
-    previous: "Former leaf"
+    next: "Next leaf (%current%/%total%)"
+    previous: "Former leaf (%current%/%total%)"
 
 quantity:
   blocks: " blocks"
