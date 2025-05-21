@@ -3,7 +3,9 @@ package io.github.pylonmc.pylon.core.block
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.base.BlockPlacer
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -11,6 +13,7 @@ import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
+import org.bukkit.GameMode
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
@@ -38,8 +41,14 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockPlace(event: BlockPlaceEvent) {
         val item = event.itemInHand
-        if (PylonItem.fromStack(item) != null && item.type.isBlock) {
-            event.isCancelled = true
+        val pylonItem = PylonItem.fromStack(item)
+        val player = event.player
+        if (pylonItem is BlockPlacer) {
+            val context = BlockCreateContext.PlayerPlace(player, item)
+            val pylonBlock = pylonItem.doPlace(context, event.block)
+            if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
+                player.inventory.getItem(event.hand).subtract()
+            }
         }
     }
 
