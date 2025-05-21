@@ -54,3 +54,4 @@ quantity:
   temperature: "°C"
   fluid: " mB"
   fluid_per_second: " mB/s"
+  chunks: " chunks"

@@ -31,6 +31,9 @@ object Quantity {
     @JvmField
     val FLUID_PER_SECOND = create("fluid_per_second", "pylon.pyloncore.quantity.fluid_per_second", TextColor.color(0xe3835f2))
 
+    @JvmField
+    val CHUNKS = create("chunks", "pylon.pyloncore.quantity.chunks", TextColor.color(0x136D37))
+
     @JvmStatic
     fun byName(name: String): Component? = quantities[name.lowercase()]
 
