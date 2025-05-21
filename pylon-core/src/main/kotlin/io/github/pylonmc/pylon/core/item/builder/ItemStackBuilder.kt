@@ -11,6 +11,8 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.translation.GlobalTranslator
 import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Material
@@ -84,14 +86,21 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
         item.editData(DataComponentTypes.ITEM_NAME) {
             GlobalTranslator.render(it, locale)
         }
-        item.editData(DataComponentTypes.LORE) {
+        item.editData(DataComponentTypes.LORE) { lore ->
             val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
-            val newLore = it.lines().flatMap { line ->
-                val translated = GlobalTranslator.render(line, locale)
-                val encoded = LineWrapEncoder.encode(translated)
-                val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
-                wrapped.toComponentLines()
-            }
+            val newLore = lore.lines()
+                .flatMap {
+                    val translated = GlobalTranslator.render(it, locale)
+                    val encoded = LineWrapEncoder.encode(translated)
+                    val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
+                    wrapped.toComponentLines()
+                }
+                .map {
+                    Component.text()
+                        .decoration(TextDecoration.ITALIC, false)
+                        .color(NamedTextColor.GRAY)
+                        .append(it)
+                }
             ItemLore.lore(newLore)
         }
         return item
