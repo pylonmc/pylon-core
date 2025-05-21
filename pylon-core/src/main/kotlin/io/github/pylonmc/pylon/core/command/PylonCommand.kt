@@ -81,6 +81,15 @@ internal class PylonCommand : BaseCommand() {
         player.wailaEnabled = !player.wailaEnabled
     }
 
+    init {
+        Bukkit.getPluginManager().addPermission(
+            Permission(
+                "pylon.command.waila",
+                PermissionDefault.TRUE
+            )
+        )
+    }
+
     @Private
     @Subcommand("test")
     @CommandCompletion("@gametests")
