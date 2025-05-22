@@ -1,11 +1,14 @@
 # The amount of Minecraft ticks between each Pylon tick
-tick-delay: 1
+tick-rate: 1
 
 # The number of errors a ticking block can throw before it is disabled
 allowed-block-errors: 5
 
 # The interval, in ticks, between WAILA checks
-waila-interval: 1
+waila-interval-ticks: 1
+
+# The interval between fluid network ticks
+fluid-interval-ticks: 1
 
 research:
   enabled: true

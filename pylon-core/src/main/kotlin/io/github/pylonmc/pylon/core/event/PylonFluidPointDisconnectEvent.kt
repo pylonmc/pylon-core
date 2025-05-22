@@ -1,13 +1,16 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.entity.PylonEntity
+import io.github.pylonmc.pylon.core.fluid.FluidConnectionPoint
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called after a Pylon entity has been unloaded. This includes the entity dying!
+ * Called after two fluid points have been disconnected
  */
-class PylonEntityUnloadEvent(val pylonEntity: PylonEntity<*, *>) : Event() {
+class PylonFluidPointDisconnectEvent(
+    val point1: FluidConnectionPoint,
+    val point2: FluidConnectionPoint,
+) : Event() {
 
     override fun getHandlers(): HandlerList
         = handlerList

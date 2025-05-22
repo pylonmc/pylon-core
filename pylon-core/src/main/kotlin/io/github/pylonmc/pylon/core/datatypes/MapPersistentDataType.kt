@@ -35,7 +35,7 @@ class MapPersistentDataType<K, V>(
     ): Map<K, V> {
         val keys = primitive.get(mapKeys, keyListType)!!
         val values = primitive.get(mapValues, valueListType)!!
-        return keys.zip(values).toMap()
+        return keys.zip(values).toMap().toMutableMap()
     }
 
     companion object {

@@ -25,6 +25,8 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
         }
     }
 
+    val uuid = entity.uniqueId
+
     open fun getWaila(player: Player): WailaConfig? = null
 
     /**

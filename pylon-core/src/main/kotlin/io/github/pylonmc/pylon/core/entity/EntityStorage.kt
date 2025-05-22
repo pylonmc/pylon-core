@@ -13,7 +13,9 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDeathEvent
+import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -55,6 +57,9 @@ object EntityStorage : Listener {
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, uuid: UUID): T? {
         val entity = get(uuid) ?: return null
+        if (!clazz.isInstance(entity)) {
+            return null
+        }
         return clazz.cast(entity)
     }
 
@@ -104,8 +109,13 @@ object EntityStorage : Listener {
     // is broken (lol), hence the lack of an entity death listener
     @EventHandler
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
-        val pylonEntity = get(event.getEntity().uniqueId) ?: return
-        PylonEntity.serialize(pylonEntity)
+        val pylonEntity = get(event.entity.uniqueId) ?: return
+
+
+        if (!event.entity.isDead) {
+            PylonEntity.serialize(pylonEntity)
+        }
+
         lockEntityWrite {
             entities.remove(pylonEntity.entity.uniqueId)
             entitiesByKey[pylonEntity.schema.key]!!.remove(pylonEntity)
@@ -113,13 +123,12 @@ object EntityStorage : Listener {
                 entitiesByKey.remove(pylonEntity.schema.key)
             }
         }
-        PylonEntityUnloadEvent(pylonEntity).callEvent()
-    }
 
-    @EventHandler(ignoreCancelled = true)
-    private fun onEntityDeath(event: EntityDeathEvent) {
-        val entity = get(event.entity)?: return
-        PylonEntityDeathEvent(entity, event).callEvent()
+        if (event.entity.isDead) {
+            PylonEntityDeathEvent(pylonEntity, event).callEvent()
+        } else {
+            PylonEntityUnloadEvent(pylonEntity).callEvent()
+        }
     }
 
     @JvmSynthetic

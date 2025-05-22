@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.block
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.BlockPlacer
@@ -14,7 +15,9 @@ import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.GameMode
+import org.bukkit.Material
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.block.BellRingEvent
@@ -35,6 +38,7 @@ import org.bukkit.event.player.PlayerInteractEvent
  * It also handles components of multiblocks being placed, removed, or moved (this
  * includes vanilla blocks)
  */
+// TODO add ignoreCancelled = true, and priority monitory where relevant
 @Suppress("UnstableApiUsage")
 internal object BlockListener : Listener {
 
@@ -62,15 +66,20 @@ internal object BlockListener : Listener {
             val tool = player.inventory.itemInMainHand
 
             tool.damage(1, player)
+            event.isCancelled = true
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockBurn(event: BlockBurnEvent) {
-        BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
+        if (BlockStorage.isPylonBlock(event.block)) {
+            BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
+            event.isCancelled = true
+        }
     }
 
     // TODO this might be dropping vanilla blocks in place of Pylon blocks
+    // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
         BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event))
@@ -80,6 +89,7 @@ internal object BlockListener : Listener {
     }
 
     // TODO this might be dropping vanilla blocks in place of Pylon blocks
+    // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         val context = BlockBreakContext.EntityExploded(event);
@@ -90,7 +100,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockFadeEvent) {
-        BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
+        if (BlockStorage.isPylonBlock(event.block)) {
+            BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
+            event.isCancelled = true
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -124,6 +137,14 @@ internal object BlockListener : Listener {
                 event.isCancelled = true
                 return
             }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    private fun preventReplacingStructureVoids(event: BlockPlaceEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if (pylonBlock != null && pylonBlock.schema.material == Material.STRUCTURE_VOID) {
+            event.isCancelled = true
         }
     }
 
@@ -460,6 +481,13 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
         if (pylonBlock is PylonInteractableBlock) {
             pylonBlock.onInteract(event)
+        }
+    }
+
+    @EventHandler
+    private fun onUnload(event: PylonBlockUnloadEvent) {
+        if (event.pylonBlock is PylonUnloadBlock) {
+            event.pylonBlock.onUnload(event)
         }
     }
 }

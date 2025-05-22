@@ -51,4 +51,7 @@ quantity:
   hearts: "❤"
   percent: "%"
   research_points: " points"
+  temperature: "°C"
+  fluid: " mB"
+  fluid_per_second: " mB/s"
   chunks: " chunks"

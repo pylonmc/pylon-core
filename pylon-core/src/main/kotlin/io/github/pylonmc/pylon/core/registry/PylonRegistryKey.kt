@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.registry
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDrop
@@ -28,6 +29,9 @@ data class PylonRegistryKey<T>(val namespace: String, val path: String) {
 
         @JvmField
         val ENTITIES = PylonRegistryKey<PylonEntitySchema>(pylonKey("entities"))
+
+        @JvmField
+        val FLUIDS = PylonRegistryKey<PylonFluid>(pylonKey("fluids"))
 
         @JvmField
         val GAMETESTS = PylonRegistryKey<GameTestConfig>(pylonKey("gametests"))

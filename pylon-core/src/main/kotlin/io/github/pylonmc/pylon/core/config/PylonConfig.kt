@@ -7,13 +7,16 @@ object PylonConfig {
     private val config = Config(PylonCore, "config.yml")
 
     @JvmStatic
-    val tickDelay: Int by config
+    val tickRate: Int by config
 
     @JvmStatic
     val allowedBlockErrors: Int by config
 
     @JvmStatic
-    val wailaInterval: Int by config
+    val wailaIntervalTicks: Int by config
+
+    @JvmStatic
+    val fluidIntervalTicks: Int by config
 
     @JvmStatic
     val researchesEnabled: Boolean = config.getOrThrow("research.enabled")

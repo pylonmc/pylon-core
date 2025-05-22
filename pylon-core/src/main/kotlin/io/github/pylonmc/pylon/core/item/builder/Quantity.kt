@@ -23,6 +23,15 @@ object Quantity {
     val RESEARCH_POINTS = create("research_points", "pylon.pyloncore.quantity.research_points", TextColor.color(0x70da65))
 
     @JvmField
+    val TEMPERATURE = create("temperature", "pylon.pyloncore.quantity.temperature", TextColor.color(0xe27f41))
+
+    @JvmField
+    val FLUID = create("fluid", "pylon.pyloncore.quantity.fluid", TextColor.color(0xe3835f2))
+
+    @JvmField
+    val FLUID_PER_SECOND = create("fluid_per_second", "pylon.pyloncore.quantity.fluid_per_second", TextColor.color(0xe3835f2))
+
+    @JvmField
     val CHUNKS = create("chunks", "pylon.pyloncore.quantity.chunks", TextColor.color(0x136D37))
 
     @JvmStatic
