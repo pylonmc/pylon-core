@@ -12,10 +12,6 @@ item:
 block:
   phantom_block: "<red>Phantom Block (%block%)"
 
-fluid:
-  tag:
-    temperature: "temperature"
-
 message:
   debug:
     not_a_block: "<red>This is not a Pylon block"
