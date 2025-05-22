@@ -20,21 +20,22 @@ open class PylonFluid(
         tags.toMutableList()
     )
 
-    override fun getKey(): NamespacedKey
-        = key
+    override fun getKey(): NamespacedKey = key
 
     fun addTag(tag: PylonFluidTag) = apply {
         check(!hasTag(tag.javaClass)) { "Fluid already has a tag of the same type" }
         tags.add(tag)
     }
 
-    fun hasTag(type: Class<out PylonFluidTag>): Boolean
-        = getTag(type) != null
+    fun hasTag(type: Class<out PylonFluidTag>): Boolean = tags.any { type.isInstance(it) }
 
-    fun <T: PylonFluidTag> getTag(type: Class<T>): T?
-        = type.cast(tags.firstOrNull { type.isInstance(it) })
+    /**
+     * @throws IllegalArgumentException if the fluid does not have a tag of the given type
+     */
+    fun <T: PylonFluidTag> getTag(type: Class<T>): T
+        = type.cast(tags.firstOrNull { type.isInstance(it) } ?: throw IllegalArgumentException("Fluid does not have a tag of type ${type.simpleName}"))
 
-    inline fun <reified T: PylonFluidTag> getTag(): T?
+    inline fun <reified T: PylonFluidTag> getTag(): T
         = getTag(T::class.java)
 
     fun removeTag(tag: PylonFluidTag) {
