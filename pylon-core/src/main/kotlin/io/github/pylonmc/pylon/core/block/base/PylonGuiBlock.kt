@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.block.base
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -43,6 +44,13 @@ interface PylonGuiBlock : PylonBreakHandler {
 
         private val guiBlocks = IdentityHashMap<PylonGuiBlock, AbstractGui>()
         private val inventories = IdentityHashMap<PylonGuiBlock, Collection<Inventory>>()
+
+        @EventHandler
+        private fun onPlace(event: PylonBlockPlaceEvent) {
+            val block = event.pylonBlock
+            if (block !is PylonGuiBlock) return
+            inventories[block] = block.gui.getAllInventories()
+        }
 
         @EventHandler
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
