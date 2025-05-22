@@ -110,12 +110,12 @@ object EntityStorage : Listener {
     @EventHandler
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
         val pylonEntity = get(event.entity.uniqueId) ?: return
-        if (event.entity.isDead) {
-            PylonEntityDeathEvent(pylonEntity, event).callEvent()
-            return
+
+
+        if (!event.entity.isDead) {
+            PylonEntity.serialize(pylonEntity)
         }
 
-        PylonEntity.serialize(pylonEntity)
         lockEntityWrite {
             entities.remove(pylonEntity.entity.uniqueId)
             entitiesByKey[pylonEntity.schema.key]!!.remove(pylonEntity)
@@ -123,7 +123,12 @@ object EntityStorage : Listener {
                 entitiesByKey.remove(pylonEntity.schema.key)
             }
         }
-        PylonEntityUnloadEvent(pylonEntity).callEvent()
+
+        if (event.entity.isDead) {
+            PylonEntityDeathEvent(pylonEntity, event).callEvent()
+        } else {
+            PylonEntityUnloadEvent(pylonEntity).callEvent()
+        }
     }
 
     @JvmSynthetic
