@@ -6,7 +6,7 @@ interface PylonFluidBlock {
 
     /**
      * Returns a map of fluid types - and their corresponding amounts - that can be supplied by
-     * a particular connection point.
+     * a particular connection point. deltaSeconds is the time since the last fluid tick.
      *
      * This is per tick, so if you have a machine that can supply
      * up to 100 fluid per second, it should supply 100 / 20 = 5 of that fluid
@@ -14,12 +14,12 @@ interface PylonFluidBlock {
      * Any implementation of this method must NEVER call the same method for another connection
      * point, otherwise you risk creating infinite loops.
      */
-    fun getSuppliedFluids(connectionPoint: String): Map<PylonFluid, Long> = mapOf()
+    fun getSuppliedFluids(connectionPoint: String, deltaSeconds: Double): Map<PylonFluid, Long> = mapOf()
 
     /**
      * Returns a map of fluid types - and their corresponding amounts - that can be *taken in* by
      * a particular connection point. For example, a tank should request enough fluid to fill up
-     * to capacity.
+     * to capacity. deltaSeconds is the time since the last fluid tick.
      *
      * This is per tick, so if you have a machine that consumes 100 fluid per second,
      * it should request 100 / 20 = 5 of that fluid
@@ -27,7 +27,7 @@ interface PylonFluidBlock {
      * Any implementation of this method must NEVER call the same method for another connection
      * point, otherwise you risk creating infinite loops.
      */
-    fun getRequestedFluids(connectionPoint: String): Map<PylonFluid, Long> = mapOf()
+    fun getRequestedFluids(connectionPoint: String, deltaSeconds: Double): Map<PylonFluid, Long> = mapOf()
 
     /**
      * `amount` is always at most `getRequestedFluids(connectionPoint).get(fluid)` and will never

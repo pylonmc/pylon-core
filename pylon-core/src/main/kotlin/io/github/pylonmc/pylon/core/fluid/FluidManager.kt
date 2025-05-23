@@ -257,7 +257,7 @@ object FluidManager {
     data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
 
     @JvmStatic
-    fun getSuppliedFluids(point: FluidConnectionPoint): Set<FluidSupplier> {
+    fun getSuppliedFluids(point: FluidConnectionPoint, deltaSeconds: Double): Set<FluidSupplier> {
         check(point.type == FluidConnectionPoint.Type.OUTPUT) { "Can only get supplied fluids of output point" }
 
         val block: PylonFluidBlock
@@ -267,7 +267,7 @@ object FluidManager {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockSuppliedFluids = block.getSuppliedFluids(point.name)
+            blockSuppliedFluids = block.getSuppliedFluids(point.name, deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -283,10 +283,10 @@ object FluidManager {
     }
 
     @JvmStatic
-    fun getSuppliedFluids(segment: UUID): Map<PylonFluid, Set<FluidSupplier>> {
+    fun getSuppliedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidSupplier>> {
         val suppliedFluids: MutableMap<PylonFluid, MutableSet<FluidSupplier>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.OUTPUT)) {
-            for (supplier in getSuppliedFluids(point)) {
+            for (supplier in getSuppliedFluids(point, deltaSeconds)) {
                 suppliedFluids.getOrPut(supplier.fluid, ::mutableSetOf).add(supplier)
             }
         }
@@ -294,7 +294,7 @@ object FluidManager {
     }
 
     @JvmStatic
-    fun getRequestedFluids(point: FluidConnectionPoint): Set<FluidRequester> {
+    fun getRequestedFluids(point: FluidConnectionPoint, deltaSeconds: Double): Set<FluidRequester> {
         check(point.type == FluidConnectionPoint.Type.INPUT) { "Can only get requested fluids of input point" }
 
         val block: PylonFluidBlock
@@ -304,7 +304,7 @@ object FluidManager {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockRequestedFluids = block.getRequestedFluids(point.name)
+            blockRequestedFluids = block.getRequestedFluids(point.name, deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -321,19 +321,19 @@ object FluidManager {
     }
 
     @JvmStatic
-    fun getRequestedFluids(segment: UUID): Map<PylonFluid, Set<FluidRequester>> {
+    fun getRequestedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidRequester>> {
         val requestedFluids: MutableMap<PylonFluid, MutableSet<FluidRequester>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.INPUT)) {
-            for (requester in getRequestedFluids(point)) {
+            for (requester in getRequestedFluids(point, deltaSeconds)) {
                 requestedFluids.getOrPut(requester.fluid, ::mutableSetOf).add(requester)
             }
         }
         return requestedFluids
     }
 
-    private fun tick(segment: UUID) {
-        val suppliedFluids = getSuppliedFluids(segment)
-        val requestedFluids = getRequestedFluids(segment)
+    private fun tick(segment: UUID, deltaSeconds: Double) {
+        val suppliedFluids = getSuppliedFluids(segment, deltaSeconds)
+        val requestedFluids = getRequestedFluids(segment, deltaSeconds)
 
         for ((fluid, suppliers) in suppliedFluids) {
             val predicate = segments[segment]!!.predicate
@@ -400,9 +400,12 @@ object FluidManager {
 
         val dispatcher = PylonCore.minecraftDispatcher
         tickers[segment] = PylonCore.launch(dispatcher) {
+            var lastTickNanos = System.nanoTime()
             while (true) {
                 delay(PylonConfig.fluidIntervalTicks.ticks)
-                tick(segment)
+                val dt = (System.nanoTime() - lastTickNanos) / 1.0e6
+                lastTickNanos = System.nanoTime()
+                tick(segment, dt)
             }
         }
     }
