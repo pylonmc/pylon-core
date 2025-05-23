@@ -1,15 +1,21 @@
 package io.github.pylonmc.pylon.core.item
 
+import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import net.kyori.adventure.text.Component
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
 open class PylonItem(
-    val schema: PylonItemSchema,
+    internal val schema: PylonItemSchema,
     val stack: ItemStack
 ) {
+
+    val pylonKey = schema.key
+    val researchBypassPermission = schema.researchBypassPermission
 
     override fun equals(other: Any?): Boolean
         = schema.key == (other as? PylonItem)?.schema?.key
@@ -41,5 +47,14 @@ open class PylonItem(
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(schema, stack))
         }
+
+        @JvmStatic
+        fun getAddon(key: NamespacedKey): PylonAddon
+             = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
+                ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
+
+        @JvmStatic
+        fun getSettings(key: NamespacedKey): Config
+            = getAddon(key).mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
     }
 }
