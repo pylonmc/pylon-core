@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.test.test.item;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
-import io.github.pylonmc.pylon.test.item.Items;
 import io.github.pylonmc.pylon.test.item.OminousBlazePower;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -25,7 +24,7 @@ public class PylonItemStackInterfaceTest extends GameTest {
                     Block block = test.getWorld().getBlockAt(test.location());
                     block.setType(Material.BREWING_STAND);
                     Bukkit.getPluginManager().callEvent(
-                            new BrewingStandFuelEvent(block, Items.OMINOUS_BLAZE_POWDER.getItemStack(), 1));
+                            new BrewingStandFuelEvent(block, OminousBlazePower.ITEM_STACK, 1));
 
                 })
                 .build());

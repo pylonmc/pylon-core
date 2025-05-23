@@ -56,12 +56,8 @@ class PhantomBlock(
         )
     }
 
-    override fun getItem(context: BlockItemContext): ItemStack? {
-        val item = ErrorItem.Schema.itemStack
-        item.editMeta {
-            it.persistentDataContainer.set(ErrorItem.blockKey, PylonSerializers.NAMESPACED_KEY, erroredBlockKey)
-        }
-        return item
+    override fun getItem(context: BlockItemContext): ItemStack {
+        return ErrorItem.getItemStack(erroredBlockKey)
     }
 
     companion object {
@@ -72,20 +68,23 @@ class PhantomBlock(
         internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)
     }
 
-    class ErrorItem(schema: Schema, stack: ItemStack) : PylonItem<ErrorItem.Schema>(schema, stack) {
+    class ErrorItem(schema: PylonItemSchema, stack: ItemStack) : PylonItem(schema, stack) {
 
-        companion object Schema : PylonItemSchema(
-            pylonKey("error_item"),
-            ErrorItem::class.java,
-            { key ->
-                ItemStackBuilder.defaultBuilder(Material.BARRIER, key).build()
+        companion object {
+            val KEY = pylonKey("error_item")
+            val BLOCK_KEY = pylonKey("block")
+            val ITEM_STACK = ItemStackBuilder.defaultBuilder(Material.BARRIER, key)
+                    .build()
+
+            fun getItemStack(erroredBlockKey: NamespacedKey): ItemStack {
+                val stack = ITEM_STACK.clone()
+                stack.editPersistentDataContainer { pdc -> pdc.set(ErrorItem.BLOCK_KEY, PylonSerializers.NAMESPACED_KEY, erroredBlockKey) }
+                return stack
             }
-        ) {
-            val blockKey = pylonKey("block")
         }
 
         override fun getPlaceholders(): Map<String, Component> {
-            val block = stack.persistentDataContainer.get(blockKey, PylonSerializers.NAMESPACED_KEY)
+            val block = stack.persistentDataContainer.get(BLOCK_KEY, PylonSerializers.NAMESPACED_KEY)
                 ?: return emptyMap()
             return mapOf("block" to Component.text(block.toString()))
         }
