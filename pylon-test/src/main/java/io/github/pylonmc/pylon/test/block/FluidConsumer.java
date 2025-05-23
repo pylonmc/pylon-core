@@ -12,7 +12,6 @@ import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.core.fluid.PylonFluid;
 import io.github.pylonmc.pylon.test.PylonTest;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -27,14 +26,14 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
     private final NamespacedKey pointKey = PylonTest.key("point");
     private final NamespacedKey amountKey = PylonTest.key("amount");
     @Getter private final FluidConnectionPoint point;
-    @Getter private long amount;
+    @Getter private double amount;
 
     public static class Schema extends PylonBlockSchema {
 
         private final PylonFluid fluid;
-        private final long capacity;
+        private final double capacity;
 
-        public Schema(@NotNull NamespacedKey key, @NotNull Material material, @NotNull PylonFluid fluid, long capacity) {
+        public Schema(@NotNull NamespacedKey key, @NotNull Material material, @NotNull PylonFluid fluid, double capacity) {
             super(key, material, FluidConsumer.class);
             this.fluid = fluid;
             this.capacity = capacity;
@@ -54,13 +53,13 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
         super(schema, block);
         point = pdc.get(pointKey, PylonSerializers.FLUID_CONNECTION_POINT);
         FluidManager.add(point);
-        amount = pdc.get(amountKey, PylonSerializers.LONG);
+        amount = pdc.get(amountKey, PylonSerializers.DOUBLE);
     }
 
     @Override
     public void write(@NotNull PersistentDataContainer pdc) {
         pdc.set(pointKey, PylonSerializers.FLUID_CONNECTION_POINT, point);
-        pdc.set(amountKey, PylonSerializers.LONG, amount);
+        pdc.set(amountKey, PylonSerializers.DOUBLE, amount);
     }
 
     @Override
@@ -69,14 +68,14 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Long> getRequestedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Double> getRequestedFluids(@NotNull String connectionPoint, double deltaSeconds) {
         return Map.of(
                 getSchema().fluid, getSchema().capacity - amount
         );
     }
 
     @Override
-    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
+    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, double amount) {
         this.amount += amount;
     }
 }

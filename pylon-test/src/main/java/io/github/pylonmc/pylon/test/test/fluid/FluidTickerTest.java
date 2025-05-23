@@ -11,6 +11,8 @@ import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class FluidTickerTest extends AsyncTest {
 
@@ -45,7 +47,15 @@ public class FluidTickerTest extends AsyncTest {
             FluidManager.connect(connector.getPoint(), consumer2.getPoint());
         }).join();
 
-        TestUtil.waitUntil(() -> consumer1.getAmount() == 100 && consumer2.getAmount() == 100).join();
+        TestUtil.sleepTicks(20).join();
+
+        assertThat(consumer1.getAmount())
+                .isGreaterThanOrEqualTo(99.9)
+                .isLessThanOrEqualTo(100.1);
+
+        assertThat(consumer2.getAmount())
+                .isGreaterThanOrEqualTo(99.9)
+                .isLessThanOrEqualTo(100.1);
 
         chunk.setForceLoaded(false);
     }
