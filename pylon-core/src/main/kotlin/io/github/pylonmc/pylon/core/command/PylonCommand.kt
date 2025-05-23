@@ -56,7 +56,7 @@ internal class PylonCommand : BaseCommand() {
     @Description("Gives you the pylon debugging item to view pylon data")
     @CommandPermission("pylon.command.debug")
     fun debug(player: Player) {
-        player.give(DebugWaxedWeatheredCutCopperStairs.itemStack)
+        player.give(DebugWaxedWeatheredCutCopperStairs.ITEM_STACK)
     }
 
     @Subcommand("setblock")

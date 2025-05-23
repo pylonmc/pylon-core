@@ -68,7 +68,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    private inline fun handleItem(item: ItemStack, handler: (PylonItem<*>) -> Unit) {
+    private inline fun handleItem(item: ItemStack, handler: (PylonItem) -> Unit) {
         if (item.isEmpty) return
         try {
             handler(PylonItem.fromStack(CraftItemStack.asCraftMirror(item)) ?: return)
@@ -94,7 +94,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 private val names = WeakHashMap<PylonItemSchema, Component>()
 private val lores = WeakHashMap<PylonItemSchema, ItemLore>()
 
-private fun reset(item: PylonItem<*>) {
+private fun reset(item: PylonItem) {
     val name = names.getOrPut(item.schema) {
         item.schema.itemStack.getData(DataComponentTypes.ITEM_NAME)!!
     }

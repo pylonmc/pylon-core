@@ -22,65 +22,56 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
-object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
-    pylonKey("debug_waxed_weathered_cut_copper_stairs"),
-    ItemInstance::class.java,
-    { key ->
-        ItemStackBuilder.defaultBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, key)
-            .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
-            .build()
-    }
-) {
+class DebugWaxedWeatheredCutCopperStairs(schema: PylonItemSchema, stack: ItemStack)
+    : PylonItem(schema, stack), BlockInteractor, EntityInteractor {
 
-    class ItemInstance(schema: DebugWaxedWeatheredCutCopperStairs, item: ItemStack) :
-        PylonItem<DebugWaxedWeatheredCutCopperStairs>(schema, item), BlockInteractor, EntityInteractor {
-        override fun onUsedToClickBlock(event: PlayerInteractEvent) {
-            val block = event.clickedBlock ?: return
-            val pylonBlock = BlockStorage.get(block)
-            val player = event.player
-            if (pylonBlock == null) {
-                player.sendDebug("not_a_block")
-                return
-            }
-            player.sendDebug(
-                "key.block",
-                PylonArgument.of("key", pylonBlock.schema.key.toString())
-            )
-            player.sendDebug(
-                when (pylonBlock) {
-                    is PylonTickingBlock -> if (TickManager.isTicking(pylonBlock)) {
-                        "ticking.ticking"
-                    } else {
-                        "ticking.error"
-                    }
-
-                    else -> "ticking.not_ticking"
-                }
-            )
-            // Create a new PDC - doesn't matter what type because we won't be saving it, so we just use the block's
-            // chunk to get a PDC context
-            val pdc = block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer()
-            pylonBlock.write(pdc)
-            val serialized = NmsAccessor.instance.serializePdc(pdc)
-            player.sendDebug(
-                "data",
-                PylonArgument.of("data", Component.text(serialized))
-            )
+    override fun onUsedToClickBlock(event: PlayerInteractEvent) {
+        val block = event.clickedBlock ?: return
+        val pylonBlock = BlockStorage.get(block)
+        val player = event.player
+        if (pylonBlock == null) {
+            player.sendDebug("not_a_block")
+            return
         }
+        player.sendDebug(
+            "key.block",
+            PylonArgument.of("key", pylonBlock.schema.key.toString())
+        )
+        player.sendDebug(
+            when (pylonBlock) {
+                is PylonTickingBlock -> if (TickManager.isTicking(pylonBlock)) {
+                    "ticking.ticking"
+                } else {
+                    "ticking.error"
+                }
 
-        override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
-            val pylonEntity = EntityStorage.get(event.rightClicked)
-            val player = event.player
-            if (pylonEntity == null) {
-                player.sendDebug("not_an_entity")
-                return
+                else -> "ticking.not_ticking"
             }
-            player.sendDebug(
-                "key.entity",
-                PylonArgument.of("key", pylonEntity.schema.key.toString())
-            )
+        )
+        // Create a new PDC - doesn't matter what type because we won't be saving it, so we just use the block's
+        // chunk to get a PDC context
+        val pdc = block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer()
+        pylonBlock.write(pdc)
+        val serialized = NmsAccessor.instance.serializePdc(pdc)
+        player.sendDebug(
+            "data",
+            PylonArgument.of("data", Component.text(serialized))
+        )
+    }
 
-            // TODO implement this once entities can tick
+    override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
+        val pylonEntity = EntityStorage.get(event.rightClicked)
+        val player = event.player
+        if (pylonEntity == null) {
+            player.sendDebug("not_an_entity")
+            return
+        }
+        player.sendDebug(
+            "key.entity",
+            PylonArgument.of("key", pylonEntity.schema.key.toString())
+        )
+
+        // TODO implement this once entities can tick
 //            event.player.sendMessage(
 //                MiniMessage.miniMessage().deserialize(
 //                    when (pylonEntity) {
@@ -94,13 +85,19 @@ object DebugWaxedWeatheredCutCopperStairs : PylonItemSchema(
 //                    }
 //                )
 //            )
-            pylonEntity.write(pylonEntity.entity.persistentDataContainer)
-            val serialized = NmsAccessor.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
-            player.sendDebug(
-                "data",
-                PylonArgument.of("data", Component.text(serialized))
-            )
-        }
+        pylonEntity.write(pylonEntity.entity.persistentDataContainer)
+        val serialized = NmsAccessor.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
+        player.sendDebug(
+            "data",
+            PylonArgument.of("data", Component.text(serialized))
+        )
+    }
+
+    companion object {
+        val KEY = pylonKey("debug_waxed_weathered_cut_copper_stairs")
+        val ITEM_STACK = ItemStackBuilder.defaultBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
+            .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
+            .build()
     }
 }
 

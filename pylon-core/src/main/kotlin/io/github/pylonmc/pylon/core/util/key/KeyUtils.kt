@@ -18,16 +18,6 @@ val ItemStack.pylonItemKey: NamespacedKey
 
 private val keyToMaterial = Material.entries.associateBy { it.key }
 
-fun pylonKeyToItem(key: NamespacedKey): ItemStack {
-    val pylonItem = PylonRegistry.ITEMS[key]?.itemStack
-    return if (pylonItem != null) {
-        pylonItem
-    } else {
-        val material = keyToMaterial[key] ?: throw IllegalArgumentException("Unknown item: $key")
-        ItemStack(material)
-    }
-}
-
 var Block.pylonType: NamespacedKey
     get() {
         val pylonBlock = BlockStorage.get(this)
