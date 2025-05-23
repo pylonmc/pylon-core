@@ -88,6 +88,10 @@ object FluidManager {
         }
     }
 
+    @JvmStatic
+    fun getById(uuid: UUID): FluidConnectionPoint?
+        = points[uuid]
+
     /**
      * Call when creating a new connection point, or when one has been loaded
      */
