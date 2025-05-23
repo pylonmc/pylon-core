@@ -77,7 +77,7 @@ public final class Blocks {
     public static final FluidLimiter.Schema FLUID_LIMITER = new FluidLimiter.Schema(
             PylonTest.key("fluid_limiter"),
             Material.AMETHYST_BLOCK,
-            5
+            50
     );
 
     public static final PylonBlockSchema FLUID_CONNECTOR = new PylonBlockSchema(
