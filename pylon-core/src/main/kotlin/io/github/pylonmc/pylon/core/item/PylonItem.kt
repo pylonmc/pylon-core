@@ -21,10 +21,10 @@ open class PylonItem(
     val pylonBlock = schema.pylonBlock
 
     override fun equals(other: Any?): Boolean
-        = schema.key == (other as? PylonItem)?.schema?.key
+        = pylonKey == (other as? PylonItem)?.pylonKey
 
     override fun hashCode(): Int
-        = schema.key.hashCode()
+        = pylonKey.hashCode()
 
     open fun getPlaceholders(): Map<String, Component>
         = emptyMap()
