@@ -17,7 +17,7 @@ import java.lang.invoke.MethodHandle
 class PylonItemSchema @JvmOverloads internal constructor(
     @JvmSynthetic internal val itemClass: Class<out PylonItem>,
     private val template: ItemStack,
-    private val pylonBlock: PylonBlockSchema? = null
+    internal val pylonBlock: PylonBlockSchema? = null
 ) : Keyed, RegistryHandler {
 
     private val key = template.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)

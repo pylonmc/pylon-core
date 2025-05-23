@@ -18,6 +18,7 @@ open class PylonItem(
     val pylonKey = schema.key
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
+    val pylonBlock = schema.pylonBlock
 
     override fun equals(other: Any?): Boolean
         = schema.key == (other as? PylonItem)?.schema?.key
