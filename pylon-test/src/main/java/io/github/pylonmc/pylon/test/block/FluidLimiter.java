@@ -35,13 +35,13 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
     @Getter private final FluidConnectionPoint input;
     @Getter private final FluidConnectionPoint output;
     @Getter private @Nullable PylonFluid fluid;
-    @Getter private long amount;
+    @Getter private double amount;
 
     public static class Schema extends PylonBlockSchema {
 
-        @Getter private final long maxFlowRate;
+        @Getter private final double maxFlowRate;
 
-        public Schema(@NotNull NamespacedKey key, @NotNull Material material, int maxFlowRate) {
+        public Schema(@NotNull NamespacedKey key, @NotNull Material material, double maxFlowRate) {
             super(key, material, FluidLimiter.class);
             this.maxFlowRate = maxFlowRate;
         }
@@ -67,7 +67,7 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
         input = pdc.get(inputKey, PylonSerializers.FLUID_CONNECTION_POINT);
         output = pdc.get(outputKey, PylonSerializers.FLUID_CONNECTION_POINT);
         fluid = pdc.get(fluidKey, PylonSerializers.PYLON_FLUID);
-        amount = pdc.get(amountKey, PylonSerializers.LONG);
+        amount = pdc.get(amountKey, PylonSerializers.DOUBLE);
 
         FluidManager.add(input);
         FluidManager.add(output);
@@ -78,7 +78,7 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
         pdc.set(inputKey, PylonSerializers.FLUID_CONNECTION_POINT, input);
         pdc.set(outputKey, PylonSerializers.FLUID_CONNECTION_POINT, output);
         PdcUtils.setNullable(pdc, fluidKey, PylonSerializers.PYLON_FLUID, fluid);
-        pdc.set(amountKey, PylonSerializers.LONG, amount);
+        pdc.set(amountKey, PylonSerializers.DOUBLE, amount);
     }
 
     @Override
@@ -88,29 +88,29 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Long> getRequestedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Double> getRequestedFluids(@NotNull String connectionPoint, double deltaSeconds) {
         return amount == 0
                 ? PylonRegistry.FLUIDS.getValues()
                         .stream()
-                        .collect(Collectors.toMap(Function.identity(), key -> getSchema().maxFlowRate))
+                        .collect(Collectors.toMap(Function.identity(), key -> getSchema().maxFlowRate * deltaSeconds))
                 : Map.of();
     }
 
     @Override
-    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
+    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, double amount) {
         this.fluid = fluid;
         this.amount += amount;
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Long> getSuppliedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Double> getSuppliedFluids(@NotNull String connectionPoint, double deltaSeconds) {
         return fluid == null
                 ? Map.of()
                 : Map.of(fluid, amount);
     }
 
     @Override
-    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
+    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, double amount) {
         this.amount -= amount;
         if (this.amount == 0) {
             this.fluid = null;
