@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.item
 
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -18,9 +17,6 @@ class PylonItemSchema internal constructor(
     private val key = template.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)
         ?: throw IllegalArgumentException("Provided item stack is not a Pylon item; make sure you are using ItemStackBuilder.defaultBuilder to create the item stack")
 
-    val addon = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
-        ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
-
     val itemStack: ItemStack
         get() = template.clone()
 
@@ -33,8 +29,6 @@ class PylonItemSchema internal constructor(
     ) ?: throw NoSuchMethodException(
         "Item '$key' ($itemClass) is missing a load constructor (${javaClass.simpleName}, ItemStack)"
     )
-
-    val settings = addon.mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
 
     override fun getKey(): NamespacedKey = key
 
