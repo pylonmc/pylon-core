@@ -1,13 +1,17 @@
 package io.github.pylonmc.pylon.core.util.gui
 
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.util.toTranslatableComponent
 import io.papermc.paper.datacomponent.DataComponentTypes
+import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
+import java.time.Duration
 
 abstract class ProgressItem @JvmOverloads constructor(
     private val material: Material,
@@ -20,6 +24,8 @@ abstract class ProgressItem @JvmOverloads constructor(
             notifyWindows()
         }
 
+    open val totalTime: Duration? = null
+
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(): ItemProvider {
         var progressValue = progress
@@ -27,7 +33,18 @@ abstract class ProgressItem @JvmOverloads constructor(
             progressValue = 1 - progressValue
         }
         val builder = ItemStackBuilder.of(material)
-            .set(DataComponentTypes.DAMAGE, (progressValue * material.maxDurability).toInt())
+            .set(DataComponentTypes.MAX_STACK_SIZE, 1)
+            .set(DataComponentTypes.MAX_DAMAGE, MAX_DURABILITY)
+            .set(DataComponentTypes.DAMAGE, (progressValue * MAX_DURABILITY).toInt())
+        totalTime?.let {
+            val remaining = it - it * progress
+            builder.lore(
+                Component.translatable(
+                    "pylon.pyloncore.gui.time.time_left",
+                    PylonArgument.of("time", remaining.toTranslatableComponent())
+                )
+            )
+        }
         completeItem(builder)
         return builder
     }
@@ -35,4 +52,10 @@ abstract class ProgressItem @JvmOverloads constructor(
     protected abstract fun completeItem(builder: ItemStackBuilder)
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {}
+
+    companion object {
+        private const val MAX_DURABILITY = 1000
+    }
 }
+
+private operator fun Duration.times(value: Double): Duration = Duration.ofMillis((toMillis() * value).toLong())

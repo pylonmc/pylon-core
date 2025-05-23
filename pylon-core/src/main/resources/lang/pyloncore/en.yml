@@ -45,6 +45,13 @@ gui:
     next: "Next page (%current%/%total%)"
     previous: "Previous page (%current%/%total%)"
 
+  time:
+    time_left: "Time left: %time%"
+    seconds: "%seconds% seconds"
+    minutes: "%minutes% minutes"
+    hours: "%hours% hours"
+    days: "%days% days"
+
 quantity:
   blocks: " blocks"
   seconds: "s"
@@ -55,3 +62,5 @@ quantity:
   temperature: "°C"
   fluid: " mB"
   fluid_per_second: " mB/s"
+  energy: " J"
+  power: " W"

@@ -18,7 +18,7 @@ import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem
 object GuiItems {
     @JvmStatic
     fun background(): Item = SimpleItem(
-        ItemStackBuilder.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+        ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
             .set(DataComponentTypes.HIDE_TOOLTIP)
     )
 

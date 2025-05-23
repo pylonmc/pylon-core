@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.item.builder
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 
+@Suppress("unused")
 object Quantity {
 
     private val quantities = mutableMapOf<String, Component>()
@@ -33,6 +34,12 @@ object Quantity {
 
     @JvmField
     val FLUID_PER_SECOND = create("fluid_per_second", "pylon.pyloncore.quantity.fluid_per_second", TextColor.color(0xe3835f2))
+
+    @JvmField
+    val ENERGY = create("energy", "pylon.pyloncore.quantity.energy", TextColor.color(0xf5dd05))
+
+    @JvmField
+    val POWER = create("power", "pylon.pyloncore.quantity.power", TextColor.color(0xf5dd05))
 
     @JvmStatic
     fun byName(name: String): Component? = quantities[name.lowercase()]
