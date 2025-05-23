@@ -67,7 +67,7 @@ object TickManager : Listener {
                 while (true) {
                     delay(tickDelay.ticks)
                     try {
-                        val dt = (System.nanoTime() - lastTickNanos) / 1.0e6
+                        val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                         lastTickNanos = System.nanoTime()
                         pylonBlock.tick(dt)
                     } catch (e: Throwable) {

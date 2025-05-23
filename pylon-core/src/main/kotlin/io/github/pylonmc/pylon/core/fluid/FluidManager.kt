@@ -267,7 +267,7 @@ object FluidManager {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockSuppliedFluids = block.getSuppliedFluids(point.name, deltaSeconds)
+            blockSuppliedFluids = block.getSuppliedFluids(point.name)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -276,7 +276,7 @@ object FluidManager {
         val suppliedFluids: MutableSet<FluidSupplier> = mutableSetOf()
         for ((fluid, amount) in blockSuppliedFluids) {
             if (amount != 0L) {
-                suppliedFluids.add(FluidSupplier(block, point.name, fluid, amount * PylonConfig.fluidIntervalTicks))
+                suppliedFluids.add(FluidSupplier(block, point.name, fluid, Math.round(amount * deltaSeconds)))
             }
         }
         return suppliedFluids
@@ -304,7 +304,7 @@ object FluidManager {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockRequestedFluids = block.getRequestedFluids(point.name, deltaSeconds)
+            blockRequestedFluids = block.getRequestedFluids(point.name)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -314,7 +314,7 @@ object FluidManager {
         val requestedFluids: MutableSet<FluidRequester> = mutableSetOf()
         for ((fluid, amount) in blockRequestedFluids) {
             if (amount != 0L) {
-                requestedFluids.add(FluidRequester(block, point.name, fluid, amount * PylonConfig.fluidIntervalTicks))
+                requestedFluids.add(FluidRequester(block, point.name, fluid, Math.round(amount * deltaSeconds)))
             }
         }
         return requestedFluids
@@ -403,7 +403,7 @@ object FluidManager {
             var lastTickNanos = System.nanoTime()
             while (true) {
                 delay(PylonConfig.fluidIntervalTicks.ticks)
-                val dt = (System.nanoTime() - lastTickNanos) / 1.0e6
+                val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                 lastTickNanos = System.nanoTime()
                 tick(segment, dt)
             }

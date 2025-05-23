@@ -14,6 +14,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.core.util.PdcUtils;
 import io.github.pylonmc.pylon.test.PylonTest;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -92,7 +93,7 @@ public class FluidLimiter extends PylonBlock<FluidLimiter.Schema> implements Pyl
         return amount == 0
                 ? PylonRegistry.FLUIDS.getValues()
                         .stream()
-                        .collect(Collectors.toMap(Function.identity(), key -> getSchema().maxFlowRate))
+                        .collect(Collectors.toMap(Function.identity(), key -> (getSchema().maxFlowRate)))
                 : Map.of();
     }
 
