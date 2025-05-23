@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.item
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -10,12 +11,13 @@ import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
 open class PylonItem(
-    internal val schema: PylonItemSchema,
+    val schema: PylonItemSchema,
     val stack: ItemStack
 ) {
 
     val pylonKey = schema.key
     val researchBypassPermission = schema.researchBypassPermission
+    val addon = schema.addon
 
     override fun equals(other: Any?): Boolean
         = schema.key == (other as? PylonItem)?.schema?.key
@@ -31,6 +33,11 @@ open class PylonItem(
         @JvmStatic
         fun register(itemClass: Class<out PylonItem>, template: ItemStack) {
             PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template))
+        }
+
+        @JvmStatic
+        fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockSchema: PylonBlockSchema) {
+            PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template, pylonBlockSchema))
         }
 
         /**
@@ -50,8 +57,9 @@ open class PylonItem(
 
         @JvmStatic
         fun getAddon(key: NamespacedKey): PylonAddon
-             = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
-                ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
+                = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
+            ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
+
 
         @JvmStatic
         fun getSettings(key: NamespacedKey): Config
