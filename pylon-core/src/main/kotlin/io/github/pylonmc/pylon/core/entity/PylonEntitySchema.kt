@@ -17,8 +17,9 @@ open class PylonEntitySchema(
     internal val loadConstructor: MethodHandle = pylonEntityClass.findConstructorMatching(
         javaClass,
         entityClass
+    ) ?: throw NoSuchMethodException(
+        "Entity '$key' ($pylonEntityClass) is missing a load constructor (${javaClass.simpleName}, ${entityClass.simpleName})"
     )
-        ?: throw NoSuchMethodException("Entity '$key' ($pylonEntityClass) is missing a load constructor (PylonEntitySchema, Entity)")
 
     fun register() {
         PylonRegistry.ENTITIES.register(this)

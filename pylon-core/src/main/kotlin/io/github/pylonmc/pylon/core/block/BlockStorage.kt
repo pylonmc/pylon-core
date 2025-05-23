@@ -181,7 +181,7 @@ object BlockStorage : Listener {
     fun placeBlock(
         blockPosition: BlockPosition,
         schema: PylonBlockSchema,
-        context: BlockCreateContext = BlockCreateContext.Default
+        context: BlockCreateContext = BlockCreateContext.Default(blockPosition.block)
     ): PylonBlock<*>? {
         require(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
         require(!isPylonBlock(blockPosition)) { "You cannot place a new Pylon block in place of an existing Pylon blocks" }
@@ -218,7 +218,7 @@ object BlockStorage : Listener {
     fun placeBlock(
         block: Block,
         schema: PylonBlockSchema,
-        context: BlockCreateContext = BlockCreateContext.Default
+        context: BlockCreateContext = BlockCreateContext.Default(block)
     ) = placeBlock(block.position, schema, context)
 
     /**
@@ -233,7 +233,7 @@ object BlockStorage : Listener {
     fun placeBlock(
         location: Location,
         schema: PylonBlockSchema,
-        context: BlockCreateContext = BlockCreateContext.Default
+        context: BlockCreateContext = BlockCreateContext.Default(location.block)
     ) = placeBlock(BlockPosition(location), schema, context)
 
     /**
@@ -276,11 +276,11 @@ object BlockStorage : Listener {
             block.postBreak()
         }
 
+        PylonBlockBreakEvent(blockPosition.block, block, context, drops).callEvent()
+
         for (drop in drops) {
             block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
         }
-
-        PylonBlockBreakEvent(blockPosition.block, block, context).callEvent()
     }
 
     /**

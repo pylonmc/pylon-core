@@ -42,13 +42,22 @@ gui:
     next: "Next leaf (%current%/%total%)"
     previous: "Former leaf (%current%/%total%)"
 
+  time:
+    time_left: "Time left: %time%"
+    seconds: "%seconds% seconds"
+    minutes: "%minutes% minutes"
+    hours: "%hours% hours"
+    days: "%days% days"
+
 quantity:
   blocks: " blocks"
   seconds: "s"
   hearts: "❤"
   percent: "%"
+  chunks: " chunks"
   research_points: " points"
   temperature: "°C"
   fluid: " mB"
   fluid_per_second: " mB/s"
-  chunks: " chunks"
+  energy: " J"
+  power: " W"

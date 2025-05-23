@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.fluid
 
 import com.github.shynixn.mccoroutine.bukkit.launch
-import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
@@ -13,7 +12,7 @@ import io.github.pylonmc.pylon.core.event.PylonFluidPointConnectEvent
 import io.github.pylonmc.pylon.core.event.PylonFluidPointDisconnectEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import java.util.*
+import java.util.UUID
 import java.util.function.Predicate
 import kotlin.math.min
 
@@ -398,8 +397,7 @@ object FluidManager {
     private fun startTicker(segment: UUID) {
         check(segment !in tickers) { "Ticker already active" }
 
-        val dispatcher = PylonCore.minecraftDispatcher
-        tickers[segment] = PylonCore.launch(dispatcher) {
+        tickers[segment] = PylonCore.launch {
             while (true) {
                 delay(PylonConfig.fluidIntervalTicks.ticks)
                 tick(segment)

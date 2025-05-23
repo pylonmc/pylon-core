@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
+import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -16,11 +17,13 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.entity.BlockDisplay
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import org.joml.Vector3i
-import java.util.*
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -29,8 +32,6 @@ import kotlin.math.min
  * remember to call loadHeldEntities and saveHeldEntities
  */
 interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
-
-    override val heldEntities: MutableMap<String, UUID>
 
     interface Component {
         fun matches(block: Block): Boolean
@@ -102,17 +103,6 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         components.mapKeys { Vector3i(it.key.z, it.key.y, -it.key.x) }
     )
 
-    /**
-     * Must be called in your place constructor.
-     */
-    fun spawnMultiblockGhosts() {
-        for ((offset, component) in components) {
-            val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
-            val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
-            heldEntities[key] = ghostBlock
-        }
-    }
-
     fun removeMultiblockGhosts() {
         val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
         for (key in toRemove) {
@@ -150,13 +140,17 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
 
     override fun checkFormed(): Boolean {
-        val formed = validStructures().any {
-            it.all {
+        val formed = validStructures().any { struct ->
+            struct.all {
                 it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
             }
         }
         if (formed) {
-            removeMultiblockGhosts()
+            val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
+            for (key in toRemove) {
+                EntityStorage.get(heldEntities[key]!!)!!.entity.remove()
+                heldEntities.remove(key)
+            }
         }
         return formed
     }
@@ -166,11 +160,24 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             it.contains((otherBlock.position - block.position).vector3i)
         }
 
-    companion object {
+    companion object : Listener {
+
+        @JvmSynthetic
         internal val GHOST_BLOCK_SCHEMA = PylonEntitySchema(
             pylonKey("multiblock_ghost_block"),
             BlockDisplay::class.java,
             MultiblockGhostBlock::class.java
         )
+
+        @EventHandler
+        private fun onPlace(event: PylonBlockPlaceEvent) {
+            val block = event.pylonBlock
+            if (block !is PylonSimpleMultiblock) return
+            for ((offset, component) in block.components) {
+                val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
+                val ghostBlock = component.spawnGhostBlock((block.block.position + offset).block)
+                block.heldEntities[key] = ghostBlock
+            }
+        }
     }
 }
