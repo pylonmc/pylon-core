@@ -55,7 +55,7 @@ class DebugWaxedWeatheredCutCopperStairs(schema: PylonItemSchema, stack: ItemSta
         val serialized = NmsAccessor.instance.serializePdc(pdc)
         player.sendDebug(
             "data",
-            PylonArgument.of("data", Component.text(serialized))
+            PylonArgument.of("data", serialized)
         )
     }
 
@@ -89,13 +89,13 @@ class DebugWaxedWeatheredCutCopperStairs(schema: PylonItemSchema, stack: ItemSta
         val serialized = NmsAccessor.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
         player.sendDebug(
             "data",
-            PylonArgument.of("data", Component.text(serialized))
+            PylonArgument.of("data", serialized)
         )
     }
 
     companion object {
         val KEY = pylonKey("debug_waxed_weathered_cut_copper_stairs")
-        val ITEM_STACK = ItemStackBuilder.defaultBuilder(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
+        val ITEM_STACK = ItemStackBuilder.pylonItem(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
     }

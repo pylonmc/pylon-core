@@ -15,16 +15,16 @@ open class PylonItem(
     val stack: ItemStack
 ) {
 
-    val pylonKey = schema.key
+    val key = schema.key
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlock
 
     override fun equals(other: Any?): Boolean
-        = pylonKey == (other as? PylonItem)?.pylonKey
+        = key == (other as? PylonItem)?.key
 
     override fun hashCode(): Int
-        = pylonKey.hashCode()
+        = key.hashCode()
 
     open fun getPlaceholders(): Map<String, Component>
         = emptyMap()

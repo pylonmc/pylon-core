@@ -15,11 +15,11 @@ import org.jetbrains.annotations.NotNull;
 public class OminousBlazePower extends PylonItem implements BrewingStandFuel {
 
     public static final NamespacedKey KEY = PylonTest.key("ominous_blaze_powder");
-    public static final ItemStack ITEM_STACK = ItemStackBuilder.defaultBuilder(Material.DIAMOND_SWORD, KEY)
-                    .name("<ff0000>OMINOUS BLAZE POWDER")
-                    .lore("<#ff0000>VERY SCARY")
-                    .lore("<#222222>OH NO")
-                    .build();
+    public static final ItemStack ITEM_STACK = ItemStackBuilder.pylonItem(Material.DIAMOND_SWORD, KEY)
+            .name("<ff0000>OMINOUS BLAZE POWDER")
+            .lore("<#ff0000>VERY SCARY")
+            .lore("<#222222>OH NO")
+            .build();
     public static boolean handlerCalled;
 
     public OminousBlazePower(@NotNull PylonItemSchema schema, @NotNull ItemStack stack) {

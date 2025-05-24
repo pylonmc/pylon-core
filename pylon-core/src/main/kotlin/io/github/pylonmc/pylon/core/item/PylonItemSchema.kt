@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import io.github.pylonmc.pylon.core.util.key.getAddon
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
@@ -39,7 +40,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
         "Item '$key' ($itemClass) is missing a load constructor (${javaClass.simpleName}, ItemStack)"
     )
 
-    fun doPlace(context: BlockCreateContext, block: Block): PylonBlock? {
+    fun place(context: BlockCreateContext, block: Block): PylonBlock? {
         if (pylonBlock == null) {
             return null
         }
@@ -47,7 +48,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
         if (BlockStorage.isPylonBlock(block)) { // special case: you can place on top of structure void blocks
             return null
         }
-        return BlockStorage.placeBlock(block, key, context)
+        return BlockStorage.placeBlock(block, pylonBlock.key, context)
     }
 
     override fun getKey(): NamespacedKey = key

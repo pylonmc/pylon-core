@@ -60,7 +60,7 @@ data class Research(
         player.researches += this
         for (recipe in RecipeTypes.VANILLA_CRAFTING) {
             val pylonItem = PylonItem.fromStack(recipe.result) ?: continue
-            if (pylonItem.pylonKey in unlocks) {
+            if (pylonItem.key in unlocks) {
                 player.discoverRecipe(recipe.key)
             }
         }
@@ -80,7 +80,7 @@ data class Research(
         player.researches -= this
         for (recipe in RecipeTypes.VANILLA_CRAFTING) {
             val pylonItem = PylonItem.fromStack(recipe.result) ?: continue
-            if (pylonItem.pylonKey in unlocks) {
+            if (pylonItem.key in unlocks) {
                 player.undiscoverRecipe(recipe.key)
             }
         }
@@ -110,7 +110,7 @@ data class Research(
         @JvmStatic
         @get:JvmName("getResearchFor")
         val PylonItem.research: Research?
-            get() = PylonRegistry.RESEARCHES.find { this.pylonKey in it.unlocks }
+            get() = PylonRegistry.RESEARCHES.find { this.key in it.unlocks }
 
         @JvmStatic
         @JvmOverloads
