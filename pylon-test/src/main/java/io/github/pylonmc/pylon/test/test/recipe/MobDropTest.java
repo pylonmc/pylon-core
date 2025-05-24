@@ -17,7 +17,7 @@ public class MobDropTest extends GameTest {
         super(new GameTestConfig.Builder(PylonTest.key("mob_drop_test"))
                 .size(1)
                 .setUp((test) -> {
-                    ItemStack stickyStick = Items.STICKY_STICK.getItemStack();
+                    ItemStack stickyStick = Items.STICKY_STICK_ITEM_STACK;
                     PylonRegistry.MOB_DROPS.register(new SimpleMobDrop(
                             PylonTest.key("sticky_stick"),
                             stickyStick,

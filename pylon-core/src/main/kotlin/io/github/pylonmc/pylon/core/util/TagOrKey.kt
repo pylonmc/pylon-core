@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.util.key
+package io.github.pylonmc.pylon.core.util
 
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
