@@ -114,6 +114,9 @@ object EntityStorage : Listener {
 
         if (!event.entity.isDead) {
             PylonEntity.serialize(pylonEntity)
+            PylonEntityUnloadEvent(pylonEntity).callEvent()
+        } else {
+            PylonEntityDeathEvent(pylonEntity, event).callEvent()
         }
 
         lockEntityWrite {
@@ -122,12 +125,6 @@ object EntityStorage : Listener {
             if (entitiesByKey[pylonEntity.schema.key]!!.isEmpty()) {
                 entitiesByKey.remove(pylonEntity.schema.key)
             }
-        }
-
-        if (event.entity.isDead) {
-            PylonEntityDeathEvent(pylonEntity, event).callEvent()
-        } else {
-            PylonEntityUnloadEvent(pylonEntity).callEvent()
         }
     }
 
