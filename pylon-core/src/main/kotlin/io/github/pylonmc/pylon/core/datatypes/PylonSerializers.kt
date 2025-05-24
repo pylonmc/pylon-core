@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.datatypes
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Material
+import org.bukkit.Registry
 import org.bukkit.block.BlockFace
 import org.bukkit.persistence.PersistentDataType
 
@@ -92,7 +93,7 @@ object PylonSerializers {
     val KEYED = KeyedPersistentDataType
 
     @JvmField
-    val MATERIAL = ENUM.enumTypeFrom(Material::class.java)
+    val MATERIAL = KEYED.keyedTypeFrom<Material>(Registry.MATERIAL::getOrThrow)
 
     @JvmField
     val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid>(PylonRegistry.FLUIDS::getOrThrow)

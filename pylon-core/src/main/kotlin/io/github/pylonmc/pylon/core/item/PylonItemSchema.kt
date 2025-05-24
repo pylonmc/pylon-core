@@ -38,7 +38,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
         "Item '$key' ($itemClass) is missing a load constructor (${javaClass.simpleName}, ItemStack)"
     )
 
-    fun doPlace(context: BlockCreateContext, block: Block): PylonBlock<*>? {
+    fun place(context: BlockCreateContext, block: Block): PylonBlock<*>? {
         if (pylonBlock == null) {
             return null
         }

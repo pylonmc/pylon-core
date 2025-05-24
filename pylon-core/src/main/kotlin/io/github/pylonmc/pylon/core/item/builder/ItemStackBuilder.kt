@@ -115,10 +115,10 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
 
         /**
          * Returns an [ItemStackBuilder] with name and lore set to the default translation keys, and
-         * with the item's ID set to `key`
+         * with the item's ID set to [key]
          */
         @JvmStatic
-        fun defaultBuilder(material: Material, key: NamespacedKey): ItemStackBuilder {
+        fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {
             return of(material)
                 .editPdc { pdc -> pdc.set(PylonItemSchema.idKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .defaultTranslatableName(key)

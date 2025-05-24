@@ -73,7 +73,7 @@ class PhantomBlock(
         companion object {
             val KEY = pylonKey("error_item")
             val BLOCK_KEY = pylonKey("block")
-            val ITEM_STACK = ItemStackBuilder.defaultBuilder(Material.BARRIER, key)
+            val ITEM_STACK = ItemStackBuilder.pylonItem(Material.BARRIER, key)
                     .build()
 
             fun getItemStack(erroredBlockKey: NamespacedKey): ItemStack {
