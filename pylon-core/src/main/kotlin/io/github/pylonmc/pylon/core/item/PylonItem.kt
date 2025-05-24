@@ -18,7 +18,7 @@ open class PylonItem(
     val key = schema.key
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
-    val pylonBlock = schema.pylonBlock
+    val pylonBlock = schema.pylonBlockKey
 
     override fun equals(other: Any?): Boolean
         = key == (other as? PylonItem)?.key
@@ -37,8 +37,8 @@ open class PylonItem(
         }
 
         @JvmStatic
-        fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockSchema: PylonBlockSchema) {
-            PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template, pylonBlockSchema))
+        fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockKey: NamespacedKey) {
+            PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template, pylonBlockKey))
         }
 
         /**

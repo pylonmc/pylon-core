@@ -19,7 +19,7 @@ import java.lang.invoke.MethodHandle
 class PylonItemSchema @JvmOverloads internal constructor(
     @JvmSynthetic internal val itemClass: Class<out PylonItem>,
     private val template: ItemStack,
-    val pylonBlock: PylonBlockSchema? = null
+    val pylonBlockKey: NamespacedKey? = null
 ) : Keyed, RegistryHandler {
 
     private val key = template.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)
@@ -41,14 +41,14 @@ class PylonItemSchema @JvmOverloads internal constructor(
     )
 
     fun place(context: BlockCreateContext, block: Block): PylonBlock? {
-        if (pylonBlock == null) {
+        if (pylonBlockKey == null) {
             return null
         }
         check(template.type.isBlock) { "Material ${template.type} is not a block" }
         if (BlockStorage.isPylonBlock(block)) { // special case: you can place on top of structure void blocks
             return null
         }
-        return BlockStorage.placeBlock(block, pylonBlock.key, context)
+        return BlockStorage.placeBlock(block, pylonBlockKey, context)
     }
 
     override fun getKey(): NamespacedKey = key
