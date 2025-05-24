@@ -15,7 +15,7 @@ public class BlockStorageRemoveTest extends GameTest {
         super(new GameTestConfig.Builder(new NamespacedKey(PylonTest.instance(), "block_storage_remove_test"))
                 .size(1)
                 .setUp((test) -> {
-                    BlockStorage.placeBlock(test.location(), Blocks.SIMPLE_BLOCK);
+                    BlockStorage.placeBlock(test.location(), Blocks.SIMPLE_BLOCK_KEY);
                     assertThat(BlockStorage.get(test.location()))
                             .isNotNull();
 

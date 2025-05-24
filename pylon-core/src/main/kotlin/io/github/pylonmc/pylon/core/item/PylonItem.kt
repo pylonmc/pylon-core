@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.key.getAddon
 import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -55,12 +55,6 @@ open class PylonItem(
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(schema, stack))
         }
-
-        @JvmStatic
-        fun getAddon(key: NamespacedKey): PylonAddon
-                = PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
-            ?: error("Item does not have a corresponding addon; does your plugin call registerWithPylon()?")
-
 
         @JvmStatic
         fun getSettings(key: NamespacedKey): Config

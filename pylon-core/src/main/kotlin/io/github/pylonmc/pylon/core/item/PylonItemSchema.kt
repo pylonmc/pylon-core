@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
+import io.github.pylonmc.pylon.core.util.key.getAddon
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
@@ -17,13 +18,13 @@ import java.lang.invoke.MethodHandle
 class PylonItemSchema @JvmOverloads internal constructor(
     @JvmSynthetic internal val itemClass: Class<out PylonItem>,
     private val template: ItemStack,
-    internal val pylonBlock: PylonBlockSchema? = null
+    val pylonBlock: PylonBlockSchema? = null
 ) : Keyed, RegistryHandler {
 
     private val key = template.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)
         ?: throw IllegalArgumentException("Provided item stack is not a Pylon item; make sure you are using ItemStackBuilder.defaultBuilder to create the item stack")
 
-    val addon = PylonItem.getAddon(key)
+    val addon = getAddon(key)
 
     val itemStack: ItemStack
         get() = template.clone()
@@ -38,7 +39,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
         "Item '$key' ($itemClass) is missing a load constructor (${javaClass.simpleName}, ItemStack)"
     )
 
-    fun doPlace(context: BlockCreateContext, block: Block): PylonBlock<*>? {
+    fun doPlace(context: BlockCreateContext, block: Block): PylonBlock? {
         if (pylonBlock == null) {
             return null
         }
@@ -46,7 +47,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
         if (BlockStorage.isPylonBlock(block)) { // special case: you can place on top of structure void blocks
             return null
         }
-        return BlockStorage.placeBlock(block, pylonBlock, context)
+        return BlockStorage.placeBlock(block, key, context)
     }
 
     override fun getKey(): NamespacedKey = key

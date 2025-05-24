@@ -12,26 +12,22 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 
-public class BlockWithField extends PylonBlock<PylonBlockSchema> {
+public class BlockWithField extends PylonBlock {
 
-    private static final NamespacedKey PROGRESS_KEY = PylonTest.key("block_with_field_progress");
+    public static final NamespacedKey KEY = PylonTest.key("block_with_field");
+    public static final NamespacedKey PROGRESS_KEY = PylonTest.key("progress");
 
-    @Getter
-    private final int progress;
+    @Getter private final int progress;
 
     @SuppressWarnings("unused")
-    public BlockWithField(PylonBlockSchema testSchema, Block block, BlockCreateContext context) {
-        super(testSchema, block);
+    public BlockWithField(PylonBlockSchema schema, Block block, BlockCreateContext context) {
+        super(schema, block);
         progress = 240;
     }
 
     @SuppressWarnings({"unused", "DataFlowIssue"})
-    public BlockWithField(
-            PylonBlockSchema testSchema,
-            Block block,
-            PersistentDataContainer pdc
-    ) {
-        super(testSchema, block);
+    public BlockWithField(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
+        super(schema, block);
         progress = pdc.get(PROGRESS_KEY, PersistentDataType.INTEGER);
     }
 
