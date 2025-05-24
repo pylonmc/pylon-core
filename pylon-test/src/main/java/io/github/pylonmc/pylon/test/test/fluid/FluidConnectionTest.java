@@ -3,11 +3,11 @@ package io.github.pylonmc.pylon.test.test.fluid;
 import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
-import io.github.pylonmc.pylon.test.block.Blocks;
-import io.github.pylonmc.pylon.test.block.FluidProducer;
-import io.github.pylonmc.pylon.test.block.FluidConsumer;
+import io.github.pylonmc.pylon.test.block.fluid.consumer.WaterConsumer;
+import io.github.pylonmc.pylon.test.block.fluid.producer.FluidProducer;
+import io.github.pylonmc.pylon.test.block.fluid.consumer.FluidConsumer;
+import io.github.pylonmc.pylon.test.block.fluid.producer.WaterProducer;
 import io.github.pylonmc.pylon.test.util.TestUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 
@@ -23,14 +23,14 @@ public class FluidConnectionTest extends AsyncTest {
 
         Block consumerBlock = chunk.getBlock(6, 64, 5);
         FluidConsumer consumer = (FluidConsumer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(consumerBlock, Blocks.WATER_CONSUMER)
+                () -> BlockStorage.placeBlock(consumerBlock, WaterConsumer.KEY)
         ).join();
         assertThat(consumer)
                 .isNotNull();
 
         Block producerBlock = chunk.getBlock(2, 64, 5);
         FluidProducer producer = (FluidProducer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(producerBlock, Blocks.WATER_PRODUCER)
+                () -> BlockStorage.placeBlock(producerBlock, WaterProducer.KEY)
         ).join();
         assertThat(producer)
                 .isNotNull();

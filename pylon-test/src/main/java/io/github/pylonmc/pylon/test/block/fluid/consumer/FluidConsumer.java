@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.test.block;
+package io.github.pylonmc.pylon.test.block.fluid.consumer;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
@@ -21,27 +21,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 
-public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements PylonFluidBlock, PylonUnloadBlock {
+public abstract class FluidConsumer extends PylonBlock implements PylonFluidBlock, PylonUnloadBlock {
 
-    private final NamespacedKey pointKey = PylonTest.key("point");
-    private final NamespacedKey amountKey = PylonTest.key("amount");
+    private static final NamespacedKey pointKey = PylonTest.key("point");
+    private static final NamespacedKey amountKey = PylonTest.key("amount");
+
     @Getter private final FluidConnectionPoint point;
     @Getter private double amount;
 
-    public static class Schema extends PylonBlockSchema {
-
-        private final PylonFluid fluid;
-        private final double capacity;
-
-        public Schema(@NotNull NamespacedKey key, @NotNull Material material, @NotNull PylonFluid fluid, double capacity) {
-            super(key, material, FluidConsumer.class);
-            this.fluid = fluid;
-            this.capacity = capacity;
-        }
-    }
+    abstract PylonFluid getFluid();
+    abstract double getCapacity();
 
     @SuppressWarnings("unused")
-    public FluidConsumer(Schema schema, Block block, BlockCreateContext context) {
+    protected FluidConsumer(PylonBlockSchema schema, Block block, BlockCreateContext context) {
         super(schema, block);
         point = new FluidConnectionPoint(block, "output", FluidConnectionPoint.Type.INPUT);
         FluidManager.add(point);
@@ -49,7 +41,7 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
     }
 
     @SuppressWarnings("unused")
-    public FluidConsumer(Schema schema, Block block, PersistentDataContainer pdc) {
+    protected FluidConsumer(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
         super(schema, block);
         point = pdc.get(pointKey, PylonSerializers.FLUID_CONNECTION_POINT);
         FluidManager.add(point);
@@ -70,7 +62,7 @@ public class FluidConsumer extends PylonBlock<FluidConsumer.Schema> implements P
     @Override
     public @NotNull Map<PylonFluid, Double> getRequestedFluids(@NotNull String connectionPoint, double deltaSeconds) {
         return Map.of(
-                getSchema().fluid, getSchema().capacity - amount
+                getFluid(), getCapacity() - amount
         );
     }
 

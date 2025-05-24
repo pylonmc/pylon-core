@@ -12,7 +12,7 @@ import org.bukkit.event.HandlerList
  */
 class PrePylonBlockPlaceEvent(
     val block: Block,
-    val pylonBlock: PylonBlock<*>,
+    val pylonBlock: PylonBlock,
     val context: BlockCreateContext,
 ) : Event(), Cancellable {
 

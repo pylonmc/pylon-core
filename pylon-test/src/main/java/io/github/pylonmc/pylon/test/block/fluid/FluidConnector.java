@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.test.block;
+package io.github.pylonmc.pylon.test.block.fluid;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
@@ -16,9 +16,11 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 
 
-public class FluidConnector extends PylonBlock<PylonBlockSchema> implements PylonUnloadBlock {
+public class FluidConnector extends PylonBlock implements PylonUnloadBlock {
 
-    private final NamespacedKey pointKey = PylonTest.key("point");
+    public static final NamespacedKey KEY = PylonTest.key("fluid_connector");
+    private static final NamespacedKey POINT_KEY = PylonTest.key("point");
+
     @Getter
     private final FluidConnectionPoint point;
 
@@ -32,13 +34,13 @@ public class FluidConnector extends PylonBlock<PylonBlockSchema> implements Pylo
     @SuppressWarnings("unused")
     public FluidConnector(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
         super(schema, block);
-        point = pdc.get(pointKey, PylonSerializers.FLUID_CONNECTION_POINT);
+        point = pdc.get(POINT_KEY, PylonSerializers.FLUID_CONNECTION_POINT);
         FluidManager.add(point);
     }
 
     @Override
     public void write(@NotNull PersistentDataContainer pdc) {
-        pdc.set(pointKey, PylonSerializers.FLUID_CONNECTION_POINT, point);
+        pdc.set(POINT_KEY, PylonSerializers.FLUID_CONNECTION_POINT, point);
     }
 
     @Override

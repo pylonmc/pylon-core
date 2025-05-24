@@ -11,7 +11,7 @@ import org.bukkit.event.HandlerList
  */
 class PylonBlockBreakEvent(
     val block: Block,
-    val pylonBlock: PylonBlock<*>,
+    val pylonBlock: PylonBlock,
     val context: BlockBreakContext,
 ) : Event(){
 

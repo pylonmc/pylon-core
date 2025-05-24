@@ -34,7 +34,7 @@ class PhantomBlock(
     val pdc: PersistentDataContainer,
     val erroredBlockKey: NamespacedKey,
     block: Block
-) : PylonBlock<PylonBlockSchema>(schema, block) {
+) : PylonBlock(schema, block) {
 
     // Hacky placeholder
     internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
