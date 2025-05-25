@@ -45,22 +45,116 @@ gui:
     next: "Next page (%current%/%total%)"
     previous: "Previous page (%current%/%total%)"
 
-  time:
-    time_left: "Time left: %time%"
-    seconds: "%seconds% seconds"
-    minutes: "%minutes% minutes"
-    hours: "%hours% hours"
-    days: "%days% days"
+  time_left: "Time left: %time%"
 
-quantity:
-  blocks: " blocks"
-  seconds: "s"
-  hearts: "❤"
-  percent: "%"
-  research_points: " points"
-  chunks: " chunks"
-  temperature: "°C"
-  fluid: " mB"
-  fluid_per_second: " mB/s"
-  energy: " J"
-  power: " W"
+unit:
+  prefix:
+    quetta:
+      name: "quetta"
+      abbr: "Q"
+    ronna:
+      name: "ronna"
+      abbr: "R"
+    yotta:
+      name: "yotta"
+      abbr: "Y"
+    zetta:
+      name: "zetta"
+      abbr: "Z"
+    exa:
+      name: "exa"
+      abbr: "E"
+    peta:
+      name: "peta"
+      abbr: "P"
+    tera:
+      name: "tera"
+      abbr: "T"
+    giga:
+      name: "giga"
+      abbr: "G"
+    mega:
+      name: "mega"
+      abbr: "M"
+    kilo:
+      name: "kilo"
+      abbr: "k"
+    hecto:
+      name: "hecto"
+      abbr: "h"
+    deca:
+      name: "deca"
+      abbr: "da"
+    none:
+      name: ""
+      abbr: ""
+    deci:
+      name: "deci"
+      abbr: "d"
+    centi:
+      name: "centi"
+      abbr: "c"
+    milli:
+      name: "milli"
+      abbr: "m"
+    micro:
+      name: "micro"
+      abbr: "μ"
+    nano:
+      name: "nano"
+      abbr: "n"
+    pico:
+      name: "pico"
+      abbr: "p"
+    femto:
+      name: "femto"
+      abbr: "f"
+    atto:
+      name: "atto"
+      abbr: "a"
+    zepto:
+      name: "zepto"
+      abbr: "z"
+    yocto:
+      name: "yocto"
+      abbr: "y"
+    ronto:
+      name: "ronto"
+      abbr: "r"
+    quecto:
+      name: "quecto"
+      abbr: "q"
+
+  blocks:
+    singular: "block"
+    plural: "blocks"
+  chunks:
+    singular: "chunk"
+    plural: "chunks"
+  seconds:
+    singular: "second"
+    plural: "seconds"
+    abbr: "s"
+  hearts:
+    singular: "heart"
+    plural: "hearts"
+    abbr: "❤"
+  percent:
+    singular: "percent"
+    plural: "percent"
+    abbr: "%"
+  research_points:
+    singular: "research point"
+    plural: "research points"
+  celsius:
+    singular: "degree Celsius"
+    plural: "degrees Celsius"
+    abbr: "°C"
+  buckets:
+    singular: "bucket"
+    plural: "buckets"
+    abbr: "B"
+  buckets_per_second:
+    singular: "bucket per second"
+    plural: "buckets per second"
+    abbr: "B/s"

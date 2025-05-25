@@ -39,6 +39,7 @@ tasks.runServer {
     val runFolder = project.projectDir.resolve("run")
     val testsFailedFile = runFolder.resolve("tests-failed")
     doFirst {
+        runFolder.deleteRecursively()
         runFolder.mkdirs()
         runFolder.resolve("eula.txt").writeText("eula=true")
         testsFailedFile.delete()
