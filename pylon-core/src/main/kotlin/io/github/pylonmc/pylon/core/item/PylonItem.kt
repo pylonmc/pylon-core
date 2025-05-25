@@ -4,7 +4,7 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.key.getAddon
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -30,8 +30,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     override fun getKey(): NamespacedKey
         = key
 
-    open fun getPlaceholders(): Map<String, Component>
-        = emptyMap()
+    open fun getPlaceholders(): Map<String, ComponentLike> = emptyMap()
 
     companion object {
 
