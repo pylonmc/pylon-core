@@ -25,7 +25,7 @@ import java.util.UUID
  */
 interface PylonEntityHolderBlock : PylonBreakHandler {
 
-    fun createEntities(context: BlockCreateContext): Map<String, UUID>
+    fun createEntities(context: BlockCreateContext): Map<String, UUID> = emptyMap()
 
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
@@ -81,7 +81,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
             if (block !is PylonEntityHolderBlock) return
-            holders[block] = event.data.get(entityKey, entityType)?.toMutableMap() ?: error("Held entities not found for ${block.schema.key}")
+            holders[block] = event.data.get(entityKey, entityType)?.toMutableMap() ?: error("Held entities not found for ${block.}")
         }
 
         @EventHandler

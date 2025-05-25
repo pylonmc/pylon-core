@@ -26,10 +26,6 @@ import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.min
 
-/**
- * SimplePylonMultiblock implements EntityHolderBlock, so make sure you
- * remember to call loadHeldEntities and saveHeldEntities
- */
 interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     interface Component {
