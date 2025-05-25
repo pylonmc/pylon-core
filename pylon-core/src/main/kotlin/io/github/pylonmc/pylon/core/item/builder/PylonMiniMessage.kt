@@ -55,7 +55,6 @@ private fun unit(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
         val number = content.toBigDecimalOrNull() ?: throw ctx.newException("Expected a number, got '$content'")
         unit.format(number)
             .prefix(prefix ?: MetricPrefix.NONE)
-            .abbreviate(true)
             .toComponent()
     }
 }

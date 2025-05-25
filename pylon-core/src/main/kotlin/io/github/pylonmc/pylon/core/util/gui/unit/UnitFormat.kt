@@ -47,7 +47,7 @@ class UnitFormat @JvmOverloads constructor(
         private var sigFigs = value.precision()
         private var decimalPlaces = value.scale()
         private var forceDecimalPlaces = false
-        private var abbreviate = false
+        private var abbreviate = true
         private var unitStyle = defaultStyle
         private var prefix: MetricPrefix = defaultPrefix
         private val badPrefixes = EnumSet.noneOf(MetricPrefix::class.java)
