@@ -120,7 +120,7 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
         @JvmStatic
         fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {
             return of(material)
-                .editPdc { pdc -> pdc.set(PylonItemSchema.idKey, PylonSerializers.NAMESPACED_KEY, key) }
+                .editPdc { pdc -> pdc.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .defaultTranslatableName(key)
                 .defaultTranslatableLore(key)
         }

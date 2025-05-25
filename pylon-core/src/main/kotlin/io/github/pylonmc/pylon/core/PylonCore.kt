@@ -10,6 +10,7 @@ import io.github.pylonmc.pylon.core.command.PylonCommand
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -18,6 +19,7 @@ import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
+import org.bukkit.entity.BlockDisplay
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
 import java.util.Locale
@@ -66,7 +68,11 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         PylonItem.register(DebugWaxedWeatheredCutCopperStairs::class.java, DebugWaxedWeatheredCutCopperStairs.ITEM_STACK)
         PylonItem.register(PhantomBlock.ErrorItem::class.java, PhantomBlock.ErrorItem.ITEM_STACK)
-        PylonSimpleMultiblock.GHOST_BLOCK_SCHEMA.register()
+        PylonEntity.register(
+            PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
+            BlockDisplay::class.java,
+            PylonSimpleMultiblock.MultiblockGhostBlock::class.java
+        )
     }
 
     override fun onDisable() {

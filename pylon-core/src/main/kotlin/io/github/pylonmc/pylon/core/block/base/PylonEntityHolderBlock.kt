@@ -26,10 +26,10 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
     fun getHeldEntityUuid(name: String)
         = heldEntities[name] ?: throw IllegalArgumentException("Entity $name not found")
 
-    fun getHeldEntity(name: String): PylonEntity<*, *>?
+    fun getHeldEntity(name: String): PylonEntity<*>?
         = EntityStorage.get(getHeldEntityUuid(name))
 
-    fun <T: PylonEntity<*, *>> getHeldEntity(clazz: Class<T>, name: String): T?
+    fun <T: PylonEntity<*>> getHeldEntity(clazz: Class<T>, name: String): T?
         = EntityStorage.getAs(clazz, getHeldEntityUuid(name))
 
     /**
