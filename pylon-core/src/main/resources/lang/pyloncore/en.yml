@@ -148,11 +148,11 @@ unit:
     singular: "degree Celsius"
     plural: "degrees Celsius"
     abbr: "°C"
-  millibuckets: # the milli prefix will be added automatically
+  buckets:
     singular: "bucket"
     plural: "buckets"
     abbr: "B"
-  millibuckets_per_second:
+  buckets_per_second:
     singular: "bucket per second"
     plural: "buckets per second"
     abbr: "B/s"

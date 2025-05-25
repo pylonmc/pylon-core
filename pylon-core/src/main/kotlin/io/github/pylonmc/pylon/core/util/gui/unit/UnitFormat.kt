@@ -156,7 +156,7 @@ class UnitFormat @JvmOverloads constructor(
 
         @JvmField
         val MILLIBUCKETS = UnitFormat(
-            "millibuckets",
+            "buckets",
             TextColor.color(0xe3835f2),
             abbreviate = true,
             prefix = MetricPrefix.MILLI
@@ -164,7 +164,7 @@ class UnitFormat @JvmOverloads constructor(
 
         @JvmField
         val MILLIBUCKETS_PER_SECOND = UnitFormat(
-            "millibuckets_per_second",
+            "buckets_per_second",
             TextColor.color(0xe3835f2),
             abbreviate = true,
             prefix = MetricPrefix.MILLI
