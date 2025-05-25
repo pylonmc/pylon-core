@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.test.test.entity;
 
 import io.github.pylonmc.pylon.core.entity.EntityStorage;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
-import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.entity.SimpleEntity;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
@@ -19,7 +18,7 @@ public class EntityStorageChunkReloadTest extends AsyncTest {
     protected void test() {
         Chunk chunk = TestUtil.getRandomChunk(false).join();
         Location location = chunk.getBlock(5, 100, 5).getLocation();
-        SimpleEntity pylonEntity = TestUtil.runSync(() -> new SimpleEntity(Entities.SIMPLE_ENTITY, location)).join();
+        SimpleEntity pylonEntity = TestUtil.runSync(() -> new SimpleEntity(location)).join();
         UUID uuid = pylonEntity.getEntity().getUniqueId();
         EntityStorage.add(pylonEntity);
 

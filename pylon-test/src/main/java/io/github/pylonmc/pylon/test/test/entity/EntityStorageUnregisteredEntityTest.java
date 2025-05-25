@@ -2,15 +2,16 @@ package io.github.pylonmc.pylon.test.test.entity;
 
 import io.github.pylonmc.pylon.core.entity.EntityStorage;
 import io.github.pylonmc.pylon.core.entity.PylonEntity;
-import io.github.pylonmc.pylon.core.entity.PylonEntitySchema;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -18,33 +19,29 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class EntityStorageMissingSchemaTest extends AsyncTest {
+public class EntityStorageUnregisteredEntityTest extends AsyncTest {
 
-    public static class SimpleEntity extends PylonEntity<PylonEntitySchema, LivingEntity> {
+    public static class UnregisteredEntity extends PylonEntity<LivingEntity> {
 
-        public SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull Location location) {
-            super(schema, location.getWorld().spawn(location, Skeleton.class));
+        public static final NamespacedKey KEY = PylonTest.key("unregistered_entity");
+
+        public UnregisteredEntity(@NotNull Location location) {
+            super(KEY, location.getWorld().spawn(location, Skeleton.class));
         }
 
         @SuppressWarnings("unused")
-        public SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull LivingEntity entity) {
-            super(schema, entity);
+        public UnregisteredEntity(@NotNull LivingEntity entity, @NotNull PersistentDataContainer pdc) {
+            super(KEY, entity);
         }
     }
 
-    public static final PylonEntitySchema SIMPLE_ENTITY = new PylonEntitySchema(
-            PylonTest.key("entity_storage_missing_schema_test_entity"),
-            LivingEntity.class,
-            SimpleEntity.class
-    );
-
     @Override
     protected void test() {
-        SIMPLE_ENTITY.register();
+        PylonEntity.register(UnregisteredEntity.KEY, LivingEntity.class, UnregisteredEntity.class);
 
         Chunk chunk = TestUtil.getRandomChunk(false).join();
         Location location = chunk.getBlock(5, 100, 5).getLocation();
-        SimpleEntity pylonEntity = TestUtil.runSync(() -> new SimpleEntity(SIMPLE_ENTITY, location)).join();
+        UnregisteredEntity pylonEntity = TestUtil.runSync(() -> new UnregisteredEntity(location)).join();
         UUID uuid = pylonEntity.getEntity().getUniqueId();
         EntityStorage.add(pylonEntity);
 
@@ -52,11 +49,11 @@ public class EntityStorageMissingSchemaTest extends AsyncTest {
                 .isTrue();
         assertThat(EntityStorage.get(uuid))
                 .isNotNull()
-                .isInstanceOf(SimpleEntity.class);
+                .isInstanceOf(UnregisteredEntity.class);
         TestUtil.unloadChunk(chunk).join();
         TestUtil.waitUntil(() -> !chunk.isEntitiesLoaded()).join();
 
-        PylonRegistry.ENTITIES.unregister(SIMPLE_ENTITY);
+        PylonRegistry.ENTITIES.unregister(UnregisteredEntity.KEY);
 
         TestUtil.loadChunk(chunk).join();
         TestUtil.waitUntil(chunk::isEntitiesLoaded).join();
@@ -67,7 +64,7 @@ public class EntityStorageMissingSchemaTest extends AsyncTest {
         TestUtil.unloadChunk(chunk).join();
         TestUtil.waitUntil(() -> !chunk.isEntitiesLoaded()).join();
 
-        SIMPLE_ENTITY.register();
+        PylonEntity.register(UnregisteredEntity.KEY, LivingEntity.class, UnregisteredEntity.class);
 
         TestUtil.loadChunk(chunk).join();
         TestUtil.waitUntil(chunk::isEntitiesLoaded).join();
@@ -75,6 +72,6 @@ public class EntityStorageMissingSchemaTest extends AsyncTest {
                 .isTrue();
         assertThat(EntityStorage.get(uuid))
                 .isNotNull()
-                .isInstanceOf(SimpleEntity.class);
+                .isInstanceOf(UnregisteredEntity.class);
     }
 }

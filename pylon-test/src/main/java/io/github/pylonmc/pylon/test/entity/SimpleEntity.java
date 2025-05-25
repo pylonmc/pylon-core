@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.test.entity;
 
 import io.github.pylonmc.pylon.core.entity.PylonEntity;
-import io.github.pylonmc.pylon.core.entity.PylonEntitySchema;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -12,26 +11,27 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 
-public class SimpleEntity extends PylonEntity<PylonEntitySchema, LivingEntity> {
+public class SimpleEntity extends PylonEntity<LivingEntity> {
 
-    private final NamespacedKey key = PylonTest.key("some_quantity");
+    public static final NamespacedKey KEY = PylonTest.key("simple_entity");
+    private static final NamespacedKey QUANTITY_KEY = PylonTest.key("some_quantity");
     private final int someQuantity;
 
-    public SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull Location location) {
-        super(schema, location.getWorld().spawn(location, Skeleton.class));
+    public SimpleEntity(@NotNull Location location) {
+        super(KEY, location.getWorld().spawn(location, Skeleton.class));
         getEntity().setAI(false);
         someQuantity = 69;
     }
 
     @SuppressWarnings({"unused", "DataFlowIssue"})
-    public SimpleEntity(@NotNull PylonEntitySchema schema, @NotNull LivingEntity entity) {
-        super(schema, entity);
-        someQuantity = entity.getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
+    public SimpleEntity(@NotNull LivingEntity entity, @NotNull PersistentDataContainer pdc) {
+        super(KEY, entity);
+        someQuantity = pdc.get(QUANTITY_KEY, PersistentDataType.INTEGER);
     }
 
     @Override
     public void write(@NotNull PersistentDataContainer pdc) {
-        pdc.set(key, PersistentDataType.INTEGER, someQuantity);
+        pdc.set(QUANTITY_KEY, PersistentDataType.INTEGER, someQuantity);
     }
 
     public int getSomeQuantity() {

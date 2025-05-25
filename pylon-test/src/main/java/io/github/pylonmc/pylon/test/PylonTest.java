@@ -17,7 +17,7 @@ import io.github.pylonmc.pylon.test.test.block.SimpleMultiblockTest;
 import io.github.pylonmc.pylon.test.test.block.TickingBlockErrorTest;
 import io.github.pylonmc.pylon.test.test.block.TickingBlockTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
-import io.github.pylonmc.pylon.test.test.entity.EntityStorageMissingSchemaTest;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageUnregisteredEntityTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidConnectionTest;
 import io.github.pylonmc.pylon.test.test.fluid.FluidCyclicConnectionsTest;
@@ -113,7 +113,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new MobDropTest());
 
         tests.add(new EntityStorageSimpleTest());
-        tests.add(new EntityStorageMissingSchemaTest());
+        tests.add(new EntityStorageUnregisteredEntityTest());
         tests.add(new EntityStorageChunkReloadTest());
 
         tests.add(new FluidConnectionTest());
