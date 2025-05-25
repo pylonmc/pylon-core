@@ -153,14 +153,3 @@ unit:
     singular: "bucket per second"
     plural: "buckets per second"
     abbr: "B/s"
-
-quantity:
-  blocks: " blocks"
-  seconds: "s"
-  hearts: "❤"
-  percent: "%"
-  research_points: " points"
-  temperature: "°C"
-  fluid: " mB"
-  fluid_per_second: " mB/s"
-  chunks: " chunks"
