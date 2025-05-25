@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.util.gui.unit
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import java.math.BigDecimal
@@ -43,7 +44,7 @@ class UnitFormat @JvmOverloads constructor(
     fun format(value: Float) = format(BigDecimal.valueOf(value.toDouble()))
     fun format(value: Double) = format(BigDecimal.valueOf(value))
 
-    inner class Formatted internal constructor(private val value: BigDecimal) {
+    inner class Formatted internal constructor(private val value: BigDecimal) : ComponentLike {
         private var sigFigs = value.precision()
         private var decimalPlaces = value.scale()
         private var forceDecimalPlaces = false
@@ -72,7 +73,7 @@ class UnitFormat @JvmOverloads constructor(
             }
         }
 
-        fun toComponent(): Component {
+        override fun asComponent(): Component {
             var usedPrefix = prefix
             while (usedPrefix in badPrefixes) {
                 usedPrefix = MetricPrefix.entries[MetricPrefix.entries.indexOf(usedPrefix) + 1]
