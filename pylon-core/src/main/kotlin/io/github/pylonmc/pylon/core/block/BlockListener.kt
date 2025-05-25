@@ -51,11 +51,12 @@ internal object BlockListener : Listener {
         val player = event.player
 
         val pylonItem = PylonItem.fromStack(item)
-
         val pylonBlock = pylonItem?.schema?.place(BlockCreateContext.PlayerPlace(player, item, event.block))
-        if (pylonBlock == null) {
+
+        if (pylonItem != null && pylonBlock == null) {
             event.isCancelled = true
         }
+
         if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
             player.inventory.getItem(event.hand).subtract()
         }
