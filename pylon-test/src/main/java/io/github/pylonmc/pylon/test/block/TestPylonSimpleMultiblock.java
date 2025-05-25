@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.test.block;
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -23,18 +22,14 @@ public class TestPylonSimpleMultiblock extends PylonBlock implements PylonSimple
     private final Map<String, UUID> heldEntities;
 
     @SuppressWarnings("unused")
-    public TestPylonSimpleMultiblock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-        super(schema, block);
+    public TestPylonSimpleMultiblock(Block block, BlockCreateContext context) {
+        super(block);
         heldEntities = new HashMap<>();
     }
 
     @SuppressWarnings("unused")
-    public TestPylonSimpleMultiblock(
-            PylonBlockSchema schema,
-            Block block,
-            PersistentDataContainer pdc
-    ) {
-        super(schema, block);
+    public TestPylonSimpleMultiblock(Block block, PersistentDataContainer pdc) {
+        super(block);
         heldEntities = loadHeldEntities(pdc);
     }
 

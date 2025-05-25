@@ -3,11 +3,9 @@ package io.github.pylonmc.pylon.test.block;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.block.fluid.FluidConnector;
+import io.github.pylonmc.pylon.test.block.fluid.FluidConsumer;
 import io.github.pylonmc.pylon.test.block.fluid.FluidLimiter;
-import io.github.pylonmc.pylon.test.block.fluid.consumer.LavaConsumer;
-import io.github.pylonmc.pylon.test.block.fluid.consumer.WaterConsumer;
-import io.github.pylonmc.pylon.test.block.fluid.producer.LavaProducer;
-import io.github.pylonmc.pylon.test.block.fluid.producer.WaterProducer;
+import io.github.pylonmc.pylon.test.block.fluid.FluidProducer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 
@@ -24,10 +22,10 @@ public final class Blocks {
         PylonBlock.register(TestPylonSimpleMultiblock.KEY, Material.AMETHYST_BLOCK, TestPylonSimpleMultiblock.class);
         PylonBlock.register(TickingErrorBlock.KEY, Material.AMETHYST_BLOCK, TickingErrorBlock.class);
         PylonBlock.register(TickingBlock.KEY, Material.AMETHYST_BLOCK, TickingBlock.class);
-        PylonBlock.register(LavaConsumer.KEY, Material.AMETHYST_BLOCK, LavaConsumer.class);
-        PylonBlock.register(WaterConsumer.KEY, Material.AMETHYST_BLOCK, WaterConsumer.class);
-        PylonBlock.register(LavaProducer.KEY, Material.AMETHYST_BLOCK, LavaProducer.class);
-        PylonBlock.register(WaterProducer.KEY, Material.AMETHYST_BLOCK, WaterProducer.class);
+        PylonBlock.register(FluidConsumer.LAVA_CONSUMER_KEY, Material.AMETHYST_BLOCK, FluidConsumer.class);
+        PylonBlock.register(FluidConsumer.WATER_CONSUMER_KEY, Material.AMETHYST_BLOCK, FluidConsumer.class);
+        PylonBlock.register(FluidProducer.LAVA_PRODUCER_KEY, Material.AMETHYST_BLOCK, FluidProducer.class);
+        PylonBlock.register(FluidProducer.WATER_PRODUCER_KEY, Material.AMETHYST_BLOCK, FluidProducer.class);
         PylonBlock.register(FluidLimiter.KEY, Material.AMETHYST_BLOCK, FluidLimiter.class);
         PylonBlock.register(FluidConnector.KEY, Material.AMETHYST_BLOCK, FluidConnector.class);
     }

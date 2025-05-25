@@ -5,25 +5,30 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.key.getAddon
 import net.kyori.adventure.text.Component
+import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
-open class PylonItem(
-    val schema: PylonItemSchema,
-    val stack: ItemStack
-) {
+open class PylonItem(val stack: ItemStack) : Keyed {
 
-    val key = schema.key
+    private val key = stack.persistentDataContainer.get(PylonItemSchema.idKey, PylonSerializers.NAMESPACED_KEY)!!
+    val schema = PylonRegistry.ITEMS.getOrThrow(key)
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
+
+    fun getSettings()
+        = Companion.getSettings(key)
 
     override fun equals(other: Any?): Boolean
         = key == (other as? PylonItem)?.key
 
     override fun hashCode(): Int
         = key.hashCode()
+
+    override fun getKey(): NamespacedKey
+        = key
 
     open fun getPlaceholders(): Map<String, Component>
         = emptyMap()
@@ -52,7 +57,7 @@ open class PylonItem(
                 ?: return null
             val schema = PylonRegistry.ITEMS[id]
                 ?: return null
-            return schema.itemClass.cast(schema.loadConstructor.invoke(schema, stack))
+            return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
         }
 
         @JvmStatic

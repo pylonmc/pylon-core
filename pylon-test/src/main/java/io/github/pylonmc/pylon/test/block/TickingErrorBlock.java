@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.test.block;
 
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.NamespacedKey;
@@ -15,13 +14,13 @@ public class TickingErrorBlock extends PylonBlock implements PylonTickingBlock {
     public static final NamespacedKey KEY = PylonTest.key("ticking_error_block");
 
     @SuppressWarnings("unused")
-    public TickingErrorBlock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-        super(schema, block);
+    public TickingErrorBlock(Block block, BlockCreateContext context) {
+        super(block);
     }
 
     @SuppressWarnings("unused")
-    public TickingErrorBlock(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
-        super(schema, block);
+    public TickingErrorBlock(Block block, PersistentDataContainer pdc) {
+        super(block);
     }
 
     @Override

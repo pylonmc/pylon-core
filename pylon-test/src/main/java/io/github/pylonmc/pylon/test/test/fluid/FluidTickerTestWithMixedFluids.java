@@ -4,12 +4,8 @@ import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import io.github.pylonmc.pylon.test.block.fluid.FluidConnector;
-import io.github.pylonmc.pylon.test.block.fluid.consumer.FluidConsumer;
-import io.github.pylonmc.pylon.test.block.fluid.consumer.LavaConsumer;
-import io.github.pylonmc.pylon.test.block.fluid.consumer.WaterConsumer;
-import io.github.pylonmc.pylon.test.block.fluid.producer.FluidProducer;
-import io.github.pylonmc.pylon.test.block.fluid.producer.LavaProducer;
-import io.github.pylonmc.pylon.test.block.fluid.producer.WaterProducer;
+import io.github.pylonmc.pylon.test.block.fluid.FluidConsumer;
+import io.github.pylonmc.pylon.test.block.fluid.FluidProducer;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
@@ -24,12 +20,12 @@ public class FluidTickerTestWithMixedFluids extends AsyncTest {
 
         Block producerBlock1 = chunk.getBlock(2, 64, 4);
         FluidProducer producer1 = (FluidProducer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(producerBlock1, WaterProducer.KEY)
+                () -> BlockStorage.placeBlock(producerBlock1, FluidProducer.WATER_PRODUCER_KEY)
         ).join();
 
         Block producerBlock2 = chunk.getBlock(2, 64, 6);
         FluidProducer producer2 = (FluidProducer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(producerBlock2, LavaProducer.KEY)
+                () -> BlockStorage.placeBlock(producerBlock2, FluidProducer.LAVA_PRODUCER_KEY)
         ).join();
 
         Block connectorBlock = chunk.getBlock(4, 64, 5);
@@ -39,12 +35,12 @@ public class FluidTickerTestWithMixedFluids extends AsyncTest {
 
         Block consumerBlock1 = chunk.getBlock(6, 64, 4);
         FluidConsumer consumer1 = (FluidConsumer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(consumerBlock1, WaterConsumer.KEY)
+                () -> BlockStorage.placeBlock(consumerBlock1, FluidConsumer.WATER_CONSUMER_KEY)
         ).join();
 
         Block consumerBlock2 = chunk.getBlock(6, 64, 6);
         FluidConsumer consumer2 = (FluidConsumer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(consumerBlock2, LavaConsumer.KEY)
+                () -> BlockStorage.placeBlock(consumerBlock2, FluidConsumer.LAVA_CONSUMER_KEY)
         ).join();
 
         TestUtil.runSync(() -> {

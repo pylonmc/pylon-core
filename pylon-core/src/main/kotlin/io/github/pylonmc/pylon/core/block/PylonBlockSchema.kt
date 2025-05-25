@@ -3,6 +3,8 @@ package io.github.pylonmc.pylon.core.block
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import io.github.pylonmc.pylon.core.util.key.getAddon
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
+import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -23,8 +25,7 @@ class PylonBlockSchema(
     val addon = getAddon(key)
 
     @JvmSynthetic
-    internal val createConstructor: MethodHandle = blockClass.findConstructorMatching(
-        javaClass,
+    private val createConstructor: MethodHandle = blockClass.findConstructorMatching(
         Block::class.java,
         BlockCreateContext::class.java
     ) ?: throw NoSuchMethodException(
@@ -32,17 +33,32 @@ class PylonBlockSchema(
     )
 
     @JvmSynthetic
-    internal val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
-        javaClass,
+    private val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
         Block::class.java,
         PersistentDataContainer::class.java
     ) ?: throw NoSuchMethodException(
         "Block '$key' ($blockClass) is missing a load constructor (${javaClass.simpleName}, Block, PersistentDataContainer)"
     )
 
+    fun create(block: Block, context: BlockCreateContext): PylonBlock {
+        schemaCache[block.position] = this
+        return createConstructor.invoke(block, context) as PylonBlock
+    }
+
+    fun load(block: Block, pdc: PersistentDataContainer): PylonBlock {
+        schemaCache[block.position] = this
+        return loadConstructor.invoke(block, pdc) as PylonBlock
+    }
+
     override fun getKey(): NamespacedKey = key
 
     override fun equals(other: Any?): Boolean = key == (other as? PylonBlockSchema)?.key
 
     override fun hashCode(): Int = key.hashCode()
+
+    companion object {
+
+        // This exists to avoid having to pass a key to the PylonBlock constructor
+        val schemaCache: MutableMap<BlockPosition, PylonBlockSchema> = mutableMapOf()
+    }
 }
