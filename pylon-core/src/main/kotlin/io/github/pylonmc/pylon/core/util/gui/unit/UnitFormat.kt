@@ -124,13 +124,6 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
-        val SECONDS = UnitFormat(
-            "seconds",
-            TextColor.color(0xc9c786),
-            abbreviate = true
-        )
-
-        @JvmField
         val HEARTS = UnitFormat("hearts", TextColor.color(0xdb3b43), abbreviate = true)
 
         @JvmField
@@ -168,6 +161,34 @@ class UnitFormat @JvmOverloads constructor(
             TextColor.color(0xe3835f2),
             abbreviate = true,
             prefix = MetricPrefix.MILLI
+        )
+
+        @JvmField
+        val DAYS = UnitFormat(
+            "days",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
+        val HOURS = UnitFormat(
+            "hours",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
+        val MINUTES = UnitFormat(
+            "minutes",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
+        val SECONDS = UnitFormat(
+            "seconds",
+            TextColor.color(0xc9c786),
+            abbreviate = true
         )
     }
 }

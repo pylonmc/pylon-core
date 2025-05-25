@@ -131,10 +131,6 @@ unit:
   chunks:
     singular: "chunk"
     plural: "chunks"
-  seconds:
-    singular: "second"
-    plural: "seconds"
-    abbr: "s"
   hearts:
     singular: "heart"
     plural: "hearts"
@@ -158,3 +154,19 @@ unit:
     singular: "bucket per second"
     plural: "buckets per second"
     abbr: "B/s"
+  days:
+    singular: "day"
+    plural: "days"
+    abbr: "d"
+  hours:
+    singular: "hour"
+    plural: "hours"
+    abbr: "h"
+  minutes:
+    singular: "minute"
+    plural: "minutes"
+    abbr: "m"
+  seconds:
+    singular: "second"
+    plural: "seconds"
+    abbr: "s"
