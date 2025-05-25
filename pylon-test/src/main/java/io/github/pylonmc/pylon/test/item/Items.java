@@ -15,12 +15,12 @@ public final class Items {
     private Items() {}
 
     public static final NamespacedKey STICKY_STICK_KEY = PylonTest.key("sticky_stick");
-    public static final ItemStack STICKY_STICK_ITEM_STACK = ItemStackBuilder.pylonItem(Material.STICK, STICKY_STICK_KEY)
+    public static final ItemStack STICKY_STICK_STACK = ItemStackBuilder.pylonItem(Material.STICK, STICKY_STICK_KEY)
             .set(DataComponentTypes.ITEM_NAME, Component.text("Sticky Stick"))
             .build();
 
     public static void register() {
-        PylonItem.register(PylonItem.class, STICKY_STICK_ITEM_STACK);
-        PylonItem.register(OminousBlazePower.class, OminousBlazePower.ITEM_STACK);
+        PylonItem.register(PylonItem.class, STICKY_STICK_STACK);
+        PylonItem.register(OminousBlazePower.class, OminousBlazePower.STACK);
     }
 }
