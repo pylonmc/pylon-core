@@ -11,13 +11,14 @@ import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataContainer
 
 
-open class PylonEntity<out E: Entity> protected constructor(
-    key: NamespacedKey,
-    val entity: E
-) {
+abstract class PylonEntity<out E: Entity>(val entity: E) {
 
+    val key = entity.persistentDataContainer.get(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY)
+        ?: throw IllegalStateException("Entity did not have a Pylon key; did you mean to call PylonEntity(NamespacedKey, Entity) instead of PylonEntity(Entity)?")
     val schema = PylonRegistry.ENTITIES.getOrThrow(key)
     val uuid = entity.uniqueId
+
+    constructor(key: NamespacedKey, entity: E): this(initialisePylonEntity<E>(key, entity))
 
     open fun getWaila(player: Player): WailaConfig? = null
 
@@ -37,10 +38,14 @@ open class PylonEntity<out E: Entity> protected constructor(
         }
 
         @JvmSynthetic
+        internal fun <E: Entity> initialisePylonEntity(key: NamespacedKey, entity: E): E {
+            entity.persistentDataContainer.set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, key)
+            return entity
+        }
+
+        @JvmSynthetic
         internal fun serialize(pylonEntity: PylonEntity<*>) {
             pylonEntity.write(pylonEntity.entity.persistentDataContainer)
-            pylonEntity.entity.persistentDataContainer
-                .set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, pylonEntity.schema.key)
         }
 
         @JvmSynthetic
@@ -62,7 +67,7 @@ open class PylonEntity<out E: Entity> protected constructor(
                 }
 
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                return schema.loadConstructor.invoke(entity, entity.persistentDataContainer) as PylonEntity<*>
+                return schema.loadConstructor.invoke(entity) as PylonEntity<*>
 
             } catch (t: Throwable) {
                 PylonCore.logger.severe("Error while loading entity $key with UUID ${entity.uniqueId}")

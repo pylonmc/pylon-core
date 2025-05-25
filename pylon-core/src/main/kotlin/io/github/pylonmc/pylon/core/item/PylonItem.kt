@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Contract
 
 open class PylonItem(val stack: ItemStack) : Keyed {
 
-    private val key = stack.persistentDataContainer.get(PylonItemSchema.idKey, PylonSerializers.NAMESPACED_KEY)!!
+    private val key = stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
     val schema = PylonRegistry.ITEMS.getOrThrow(key)
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon

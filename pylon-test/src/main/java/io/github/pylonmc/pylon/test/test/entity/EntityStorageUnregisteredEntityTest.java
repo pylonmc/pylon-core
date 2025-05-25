@@ -11,7 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -30,8 +29,8 @@ public class EntityStorageUnregisteredEntityTest extends AsyncTest {
         }
 
         @SuppressWarnings("unused")
-        public UnregisteredEntity(@NotNull LivingEntity entity, @NotNull PersistentDataContainer pdc) {
-            super(KEY, entity);
+        public UnregisteredEntity(@NotNull LivingEntity entity) {
+            super(entity);
         }
     }
 

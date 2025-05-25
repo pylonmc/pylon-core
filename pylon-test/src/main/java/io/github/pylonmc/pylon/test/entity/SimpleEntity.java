@@ -24,9 +24,9 @@ public class SimpleEntity extends PylonEntity<LivingEntity> {
     }
 
     @SuppressWarnings({"unused", "DataFlowIssue"})
-    public SimpleEntity(@NotNull LivingEntity entity, @NotNull PersistentDataContainer pdc) {
-        super(KEY, entity);
-        someQuantity = pdc.get(QUANTITY_KEY, PersistentDataType.INTEGER);
+    public SimpleEntity(@NotNull LivingEntity entity) {
+        super(entity);
+        someQuantity = entity.getPersistentDataContainer().get(QUANTITY_KEY, PersistentDataType.INTEGER);
     }
 
     @Override

@@ -66,8 +66,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         registerWithPylon()
 
-        PylonItem.register(DebugWaxedWeatheredCutCopperStairs::class.java, DebugWaxedWeatheredCutCopperStairs.ITEM_STACK)
-        PylonItem.register(PhantomBlock.ErrorItem::class.java, PhantomBlock.ErrorItem.ITEM_STACK)
+        PylonItem.register(DebugWaxedWeatheredCutCopperStairs::class.java, DebugWaxedWeatheredCutCopperStairs.STACK)
+        PylonItem.register(PhantomBlock.ErrorItem::class.java, PhantomBlock.ErrorItem.STACK)
         PylonEntity.register(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
             BlockDisplay::class.java,

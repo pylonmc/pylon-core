@@ -40,8 +40,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
     class MultiblockGhostBlock(entity: BlockDisplay, val name: String)
         : PylonEntity<BlockDisplay>(KEY, entity), PylonInteractableEntity {
 
-        constructor(entity: BlockDisplay, pdc: PersistentDataContainer)
-            : this(entity, pdc.get(NAME_KEY, PylonSerializers.STRING)!!)
+        constructor(entity: BlockDisplay)
+            : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
 
         override fun onInteract(event: PlayerInteractEntityEvent) {
             event.player.sendMessage(name)
