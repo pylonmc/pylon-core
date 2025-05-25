@@ -2,6 +2,8 @@
 
 package io.github.pylonmc.pylon.core.item.builder
 
+import io.github.pylonmc.pylon.core.util.gui.unit.MetricPrefix
+import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TextReplacementConfig
@@ -13,13 +15,15 @@ import net.kyori.adventure.text.minimessage.tag.Modifying
 import net.kyori.adventure.text.minimessage.tag.Tag
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
 val customMiniMessage = MiniMessage.builder()
     .tags(TagResolver.standard())
     .editTags {
         it.tag("arrow", ::arrow)
         it.tag(setOf("instruction", "insn")) { _, _ -> Tag.styling(TextColor.color(0xf9d104)) }
-        it.tag(setOf("attribute", "attr"), ::attr)
+        it.tag(setOf("attribute", "attr")) { _, _ -> Tag.styling(TextColor.color(0xa9d9e8)) }
+        it.tag(setOf("unit", "u"), ::unit)
         // No break space
         it.tag(setOf("nbsp", "nb"), ::nbsp)
         it.tag("star", ::star)
@@ -37,17 +41,22 @@ private fun star(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
     return Tag.selfClosingInserting(Component.text("\u2605").color(color))
 }
 
-private fun attr(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
-    val name = args.popOr("Attribute name not present").value()
-    val quantity = args.peek()?.value()?.let(Quantity::byName)
+private fun unit(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
+    val args = args.iterator().asSequence().toList()
+    val (prefix, unitName) = when (args.size) {
+        2 -> enumValueOf<MetricPrefix>(args[0].value().uppercase()) to args[1].value()
+        1 -> null to args[0].value()
+        else -> throw ctx.newException("Expected 1 or 2 arguments, got ${args.size}")
+    }
+    val unit = UnitFormat.allUnits[unitName]
+        ?: throw ctx.newException("No such unit: $unitName")
     return Replacing {
-        val component = Component.text()
-            .append(Component.text("$name: ").color(TextColor.color(0xa9d9e8)))
-            .append(it.color(NamedTextColor.WHITE))
-        if (quantity != null) {
-            component.append(quantity)
-        }
-        component
+        val content = PlainTextComponentSerializer.plainText().serialize(it).trim()
+        val number = content.toBigDecimalOrNull() ?: throw ctx.newException("Expected a number, got '$content'")
+        unit.format(number)
+            .prefix(prefix ?: MetricPrefix.NONE)
+            .abbreviate(true)
+            .toComponent()
     }
 }
 
@@ -73,5 +82,12 @@ private inline fun Replacing(crossinline block: (Component) -> ComponentLike): T
     return Modifying { current, depth ->
         if (depth == 0) block(current).asComponent()
         else Component.empty()
+    }
+}
+
+private operator fun ArgumentQueue.iterator(): Iterator<Tag.Argument> {
+    return object : Iterator<Tag.Argument> {
+        override fun hasNext() = peek() != null
+        override fun next() = popOr("No more arguments available")
     }
 }
