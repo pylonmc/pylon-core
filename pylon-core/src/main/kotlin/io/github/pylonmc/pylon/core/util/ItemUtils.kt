@@ -7,7 +7,7 @@ import io.papermc.paper.datacomponent.DataComponentType
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-fun findPylonItemInInventory(inventory: Inventory, targetItem: PylonItem<*>): Int? {
+fun findPylonItemInInventory(inventory: Inventory, targetItem: PylonItem): Int? {
     for (i in 0..<inventory.size) {
         val item = inventory.getItem(i)?.let {
             PylonItem.fromStack(it)
@@ -43,7 +43,7 @@ fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
         return false
     }
 
-    return pylonItem1.id == pylonItem2.id
+    return pylonItem1.schema.key == pylonItem2.schema.key
 }
 
 @JvmSynthetic

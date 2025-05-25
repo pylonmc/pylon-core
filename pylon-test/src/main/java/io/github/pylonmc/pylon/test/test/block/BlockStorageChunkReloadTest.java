@@ -1,17 +1,17 @@
 package io.github.pylonmc.pylon.test.test.block;
 
+import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
-import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition;
-import io.github.pylonmc.pylon.test.block.BlockWithField;
-import io.github.pylonmc.pylon.test.block.Blocks;
-import io.github.pylonmc.pylon.test.util.TestUtil;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
+import io.github.pylonmc.pylon.test.block.BlockWithField;
+import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +32,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
             futures.add(TestUtil.runAsync(() -> {
                 TestUtil.loadChunk(chunk).join();
                 TestUtil.runSync(() -> {
-                    BlockStorage.placeBlock(block, Blocks.BLOCK_WITH_FIELD);
+                    BlockStorage.placeBlock(block, BlockWithField.KEY);
                 }).join();
                 TestUtil.unloadChunk(chunk).join();
 

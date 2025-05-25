@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack
  */
 class PylonBlockBreakEvent(
     val block: Block,
-    val pylonBlock: PylonBlock<*>,
+    val pylonBlock: PylonBlock,
     val context: BlockBreakContext,
     val drops: MutableList<ItemStack>
 ) : Event(){

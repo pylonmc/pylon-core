@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.util.UUID
 import java.util.function.Predicate
+import kotlin.math.absoluteValue
 import kotlin.math.min
 
 /**
@@ -46,7 +47,7 @@ object FluidManager {
 
     private class Segment(
         val points: MutableSet<FluidConnectionPoint> = mutableSetOf(),
-        var fluidPerTick: Long = Long.MAX_VALUE,
+        var fluidPerSecond: Double = Double.MAX_VALUE,
         var predicate: Predicate<PylonFluid>? = null,
     )
 
@@ -137,9 +138,9 @@ object FluidManager {
      * being connected is selected, and its segment's flow rate is copied to the new segment).
      */
     @JvmStatic
-    fun setFluidPerTick(segment: UUID, fluidPerTick: Long) {
+    fun setFluidPerSecond(segment: UUID, fluidPerSecond: Double) {
         check(segment in segments) { "Segment does not exist" }
-        segments[segment]!!.fluidPerTick = fluidPerTick
+        segments[segment]!!.fluidPerSecond = fluidPerSecond
     }
 
     /**
@@ -206,7 +207,7 @@ object FluidManager {
             val newSegment = UUID.randomUUID()
             segments[newSegment] = Segment(
                 mutableSetOf(),
-                segments[point1.segment]!!.fluidPerTick,
+                segments[point1.segment]!!.fluidPerSecond,
                 segments[point1.segment]!!.predicate
             )
             startTicker(newSegment)
@@ -248,25 +249,25 @@ object FluidManager {
     /**
      * A temporary representation of a block supplying a specific fluid. Exists to make ticking logic nicer.
      */
-    data class FluidSupplier(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
+    data class FluidSupplier(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Double)
 
     /**
      * A temporary representation of a block requesting a specific fluid. Exists to make ticking logic nicer.
      */
-    data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Long)
+    data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Double)
 
     @JvmStatic
-    fun getSuppliedFluids(point: FluidConnectionPoint): Set<FluidSupplier> {
+    fun getSuppliedFluids(point: FluidConnectionPoint, deltaSeconds: Double): Set<FluidSupplier> {
         check(point.type == FluidConnectionPoint.Type.OUTPUT) { "Can only get supplied fluids of output point" }
 
         val block: PylonFluidBlock
-        val blockSuppliedFluids: Map<PylonFluid, Long>
+        val blockSuppliedFluids: Map<PylonFluid, Double>
         try {
             if (!point.position.chunk.isLoaded) {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockSuppliedFluids = block.getSuppliedFluids(point.name)
+            blockSuppliedFluids = block.getSuppliedFluids(point.name, deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -274,18 +275,18 @@ object FluidManager {
 
         val suppliedFluids: MutableSet<FluidSupplier> = mutableSetOf()
         for ((fluid, amount) in blockSuppliedFluids) {
-            if (amount != 0L) {
-                suppliedFluids.add(FluidSupplier(block, point.name, fluid, amount * PylonConfig.fluidIntervalTicks))
+            if (amount.absoluteValue > 1.0e-9) {
+                suppliedFluids.add(FluidSupplier(block, point.name, fluid,amount))
             }
         }
         return suppliedFluids
     }
 
     @JvmStatic
-    fun getSuppliedFluids(segment: UUID): Map<PylonFluid, Set<FluidSupplier>> {
+    fun getSuppliedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidSupplier>> {
         val suppliedFluids: MutableMap<PylonFluid, MutableSet<FluidSupplier>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.OUTPUT)) {
-            for (supplier in getSuppliedFluids(point)) {
+            for (supplier in getSuppliedFluids(point, deltaSeconds)) {
                 suppliedFluids.getOrPut(supplier.fluid, ::mutableSetOf).add(supplier)
             }
         }
@@ -293,17 +294,17 @@ object FluidManager {
     }
 
     @JvmStatic
-    fun getRequestedFluids(point: FluidConnectionPoint): Set<FluidRequester> {
+    fun getRequestedFluids(point: FluidConnectionPoint, deltaSeconds: Double): Set<FluidRequester> {
         check(point.type == FluidConnectionPoint.Type.INPUT) { "Can only get requested fluids of input point" }
 
         val block: PylonFluidBlock
-        val blockRequestedFluids: Map<PylonFluid, Long>
+        val blockRequestedFluids: Map<PylonFluid, Double>
         try {
             if (!point.position.chunk.isLoaded) {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockRequestedFluids = block.getRequestedFluids(point.name)
+            blockRequestedFluids = block.getRequestedFluids(point.name, deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -312,27 +313,27 @@ object FluidManager {
         // Create requester for each request
         val requestedFluids: MutableSet<FluidRequester> = mutableSetOf()
         for ((fluid, amount) in blockRequestedFluids) {
-            if (amount != 0L) {
-                requestedFluids.add(FluidRequester(block, point.name, fluid, amount * PylonConfig.fluidIntervalTicks))
+            if (amount.absoluteValue > 1.0e-9) {
+                requestedFluids.add(FluidRequester(block, point.name, fluid, amount))
             }
         }
         return requestedFluids
     }
 
     @JvmStatic
-    fun getRequestedFluids(segment: UUID): Map<PylonFluid, Set<FluidRequester>> {
+    fun getRequestedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidRequester>> {
         val requestedFluids: MutableMap<PylonFluid, MutableSet<FluidRequester>> = mutableMapOf()
         for (point in getPoints(segment, FluidConnectionPoint.Type.INPUT)) {
-            for (requester in getRequestedFluids(point)) {
+            for (requester in getRequestedFluids(point, deltaSeconds)) {
                 requestedFluids.getOrPut(requester.fluid, ::mutableSetOf).add(requester)
             }
         }
         return requestedFluids
     }
 
-    private fun tick(segment: UUID) {
-        val suppliedFluids = getSuppliedFluids(segment)
-        val requestedFluids = getRequestedFluids(segment)
+    private fun tick(segment: UUID, deltaSeconds: Double) {
+        val suppliedFluids = getSuppliedFluids(segment, deltaSeconds)
+        val requestedFluids = getRequestedFluids(segment, deltaSeconds)
 
         for ((fluid, suppliers) in suppliedFluids) {
             val predicate = segments[segment]!!.predicate
@@ -346,14 +347,14 @@ object FluidManager {
             }
 
             // Take fluids on a first-come-first-serve basis from suppliers
-            val totalRequested = min(requesters.sumOf { it.amount }, segments[segment]!!.fluidPerTick)
-            if (totalRequested == 0L) {
+            val totalRequested = min(requesters.sumOf { it.amount }, segments[segment]!!.fluidPerSecond * deltaSeconds)
+            if (totalRequested.absoluteValue < 1.0e-9) {
                 continue
             }
-            var totalSupplied = 0L
+            var totalSupplied = 0.0
             for (supplier in suppliers) {
                 val remaining = totalRequested - totalSupplied
-                if (remaining == 0L) {
+                if (remaining.absoluteValue < 1.0e-9) {
                     break
                 }
 
@@ -368,15 +369,10 @@ object FluidManager {
             }
 
             // Round-robin distribute to requesters
-            while (totalSupplied != 0L) {
-                val maxFluidPerRequester = if (totalSupplied / requesters.size != 0L) {
-                    totalSupplied / requesters.size
-                } else {
-                    // eg: splitting 3 mB amongst 5 requesters
-                    1
-                }
+            while (totalSupplied.absoluteValue > 1.0e-9) {
+                val maxFluidPerRequester = totalSupplied / requesters.size
                 val iterator = requesters.iterator()
-                while (iterator.hasNext() && totalSupplied != 0L) {
+                while (iterator.hasNext()) {
                     val requester = iterator.next()
                     if (requester.amount < maxFluidPerRequester) {
                         requester.block.addFluid(requester.name, requester.fluid, requester.amount)
@@ -398,9 +394,12 @@ object FluidManager {
         check(segment !in tickers) { "Ticker already active" }
 
         tickers[segment] = PylonCore.launch {
+            var lastTickNanos = System.nanoTime()
             while (true) {
                 delay(PylonConfig.fluidIntervalTicks.ticks)
-                tick(segment)
+                val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
+                lastTickNanos = System.nanoTime()
+                tick(segment, dt)
             }
         }
     }

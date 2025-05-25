@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
@@ -38,11 +37,11 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         fun spawnGhostBlock(block: Block): UUID
     }
 
-    class MultiblockGhostBlock(schema: PylonEntitySchema, entity: BlockDisplay, val name: String)
-        : PylonEntity<PylonEntitySchema, BlockDisplay>(schema, entity), PylonInteractableEntity {
+    class MultiblockGhostBlock(entity: BlockDisplay, val name: String)
+        : PylonEntity<BlockDisplay>(KEY, entity), PylonInteractableEntity {
 
-        constructor(schema: PylonEntitySchema, entity: BlockDisplay)
-            : this(schema, entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
+        constructor(entity: BlockDisplay)
+            : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
 
         override fun onInteract(event: PlayerInteractEntityEvent) {
             event.player.sendMessage(name)
@@ -53,6 +52,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
 
         companion object {
+            val KEY = pylonKey("multiblock_ghost_block")
             val NAME_KEY = pylonKey("name")
         }
     }
@@ -66,7 +66,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
                 .material(material)
                 .transformation(TransformBuilder().scale(0.5))
                 .build(block.location.toCenterLocation())
-            EntityStorage.add(MultiblockGhostBlock(GHOST_BLOCK_SCHEMA, display, material.name))
+            EntityStorage.add(MultiblockGhostBlock(display, material.name))
             return display.uniqueId
         }
     }
@@ -82,7 +82,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
                 .material(schema.material)
                 .transformation(TransformBuilder().scale(0.7))
                 .build(block.location.toCenterLocation())
-            EntityStorage.add(MultiblockGhostBlock(GHOST_BLOCK_SCHEMA, display, key.key))
+            EntityStorage.add(MultiblockGhostBlock(display, key.key))
             return display.uniqueId
         }
     }
@@ -161,14 +161,6 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
 
     companion object : Listener {
-
-        @JvmSynthetic
-        internal val GHOST_BLOCK_SCHEMA = PylonEntitySchema(
-            pylonKey("multiblock_ghost_block"),
-            BlockDisplay::class.java,
-            MultiblockGhostBlock::class.java
-        )
-
         @EventHandler
         private fun onPlace(event: PylonBlockPlaceEvent) {
             val block = event.pylonBlock

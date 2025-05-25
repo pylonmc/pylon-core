@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import org.bukkit.block.Block
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
@@ -12,7 +12,7 @@ import org.bukkit.event.HandlerList
  */
 class PrePylonBlockPlaceEvent(
     val block: Block,
-    val pylonBlock: PylonBlock<*>,
+    val pylonBlock: PylonBlock,
     val context: BlockCreateContext,
 ) : Event(), Cancellable {
 

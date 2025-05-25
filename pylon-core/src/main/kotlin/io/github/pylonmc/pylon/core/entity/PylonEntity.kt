@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.entity
 
-import com.google.common.base.Supplier
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -12,20 +11,14 @@ import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataContainer
 
 
-abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected constructor(
-    val schema: S,
-    val entity: E
-) {
+abstract class PylonEntity<out E: Entity>(val entity: E) {
 
-    protected constructor(schema: S, supplier: Supplier<E>): this(schema, supplier.get())
-
-    init {
-        require(PylonRegistry.ENTITIES.contains(schema.key)) {
-            "You can only create entities using a registered schema; did you forget to register ${schema.key}?"
-        }
-    }
-
+    val key = entity.persistentDataContainer.get(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY)
+        ?: throw IllegalStateException("Entity did not have a Pylon key; did you mean to call PylonEntity(NamespacedKey, Entity) instead of PylonEntity(Entity)?")
+    val schema = PylonRegistry.ENTITIES.getOrThrow(key)
     val uuid = entity.uniqueId
+
+    constructor(key: NamespacedKey, entity: E): this(initialisePylonEntity<E>(key, entity))
 
     open fun getWaila(player: Player): WailaConfig? = null
 
@@ -37,17 +30,26 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
 
     companion object {
 
-        private val pylonEntityKeyKey = pylonKey("entity_schema_key")
+        private val pylonEntityKeyKey = pylonKey("pylon_entity_key")
 
-        @JvmSynthetic
-        internal fun serialize(pylonEntity: PylonEntity<*, *>) {
-            pylonEntity.write(pylonEntity.entity.persistentDataContainer)
-            pylonEntity.entity.persistentDataContainer
-                .set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, pylonEntity.schema.key)
+        @JvmStatic
+        fun register(key: NamespacedKey, entityClass: Class<*>, pylonEntityClass: Class<out PylonEntity<*>>) {
+            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, entityClass, pylonEntityClass))
         }
 
         @JvmSynthetic
-        internal fun deserialize(entity: Entity): PylonEntity<*, *>? {
+        internal fun <E: Entity> initialisePylonEntity(key: NamespacedKey, entity: E): E {
+            entity.persistentDataContainer.set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, key)
+            return entity
+        }
+
+        @JvmSynthetic
+        internal fun serialize(pylonEntity: PylonEntity<*>) {
+            pylonEntity.write(pylonEntity.entity.persistentDataContainer)
+        }
+
+        @JvmSynthetic
+        internal fun deserialize(entity: Entity): PylonEntity<*>? {
             // Stored outside of the try block so it is displayed in error messages once acquired
             var key: NamespacedKey? = null
 
@@ -65,7 +67,7 @@ abstract class PylonEntity<out S : PylonEntitySchema, out E: Entity> protected c
                 }
 
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                return schema.loadConstructor.invoke(schema, entity) as PylonEntity<*, *>
+                return schema.loadConstructor.invoke(entity) as PylonEntity<*>
 
             } catch (t: Throwable) {
                 PylonCore.logger.severe("Error while loading entity $key with UUID ${entity.uniqueId}")
