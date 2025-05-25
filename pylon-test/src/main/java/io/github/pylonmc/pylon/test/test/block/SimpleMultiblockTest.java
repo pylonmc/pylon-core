@@ -29,15 +29,15 @@ public class SimpleMultiblockTest extends AsyncTest {
         Location component1Location = multiblockLocation.clone().add(1, 1, 4);
         Location component2Location = multiblockLocation.clone().add(2, -1, 0);
 
-        TestUtil.runSync(() -> BlockStorage.placeBlock(multiblockLocation, Blocks.SIMPLE_MULTIBLOCK)).join();
+        TestUtil.runSync(() -> BlockStorage.placeBlock(multiblockLocation, TestPylonSimpleMultiblock.KEY)).join();
         TestUtil.sleepTicks(2).join();
         assertMultiblockFormed(multiblockLocation, false);
 
-        TestUtil.runSync(() -> BlockStorage.placeBlock(component1Location, Blocks.SIMPLE_BLOCK)).join();
+        TestUtil.runSync(() -> BlockStorage.placeBlock(component1Location, Blocks.SIMPLE_BLOCK_KEY)).join();
         TestUtil.sleepTicks(2).join();
         assertMultiblockFormed(multiblockLocation, false);
 
-        TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, Blocks.SIMPLE_BLOCK)).join();
+        TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, Blocks.SIMPLE_BLOCK_KEY)).join();
         TestUtil.sleepTicks(2).join();
         assertMultiblockFormed(multiblockLocation, true);
 
@@ -50,13 +50,13 @@ public class SimpleMultiblockTest extends AsyncTest {
         TestUtil.loadChunk(chunk).join();
         chunk.setForceLoaded(true);
 
-        TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, Blocks.SIMPLE_BLOCK)).join();
+        TestUtil.runSync(() -> BlockStorage.placeBlock(component2Location, Blocks.SIMPLE_BLOCK_KEY)).join();
         TestUtil.sleepTicks(2).join();
         assertMultiblockFormed(multiblockLocation, true);
 
         TestUtil.runSync(() -> {
             BlockStorage.breakBlock(multiblockLocation);
-            BlockStorage.placeBlock(multiblockLocation, Blocks.SIMPLE_MULTIBLOCK);
+            BlockStorage.placeBlock(multiblockLocation, TestPylonSimpleMultiblock.KEY);
         }).join();
         TestUtil.sleepTicks(2).join();
         assertMultiblockFormed(multiblockLocation, true);

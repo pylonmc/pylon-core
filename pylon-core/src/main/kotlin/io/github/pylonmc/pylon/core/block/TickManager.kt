@@ -26,10 +26,10 @@ import java.util.logging.Level.SEVERE
 
 object TickManager : Listener {
 
-    private val tickingBlocks: MutableMap<PylonBlock<*>, Job> = ConcurrentHashMap()
+    private val tickingBlocks: MutableMap<PylonBlock, Job> = ConcurrentHashMap()
 
     @JvmStatic
-    fun isTicking(block: PylonBlock<*>): Boolean {
+    fun isTicking(block: PylonBlock): Boolean {
         return tickingBlocks[block]?.isActive == true
     }
 
@@ -56,7 +56,7 @@ object TickManager : Listener {
         tickingBlocks.remove(e.pylonBlock)?.cancel()
     }
 
-    private fun startTicker(pylonBlock: PylonBlock<*>) {
+    private fun startTicker(pylonBlock: PylonBlock) {
         if (pylonBlock is PylonTickingBlock) {
             val dispatcher =
                 if (pylonBlock.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
@@ -78,7 +78,7 @@ object TickManager : Listener {
         }
     }
 
-    private suspend fun handleBlockError(pylonBlock: PylonBlock<*>, error: Throwable, errors: Int) {
+    private suspend fun handleBlockError(pylonBlock: PylonBlock, error: Throwable, errors: Int) {
         // Drop onto main thread for error logging and stuff
         withContext(PylonCore.minecraftDispatcher) {
             val block = pylonBlock.block

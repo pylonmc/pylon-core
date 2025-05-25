@@ -50,6 +50,14 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
         return false
     }
 
+    fun addScalar(x: Int, y: Int, z: Int): BlockPosition {
+        return BlockPosition(world, this.x + x, this.y + y, this.z + z)
+    }
+
+    fun withScalar(x: Int, y: Int, z: Int): BlockPosition {
+        return BlockPosition(world, x, y, z)
+    }
+
     operator fun plus(other: BlockPosition): BlockPosition {
         check(world == other.world) { "Cannot add two BlockPositions in different worlds" }
         return BlockPosition(world, x + other.x, y + other.y, z + other.z)

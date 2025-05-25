@@ -1,8 +1,10 @@
 package io.github.pylonmc.pylon.core.item.builder
 
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper
+import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.papermc.paper.datacomponent.DataComponentBuilder
@@ -11,12 +13,15 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.translation.GlobalTranslator
 import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataContainer
 import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
 
@@ -51,6 +56,10 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
         stack.editMeta(consumer)
     }
 
+    fun editPdc(consumer: Consumer<PersistentDataContainer>) = apply {
+        stack.editPersistentDataContainer(consumer)
+    }
+
     fun name(name: Component) = set(DataComponentTypes.ITEM_NAME, name)
 
     fun name(name: String) = name(fromMiniMessage(name))
@@ -58,12 +67,14 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
     fun defaultTranslatableName(key: NamespacedKey) =
         name(Component.translatable("pylon.${key.namespace}.item.${key.key}.name"))
 
-    fun lore(vararg loreToAdd: ComponentLike) = apply {
+    fun lore(loreToAdd: List<ComponentLike>) = apply {
         val lore = ItemLore.lore()
         stack.getData(DataComponentTypes.LORE)?.let { lore.addLines(it.lines()) }
-        lore.addLines(loreToAdd.toList())
+        lore.addLines(loreToAdd)
         stack.setData(DataComponentTypes.LORE, lore)
     }
+
+    fun lore(vararg loreToAdd: ComponentLike) = lore(loreToAdd.toList())
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
@@ -82,14 +93,21 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
         item.editData(DataComponentTypes.ITEM_NAME) {
             GlobalTranslator.render(it, locale)
         }
-        item.editData(DataComponentTypes.LORE) {
+        item.editData(DataComponentTypes.LORE) { lore ->
             val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
-            val newLore = it.lines().flatMap { line ->
-                val translated = GlobalTranslator.render(line, locale)
-                val encoded = LineWrapEncoder.encode(translated)
-                val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
-                wrapped.toComponentLines()
-            }
+            val newLore = lore.lines()
+                .flatMap {
+                    val translated = GlobalTranslator.render(it, locale)
+                    val encoded = LineWrapEncoder.encode(translated)
+                    val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
+                    wrapped.toComponentLines()
+                }
+                .map {
+                    Component.text()
+                        .decoration(TextDecoration.ITALIC, false)
+                        .color(NamedTextColor.GRAY)
+                        .append(it)
+                }
             ItemLore.lore(newLore)
         }
         return item
@@ -107,11 +125,13 @@ open class ItemStackBuilder private constructor(private val stack: ItemStack) : 
         }
 
         /**
-         * Returns an [ItemStackBuilder] with name and lore set to the default translation keys
+         * Returns an [ItemStackBuilder] with name and lore set to the default translation keys, and
+         * with the item's ID set to [key]
          */
         @JvmStatic
-        fun defaultBuilder(material: Material, key: NamespacedKey): ItemStackBuilder {
+        fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {
             return of(material)
+                .editPdc { pdc -> pdc.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .defaultTranslatableName(key)
                 .defaultTranslatableLore(key)
         }

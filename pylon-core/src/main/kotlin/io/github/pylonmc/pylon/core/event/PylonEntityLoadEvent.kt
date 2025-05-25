@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList
 /**
  * Called after a Pylon entity has been loaded
  */
-class PylonEntityLoadEvent(val pylonEntity: PylonEntity<*, *>) : Event() {
+class PylonEntityLoadEvent(val pylonEntity: PylonEntity<*>) : Event() {
 
     override fun getHandlers(): HandlerList
         = handlerList

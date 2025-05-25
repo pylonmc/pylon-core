@@ -19,7 +19,7 @@ class PlayerTranslationHandler(val player: Player) {
 
     private val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
 
-    fun handleItem(item: PylonItem<*>) {
+    fun handleItem(item: PylonItem) {
         val attacher = PlaceholderAttacher(item.getPlaceholders())
         item.stack.editData(DataComponentTypes.ITEM_NAME) {
             GlobalTranslator.render(attacher.render(it, Unit), player.locale())

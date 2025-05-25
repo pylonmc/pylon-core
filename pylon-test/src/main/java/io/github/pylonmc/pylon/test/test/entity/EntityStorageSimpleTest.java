@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.entity.EntityStorage;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
-import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.entity.SimpleEntity;
 import org.bukkit.NamespacedKey;
 
@@ -19,7 +18,7 @@ public class EntityStorageSimpleTest extends GameTest {
         super(new GameTestConfig.Builder(new NamespacedKey(PylonTest.instance(), "entity_storage_add_test"))
                 .size(1)
                 .setUp((test) -> {
-                    SimpleEntity pylonEntity = new SimpleEntity(Entities.SIMPLE_ENTITY, test.location());
+                    SimpleEntity pylonEntity = new SimpleEntity(test.location());
                     UUID uuid = pylonEntity.getEntity().getUniqueId();
                     EntityStorage.add(pylonEntity);
 

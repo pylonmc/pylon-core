@@ -13,9 +13,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityDamageEvent
-import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -26,10 +23,10 @@ object EntityStorage : Listener {
 
     private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
 
-    private val entities: MutableMap<UUID, PylonEntity<*, *>> = ConcurrentHashMap()
-    private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*, *>>> = ConcurrentHashMap()
+    private val entities: MutableMap<UUID, PylonEntity<*>> = ConcurrentHashMap()
+    private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*>>> = ConcurrentHashMap()
 
-    val loadedEntities: Collection<PylonEntity<*, *>>
+    val loadedEntities: Collection<PylonEntity<*>>
         get() = entities.values
 
     // Access to entities, entitiesById fields must be synchronized to prevent them
@@ -47,11 +44,11 @@ object EntityStorage : Listener {
     }
 
     @JvmStatic
-    fun get(uuid: UUID): PylonEntity<*, *>?
+    fun get(uuid: UUID): PylonEntity<*>?
         = lockEntityRead { entities[uuid] }
 
     @JvmStatic
-    fun get(entity: Entity): PylonEntity<*, *>?
+    fun get(entity: Entity): PylonEntity<*>?
         = get(entity.uniqueId)
 
     @JvmStatic
@@ -73,7 +70,7 @@ object EntityStorage : Listener {
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 
-    fun getByKey(key: NamespacedKey): Collection<PylonEntity<*, *>> =
+    fun getByKey(key: NamespacedKey): Collection<PylonEntity<*>> =
         if (key in PylonRegistry.ENTITIES) {
             lockEntityRead {
                 entitiesByKey[key].orEmpty()
@@ -91,7 +88,7 @@ object EntityStorage : Listener {
         = get(entity) != null
 
     @JvmStatic
-    fun add(entity: PylonEntity<*, *>) = lockEntityWrite {
+    fun add(entity: PylonEntity<*>) = lockEntityWrite {
         entities[entity.entity.uniqueId] = entity
         entitiesByKey.getOrPut(entity.schema.key, ::mutableSetOf).add(entity)
     }
@@ -114,6 +111,9 @@ object EntityStorage : Listener {
 
         if (!event.entity.isDead) {
             PylonEntity.serialize(pylonEntity)
+            PylonEntityUnloadEvent(pylonEntity).callEvent()
+        } else {
+            PylonEntityDeathEvent(pylonEntity, event).callEvent()
         }
 
         lockEntityWrite {
@@ -122,12 +122,6 @@ object EntityStorage : Listener {
             if (entitiesByKey[pylonEntity.schema.key]!!.isEmpty()) {
                 entitiesByKey.remove(pylonEntity.schema.key)
             }
-        }
-
-        if (event.entity.isDead) {
-            PylonEntityDeathEvent(pylonEntity, event).callEvent()
-        } else {
-            PylonEntityUnloadEvent(pylonEntity).callEvent()
         }
     }
 

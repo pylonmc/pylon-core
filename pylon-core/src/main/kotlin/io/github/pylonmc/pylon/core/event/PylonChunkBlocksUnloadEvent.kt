@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList
 
 class PylonChunkBlocksUnloadEvent(
     val chunk: Chunk,
-    val pylonBlocks: List<PylonBlock<*>>,
+    val pylonBlocks: List<PylonBlock>,
 ) : Event() {
     override fun getHandlers(): HandlerList
         = handlerList

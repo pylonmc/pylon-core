@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import org.bukkit.block.Block
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
@@ -11,7 +11,7 @@ import org.bukkit.event.HandlerList
  */
 class PylonBlockPlaceEvent(
     val block: Block,
-    val pylonBlock: PylonBlock<*>,
+    val pylonBlock: PylonBlock,
     val context: BlockCreateContext,
 ) : Event() {
 

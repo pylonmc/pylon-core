@@ -5,7 +5,6 @@ import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.bossbar.BossBar
@@ -34,17 +33,17 @@ class PhantomBlock(
     val pdc: PersistentDataContainer,
     val erroredBlockKey: NamespacedKey,
     block: Block
-) : PylonBlock<PylonBlockSchema>(schema, block) {
+) : PylonBlock(block) {
 
     // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
+    internal constructor(block: Block, context: BlockCreateContext)
+            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), pylonKey("bruh"), block) {
         throw UnsupportedOperationException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
+    internal constructor(block: Block, pdc: PersistentDataContainer)
+            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), pylonKey("bruh"), block) {
         throw UnsupportedOperationException("Phantom block cannot be loaded")
     }
 
@@ -56,12 +55,8 @@ class PhantomBlock(
         )
     }
 
-    override fun getItem(context: BlockItemContext): ItemStack? {
-        val item = ErrorItem.Schema.itemStack
-        item.editMeta {
-            it.persistentDataContainer.set(ErrorItem.blockKey, PylonSerializers.NAMESPACED_KEY, erroredBlockKey)
-        }
-        return item
+    override fun getItem(context: BlockItemContext): ItemStack {
+        return ErrorItem(erroredBlockKey).stack
     }
 
     companion object {
@@ -72,22 +67,23 @@ class PhantomBlock(
         internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)
     }
 
-    class ErrorItem(schema: Schema, stack: ItemStack) : PylonItem<ErrorItem.Schema>(schema, stack) {
+    class ErrorItem(stack: ItemStack) : PylonItem(stack) {
 
-        companion object Schema : PylonItemSchema(
-            pylonKey("error_item"),
-            ErrorItem::class.java,
-            { key ->
-                ItemStackBuilder.defaultBuilder(Material.BARRIER, key).build()
-            }
-        ) {
-            val blockKey = pylonKey("block")
+        constructor(erroredBlock: NamespacedKey): this(STACK.clone()) {
+            stack.editPersistentDataContainer { pdc -> pdc.set(ErrorItem.BLOCK_KEY, PylonSerializers.NAMESPACED_KEY, erroredBlock) }
         }
 
         override fun getPlaceholders(): Map<String, Component> {
-            val block = stack.persistentDataContainer.get(blockKey, PylonSerializers.NAMESPACED_KEY)
+            val block = stack.persistentDataContainer.get(BLOCK_KEY, PylonSerializers.NAMESPACED_KEY)
                 ?: return emptyMap()
             return mapOf("block" to Component.text(block.toString()))
+        }
+
+        companion object {
+            val KEY = pylonKey("error_item")
+            val BLOCK_KEY = pylonKey("block")
+            val STACK = ItemStackBuilder.pylonItem(Material.BARRIER, key)
+                .build()
         }
     }
 }
