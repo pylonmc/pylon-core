@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.base.BlockInteractor
 import io.github.pylonmc.pylon.core.item.base.EntityInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
@@ -22,8 +21,8 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
-class DebugWaxedWeatheredCutCopperStairs(schema: PylonItemSchema, stack: ItemStack)
-    : PylonItem(schema, stack), BlockInteractor, EntityInteractor {
+class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
+    : PylonItem(stack), BlockInteractor, EntityInteractor {
 
     override fun onUsedToClickBlock(event: PlayerInteractEvent) {
         val block = event.clickedBlock ?: return
@@ -95,7 +94,7 @@ class DebugWaxedWeatheredCutCopperStairs(schema: PylonItemSchema, stack: ItemSta
 
     companion object {
         val KEY = pylonKey("debug_waxed_weathered_cut_copper_stairs")
-        val ITEM_STACK = ItemStackBuilder.pylonItem(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
+        val STACK = ItemStackBuilder.pylonItem(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
     }

@@ -19,7 +19,7 @@ public class FurnaceTest extends GameTest {
         super(new GameTestConfig.Builder(PylonTest.key("furnace_test"))
                 .size(0)
                 .setUp(test -> {
-                    ItemStack stickyStick = Items.STICKY_STICK_ITEM_STACK;
+                    ItemStack stickyStick = Items.STICKY_STICK_STACK;
                     ItemStack diamond = new ItemStack(Material.DIAMOND);
                     RecipeTypes.VANILLA_FURNACE.addRecipe(new FurnaceRecipe(
                             PylonTest.key("sticky_stick_furnace"),

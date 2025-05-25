@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.test.item;
 
 import io.github.pylonmc.pylon.core.item.PylonItem;
-import io.github.pylonmc.pylon.core.item.PylonItemSchema;
 import io.github.pylonmc.pylon.core.item.base.BrewingStandFuel;
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder;
 import io.github.pylonmc.pylon.test.PylonTest;
@@ -15,15 +14,15 @@ import org.jetbrains.annotations.NotNull;
 public class OminousBlazePower extends PylonItem implements BrewingStandFuel {
 
     public static final NamespacedKey KEY = PylonTest.key("ominous_blaze_powder");
-    public static final ItemStack ITEM_STACK = ItemStackBuilder.pylonItem(Material.DIAMOND_SWORD, KEY)
+    public static final ItemStack STACK = ItemStackBuilder.pylonItem(Material.DIAMOND_SWORD, KEY)
                     .name("<ff0000>OMINOUS BLAZE POWDER")
                     .lore("<#ff0000>VERY SCARY")
                     .lore("<#222222>OH NO")
                     .build();
     public static boolean handlerCalled;
 
-    public OminousBlazePower(@NotNull PylonItemSchema schema, @NotNull ItemStack stack) {
-        super(schema, stack);
+    public OminousBlazePower(@NotNull ItemStack stack) {
+        super(stack);
     }
 
     @Override
