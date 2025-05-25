@@ -50,7 +50,7 @@ internal object BlockListener : Listener {
         val context = BlockCreateContext.PlayerPlace(player, item)
 
         val pylonBlock = pylonItem?.schema?.place(context, event.block)
-        if (pylonItem?.schema != null && pylonBlock == null) {
+        if (pylonItem != null && pylonBlock == null) {
             event.isCancelled = true
         }
         if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
