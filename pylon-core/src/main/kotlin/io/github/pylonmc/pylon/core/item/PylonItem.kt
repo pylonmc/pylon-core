@@ -37,8 +37,8 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
         @JvmStatic
         @JvmOverloads
-        fun register(itemClass: Class<out PylonItem>, template: ItemStack,pylonBlockKey: NamespacedKey? = null) {
-            PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template))
+        fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockKey: NamespacedKey? = null) {
+            PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template, pylonBlockKey))
         }
 
         /**
