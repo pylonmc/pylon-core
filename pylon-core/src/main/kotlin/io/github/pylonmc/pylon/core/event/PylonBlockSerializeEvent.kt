@@ -12,7 +12,7 @@ import org.bukkit.persistence.PersistentDataContainer
  */
 class PylonBlockSerializeEvent(
     val block: Block,
-    val pylonBlock: PylonBlock<*>,
+    val pylonBlock: PylonBlock,
     val data: PersistentDataContainer
 ) : Event(){
 

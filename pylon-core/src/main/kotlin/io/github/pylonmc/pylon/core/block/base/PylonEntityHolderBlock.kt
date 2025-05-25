@@ -81,7 +81,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
             if (block !is PylonEntityHolderBlock) return
-            holders[block] = event.data.get(entityKey, entityType)?.toMutableMap() ?: error("Held entities not found for ${block.}")
+            holders[block] = event.data.get(entityKey, entityType)?.toMutableMap() ?: error("Held entities not found for ${block.key}")
         }
 
         @EventHandler

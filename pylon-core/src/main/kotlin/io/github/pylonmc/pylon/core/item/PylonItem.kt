@@ -36,13 +36,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     companion object {
 
         @JvmStatic
-        fun register(itemClass: Class<out PylonItem>, template: ItemStack) {
+        @JvmOverloads
+        fun register(itemClass: Class<out PylonItem>, template: ItemStack,pylonBlockKey: NamespacedKey? = null) {
             PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template))
-        }
-
-        @JvmStatic
-        fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockKey: NamespacedKey) {
-            PylonRegistry.ITEMS.register(PylonItemSchema(itemClass, template, pylonBlockKey))
         }
 
         /**
