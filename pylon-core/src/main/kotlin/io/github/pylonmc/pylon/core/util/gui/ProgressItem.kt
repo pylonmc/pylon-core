@@ -47,7 +47,6 @@ abstract class ProgressItem @JvmOverloads constructor(
                     UnitFormat.DAYS.format(days)
                         .abbreviate(false)
                         .unitStyle(Style.empty())
-                        .toComponent()
                 )
             }
             val hours = remaining.toHoursPart()
@@ -56,7 +55,6 @@ abstract class ProgressItem @JvmOverloads constructor(
                     UnitFormat.HOURS.format(hours)
                         .abbreviate(false)
                         .unitStyle(Style.empty())
-                        .toComponent()
                 )
             }
             val minutes = remaining.toMinutesPart()
@@ -65,7 +63,6 @@ abstract class ProgressItem @JvmOverloads constructor(
                     UnitFormat.MINUTES.format(minutes)
                         .abbreviate(false)
                         .unitStyle(Style.empty())
-                        .toComponent()
                 )
             }
             val seconds = remaining.toSecondsPart()
@@ -74,7 +71,6 @@ abstract class ProgressItem @JvmOverloads constructor(
                     UnitFormat.SECONDS.format(seconds)
                         .abbreviate(false)
                         .unitStyle(Style.empty())
-                        .toComponent()
                 )
             }
             builder.lore(
