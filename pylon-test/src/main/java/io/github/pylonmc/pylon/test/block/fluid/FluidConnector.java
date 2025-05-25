@@ -25,15 +25,15 @@ public class FluidConnector extends PylonBlock implements PylonUnloadBlock {
     private final FluidConnectionPoint point;
 
     @SuppressWarnings("unused")
-    public FluidConnector(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-        super(schema, block);
+    public FluidConnector(Block block, BlockCreateContext context) {
+        super(block);
         point = new FluidConnectionPoint(block, "point", FluidConnectionPoint.Type.CONNECTOR);
         FluidManager.add(point);
     }
 
     @SuppressWarnings("unused")
-    public FluidConnector(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
-        super(schema, block);
+    public FluidConnector(Block block, PersistentDataContainer pdc) {
+        super(block);
         point = pdc.get(POINT_KEY, PylonSerializers.FLUID_CONNECTION_POINT);
         FluidManager.add(point);
     }

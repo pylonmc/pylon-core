@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.test.block;
 
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.test.PylonTest;
 import lombok.Getter;
 import org.bukkit.NamespacedKey;
@@ -20,14 +19,14 @@ public class BlockWithField extends PylonBlock {
     @Getter private final int progress;
 
     @SuppressWarnings("unused")
-    public BlockWithField(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-        super(schema, block);
+    public BlockWithField(Block block, BlockCreateContext context) {
+        super(block);
         progress = 240;
     }
 
     @SuppressWarnings({"unused", "DataFlowIssue"})
-    public BlockWithField(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
-        super(schema, block);
+    public BlockWithField(Block block, PersistentDataContainer pdc) {
+        super(block);
         progress = pdc.get(PROGRESS_KEY, PersistentDataType.INTEGER);
     }
 

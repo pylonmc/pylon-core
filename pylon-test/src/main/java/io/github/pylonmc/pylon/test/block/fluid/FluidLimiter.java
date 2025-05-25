@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.test.block.fluid;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.block.base.PylonFluidBlock;
 import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
@@ -41,8 +40,8 @@ public class FluidLimiter extends PylonBlock implements PylonFluidBlock, PylonUn
     @Getter private double amount;
 
     @SuppressWarnings("unused")
-    public FluidLimiter(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-        super(schema, block);
+    public FluidLimiter(Block block, BlockCreateContext context) {
+        super(block);
 
         input = new FluidConnectionPoint(block, "input", FluidConnectionPoint.Type.INPUT);
         output = new FluidConnectionPoint(block, "output", FluidConnectionPoint.Type.OUTPUT);
@@ -54,8 +53,8 @@ public class FluidLimiter extends PylonBlock implements PylonFluidBlock, PylonUn
     }
 
     @SuppressWarnings("unused")
-    public FluidLimiter(PylonBlockSchema schema, Block block, PersistentDataContainer pdc) {
-        super(schema, block);
+    public FluidLimiter(Block block, PersistentDataContainer pdc) {
+        super(block);
 
         input = pdc.get(INPUT_KEY, PylonSerializers.FLUID_CONNECTION_POINT);
         output = pdc.get(OUTPUT_KEY, PylonSerializers.FLUID_CONNECTION_POINT);

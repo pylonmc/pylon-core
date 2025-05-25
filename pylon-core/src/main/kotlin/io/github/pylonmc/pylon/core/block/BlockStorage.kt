@@ -190,8 +190,7 @@ object BlockStorage : Listener {
         require(schema != null) { "Block $key does not exist" }
 
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
-                as PylonBlock
+        val block = schema.create(blockPosition.block, context)
         val event = PrePylonBlockPlaceEvent(blockPosition.block, block, context)
         event.callEvent()
         if (event.isCancelled) return null
@@ -379,6 +378,7 @@ object BlockStorage : Listener {
     internal fun cleanup(addon: PylonAddon) = lockBlockWrite {
         val replacer: (PylonBlock) -> PylonBlock = { block ->
             if (block.schema.key.isFromAddon(addon)) {
+                PylonBlockSchema.schemaCache[block.block.position] = PhantomBlock.schema
                 PhantomBlock(
                     PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
                     block.schema.key,
@@ -422,6 +422,4 @@ object BlockStorage : Listener {
             blockLock.writeLock().unlock()
         }
     }
-
-
 }

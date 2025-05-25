@@ -3,11 +3,9 @@ package io.github.pylonmc.pylon.test.test.fluid;
 import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
-import io.github.pylonmc.pylon.test.block.fluid.consumer.FluidConsumer;
+import io.github.pylonmc.pylon.test.block.fluid.FluidConsumer;
 import io.github.pylonmc.pylon.test.block.fluid.FluidLimiter;
-import io.github.pylonmc.pylon.test.block.fluid.consumer.WaterConsumer;
-import io.github.pylonmc.pylon.test.block.fluid.producer.FluidProducer;
-import io.github.pylonmc.pylon.test.block.fluid.producer.WaterProducer;
+import io.github.pylonmc.pylon.test.block.fluid.FluidProducer;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
@@ -24,7 +22,7 @@ public class FluidTickerLoopTest extends AsyncTest {
 
         Block producerBlock = chunk.getBlock(2, 64, 5);
         FluidProducer producer = (FluidProducer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(producerBlock, WaterProducer.KEY)
+                () -> BlockStorage.placeBlock(producerBlock, FluidProducer.WATER_PRODUCER_KEY)
         ).join();
 
         Block limiterBlock1 = chunk.getBlock(4, 64, 4);
@@ -39,7 +37,7 @@ public class FluidTickerLoopTest extends AsyncTest {
 
         Block consumerBlock = chunk.getBlock(6, 64, 4);
         FluidConsumer consumer = (FluidConsumer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(consumerBlock, WaterConsumer.KEY)
+                () -> BlockStorage.placeBlock(consumerBlock, FluidConsumer.WATER_CONSUMER_KEY)
         ).join();
 
         TestUtil.runSync(() -> {

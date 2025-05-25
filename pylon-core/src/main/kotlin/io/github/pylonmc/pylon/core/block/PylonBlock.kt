@@ -22,19 +22,18 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 
-open class PylonBlock protected constructor(
-    val schema: PylonBlockSchema,
-    val block: Block
-) {
+open class PylonBlock protected constructor(val block: Block) {
+
+    val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
+    val key = schema.key
 
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
     open val name: Component = Component.translatable("pylon.${schema.key.namespace}.block.${schema.key.key}")
 
-    // Mostly for convenience, so refactoring tools can automatically create the correct constructors for new blocks
-    constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext) : this(schema, block)
-    constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer) : this(schema, block)
+    constructor(block: Block, context: BlockCreateContext) : this(block)
+    constructor(block: Block, pdc: PersistentDataContainer) : this(block)
 
     open fun getWaila(player: Player): WailaConfig {
         return WailaConfig(name)
@@ -58,6 +57,9 @@ open class PylonBlock protected constructor(
     }
 
     open fun write(pdc: PersistentDataContainer) {}
+
+    fun getSettings(): Config
+        = Companion.getSettings(key)
 
     companion object {
 
@@ -118,11 +120,14 @@ open class PylonBlock protected constructor(
                 // In this case, we don't want to delete the data, and we also don't want to spam errors.
                 // See PhantomBlock docs for why PhantomBlock is returned rather than null.
                 val schema = PylonRegistry.BLOCKS[key]
-                    ?: return PhantomBlock(pdc, key, position.block)
+                if (schema == null) {
+                    PylonBlockSchema.schemaCache[position] = PhantomBlock.schema
+                    return PhantomBlock(pdc, key, position.block)
+                }
 
                 // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                val block = schema.loadConstructor.invoke(schema, position.block, pdc) as PylonBlock
+                val block = schema.load(position.block, pdc)
 
                 block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
                     ?.let { world.getEntity(it) as? BlockDisplay }
