@@ -72,7 +72,7 @@ class UnitFormat @JvmOverloads constructor(
             }
 
             var usedPrefix = if (prefix == null) {
-                val exponent = value.precision() - value.scale()
+                val exponent = value.precision() - value.scale() - if (value.signum() == 0) 0 else 1
                 val prefix = MetricPrefix.entries.firstOrNull { it.scale <= exponent }
                 prefix ?: defaultPrefix
             } else {
