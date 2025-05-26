@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.item
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
@@ -17,7 +17,7 @@ abstract class PylonItem<out S : PylonItemSchema>(
 
     override fun hashCode(): Int = id.hashCode()
 
-    open fun getPlaceholders(): Map<String, Component> = emptyMap()
+    open fun getPlaceholders(): Map<String, ComponentLike> = emptyMap()
 
     companion object {
         val idKey = pylonKey("pylon_id")
