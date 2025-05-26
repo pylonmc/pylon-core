@@ -191,5 +191,21 @@ class UnitFormat @JvmOverloads constructor(
             TextColor.color(0xc9c786),
             abbreviate = true
         )
+
+        @JvmField
+        val JOULES = UnitFormat(
+            "joules",
+            TextColor.color(0xF2A900),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
+        )
+
+        @JvmField
+        val WATTS = UnitFormat(
+            "watts",
+            TextColor.color(0xF2A900),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
+        )
     }
 }
