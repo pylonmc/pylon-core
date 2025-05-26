@@ -66,16 +66,14 @@ abstract class ProgressItem @JvmOverloads constructor(
                 )
             }
             val seconds = remaining.toSecondsPart()
-            if (seconds > 0) {
-                component = component.append(
-                    UnitFormat.SECONDS.format(seconds)
-                        .abbreviate(false)
-                        .unitStyle(Style.empty())
-                )
-            }
+            component = component.append(
+                UnitFormat.SECONDS.format(seconds)
+                    .abbreviate(false)
+                    .unitStyle(Style.empty())
+            )
             builder.lore(
                 Component.translatable(
-                    "pylon.pyloncore.gui.time.time_left",
+                    "pylon.pyloncore.gui.time_left",
                     PylonArgument.of("time", component.build())
                 )
             )

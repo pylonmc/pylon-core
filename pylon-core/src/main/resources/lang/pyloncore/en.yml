@@ -170,3 +170,11 @@ unit:
     singular: "second"
     plural: "seconds"
     abbr: "s"
+  joules:
+    singular: "joule"
+    plural: "joules"
+    abbr: "J"
+  watts:
+    singular: "watt"
+    plural: "watts"
+    abbr: "W"
