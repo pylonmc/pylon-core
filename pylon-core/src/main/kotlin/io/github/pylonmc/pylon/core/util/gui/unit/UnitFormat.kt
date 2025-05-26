@@ -50,7 +50,7 @@ class UnitFormat @JvmOverloads constructor(
         private var forceDecimalPlaces = false
         private var abbreviate = true
         private var unitStyle = defaultStyle
-        private var prefix: MetricPrefix = defaultPrefix
+        private var prefix: MetricPrefix? = defaultPrefix
         private val badPrefixes = EnumSet.noneOf(MetricPrefix::class.java)
 
         fun significantFigures(sigFigs: Int) = apply { this.sigFigs = sigFigs }
@@ -62,19 +62,22 @@ class UnitFormat @JvmOverloads constructor(
         fun ignorePrefixes(prefixes: Collection<MetricPrefix>) = apply { badPrefixes.addAll(prefixes) }
         fun ignorePrefixes(vararg prefixes: MetricPrefix) = apply { badPrefixes.addAll(prefixes) }
 
-        fun autoSelectPrefix() = apply {
-            val absValue = value.abs()
-            val exponent = -absValue.scale()
-            if (exponent != 0) {
-                val prefix = MetricPrefix.entries.firstOrNull { it.scale <= exponent }
-                if (prefix != null) {
-                    this.prefix = prefix
-                }
-            }
-        }
+        fun autoSelectPrefix() = apply { prefix = null }
 
         override fun asComponent(): Component {
-            var usedPrefix = prefix
+            var usedValue = value.round(MathContext(sigFigs, RoundingMode.HALF_UP))
+            usedValue = usedValue.setScale(decimalPlaces, RoundingMode.HALF_UP)
+            if (!forceDecimalPlaces) {
+                usedValue = usedValue.stripTrailingZeros()
+            }
+
+            var usedPrefix = if (prefix == null) {
+                val exponent = value.precision() - value.scale()
+                val prefix = MetricPrefix.entries.firstOrNull { it.scale <= exponent }
+                prefix ?: defaultPrefix
+            } else {
+                prefix!!
+            }
             while (usedPrefix in badPrefixes) {
                 usedPrefix = MetricPrefix.entries[MetricPrefix.entries.indexOf(usedPrefix) + 1]
             }
@@ -82,12 +85,7 @@ class UnitFormat @JvmOverloads constructor(
                 usedPrefix = MetricPrefix.NONE
             }
 
-            var usedValue = value.movePointRight(usedPrefix.scale - defaultPrefix.scale)
-            usedValue = usedValue.round(MathContext(sigFigs, RoundingMode.HALF_UP))
-            usedValue = usedValue.setScale(decimalPlaces, RoundingMode.HALF_UP)
-            if (!forceDecimalPlaces && usedValue.scale() > 0) {
-                usedValue = usedValue.stripTrailingZeros()
-            }
+            usedValue = usedValue.movePointLeft(usedPrefix.scale - defaultPrefix.scale)
 
             val number = Component.text(usedValue.toPlainString())
             var unit = Component.empty().style(unitStyle)
