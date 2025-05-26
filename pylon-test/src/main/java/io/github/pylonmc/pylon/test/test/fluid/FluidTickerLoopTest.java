@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import io.github.pylonmc.pylon.test.block.Blocks;
-import io.github.pylonmc.pylon.test.block.FluidConnector;
 import io.github.pylonmc.pylon.test.block.FluidConsumer;
 import io.github.pylonmc.pylon.test.block.FluidLimiter;
 import io.github.pylonmc.pylon.test.block.FluidProducer;
@@ -49,12 +48,12 @@ public class FluidTickerLoopTest extends AsyncTest {
             FluidManager.connect(limiter1.getOutput(), limiter2.getInput());
         }).join();
 
-        TestUtil.sleepTicks(10).join();
+        TestUtil.sleepTicks(20).join();
 
-        // account for +- 2 tick offset, divide by 2 because half the input should go to the limiter loop
+        // account for +- 0.1 floating point offset, divide by 2 because half the input should go to the limiter loop
         assertThat(consumer.getAmount())
-                .isGreaterThanOrEqualTo((Blocks.FLUID_LIMITER.getMaxFlowRate() - 2) * 10 / 2)
-                .isLessThanOrEqualTo((Blocks.FLUID_LIMITER.getMaxFlowRate() + 2) * 10 / 2);
+                .isGreaterThanOrEqualTo(Blocks.FLUID_LIMITER.getMaxFlowRate() / 2 - 0.1)
+                .isLessThanOrEqualTo(Blocks.FLUID_LIMITER.getMaxFlowRate() / 2 + 0.1);
 
         chunk.setForceLoaded(false);
     }

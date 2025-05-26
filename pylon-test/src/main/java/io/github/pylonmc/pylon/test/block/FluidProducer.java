@@ -61,14 +61,14 @@ public class FluidProducer extends PylonBlock<FluidProducer.Schema> implements P
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Long> getSuppliedFluids(@NotNull String connectionPoint) {
+    public @NotNull Map<PylonFluid, Double> getSuppliedFluids(@NotNull String connectionPoint, double deltaSeconds) {
         return Map.of(
-                getSchema().fluid, 20L
+                getSchema().fluid, 200.0 * deltaSeconds
         );
     }
 
     @Override
-    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, long amount) {
+    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, double amount) {
         // do nothing
     }
 }

@@ -42,16 +42,17 @@ public class FluidFlowRateTest extends AsyncTest {
 
         TestUtil.runSync(() -> {
             FluidManager.connect(waterProducer.getPoint(), waterConsumer.getPoint());
-            FluidManager.setFluidPerTick(waterProducer.getPoint().getSegment(), 1);
+            FluidManager.setFluidPerSecond(waterProducer.getPoint().getSegment(), 1);
 
             FluidManager.connect(lavaProducer.getPoint(), lavaConsumer.getPoint());
-            FluidManager.setFluidPerTick(lavaProducer.getPoint().getSegment(), 2);
+            FluidManager.setFluidPerSecond(lavaProducer.getPoint().getSegment(), 2);
         }).join();
 
         TestUtil.sleepTicks(5).join();
 
         assertThat(waterConsumer.getAmount() * 2)
-                .isEqualTo(lavaConsumer.getAmount());
+                .isGreaterThan(lavaConsumer.getAmount() - 0.1)
+                .isLessThan(lavaConsumer.getAmount() + 0.1);
 
         chunk.setForceLoaded(false);
     }
