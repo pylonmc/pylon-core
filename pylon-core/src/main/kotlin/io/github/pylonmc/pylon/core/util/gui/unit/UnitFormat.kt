@@ -45,7 +45,7 @@ class UnitFormat @JvmOverloads constructor(
     fun format(value: Long) = format(BigDecimal.valueOf(value))
 
     fun format(value: Float): Formatted {
-        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or Infinite values" }
+        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
         return format(BigDecimal.valueOf(value.toDouble()))
     }
 
