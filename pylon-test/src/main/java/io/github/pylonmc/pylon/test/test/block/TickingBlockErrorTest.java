@@ -5,7 +5,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.test.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
-import io.github.pylonmc.pylon.test.block.Blocks;
+import io.github.pylonmc.pylon.test.block.TickingErrorBlock;
 
 
 public class TickingBlockErrorTest extends GameTest {
@@ -14,7 +14,7 @@ public class TickingBlockErrorTest extends GameTest {
         super(new GameTestConfig.Builder(PylonTest.key("ticking_error_block"))
                 .size(1)
                 .setUp((test) -> {
-                    BlockStorage.placeBlock(test.location(), Blocks.TICKING_ERROR_BLOCK);
+                    BlockStorage.placeBlock(test.location(), TickingErrorBlock.KEY);
 
                     test.succeedWhen(() -> !TickManager.isTicking(BlockStorage.get(test.location())));
                 })

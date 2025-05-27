@@ -3,7 +3,8 @@ package io.github.pylonmc.pylon.test.block;
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
+import io.github.pylonmc.pylon.test.PylonTest;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
@@ -14,23 +15,21 @@ import java.util.Map;
 import java.util.UUID;
 
 
-public class TestPylonSimpleMultiblock extends PylonBlock<PylonBlockSchema> implements PylonSimpleMultiblock {
+public class TestPylonSimpleMultiblock extends PylonBlock implements PylonSimpleMultiblock {
+
+    public static final NamespacedKey KEY = PylonTest.key("simple_multiblock");
 
     private final Map<String, UUID> heldEntities;
 
     @SuppressWarnings("unused")
-    public TestPylonSimpleMultiblock(PylonBlockSchema schema, Block block, BlockCreateContext context) {
-        super(schema, block);
+    public TestPylonSimpleMultiblock(Block block, BlockCreateContext context) {
+        super(block);
         heldEntities = new HashMap<>();
     }
 
     @SuppressWarnings("unused")
-    public TestPylonSimpleMultiblock(
-            PylonBlockSchema schema,
-            Block block,
-            PersistentDataContainer pdc
-    ) {
-        super(schema, block);
+    public TestPylonSimpleMultiblock(Block block, PersistentDataContainer pdc) {
+        super(block);
         heldEntities = loadHeldEntities(pdc);
     }
 
@@ -42,8 +41,8 @@ public class TestPylonSimpleMultiblock extends PylonBlock<PylonBlockSchema> impl
     @Override
     public @NotNull Map<Vector3i, Component> getComponents() {
         return Map.of(
-                new Vector3i(1, 1, 4), new PylonComponent(Blocks.SIMPLE_BLOCK.getKey()),
-                new Vector3i(2, -1, 0), new PylonComponent(Blocks.SIMPLE_BLOCK.getKey())
+                new Vector3i(1, 1, 4), new PylonComponent(Blocks.SIMPLE_BLOCK_KEY),
+                new Vector3i(2, -1, 0), new PylonComponent(Blocks.SIMPLE_BLOCK_KEY)
         );
     }
 

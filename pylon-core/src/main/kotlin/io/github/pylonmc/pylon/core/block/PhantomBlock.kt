@@ -35,17 +35,17 @@ class PhantomBlock(
     val pdc: PersistentDataContainer,
     val erroredBlockKey: NamespacedKey,
     block: Block
-) : PylonBlock<PylonBlockSchema>(schema, block) {
+) : PylonBlock(block) {
 
     // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, context: BlockCreateContext)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
+    internal constructor(block: Block, context: BlockCreateContext)
+            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), pylonKey("bruh"), block) {
         throw UnsupportedOperationException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
-    internal constructor(schema: PylonBlockSchema, block: Block, pdc: PersistentDataContainer)
-            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), schema.key, block) {
+    internal constructor(block: Block, pdc: PersistentDataContainer)
+            : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), pylonKey("bruh"), block) {
         throw UnsupportedOperationException("Phantom block cannot be loaded")
     }
 

@@ -59,14 +59,14 @@ object BlockStorage : Listener {
     // to prevent them briefly going out of sync
     private val blockLock = ReentrantReadWriteLock()
 
-    private val blocks: MutableMap<BlockPosition, PylonBlock<*>> = ConcurrentHashMap()
+    private val blocks: MutableMap<BlockPosition, PylonBlock> = ConcurrentHashMap()
 
     /**
      * Only contains chunks that have been loaded (including chunks with no Pylon blocks)
      */
-    private val blocksByChunk: MutableMap<ChunkPosition, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
+    private val blocksByChunk: MutableMap<ChunkPosition, MutableList<PylonBlock>> = ConcurrentHashMap()
 
-    private val blocksByKey: MutableMap<NamespacedKey, MutableList<PylonBlock<*>>> = ConcurrentHashMap()
+    private val blocksByKey: MutableMap<NamespacedKey, MutableList<PylonBlock>> = ConcurrentHashMap()
 
     @JvmStatic
     val loadedBlocks: Set<BlockPosition>
@@ -77,7 +77,7 @@ object BlockStorage : Listener {
         get() = lockBlockRead { blocksByChunk.keys }
 
     @JvmStatic
-    val loadedPylonBlocks: Collection<PylonBlock<*>>
+    val loadedPylonBlocks: Collection<PylonBlock>
         get() = lockBlockRead { blocks.values }
 
     // TODO implement this properly and actually run it
@@ -93,16 +93,16 @@ object BlockStorage : Listener {
     }
 
     @JvmStatic
-    fun get(blockPosition: BlockPosition): PylonBlock<*>? {
+    fun get(blockPosition: BlockPosition): PylonBlock? {
         require(blockPosition.chunk.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocks[blockPosition] }
     }
 
     @JvmStatic
-    fun get(block: Block): PylonBlock<*>? = get(block.position)
+    fun get(block: Block): PylonBlock? = get(block.position)
 
     @JvmStatic
-    fun get(location: Location): PylonBlock<*>? = get(location.block)
+    fun get(location: Location): PylonBlock? = get(location.block)
 
     /**
      * Returns null if the block is not of the expected class
@@ -146,13 +146,13 @@ object BlockStorage : Listener {
     inline fun <reified T> getAs(location: Location): T? = getAs(T::class.java, location)
 
     @JvmStatic
-    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock<*>> {
+    fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock> {
         require(chunkPosition.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
     }
 
     @JvmStatic
-    fun getByKey(key: NamespacedKey): Collection<PylonBlock<*>> =
+    fun getByKey(key: NamespacedKey): Collection<PylonBlock> =
         if (PylonRegistry.BLOCKS.contains(key)) {
             lockBlockRead {
                 blocksByKey[key].orEmpty()
@@ -180,20 +180,22 @@ object BlockStorage : Listener {
     @JvmOverloads
     fun placeBlock(
         blockPosition: BlockPosition,
-        schema: PylonBlockSchema,
+        key: NamespacedKey,
         context: BlockCreateContext = BlockCreateContext.Default
-    ): PylonBlock<*>? {
+    ): PylonBlock? {
         require(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
         require(!isPylonBlock(blockPosition)) { "You cannot place a new Pylon block in place of an existing Pylon blocks" }
 
+        val schema = PylonRegistry.BLOCKS[key]
+        require(schema != null) { "Block $key does not exist" }
+
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-        val block = schema.createConstructor.invoke(schema, blockPosition.block, context)
-                as PylonBlock<*>
+        val block = schema.create(blockPosition.block, context)
         val event = PrePylonBlockPlaceEvent(blockPosition.block, block, context)
         event.callEvent()
         if (event.isCancelled) return null
 
-        event.block.type = block.schema.getPlaceMaterial(event.block, context)
+        event.block.type = block.getPlaceMaterial(event.block, context)
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
@@ -217,9 +219,9 @@ object BlockStorage : Listener {
     @JvmOverloads
     fun placeBlock(
         block: Block,
-        schema: PylonBlockSchema,
+        key: NamespacedKey,
         context: BlockCreateContext = BlockCreateContext.Default
-    ) = placeBlock(block.position, schema, context)
+    ) = placeBlock(block.position, key, context)
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -232,9 +234,9 @@ object BlockStorage : Listener {
     @JvmOverloads
     fun placeBlock(
         location: Location,
-        schema: PylonBlockSchema,
+        key: NamespacedKey,
         context: BlockCreateContext = BlockCreateContext.Default
-    ) = placeBlock(BlockPosition(location), schema, context)
+    ) = placeBlock(BlockPosition(location), key, context)
 
     /**
      * Removes a block from the world and the storage.
@@ -307,7 +309,7 @@ object BlockStorage : Listener {
     fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
         breakBlock(BlockPosition(location), context)
 
-    private fun load(world: World, chunk: Chunk): List<PylonBlock<*>> {
+    private fun load(world: World, chunk: Chunk): List<PylonBlock> {
         val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
         val chunkBlocks = chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
             PylonBlock.deserialize(world, element)
@@ -316,7 +318,7 @@ object BlockStorage : Listener {
         return chunkBlocks
     }
 
-    private fun save(chunk: Chunk, chunkBlocks: MutableList<PylonBlock<*>>) {
+    private fun save(chunk: Chunk, chunkBlocks: MutableList<PylonBlock>) {
         val serializedBlocks = chunkBlocks.map {
             PylonBlock.serialize(it, chunk.persistentDataContainer.adapterContext)
         }
@@ -374,8 +376,9 @@ object BlockStorage : Listener {
      */
     @JvmSynthetic
     internal fun cleanup(addon: PylonAddon) = lockBlockWrite {
-        val replacer: (PylonBlock<*>) -> PylonBlock<*> = { block ->
+        val replacer: (PylonBlock) -> PylonBlock = { block ->
             if (block.schema.key.isFromAddon(addon)) {
+                PylonBlockSchema.schemaCache[block.block.position] = PhantomBlock.schema
                 PhantomBlock(
                     PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
                     block.schema.key,
@@ -419,6 +422,4 @@ object BlockStorage : Listener {
             blockLock.writeLock().unlock()
         }
     }
-
-
 }

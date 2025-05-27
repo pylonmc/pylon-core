@@ -1,14 +1,18 @@
 package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
+import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.key.getAddon
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
@@ -18,23 +22,18 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 
-abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
-    val schema: S,
-    val block: Block
-) {
+open class PylonBlock protected constructor(val block: Block) {
 
-    init {
-        if (schema.key != PhantomBlock.key) {
-            require(PylonRegistry.BLOCKS.contains(schema.key)) {
-                "You can only create blocks using a registered schema; did you forget to register ${schema.key}?"
-            }
-        }
-    }
+    val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
+    val key = schema.key
 
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
     open val name: Component = Component.translatable("pylon.${schema.key.namespace}.block.${schema.key.key}")
+
+    constructor(block: Block, context: BlockCreateContext) : this(block)
+    constructor(block: Block, pdc: PersistentDataContainer) : this(block)
 
     open fun getWaila(player: Player): WailaConfig {
         return WailaConfig(name)
@@ -53,7 +52,14 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
         }
     }
 
+    open fun getPlaceMaterial(block: Block, context: BlockCreateContext): Material {
+        return schema.material
+    }
+
     open fun write(pdc: PersistentDataContainer) {}
+
+    fun getSettings(): Config
+        = Companion.getSettings(key)
 
     companion object {
 
@@ -61,9 +67,18 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
         private val pylonBlockPositionKey = pylonKey("position")
         private val pylonBlockErrorKey = pylonKey("error")
 
+        @JvmStatic
+        fun getSettings(key: NamespacedKey): Config
+                = getAddon(key).mergeGlobalConfig("settings/block/${key.namespace}/${key.key}.yml")
+
+        @JvmStatic
+        fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
+            PylonRegistry.BLOCKS.register(PylonBlockSchema(key, material, blockClass))
+        }
+
         @JvmSynthetic
         internal fun serialize(
-            block: PylonBlock<*>,
+            block: PylonBlock,
             context: PersistentDataAdapterContext
         ): PersistentDataContainer {
             // See PhantomBlock docs for why we do this
@@ -88,7 +103,7 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
         internal fun deserialize(
             world: World,
             pdc: PersistentDataContainer
-        ): PylonBlock<*>? {
+        ): PylonBlock? {
             // Stored outside of the try block so they are displayed in error messages once acquired
             var key: NamespacedKey? = null
             var position: BlockPosition? = null
@@ -105,11 +120,14 @@ abstract class PylonBlock<out S : PylonBlockSchema> protected constructor(
                 // In this case, we don't want to delete the data, and we also don't want to spam errors.
                 // See PhantomBlock docs for why PhantomBlock is returned rather than null.
                 val schema = PylonRegistry.BLOCKS[key]
-                    ?: return PhantomBlock(pdc, key, position.block)
+                if (schema == null) {
+                    PylonBlockSchema.schemaCache[position] = PhantomBlock.schema
+                    return PhantomBlock(pdc, key, position.block)
+                }
 
                 // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                val block = schema.loadConstructor.invoke(schema, position.block, pdc) as PylonBlock<*>
+                val block = schema.load(position.block, pdc)
 
                 block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
                     ?.let { world.getEntity(it) as? BlockDisplay }

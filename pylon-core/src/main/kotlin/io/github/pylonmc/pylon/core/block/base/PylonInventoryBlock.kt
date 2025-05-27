@@ -17,10 +17,10 @@ import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.window.Window
 
-abstract class PylonInventoryBlock<S : PylonBlockSchema>(schema: S, block: Block) :
-    PylonBlock<S>(schema, block), PylonInteractableBlock, PylonBreakHandler {
+abstract class PylonInventoryBlock(block: Block) :
+    PylonBlock(block), PylonInteractableBlock, PylonBreakHandler {
 
-    constructor(schema: S, block: Block, pdc: PersistentDataContainer) : this(schema, block) {
+    constructor(block: Block, pdc: PersistentDataContainer) : this(block) {
         val items = pdc.getOrDefault(inventoryKey, inventoryType, emptyList()).map { inv ->
             inv.map { item -> item.takeUnless { it.isEmpty } }
         }

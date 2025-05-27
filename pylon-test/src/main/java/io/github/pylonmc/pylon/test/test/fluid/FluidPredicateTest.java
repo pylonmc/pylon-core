@@ -3,9 +3,8 @@ package io.github.pylonmc.pylon.test.test.fluid;
 import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
-import io.github.pylonmc.pylon.test.block.Blocks;
-import io.github.pylonmc.pylon.test.block.FluidConsumer;
-import io.github.pylonmc.pylon.test.block.FluidProducer;
+import io.github.pylonmc.pylon.test.block.fluid.FluidConsumer;
+import io.github.pylonmc.pylon.test.block.fluid.FluidProducer;
 import io.github.pylonmc.pylon.test.fluid.LavaTag;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import org.bukkit.Chunk;
@@ -23,22 +22,22 @@ public class FluidPredicateTest extends AsyncTest {
 
         Block waterProducerBlock = chunk.getBlock(2, 64, 5);
         FluidProducer waterProducer = (FluidProducer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(waterProducerBlock, Blocks.WATER_PRODUCER)
+                () -> BlockStorage.placeBlock(waterProducerBlock, FluidProducer.WATER_PRODUCER_KEY)
         ).join();
 
         Block waterConsumerBlock = chunk.getBlock(6, 64, 4);
         FluidConsumer waterConsumer = (FluidConsumer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(waterConsumerBlock, Blocks.WATER_CONSUMER)
+                () -> BlockStorage.placeBlock(waterConsumerBlock, FluidConsumer.WATER_CONSUMER_KEY)
         ).join();
 
         Block lavaProducerBlock = chunk.getBlock(3, 64, 5);
         FluidProducer lavaProducer = (FluidProducer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(lavaProducerBlock, Blocks.LAVA_PRODUCER)
+                () -> BlockStorage.placeBlock(lavaProducerBlock, FluidProducer.LAVA_PRODUCER_KEY)
         ).join();
 
         Block lavaConsumerBlock = chunk.getBlock(7, 64, 4);
         FluidConsumer lavaConsumer = (FluidConsumer) TestUtil.runSync(
-                () -> BlockStorage.placeBlock(lavaConsumerBlock, Blocks.LAVA_CONSUMER)
+                () -> BlockStorage.placeBlock(lavaConsumerBlock, FluidConsumer.LAVA_CONSUMER_KEY)
         ).join();
 
         TestUtil.runSync(() -> {

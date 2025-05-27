@@ -32,21 +32,21 @@ public class BlockStorageFilledChunkTest extends AsyncTest {
         TestUtil.loadChunk(chunk).join();
         TestUtil.runSync(() -> {
             for (Block block : blocks) {
-                BlockStorage.placeBlock(block, Blocks.SIMPLE_BLOCK);
+                BlockStorage.placeBlock(block, Blocks.SIMPLE_BLOCK_KEY);
             }
         }).join();
         TestUtil.unloadChunk(chunk).join();
 
         TestUtil.loadChunk(chunk).join();
         for (Block block : blocks) {
-            PylonBlock<?> pylonBlock = BlockStorage.get(block);
+            PylonBlock pylonBlock = BlockStorage.get(block);
 
             assertThat(pylonBlock)
                     .isNotNull();
 
             assertThat(pylonBlock.getSchema())
                     .extracting(PylonBlockSchema::getKey)
-                    .isEqualTo(Blocks.SIMPLE_BLOCK.getKey());
+                    .isEqualTo(Blocks.SIMPLE_BLOCK_KEY);
         }
         TestUtil.unloadChunk(chunk).join();
     }

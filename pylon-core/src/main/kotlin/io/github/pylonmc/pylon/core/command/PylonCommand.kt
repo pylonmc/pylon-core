@@ -71,7 +71,7 @@ internal class PylonCommand : BaseCommand() {
             player.sendRichMessage("<red>Block not found: $block")
             return
         }
-        BlockStorage.placeBlock(location, pylonBlock)
+        BlockStorage.placeBlock(location, pylonBlock.key)
     }
 
     @Subcommand("waila")
