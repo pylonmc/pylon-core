@@ -48,4 +48,5 @@ open class PylonFluid(
 
     override fun equals(other: Any?): Boolean = other is PylonFluid && key == other.key
     override fun hashCode(): Int = key.hashCode()
+    override fun toString(): String = key.toString()
 }

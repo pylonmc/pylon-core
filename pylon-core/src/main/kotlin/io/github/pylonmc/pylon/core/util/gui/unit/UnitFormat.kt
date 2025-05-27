@@ -39,10 +39,20 @@ class UnitFormat @JvmOverloads constructor(
     }
 
     fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
+
     fun format(value: Int) = format(BigDecimal.valueOf(value.toLong()))
+
     fun format(value: Long) = format(BigDecimal.valueOf(value))
-    fun format(value: Float) = format(BigDecimal.valueOf(value.toDouble()))
-    fun format(value: Double) = format(BigDecimal.valueOf(value))
+
+    fun format(value: Float): Formatted {
+        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or Infinite values" }
+        return format(BigDecimal.valueOf(value.toDouble()))
+    }
+
+    fun format(value: Double): Formatted {
+        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
+        return format(BigDecimal.valueOf(value))
+    }
 
     inner class Formatted internal constructor(private val value: BigDecimal) : ComponentLike {
         private var sigFigs = value.precision()
