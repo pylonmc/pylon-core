@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -15,7 +14,7 @@ import org.jetbrains.annotations.Contract
 
 open class PylonItem(val stack: ItemStack) : Keyed {
 
-    private val key = stack.persistentDataContainer.get(PylonItemSchema.idKey, PylonSerializers.NAMESPACED_KEY)!!
+    private val key = stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
     val schema = PylonRegistry.ITEMS.getOrThrow(key)
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
@@ -56,7 +55,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         @Contract("null -> null")
         fun fromStack(stack: ItemStack?): PylonItem? {
             if (stack == null || stack.isEmpty) return null
-            val id = stack.persistentDataContainer.get(PylonItemSchema.idKey, PylonSerializers.NAMESPACED_KEY)
+            val id = stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)
                 ?: return null
             val schema = PylonRegistry.ITEMS[id]
                 ?: return null

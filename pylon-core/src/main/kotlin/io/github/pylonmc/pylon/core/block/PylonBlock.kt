@@ -63,7 +63,7 @@ open class PylonBlock protected constructor(val block: Block) {
 
     companion object {
 
-        private val pylonBlockKeyKey = pylonKey("key")
+        private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
         private val pylonBlockErrorKey = pylonKey("error")
 

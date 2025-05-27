@@ -2,13 +2,11 @@ package io.github.pylonmc.pylon.core.item
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import io.github.pylonmc.pylon.core.util.key.getAddon
-import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
@@ -23,7 +21,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
     val pylonBlockKey: NamespacedKey? = null
 ) : Keyed, RegistryHandler {
 
-    private val key = template.persistentDataContainer.get(idKey, PylonSerializers.NAMESPACED_KEY)
+    private val key = template.persistentDataContainer.get(pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)
         ?: throw IllegalArgumentException("Provided item stack is not a Pylon item; make sure you are using ItemStackBuilder.defaultBuilder to create the item stack")
 
     val addon = getAddon(key)
@@ -55,6 +53,6 @@ class PylonItemSchema @JvmOverloads internal constructor(
     override fun hashCode(): Int = key.hashCode()
 
     companion object {
-        val idKey = pylonKey("pylon_id")
+        val pylonItemKeyKey = pylonKey("pylon_item_key")
     }
 }
