@@ -9,7 +9,6 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.recipe.RecipeTypes
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -43,11 +42,11 @@ data class Research(
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
-    constructor(key: NamespacedKey, cost: Long?, vararg unlocks: PylonItemSchema) : this(
+    constructor(key: NamespacedKey, cost: Long?, vararg unlocks: NamespacedKey) : this(
         key,
         Component.translatable("pylon.${key.namespace}.research.${key.key}"),
         cost,
-        unlocks.map(PylonItemSchema::getKey).toSet()
+        unlocks.toSet()
     )
 
     fun register() {
@@ -60,7 +59,7 @@ data class Research(
 
         player.researches += this
         for (recipe in RecipeTypes.VANILLA_CRAFTING) {
-            val pylonItem = PylonItem.fromStack(recipe.result)?.schema ?: continue
+            val pylonItem = PylonItem.fromStack(recipe.result) ?: continue
             if (pylonItem.key in unlocks) {
                 player.discoverRecipe(recipe.key)
             }
@@ -80,7 +79,7 @@ data class Research(
 
         player.researches -= this
         for (recipe in RecipeTypes.VANILLA_CRAFTING) {
-            val pylonItem = PylonItem.fromStack(recipe.result)?.schema ?: continue
+            val pylonItem = PylonItem.fromStack(recipe.result) ?: continue
             if (pylonItem.key in unlocks) {
                 player.undiscoverRecipe(recipe.key)
             }
@@ -110,21 +109,20 @@ data class Research(
 
         @JvmStatic
         @get:JvmName("getResearchFor")
-        val PylonItemSchema.research: Research?
+        val PylonItem.research: Research?
             get() = PylonRegistry.RESEARCHES.find { this.key in it.unlocks }
 
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerUse")
-        fun Player.canUse(item: PylonItemSchema, sendMessage: Boolean = false): Boolean {
+        fun Player.canUse(item: PylonItem, sendMessage: Boolean = false): Boolean {
             if (
                 !PylonConfig.researchesEnabled
                 || this.gameMode == GameMode.CREATIVE
                 || this.hasPermission(item.researchBypassPermission)
             ) return true
 
-            val research = item.research
-            if (research == null) return true
+            val research = item.research ?: return true
 
             val canUse = this.hasResearch(research)
             if (!canUse && sendMessage) {
@@ -144,7 +142,7 @@ data class Research(
                 this.sendMessage(
                     Component.translatable(
                         "pylon.pyloncore.message.research.unknown",
-                        PylonArgument.of("item", item.itemStack.effectiveName()),
+                        PylonArgument.of("item", item.stack.effectiveName()),
                         PylonArgument.of("research", researchName)
                     )
                 )
@@ -195,7 +193,7 @@ data class Research(
 
 private fun Player.ejectUnknownItems() {
     val toRemove = inventory.contents.filterNotNull().filter { item ->
-        val pylonItem = PylonItem.fromStack(item)?.schema
+        val pylonItem = PylonItem.fromStack(item)
         pylonItem != null && !canUse(pylonItem, sendMessage = true)
     }
     for (item in toRemove) {

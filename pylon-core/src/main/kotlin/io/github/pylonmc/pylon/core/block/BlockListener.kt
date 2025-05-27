@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.base.BlockPlacer
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -45,14 +44,17 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockPlace(event: BlockPlaceEvent) {
         val item = event.itemInHand
-        val pylonItem = PylonItem.fromStack(item)
         val player = event.player
-        if (pylonItem is BlockPlacer) {
-            val context = BlockCreateContext.PlayerPlace(player, item)
-            val pylonBlock = pylonItem.doPlace(context, event.block)
-            if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
-                player.inventory.getItem(event.hand).subtract()
-            }
+
+        val pylonItem = PylonItem.fromStack(item)
+        val context = BlockCreateContext.PlayerPlace(player, item)
+
+        val pylonBlock = pylonItem?.schema?.place(context, event.block)
+        if (pylonItem != null && pylonBlock == null) {
+            event.isCancelled = true
+        }
+        if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
+            player.inventory.getItem(event.hand).subtract()
         }
     }
 
