@@ -13,8 +13,13 @@ class PylonArgument private constructor(val name: String, val value: Component) 
 
     companion object {
         @JvmStatic
-        fun of(name: String, value: Component): TranslationArgument {
-            return TranslationArgument.component(Component.virtual(Unit::class.java, PylonArgument(name, value)))
+        fun of(name: String, value: ComponentLike): TranslationArgument {
+            return TranslationArgument.component(
+                Component.virtual(
+                    Unit::class.java,
+                    PylonArgument(name, value.asComponent())
+                )
+            )
         }
 
         @JvmStatic
