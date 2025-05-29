@@ -10,9 +10,9 @@ waila-interval-ticks: 1
 # The interval between fluid network ticks
 fluid-interval-ticks: 1
 
-block-data-autosave-interval-seconds: 300
+block-data-autosave-interval-seconds: 3
 
-entity-data-autosave-interval-seconds: 300
+entity-data-autosave-interval-seconds: 3
 
 research:
   enabled: true
