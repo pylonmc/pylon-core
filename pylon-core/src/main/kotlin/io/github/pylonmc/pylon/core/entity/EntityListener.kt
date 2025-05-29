@@ -16,7 +16,7 @@ object EntityListener : Listener {
     /**
      * Prevent /kill from deleting Pylon entities
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     fun handle(event: EntityDamageEvent) {
         if (EntityStorage.isPylonEntity(event.entity) && event.cause == EntityDamageEvent.DamageCause.KILL) {
            event.isCancelled = true
