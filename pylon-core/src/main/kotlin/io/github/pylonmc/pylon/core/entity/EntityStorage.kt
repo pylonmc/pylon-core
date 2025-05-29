@@ -1,13 +1,19 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
+import io.github.pylonmc.pylon.core.util.position.position
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
@@ -20,14 +26,16 @@ import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.random.Random
 
 
 object EntityStorage : Listener {
 
-    private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
+    private val random = Random(System.nanoTime())
 
     private val entities: MutableMap<UUID, PylonEntity<*>> = ConcurrentHashMap()
     private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*>>> = ConcurrentHashMap()
+    private val entityAutosaveTasks: MutableMap<UUID, Job> = ConcurrentHashMap()
 
     val loadedEntities: Collection<PylonEntity<*>>
         get() = entities.values
@@ -35,16 +43,6 @@ object EntityStorage : Listener {
     // Access to entities, entitiesById fields must be synchronized to prevent them
     // briefly going out of sync
     private val entityLock = ReentrantReadWriteLock()
-
-    // TODO implement this properly and actually run it
-    internal fun startAutosaveTask() {
-        Bukkit.getScheduler().runTaskTimer(PylonCore, Runnable {
-            // TODO this saves all entities at once, potentially leading to large pauses
-            for (entity in entities.values) {
-                entity.write(entity.entity.persistentDataContainer)
-            }
-        }, AUTOSAVE_INTERVAL_TICKS, AUTOSAVE_INTERVAL_TICKS)
-    }
 
     @JvmStatic
     fun get(uuid: UUID): PylonEntity<*>?
@@ -92,8 +90,22 @@ object EntityStorage : Listener {
 
     @JvmStatic
     fun add(entity: PylonEntity<*>) = lockEntityWrite {
-        entities[entity.entity.uniqueId] = entity
+        entities[entity.uuid] = entity
         entitiesByKey.getOrPut(entity.schema.key, ::mutableSetOf).add(entity)
+
+        // autosaving
+        entityAutosaveTasks[entity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
+
+            // Wait a random delay before starting, this is to help smooth out lag from saving
+            delay(random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
+
+            entityAutosaveTasks[entity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
+                lockEntityRead {
+                    entity.write(entity.entity.persistentDataContainer)
+                }
+                delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
+            }
+        }
     }
 
     @EventHandler
@@ -111,7 +123,6 @@ object EntityStorage : Listener {
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
         val pylonEntity = get(event.entity.uniqueId) ?: return
 
-
         if (!event.entity.isDead) {
             PylonEntity.serialize(pylonEntity)
             PylonEntityUnloadEvent(pylonEntity).callEvent()
@@ -120,11 +131,12 @@ object EntityStorage : Listener {
         }
 
         lockEntityWrite {
-            entities.remove(pylonEntity.entity.uniqueId)
+            entities.remove(pylonEntity.uuid)
             entitiesByKey[pylonEntity.schema.key]!!.remove(pylonEntity)
             if (entitiesByKey[pylonEntity.schema.key]!!.isEmpty()) {
                 entitiesByKey.remove(pylonEntity.schema.key)
             }
+            entityAutosaveTasks.remove(pylonEntity.uuid)
         }
     }
 

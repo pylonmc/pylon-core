@@ -12,6 +12,8 @@ fluid-interval-ticks: 1
 
 block-data-autosave-interval-seconds: 300
 
+entity-data-autosave-interval-seconds: 300
+
 research:
   enabled: true
   # The interval, in ticks, between when Pylon checks for unresearched items in inventories

@@ -22,6 +22,9 @@ object PylonConfig {
     val blockDataAutosaveIntervalSeconds: Long = config.getOrThrow<Int>("block-autosave-interval-seconds").toLong()
 
     @JvmStatic
+    val entityDataAutosaveIntervalSeconds: Long = config.getOrThrow<Int>("entity-autosave-interval-seconds").toLong()
+
+    @JvmStatic
     val researchesEnabled: Boolean = config.getOrThrow("research.enabled")
 
     @JvmStatic

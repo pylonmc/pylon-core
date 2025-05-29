@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block
 
+
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import io.github.pylonmc.pylon.core.PylonCore
@@ -338,7 +339,7 @@ object BlockStorage : Listener {
             chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
 
                 // Wait a random delay before starting, this is to help smooth out lag from saving
-                delay(random.nextLong(PylonConfig.blockDataAutosaveIntervalSeconds * 1000))
+                delay(random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
 
                 chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
                     lockBlockRead {
@@ -346,7 +347,7 @@ object BlockStorage : Listener {
                         check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
                         save(event.chunk, blocksInChunk)
                     }
-                    delay(PylonConfig.blockDataAutosaveIntervalSeconds * 1000)
+                    delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
                 }
             }
         }
