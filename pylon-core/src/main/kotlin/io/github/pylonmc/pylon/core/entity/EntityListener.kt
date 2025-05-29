@@ -8,9 +8,20 @@ import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
 object EntityListener : Listener {
+
+    /**
+     * Prevent /kill from deleting Pylon entities
+     */
+    @EventHandler
+    fun handle(event: EntityDamageEvent) {
+        if (EntityStorage.isPylonEntity(event.entity) && event.cause == EntityDamageEvent.DamageCause.KILL) {
+           event.isCancelled = true
+        }
+    }
 
     @EventHandler(priority = EventPriority.MONITOR)
     fun handle(event: PlayerInteractEntityEvent) {

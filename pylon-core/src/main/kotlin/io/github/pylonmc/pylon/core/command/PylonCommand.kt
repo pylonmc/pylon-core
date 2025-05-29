@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
@@ -88,6 +89,16 @@ internal class PylonCommand : BaseCommand() {
                 PermissionDefault.TRUE
             )
         )
+    }
+    @Subcommand("kill")
+    @Description("Kill pylon entities in a radius")
+    @CommandPermission("pylon.command.kill")
+    fun kill(player: Player, blocks: Double) {
+        for (entity in player.getNearbyEntities(blocks, blocks, blocks)) {
+            if (EntityStorage.isPylonEntity(entity)) {
+                entity.remove()
+            }
+        }
     }
 
     @Private
