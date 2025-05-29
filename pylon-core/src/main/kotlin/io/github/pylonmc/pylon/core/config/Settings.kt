@@ -7,5 +7,5 @@ object Settings {
 
     @JvmStatic
     fun get(key: NamespacedKey): Config
-            = getAddon(key).mergeGlobalConfig("settings/${key.key}.yml", "settings/${key.namespace}/${key.key}")
+            = getAddon(key).mergeGlobalConfig("settings/${key.key}.yml", "settings/${key.namespace}/${key.key}.yml")
 }
