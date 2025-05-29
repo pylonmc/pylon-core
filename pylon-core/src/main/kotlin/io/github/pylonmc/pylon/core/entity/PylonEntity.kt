@@ -1,7 +1,9 @@
 package io.github.pylonmc.pylon.core.entity
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
+import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -27,6 +29,9 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
      * container.
      */
     open fun write(pdc: PersistentDataContainer) {}
+
+    fun getSettings(): Config
+            = PylonBlock.getSettings(key)
 
     companion object {
 

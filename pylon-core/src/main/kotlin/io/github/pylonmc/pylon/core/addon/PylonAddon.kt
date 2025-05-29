@@ -34,23 +34,25 @@ interface PylonAddon : Keyed {
     }
 
     /**
-     * Merges config from resources to the Pylon config directory.
+     * Merges config from addons to the Pylon config directory.
      * Used for stuff like item settings and language files.
+     * TODO what on earth does the below sentence mean? Also could we warn if the resource is not found? Silent fail here does not some ideal
      * If the resource file does not exist, any existing config in the given path will be used,
      * or a new one created.
      *
-     * @param path The path to the config file. Must be a YAML file.
+     * @param from The path to the config file. Must be a YAML file.
      * @return The merged config
      */
-    fun mergeGlobalConfig(path: String): Config {
-        require(path.endsWith(".yml")) { "Config file must be a YAML file" }
-        val globalConfig = PylonCore.dataFolder.resolve(path)
+    fun mergeGlobalConfig(from: String, to: String): Config {
+        require(from.endsWith(".yml")) { "Config file must be a YAML file" }
+        require(to.endsWith(".yml")) { "Config file must be a YAML file" }
+        val globalConfig = PylonCore.dataFolder.resolve(to)
         if (!globalConfig.exists()) {
             globalConfig.parentFile.mkdirs()
             globalConfig.createNewFile()
         }
         val config = Config(globalConfig)
-        val resource = this.javaPlugin.getResource(path)
+        val resource = this.javaPlugin.getResource(from)
         if (resource != null) {
             val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
             config.internalConfig.setDefaults(newConfig)
