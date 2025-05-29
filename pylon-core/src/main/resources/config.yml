@@ -10,6 +10,8 @@ waila-interval-ticks: 1
 # The interval between fluid network ticks
 fluid-interval-ticks: 1
 
+block-data-autosave-interval-seconds: 300
+
 research:
   enabled: true
   # The interval, in ticks, between when Pylon checks for unresearched items in inventories
