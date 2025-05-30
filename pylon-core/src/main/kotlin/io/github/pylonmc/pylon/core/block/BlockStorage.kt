@@ -58,8 +58,6 @@ import kotlin.random.Random
  */
 object BlockStorage : Listener {
 
-    private val random = Random(System.nanoTime())
-
     private val pylonBlocksKey = pylonKey("blocks")
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized
@@ -339,7 +337,7 @@ object BlockStorage : Listener {
             chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
 
                 // Wait a random delay before starting, this is to help smooth out lag from saving
-                delay(random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
+                delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
 
                 chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
                     while (true) {

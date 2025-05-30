@@ -11,17 +11,12 @@ import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isFromAddon
-import io.github.pylonmc.pylon.core.util.position.position
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityDamageEvent
-import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -30,8 +25,6 @@ import kotlin.random.Random
 
 
 object EntityStorage : Listener {
-
-    private val random = Random(System.nanoTime())
 
     private val entities: MutableMap<UUID, PylonEntity<*>> = ConcurrentHashMap()
     private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*>>> = ConcurrentHashMap()
@@ -97,7 +90,7 @@ object EntityStorage : Listener {
         entityAutosaveTasks[entity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
 
             // Wait a random delay before starting, this is to help smooth out lag from saving
-            delay(random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
+            delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
 
             entityAutosaveTasks[entity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
                 while (true) {
