@@ -52,10 +52,6 @@ open class PylonBlock protected constructor(val block: Block) {
         }
     }
 
-    open fun getPlaceMaterial(block: Block, context: BlockCreateContext): Material {
-        return schema.material
-    }
-
     open fun write(pdc: PersistentDataContainer) {}
 
     fun getSettings(): Config
