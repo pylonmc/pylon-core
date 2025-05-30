@@ -51,7 +51,7 @@ class PhantomBlock(
 
     override fun getWaila(player: Player): WailaConfig {
         return WailaConfig(
-            text = name,
+            key,
             placeholders = mapOf("block" to Component.text(erroredBlockKey.toString())),
             color = BossBar.Color.RED
         )
