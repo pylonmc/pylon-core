@@ -342,12 +342,14 @@ object BlockStorage : Listener {
                 delay(random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
 
                 chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
-                    lockBlockRead {
-                        val blocksInChunk = blocksByChunk[event.chunk.position]
-                        check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
-                        save(event.chunk, blocksInChunk)
+                    while (true) {
+                        lockBlockRead {
+                            val blocksInChunk = blocksByChunk[event.chunk.position]
+                            check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
+                            save(event.chunk, blocksInChunk)
+                        }
+                        delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
                     }
-                    delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
                 }
             }
         }
