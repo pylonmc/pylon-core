@@ -36,7 +36,6 @@ interface PylonAddon : Keyed {
     /**
      * Merges config from addons to the Pylon config directory.
      * Used for stuff like item settings and language files.
-     * TODO what on earth does the below sentence mean? Also could we warn if the resource is not found? Silent fail here does not some ideal
      *
      * Returns the configuration read and merged from the resource.
      * If the file does not exist in the resource but already exists
