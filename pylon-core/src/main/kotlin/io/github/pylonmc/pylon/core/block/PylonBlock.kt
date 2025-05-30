@@ -59,17 +59,13 @@ open class PylonBlock protected constructor(val block: Block) {
     open fun write(pdc: PersistentDataContainer) {}
 
     fun getSettings(): Config
-        = Companion.getSettings(key)
+        = Settings.get(key)
 
     companion object {
 
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
         private val pylonBlockErrorKey = pylonKey("error")
-
-        @JvmStatic
-        fun getSettings(key: NamespacedKey): Config
-                = Settings.get(key)
 
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {

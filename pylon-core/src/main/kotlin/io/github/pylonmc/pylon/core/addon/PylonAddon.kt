@@ -37,8 +37,10 @@ interface PylonAddon : Keyed {
      * Merges config from addons to the Pylon config directory.
      * Used for stuff like item settings and language files.
      * TODO what on earth does the below sentence mean? Also could we warn if the resource is not found? Silent fail here does not some ideal
-     * If the resource file does not exist, any existing config in the given path will be used,
-     * or a new one created.
+     *
+     * Returns the configuration read and merged from the resource.
+     * If the file does not exist in the resource but already exists
+     * at the [to] path, reads and returns the file at the [to] path.
      *
      * @param from The path to the config file. Must be a YAML file.
      * @return The merged config
@@ -53,7 +55,9 @@ interface PylonAddon : Keyed {
         }
         val config = Config(globalConfig)
         val resource = this.javaPlugin.getResource(from)
-        if (resource != null) {
+        if (resource == null) {
+            PylonCore.logger.warning("Resource not found: $from")
+        } else {
             val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
             config.internalConfig.setDefaults(newConfig)
             config.internalConfig.options().copyDefaults(true)
