@@ -45,26 +45,26 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             }
 
             // Adventure is a perfect API with absolutely no problems whatsoever.
-            val plaintextName = PlainTextComponentSerializer.plainText().serialize(schema.itemStack.effectiveName())
-            val plaintextLore = schema.itemStack.lore()?.get(0)?.let { PlainTextComponentSerializer.plainText().serialize(it) }
+            val name = PlainTextComponentSerializer.plainText().serialize(schema.itemStack.effectiveName())
+            val lore = schema.itemStack.lore()?.get(0)?.let { PlainTextComponentSerializer.plainText().serialize(it) }
 
             var isNameAndLoreValid = true
-            if (plaintextName != ItemStackBuilder.nameKey(schema.key)) {
+            if (name != ItemStackBuilder.nameKey(schema.key)) {
                 PylonCore.logger.warning("Item ${schema.key}'s name is not a translation key; check your item uses ItemStackBuilder.pylonItem(...)")
                 isNameAndLoreValid = false
             }
 
-            if (plaintextLore == null || plaintextLore != ItemStackBuilder.loreKey(schema.key)) {
+            if (lore == null || lore != ItemStackBuilder.loreKey(schema.key)) {
                 PylonCore.logger.warning("Item ${schema.key}'s lore is not a translation key; check your item uses ItemStackBuilder.pylonItem(...)")
                 isNameAndLoreValid = false
             }
 
             if (isNameAndLoreValid) {
                 for (locale in schema.addon.languages) {
-                    if (!translator.translationKeyExists(plaintextName, locale)) {
+                    if (!translator.translationKeyExists(name, locale)) {
                         PylonCore.logger.warning("Item ${schema.key} is missing a name translation key (${locale.displayName} | ${ItemStackBuilder.nameKey(schema.key)}")
                     }
-                    if (!translator.translationKeyExists(plaintextLore!!, locale)) {
+                    if (!translator.translationKeyExists(lore!!, locale)) {
                         PylonCore.logger.warning("Item ${schema.key} is missing a lore translation key (${locale.displayName} | ${ItemStackBuilder.loreKey(schema.key)}")
                     }
                 }
