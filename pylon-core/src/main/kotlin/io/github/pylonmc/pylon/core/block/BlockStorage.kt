@@ -195,7 +195,6 @@ object BlockStorage : Listener {
         event.callEvent()
         if (event.isCancelled) return null
 
-        event.block.type = block.getPlaceMaterial(event.block, context)
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
