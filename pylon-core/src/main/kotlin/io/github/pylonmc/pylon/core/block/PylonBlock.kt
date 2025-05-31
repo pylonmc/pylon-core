@@ -5,9 +5,9 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.key.getAddon
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -55,17 +55,13 @@ open class PylonBlock protected constructor(val block: Block) {
     open fun write(pdc: PersistentDataContainer) {}
 
     fun getSettings(): Config
-        = Companion.getSettings(key)
+        = Settings.get(key)
 
     companion object {
 
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
         private val pylonBlockErrorKey = pylonKey("error")
-
-        @JvmStatic
-        fun getSettings(key: NamespacedKey): Config
-                = getAddon(key).mergeGlobalConfig("settings/block/${key.namespace}/${key.key}.yml")
 
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {

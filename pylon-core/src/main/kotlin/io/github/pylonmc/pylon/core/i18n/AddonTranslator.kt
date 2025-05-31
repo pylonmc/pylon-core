@@ -1,8 +1,6 @@
 package io.github.pylonmc.pylon.core.i18n
 
-import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import net.kyori.adventure.key.Key
@@ -20,17 +18,14 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLocaleChangeEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.text.MessageFormat
-import java.util.Locale
-import java.util.WeakHashMap
+import java.util.*
 
 class AddonTranslator(private val addon: PylonAddon) : Translator {
 
     private val addonNamespace = addon.key.namespace
 
     private val translations = addon.languages.associateWith {
-        val path = "lang/$addonNamespace/$it.yml"
-        addon.mergeGlobalConfig(path)
-        Config(PylonCore.dataFolder.resolve(path))
+        addon.mergeGlobalConfig("lang/$it.yml", "lang/$addonNamespace/$it.yml")
     }
 
     private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()

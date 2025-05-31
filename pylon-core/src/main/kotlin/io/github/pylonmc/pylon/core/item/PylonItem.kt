@@ -1,14 +1,11 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.key.getAddon
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import io.github.pylonmc.pylon.core.util.pylonKey
-import net.kyori.adventure.text.ComponentLike
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
@@ -21,7 +18,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     val pylonBlock = schema.pylonBlockKey
 
     fun getSettings()
-        = Companion.getSettings(key)
+        = Settings.get(key)
 
     override fun equals(other: Any?): Boolean
         = key == (other as? PylonItem)?.key
@@ -61,9 +58,5 @@ open class PylonItem(val stack: ItemStack) : Keyed {
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
         }
-
-        @JvmStatic
-        fun getSettings(key: NamespacedKey): Config
-            = getAddon(key).mergeGlobalConfig("settings/item/${key.namespace}/${key.key}.yml")
     }
 }
