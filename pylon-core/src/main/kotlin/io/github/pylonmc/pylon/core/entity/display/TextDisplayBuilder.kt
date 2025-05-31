@@ -16,7 +16,7 @@ class TextDisplayBuilder() {
 
     private var text: Component? = null
     private var transformation: Matrix4f? = null
-    private var brightness: Int? = null
+    private var brightness: Brightness? = null
     private var glowColor: Color? = null
     private var viewRange: Float? = null
     private var billboard: Billboard? = null
@@ -42,7 +42,8 @@ class TextDisplayBuilder() {
     fun text(text: Component?): TextDisplayBuilder = apply { this.text = text }
     fun transformation(transformation: Matrix4f?): TextDisplayBuilder = apply { this.transformation = transformation }
     fun transformation(builder: TransformBuilder): TextDisplayBuilder = apply { this.transformation = builder.buildForTextDisplay() }
-    fun brightness(brightness: Int): TextDisplayBuilder = apply { this.brightness = brightness }
+    fun brightness(brightness: Brightness): TextDisplayBuilder = apply { this.brightness = brightness }
+    fun brightness(brightness: Int): TextDisplayBuilder = brightness(Brightness(0, brightness))
     fun glow(glowColor: Color?): TextDisplayBuilder = apply { this.glowColor = glowColor }
     fun viewRange(viewRange: Float): TextDisplayBuilder = apply { this.viewRange = viewRange }
     fun billboard(billboard: Billboard?): TextDisplayBuilder = apply { this.billboard = billboard }
@@ -67,7 +68,7 @@ class TextDisplayBuilder() {
             display.setTransformationMatrix(transformation!!)
         }
         if (brightness != null) {
-            display.brightness = Brightness(brightness!!, 0)
+            display.brightness = brightness
         }
         if (glowColor != null) {
             display.isGlowing = true
