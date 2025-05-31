@@ -113,7 +113,7 @@ object FluidManager {
     }
 
     /**
-     * Call when removing a connection point, or when one has been unloaded
+     * Call when removing a connection point. Use [unload] for when a connection point is unloaded.
      */
     @JvmStatic
     fun remove(point: FluidConnectionPoint) {
@@ -125,6 +125,18 @@ object FluidManager {
                 disconnect(point, it)
             }
         }
+
+        removeFromSegment(point)
+
+        points.remove(point.id)
+    }
+
+    /**
+     * Removes a connection point from the cache, but keeps its connection information intact.
+     */
+    @JvmStatic
+    fun unload(point: FluidConnectionPoint) {
+        check(point.id in points) { "Nonexistant connection point" }
 
         removeFromSegment(point)
 
