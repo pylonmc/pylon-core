@@ -113,7 +113,7 @@ object FluidManager {
     }
 
     /**
-     * Call when removing a connection point, or when one has been unloaded
+     * Call when removing a connection point. Use [unload] for when a connection point is unloaded.
      */
     @JvmStatic
     fun remove(point: FluidConnectionPoint) {
@@ -132,6 +132,18 @@ object FluidManager {
     }
 
     /**
+     * Removes a connection point from the cache, but keeps its connection information intact.
+     */
+    @JvmStatic
+    fun unload(point: FluidConnectionPoint) {
+        check(point.id in points) { "Nonexistant connection point" }
+
+        removeFromSegment(point)
+
+        points.remove(point.id)
+    }
+
+    /**
      * Sets the flow rate per tick for a segment. The segment will not transfer more fluid than the
      * flow rate per tick.
      *
@@ -142,6 +154,12 @@ object FluidManager {
     fun setFluidPerSecond(segment: UUID, fluidPerSecond: Double) {
         check(segment in segments) { "Segment does not exist" }
         segments[segment]!!.fluidPerSecond = fluidPerSecond
+    }
+
+    @JvmStatic
+    fun getFluidPerSecond(segment: UUID): Double {
+        check(segment in segments) { "Segment does not exist" }
+        return segments[segment]!!.fluidPerSecond
     }
 
     /**
@@ -169,8 +187,6 @@ object FluidManager {
             return
         }
 
-        point1.connectedPoints.add(point2.id)
-        point2.connectedPoints.add(point1.id)
 
         if (point1.segment != point2.segment) {
             val newSegment = point2.segment
@@ -180,6 +196,9 @@ object FluidManager {
                 addToSegment(point)
             }
         }
+
+        point1.connectedPoints.add(point2.id)
+        point2.connectedPoints.add(point1.id)
 
         PylonFluidPointConnectEvent(point1, point2).callEvent()
     }
@@ -204,7 +223,7 @@ object FluidManager {
 
         val connectedToPoint1 = getAllConnected(point1)
         if (point2 !in connectedToPoint1) {
-            // points are still (indirectly) connected
+            // points no longer (even indirectly) connected
             val newSegment = UUID.randomUUID()
             segments[newSegment] = Segment(
                 mutableSetOf(),

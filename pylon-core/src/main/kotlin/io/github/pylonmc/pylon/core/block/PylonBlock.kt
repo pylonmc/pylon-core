@@ -145,6 +145,7 @@ open class PylonBlock protected constructor(val block: Block) {
                 PylonCore.logger.severe("Error while loading block $key at $position")
                 t.printStackTrace()
                 return if (key != null && position != null) {
+                    PylonBlockSchema.schemaCache[position] = PhantomBlock.schema
                     PhantomBlock(pdc, key, position.block)
                 } else {
                     null

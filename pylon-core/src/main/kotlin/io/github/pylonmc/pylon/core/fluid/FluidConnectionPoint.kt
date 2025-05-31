@@ -10,8 +10,6 @@ import java.util.*
  *
  * The FluidConnectionPoint class is created in memory for every loaded point. FluidConnectionPoints
  * are persisted when unloaded, but do not store the segment UUID - this is decided at runtime.
- *
- * The flow rate of a segment is the lowest maxFlowRate of any point in the segment.
  */
 data class FluidConnectionPoint(
     val id: UUID,
@@ -24,6 +22,14 @@ data class FluidConnectionPoint(
 
     constructor(block: Block, name: String, type: Type)
             : this (UUID.randomUUID(), block.position, name, type, mutableSetOf())
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is FluidConnectionPoint && other.id == id
+    }
 
     enum class Type {
         INPUT, // input to the attached machine

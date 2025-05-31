@@ -17,7 +17,7 @@ class BlockDisplayBuilder() {
     private var blockData: BlockData? = null
     private var transformation: Matrix4f? = null
     private var glowColor: Color? = null
-    private var brightness: Int? = null
+    private var brightness: Brightness? = null
     private var viewRange: Float? = null
     private var interpolationDelay: Int? = null
     private var interpolationDuration: Int? = null
@@ -41,7 +41,8 @@ class BlockDisplayBuilder() {
     fun blockData(blockData: BlockData?): BlockDisplayBuilder = apply { this.blockData = blockData }
     fun transformation(transformation: Matrix4f?): BlockDisplayBuilder = apply { this.transformation = transformation }
     fun transformation(builder: TransformBuilder): BlockDisplayBuilder = apply { this.transformation = builder.buildForBlockDisplay() }
-    fun brightness(brightness: Int): BlockDisplayBuilder = apply { this.brightness = brightness }
+    fun brightness(brightness: Brightness): BlockDisplayBuilder = apply { this.brightness = brightness }
+    fun brightness(brightness: Int): BlockDisplayBuilder = brightness(Brightness(0, brightness))
     fun glow(glowColor: Color?): BlockDisplayBuilder = apply { this.glowColor = glowColor }
     fun viewRange(viewRange: Float): BlockDisplayBuilder = apply { this.viewRange = viewRange }
     fun interpolationDelay(interpolationDelay: Int): BlockDisplayBuilder = apply { this.interpolationDelay = interpolationDelay }
@@ -69,7 +70,7 @@ class BlockDisplayBuilder() {
             display.glowColorOverride = glowColor
         }
         if (brightness != null) {
-            display.brightness = Brightness(brightness!!, 0)
+            display.brightness = brightness
         }
         if (viewRange != null) {
             display.viewRange = viewRange!!

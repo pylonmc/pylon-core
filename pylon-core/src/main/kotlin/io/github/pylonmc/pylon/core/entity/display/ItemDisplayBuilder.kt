@@ -17,7 +17,7 @@ class ItemDisplayBuilder() {
 
     var itemStack: ItemStack? = null
     var transformation: Matrix4f? = null
-    var brightness: Int? = null
+    var brightness: Brightness? = null
     var glowColor: Color? = null
     var billboard: Display.Billboard? = null
     var viewRange: Float? = null
@@ -39,7 +39,8 @@ class ItemDisplayBuilder() {
     fun itemStack(itemStack: ItemStack?): ItemDisplayBuilder = apply { this.itemStack = itemStack }
     fun transformation(transformation: Matrix4f?): ItemDisplayBuilder = apply { this.transformation = transformation }
     fun transformation(builder: TransformBuilder): ItemDisplayBuilder = apply { this.transformation = builder.buildForItemDisplay() }
-    fun brightness(brightness: Int): ItemDisplayBuilder = apply { this.brightness = brightness }
+    fun brightness(brightness: Brightness): ItemDisplayBuilder = apply { this.brightness = brightness }
+    fun brightness(brightness: Int): ItemDisplayBuilder = brightness(Brightness(0, brightness))
     fun glow(glowColor: Color?): ItemDisplayBuilder = apply { this.glowColor = glowColor }
     fun billboard(billboard: Billboard?): ItemDisplayBuilder = apply { this.billboard = billboard }
     fun viewRange(viewRange: Float): ItemDisplayBuilder = apply { this.viewRange = viewRange }
@@ -68,7 +69,7 @@ class ItemDisplayBuilder() {
             display.glowColorOverride = glowColor
         }
         if (brightness != null) {
-            display.brightness = Brightness(brightness!!, 0)
+            display.brightness = brightness
         }
         if (billboard != null) {
             display.billboard = billboard!!
