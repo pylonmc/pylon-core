@@ -131,7 +131,7 @@ object EntityStorage : Listener {
             if (entitiesByKey[pylonEntity.schema.key]!!.isEmpty()) {
                 entitiesByKey.remove(pylonEntity.schema.key)
             }
-            entityAutosaveTasks.remove(pylonEntity.uuid)
+            entityAutosaveTasks.remove(pylonEntity.uuid)?.cancel()
         }
     }
 

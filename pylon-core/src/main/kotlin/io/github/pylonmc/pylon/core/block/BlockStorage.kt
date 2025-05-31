@@ -368,7 +368,7 @@ object BlockStorage : Listener {
                 blocks.remove(block.block.position)
                 (blocksByKey[block.schema.key] ?: continue).remove(block)
             }
-            chunkAutosaveTasks.remove(event.chunk.position)
+            chunkAutosaveTasks.remove(event.chunk.position)?.cancel()
             chunkBlocks
         }
 
