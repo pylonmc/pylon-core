@@ -44,8 +44,7 @@ interface PylonAddon : Keyed {
      * @param from The path to the config file. Must be a YAML file.
      * @return The merged config
      */
-    @JvmOverloads
-    fun mergeGlobalConfig(from: String, to: String = from): Config {
+    fun mergeGlobalConfig(from: String, to: String): Config {
         require(from.endsWith(".yml")) { "Config file must be a YAML file" }
         require(to.endsWith(".yml")) { "Config file must be a YAML file" }
         val globalConfig = PylonCore.dataFolder.resolve(to)
