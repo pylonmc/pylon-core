@@ -23,6 +23,14 @@ data class FluidConnectionPoint(
     constructor(block: Block, name: String, type: Type)
             : this (UUID.randomUUID(), block.position, name, type, mutableSetOf())
 
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is FluidConnectionPoint && other.id == id
+    }
+
     enum class Type {
         INPUT, // input to the attached machine
         OUTPUT, // output from the attached machine

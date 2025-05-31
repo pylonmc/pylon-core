@@ -175,8 +175,6 @@ object FluidManager {
             return
         }
 
-        point1.connectedPoints.add(point2.id)
-        point2.connectedPoints.add(point1.id)
 
         if (point1.segment != point2.segment) {
             val newSegment = point2.segment
@@ -186,6 +184,9 @@ object FluidManager {
                 addToSegment(point)
             }
         }
+
+        point1.connectedPoints.add(point2.id)
+        point2.connectedPoints.add(point1.id)
 
         PylonFluidPointConnectEvent(point1, point2).callEvent()
     }
@@ -210,7 +211,7 @@ object FluidManager {
 
         val connectedToPoint1 = getAllConnected(point1)
         if (point2 !in connectedToPoint1) {
-            // points are still (indirectly) connected
+            // points no longer (even indirectly) connected
             val newSegment = UUID.randomUUID()
             segments[newSegment] = Segment(
                 mutableSetOf(),
