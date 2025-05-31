@@ -144,6 +144,12 @@ object FluidManager {
         segments[segment]!!.fluidPerSecond = fluidPerSecond
     }
 
+    @JvmStatic
+    fun getFluidPerSecond(segment: UUID): Double {
+        check(segment in segments) { "Segment does not exist" }
+        return segments[segment]!!.fluidPerSecond
+    }
+
     /**
      * Sets the fluid predicate for a segment. The segment will only transfer fluids that match the
      * predicate.
