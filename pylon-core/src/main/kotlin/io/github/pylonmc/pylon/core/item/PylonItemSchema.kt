@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import io.github.pylonmc.pylon.core.util.key.getAddon
@@ -39,7 +40,11 @@ class PylonItemSchema @JvmOverloads internal constructor(
         if (pylonBlockKey == null) {
             return null
         }
-        check(template.type.isBlock) { "Material ${template.type} is not a block" }
+        val blockSchema = PylonRegistry.BLOCKS[pylonBlockKey]
+        check(blockSchema != null) { "Block $pylonBlockKey not found" }
+        check(template.type == blockSchema.material) {
+            "Item $key places block $pylonBlockKey and so must have the same type - but the item is of type + ${template.type} while the block is of type ${blockSchema.material}"
+        }
         if (BlockStorage.isPylonBlock(block)) { // special case: you can place on top of structure void blocks
             return null
         }

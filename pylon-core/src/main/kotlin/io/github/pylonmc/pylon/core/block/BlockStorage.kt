@@ -1,11 +1,15 @@
 package io.github.pylonmc.pylon.core.block
 
+
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -14,6 +18,8 @@ import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
@@ -23,6 +29,7 @@ import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.random.Random
 
 /**
  * Welcome to the circus!
@@ -51,8 +58,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
  */
 object BlockStorage : Listener {
 
-    private const val AUTOSAVE_INTERVAL_TICKS = 60 * 20L
-
     private val pylonBlocksKey = pylonKey("blocks")
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized
@@ -68,6 +73,8 @@ object BlockStorage : Listener {
 
     private val blocksByKey: MutableMap<NamespacedKey, MutableList<PylonBlock>> = ConcurrentHashMap()
 
+    private val chunkAutosaveTasks: MutableMap<ChunkPosition, Job> = ConcurrentHashMap()
+
     @JvmStatic
     val loadedBlocks: Set<BlockPosition>
         get() = lockBlockRead { blocks.keys }
@@ -79,18 +86,6 @@ object BlockStorage : Listener {
     @JvmStatic
     val loadedPylonBlocks: Collection<PylonBlock>
         get() = lockBlockRead { blocks.values }
-
-    // TODO implement this properly and actually run it
-    internal fun startAutosaveTask() {
-        Bukkit.getScheduler().runTaskTimer(PylonCore, Runnable {
-            // TODO this saves all chunks at once, potentially leading to large pauses
-            for ((chunkPosition, chunkBlocks) in blocksByChunk.entries) {
-                chunkPosition.chunk?.let {
-                    save(it, chunkBlocks)
-                }
-            }
-        }, AUTOSAVE_INTERVAL_TICKS, AUTOSAVE_INTERVAL_TICKS)
-    }
 
     @JvmStatic
     fun get(blockPosition: BlockPosition): PylonBlock? {
@@ -195,7 +190,6 @@ object BlockStorage : Listener {
         event.callEvent()
         if (event.isCancelled) return null
 
-        event.block.type = block.getPlaceMaterial(event.block, context)
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
             blocks[blockPosition] = block
@@ -337,6 +331,24 @@ object BlockStorage : Listener {
                 blocks[block.block.position] = block
                 blocksByKey.computeIfAbsent(block.schema.key) { mutableListOf() }.add(block)
             }
+
+            // autosaving
+            chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
+
+                // Wait a random delay before starting, this is to help smooth out lag from saving
+                delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
+
+                chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
+                    while (true) {
+                        lockBlockRead {
+                            val blocksInChunk = blocksByChunk[event.chunk.position]
+                            check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
+                            save(event.chunk, blocksInChunk)
+                        }
+                        delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
+                    }
+                }
+            }
         }
 
         for (block in chunkBlocks) {
@@ -355,6 +367,7 @@ object BlockStorage : Listener {
                 blocks.remove(block.block.position)
                 (blocksByKey[block.schema.key] ?: continue).remove(block)
             }
+            chunkAutosaveTasks.remove(event.chunk.position)?.cancel()
             chunkBlocks
         }
 
