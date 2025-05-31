@@ -52,11 +52,10 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
         return translated
     }
 
-    private fun getTranslation(component: TranslatableComponent, locale: Locale): Component? {
-        val key = component.key()
-        val translation = translationCache.getOrPut(locale to key) {
-            if (!key.startsWith("pylon.")) return null
-            val (_, addon, key) = key.split('.', limit = 3)
+    private fun getTranslation(translationKey: String, locale: Locale): Component? {
+        return translationCache.getOrPut(locale to translationKey) {
+            if (!translationKey.startsWith("pylon.")) return null
+            val (_, addon, key) = translationKey.split('.', limit = 3)
             if (addon != addonNamespace) return null
             val languageRange = languageRanges.getOrPut(locale) {
                 val lookupList = LocaleUtils.localeLookupList(locale).reversed()
@@ -68,12 +67,19 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
             val translation = translations[matchedLocale]?.get<String>(key) ?: return null
             customMiniMessage.deserialize(translation)
         }
-        return Component.text().style(component.style()).append(translation).build()
     }
+
+    private fun getTranslation(component: TranslatableComponent, locale: Locale): Component? {
+        val translated = getTranslation(component.key(), locale) ?: return null
+        return Component.text().style(component.style()).append(translated).build()
+    }
+
+    fun translationKeyExists(key: String, locale: Locale): Boolean
+        = getTranslation(key, locale) != null
 
     companion object : Listener {
 
-        private val translators = mutableMapOf<PylonAddon, AddonTranslator>()
+        val translators = mutableMapOf<PylonAddon, AddonTranslator>()
 
         @JvmSynthetic
         internal fun register(addon: PylonAddon) {
