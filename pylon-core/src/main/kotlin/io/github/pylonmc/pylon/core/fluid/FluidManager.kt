@@ -175,8 +175,15 @@ object FluidManager {
         segments[segment]!!.predicate = predicate
     }
 
+    @JvmStatic
+    fun getFluidPredicate(segment: UUID): Predicate<PylonFluid>? {
+        check(segment in segments) { "Segment does not exist" }
+        return segments[segment]!!.predicate
+    }
+
     /**
-     * Connects two points - and all their connected points - into one segment
+     * Connects two points - and all their connected points - into one segment. Preserves the
+     * flow rate and predicate of the first point's segment.
      */
     @JvmStatic
     fun connect(point1: FluidConnectionPoint, point2: FluidConnectionPoint) {
@@ -187,6 +194,8 @@ object FluidManager {
             return
         }
 
+        val fluidPerSecond = getFluidPerSecond(point1.segment)
+        val fluidPredicate = getFluidPredicate(point1.segment)
 
         if (point1.segment != point2.segment) {
             val newSegment = point2.segment
@@ -194,6 +203,10 @@ object FluidManager {
                 removeFromSegment(point)
                 point.segment = newSegment
                 addToSegment(point)
+            }
+            setFluidPerSecond(newSegment, fluidPerSecond)
+            if (fluidPredicate != null) {
+                setFluidPredicate(newSegment, fluidPredicate)
             }
         }
 
