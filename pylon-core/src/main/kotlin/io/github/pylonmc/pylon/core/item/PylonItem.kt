@@ -101,5 +101,10 @@ open class PylonItem(val stack: ItemStack) : Keyed {
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
         }
+
+        @JvmStatic
+        fun isPylonitem(stack: ItemStack?): Boolean {
+            return stack != null && stack.persistentDataContainer.has(PylonItemSchema.pylonItemKeyKey)
+        }
     }
 }
