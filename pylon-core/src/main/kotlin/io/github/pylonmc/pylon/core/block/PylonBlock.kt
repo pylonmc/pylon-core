@@ -71,7 +71,7 @@ open class PylonBlock protected constructor(val block: Block) {
             }
 
             for (locale in schema.addon.languages) {
-                val wailaKey = WailaConfig.getWailaTranslationKey(schema.key)
+                val wailaKey = "pylon.${schema.key.namespace}.item.${schema.key.key}.waila"
                 if (!translator.translationKeyExists(wailaKey, locale)) {
                     PylonCore.logger.warning("Block ${schema.key} is missing a WAILA translation key (${locale.displayName} | $wailaKey")
                 }

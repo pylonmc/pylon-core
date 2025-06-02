@@ -18,17 +18,12 @@ data class WailaConfig @JvmOverloads constructor(
         val player = bar.viewers().singleOrNull() as? Player
         if (player != null) {
             val attacher = PlaceholderAttacher(placeholders)
-            bar.name(attacher.render(Component.translatable(getWailaTranslationKey(key)), Unit))
+            bar.name(attacher.render(Component.translatable("pylon.${key.namespace}.item.${key.key}.waila"), Unit))
         } else {
-            bar.name(Component.translatable(getWailaTranslationKey(key)))
+            bar.name(Component.translatable("pylon.${key.namespace}.item.${key.key}.waila"))
         }
         bar.color(color)
         bar.overlay(style)
         bar.progress(progress)
-    }
-
-    companion object {
-        fun getWailaTranslationKey(key: NamespacedKey): String
-            = "pylon.${key.namespace}.block.${key.key}"
     }
 }
