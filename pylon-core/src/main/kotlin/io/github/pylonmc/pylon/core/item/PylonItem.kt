@@ -9,7 +9,6 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslatableComponent
-import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -40,7 +39,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     companion object {
 
-        private fun register(schema: PylonItemSchema) {
+        private val nameAndLoreWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
+
+        private fun checkNameAndLore(schema: PylonItemSchema) {
             val translator = AddonTranslator.translators[schema.addon]
             check(translator != null) {
                 "Addon does not have a translator; did you forget to call registerWithPylon()?"
@@ -71,7 +72,12 @@ open class PylonItem(val stack: ItemStack) : Keyed {
                     }
                 }
             }
+        }
 
+        private fun register(schema: PylonItemSchema) {
+            if (!nameAndLoreWarningsSupressed.contains(schema.key)) {
+                checkNameAndLore(schema)
+            }
             PylonRegistry.ITEMS.register(schema)
         }
 
@@ -96,6 +102,10 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             val schema = PylonRegistry.ITEMS[id]
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
+        }
+
+        fun supressNameAndLoreWarnings(key: NamespacedKey) {
+            nameAndLoreWarningsSupressed.add(key)
         }
     }
 }
