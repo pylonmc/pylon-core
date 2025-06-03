@@ -87,6 +87,17 @@ paper {
     load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }
 
+// Disable signing for maven local publish
+if (project.gradle.startParameter.taskNames.any { it.contains("publishToMavenLocal") }) {
+    tasks.withType<Sign>().configureEach {
+        enabled = false
+    }
+}
+
+tasks.withType<Jar> {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 signing {
     useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
 }
