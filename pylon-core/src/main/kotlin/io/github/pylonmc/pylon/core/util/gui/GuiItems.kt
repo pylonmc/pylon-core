@@ -5,6 +5,7 @@ package io.github.pylonmc.pylon.core.util.gui
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.plugin.lifecycle.event.types.PrioritizableLifecycleEventType.Simple
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import xyz.xenondevs.invui.gui.PagedGui
@@ -40,6 +41,12 @@ object GuiItems {
 
     @JvmStatic
     fun pagePrevious(): Item = PylonPageItem(false)
+
+    @JvmStatic
+    fun blankGrayPane(): Item = SimpleItem(ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE).name(""))
+
+    @JvmStatic
+    fun blankBlackPane(): Item = SimpleItem(ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE).name(""))
 }
 
 private class PylonScrollItem(private val direction: Int, key: String?) : ScrollItem(direction) {
