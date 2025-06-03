@@ -64,10 +64,10 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             if (isNameAndLoreValid) {
                 for (locale in schema.addon.languages) {
                     if (!translator.translationKeyExists(name!!.key(), locale)) {
-                        PylonCore.logger.warning("Item ${schema.key} is missing a name translation key (${locale.displayName} | ${ItemStackBuilder.nameKey(schema.key)}")
+                        PylonCore.logger.warning("${schema.key.namespace} is missing a name translation key for item ${schema.key} (locale: ${locale.displayName} | expected translation key: ${ItemStackBuilder.nameKey(schema.key)}")
                     }
                     if (!translator.translationKeyExists(lore!!.key(), locale)) {
-                        PylonCore.logger.warning("Item ${schema.key} is missing a lore translation key (${locale.displayName} | ${ItemStackBuilder.loreKey(schema.key)}")
+                        PylonCore.logger.warning("${schema.key.namespace} is missing a lore translation key for item ${schema.key} (locale: ${locale.displayName} | expected translation key: ${ItemStackBuilder.loreKey(schema.key)}")
                     }
                 }
             }
