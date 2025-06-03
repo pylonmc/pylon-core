@@ -75,7 +75,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         private fun register(schema: PylonItemSchema) {
-            if (!nameAndLoreWarningsSupressed.contains(schema.key)) {
+            if (schema.key !in nameAndLoreWarningsSupressed) {
                 checkNameAndLore(schema)
             }
             PylonRegistry.ITEMS.register(schema)
