@@ -104,6 +104,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
         }
 
+        @JvmStatic
         fun supressNameAndLoreWarnings(key: NamespacedKey) {
             nameAndLoreWarningsSupressed.add(key)
         }
