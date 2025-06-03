@@ -109,6 +109,14 @@ object EntityStorage : Listener {
         }
     }
 
+    /**
+     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * if the entity is already loaded
+     */
+    @JvmStatic
+    inline fun <reified T: PylonEntity<*>> whenEntityLoads(uuid: UUID, crossinline consumer: (T) -> Unit)
+            = whenEntityLoads(uuid, T::class.java) { t -> consumer(t) }
+
     @JvmStatic
     fun isPylonEntity(uuid: UUID): Boolean
         = get(uuid) != null
