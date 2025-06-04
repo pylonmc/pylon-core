@@ -111,7 +111,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         @JvmStatic
-        fun isPylonitem(stack: ItemStack?): Boolean {
+        fun isPylonItem(stack: ItemStack?): Boolean {
             return stack != null && stack.persistentDataContainer.has(PylonItemSchema.pylonItemKeyKey)
         }
 
