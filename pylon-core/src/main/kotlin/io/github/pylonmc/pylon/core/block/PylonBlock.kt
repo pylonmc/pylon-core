@@ -7,6 +7,8 @@ import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -63,9 +65,30 @@ open class PylonBlock protected constructor(val block: Block) {
         private val pylonBlockPositionKey = pylonKey("position")
         private val pylonBlockErrorKey = pylonKey("error")
 
+        private val wailaWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
+
+        fun checkWaila(schema: PylonBlockSchema) {
+            val translator = AddonTranslator.translators[schema.addon]
+            check(translator != null) {
+                "Addon does not have a translator; did you forget to call registerWithPylon()?"
+            }
+
+
+            for (locale in schema.addon.languages) {
+                val translationKey = "pylon.${schema.key.namespace}.block.${schema.key.key}"
+                if (!translator.translationKeyExists(translationKey, locale)) {
+                    PylonCore.logger.warning("${schema.key.namespace} is missing a WAILA translation key for block ${schema.key} (locale: ${locale.displayName} | expected translation key: $translationKey")
+                }
+            }
+        }
+
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
-            PylonRegistry.BLOCKS.register(PylonBlockSchema(key, material, blockClass))
+            val schema = PylonBlockSchema(key, material, blockClass)
+            if (key !in wailaWarningsSupressed) {
+                checkWaila(schema)
+            }
+            PylonRegistry.BLOCKS.register(schema)
         }
 
         @JvmSynthetic
@@ -134,6 +157,11 @@ open class PylonBlock protected constructor(val block: Block) {
                     null
                 }
             }
+        }
+
+        @JvmStatic
+        fun supressWailaWarnings(key: NamespacedKey) {
+            wailaWarningsSupressed.add(key)
         }
     }
 }
