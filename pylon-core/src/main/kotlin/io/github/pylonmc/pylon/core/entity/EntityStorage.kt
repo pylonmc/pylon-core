@@ -21,6 +21,7 @@ import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.function.Consumer
 import kotlin.random.Random
 
 
@@ -29,6 +30,7 @@ object EntityStorage : Listener {
     private val entities: MutableMap<UUID, PylonEntity<*>> = ConcurrentHashMap()
     private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*>>> = ConcurrentHashMap()
     private val entityAutosaveTasks: MutableMap<UUID, Job> = ConcurrentHashMap()
+    private val whenEntityLoadsTasks: MutableMap<UUID, MutableSet<Consumer<PylonEntity<*>>>> = ConcurrentHashMap()
 
     val loadedEntities: Collection<PylonEntity<*>>
         get() = entities.values
@@ -64,6 +66,7 @@ object EntityStorage : Listener {
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 
+    @JvmStatic
     fun getByKey(key: NamespacedKey): Collection<PylonEntity<*>> =
         if (key in PylonRegistry.ENTITIES) {
             lockEntityRead {
@@ -72,6 +75,47 @@ object EntityStorage : Listener {
         } else {
             emptySet()
         }
+
+    /**
+     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * if the entity is already loaded
+     */
+    @JvmStatic
+    fun whenEntityLoads(uuid: UUID, consumer: Consumer<PylonEntity<*>>) {
+        val pylonEntity = get(uuid)
+        if (pylonEntity != null) {
+            consumer.accept(pylonEntity)
+        } else {
+            whenEntityLoadsTasks.getOrPut(uuid) { mutableSetOf() }.add {
+                consumer.accept(it)
+            }
+        }
+
+    }
+
+    /**
+     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * if the entity is already loaded
+     */
+    @JvmStatic
+    fun <T: PylonEntity<*>> whenEntityLoads(uuid: UUID, clazz: Class<T>, consumer: Consumer<T>) {
+        val pylonEntity = getAs(clazz, uuid)
+        if (pylonEntity != null) {
+            consumer.accept(pylonEntity)
+        } else {
+            whenEntityLoadsTasks.getOrPut(uuid) { mutableSetOf() }.add {
+                consumer.accept(getAs(clazz, uuid) ?: throw IllegalStateException("Entity $uuid was not of expected type ${clazz.simpleName}"))
+            }
+        }
+    }
+
+    /**
+     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * if the entity is already loaded
+     */
+    @JvmStatic
+    inline fun <reified T: PylonEntity<*>> whenEntityLoads(uuid: UUID, crossinline consumer: (T) -> Unit)
+            = whenEntityLoads(uuid, T::class.java) { t -> consumer(t) }
 
     @JvmStatic
     fun isPylonEntity(uuid: UUID): Boolean
@@ -108,6 +152,19 @@ object EntityStorage : Listener {
         for (entity in event.entities) {
             val pylonEntity = PylonEntity.deserialize(entity) ?: continue
             add(pylonEntity)
+
+            val tasks = whenEntityLoadsTasks[pylonEntity.uuid]
+            if (tasks != null) {
+                for (task in tasks) {
+                    try {
+                        task.accept(pylonEntity)
+                    } catch (t: Throwable) {
+                        t.printStackTrace()
+                    }
+                }
+                whenEntityLoadsTasks.remove(pylonEntity.uuid)
+            }
+
             PylonEntityLoadEvent(pylonEntity).callEvent()
         }
     }

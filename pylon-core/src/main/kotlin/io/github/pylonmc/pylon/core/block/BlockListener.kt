@@ -49,7 +49,7 @@ internal object BlockListener : Listener {
         val pylonItem = PylonItem.fromStack(item)
         val context = BlockCreateContext.PlayerPlace(player, item)
 
-        val pylonBlock = pylonItem?.schema?.place(context, event.block)
+        val pylonBlock = pylonItem?.place(context, event.block)
         if (pylonItem != null && pylonBlock == null) {
             event.isCancelled = true
         }

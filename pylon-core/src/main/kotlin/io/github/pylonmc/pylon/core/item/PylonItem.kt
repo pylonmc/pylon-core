@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.item
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
@@ -11,6 +13,7 @@ import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
+import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
@@ -36,6 +39,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     open fun getPlaceholders(): Map<String, ComponentLike>
         = emptyMap()
+
+    open fun place(context: BlockCreateContext, block: Block): PylonBlock?
+        = schema.place(context, block)
 
     companion object {
 
@@ -102,6 +108,11 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             val schema = PylonRegistry.ITEMS[id]
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
+        }
+
+        @JvmStatic
+        fun isPylonItem(stack: ItemStack?): Boolean {
+            return stack != null && stack.persistentDataContainer.has(PylonItemSchema.pylonItemKeyKey)
         }
 
         @JvmStatic

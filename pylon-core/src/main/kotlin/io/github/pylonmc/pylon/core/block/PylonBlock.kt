@@ -67,15 +67,14 @@ open class PylonBlock protected constructor(val block: Block) {
 
         private val wailaWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
 
-        fun checkWaila(schema: PylonBlockSchema) {
+        private fun checkWaila(schema: PylonBlockSchema) {
             val translator = AddonTranslator.translators[schema.addon]
             check(translator != null) {
                 "Addon does not have a translator; did you forget to call registerWithPylon()?"
             }
 
-
             for (locale in schema.addon.languages) {
-                val translationKey = "pylon.${schema.key.namespace}.block.${schema.key.key}"
+                val translationKey = "pylon.${schema.key.namespace}.item.${schema.key.key}.waila"
                 if (!translator.translationKeyExists(translationKey, locale)) {
                     PylonCore.logger.warning("${schema.key.namespace} is missing a WAILA translation key for block ${schema.key} (locale: ${locale.displayName} | expected translation key: $translationKey")
                 }
@@ -152,6 +151,7 @@ open class PylonBlock protected constructor(val block: Block) {
                 PylonCore.logger.severe("Error while loading block $key at $position")
                 t.printStackTrace()
                 return if (key != null && position != null) {
+                    PylonBlockSchema.schemaCache[position] = PhantomBlock.schema
                     PhantomBlock(pdc, key, position.block)
                 } else {
                     null

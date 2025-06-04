@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.bukkit.Bukkit
 import org.bukkit.Color.RED
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.event.EventHandler
@@ -93,7 +94,9 @@ object TickManager : Listener {
                 display.glowColorOverride = RED
                 display.isGlowing = true
                 pylonBlock.errorBlock = display
+            }
 
+            if (errors >= PylonConfig.allowedBlockErrors) {
                 cancel()
             }
         }
