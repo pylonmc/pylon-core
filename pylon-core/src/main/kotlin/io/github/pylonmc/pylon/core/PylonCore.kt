@@ -11,6 +11,7 @@ import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
+import io.github.pylonmc.pylon.core.guide.GuideItems
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -68,6 +69,9 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         PylonItem.register(DebugWaxedWeatheredCutCopperStairs::class.java, DebugWaxedWeatheredCutCopperStairs.STACK)
         PylonItem.register(PhantomBlock.ErrorItem::class.java, PhantomBlock.ErrorItem.STACK)
+
+        PylonItem.register(PylonItem::class.java, GuideItems.fluids.getItemProvider())
+
         PylonEntity.register(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
             BlockDisplay::class.java,

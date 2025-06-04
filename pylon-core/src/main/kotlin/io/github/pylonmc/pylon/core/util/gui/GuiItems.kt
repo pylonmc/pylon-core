@@ -5,7 +5,6 @@ package io.github.pylonmc.pylon.core.util.gui
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.plugin.lifecycle.event.types.PrioritizableLifecycleEventType.Simple
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import xyz.xenondevs.invui.gui.PagedGui

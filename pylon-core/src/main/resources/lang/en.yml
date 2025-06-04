@@ -13,6 +13,30 @@ item:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
     lore: "<insn>Right click</insn> a block to view its Pylon block data"
 
+  guide_fluids:
+    name: "<yellow>Fluids"
+    lore: ""
+
+  guide_researches:
+    name: "<yellow>Researches"
+    lore: ""
+
+  guide_guides:
+    name: "<yellow>Guides"
+    lore: ""
+
+  search_items:
+    name: "<yellow>Search items"
+    lore: ""
+
+  search_fluids:
+    name: "<yellow>Search Fluids"
+    lore: ""
+
+  search_researches:
+    name: "<yellow>Search Researches"
+    lore: ""
+
 block:
   phantom_block: "<red>Phantom Block (%block%)"
 
@@ -48,6 +72,8 @@ gui:
   page:
     next: "Next page (%current%/%total%)"
     previous: "Previous page (%current%/%total%)"
+
+
 
 unit:
   prefix:
