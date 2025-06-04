@@ -84,7 +84,7 @@ open class PylonBlock protected constructor(val block: Block) {
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
             val schema = PylonBlockSchema(key, material, blockClass)
-            if (!wailaWarningsSupressed.contains(key)) {
+            if (key !in wailaWarningsSupressed) {
                 checkWaila(schema)
             }
             PylonRegistry.BLOCKS.register(schema)
