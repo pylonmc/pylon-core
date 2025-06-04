@@ -75,3 +75,4 @@ private class PylonPageItem(private val forward: Boolean) : PageItem(forward) {
     private val PagedGui<*>.canPage: Boolean
         get() = if (forward) hasNextPage() else hasPreviousPage()
 }
+

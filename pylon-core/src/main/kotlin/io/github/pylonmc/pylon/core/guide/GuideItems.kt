@@ -1,31 +1,47 @@
 package io.github.pylonmc.pylon.core.guide
 
+import io.github.pylonmc.pylon.core.guide.pages.FluidsPage
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
+import net.kyori.adventure.text.Component
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.inventory.ClickType
+import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
 object GuideItems {
 
-    fun fluids() = object : AbstractItem() {
-
-        val KEY = pylonKey("guide_fluids")
+    fun back() = object : AbstractItem() {
 
         override fun getItemProvider(): ItemProvider {
-            return ItemStackBuilder.pylonItem(Material.WATER_BUCKET, KEY)
+            return ItemStackBuilder.of(Material.ENCHANTED_BOOK)
+                .name(Component.translatable("pylon.pyloncore.guide.button.back"))
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-            // TODO fluids page
+            // TODO history system
+        }
+    }
+
+    fun fluids() = object : AbstractItem() {
+
+        override fun getItemProvider(): ItemProvider {
+            return ItemStackBuilder.of(Material.WATER_BUCKET)
+                .name(Component.translatable("pylon.pyloncore.guide.button.fluids"))
+        }
+
+        override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+            FluidsPage.open(player)
         }
     }
 
     fun researches() = object : AbstractItem() {
 
-        val KEY = pylonKey("guide_researches")
-
         override fun getItemProvider(): ItemProvider {
-            return ItemStackBuilder.pylonItem(Material.BREWING_STAND, KEY)
+            return ItemStackBuilder.of(Material.BREWING_STAND)
+                .name(Component.translatable("pylon.pyloncore.guide.button.researches"))
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
@@ -35,10 +51,9 @@ object GuideItems {
 
     fun settingsAndInfo() = object : AbstractItem() {
 
-        val KEY = pylonKey("guide_settings_and_info")
-
         override fun getItemProvider(): ItemProvider {
-            return ItemStackBuilder.pylonItem(Material.TODO, KEY)
+            return ItemStackBuilder.of(Material.COMPARATOR)
+                .name(Component.translatable("pylon.pyloncore.guide.button.settings-and-info"))
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
@@ -48,10 +63,9 @@ object GuideItems {
 
     fun guides() = object : AbstractItem() {
 
-        val KEY = pylonKey("guide_guides")
-
         override fun getItemProvider(): ItemProvider {
-            return ItemStackBuilder.pylonItem(Material.BOOK, KEY)
+            return ItemStackBuilder.of(Material.LANTERN)
+                .name(Component.translatable("pylon.pyloncore.guide.button.guides"))
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
@@ -61,10 +75,9 @@ object GuideItems {
 
     fun searchItems() = object : AbstractItem() {
 
-        val KEY = pylonKey("guide_search_items")
-
         override fun getItemProvider(): ItemProvider {
-            return ItemStackBuilder.pylonItem(Material.OAK_SIGN, KEY)
+            return ItemStackBuilder.of(Material.OAK_SIGN)
+                .name(Component.translatable("pylon.pyloncore.guide.button.search-items"))
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
@@ -74,10 +87,9 @@ object GuideItems {
 
     fun searchFluids() = object : AbstractItem() {
 
-        val KEY = pylonKey("guide_search_fluids")
-
         override fun getItemProvider(): ItemProvider {
-            return ItemStackBuilder.pylonItem(Material.THE_BLUE_SIGN_IDK_MY_LSP_ISNT_WORKING, KEY)
+            return ItemStackBuilder.of(Material.WARPED_SIGN)
+                .name(Component.translatable("pylon.pyloncore.guide.button.search-fluids"))
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
@@ -87,10 +99,9 @@ object GuideItems {
 
     fun searchResearches() = object : AbstractItem() {
 
-        val KEY = pylonKey("guide_search_researches")
-
         override fun getItemProvider(): ItemProvider {
-            return ItemStackBuilder.pylonItem(Material.THE_RED_SIGN_IDK_MY_LSP_ISNT_WORKING, KEY)
+            return ItemStackBuilder.of(Material.CRIMSON_SIGN)
+                .name(Component.translatable("pylon.pyloncore.guide.button.search-researches"))
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {

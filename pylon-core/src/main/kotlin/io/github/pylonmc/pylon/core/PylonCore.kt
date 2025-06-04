@@ -12,13 +12,16 @@ import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.guide.GuideItems
+import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.plugin.java.JavaPlugin
@@ -70,7 +73,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonItem.register(DebugWaxedWeatheredCutCopperStairs::class.java, DebugWaxedWeatheredCutCopperStairs.STACK)
         PylonItem.register(PhantomBlock.ErrorItem::class.java, PhantomBlock.ErrorItem.STACK)
 
-        PylonItem.register(PylonItem::class.java, GuideItems.fluids.getItemProvider())
+        PylonItem.register(PylonGuide::class.java, PylonGuide.STACK)
 
         PylonEntity.register(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
@@ -92,7 +95,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
     override val javaPlugin = this
 
-    override val displayName = "Core"
+    override val material = Material.COPPER_INGOT
 
     override val languages: Set<Locale> = setOf(
         Locale.ENGLISH,

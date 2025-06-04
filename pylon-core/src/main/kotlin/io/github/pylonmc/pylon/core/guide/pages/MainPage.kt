@@ -2,8 +2,11 @@ package io.github.pylonmc.pylon.core.guide.pages
 
 import io.github.pylonmc.pylon.core.guide.GuideItems
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
+import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.PagedGui
+import xyz.xenondevs.invui.window.Window
+import xyz.xenondevs.invui.window.type.context.setTitle
 
 object MainPage {
     fun open(player: Player) {
@@ -24,6 +27,13 @@ object MainPage {
             .addIngredient('p', GuiItems.pagePrevious())
             .addIngredient('g', GuideItems.guides())
             .addIngredient('n', GuiItems.pageNext())
+
+        Window.single()
+            .setGui(gui)
+            .setViewer(player)
+            .setTitle(Component.translatable("pylon.pyloncore.guide.title.main"))
+            .build()
+            .open()
 
         // TODO add categories
     }

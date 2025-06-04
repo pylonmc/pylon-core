@@ -4,10 +4,13 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.Locale
 
@@ -17,10 +20,7 @@ interface PylonAddon : Keyed {
 
     val languages: Set<Locale>
 
-    /**
-     * The display name used, for example, at the bottom of items to show which addon an item is from
-     */
-    val displayName: String
+    val material: Material
 
     override fun getKey(): NamespacedKey
             = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
@@ -31,6 +31,13 @@ interface PylonAddon : Keyed {
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)
         AddonTranslator.register(this)
+
+        val translator = AddonTranslator.translators[this]!!
+        for (locale in languages) {
+            if (!translator.canTranslate("pylon.${key.namespace}.addon", locale)) {
+                PylonCore.logger.warning("${key.namespace} is missing the 'addon' translation key for ${locale.displayName}")
+            }
+        }
     }
 
     /**

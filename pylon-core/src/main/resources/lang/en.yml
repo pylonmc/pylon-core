@@ -1,10 +1,17 @@
+addon: "Core"
+
 item:
   error_item:
     name: "<red>Error"
     lore: |-
       <red>This item dropped from a block that, for some reason, failed to load
       <red>Errored block:</red> <yellow>%block%
-  
+
+  guide:
+    name: "Pylon Guide"
+    lore: |-
+      <insn>Right click</insn> to open
+
   phantom_block:
     name: "<red>Phantom Block (%block%)"
     lore: ""
@@ -12,30 +19,6 @@ item:
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
     lore: "<insn>Right click</insn> a block to view its Pylon block data"
-
-  guide_fluids:
-    name: "<yellow>Fluids"
-    lore: ""
-
-  guide_researches:
-    name: "<yellow>Researches"
-    lore: ""
-
-  guide_guides:
-    name: "<yellow>Guides"
-    lore: ""
-
-  search_items:
-    name: "<yellow>Search items"
-    lore: ""
-
-  search_fluids:
-    name: "<yellow>Search Fluids"
-    lore: ""
-
-  search_researches:
-    name: "<yellow>Search Researches"
-    lore: ""
 
 block:
   phantom_block: "<red>Phantom Block (%block%)"
@@ -73,7 +56,19 @@ gui:
     next: "Next page (%current%/%total%)"
     previous: "Previous page (%current%/%total%)"
 
-
+guide:
+  button:
+    back: "&eBack"
+    fluids: "&eFluids"
+    researches: "&eResearches"
+    settings-and-info: "&eSettings & info"
+    guides: "Guides"
+  title:
+    main: "Pylon Guide"
+    fluids: "Fluids"
+    researches: "Researches"
+    settings-and-info: "Settings & info"
+    guides: "Guides"
 
 unit:
   prefix:

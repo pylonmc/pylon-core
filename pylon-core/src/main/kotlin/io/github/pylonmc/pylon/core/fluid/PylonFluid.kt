@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.fluid
 
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -38,4 +40,9 @@ open class PylonFluid(
     fun register() {
         PylonRegistry.FLUIDS.register(this)
     }
+
+    fun getItem() = ItemStackBuilder.of(material)
+        .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}.name"))
+        .lore(Component.translatable("pylon.${key.namespace}.fluid.${key.key}.lore"))
+        .build()
 }
