@@ -5,11 +5,12 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.key.getAddon
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -54,14 +55,10 @@ open class PylonBlock protected constructor(val block: Block) {
         }
     }
 
-    open fun getPlaceMaterial(block: Block, context: BlockCreateContext): Material {
-        return schema.material
-    }
-
     open fun write(pdc: PersistentDataContainer) {}
 
     fun getSettings(): Config
-        = Companion.getSettings(key)
+        = Settings.get(key)
 
     companion object {
 
@@ -69,13 +66,29 @@ open class PylonBlock protected constructor(val block: Block) {
         private val pylonBlockPositionKey = pylonKey("position")
         private val pylonBlockErrorKey = pylonKey("error")
 
-        @JvmStatic
-        fun getSettings(key: NamespacedKey): Config
-                = getAddon(key).mergeGlobalConfig("settings/block/${key.namespace}/${key.key}.yml")
+        private val wailaWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
+
+        private fun checkWaila(schema: PylonBlockSchema) {
+            val translator = AddonTranslator.translators[schema.addon]
+            check(translator != null) {
+                "Addon does not have a translator; did you forget to call registerWithPylon()?"
+            }
+
+            for (locale in schema.addon.languages) {
+                val translationKey = "pylon.${schema.key.namespace}.item.${schema.key.key}.waila"
+                if (!translator.translationKeyExists(translationKey, locale)) {
+                    PylonCore.logger.warning("${schema.key.namespace} is missing a WAILA translation key for block ${schema.key} (locale: ${locale.displayName} | expected translation key: $translationKey")
+                }
+            }
+        }
 
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
-            PylonRegistry.BLOCKS.register(PylonBlockSchema(key, material, blockClass))
+            val schema = PylonBlockSchema(key, material, blockClass)
+            if (key !in wailaWarningsSupressed) {
+                checkWaila(schema)
+            }
+            PylonRegistry.BLOCKS.register(schema)
         }
 
         @JvmSynthetic
@@ -143,11 +156,17 @@ open class PylonBlock protected constructor(val block: Block) {
                 PylonCore.logger.severe("Error while loading block $key at $position")
                 t.printStackTrace()
                 return if (key != null && position != null) {
+                    PylonBlockSchema.schemaCache[position] = PhantomBlock.schema
                     PhantomBlock(pdc, key, position.block)
                 } else {
                     null
                 }
             }
+        }
+
+        @JvmStatic
+        fun supressWailaWarnings(key: NamespacedKey) {
+            wailaWarningsSupressed.add(key)
         }
     }
 }

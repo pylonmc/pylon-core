@@ -8,8 +8,8 @@ interface PylonFluidBlock {
      * Returns a map of fluid types - and their corresponding amounts - that can be supplied by
      * a particular connection point. deltaSeconds is the time since the last fluid tick.
      *
-     * This is per tick, so if you have a machine that can supply up to 100 fluid per second,
-     * it should supply 100 of that fluid
+     * If you have a machine that can supply up to 100 fluid per second, it should supply
+     * 100*deltaSeconds of that fluid
      *
      * Any implementation of this method must NEVER call the same method for another connection
      * point, otherwise you risk creating infinite loops.
@@ -21,8 +21,8 @@ interface PylonFluidBlock {
      * a particular connection point. For example, a tank should request enough fluid to fill up
      * to capacity.
      *
-     * This is per second, so if you have a machine that consumes 100 fluid per second,
-     * it should request 100 of that fluid
+     * If you have a machine that consumes 100 fluid per second, it should request
+     * 100*deltaSeconds of that fluid
      *
      * Any implementation of this method must NEVER call the same method for another connection
      * point, otherwise you risk creating infinite loops.

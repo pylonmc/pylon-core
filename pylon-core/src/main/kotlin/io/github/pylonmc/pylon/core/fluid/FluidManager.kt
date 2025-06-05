@@ -10,6 +10,7 @@ import io.github.pylonmc.pylon.core.event.PrePylonFluidPointConnectEvent
 import io.github.pylonmc.pylon.core.event.PrePylonFluidPointDisconnectEvent
 import io.github.pylonmc.pylon.core.event.PylonFluidPointConnectEvent
 import io.github.pylonmc.pylon.core.event.PylonFluidPointDisconnectEvent
+import io.github.pylonmc.pylon.core.fluid.FluidManager.unload
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.util.UUID
@@ -112,7 +113,7 @@ object FluidManager {
     }
 
     /**
-     * Call when removing a connection point, or when one has been unloaded
+     * Call when removing a connection point. Use [unload] for when a connection point is unloaded.
      */
     @JvmStatic
     fun remove(point: FluidConnectionPoint) {
@@ -124,6 +125,18 @@ object FluidManager {
                 disconnect(point, it)
             }
         }
+
+        removeFromSegment(point)
+
+        points.remove(point.id)
+    }
+
+    /**
+     * Removes a connection point from the cache, but keeps its connection information intact.
+     */
+    @JvmStatic
+    fun unload(point: FluidConnectionPoint) {
+        check(point.id in points) { "Nonexistant connection point" }
 
         removeFromSegment(point)
 
@@ -143,6 +156,12 @@ object FluidManager {
         segments[segment]!!.fluidPerSecond = fluidPerSecond
     }
 
+    @JvmStatic
+    fun getFluidPerSecond(segment: UUID): Double {
+        check(segment in segments) { "Segment does not exist" }
+        return segments[segment]!!.fluidPerSecond
+    }
+
     /**
      * Sets the fluid predicate for a segment. The segment will only transfer fluids that match the
      * predicate.
@@ -156,8 +175,15 @@ object FluidManager {
         segments[segment]!!.predicate = predicate
     }
 
+    @JvmStatic
+    fun getFluidPredicate(segment: UUID): Predicate<PylonFluid>? {
+        check(segment in segments) { "Segment does not exist" }
+        return segments[segment]!!.predicate
+    }
+
     /**
-     * Connects two points - and all their connected points - into one segment
+     * Connects two points - and all their connected points - into one segment. Preserves the
+     * flow rate and predicate of the first point's segment.
      */
     @JvmStatic
     fun connect(point1: FluidConnectionPoint, point2: FluidConnectionPoint) {
@@ -168,8 +194,8 @@ object FluidManager {
             return
         }
 
-        point1.connectedPoints.add(point2.id)
-        point2.connectedPoints.add(point1.id)
+        val fluidPerSecond = getFluidPerSecond(point1.segment)
+        val fluidPredicate = getFluidPredicate(point1.segment)
 
         if (point1.segment != point2.segment) {
             val newSegment = point2.segment
@@ -178,7 +204,14 @@ object FluidManager {
                 point.segment = newSegment
                 addToSegment(point)
             }
+            setFluidPerSecond(newSegment, fluidPerSecond)
+            if (fluidPredicate != null) {
+                setFluidPredicate(newSegment, fluidPredicate)
+            }
         }
+
+        point1.connectedPoints.add(point2.id)
+        point2.connectedPoints.add(point1.id)
 
         PylonFluidPointConnectEvent(point1, point2).callEvent()
     }
@@ -203,7 +236,7 @@ object FluidManager {
 
         val connectedToPoint1 = getAllConnected(point1)
         if (point2 !in connectedToPoint1) {
-            // points are still (indirectly) connected
+            // points no longer (even indirectly) connected
             val newSegment = UUID.randomUUID()
             segments[newSegment] = Segment(
                 mutableSetOf(),

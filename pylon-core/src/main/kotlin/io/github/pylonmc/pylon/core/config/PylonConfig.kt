@@ -19,6 +19,12 @@ object PylonConfig {
     val fluidIntervalTicks: Int by config
 
     @JvmStatic
+    val blockDataAutosaveIntervalSeconds: Long = config.getOrThrow<Int>("block-data-autosave-interval-seconds").toLong()
+
+    @JvmStatic
+    val entityDataAutosaveIntervalSeconds: Long = config.getOrThrow<Int>("entity-data-autosave-interval-seconds").toLong()
+
+    @JvmStatic
     val researchesEnabled: Boolean = config.getOrThrow("research.enabled")
 
     @JvmStatic

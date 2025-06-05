@@ -34,24 +34,29 @@ interface PylonAddon : Keyed {
     }
 
     /**
-     * Merges config from resources to the Pylon config directory.
+     * Merges config from addons to the Pylon config directory.
      * Used for stuff like item settings and language files.
-     * If the resource file does not exist, any existing config in the given path will be used,
-     * or a new one created.
      *
-     * @param path The path to the config file. Must be a YAML file.
+     * Returns the configuration read and merged from the resource.
+     * If the file does not exist in the resource but already exists
+     * at the [to] path, reads and returns the file at the [to] path.
+     *
+     * @param from The path to the config file. Must be a YAML file.
      * @return The merged config
      */
-    fun mergeGlobalConfig(path: String): Config {
-        require(path.endsWith(".yml")) { "Config file must be a YAML file" }
-        val globalConfig = PylonCore.dataFolder.resolve(path)
+    fun mergeGlobalConfig(from: String, to: String): Config {
+        require(from.endsWith(".yml")) { "Config file must be a YAML file" }
+        require(to.endsWith(".yml")) { "Config file must be a YAML file" }
+        val globalConfig = PylonCore.dataFolder.resolve(to)
         if (!globalConfig.exists()) {
             globalConfig.parentFile.mkdirs()
             globalConfig.createNewFile()
         }
         val config = Config(globalConfig)
-        val resource = this.javaPlugin.getResource(path)
-        if (resource != null) {
+        val resource = this.javaPlugin.getResource(from)
+        if (resource == null) {
+            PylonCore.logger.warning("Resource not found: $from")
+        } else {
             val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
             config.internalConfig.setDefaults(newConfig)
             config.internalConfig.options().copyDefaults(true)

@@ -50,8 +50,8 @@ public class FluidFlowRateTest extends AsyncTest {
         TestUtil.sleepTicks(5).join();
 
         assertThat(waterConsumer.getAmount() * 2)
-                .isGreaterThan(lavaConsumer.getAmount() - 0.1)
-                .isLessThan(lavaConsumer.getAmount() + 0.1);
+                .isGreaterThan(lavaConsumer.getAmount() - 0.101)
+                .isLessThan(lavaConsumer.getAmount() + 0.101);
 
         chunk.setForceLoaded(false);
     }

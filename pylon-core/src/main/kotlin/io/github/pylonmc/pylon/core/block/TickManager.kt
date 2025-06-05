@@ -93,7 +93,9 @@ object TickManager : Listener {
                 display.glowColorOverride = RED
                 display.isGlowing = true
                 pylonBlock.errorBlock = display
+            }
 
+            if (errors >= PylonConfig.allowedBlockErrors) {
                 cancel()
             }
         }
