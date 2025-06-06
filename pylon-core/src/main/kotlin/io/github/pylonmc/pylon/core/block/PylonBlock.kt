@@ -33,10 +33,12 @@ open class PylonBlock protected constructor(val block: Block) {
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.block.${schema.key.key}")
+    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.item.${schema.key.key}.waila")
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
+
+    protected open fun postLoad() {}
 
     open fun getWaila(player: Player): WailaConfig {
         return WailaConfig(name)
@@ -150,7 +152,7 @@ open class PylonBlock protected constructor(val block: Block) {
                     ?.let { world.getEntity(it) as? BlockDisplay }
 
                 PylonBlockDeserializeEvent(block.block, block, pdc).callEvent()
-
+                block.postLoad()
                 return block
             } catch (t: Throwable) {
                 PylonCore.logger.severe("Error while loading block $key at $position")
