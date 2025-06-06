@@ -377,13 +377,11 @@ object BlockStorage : Listener {
 
         save(event.chunk, chunkBlocks)
 
-        Bukkit.getScheduler().runTask(PylonCore, Runnable {
-            for (block in chunkBlocks) {
-                PylonBlockUnloadEvent(block.block, block).callEvent()
-            }
+        for (block in chunkBlocks) {
+            PylonBlockUnloadEvent(block.block, block).callEvent()
+        }
 
-            PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
-        })
+        PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
     }
 
     /**
