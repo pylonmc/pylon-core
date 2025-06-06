@@ -3,8 +3,8 @@ package io.github.pylonmc.pylon.core.block
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
-import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
@@ -15,6 +15,7 @@ import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -26,8 +27,11 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
-import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerTakeLecternBookEvent
+import org.bukkit.inventory.EquipmentSlot
+import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
+import xyz.xenondevs.invui.window.Window
 
 
 /**
@@ -47,12 +51,12 @@ internal object BlockListener : Listener {
         val player = event.player
 
         val pylonItem = PylonItem.fromStack(item)
-        val context = BlockCreateContext.PlayerPlace(player, item)
+        val pylonBlock = pylonItem?.schema?.place(BlockCreateContext.PlayerPlace(player, item, event.block))
 
-        val pylonBlock = pylonItem?.place(context, event.block)
         if (pylonItem != null && pylonBlock == null) {
             event.isCancelled = true
         }
+
         if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
             player.inventory.getItem(event.hand).subtract()
         }
@@ -483,6 +487,21 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
         if (pylonBlock is PylonInteractableBlock) {
             pylonBlock.onInteract(event)
+        }
+        if (
+            event.action == Action.RIGHT_CLICK_BLOCK
+            && event.hand == EquipmentSlot.HAND
+            && event.useInteractedBlock() != Event.Result.DENY
+            && pylonBlock is PylonGuiBlock
+        ) {
+            event.setUseInteractedBlock(Event.Result.DENY)
+            event.setUseItemInHand(Event.Result.DENY)
+            val window = Window.single()
+                .setGui(pylonBlock.gui)
+                .setTitle(AdventureComponentWrapper(pylonBlock.name))
+                .setViewer(event.player)
+                .build()
+            window.open()
         }
     }
 

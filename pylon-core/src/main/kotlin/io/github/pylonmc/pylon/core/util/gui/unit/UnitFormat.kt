@@ -39,10 +39,20 @@ class UnitFormat @JvmOverloads constructor(
     }
 
     fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
+
     fun format(value: Int) = format(BigDecimal.valueOf(value.toLong()))
+
     fun format(value: Long) = format(BigDecimal.valueOf(value))
-    fun format(value: Float) = format(BigDecimal.valueOf(value.toDouble()))
-    fun format(value: Double) = format(BigDecimal.valueOf(value))
+
+    fun format(value: Float): Formatted {
+        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
+        return format(BigDecimal.valueOf(value.toDouble()))
+    }
+
+    fun format(value: Double): Formatted {
+        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
+        return format(BigDecimal.valueOf(value))
+    }
 
     inner class Formatted internal constructor(private val value: BigDecimal) : ComponentLike {
         private var sigFigs = value.precision()
@@ -72,7 +82,7 @@ class UnitFormat @JvmOverloads constructor(
             }
 
             var usedPrefix = if (prefix == null) {
-                val exponent = value.precision() - value.scale()
+                val exponent = value.precision() - value.scale() - if (value.signum() == 0) 0 else 1
                 val prefix = MetricPrefix.entries.firstOrNull { it.scale <= exponent }
                 prefix ?: defaultPrefix
             } else {
@@ -123,13 +133,6 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
-        val SECONDS = UnitFormat(
-            "seconds",
-            TextColor.color(0xc9c786),
-            abbreviate = true
-        )
-
-        @JvmField
         val HEARTS = UnitFormat("hearts", TextColor.color(0xdb3b43), abbreviate = true)
 
         @JvmField
@@ -167,6 +170,50 @@ class UnitFormat @JvmOverloads constructor(
             TextColor.color(0xe3835f2),
             abbreviate = true,
             prefix = MetricPrefix.MILLI
+        )
+
+        @JvmField
+        val DAYS = UnitFormat(
+            "days",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
+        val HOURS = UnitFormat(
+            "hours",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
+        val MINUTES = UnitFormat(
+            "minutes",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
+        val SECONDS = UnitFormat(
+            "seconds",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
+        val JOULES = UnitFormat(
+            "joules",
+            TextColor.color(0xF2A900),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
+        )
+
+        @JvmField
+        val WATTS = UnitFormat(
+            "watts",
+            TextColor.color(0xF2A900),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
         )
     }
 }

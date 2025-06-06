@@ -18,7 +18,8 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLocaleChangeEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.text.MessageFormat
-import java.util.*
+import java.util.Locale
+import java.util.WeakHashMap
 
 class AddonTranslator(private val addon: PylonAddon) : Translator {
 
