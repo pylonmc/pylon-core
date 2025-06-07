@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.fluid
 
+import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import net.kyori.adventure.text.Component
@@ -15,6 +17,23 @@ open class PylonFluid(
 
     constructor(key: NamespacedKey, material: Material, vararg tags: PylonFluidTag)
             : this(key, material, mutableListOf(*tags))
+
+    init {
+        val addon = PylonRegistry.ADDONS[NamespacedKey(key.namespace, key.namespace)]!!
+        val translator = AddonTranslator.translators[addon]!!
+
+        for (locale in addon.languages) {
+            val nameTranslationKey = "pylon.${key.namespace}.fluid.${key.key}.name"
+            check(translator.canTranslate(nameTranslationKey, locale)) {
+                PylonCore.logger.warning("${key.namespace} is missing a name translation key for fluid ${key.key} (locale: ${locale.displayName} | expected translation key: $nameTranslationKey")
+            }
+
+            val loreTranslationKey = "pylon.${key.namespace}.fluid.${key.key}.lore"
+            check(translator.canTranslate(loreTranslationKey, locale)) {
+                PylonCore.logger.warning("${key.namespace} is missing a lore translation key for fluid ${key.key} (locale: ${locale.displayName} | expected translation key: $loreTranslationKey")
+            }
+        }
+    }
 
     override fun getKey(): NamespacedKey
         = key
@@ -42,7 +61,7 @@ open class PylonFluid(
     }
 
     fun getItem() = ItemStackBuilder.of(material)
+        // TODO placeholder system with tags - don't want to do anything more with temperature rn because it's being yeeted
         .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}.name"))
         .lore(Component.translatable("pylon.${key.namespace}.fluid.${key.key}.lore"))
-        .build()
 }

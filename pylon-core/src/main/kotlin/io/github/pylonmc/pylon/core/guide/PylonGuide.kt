@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide
 
-import io.github.pylonmc.pylon.core.guide.pages.MainPage
+import io.github.pylonmc.pylon.core.guide.views.MainView
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.Interactor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
@@ -12,7 +12,9 @@ import org.bukkit.inventory.ItemStack
 class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
 
     override fun onUsedToRightClick(event: PlayerInteractEvent) {
-        MainPage.open(event.player)
+        if (event.action.isRightClick) {
+            MainView.open(event.player)
+        }
     }
 
     companion object {

@@ -56,11 +56,14 @@ gui:
 
 guide:
   button:
-    back: "&eBack"
-    fluids: "&eFluids"
-    researches: "&eResearches"
-    settings-and-info: "&eSettings & info"
-    guides: "Guides"
+    back: "<yellow>Back"
+    fluids: "<yellow>Fluids"
+    researches: "<yellow>Researches"
+    settings-and-info: "<yellow>Settings & info"
+    guides: "<yellow>Guides"
+    search-items: "<yellow>Search items"
+    search-fluids: "<yellow>Search fluids"
+    search-researches: "<yellow>Search researches"
   title:
     main: "Pylon Guide"
     fluids: "Fluids"

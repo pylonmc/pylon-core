@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.guide.pages
+package io.github.pylonmc.pylon.core.guide.views
 
 import io.github.pylonmc.pylon.core.guide.GuideItems
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -13,7 +13,7 @@ import xyz.xenondevs.invui.item.impl.SimpleItem
 import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.invui.window.type.context.setTitle
 
-object FluidsPage {
+object FluidsView {
 
     fun open(player: Player) {
         val gui = PagedGui.guis()
@@ -30,7 +30,7 @@ object FluidsPage {
             .addIngredient('n', GuiItems.pageNext())
             .addIngredient('p', GuiItems.pagePrevious())
             .addIngredient('b', GuideItems.back())
-            .addIngredient('s', GuideItems.searchItems())
+            .addIngredient('s', GuideItems.searchFluids())
 
         val fluidsIterator = PylonRegistry.FLUIDS.iterator()
         while (fluidsIterator.hasNext()) {
@@ -45,10 +45,10 @@ object FluidsPage {
                 .build()
 
             var j = 0
-            while (fluidsIterator.hasNext() && j < 26) {
-                j++
+            while (fluidsIterator.hasNext() && j < 27) {
                 val fluid = fluidsIterator.next()
                 page[j] = SimpleItem(fluid.getItem())
+                j++
             }
 
             gui.addContent(page)

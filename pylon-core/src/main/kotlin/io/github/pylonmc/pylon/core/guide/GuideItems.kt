@@ -1,8 +1,7 @@
 package io.github.pylonmc.pylon.core.guide
 
-import io.github.pylonmc.pylon.core.guide.pages.FluidsPage
+import io.github.pylonmc.pylon.core.guide.views.FluidsView
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -33,7 +32,7 @@ object GuideItems {
         }
 
         override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-            FluidsPage.open(player)
+            FluidsView.open(player)
         }
     }
 

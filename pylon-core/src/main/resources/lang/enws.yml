@@ -1,9 +1,16 @@
+addon: "Core"
+
 item:
   error_item:
     name: "<red>Error"
     lore: |-
       <red>Lo, this item was cast forth from a block that, by misfortune or devilry, could not take form
       <red>The block in error:</red> <yellow>%block%
+
+  guide:
+    name: "Pylon Bible (King James Version)"
+    lore: |-
+      <insn>Right click</insn> to open
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"

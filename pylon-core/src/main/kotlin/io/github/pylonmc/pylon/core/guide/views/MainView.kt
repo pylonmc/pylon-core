@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.guide.pages
+package io.github.pylonmc.pylon.core.guide.views
 
 import io.github.pylonmc.pylon.core.guide.GuideItems
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
@@ -8,7 +8,7 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.invui.window.type.context.setTitle
 
-object MainPage {
+object MainView {
     fun open(player: Player) {
         val gui = PagedGui.guis()
             .setStructure(

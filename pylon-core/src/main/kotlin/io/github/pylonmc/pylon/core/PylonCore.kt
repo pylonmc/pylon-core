@@ -95,7 +95,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
     override val javaPlugin = this
 
-    override val material = Material.COPPER_INGOT
+    override val material = Material.BEDROCK
 
     override val languages: Set<Locale> = setOf(
         Locale.ENGLISH,
