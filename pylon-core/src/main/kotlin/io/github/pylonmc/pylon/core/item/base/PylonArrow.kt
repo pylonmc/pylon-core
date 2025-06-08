@@ -5,7 +5,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.ProjectileHitEvent
 
-interface Arrow {
+interface PylonArrow {
     /**
      * Called when the arrow is shot from the bow of any entity
      */
