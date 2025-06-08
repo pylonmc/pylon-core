@@ -497,10 +497,11 @@ internal object BlockListener : Listener {
             * Event player is from before the event is triggered, so when the player
             * is marked as *not* sneaking, they just toggled it.
             */
-            if (!event.player.isSneaking)
+            if (!event.player.isSneaking) {
                 pylonBlock.onSneakStart(event)
-            if (event.player.isSneaking)
+            } else {
                 pylonBlock.onSneakEnd(event)
+            }
         }
     }
 
