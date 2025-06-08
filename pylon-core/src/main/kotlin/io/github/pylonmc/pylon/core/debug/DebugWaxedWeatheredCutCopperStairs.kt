@@ -6,8 +6,8 @@ import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.base.BlockInteractor
-import io.github.pylonmc.pylon.core.item.base.EntityInteractor
+import io.github.pylonmc.pylon.core.item.base.PylonBlockInteractor
+import io.github.pylonmc.pylon.core.item.base.PylonItemEntityInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -22,7 +22,7 @@ import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
 class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
-    : PylonItem(stack), BlockInteractor, EntityInteractor {
+    : PylonItem(stack), PylonBlockInteractor, PylonItemEntityInteractor {
 
     override fun onUsedToClickBlock(event: PlayerInteractEvent) {
         val block = event.clickedBlock ?: return
