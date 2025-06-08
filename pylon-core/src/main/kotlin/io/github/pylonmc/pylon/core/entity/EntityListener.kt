@@ -6,8 +6,8 @@ import io.github.pylonmc.pylon.core.entity.base.PylonUnloadEntity
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.base.PylonArrow
 import org.bukkit.entity.AbstractArrow
-import org.bukkit.entity.Arrow
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -43,7 +43,7 @@ object EntityListener : Listener {
     fun handle(event: ProjectileHitEvent) {
         if(event.entity is AbstractArrow){
             val arrowItem = PylonItem.fromStack((event.entity as AbstractArrow).itemStack)
-            if(arrowItem is io.github.pylonmc.pylon.core.item.base.Arrow){
+            if(arrowItem is PylonArrow){
                 arrowItem.onArrowHit(event)
             }
         }
@@ -53,7 +53,7 @@ object EntityListener : Listener {
     fun handle(event: EntityDamageByEntityEvent) {
         if(event.damager is AbstractArrow){
             val arrowItem = PylonItem.fromStack((event.damager as AbstractArrow).itemStack)
-            if(arrowItem is io.github.pylonmc.pylon.core.item.base.Arrow){
+            if(arrowItem is PylonArrow){
                 arrowItem.onArrowDamage(event)
             }
         }
