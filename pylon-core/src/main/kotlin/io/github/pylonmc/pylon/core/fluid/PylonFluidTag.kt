@@ -1,3 +1,5 @@
 package io.github.pylonmc.pylon.core.fluid
 
-interface PylonFluidTag
+interface PylonFluidTag {
+    // TODO add text display methods once the guide is added
+}
