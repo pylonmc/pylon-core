@@ -39,7 +39,6 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
             event.hand == EquipmentSlot.HAND &&
             event.useInteractedBlock() != Event.Result.DENY
         ) {
-            event.setUseInteractedBlock(Event.Result.DENY)
             event.setUseItemInHand(Event.Result.DENY)
             val window = Window.single()
                 .setGui(gui)
@@ -48,6 +47,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
                 .build()
             window.open()
         }
+        event.setUseInteractedBlock(Event.Result.DENY)
     }
 
     @MustBeInvokedByOverriders
