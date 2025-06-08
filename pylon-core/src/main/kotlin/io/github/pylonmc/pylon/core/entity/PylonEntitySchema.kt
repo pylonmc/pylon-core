@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.core.entity
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import org.bukkit.persistence.PersistentDataContainer
 import java.lang.invoke.MethodHandle
 
 

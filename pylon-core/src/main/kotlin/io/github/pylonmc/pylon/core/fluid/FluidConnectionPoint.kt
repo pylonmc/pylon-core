@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.fluid
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.block.Block
-import java.util.*
+import java.util.UUID
 
 /**
  * A point is just a connection in a fluid network, like a machine's output or the end of a pipe.

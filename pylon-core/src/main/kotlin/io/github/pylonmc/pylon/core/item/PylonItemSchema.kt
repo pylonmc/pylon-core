@@ -11,9 +11,7 @@ import io.github.pylonmc.pylon.core.util.key.getAddon
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataContainer
 import java.lang.invoke.MethodHandle
 
 class PylonItemSchema @JvmOverloads internal constructor(
@@ -36,7 +34,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(ItemStack::class.java)
         ?: throw NoSuchMethodException("Item '$key' (${itemClass.simpleName}) is missing a load constructor (ItemStack)")
 
-    fun place(context: BlockCreateContext, block: Block): PylonBlock? {
+    fun place(context: BlockCreateContext): PylonBlock? {
         if (pylonBlockKey == null) {
             return null
         }
@@ -45,10 +43,10 @@ class PylonItemSchema @JvmOverloads internal constructor(
         check(template.type == blockSchema.material) {
             "Item $key places block $pylonBlockKey and so must have the same type - but the item is of type + ${template.type} while the block is of type ${blockSchema.material}"
         }
-        if (BlockStorage.isPylonBlock(block)) { // special case: you can place on top of structure void blocks
+        if (BlockStorage.isPylonBlock(context.block)) { // special case: you can place on top of structure void blocks
             return null
         }
-        return BlockStorage.placeBlock(block, pylonBlockKey, context)
+        return BlockStorage.placeBlock(context.block, pylonBlockKey, context)
     }
 
     override fun getKey(): NamespacedKey = key

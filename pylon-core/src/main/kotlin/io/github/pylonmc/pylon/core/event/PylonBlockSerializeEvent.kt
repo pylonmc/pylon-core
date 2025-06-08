@@ -1,24 +1,22 @@
 package io.github.pylonmc.pylon.core.event
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import org.bukkit.block.Block
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
-import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataContainer
 
 /**
- * Called after a pylon block has been broken.
+ * Called after serializing a block. **A block being serialized does not necessarily mean
+ * it is going to be unloaded.**
  */
-class PylonBlockBreakEvent(
+class PylonBlockSerializeEvent(
     val block: Block,
     val pylonBlock: PylonBlock,
-    val context: BlockBreakContext,
-    val drops: MutableList<ItemStack>
+    val pdc: PersistentDataContainer
 ) : Event(){
 
-    override fun getHandlers(): HandlerList
-        = handlerList
+    override fun getHandlers(): HandlerList = handlerList
 
     companion object {
         @JvmStatic
