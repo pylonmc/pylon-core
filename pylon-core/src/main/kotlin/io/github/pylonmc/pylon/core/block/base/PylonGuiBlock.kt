@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
@@ -7,23 +8,47 @@ import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.MustBeInvokedByOverriders
+import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.Inventory
+import xyz.xenondevs.invui.window.Window
 import java.util.IdentityHashMap
 
-interface PylonGuiBlock : PylonBreakHandler {
+interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
 
     fun createGui(): Gui
 
     @get:ApiStatus.NonExtendable
     val gui: AbstractGui
         get() = guiBlocks.getOrPut(this) { createGui() as AbstractGui }
+
+    @MustBeInvokedByOverriders
+    override fun onInteract(event: PlayerInteractEvent) {
+        if (
+            event.action.isRightClick &&
+            !event.player.isSneaking &&
+            event.hand == EquipmentSlot.HAND &&
+            event.useInteractedBlock() != Event.Result.DENY
+        ) {
+            event.setUseInteractedBlock(Event.Result.DENY)
+            event.setUseItemInHand(Event.Result.DENY)
+            val window = Window.single()
+                .setGui(gui)
+                .setTitle(AdventureComponentWrapper((this as PylonBlock).name))
+                .setViewer(event.player)
+                .build()
+            window.open()
+        }
+    }
 
     @MustBeInvokedByOverriders
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
