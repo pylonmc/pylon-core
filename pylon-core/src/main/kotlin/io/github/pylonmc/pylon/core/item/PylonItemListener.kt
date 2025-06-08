@@ -28,7 +28,7 @@ internal object PylonItemListener : Listener {
         }
 
         val arrow = PylonItem.fromStack(event.arrow)
-        if (arrow is Arrow) {
+        if (arrow is PylonArrow) {
             arrow.onArrowReady(event)
         }
     }
@@ -41,7 +41,7 @@ internal object PylonItemListener : Listener {
         }
 
         val arrow = event.consumable?.let { PylonItem.fromStack(it) }
-        if (arrow is Arrow) {
+        if (arrow is PylonArrow) {
             arrow.onArrowShotFromBow(event)
         }
     }
