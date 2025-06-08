@@ -507,7 +507,7 @@ internal object BlockListener : Listener {
 
     @EventHandler
     private fun onPlayerJumpEvent(event: PlayerJumpEvent) {
-        val block = event.player.location.add(0.0, -1.0,0.0).block
+        val block = event.player.location.add(0.0, -1.0, 0.0).block
         val pylonBlock = BlockStorage.get(block)
         if (pylonBlock is PylonJumpableBlock) {
             pylonBlock.onJump(event)
