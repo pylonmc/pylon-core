@@ -81,7 +81,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
             if (block !is PylonGuiBlock) return
-            val items = event.data.getOrDefault(inventoryKey, inventoryType, emptyList()).map { inv ->
+            val items = event.pdc.getOrDefault(inventoryKey, inventoryType, emptyList()).map { inv ->
                 inv.map { item -> item.takeUnless { it.isEmpty } }
             }
             val invs = inventories.getOrPut(block) { block.gui.getAllInventories() }
@@ -96,7 +96,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
         private fun onSerialize(event: PylonBlockSerializeEvent) {
             val block = event.pylonBlock
             if (block !is PylonGuiBlock) return
-            event.data.set(
+            event.pdc.set(
                 inventoryKey,
                 inventoryType,
                 inventories[block]!!.map { inv -> inv.unsafeItems.map { it ?: ItemStack.empty() } }

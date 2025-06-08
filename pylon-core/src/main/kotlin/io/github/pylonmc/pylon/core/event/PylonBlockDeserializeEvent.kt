@@ -12,7 +12,7 @@ import org.bukkit.persistence.PersistentDataContainer
 class PylonBlockDeserializeEvent(
     val block: Block,
     val pylonBlock: PylonBlock,
-    val data: PersistentDataContainer
+    val pdc: PersistentDataContainer
 ) : Event(){
 
     override fun getHandlers(): HandlerList = handlerList
