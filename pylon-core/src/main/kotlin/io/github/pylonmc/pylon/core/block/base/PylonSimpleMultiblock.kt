@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
@@ -99,6 +100,15 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         components.mapKeys { Vector3i(it.key.z, it.key.y, -it.key.x) }
     )
 
+    fun spawnGhostBlocks() {
+        val block = (this as PylonBlock).block
+        for ((offset, component) in components) {
+            val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
+            val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
+            heldEntities[key] = ghostBlock
+        }
+    }
+
     fun removeMultiblockGhosts() {
         val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
         for (key in toRemove) {
@@ -161,11 +171,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         private fun onPlace(event: PylonBlockPlaceEvent) {
             val block = event.pylonBlock
             if (block !is PylonSimpleMultiblock) return
-            for ((offset, component) in block.components) {
-                val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
-                val ghostBlock = component.spawnGhostBlock((block.block.position + offset).block)
-                block.heldEntities[key] = ghostBlock
-            }
+            block.spawnGhostBlocks()
         }
     }
 }
