@@ -15,6 +15,7 @@ import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -47,7 +48,10 @@ internal object BlockListener : Listener {
         val player = event.player
 
         val pylonItem = PylonItem.fromStack(item)
-        val pylonBlock = pylonItem?.place(BlockCreateContext.PlayerPlace(player, item, event.block))
+        val relative = event.blockPlaced.position - event.blockAgainst.position
+        val blockFace = BlockFace.entries.find { it.modX == relative.x && it.modY == relative.y && it.modZ == relative.z }
+            ?: BlockFace.SELF
+        val pylonBlock = pylonItem?.place(BlockCreateContext.PlayerPlace(player, item, event.blockPlaced, blockFace))
 
         if (pylonItem != null && pylonBlock == null) {
             event.isCancelled = true
