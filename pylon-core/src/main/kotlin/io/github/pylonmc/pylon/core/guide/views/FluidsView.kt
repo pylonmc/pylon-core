@@ -56,9 +56,7 @@ object FluidsView {
 
         Window.single()
             .setGui(gui)
-            .setViewer(player)
             .setTitle(Component.translatable("pylon.pyloncore.guide.title.fluids"))
-            .build()
-            .open()
+            .open(player)
     }
 }
