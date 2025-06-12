@@ -21,6 +21,12 @@ item:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
     lore: "<insn>Right click</insn> a block to view its Pylon block data"
 
+fluid:
+  temperature:
+    cold: "cold"
+    normal: "normal"
+    hot: "hot"
+
 message:
   debug:
     not_a_block: "<red>This is not a Pylon block"
@@ -53,6 +59,8 @@ gui:
   page:
     next: "Next page (%current%/%total%)"
     previous: "Previous page (%current%/%total%)"
+
+  time_left: "Time left: %time%"
 
 guide:
   button:
@@ -95,7 +103,7 @@ guide:
       title: "Researches"
       research-button:
         cost:
-          not-enough: "<arrow> <attr>Unlock cost</attr> <#ea6738>%points%/%cost%"
+          not-enough: "<arrow> <attr>Unlock cost</attr> <#e23b28>%points%/%cost%"
           enough: "<arrow> <attr>Unlock cost</attr> <#61ea38>%points%/%cost%"
         instructions: |-
           <arrow> <insn>Left click</insn> to research
@@ -205,10 +213,6 @@ unit:
   chunks:
     singular: "chunk"
     plural: "chunks"
-  seconds:
-    singular: "second"
-    plural: "seconds"
-    abbr: "s"
   hearts:
     singular: "heart"
     plural: "hearts"
@@ -232,3 +236,27 @@ unit:
     singular: "bucket per second"
     plural: "buckets per second"
     abbr: "B/s"
+  days:
+    singular: "day"
+    plural: "days"
+    abbr: "d"
+  hours:
+    singular: "hour"
+    plural: "hours"
+    abbr: "h"
+  minutes:
+    singular: "minute"
+    plural: "minutes"
+    abbr: "m"
+  seconds:
+    singular: "second"
+    plural: "seconds"
+    abbr: "s"
+  joules:
+    singular: "joule"
+    plural: "joules"
+    abbr: "J"
+  watts:
+    singular: "watt"
+    plural: "watts"
+    abbr: "W"

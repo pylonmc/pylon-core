@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.item
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
@@ -13,7 +14,6 @@ import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
@@ -25,23 +25,17 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
 
-    fun getSettings()
-        = Settings.get(key)
+    fun getSettings() = Settings.get(key)
 
-    override fun equals(other: Any?): Boolean
-        = key == (other as? PylonItem)?.key
+    override fun equals(other: Any?): Boolean = key == (other as? PylonItem)?.key
 
-    override fun hashCode(): Int
-        = key.hashCode()
+    override fun hashCode(): Int = key.hashCode()
 
-    override fun getKey(): NamespacedKey
-        = key
+    override fun getKey(): NamespacedKey = key
 
-    open fun getPlaceholders(): Map<String, ComponentLike>
-        = emptyMap()
+    open fun getPlaceholders(): Map<String, ComponentLike> = emptyMap()
 
-    open fun place(context: BlockCreateContext, block: Block): PylonBlock?
-        = schema.place(context, block)
+    open fun place(context: BlockCreateContext): PylonBlock? = schema.place(context)
 
     companion object {
 
@@ -71,10 +65,22 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             if (isNameAndLoreValid) {
                 for (locale in schema.addon.languages) {
                     if (!translator.translationKeyExists(name!!.key(), locale)) {
-                        PylonCore.logger.warning("${schema.key.namespace} is missing a name translation key for item ${schema.key} (locale: ${locale.displayName} | expected translation key: ${ItemStackBuilder.nameKey(schema.key)}")
+                        PylonCore.logger.warning(
+                            "${schema.key.namespace} is missing a name translation key for item ${schema.key} (locale: ${locale.displayName} | expected translation key: ${
+                                ItemStackBuilder.nameKey(
+                                    schema.key
+                                )
+                            }"
+                        )
                     }
                     if (!translator.translationKeyExists(lore!!.key(), locale)) {
-                        PylonCore.logger.warning("${schema.key.namespace} is missing a lore translation key for item ${schema.key} (locale: ${locale.displayName} | expected translation key: ${ItemStackBuilder.loreKey(schema.key)}")
+                        PylonCore.logger.warning(
+                            "${schema.key.namespace} is missing a lore translation key for item ${schema.key} (locale: ${locale.displayName} | expected translation key: ${
+                                ItemStackBuilder.loreKey(
+                                    schema.key
+                                )
+                            }"
+                        )
                     }
                 }
             }
@@ -88,12 +94,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         @JvmStatic
-        fun register(itemClass: Class<out PylonItem>, template: ItemStack)
-            = register(PylonItemSchema(itemClass, template))
-
-        @JvmStatic
-        fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockKey: NamespacedKey)
-            = register(PylonItemSchema(itemClass, template, pylonBlockKey))
+        @JvmOverloads
+        fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockKey: NamespacedKey? = null) =
+            register(PylonItemSchema(itemClass, template, pylonBlockKey))
 
         /**
          * Converts a regular ItemStack to a PylonItemStack
@@ -119,5 +122,8 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         fun supressNameAndLoreWarnings(key: NamespacedKey) {
             nameAndLoreWarningsSupressed.add(key)
         }
+
+        @JvmStatic
+        fun getSettings(key: NamespacedKey): Config = Settings.get(key)
     }
 }

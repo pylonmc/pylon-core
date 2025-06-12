@@ -1,11 +1,20 @@
 package io.github.pylonmc.pylon.core.block.context
 
+import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 interface BlockCreateContext {
 
-    data class PlayerPlace(val player: Player, val item: ItemStack) : BlockCreateContext
+    val block: Block
 
-    data object Default : BlockCreateContext
+    data class PlayerPlace(
+        val player: Player,
+        val item: ItemStack,
+        override val block: Block,
+        val clickedFace: BlockFace
+    ) : BlockCreateContext
+
+    data class Default(override val block: Block) : BlockCreateContext
 }

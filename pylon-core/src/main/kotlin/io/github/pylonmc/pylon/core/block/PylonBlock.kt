@@ -7,8 +7,9 @@ import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -36,6 +37,8 @@ open class PylonBlock protected constructor(val block: Block) {
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
+
+    protected open fun postLoad() {}
 
     open fun getWaila(player: Player): WailaConfig {
         return WailaConfig(name)
@@ -110,6 +113,8 @@ open class PylonBlock protected constructor(val block: Block) {
             }
 
             block.write(pdc)
+            PylonBlockSerializeEvent(block.block, block, pdc).callEvent()
+
             return pdc
         }
 
@@ -146,6 +151,8 @@ open class PylonBlock protected constructor(val block: Block) {
                 block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
                     ?.let { world.getEntity(it) as? BlockDisplay }
 
+                PylonBlockDeserializeEvent(block.block, block, pdc).callEvent()
+                block.postLoad()
                 return block
             } catch (t: Throwable) {
                 PylonCore.logger.severe("Error while loading block $key at $position")

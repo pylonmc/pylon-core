@@ -38,12 +38,10 @@ fun vectorToBlockFace(vector: Vector3i): BlockFace {
     }
 }
 
-fun vectorToBlockFace(vector: Vector3f)
-    = vectorToBlockFace(Vector3i(vector, RoundingMode.HALF_DOWN))
+fun vectorToBlockFace(vector: Vector3f) = vectorToBlockFace(Vector3i(vector, RoundingMode.HALF_DOWN))
 
 // use toVector3f rather than toVector3i because toVector3i will floor components
-fun vectorToBlockFace(vector: Vector)
-    = vectorToBlockFace(vector.toVector3f())
+fun vectorToBlockFace(vector: Vector) = vectorToBlockFace(vector.toVector3f())
 
 /**
  * Rotates a BlockFace to the player's reference frame. Where the player is facing becomes NORTH.

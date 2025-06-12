@@ -19,7 +19,6 @@ object GuiItems {
     @JvmStatic
     fun background(): Item = SimpleItem(
         ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
-            .name("")
             .set(DataComponentTypes.HIDE_TOOLTIP)
     )
 
