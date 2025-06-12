@@ -25,7 +25,15 @@ class PlayerTranslationHandler(val player: Player) {
             GlobalTranslator.render(attacher.render(it, Unit), player.locale())
         }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
-            val newLore: MutableList<Component> = lore.lines().flatMapTo(mutableListOf()) { line ->
+            val clonedLore = lore.lines().toMutableList()
+
+            clonedLore.add(
+                Component.translatable("pylon.${item.key.namespace}.addon")
+                    .decoration(TextDecoration.ITALIC, true)
+                    .color(NamedTextColor.BLUE)
+            )
+
+            val newLore: MutableList<Component> = clonedLore.flatMapTo(mutableListOf()) { line ->
                 val translated = GlobalTranslator.render(attacher.render(line, Unit), player.locale())
                 val encoded = LineWrapEncoder.encode(translated)
                 val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
@@ -37,11 +45,7 @@ class PlayerTranslationHandler(val player: Player) {
                         .build()
                 }
             }
-            newLore.add(
-                Component.translatable("pylon.${item.addon.key.namespace}.addon")
-                    .decoration(TextDecoration.ITALIC, true)
-                    .color(NamedTextColor.BLUE)
-            )
+
             ItemLore.lore(newLore)
         }
     }

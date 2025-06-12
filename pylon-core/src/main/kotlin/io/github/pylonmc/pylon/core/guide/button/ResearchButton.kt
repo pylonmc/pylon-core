@@ -27,7 +27,7 @@ open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
             val playerPoints = 5 // TODO why the fuck does this not work, fuck you intellj
             item.lore(Component.translatable(
                 "pylon.pyloncore.guide.page.researches.research-button.cost."
-                        + (if (research.cost < playerPoints) "not-enough" else "enough"),
+                        + (if (research.cost > playerPoints) "not-enough" else "enough"),
                 PylonArgument.of("points", playerPoints),
                 PylonArgument.of("cost", research.cost)
             ))
