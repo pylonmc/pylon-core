@@ -73,6 +73,9 @@ object PylonCore : JavaPlugin(), PylonAddon {
             BlockDisplay::class.java,
             PylonSimpleMultiblock.MultiblockGhostBlock::class.java
         )
+
+        // 26153 is pluginID for PylonCore
+        val metrics: Metrics = Metrics(this, 26153)
     }
 
     override fun onDisable() {

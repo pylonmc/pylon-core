@@ -12,6 +12,7 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     maven("https://repo.xenondevs.xyz/releases") {
         name = "InvUI"
     }
@@ -39,6 +40,7 @@ dependencies {
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
     paperLibrary("xyz.xenondevs.invui:inventory-access-r22:1.45:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.45")
+    paperLibrary("org.bstats:bstats-bukkit:3.1.0")
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
@@ -72,6 +74,8 @@ tasks.shadowJar {
 
     archiveBaseName = project.name
     archiveClassifier = null
+
+    relocate("org.bstats", "io.github.pylonmc.pylon.core.bstats")
 }
 
 paper {
