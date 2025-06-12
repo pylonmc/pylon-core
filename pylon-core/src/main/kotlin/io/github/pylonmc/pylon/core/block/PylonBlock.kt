@@ -32,7 +32,7 @@ open class PylonBlock protected constructor(val block: Block) {
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.block.${schema.key.key}")
+    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.item.${schema.key.key}.waila")
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)

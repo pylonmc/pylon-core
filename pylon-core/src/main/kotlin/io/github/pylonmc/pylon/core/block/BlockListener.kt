@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
+import com.destroystokyo.paper.event.player.PlayerJumpEvent
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
@@ -28,6 +29,7 @@ import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerToggleSneakEvent
 
 
 /**
@@ -483,6 +485,32 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
         if (pylonBlock is PylonInteractableBlock) {
             pylonBlock.onInteract(event)
+        }
+    }
+
+    @EventHandler
+    private fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) {
+        val block = event.player.location.add(0.0, -1.0, 0.0).block
+        val pylonBlock = BlockStorage.get(block)
+        if (pylonBlock is PylonSneakableBlock) {
+            /*
+            * Event player is from before the event is triggered, so when the player
+            * is marked as *not* sneaking, they just toggled it.
+            */
+            if (!event.player.isSneaking) {
+                pylonBlock.onSneakStart(event)
+            } else {
+                pylonBlock.onSneakEnd(event)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun onPlayerJumpEvent(event: PlayerJumpEvent) {
+        val block = event.player.location.add(0.0, -1.0, 0.0).block
+        val pylonBlock = BlockStorage.get(block)
+        if (pylonBlock is PylonJumpableBlock) {
+            pylonBlock.onJump(event)
         }
     }
 
