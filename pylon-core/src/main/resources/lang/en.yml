@@ -56,20 +56,70 @@ gui:
 
 guide:
   button:
-    back: "<yellow>Back"
-    fluids: "<yellow>Fluids"
-    researches: "<yellow>Researches"
-    settings-and-info: "<yellow>Settings & info"
-    guides: "<yellow>Guides"
-    search-items: "<yellow>Search items"
-    search-fluids: "<yellow>Search fluids"
-    search-researches: "<yellow>Search researches"
-  title:
-    main: "Pylon Guide"
-    fluids: "Fluids"
-    researches: "Researches"
-    settings-and-info: "Settings & info"
-    guides: "Guides"
+    back:
+      name: "<yellow>Back"
+      lore: ""
+    fluids:
+      name: "<yellow>Fluids"
+      lore: ""
+    researches:
+      name: "<yellow>Researches"
+      lore: ""
+    settings-and-info:
+      name: "<yellow>Settings & info"
+      lore: ""
+    guides:
+      name: "<yellow>Guides"
+      lore: ""
+    search-items:
+      name: "<yellow>Search items"
+      lore: ""
+    search-fluids:
+      name: "<yellow>Search fluids"
+      lore: ""
+    search-researches:
+      name: "<yellow>Search researches"
+      lore: ""
+  page:
+    fluids:
+      name: "Fluids"
+      lore: ""
+      title: "Fluids"
+    info:
+      name: "Info"
+      lore: ""
+      title: "Info"
+    researches:
+      name: "Researches"
+      lore: ""
+      title: "Researches"
+      research-button:
+        cost:
+          not-enough: "<arrow> <attr>Unlock cost</attr> <#ea6738>%points%/%cost%"
+          enough: "<arrow> <attr>Unlock cost</attr> <#61ea38>%points%/%cost%"
+        instructions: |-
+          <arrow> <insn>Left click</insn> to research
+          <arrow> <insn>Right click</insn> to see unlocks
+    root:
+      name: "Pylon guide"
+      lore: ""
+      title: "Pylon guide"
+    search_fluids:
+      name: "Search fluids"
+      lore: ""
+      title: "Search fluids"
+    search_items:
+      name: "Search items"
+      lore: ""
+      title: "Search items"
+    search_researches:
+      name: "Search researches"
+      lore: ""
+      title: "Search researches"
+    settings_and_info:
+      name: "Settings & info"
+      lore: ""
+      title: "Settings & info"
 
 unit:
   prefix:

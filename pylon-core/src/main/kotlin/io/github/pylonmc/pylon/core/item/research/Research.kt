@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.recipe.RecipeTypes
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -21,6 +22,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import org.bukkit.GameMode
 import org.bukkit.Keyed
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -37,14 +39,16 @@ import java.util.UUID
  */
 data class Research(
     private val key: NamespacedKey,
+    val material: Material,
     val name: Component,
     val cost: Long?,
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
-    constructor(key: NamespacedKey, cost: Long?, vararg unlocks: NamespacedKey) : this(
+    constructor(key: NamespacedKey, material: Material, cost: Long?, vararg unlocks: NamespacedKey) : this(
         key,
-        Component.translatable("pylon.${key.namespace}.research.${key.key}"),
+        material,
+        Component.translatable("pylon.${key.namespace}.research.${key.key}.name"),
         cost,
         unlocks.toSet()
     )
