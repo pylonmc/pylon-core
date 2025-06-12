@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.key.getAddon
 import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -34,6 +35,15 @@ open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
         }
 
         item.lore(Component.translatable("pylon.pyloncore.guide.page.researches.research-button.instructions"))
+
+        item.lore(Component.translatable("pylon.pyloncore.guide.page.researches.unlocks-text"))
+        for (researchItemKey in research.unlocks) {
+            item.lore(Component.translatable("pylon.${researchItemKey.namespace}.item.${researchItemKey.key}.name"))
+        }
+
+        // TODO add unlock lines
+
+        item.lore(getAddon(key).displayName)
 
         return item
     }

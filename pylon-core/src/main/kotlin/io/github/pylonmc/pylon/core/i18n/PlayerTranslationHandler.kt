@@ -27,11 +27,7 @@ class PlayerTranslationHandler(val player: Player) {
         item.stack.editData(DataComponentTypes.LORE) { lore ->
             val clonedLore = lore.lines().toMutableList()
 
-            clonedLore.add(
-                Component.translatable("pylon.${item.key.namespace}.addon")
-                    .decoration(TextDecoration.ITALIC, true)
-                    .color(NamedTextColor.BLUE)
-            )
+            clonedLore.add(item.addon.displayName)
 
             val newLore: MutableList<Component> = clonedLore.flatMapTo(mutableListOf()) { line ->
                 val translated = GlobalTranslator.render(attacher.render(line, Unit), player.locale())

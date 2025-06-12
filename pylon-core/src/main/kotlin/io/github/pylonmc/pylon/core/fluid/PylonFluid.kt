@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.key.getAddon
 import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.Material
@@ -61,9 +62,18 @@ open class PylonFluid(
         PylonRegistry.FLUIDS.register(this)
     }
 
-    fun getItem() = ItemStackBuilder.of(material)
-        // TODO placeholder system with tags - don't want to do anything more with temperature rn because it's being yeeted
-        .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}"))
+    fun getItem(): ItemStackBuilder {
+        val item = ItemStackBuilder.of(material)
+            .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}"))
+
+        for (tag in tags) {
+            item.lore(tag.displayText)
+        }
+
+        item.lore(getAddon(key).displayName)
+
+        return item
+    }
 
     override fun equals(other: Any?): Boolean = other is PylonFluid && key == other.key
     override fun hashCode(): Int = key.hashCode()

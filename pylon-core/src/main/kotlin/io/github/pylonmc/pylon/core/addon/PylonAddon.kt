@@ -6,6 +6,10 @@ import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -21,6 +25,11 @@ interface PylonAddon : Keyed {
     val languages: Set<Locale>
 
     val material: Material
+
+    val displayName: TranslatableComponent
+        get() = Component.translatable("pylon.${key.namespace}.addon")
+                        .decoration(TextDecoration.ITALIC, true)
+                        .color(NamedTextColor.BLUE)
 
     override fun getKey(): NamespacedKey
             = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())

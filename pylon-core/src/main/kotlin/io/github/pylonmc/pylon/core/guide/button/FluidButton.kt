@@ -9,9 +9,9 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 
 open class FluidButton(val key: NamespacedKey) : AbstractItem() {
 
-    val schema = PylonRegistry.FLUIDS[key] ?: throw IllegalArgumentException("There is no fluid with key $key")
+    val fluid = PylonRegistry.FLUIDS[key] ?: throw IllegalArgumentException("There is no fluid with key $key")
 
-    override fun getItemProvider() = schema.getItem()
+    override fun getItemProvider() = fluid.getItem()
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
         if (clickType.isRightClick) {

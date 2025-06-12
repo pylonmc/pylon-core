@@ -12,6 +12,11 @@ open class PageButton(val page: GuidePage) : AbstractItem() {
     override fun getItemProvider() = page.item
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-        page.open(player)
+        // The UI will break and let people take items out of it if an exception happesns
+        try {
+            page.open(player)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
     }
 }

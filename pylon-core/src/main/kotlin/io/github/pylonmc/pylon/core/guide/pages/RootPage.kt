@@ -13,12 +13,16 @@ import xyz.xenondevs.invui.gui.structure.Markers
 class RootPage internal constructor() : SimpleStaticGuidePage(
     pylonKey("root"),
     Material.ENCHANTED_BOOK,
-    mutableListOf(PageButton(PylonGuide.fluidsPage))
+    mutableListOf(
+        PageButton(PylonGuide.infoPage),
+        PageButton(PylonGuide.researchesPage),
+        PageButton(PylonGuide.fluidsPage),
+    )
 ) {
 
     override fun getHeader(player: Player) = PagedGui.guis()
         .setStructure(
-            "# g # r # e # s #",
+            "# e # # # # # s #",
             "x x x x x x x x x",
             "x x x x x x x x x",
             "x x x x x x x x x",
@@ -26,8 +30,6 @@ class RootPage internal constructor() : SimpleStaticGuidePage(
             "x x x x x x x x x",
         )
         .addIngredient('#', GuiItems.blankGrayPane())
-        .addIngredient('g', PageButton(PylonGuide.infoPage))
-        .addIngredient('r', PageButton(PylonGuide.researchesPage))
         .addIngredient('e', PageButton(PylonGuide.settingsAndInfoPage))
         .addIngredient('s', PageButton(PylonGuide.searchItemsPage))
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
