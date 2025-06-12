@@ -63,8 +63,8 @@ open class SimpleDynamicGuidePage(
         var j = 0
         for (button in buttonSupplier.get()) {
             if (j >= 45) {
-                page = pageSupplier.invoke()
                 gui.addContent(page)
+                page = pageSupplier.invoke()
             }
 
             page.setItem(j, button)
