@@ -4,10 +4,15 @@ package io.github.pylonmc.pylon.core.util
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
+import net.kyori.adventure.text.Component
+import org.bukkit.Color
+import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
+import org.bukkit.entity.TextDisplay
 import org.bukkit.util.Vector
+import org.joml.Matrix4f
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
@@ -53,4 +58,16 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
         vector = vector.rotateAroundNonUnitAxis(rightVector, -yawToCardinalDirection(player.eyeLocation.pitch).toDouble())
     }
     return vectorToBlockFace(vector)
+}
+
+fun spawnUnitSquareTextDisplay(location: Location, color: Color): TextDisplay {
+    val display = location.world!!.spawn(location, TextDisplay::class.java)
+    display.setTransformationMatrix( // https://github.com/TheCymaera/minecraft-hologram/blob/d67eb43308df61bdfe7283c6821312cca5f9dea9/src/main/java/com/heledron/hologram/utilities/rendering/textDisplays.kt#L15
+        Matrix4f()
+            .translate(-0.1f + .5f, -0.5f + .5f, 0f)
+            .scale(8.0f, 4.0f, 1f)
+    )
+    display.text(Component.text(" "))
+    display.backgroundColor = color
+    return display
 }

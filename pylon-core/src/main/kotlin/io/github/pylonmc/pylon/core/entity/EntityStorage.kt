@@ -126,7 +126,7 @@ object EntityStorage : Listener {
         = get(entity) != null
 
     @JvmStatic
-    fun add(entity: PylonEntity<*>) = lockEntityWrite {
+    fun <E : Entity> add(entity: PylonEntity<E>): PylonEntity<E> = lockEntityWrite {
         entities[entity.uuid] = entity
         entitiesByKey.getOrPut(entity.schema.key, ::mutableSetOf).add(entity)
 
@@ -145,6 +145,7 @@ object EntityStorage : Listener {
                 }
             }
         }
+        entity
     }
 
     @EventHandler
