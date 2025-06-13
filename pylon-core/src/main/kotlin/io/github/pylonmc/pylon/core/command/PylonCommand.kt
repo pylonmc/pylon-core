@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
@@ -35,6 +36,20 @@ import org.jetbrains.annotations.ApiStatus
 @CommandAlias("pylon|py")
 @ApiStatus.Internal
 internal class PylonCommand : BaseCommand() {
+
+    @Default
+    @Description("Open the Pylon guide")
+    @CommandPermission("pylon.command.open_guide")
+    fun default(player: Player) {
+        PylonGuide.open(player)
+    }
+
+    @Subcommand("guide")
+    @Description("Obtain the Pylon guide")
+    @CommandPermission("pylon.command.guide")
+    fun guide(player: Player) {
+        player.inventory.addItem(PylonGuide.STACK)
+    }
 
     @Subcommand("give")
     @CommandCompletion("@players @items")

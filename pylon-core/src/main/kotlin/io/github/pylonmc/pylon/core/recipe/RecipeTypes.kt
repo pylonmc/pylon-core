@@ -1,12 +1,14 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -15,42 +17,71 @@ import org.bukkit.event.block.BlockCookEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
 import org.bukkit.inventory.*
+import xyz.xenondevs.invui.gui.Gui
 
 object RecipeTypes {
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_BLASTING: RecipeType<BlastingRecipe> = CookingRecipeType("blasting") as RecipeType<BlastingRecipe>
+    val VANILLA_BLASTING: RecipeType<BlastingRecipe> = CookingRecipeType("blasting", Material.BLAST_FURNACE) as RecipeType<BlastingRecipe>
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_CAMPFIRE: RecipeType<CampfireRecipe> = CookingRecipeType("campfire") as RecipeType<CampfireRecipe>
+    val VANILLA_CAMPFIRE: RecipeType<CampfireRecipe> = CookingRecipeType("campfire", Material.CAMPFIRE) as RecipeType<CampfireRecipe>
 
     @JvmField
-    val VANILLA_CRAFTING: RecipeType<CraftingRecipe> = CraftingRecipeType
+    val VANILLA_SHAPED: RecipeType<ShapedRecipeWrapper> = CraftingRecipeType("shaped")
+
+    @JvmField
+    val VANILLA_SHAPELESS: RecipeType<ShapelessRecipeWrapper> = CraftingRecipeType("shapeless")
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_FURNACE: RecipeType<FurnaceRecipe> = CookingRecipeType("furnace") as RecipeType<FurnaceRecipe>
+    val VANILLA_FURNACE: RecipeType<FurnaceRecipe> = CookingRecipeType("furnace", Material.FURNACE) as RecipeType<FurnaceRecipe>
 
     @JvmField
     val VANILLA_SMITHING: RecipeType<SmithingRecipe> = SmithingRecipeType
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_SMOKING: RecipeType<SmokingRecipe> = CookingRecipeType("smoking") as RecipeType<SmokingRecipe>
+    val VANILLA_SMOKING: RecipeType<SmokingRecipe> = CookingRecipeType("smoking", Material.SMOKER) as RecipeType<SmokingRecipe>
 
     init {
         VANILLA_BLASTING.register()
         VANILLA_CAMPFIRE.register()
-        VANILLA_CRAFTING.register()
+        VANILLA_SHAPED.register()
+        VANILLA_SHAPELESS.register()
         VANILLA_FURNACE.register()
         VANILLA_SMITHING.register()
         VANILLA_SMOKING.register()
     }
 }
 
-private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
+abstract class CraftingRecipeWrapper : PylonRecipe {
+    // TODO gui
+}
+
+class ShapedRecipeWrapper(val recipe: ShapedRecipe) : CraftingRecipeWrapper() {
+    override fun getKey(): NamespacedKey = recipe.key
+
+    override fun getInputItems(): Set<ItemStack> = recipe.choiceMap.values.map { it.itemStack }.toSet()
+    override fun getOutputItems(): Set<ItemStack> = setOf(recipe.result)
+
+    override fun getInputFluids(): Set<PylonFluid> = setOf()
+    override fun getOutputFluids(): Set<PylonFluid> = setOf()
+}
+
+class ShapelessRecipeWrapper(val recipe: ShapelessRecipe) : CraftingRecipeWrapper() {
+    override fun getKey(): NamespacedKey = recipe.key
+
+    override fun getInputItems(): Set<ItemStack> = recipe.choiceList.map { it.itemStack }.toSet()
+    override fun getOutputItems(): Set<ItemStack> = setOf(recipe.result)
+
+    override fun getInputFluids(): Set<PylonFluid> = setOf()
+    override fun getOutputFluids(): Set<PylonFluid> = setOf()
+}
+
+private class CraftingRecipeType<T: PylonRecipe>(key: String) : VanillaRecipe<T>(key) {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onPreCraft(e: PrepareItemCraftEvent) {
@@ -65,15 +96,45 @@ private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
     }
 }
 
-private class CookingRecipeType(key: String) : VanillaRecipe<CookingRecipe<*>>(key) {
+class CookingRecipeWrapper(
+    val recipe: CookingRecipe<*>,
+    val block: Material
+) : PylonRecipe {
+    override fun getKey(): NamespacedKey = recipe.key
+
+    override fun getInputItems(): Set<ItemStack> = setOf(recipe.input)
+    override fun getOutputItems(): Set<ItemStack> = setOf(recipe.result)
+
+    override fun getInputFluids(): Set<PylonFluid> = setOf()
+    override fun getOutputFluids(): Set<PylonFluid> = setOf()
+
+    override fun display(): Gui {
+        return Gui.normal()
+            .setStructure(
+                "# # # # # # # # #",
+                "# b # i f o # c #",
+                "# # # # # # # # #",
+            )
+            .addIngredient('b', ItemStack(block))
+            .addIngredient('i', recipe.inputChoice.itemStack)
+            .addIngredient('f', ItemStack(Material.FIRE))
+            .addIngredient('o', recipe.result)
+            .addIngredient('c', ItemStack(Material.COAL))
+            .build()
+    }
+}
+
+private class CookingRecipeType(
+    key: String,
+) : VanillaRecipe<CookingRecipeWrapper>(key) {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onCook(e: BlockCookEvent) {
         val input = e.source
         if (PylonItem.fromStack(input) == null) return
         for (recipe in recipes) {
-            if (recipe.inputChoice.test(input)) {
-                e.result = recipe.result.clone()
+            if (recipe.recipe.inputChoice.test(input)) {
+                e.result = recipe.recipe.result.clone()
                 return
             }
         }
@@ -101,7 +162,7 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
 }
 
 private abstract class VanillaRecipe<T>(key: String) :
-    RecipeType<T>(NamespacedKey.minecraft(key)), Listener where T : Keyed, T : Recipe {
+    RecipeType<T>(NamespacedKey.minecraft(key)), Listener where T : Keyed, T : PylonRecipe {
 
     init {
         Bukkit.getPluginManager().registerEvents(this, PylonCore)

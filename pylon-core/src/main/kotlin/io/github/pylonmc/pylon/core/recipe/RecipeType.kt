@@ -7,7 +7,7 @@ import org.bukkit.NamespacedKey
 /**
  * Iteration order will be the order in which recipes were added unless overridden.
  */
-open class RecipeType<T : Keyed>(private val key: NamespacedKey) : Keyed, Iterable<T> {
+open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, Iterable<T> {
 
     protected open val registeredRecipes = mutableMapOf<NamespacedKey, T>()
     val recipes: Collection<T>

@@ -8,7 +8,7 @@ item:
       <red>Errored block:</red> <yellow>%block%
 
   guide:
-    name: "Pylon Guide"
+    name: "<white>Pylon Guide"
     lore: |-
       <insn>Right click</insn> to open
 
@@ -89,46 +89,40 @@ guide:
     search-researches:
       name: "<yellow>Search researches"
       lore: ""
+    research:
+      cost:
+        not-enough: "<arrow> <attr>Unlock cost</attr> <#e23b28>%points%/%cost%"
+        enough: "<arrow> <attr>Unlock cost</attr> <#61ea38>%points%/%cost%"
+      instructions: "<arrow> <guideinsn>Left click</guideinsn> to research"
+      unlocks-title: "<u>Unlocks</u>"
+      unlocks-item: "<diamond> <white>%item%"
+      more-researches: "<diamond> <gray>And <aqua>%amount% <gray>more - <guideinsn>right click</guideinsn> <gray>to see all"
+
   page:
     fluids:
       name: "Fluids"
       lore: ""
-      title: "Fluids"
     info:
       name: "Info"
       lore: ""
-      title: "Info"
     researches:
       name: "Researches"
       lore: ""
-      title: "Researches"
-      research-button:
-        cost:
-          not-enough: "<arrow> <attr>Unlock cost</attr> <#e23b28>%points%/%cost%"
-          enough: "<arrow> <attr>Unlock cost</attr> <#61ea38>%points%/%cost%"
-        instructions: |-
-          <arrow> <insn>Left click</insn> to research
-          <arrow> <insn>Right click</insn> to see unlocks
     root:
       name: "Pylon guide"
       lore: ""
-      title: "Pylon guide"
     search_fluids:
       name: "Search fluids"
       lore: ""
-      title: "Search fluids"
     search_items:
       name: "Search items"
       lore: ""
-      title: "Search items"
     search_researches:
       name: "Search researches"
       lore: ""
-      title: "Search researches"
     settings_and_info:
       name: "Settings & info"
       lore: ""
-      title: "Settings & info"
 
 unit:
   prefix:

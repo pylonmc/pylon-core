@@ -19,6 +19,7 @@ object GuiItems {
     @JvmStatic
     fun background(): Item = SimpleItem(
         ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
+            .name("")
             .set(DataComponentTypes.HIDE_TOOLTIP)
     )
 
@@ -39,12 +40,6 @@ object GuiItems {
 
     @JvmStatic
     fun pagePrevious(): Item = PylonPageItem(false)
-
-    @JvmStatic
-    fun blankGrayPane(): Item = SimpleItem(ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE).name(""))
-
-    @JvmStatic
-    fun blankBlackPane(): Item = SimpleItem(ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE).name(""))
 }
 
 private class PylonScrollItem(private val direction: Int, key: String?) : ScrollItem(direction) {

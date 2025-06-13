@@ -23,6 +23,7 @@ val customMiniMessage = MiniMessage.builder()
         it.tag("arrow", ::arrow)
         it.tag("diamond", ::diamond)
         it.tag(setOf("instruction", "insn")) { _, _ -> Tag.styling(TextColor.color(0xf9d104)) }
+        it.tag(setOf("guideinstruction", "guideinsn")) { _, _ -> Tag.styling(TextColor.color(0xc907f4)) }
         it.tag(setOf("attribute", "attr")) { _, _ -> Tag.styling(TextColor.color(0xa9d9e8)) }
         it.tag(setOf("unit", "u"), ::unit)
         // No break space
