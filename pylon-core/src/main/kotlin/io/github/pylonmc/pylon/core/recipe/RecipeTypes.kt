@@ -23,7 +23,7 @@ object RecipeTypes {
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
-    val VANILLA_BLASTING: RecipeType<BlastingRecipe> = CookingRecipeType("blasting", Material.BLAST_FURNACE) as RecipeType<BlastingRecipe>
+    val VANILLA_BLASTING: RecipeType<BlastingRecipeWrapper> = CookingRecipeType("blasting", Material.BLAST_FURNACE) as RecipeType<BlastingRecipe>
 
     @JvmField
     @Suppress("UNCHECKED_CAST")
@@ -64,6 +64,8 @@ abstract class CraftingRecipeWrapper : PylonRecipe {
 class ShapedRecipeWrapper(val recipe: ShapedRecipe) : CraftingRecipeWrapper() {
     override fun getKey(): NamespacedKey = recipe.key
 
+    override fun getResult(): ItemStack = recipe.result
+
     override fun getInputItems(): Set<ItemStack> = recipe.choiceMap.values.map { it.itemStack }.toSet()
     override fun getOutputItems(): Set<ItemStack> = setOf(recipe.result)
 
@@ -73,6 +75,8 @@ class ShapedRecipeWrapper(val recipe: ShapedRecipe) : CraftingRecipeWrapper() {
 
 class ShapelessRecipeWrapper(val recipe: ShapelessRecipe) : CraftingRecipeWrapper() {
     override fun getKey(): NamespacedKey = recipe.key
+
+    override fun getResult(): ItemStack = recipe.result
 
     override fun getInputItems(): Set<ItemStack> = recipe.choiceList.map { it.itemStack }.toSet()
     override fun getOutputItems(): Set<ItemStack> = setOf(recipe.result)
@@ -96,11 +100,13 @@ private class CraftingRecipeType<T: PylonRecipe>(key: String) : VanillaRecipe<T>
     }
 }
 
-class CookingRecipeWrapper(
+abstract class CookingRecipeWrapper(
     val recipe: CookingRecipe<*>,
     val block: Material
 ) : PylonRecipe {
     override fun getKey(): NamespacedKey = recipe.key
+
+    override fun getResult(): ItemStack = recipe.result
 
     override fun getInputItems(): Set<ItemStack> = setOf(recipe.input)
     override fun getOutputItems(): Set<ItemStack> = setOf(recipe.result)
@@ -123,6 +129,12 @@ class CookingRecipeWrapper(
             .build()
     }
 }
+
+class BlastingRecipeWrapper(recipe: BlastingRecipe) : CookingRecipeWrapper(recipe, Material.BLAST_FURNACE)
+
+class RecipeWrapper(recipe: BlastingRecipe) : CookingRecipeWrapper(recipe, Material.BLAST_FURNACE)
+
+class BlastingRecipeWrapper(recipe: BlastingRecipe) : CookingRecipeWrapper(recipe, Material.BLAST_FURNACE)
 
 private class CookingRecipeType(
     key: String,
@@ -161,8 +173,9 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
     }
 }
 
-private abstract class VanillaRecipe<T>(key: String) :
-    RecipeType<T>(NamespacedKey.minecraft(key)), Listener where T : Keyed, T : PylonRecipe {
+private abstract class VanillaRecipe<T>(key: String)
+    : RecipeType<T>(NamespacedKey.minecraft(key)), Listener
+        where T : Keyed, T : PylonRecipe {
 
     init {
         Bukkit.getPluginManager().registerEvents(this, PylonCore)

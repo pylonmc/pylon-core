@@ -3,9 +3,10 @@ package io.github.pylonmc.pylon.core.recipe
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import org.bukkit.Keyed
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.Recipe
 import xyz.xenondevs.invui.gui.Gui
 
-interface PylonRecipe : Keyed {
+interface PylonRecipe : Keyed, Recipe {
     fun getInputItems(): Set<ItemStack> = TODO()
 
     fun getInputFluids(): Set<PylonFluid> = TODO()
