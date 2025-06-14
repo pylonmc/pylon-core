@@ -490,8 +490,9 @@ internal object BlockListener : Listener {
 
     @EventHandler
     private fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) {
-        val block = event.player.location.add(0.0, -1.0, 0.0).block
-        val pylonBlock = BlockStorage.get(block)
+        val blockUnder = event.player.location.add(0.0, -1.0, 0.0).block
+        val blockIn = event.player.location.add(0.0, 0.0, 0.0).block
+        val pylonBlock = BlockStorage.get(blockUnder) ?: BlockStorage.get(blockIn)
         if (pylonBlock is PylonSneakableBlock) {
             /*
             * Event player is from before the event is triggered, so when the player
@@ -507,8 +508,9 @@ internal object BlockListener : Listener {
 
     @EventHandler
     private fun onPlayerJumpEvent(event: PlayerJumpEvent) {
-        val block = event.player.location.add(0.0, -1.0, 0.0).block
-        val pylonBlock = BlockStorage.get(block)
+        val blockUnder = event.player.location.add(0.0, -1.0, 0.0).block
+        val blockIn = event.player.location.add(0.0, 0.0, 0.0).block
+        val pylonBlock = BlockStorage.get(blockUnder) ?: BlockStorage.get(blockIn)
         if (pylonBlock is PylonJumpableBlock) {
             pylonBlock.onJump(event)
         }
