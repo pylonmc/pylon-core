@@ -4,7 +4,7 @@ import org.bukkit.event.player.PlayerItemBreakEvent
 import org.bukkit.event.player.PlayerItemDamageEvent
 import org.bukkit.event.player.PlayerItemMendEvent
 
-interface Damageable {
+interface PylonItemDamageable {
     /**
      * Called when the item is damaged
      */

@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.item.base
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerBucketFillEvent
 
-interface Bucket {
+interface PylonBucket {
     /**
      * Called when the bucket is emptied
      */

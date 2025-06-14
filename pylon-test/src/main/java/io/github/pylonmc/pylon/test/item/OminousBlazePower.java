@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.item;
 
 import io.github.pylonmc.pylon.core.item.PylonItem;
-import io.github.pylonmc.pylon.core.item.base.BrewingStandFuel;
+import io.github.pylonmc.pylon.core.item.base.PylonBrewingStandFuel;
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Material;
@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 
-public class OminousBlazePower extends PylonItem implements BrewingStandFuel {
+public class OminousBlazePower extends PylonItem implements PylonBrewingStandFuel {
 
     public static final NamespacedKey KEY = PylonTest.key("ominous_blaze_powder");
     public static final ItemStack STACK = ItemStackBuilder.pylonItem(Material.DIAMOND_SWORD, KEY)
