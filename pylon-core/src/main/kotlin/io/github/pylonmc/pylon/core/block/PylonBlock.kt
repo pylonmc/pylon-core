@@ -70,27 +70,9 @@ open class PylonBlock protected constructor(val block: Block) {
 
         private val wailaWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
 
-        private fun checkWaila(schema: PylonBlockSchema) {
-            val translator = AddonTranslator.translators[schema.addon]
-            check(translator != null) {
-                "Addon does not have a translator; did you forget to call registerWithPylon()?"
-            }
-
-            for (locale in schema.addon.languages) {
-                val nameTranslationKey = "pylon.${schema.key.namespace}.item.${schema.key.key}.name"
-                val wailaTranslationKey = "pylon.${schema.key.namespace}.item.${schema.key.key}.waila"
-                if (!translator.translationKeyExists(nameTranslationKey, locale) && !translator.translationKeyExists(wailaTranslationKey, locale)) {
-                    PylonCore.logger.warning("${schema.key.namespace} is missing a WAILA and name translation key for block ${schema.key} (locale: ${locale.displayName} | expected translation key: $nameTranslationKey or $wailaTranslationKey)")
-                }
-            }
-        }
-
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
             val schema = PylonBlockSchema(key, material, blockClass)
-            if (key !in wailaWarningsSupressed) {
-                checkWaila(schema)
-            }
             PylonRegistry.BLOCKS.register(schema)
         }
 
