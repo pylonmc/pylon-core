@@ -25,7 +25,7 @@ import java.util.UUID
  */
 interface PylonEntityHolderBlock : PylonBreakHandler {
 
-    fun createEntities(context: BlockCreateContext): Map<String, UUID> = emptyMap()
+    fun createEntities(context: BlockCreateContext): Map<String, PylonEntity<*>> = emptyMap()
 
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
@@ -74,7 +74,15 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         private fun onPlace(event: PylonBlockPlaceEvent) {
             val block = event.pylonBlock
             if (block !is PylonEntityHolderBlock) return
-            holders[block] = block.createEntities(event.context).toMutableMap()
+            val entities = mutableMapOf<String, UUID>()
+            for ((name, entity) in block.createEntities(event.context)) {
+                val uuid = entity.uuid
+                if (!EntityStorage.isPylonEntity(uuid)) {
+                    EntityStorage.add(entity)
+                }
+                entities[name] = uuid
+            }
+            holders[block] = entities
         }
 
         @EventHandler
