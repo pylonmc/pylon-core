@@ -238,9 +238,24 @@ internal class PylonCommand : BaseCommand() {
                 player.sendRichMessage("<red>Research not found: $research")
                 return
             }
-            player.removeResearch(res)
-            val name = MiniMessage.miniMessage().serialize(res.name)
-            player.sendRichMessage("<green>Removed research $name from ${player.name}")
+            if (player.hasResearch(res)) {
+                player.removeResearch(res)
+                val name = MiniMessage.miniMessage().serialize(res.name)
+                player.sendRichMessage("<green>Removed research $name from ${player.name}")
+            } else {
+                player.sendRichMessage("<red>${player.name} does not have $name")
+            }
+        }
+
+        @Subcommand("removeall")
+        @CommandCompletion("@players")
+        @Description("Remove all researches from a player")
+        @CommandPermission("pylon.command.research.modify")
+        fun removeAll(p: OnlinePlayer) {
+            val player = p.player
+            for (research in player.researches) {
+                player.removeResearch(research)
+            }
         }
 
         @Subcommand("points")

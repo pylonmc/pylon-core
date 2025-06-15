@@ -27,8 +27,7 @@ open class SimpleDynamicGuidePage(
     override fun getKey() = key
 
     override val item = ItemStackBuilder.of(material)
-        .name(Component.translatable("pylon.${key.namespace}.guide.page.${key.key}.name"))
-        .lore(Component.translatable("pylon.${key.namespace}.guide.page.${key.key}.lore"))
+        .name(Component.translatable("pylon.${key.namespace}.guide.page.${key.key}"))
 
     open fun getHeader(player: Player, buttons: List<Item>) = PagedGui.items()
         .setStructure(

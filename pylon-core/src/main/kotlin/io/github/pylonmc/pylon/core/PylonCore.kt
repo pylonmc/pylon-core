@@ -19,6 +19,8 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
+import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
+import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -52,6 +54,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
+        Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,
@@ -74,15 +77,21 @@ object PylonCore : JavaPlugin(), PylonAddon {
         registerWithPylon()
 
         PylonItem.register(DebugWaxedWeatheredCutCopperStairs::class.java, DebugWaxedWeatheredCutCopperStairs.STACK)
+        PylonGuide.hideItem(DebugWaxedWeatheredCutCopperStairs.KEY)
+
         PylonItem.register(PhantomBlock.ErrorItem::class.java, PhantomBlock.ErrorItem.STACK)
+        PylonGuide.hideItem(PhantomBlock.ErrorItem.KEY)
 
         PylonItem.register(PylonGuide::class.java, PylonGuide.STACK)
+        PylonGuide.hideItem(PylonGuide.KEY)
 
         PylonEntity.register(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
             BlockDisplay::class.java,
             PylonSimpleMultiblock.MultiblockGhostBlock::class.java
         )
+
+        RecipeType.addVanillaRecipes()
     }
 
     override fun onDisable() {

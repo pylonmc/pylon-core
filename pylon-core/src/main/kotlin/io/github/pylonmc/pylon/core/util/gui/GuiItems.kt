@@ -11,6 +11,7 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.ScrollGui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.impl.AutoCycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
 import xyz.xenondevs.invui.item.impl.controlitem.PageItem
 import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem
@@ -22,6 +23,27 @@ object GuiItems {
             .name("")
             .set(DataComponentTypes.HIDE_TOOLTIP)
     )
+
+    @JvmStatic
+    fun backgroundBlack(): Item = SimpleItem(
+        ItemStackBuilder.of(Material.BLACK_STAINED_GLASS_PANE)
+            .name("")
+            .set(DataComponentTypes.HIDE_TOOLTIP)
+    )
+
+    @JvmStatic
+    fun progressCyclingItem(timeTicks: Int, template: ItemStackBuilder): Item {
+        val states: MutableList<ItemStackBuilder> = mutableListOf()
+        var i = 0
+        while (i < timeTicks) {
+            states.add(ItemStackBuilder.of(template.build().clone())
+                .set(DataComponentTypes.MAX_DAMAGE, timeTicks)
+                .set(DataComponentTypes.DAMAGE, i)
+            )
+            i++
+        }
+        return AutoCycleItem(1, *(states.toTypedArray()))
+    }
 
     @JvmStatic
     fun scrollUp(): Item = PylonScrollItem(-1, "up")

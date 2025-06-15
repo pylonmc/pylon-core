@@ -1,18 +1,19 @@
 package io.github.pylonmc.pylon.core.guide
 
-import io.github.pylonmc.pylon.core.guide.pages.FluidsPage
-import io.github.pylonmc.pylon.core.guide.pages.ResearchesPage
+import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidsPage
+import io.github.pylonmc.pylon.core.guide.pages.research.ResearchesPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
-import io.github.pylonmc.pylon.core.guide.pages.SearchItemsPage
+import io.github.pylonmc.pylon.core.guide.pages.item.SearchItemsPage
 import io.github.pylonmc.pylon.core.guide.pages.SettingsAndInfoPage
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
-import io.github.pylonmc.pylon.core.guide.pages.SearchFluidsPage
+import io.github.pylonmc.pylon.core.guide.pages.fluid.SearchFluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.Interactor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
@@ -35,14 +36,27 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
         val STACK = ItemStackBuilder.pylonItem(Material.ENCHANTED_BOOK, KEY)
             .build()
 
+        /**
+         * Keeps track of the pages the player last visited
+         * Resets when the player ends up on the root page
+         */
         @JvmField
         val history: MutableMap<UUID, MutableList<GuidePage>> = mutableMapOf()
 
         /**
-         * We use get() here to force the page to be re-created every time
-         *
-         * This makes sure the guide is always up to date
+         * Hidden items do not show up in searches
          */
+        @JvmField
+        val hiddenItems: MutableSet<NamespacedKey> = mutableSetOf()
+
+        /**
+         * Hidden fluids do not show up in searches
+         */
+        @JvmField
+        val hiddenFluids: MutableSet<NamespacedKey> = mutableSetOf()
+
+        // We use get() in the following fields to force the page to be re-created every time
+        // This makes sure the guide is always up to date
 
         @JvmField
         var fluidsPage = FluidsPage()
@@ -65,6 +79,23 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
         @JvmField
         var settingsAndInfoPage = SettingsAndInfoPage()
 
+        /**
+         * Hide an item from showing up in searches
+         */
+        fun hideItem(key: NamespacedKey) {
+            hiddenItems.add(key)
+        }
+
+        /**
+         * Hide a fluid from showing up in searches
+         */
+        fun hideFluid(key: NamespacedKey) {
+            hiddenFluids.add(key)
+        }
+
+        /**
+         * Opens the guide to the last page that the player was on
+         */
         fun open(player: Player) {
             val history = history.getOrPut(player.uniqueId) { mutableListOf() }
             if (history.isEmpty()) {

@@ -14,7 +14,8 @@ interface GuidePage : Keyed {
     val item: ItemProvider
 
     val title: Component
-        get() = Component.translatable("pylon.pyloncore.guide.title")
+        get() =Component.translatable("pylon.${key.namespace}.guide.page.${key.key}")
+
 
     fun getGui(player: Player): Gui
 

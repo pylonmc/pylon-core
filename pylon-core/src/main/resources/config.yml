@@ -17,7 +17,7 @@ entity-data-autosave-interval-seconds: 3
 research:
   enabled: true
   # The interval, in ticks, between when Pylon checks for unresearched items in inventories
-  interval: 1
+  interval: 20
 
 # How many characters a line can be before it is split into a new line when translating
 translation-wrap-limit: 64

@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.guide.pages
+package io.github.pylonmc.pylon.core.guide.pages.fluid
 
 import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.FluidButton

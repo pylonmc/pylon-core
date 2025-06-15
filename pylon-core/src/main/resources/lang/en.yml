@@ -64,6 +64,7 @@ gui:
   time_left: "Time left: %time%"
 
 guide:
+  title: "Pylon Guide"
   button:
     back:
       name: "<yellow>Back"
@@ -86,43 +87,41 @@ guide:
     search-fluids:
       name: "<yellow>Search fluids"
       lore: ""
-    search-researches:
-      name: "<yellow>Search researches"
-      lore: ""
     research:
       cost:
-        not-enough: "<arrow> <attr>Unlock cost</attr> <#e23b28>%points%/%cost%"
-        enough: "<arrow> <attr>Unlock cost</attr> <#61ea38>%points%/%cost%"
+        not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
+        enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%points%/%cost%"
+        researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%cost% (researched)"
       instructions: "<arrow> <guideinsn>Left click</guideinsn> to research"
       unlocks-title: "<u>Unlocks</u>"
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>more - <guideinsn>right click</guideinsn> <gray>to see all"
+    fluid:
+      name: "%fluid% <gray>(%amount%<gray>)"
+    item:
+      not-researched: "<#ff0000>Not researched yet"
+      research-instructions: |-
+        <arrow> <guideinsn>Shift left click</guideinsn> to research
+        <arrow> <guideinsn>Shift right click</guideinsn> to see other research unlocks
+    toggle-waila:
+      name: "Toggle WAILA"
+      lore: "<arrow> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
+  recipe:
+    cooking: "<attr>Cooking time:</attr> %time%"
 
   page:
-    fluids:
-      name: "Fluids"
-      lore: ""
-    info:
-      name: "Info"
-      lore: ""
-    researches:
-      name: "Researches"
-      lore: ""
-    root:
-      name: "Pylon guide"
-      lore: ""
-    search_fluids:
-      name: "Search fluids"
-      lore: ""
-    search_items:
-      name: "Search items"
-      lore: ""
-    search_researches:
-      name: "Search researches"
-      lore: ""
-    settings_and_info:
-      name: "Settings & info"
-      lore: ""
+    fluids: "Fluids"
+    info: "Info"
+    researches: "Researches"
+    research-items: "Research items"
+    root: "Pylon guide"
+    search_fluids: "Search fluids"
+    search_items: "Search items"
+    settings_and_info: "Settings & info"
+    item_recipes: "Item recipes"
+    fluid_recipes: "Fluid recipes"
+    item_usages: "Item usages"
+    fluid_usages: "Fluid usages"
 
 unit:
   prefix:

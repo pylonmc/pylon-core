@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
@@ -23,19 +24,28 @@ class RootPage() : SimpleStaticGuidePage(
     )
 ) {
 
-    override fun getHeader(player: Player, buttons: List<Item>) = PagedGui.guis()
-        .setStructure(
-            "# e # # # # # s #",
-            "x x x x x x x x x",
-            "x x x x x x x x x",
-            "x x x x x x x x x",
-            "x x x x x x x x x",
-            "x x x x x x x x x",
-        )
-        .addIngredient('#', GuiItems.background())
-        .addIngredient('e', PageButton(PylonGuide.settingsAndInfoPage))
-        .addIngredient('s', PageButton(PylonGuide.searchItemsPage))
-        .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+    override fun getGui(player: Player): Gui {
+        val buttons = buttonSupplier.get()
+        val gui = PagedGui.items()
+            .setStructure(
+                "# e # # # # # s #",
+                "x x x x x x x x x",
+                "x x x x x x x x x",
+                "x x x x x x x x x",
+                "x x x x x x x x x",
+                "x x x x x x x x x",
+            )
+            .addIngredient('#', GuiItems.background())
+            .addIngredient('e', PageButton(PylonGuide.settingsAndInfoPage))
+            .addIngredient('s', PageButton(PylonGuide.searchItemsPage))
+            .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+
+        for (button in buttons) {
+            gui.addContent(button)
+        }
+
+        return gui.build()
+    }
 
     override fun open(player: Player) {
         // Reset history
