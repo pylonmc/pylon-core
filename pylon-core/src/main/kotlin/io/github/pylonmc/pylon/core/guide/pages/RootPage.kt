@@ -11,7 +11,6 @@ import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.window.Window
 
 class RootPage() : SimpleStaticGuidePage(
@@ -37,7 +36,7 @@ class RootPage() : SimpleStaticGuidePage(
             )
             .addIngredient('#', GuiItems.background())
             .addIngredient('e', PageButton(PylonGuide.settingsAndInfoPage))
-            .addIngredient('s', PageButton(PylonGuide.searchItemsPage))
+            .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 
         for (button in buttons) {

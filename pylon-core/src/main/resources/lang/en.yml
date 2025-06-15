@@ -81,11 +81,8 @@ guide:
     guides:
       name: "<yellow>Guides"
       lore: ""
-    search-items:
-      name: "<yellow>Search items"
-      lore: ""
-    search-fluids:
-      name: "<yellow>Search fluids"
+    search:
+      name: "<yellow>Search"
       lore: ""
     research:
       cost:
@@ -115,8 +112,7 @@ guide:
     researches: "Researches"
     research-items: "Research items"
     root: "Pylon guide"
-    search_fluids: "Search fluids"
-    search_items: "Search items"
+    search: "Search"
     settings_and_info: "Settings & info"
     item_recipes: "Item recipes"
     fluid_recipes: "Fluid recipes"

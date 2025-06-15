@@ -44,11 +44,29 @@ internal class PylonCommand : BaseCommand() {
         PylonGuide.open(player)
     }
 
+    init {
+        Bukkit.getPluginManager().addPermission(
+            Permission(
+                "pylon.command.open_guide",
+                PermissionDefault.TRUE
+            )
+        )
+    }
+
     @Subcommand("guide")
     @Description("Obtain the Pylon guide")
     @CommandPermission("pylon.command.guide")
     fun guide(player: Player) {
         player.inventory.addItem(PylonGuide.STACK)
+    }
+
+    init {
+        Bukkit.getPluginManager().addPermission(
+            Permission(
+                "pylon.command.guide",
+                PermissionDefault.TRUE
+            )
+        )
     }
 
     @Subcommand("give")

@@ -6,16 +6,13 @@ import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.ComponentLike
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.window.Window
 import java.util.function.Supplier
 
 open class SimpleDynamicGuidePage(
@@ -41,7 +38,7 @@ open class SimpleDynamicGuidePage(
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', if (buttons.size >= 45) GuiItems.pagePrevious() else GuiItems.background())
         .addIngredient('b', BackButton(player))
-        .addIngredient('s', PageButton(PylonGuide.searchItemsPage))
+        .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', if (buttons.size >= 45) GuiItems.pageNext() else GuiItems.background())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 

@@ -17,5 +17,5 @@ class FluidsPage : SimpleDynamicGuidePage(
 ) {
 
     override fun getHeader(player: Player, buttons: List<Item>) = super.getHeader(player, buttons)
-        .addIngredient('s', PageButton(PylonGuide.searchFluidsPage))
+        .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
 }

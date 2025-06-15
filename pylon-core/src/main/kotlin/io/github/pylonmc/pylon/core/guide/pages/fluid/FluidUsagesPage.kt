@@ -7,8 +7,6 @@ import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.papermc.paper.datacomponent.DataComponentTypes
-import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
@@ -48,7 +46,7 @@ open class FluidUsagesPage(fluidKey: NamespacedKey) : GuidePage {
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', if (pages.size > 1) GuiItems.pagePrevious() else GuiItems.background())
         .addIngredient('b', BackButton(player))
-        .addIngredient('s', PageButton(PylonGuide.Companion.searchItemsPage))
+        .addIngredient('s', PageButton(PylonGuide.Companion.searchItemsAndFluidsPage))
         .addIngredient('>', if (pages.size > 1) GuiItems.pageNext() else GuiItems.background())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 

@@ -3,10 +3,9 @@ package io.github.pylonmc.pylon.core.guide
 import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchesPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
-import io.github.pylonmc.pylon.core.guide.pages.item.SearchItemsPage
+import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.SettingsAndInfoPage
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
-import io.github.pylonmc.pylon.core.guide.pages.fluid.SearchFluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.Interactor
@@ -71,10 +70,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
         var rootPage = RootPage()
 
         @JvmField
-        var searchFluidsPage = SearchFluidsPage()
-
-        @JvmField
-        var searchItemsPage = SearchItemsPage()
+        var searchItemsAndFluidsPage = SearchItemsAndFluidsPage()
 
         @JvmField
         var settingsAndInfoPage = SettingsAndInfoPage()
