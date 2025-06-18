@@ -39,37 +39,37 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
          * Keeps track of the pages the player last visited
          * Resets when the player ends up on the root page
          */
-        @JvmField
+        @JvmStatic
         val history: MutableMap<UUID, MutableList<GuidePage>> = mutableMapOf()
 
         /**
          * Hidden items do not show up in searches
          */
-        @JvmField
+        @JvmStatic
         val hiddenItems: MutableSet<NamespacedKey> = mutableSetOf()
 
         /**
          * Hidden fluids do not show up in searches
          */
-        @JvmField
+        @JvmStatic
         val hiddenFluids: MutableSet<NamespacedKey> = mutableSetOf()
 
-        @JvmField
+        @JvmStatic
         var fluidsPage = FluidsPage()
 
-        @JvmField
+        @JvmStatic
         var infoPage = InfoPage()
 
-        @JvmField
+        @JvmStatic
         var researchesPage = ResearchesPage()
 
-        @JvmField
+        @JvmStatic
         var rootPage = RootPage()
 
-        @JvmField
+        @JvmStatic
         var searchItemsAndFluidsPage = SearchItemsAndFluidsPage()
 
-        @JvmField
+        @JvmStatic
         var settingsAndInfoPage = SettingsAndInfoPage()
 
         /**
