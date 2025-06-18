@@ -60,6 +60,10 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
         stack.editPersistentDataContainer(consumer)
     }
 
+    fun <T : Any> editData(type: DataComponentType.Valued<T>, block: (T) -> T) = apply {
+        stack.editData(type, block)
+    }
+
     fun name(name: Component) = set(DataComponentTypes.ITEM_NAME, name)
 
     fun name(name: String) = name(fromMiniMessage(name))

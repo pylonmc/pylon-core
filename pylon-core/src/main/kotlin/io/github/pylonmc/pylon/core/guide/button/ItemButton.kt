@@ -48,10 +48,11 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
             .name((stack.getData(DataComponentTypes.ITEM_NAME) as TranslatableComponent).arguments(placeholders))
             // have to use set() instead of lore() in order to override existing lore
-            .set(DataComponentTypes.LORE, ItemLore.lore(
-                (stack.getData(DataComponentTypes.LORE)!!.lines().map {
+            .editData(DataComponentTypes.LORE) { lore ->
+                ItemLore.lore(lore.lines().map {
                     (it as TranslatableComponent).arguments(placeholders)
-                }).toList()))
+                })
+            }
 
         if (!player.canUse(item)) {
             builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
