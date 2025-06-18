@@ -19,10 +19,10 @@ class SearchItemsAndFluidsPage : SearchPage(
     Material.OAK_SIGN
 ) {
 
-    fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.Companion.ITEMS.getKeys().filter {
-        !PylonGuide.Companion.hiddenItems.contains(it)
+    fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.ITEMS.getKeys().filter {
+        !PylonGuide.hiddenItems.contains(it)
     }.map {
-        val translator = AddonTranslator.Companion.translators[getAddon(it)]!!
+        val translator = AddonTranslator.translators[getAddon(it)]!!
         val name = translator.translate(
             Component.translatable("pylon.${it.namespace}.item.${it.key}.name"), player.locale()
         )
@@ -31,10 +31,10 @@ class SearchItemsAndFluidsPage : SearchPage(
         Pair(ItemButton(it), plainTextName)
     }.toMutableList()
 
-    fun getFluidButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.Companion.FLUIDS.getKeys().filter {
-        !PylonGuide.Companion.hiddenFluids.contains(it)
+    fun getFluidButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.FLUIDS.getKeys().filter {
+        !PylonGuide.hiddenFluids.contains(it)
     }.map {
-        val translator = AddonTranslator.Companion.translators[getAddon(it)]!!
+        val translator = AddonTranslator.translators[getAddon(it)]!!
         val name = translator.translate(
             Component.translatable("pylon.${it.namespace}.fluid.${it.key}"), player.locale()
         )

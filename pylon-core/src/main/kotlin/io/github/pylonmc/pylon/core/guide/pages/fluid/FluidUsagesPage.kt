@@ -46,7 +46,7 @@ open class FluidUsagesPage(fluidKey: NamespacedKey) : GuidePage {
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', if (pages.size > 1) GuiItems.pagePrevious() else GuiItems.background())
         .addIngredient('b', BackButton(player))
-        .addIngredient('s', PageButton(PylonGuide.Companion.searchItemsAndFluidsPage))
+        .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', if (pages.size > 1) GuiItems.pageNext() else GuiItems.background())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 
