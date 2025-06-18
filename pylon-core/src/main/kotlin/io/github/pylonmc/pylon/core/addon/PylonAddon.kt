@@ -41,10 +41,12 @@ interface PylonAddon : Keyed {
         PylonRegistry.ADDONS.register(this)
         AddonTranslator.register(this)
 
-        val translator = AddonTranslator.translators[this]!!
-        for (locale in languages) {
-            if (!translator.canTranslate("pylon.${key.namespace}.addon", locale)) {
-                PylonCore.logger.warning("${key.namespace} is missing the 'addon' translation key for ${locale.displayName}")
+        if (key !in addonNameWarningsSupressed) {
+            val translator = AddonTranslator.translators[this]!!
+            for (locale in languages) {
+                if (!translator.canTranslate("pylon.${key.namespace}.addon", locale)) {
+                    PylonCore.logger.warning("${key.namespace} is missing the 'addon' translation key for ${locale.displayName}")
+                }
             }
         }
     }
@@ -80,5 +82,15 @@ interface PylonAddon : Keyed {
             config.save()
         }
         return config
+    }
+
+    companion object {
+
+        private val addonNameWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
+
+        @JvmStatic
+        fun supressAddonNameWarnings(key: NamespacedKey) {
+            addonNameWarningsSupressed.add(key)
+        }
     }
 }
