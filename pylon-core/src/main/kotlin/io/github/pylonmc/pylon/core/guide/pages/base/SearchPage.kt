@@ -71,7 +71,9 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
         it.second
     }.map {
         it.first
-    }.take(27).toList()
+    }
+    .take(27)
+    .toList()
 
     companion object {
         val serializer = PlainTextComponentSerializer.plainText()
