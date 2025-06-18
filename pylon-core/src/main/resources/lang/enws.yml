@@ -10,7 +10,7 @@ item:
   guide:
     name: "Pylon Bible (King James Version)"
     lore: |-
-      <insn>Right click</insn> to open
+      Open using <insn>thy right hand</insn>
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"
