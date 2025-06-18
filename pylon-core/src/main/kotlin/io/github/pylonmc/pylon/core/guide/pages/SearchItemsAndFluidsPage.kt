@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.key.getAddon
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.item.Item
@@ -46,5 +47,9 @@ class SearchItemsAndFluidsPage : SearchPage(
         val list = getItemButtons(player)
         list.addAll(getFluidButtons(player))
         return list
+    }
+
+    companion object {
+        private val serializer = PlainTextComponentSerializer.plainText()
     }
 }

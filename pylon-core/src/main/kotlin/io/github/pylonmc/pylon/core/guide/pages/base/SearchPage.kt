@@ -4,7 +4,6 @@ import info.debatty.java.stringsimilarity.JaroWinkler
 import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -48,7 +47,7 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
         }
     }
 
-    fun getItems(player: Player, search: String): List<Item> = getItemNamePairs(player, search).map {
+    open fun getItems(player: Player, search: String): List<Item> = getItemNamePairs(player, search).map {
         val name = it.second
         val distance = searchAlgorithm.distance(name, search)
         val weight = when {
@@ -72,7 +71,6 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     }.take(27).toList()
 
     companion object {
-        val serializer = PlainTextComponentSerializer.plainText()
-        val searchAlgorithm = JaroWinkler()
+        private val searchAlgorithm = JaroWinkler()
     }
 }
