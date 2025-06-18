@@ -29,7 +29,7 @@ dependencies {
 
     runtimeOnly(project(":nms"))
 
-    implementation("com.aallam.similarity:string-similarity-kotlin:0.1.0")
+    implementation("info.debatty:java-string-similarity:2.0.0")
 
     paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 

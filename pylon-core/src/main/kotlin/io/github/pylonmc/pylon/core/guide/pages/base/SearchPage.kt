@@ -1,15 +1,9 @@
 package io.github.pylonmc.pylon.core.guide.pages.base
 
-import com.aallam.similarity.JaroWinkler
+import info.debatty.java.stringsimilarity.JaroWinkler
 import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
-import io.github.pylonmc.pylon.core.guide.button.FluidButton
-import io.github.pylonmc.pylon.core.i18n.AddonTranslator
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
-import io.github.pylonmc.pylon.core.util.key.getAddon
-import io.github.pylonmc.pylon.core.util.pylonKey
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -19,7 +13,6 @@ import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.window.AnvilWindow
 
 abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStaticGuidePage(key, material) {
