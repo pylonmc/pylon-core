@@ -1,12 +1,12 @@
 package io.github.pylonmc.pylon.core.guide
 
 import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidsPage
-import io.github.pylonmc.pylon.core.guide.pages.research.ResearchesPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.SettingsAndInfoPage
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
+import io.github.pylonmc.pylon.core.guide.pages.research.ResearchesPage
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.Interactor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
@@ -54,6 +54,12 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
         @JvmStatic
         val hiddenFluids: MutableSet<NamespacedKey> = mutableSetOf()
 
+        /**
+         * Hidden researches do not show up in the researches category
+         */
+        @JvmStatic
+        val hiddenResearches: MutableSet<NamespacedKey> = mutableSetOf()
+
         @JvmStatic
         var fluidsPage = FluidsPage()
 
@@ -84,6 +90,13 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
          */
         fun hideFluid(key: NamespacedKey) {
             hiddenFluids.add(key)
+        }
+
+        /**
+         * Hide a fluid from showing up in searches
+         */
+        fun hideResearch(key: NamespacedKey) {
+            hiddenResearches.add(key)
         }
 
         /**
