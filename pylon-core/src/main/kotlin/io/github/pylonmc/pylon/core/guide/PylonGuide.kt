@@ -54,9 +54,6 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), Interactor {
         @JvmField
         val hiddenFluids: MutableSet<NamespacedKey> = mutableSetOf()
 
-        // We use get() in the following fields to force the page to be re-created every time
-        // This makes sure the guide is always up to date
-
         @JvmField
         var fluidsPage = FluidsPage()
 
