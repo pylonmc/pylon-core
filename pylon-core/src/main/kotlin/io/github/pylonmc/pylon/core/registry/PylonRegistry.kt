@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
+import java.util.stream.Stream
 
 class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
@@ -68,6 +69,8 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
     override fun iterator(): Iterator<T> {
         return values.values.iterator()
     }
+
+    fun stream(): Stream<T> = values.values.stream()
 
     companion object {
         private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
