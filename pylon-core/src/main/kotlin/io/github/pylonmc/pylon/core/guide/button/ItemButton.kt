@@ -44,7 +44,6 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
 
         val placeholders = PylonItem.fromStack(stack)!!.getPlaceholders().map { (name, value) -> PylonArgument.of(name, value) }
         val builder = ItemStackBuilder.of(stack.clone())
-            // have to use set() instead of lore() in order to override existing lore
             .editData(DataComponentTypes.LORE) { lore ->
                 ItemLore.lore(lore.lines().map {
                     (it as TranslatableComponent).arguments(placeholders)
