@@ -16,6 +16,10 @@ open class RecipeType<T : Keyed>(private val key: NamespacedKey) : Keyed, Iterab
     fun getRecipe(key: NamespacedKey): T?
         = registeredRecipes[key]
 
+    fun getRecipeOrThrow(key: NamespacedKey): T {
+        return registeredRecipes[key] ?: throw NoSuchElementException("No recipe found for key $key in ${this.key}")
+    }
+
     open fun addRecipe(recipe: T) {
         registeredRecipes[recipe.key] = recipe
     }
