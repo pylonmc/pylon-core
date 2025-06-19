@@ -12,10 +12,9 @@ interface VanillaRecipeWrapper : PylonRecipe {
     fun getRecipe(): Recipe
 }
 
-abstract class VanillaRecipeType<T>(
+abstract class VanillaRecipeType<T : VanillaRecipeWrapper>(
     key: String
-) : RecipeType<T>(NamespacedKey.minecraft(key)), Listener
-where T: VanillaRecipeWrapper {
+) : RecipeType<T>(NamespacedKey.minecraft(key)), Listener {
 
     init {
         Bukkit.getPluginManager().registerEvents(this, PylonCore)

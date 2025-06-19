@@ -56,19 +56,16 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
             name.contains(search) -> 2.0 + distance
             else -> 3.0 + distance
         }
-        val nulledWeight = if (weight > 3.15) {
-            null
-        } else {
-            weight
-        }
-        Pair(it.first, nulledWeight)
+        Pair(it.first, weight.takeIf { weight < 3.15 })
     }.filter {
         it.second != null
     }.sortedBy {
         it.second
     }.map {
         it.first
-    }.take(27).toList()
+    }
+    .take(27)
+    .toList()
 
     companion object {
         private val searchAlgorithm = JaroWinkler()
