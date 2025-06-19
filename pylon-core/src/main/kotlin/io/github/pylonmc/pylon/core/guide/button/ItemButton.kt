@@ -44,15 +44,19 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
 
         val placeholders = PylonItem.fromStack(stack)!!.getPlaceholders().map { (name, value) -> PylonArgument.of(name, value) }
         val builder = ItemStackBuilder.of(stack.clone())
-            // buffoonery to bypass InvUI's translation mess
-            // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
-            .name((stack.getData(DataComponentTypes.ITEM_NAME) as TranslatableComponent).arguments(placeholders))
             // have to use set() instead of lore() in order to override existing lore
             .editData(DataComponentTypes.LORE) { lore ->
                 ItemLore.lore(lore.lines().map {
                     (it as TranslatableComponent).arguments(placeholders)
                 })
             }
+
+        // buffoonery to bypass InvUI's translation mess
+        // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
+        val stackName = stack.getData(DataComponentTypes.ITEM_NAME)
+        if (stackName is TranslatableComponent) {
+            builder.name(stackName.arguments(placeholders))
+        }
 
         if (!player.canUse(item)) {
             builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
