@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
+import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
@@ -27,6 +28,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.jetbrains.annotations.ApiStatus
@@ -57,6 +59,18 @@ internal class PylonCommand : BaseCommand() {
     @CommandPermission("pylon.command.debug")
     fun debug(player: Player) {
         player.give(DebugWaxedWeatheredCutCopperStairs.STACK)
+    }
+
+    @Subcommand("key")
+    @Description("Shows you the key of the item in your main hand")
+    @CommandPermission("pylon.command.key")
+    fun key(player: Player) {
+        val item = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
+        if (item == null) {
+            player.sendRichMessage("<red>You are not holding a Pylon item")
+            return
+        }
+        player.sendRichMessage("${item.key}")
     }
 
     @Subcommand("setblock")
