@@ -89,7 +89,7 @@ guide:
         not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
         enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%points%/%cost%"
         researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%cost% (researched)"
-      instructions: "<arrow> <guideinsn>Left click</guideinsn> to research"
+      instructions: "<arrow:#3a293> <guideinsn>Left click</guideinsn> to research"
       unlocks-title: "<u>Unlocks</u>"
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>more - <guideinsn>right click</guideinsn> <gray>to see all"
@@ -98,11 +98,11 @@ guide:
     item:
       not-researched: "<#ff0000>Not researched yet"
       research-instructions: |-
-        <arrow> <guideinsn>Shift left click</guideinsn> to research
-        <arrow> <guideinsn>Shift right click</guideinsn> to see other research unlocks
+        <arrow:#3a2939> <guideinsn>Shift left click</guideinsn> to research
+        <arrow:#3a2939> <guideinsn>Shift right click</guideinsn> to see other research unlocks
     toggle-waila:
       name: "Toggle WAILA"
-      lore: "<arrow> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
+      lore: "<arrow:#3a2939> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 
