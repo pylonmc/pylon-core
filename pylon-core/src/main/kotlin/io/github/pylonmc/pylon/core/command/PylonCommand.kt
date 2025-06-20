@@ -39,18 +39,9 @@ internal class PylonCommand : BaseCommand() {
 
     @Default
     @Description("Open the Pylon guide")
-    @CommandPermission("pylon.command.open_guide")
+    @CommandPermission("pylon.command.guide")
     fun default(player: Player) {
         PylonGuide.open(player)
-    }
-
-    init {
-        Bukkit.getPluginManager().addPermission(
-            Permission(
-                "pylon.command.open_guide",
-                PermissionDefault.TRUE
-            )
-        )
     }
 
     @Subcommand("guide")
