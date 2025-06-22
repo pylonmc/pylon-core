@@ -156,23 +156,6 @@ data class Research(
             this.researches = emptySet()
         }
 
-        private val playerCheckerJobs = mutableMapOf<UUID, Job>()
-
-        @EventHandler(priority = EventPriority.MONITOR)
-        private fun onPlayerJoin(event: PlayerJoinEvent) {
-            if (PylonConfig.researchesEnabled) {
-                val player = event.player
-                // This task runs just in case a player manages to obtain an
-                // unknown item without picking it up somehow
-                playerCheckerJobs[player.uniqueId] = PylonCore.launch {
-                    while (true) {
-                        player.ejectUnknownItems()
-                        delay(PylonConfig.researchCheckInterval.ticks)
-                    }
-                }
-            }
-        }
-
         @EventHandler
         private fun onPlayerPickup(event: EntityPickupItemEvent) {
             val entity = event.entity
@@ -183,15 +166,10 @@ data class Research(
                 }
             }
         }
-
-        @EventHandler(priority = EventPriority.MONITOR)
-        private fun onPlayerLeave(event: PlayerQuitEvent) {
-            playerCheckerJobs[event.player.uniqueId]?.cancel()
-        }
     }
 }
 
-private fun Player.ejectUnknownItems() {
+fun Player.ejectUnknownItems() {
     val toRemove = inventory.contents.filterNotNull().filter { item ->
         val pylonItem = PylonItem.fromStack(item)
         pylonItem != null && !canUse(pylonItem, sendMessage = true)
