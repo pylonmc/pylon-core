@@ -180,7 +180,7 @@ data class Research(
                 if (item == null) {
                     true
                 } else {
-                    event.player.canUse(item)
+                    event.player.canUse(item, true)
                 }
             }
 
