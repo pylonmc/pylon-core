@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.config
 
 import io.github.pylonmc.pylon.core.PylonCore
+import org.bukkit.NamespacedKey
 
 object PylonConfig {
 
@@ -32,4 +33,16 @@ object PylonConfig {
 
     @JvmStatic
     val translationWrapLimit: Int by config
+
+    @JvmStatic
+    val disabledItems: Array<NamespacedKey> =
+        config.getOrThrow<List<String>>("disabled-items")
+            .mapNotNull {
+                val key = NamespacedKey.fromString(it)
+                if (key == null) {
+                    PylonCore.logger.warning { "Invalid disabled-items key '$it'" }
+                }
+                key
+            }
+            .toTypedArray()
 }

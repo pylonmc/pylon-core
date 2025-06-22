@@ -21,3 +21,13 @@ research:
 
 # How many characters a line can be before it is split into a new line when translating
 translation-wrap-limit: 64
+
+# Keys of the items you want to disable. You can get an item's key with /pylon key
+#
+# Disabling an item will remove it from the guide, stop players from being able to craft it,
+# and prevent players from using it in any way. Any disabled items that already exist ingame
+# will become functional again when the item is removed from the disabled-items list.
+#
+# Be aware that disabling an item that's used as an ingredient for other items will mean that
+# those items can't be crafted.
+disabled-items: ["pylonbase:copper_dust"]
