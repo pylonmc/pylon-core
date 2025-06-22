@@ -7,6 +7,7 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
@@ -19,6 +20,7 @@ import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Keyed
 import org.bukkit.Material
@@ -164,6 +166,26 @@ data class Research(
                     delay(1.ticks)
                     entity.ejectUnknownItems()
                 }
+            }
+        }
+
+        @EventHandler
+        private fun onPrePylonCraft(event: PrePylonCraftEvent<*>) {
+            if (event.player == null) {
+                return
+            }
+
+            val canCraft = event.recipe.getOutputItems().all {
+                val item = PylonItem.fromStack(it)
+                if (item == null) {
+                    true
+                } else {
+                    event.player.canUse(item)
+                }
+            }
+
+            if (!canCraft) {
+                event.isCancelled = true
             }
         }
     }
