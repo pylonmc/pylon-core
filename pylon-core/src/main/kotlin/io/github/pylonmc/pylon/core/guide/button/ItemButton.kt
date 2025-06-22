@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.hasResearchFor
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
@@ -57,7 +58,11 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             builder.name(stackName.arguments(placeholders))
         }
 
-        if (!player.canUse(item)) {
+        if (item.isDisabled()) {
+            builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
+        }
+
+        if (!player.hasResearchFor(item)) {
             builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
                 .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
                 .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))

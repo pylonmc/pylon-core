@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
@@ -36,6 +37,8 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     open fun getPlaceholders(): Map<String, ComponentLike> = emptyMap()
 
     open fun place(context: BlockCreateContext): PylonBlock? = schema.place(context)
+
+    fun isDisabled(): Boolean = PylonConfig.disabledItems.contains(key)
 
     companion object {
 

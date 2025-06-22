@@ -30,4 +30,4 @@ translation-wrap-limit: 64
 #
 # Be aware that disabling an item that's used as an ingredient for other items will mean that
 # those items can't be crafted.
-disabled-items: ["pylonbase:copper_dust"]
+disabled-items: []

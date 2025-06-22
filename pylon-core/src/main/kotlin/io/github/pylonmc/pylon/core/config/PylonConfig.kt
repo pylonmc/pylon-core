@@ -35,7 +35,7 @@ object PylonConfig {
     val translationWrapLimit: Int by config
 
     @JvmStatic
-    val disabledItems: Array<NamespacedKey> =
+    val disabledItems: Set<NamespacedKey> =
         config.getOrThrow<List<String>>("disabled-items")
             .mapNotNull {
                 val key = NamespacedKey.fromString(it)
@@ -44,5 +44,5 @@ object PylonConfig {
                 }
                 key
             }
-            .toTypedArray()
+            .toSet()
 }

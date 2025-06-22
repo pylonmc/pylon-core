@@ -25,7 +25,12 @@ class PlayerTranslationHandler(val player: Player) {
             GlobalTranslator.render(attacher.render(it, Unit), player.locale())
         }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
-            val newLore: MutableList<Component> = (lore.lines() + item.addon.displayName).flatMapTo(mutableListOf()) { line ->
+            val toTranslate = (lore.lines() + item.addon.displayName).toMutableList()
+            if (item.isDisabled()) {
+                toTranslate.add(Component.translatable("pylon.pyloncore.message.disabled.lore"))
+            }
+
+            val newLore: MutableList<Component> = toTranslate.flatMapTo(mutableListOf()) { line ->
                 val translated = GlobalTranslator.render(attacher.render(line, Unit), player.locale())
                 val encoded = LineWrapEncoder.encode(translated)
                 val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))

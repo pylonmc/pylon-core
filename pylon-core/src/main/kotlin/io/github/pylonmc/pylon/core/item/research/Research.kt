@@ -10,30 +10,22 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickup
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.Recipe
-import java.util.UUID
 
 /**
  * @property cost If null, the research cannot be unlocked using points
@@ -120,8 +112,8 @@ data class Research(
 
         @JvmStatic
         @JvmOverloads
-        @JvmName("canPlayerUse")
-        fun Player.canUse(item: PylonItem, sendMessage: Boolean = false): Boolean {
+        @JvmName("canPlayerCraft")
+        fun Player.hasResearchFor(item: PylonItem, sendMessage: Boolean = false): Boolean {
             if (!PylonConfig.researchesEnabled || this.hasPermission(item.researchBypassPermission)) return true
 
             val research = item.research ?: return true
@@ -154,6 +146,31 @@ data class Research(
         }
 
         @JvmStatic
+        @JvmOverloads
+        @JvmName("canPlayerPickup")
+        fun Player.canPickup(item: PylonItem, sendMessage: Boolean = false): Boolean
+            = hasResearchFor(item, sendMessage)
+
+        @JvmStatic
+        @JvmOverloads
+        @JvmName("canPlayerUse")
+        fun Player.canUse(item: PylonItem, sendMessage: Boolean = false): Boolean {
+            if (PylonConfig.disabledItems.contains(item.key)) {
+                if (sendMessage) {
+                    this.sendMessage(
+                        Component.translatable(
+                            "pylon.pyloncore.message.disabled.message",
+                            PylonArgument.of("item", item.stack.effectiveName()),
+                        )
+                    )
+                }
+                return false
+            }
+
+            return hasResearchFor(item, sendMessage)
+        }
+
+        @JvmStatic
         fun Player.clearResearches() {
             this.researches = emptySet()
         }
@@ -180,7 +197,7 @@ data class Research(
                 if (item == null) {
                     true
                 } else {
-                    event.player.canUse(item, true)
+                    event.player.hasResearchFor(item, true)
                 }
             }
 
@@ -194,7 +211,7 @@ data class Research(
 fun Player.ejectUnknownItems() {
     val toRemove = inventory.contents.filterNotNull().filter { item ->
         val pylonItem = PylonItem.fromStack(item)
-        pylonItem != null && !canUse(pylonItem, sendMessage = true)
+        pylonItem != null && !canPickup(pylonItem, sendMessage = true)
     }
     for (item in toRemove) {
         inventory.remove(item)

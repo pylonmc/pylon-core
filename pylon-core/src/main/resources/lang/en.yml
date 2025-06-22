@@ -41,6 +41,10 @@ message:
       not_ticking: "<gold>Ticking: <red>No"
     data: "<gold>Data: <white>%data%"
 
+  disabled:
+    message: "<white>%item% <red>has been disabled"
+    lore: "<arrow> <#ff0000>Disabled - you can still craft this item but cannot use it"
+
   research:
     unknown: "<red>You do not know how to use %item%. Try thinking about %research%"
     unlocked: "<green>You have discovered %research%"
