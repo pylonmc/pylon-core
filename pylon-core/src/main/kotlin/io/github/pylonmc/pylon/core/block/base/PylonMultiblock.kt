@@ -40,8 +40,8 @@ interface PylonMultiblock {
             = MultiblockCache.isFormed(this)
 
     /**
-     * Should return true if there is any scenario in which this block could be part of a formed
-     * multiblock.
+     * Should return true if there is any scenario in which this block's position could be part
+     * of a formed multiblock.
      *
      * This could be called often, so make it lightweight.
      */

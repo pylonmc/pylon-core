@@ -11,10 +11,13 @@ import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.test.GameTestConfig
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.key.Key
+import org.bukkit.NamespacedKey
+import org.bukkit.plugin.Plugin
 
 @JvmRecord
 data class PylonRegistryKey<T>(val namespace: String, val path: String) {
     constructor(key: Key) : this(key.namespace(), key.value())
+    constructor(plugin: Plugin, path: String) : this(NamespacedKey(plugin, path))
 
     override fun toString(): String {
         return "$namespace:$path"

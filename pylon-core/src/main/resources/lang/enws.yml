@@ -1,9 +1,16 @@
+addon: "Core"
+
 item:
   error_item:
     name: "<red>Error"
     lore: |-
       <red>Lo, this item was cast forth from a block that, by misfortune or devilry, could not take form
       <red>The block in error:</red> <yellow>%block%
+
+  guide:
+    name: "Pylon Bible (King James Version)"
+    lore: |-
+      Open using <insn>thy right hand</insn>
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"
@@ -15,6 +22,12 @@ item:
 
 block:
   phantom_block: "<red>Phantom Block (%block%)"
+
+fluid:
+  temperature:
+    cold: "cold"
+    normal: "normal"
+    hot: "hot"
 
 message:
   debug:
@@ -45,6 +58,65 @@ gui:
   page:
     next: "Next leaf (%current%/%total%)"
     previous: "Former leaf (%current%/%total%)"
+
+  time_left: "Time left: %time%"
+
+
+guide:
+  title: "Pylon Bible (King James Version)"
+  button:
+    back:
+      name: "<yellow>Back"
+      lore: ""
+    fluids:
+      name: "<yellow>Fluids"
+      lore: ""
+    researches:
+      name: "<yellow>Inquisitions"
+      lore: ""
+    settings-and-info:
+      name: "<yellow>Settings & informations"
+      lore: ""
+    guides:
+      name: "<yellow>Instructions"
+      lore: ""
+    search:
+      name: "<yellow>Seeketh"
+      lore: ""
+    research:
+      cost:
+        not-enough: "<arrow> <attr>Reveal cost:</attr> <#e23b28>%points%/%cost%"
+        enough: "<arrow> <attr>Reveal cost:</attr> <#61ea38>%points%/%cost%"
+        researched: "<arrow> <attr>Reveal cost:</attr> <#61ea38>%cost% (revealed)"
+      instructions: "<arrow> <guideinsn>Strike with thy left hand</guideinsn> to reveal"
+      unlocks-title: "<u>Revelations</u>"
+      unlocks-item: "<diamond> <white>%item%"
+      more-researches: "<diamond> <gray>And <aqua>%amount% <gray>additional revelations - <guideinsn>right click</guideinsn> <gray>to see all"
+    fluid:
+      name: "%fluid% <gray>(%amount%<gray>)"
+    item:
+      not-researched: "<#ff0000>Not revealed yet"
+      research-instructions: |-
+        <arrow> <guideinsn>Strike with thy left hand while crouching</guideinsn> to reveal
+        <arrow> <guideinsn>Strike with thy right hand while crouching</guideinsn> to see other revelations
+    toggle-waila:
+      name: "Toggle WAILA"
+      lore: "<arrow> WAILA is thy bossbar at the top of your computational device's screen that reveals itself when thy camera is pointed at a Pylon block"
+  recipe:
+    cooking: "<attr>Cooking time:</attr> %time%"
+
+  page:
+    fluids: "Fluids"
+    info: "Info"
+    researches: "Inquisitions"
+    research-items: "Revelations"
+    root: "Pylon Bible"
+    search: "Seeketh"
+    settings_and_info: "Settings & informations"
+    item_recipes: "Item recipes"
+    fluid_recipes: "Fluid recipes"
+    item_usages: "Item usages"
+    fluid_usages: "Fluid usages"
 
 unit:
   prefix:
@@ -130,10 +202,6 @@ unit:
   chunks:
     singular: "chunk"
     plural: "chunks"
-  seconds:
-    singular: "second"
-    plural: "seconds"
-    abbr: "s"
   hearts:
     singular: "heart"
     plural: "hearts"
@@ -157,3 +225,27 @@ unit:
     singular: "bucket per second"
     plural: "buckets per second"
     abbr: "B/s"
+  days:
+    singular: "day"
+    plural: "days"
+    abbr: "d"
+  hours:
+    singular: "hour"
+    plural: "hours"
+    abbr: "h"
+  minutes:
+    singular: "minute"
+    plural: "minutes"
+    abbr: "m"
+  seconds:
+    singular: "second"
+    plural: "seconds"
+    abbr: "s"
+  joules:
+    singular: "joule"
+    plural: "joules"
+    abbr: "J"
+  watts:
+    singular: "watt"
+    plural: "watts"
+    abbr: "W"

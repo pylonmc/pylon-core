@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.test.test.block;
 import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.block.PhantomBlock;
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.PylonBlockSchema;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
@@ -21,7 +20,9 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
 
     @Override
     protected void test() {
-        PylonBlock.register(BLOCK_KEY, Material.AMETHYST_BLOCK, PylonBlock.class);
+        TestUtil.runSync(() -> {
+                    PylonBlock.register(BLOCK_KEY, Material.AMETHYST_BLOCK, PylonBlock.class);
+        }).join();
 
         Chunk chunk = TestUtil.getRandomChunk(false).join();
         Block block = chunk.getBlock(7, 100, 7);
