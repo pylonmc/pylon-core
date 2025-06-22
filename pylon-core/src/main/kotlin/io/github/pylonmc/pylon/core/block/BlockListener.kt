@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -49,10 +50,18 @@ internal object BlockListener : Listener {
         val player = event.player
 
         val pylonItem = PylonItem.fromStack(item)
+        if (pylonItem == null) {
+            return
+        }
+        if (!event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
+
         val context = BlockCreateContext.PlayerPlace(player, item)
 
-        val pylonBlock = pylonItem?.place(context, event.block)
-        if (pylonItem != null && pylonBlock == null) {
+        val pylonBlock = pylonItem.place(context, event.block)
+        if (pylonBlock == null) {
             event.isCancelled = true
         }
         if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
