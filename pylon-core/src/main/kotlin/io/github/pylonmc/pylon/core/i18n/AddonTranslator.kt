@@ -42,7 +42,7 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
             if (it == null) {
                 val fallback = component.fallback()
                 if (fallback != null) {
-                    getTranslation(fallback, locale) ?: return null
+                    getTranslation(fallback, locale) ?: return Component.text(fallback)
                 } else return null
             } else it
         }
