@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.VirtualComponent
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.kyori.adventure.translation.GlobalTranslator
 import net.kyori.adventure.translation.Translator
 import org.apache.commons.lang3.LocaleUtils
@@ -37,7 +38,14 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
     override fun translate(key: String, locale: Locale): MessageFormat? = null
 
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
-        var translated = getTranslation(component, locale) ?: return null
+        var translated = getTranslation(component, locale).let {
+            if (it == null) {
+                val fallback = component.fallback()
+                if (fallback != null) {
+                    getTranslation(fallback, locale) ?: return null
+                } else return null
+            } else it
+        }
         for (arg in component.arguments()) {
             val component = arg.asComponent()
             if (component !is VirtualComponent) continue
@@ -75,7 +83,7 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
     }
 
     fun translationKeyExists(key: String, locale: Locale): Boolean
-        = getTranslation(key, locale) != null
+            = getTranslation(key, locale) != null
 
     companion object : Listener {
 

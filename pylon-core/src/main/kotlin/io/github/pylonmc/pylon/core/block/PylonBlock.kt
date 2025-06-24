@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -30,8 +31,7 @@ open class PylonBlock protected constructor(val block: Block) {
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    // doesn't work yet
-    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.item.${schema.key.key}.waila", Component.translatable("pylon.${schema.key.namespace}.item.${schema.key.key}.name"))
+    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.item.${schema.key.key}.waila", "pylon.${schema.key.namespace}.item.${schema.key.key}.name")
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
