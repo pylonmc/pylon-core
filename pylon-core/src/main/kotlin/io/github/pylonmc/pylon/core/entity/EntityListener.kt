@@ -41,9 +41,9 @@ object EntityListener : Listener {
 
     @EventHandler
     fun handle(event: ProjectileHitEvent) {
-        if(event.entity is AbstractArrow){
+        if (event.entity is AbstractArrow) {
             val arrowItem = PylonItem.fromStack((event.entity as AbstractArrow).itemStack)
-            if(arrowItem is PylonArrow){
+            if (arrowItem is PylonArrow) {
                 arrowItem.onArrowHit(event)
             }
         }
@@ -51,9 +51,9 @@ object EntityListener : Listener {
 
     @EventHandler
     fun handle(event: EntityDamageByEntityEvent) {
-        if(event.damager is AbstractArrow){
+        if (event.damager is AbstractArrow) {
             val arrowItem = PylonItem.fromStack((event.damager as AbstractArrow).itemStack)
-            if(arrowItem is PylonArrow){
+            if (arrowItem is PylonArrow) {
                 arrowItem.onArrowDamage(event)
             }
         }
