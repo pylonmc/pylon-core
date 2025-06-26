@@ -38,8 +38,9 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
     override fun translate(key: String, locale: Locale): MessageFormat? = null
 
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
-        var translated = getTranslation(component, locale) 
-            ?: component.fallback()?.let { getTranslation(it, locale) ?: Component.text(fallback) }
+        val fallback = component.fallback()
+        var translated = getTranslation(component, locale)
+            ?: fallback?.let { getTranslation(it, locale) ?: Component.text(fallback) } ?: return null
         for (arg in component.arguments()) {
             val component = arg.asComponent()
             if (component !is VirtualComponent) continue
