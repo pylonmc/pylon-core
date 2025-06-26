@@ -65,6 +65,16 @@ abstract class PylonInventoryBlock(block: Block) :
         }
     }
 
+    fun getItems() : List<ItemStack> {
+        val items = mutableListOf<ItemStack>()
+        for(inv in inventories){
+            for(item in inv.items){
+                item?.let(items::add)
+            }
+        }
+        return items
+    }
+
     companion object {
         private val inventoryKey = pylonKey("inventories")
         private val inventoryType =
