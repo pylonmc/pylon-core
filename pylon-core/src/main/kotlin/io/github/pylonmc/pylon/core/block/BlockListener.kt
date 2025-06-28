@@ -50,10 +50,7 @@ internal object BlockListener : Listener {
         val item = event.itemInHand
         val player = event.player
 
-        val pylonItem = PylonItem.fromStack(item)
-        if (pylonItem == null) {
-            return
-        }
+        val pylonItem = PylonItem.fromStack(item) ?: return
         if (!event.player.canUse(pylonItem, true)) {
             event.isCancelled = true
             return

@@ -194,11 +194,7 @@ data class Research(
 
             val canCraft = event.recipe.getOutputItems().all {
                 val item = PylonItem.fromStack(it)
-                if (item == null) {
-                    true
-                } else {
-                    event.player.hasResearchFor(item, true)
-                }
+                item == null || event.player.hasResearchFor(item, true)
             }
 
             if (!canCraft) {

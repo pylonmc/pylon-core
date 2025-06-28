@@ -25,6 +25,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
+    val isDisabled: Boolean = PylonConfig.disabledItems.contains(key)
 
     fun getSettings() = Settings.get(key)
 
@@ -37,8 +38,6 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     open fun getPlaceholders(): Map<String, ComponentLike> = emptyMap()
 
     open fun place(context: BlockCreateContext): PylonBlock? = schema.place(context)
-
-    fun isDisabled(): Boolean = PylonConfig.disabledItems.contains(key)
 
     companion object {
 

@@ -26,7 +26,7 @@ class PlayerTranslationHandler(val player: Player) {
         }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
             val toTranslate = (lore.lines() + item.addon.displayName).toMutableList()
-            if (item.isDisabled()) {
+            if (item.isDisabled) {
                 toTranslate.add(Component.translatable("pylon.pyloncore.message.disabled.lore"))
             }
 

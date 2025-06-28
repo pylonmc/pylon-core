@@ -58,7 +58,7 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             builder.name(stackName.arguments(placeholders))
         }
 
-        if (item.isDisabled()) {
+        if (item.isDisabled) {
             builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
         }
 

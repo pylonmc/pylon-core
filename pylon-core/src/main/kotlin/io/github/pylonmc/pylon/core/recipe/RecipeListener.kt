@@ -32,12 +32,8 @@ internal object PylonRecipeListener : Listener {
 
         // Prevent crafting of unresearched items
         val pylonItemResult = PylonItem.fromStack(recipe.result)
-        val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.any {
-            if (it !is Player) {
-                false
-            } else {
-                !it.hasResearchFor(pylonItemResult, true)
-            }
+        val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.none {
+            it is Player && it.hasResearchFor(pylonItemResult, true)
         }
         if (anyViewerDoesNotHaveResearch) {
             inventory.result = null
@@ -70,12 +66,8 @@ internal object PylonRecipeListener : Listener {
 
         // Prevent crafting of unresearched items
         val pylonItemResult = PylonItem.fromStack(recipe.result)
-        val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.any {
-            if (it !is Player) {
-                false
-            } else {
-                !it.hasResearchFor(pylonItemResult, true)
-            }
+        val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.none {
+            it is Player && it.hasResearchFor(pylonItemResult, true)
         }
         if (anyViewerDoesNotHaveResearch) {
             inv.result = null

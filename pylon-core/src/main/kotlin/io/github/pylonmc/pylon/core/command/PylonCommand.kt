@@ -94,7 +94,7 @@ internal class PylonCommand : BaseCommand() {
             player.sendRichMessage("<red>You are not holding a Pylon item")
             return
         }
-        player.sendRichMessage("${item.key}")
+        player.sendRichMessage(item.key.toString())
     }
 
     @Subcommand("setblock")
