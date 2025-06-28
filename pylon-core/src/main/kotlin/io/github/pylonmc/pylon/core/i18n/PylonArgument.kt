@@ -5,7 +5,7 @@ import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslationArgument
 import net.kyori.adventure.text.VirtualComponentRenderer
 
-class PylonArgument private constructor(val name: String, val value: Component) : VirtualComponentRenderer<Unit> {
+class PylonArgument private constructor(val name: String, val value: ComponentLike) : VirtualComponentRenderer<Unit> {
 
     override fun apply(context: Unit): ComponentLike {
         return value
@@ -17,8 +17,8 @@ class PylonArgument private constructor(val name: String, val value: Component) 
             return TranslationArgument.component(
                 Component.virtual(
                     Unit::class.java,
-                    PylonArgument(name, value.asComponent())
-                )
+                    PylonArgument(name, value)
+                ).append(value) // Append the value for comparison purposes, it'll get thrown out anyway
             )
         }
 

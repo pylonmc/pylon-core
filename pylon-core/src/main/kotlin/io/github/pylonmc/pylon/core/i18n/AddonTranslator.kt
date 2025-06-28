@@ -45,7 +45,7 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
             val argument = component.renderer() as? PylonArgument ?: continue
             val replacer = TextReplacementConfig.builder()
                 .match("%${argument.name}%")
-                .replacement(GlobalTranslator.render(argument.value, locale))
+                .replacement(GlobalTranslator.render(argument.value.asComponent(), locale))
                 .build()
             translated = translated.replaceText(replacer)
         }
