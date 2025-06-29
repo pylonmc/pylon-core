@@ -47,6 +47,7 @@ fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
     return pylonItem1.schema.key == pylonItem2.schema.key
 }
 
+@JvmName("recipeChoiceFromItem")
 fun ItemStack.asRecipeChoice(): RecipeChoice {
     return if (PylonItem.isPylonItem(this)) {
         RecipeChoice.ExactChoice(this)
