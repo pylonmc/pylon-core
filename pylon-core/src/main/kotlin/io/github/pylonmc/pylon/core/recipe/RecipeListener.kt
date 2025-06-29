@@ -1,11 +1,10 @@
 package io.github.pylonmc.pylon.core.recipe
 
-import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.hasResearchFor
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
 import org.bukkit.Keyed
 import org.bukkit.entity.Player
@@ -33,7 +32,7 @@ internal object PylonRecipeListener : Listener {
         // Prevent crafting of unresearched items
         val pylonItemResult = PylonItem.fromStack(recipe.result)
         val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.none {
-            it is Player && it.hasResearchFor(pylonItemResult, true)
+            it is Player && it.canCraft(pylonItemResult, true)
         }
         if (anyViewerDoesNotHaveResearch) {
             inventory.result = null
@@ -67,7 +66,7 @@ internal object PylonRecipeListener : Listener {
         // Prevent crafting of unresearched items
         val pylonItemResult = PylonItem.fromStack(recipe.result)
         val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.none {
-            it is Player && it.hasResearchFor(pylonItemResult, true)
+            it is Player && it.canCraft(pylonItemResult, true)
         }
         if (anyViewerDoesNotHaveResearch) {
             inv.result = null

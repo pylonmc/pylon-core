@@ -113,7 +113,7 @@ data class Research(
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerCraft")
-        fun Player.hasResearchFor(item: PylonItem, sendMessage: Boolean = false): Boolean {
+        fun Player.canCraft(item: PylonItem, sendMessage: Boolean = false): Boolean {
             if (!PylonConfig.researchesEnabled || this.hasPermission(item.researchBypassPermission)) return true
 
             val research = item.research ?: return true
@@ -149,7 +149,7 @@ data class Research(
         @JvmOverloads
         @JvmName("canPlayerPickup")
         fun Player.canPickup(item: PylonItem, sendMessage: Boolean = false): Boolean
-            = hasResearchFor(item, sendMessage)
+            = canCraft(item, sendMessage)
 
         @JvmStatic
         @JvmOverloads
@@ -167,7 +167,7 @@ data class Research(
                 return false
             }
 
-            return hasResearchFor(item, sendMessage)
+            return canCraft(item, sendMessage)
         }
 
         @JvmStatic
@@ -194,7 +194,7 @@ data class Research(
 
             val canCraft = event.recipe.getOutputItems().all {
                 val item = PylonItem.fromStack(it)
-                item == null || event.player.hasResearchFor(item, true)
+                item == null || event.player.canCraft(item, true)
             }
 
             if (!canCraft) {
