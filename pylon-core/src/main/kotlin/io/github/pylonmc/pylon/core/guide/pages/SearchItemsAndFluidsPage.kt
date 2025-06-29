@@ -21,26 +21,32 @@ class SearchItemsAndFluidsPage : SearchPage(
 
     fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.ITEMS.getKeys().filter {
         !PylonGuide.hiddenItems.contains(it)
-    }.map {
+    }.mapNotNull {
         val translator = AddonTranslator.translators[getAddon(it)]!!
         val name = translator.translate(
             Component.translatable("pylon.${it.namespace}.item.${it.key}.name"), player.locale()
         )
-        check(name != null)
-        val plainTextName = serializer.serialize(name).lowercase()
-        Pair(ItemButton(it), plainTextName)
+        if (name == null) {
+            null
+        } else {
+            val plainTextName = serializer.serialize(name).lowercase()
+            Pair(ItemButton(it), plainTextName)
+        }
     }.toMutableList()
 
     fun getFluidButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.FLUIDS.getKeys().filter {
         !PylonGuide.hiddenFluids.contains(it)
-    }.map {
+    }.mapNotNull {
         val translator = AddonTranslator.translators[getAddon(it)]!!
         val name = translator.translate(
             Component.translatable("pylon.${it.namespace}.fluid.${it.key}"), player.locale()
         )
-        check(name != null)
-        val plainTextName = serializer.serialize(name).lowercase()
-        Pair(FluidButton(it), plainTextName)
+        if (name == null) {
+            null
+        } else {
+            val plainTextName = serializer.serialize(name).lowercase()
+            Pair(FluidButton(it), plainTextName)
+        }
     }.toMutableList()
 
     override fun getItemNamePairs(player: Player, search: String): List<Pair<Item, String>> {

@@ -1,7 +1,11 @@
 package io.github.pylonmc.pylon.core.config
 
 import com.google.common.base.CaseFormat
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.inventory.ItemStack
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -25,6 +29,45 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
 
     fun getSectionOrThrow(key: String): ConfigSection =
         getSection(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
+
+    fun getItem(key: String): ItemStack? {
+        if (key.contains(':')) {
+            val namespacedKey = NamespacedKey.fromString(key)
+            if (namespacedKey != null) {
+                val pylonItem = PylonRegistry.ITEMS[namespacedKey]
+                if (pylonItem != null) {
+                    return pylonItem.itemStack
+                }
+            }
+        }
+
+        val material = Material.getMaterial(key.uppercase())
+        if (material != null) {
+            return ItemStack(material)
+        }
+
+        return null
+    }
+
+    fun getItemOrThrow(key: String): ItemStack {
+        if (key.contains(':')) {
+            val namespacedKey = NamespacedKey.fromString(key)
+            if (namespacedKey != null) {
+                val pylonItem = PylonRegistry.ITEMS[namespacedKey]
+                if (pylonItem != null) {
+                    return pylonItem.itemStack
+                }
+                error("No such Pylon item $key")
+            }
+        }
+
+        val material = Material.getMaterial(key.uppercase())
+        if (material != null) {
+            return ItemStack(material)
+        }
+
+        error("No such material $key")
+    }
 
     fun <T> get(key: String, type: Class<out T>): T? {
         val value = internalSection.get(key) ?: return null
