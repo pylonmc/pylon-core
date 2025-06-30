@@ -4,27 +4,29 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 
+/**
+ * Iteration order will be the order in which recipes were added unless overridden.
+ */
 open class RecipeType<T : Keyed>(private val key: NamespacedKey) : Keyed, Iterable<T> {
 
-    protected val registeredRecipes = mutableMapOf<NamespacedKey, T>()
+    protected open val registeredRecipes = mutableMapOf<NamespacedKey, T>()
     val recipes: Collection<T>
         get() = registeredRecipes.values
 
     fun getRecipe(key: NamespacedKey): T?
         = registeredRecipes[key]
 
-    fun addRecipe(recipe: T) {
+    fun getRecipeOrThrow(key: NamespacedKey): T {
+        return registeredRecipes[key] ?: throw NoSuchElementException("No recipe found for key $key in ${this.key}")
+    }
+
+    open fun addRecipe(recipe: T) {
         registeredRecipes[recipe.key] = recipe
-        registerRecipe(recipe)
     }
 
-    fun removeRecipe(recipe: NamespacedKey) {
-        registeredRecipes.remove(recipe)?.let { unregisterRecipe(it.key) }
+    open fun removeRecipe(recipe: NamespacedKey) {
+        registeredRecipes.remove(recipe)
     }
-
-    protected open fun registerRecipe(recipe: T) {}
-
-    protected open fun unregisterRecipe(recipe: NamespacedKey) {}
 
     fun register() {
         PylonRegistry.RECIPE_TYPES.register(this)

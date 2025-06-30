@@ -56,7 +56,7 @@ private object CraftingRecipeType : VanillaRecipe<CraftingRecipe>("crafting") {
     private fun onPreCraft(e: PrepareItemCraftEvent) {
         val recipe = e.recipe
         // All recipe types but MerchantRecipe implement Keyed
-        if(recipe !is Keyed) return
+        if (recipe !is Keyed) return
         val inventory = e.inventory
         if (recipes.all { it.key != recipe.key } && inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }) {
             // Prevent the erroneous crafting of vanilla items with Pylon ingredients
@@ -86,7 +86,7 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
     private fun onSmith(e: PrepareSmithingEvent) {
         val inv = e.inventory
         val recipe = inv.recipe
-        if(recipe !is Keyed) return
+        if (recipe !is Keyed) return
         if (
             recipes.all { it.key != recipe.key } &&
             (
@@ -100,19 +100,20 @@ private object SmithingRecipeType : VanillaRecipe<SmithingRecipe>("smithing") {
     }
 }
 
-private abstract class VanillaRecipe<T>(key: String) : RecipeType<T>(
-    NamespacedKey.minecraft(key)
-), Listener where T : Keyed, T : Recipe {
+private abstract class VanillaRecipe<T>(key: String) :
+    RecipeType<T>(NamespacedKey.minecraft(key)), Listener where T : Keyed, T : Recipe {
 
     init {
         Bukkit.getPluginManager().registerEvents(this, PylonCore)
     }
 
-    override fun registerRecipe(recipe: T) {
+    override fun addRecipe(recipe: T) {
+        super.addRecipe(recipe)
         Bukkit.addRecipe(recipe)
     }
 
-    override fun unregisterRecipe(recipe: NamespacedKey) {
+    override fun removeRecipe(recipe: NamespacedKey) {
+        super.removeRecipe(recipe)
         Bukkit.removeRecipe(recipe)
     }
 }

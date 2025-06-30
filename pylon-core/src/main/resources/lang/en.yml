@@ -4,7 +4,7 @@ item:
     lore: |-
       <red>This item dropped from a block that, for some reason, failed to load
       <red>Errored block:</red> <yellow>%block%
-  
+
   phantom_block:
     name: "<red>Phantom Block (%block%)"
     lore: ""
@@ -13,6 +13,12 @@ item:
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
     lore: "<insn>Right click</insn> a block to view its Pylon block data"
+
+fluid:
+  temperature:
+    cold: "cold"
+    normal: "normal"
+    hot: "hot"
 
 message:
   debug:
@@ -46,6 +52,8 @@ gui:
   page:
     next: "Next page (%current%/%total%)"
     previous: "Previous page (%current%/%total%)"
+
+  time_left: "Time left: %time%"
 
 unit:
   prefix:
@@ -131,10 +139,6 @@ unit:
   chunks:
     singular: "chunk"
     plural: "chunks"
-  seconds:
-    singular: "second"
-    plural: "seconds"
-    abbr: "s"
   hearts:
     singular: "heart"
     plural: "hearts"
@@ -158,3 +162,27 @@ unit:
     singular: "bucket per second"
     plural: "buckets per second"
     abbr: "B/s"
+  days:
+    singular: "day"
+    plural: "days"
+    abbr: "d"
+  hours:
+    singular: "hour"
+    plural: "hours"
+    abbr: "h"
+  minutes:
+    singular: "minute"
+    plural: "minutes"
+    abbr: "m"
+  seconds:
+    singular: "second"
+    plural: "seconds"
+    abbr: "s"
+  joules:
+    singular: "joule"
+    plural: "joules"
+    abbr: "J"
+  watts:
+    singular: "watt"
+    plural: "watts"
+    abbr: "W"
