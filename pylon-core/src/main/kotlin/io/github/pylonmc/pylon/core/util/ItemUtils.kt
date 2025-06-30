@@ -55,6 +55,7 @@ inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
     return pylonItem != null && pylonItem !is T
 }
 
+@JvmName("recipeChoiceFromItem")
 fun ItemStack.asRecipeChoice(): RecipeChoice {
     return if (PylonItem.isPylonItem(this)) {
         RecipeChoice.ExactChoice(this)
