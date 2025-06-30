@@ -8,15 +8,14 @@ import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -57,7 +56,11 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             builder.name(stackName.arguments(placeholders))
         }
 
-        if (!player.canUse(item)) {
+        if (item.isDisabled) {
+            builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
+        }
+
+        if (!player.canCraft(item)) {
             builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
                 .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
                 .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))

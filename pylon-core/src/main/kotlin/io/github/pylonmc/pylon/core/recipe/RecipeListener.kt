@@ -4,9 +4,10 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
-import org.bukkit.Bukkit
 import org.bukkit.Keyed
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -28,8 +29,17 @@ internal object PylonRecipeListener : Listener {
             it.key != recipe.key
         }
 
+        // Prevent crafting of unresearched items
+        val pylonItemResult = PylonItem.fromStack(recipe.result)
+        val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.none {
+            it is Player && it.canCraft(pylonItemResult, true)
+        }
+        if (anyViewerDoesNotHaveResearch) {
+            inventory.result = null
+        }
+
+        // Prevent the erroneous crafting of vanilla items with Pylon ingredients
         if (hasPylonItems && isNotPylonCraftingRecipe) {
-            // Prevent the erroneous crafting of vanilla items with Pylon ingredients
             inventory.result = null
         }
     }
@@ -52,6 +62,17 @@ internal object PylonRecipeListener : Listener {
         val inv = e.inventory
         val recipe = inv.recipe
         if (recipe !is Keyed) return
+
+        // Prevent crafting of unresearched items
+        val pylonItemResult = PylonItem.fromStack(recipe.result)
+        val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.none {
+            it is Player && it.canCraft(pylonItemResult, true)
+        }
+        if (anyViewerDoesNotHaveResearch) {
+            inv.result = null
+        }
+
+        // Prevent the erroneous smithing of vanilla items with Pylon ingredients
         if (
             RecipeType.VANILLA_SMITHING.all { it.key != recipe.key } &&
             (
@@ -59,7 +80,6 @@ internal object PylonRecipeListener : Listener {
                             inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
                     )
         ) {
-            // Prevent the erroneous smithing of vanilla items with Pylon ingredients
             inv.result = null
         }
     }

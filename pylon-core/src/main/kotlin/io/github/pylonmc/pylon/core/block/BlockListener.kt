@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -16,6 +17,7 @@ import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -48,10 +50,17 @@ internal object BlockListener : Listener {
         val item = event.itemInHand
         val player = event.player
 
-        val pylonItem = PylonItem.fromStack(item)
-        val pylonBlock = pylonItem?.place(BlockCreateContext.PlayerPlace(player, item, event))
+        val pylonItem = PylonItem.fromStack(item) ?: return
+        if (!event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
+        val relative = event.blockPlaced.position - event.blockAgainst.position
+        val blockFace = BlockFace.entries.find { it.modX == relative.x && it.modY == relative.y && it.modZ == relative.z }
+            ?: BlockFace.SELF
+        val pylonBlock = pylonItem.place(BlockCreateContext.PlayerPlace(player, item, event))
 
-        if (pylonItem != null && pylonBlock == null) {
+        if (pylonBlock == null) {
             event.isCancelled = true
         }
 
