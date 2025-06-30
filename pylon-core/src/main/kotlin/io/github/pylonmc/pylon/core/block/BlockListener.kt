@@ -58,7 +58,7 @@ internal object BlockListener : Listener {
         val relative = event.blockPlaced.position - event.blockAgainst.position
         val blockFace = BlockFace.entries.find { it.modX == relative.x && it.modY == relative.y && it.modZ == relative.z }
             ?: BlockFace.SELF
-        val pylonBlock = pylonItem.place(BlockCreateContext.PlayerPlace(player, item, event.blockPlaced, blockFace))
+        val pylonBlock = pylonItem.place(BlockCreateContext.PlayerPlace(player, item, event))
 
         if (pylonBlock == null) {
             event.isCancelled = true

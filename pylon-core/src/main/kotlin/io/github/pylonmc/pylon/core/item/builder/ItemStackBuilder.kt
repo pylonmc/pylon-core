@@ -83,7 +83,7 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
     fun defaultTranslatableLore(key: NamespacedKey) =
-        lore(Component.translatable(loreKey(key)))
+        lore(Component.translatable(loreKey(key), ""))
 
     fun build(): ItemStack = stack.clone()
 
