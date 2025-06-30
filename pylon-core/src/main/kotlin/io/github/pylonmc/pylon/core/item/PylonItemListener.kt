@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.item.base.*
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
 import org.bukkit.entity.Player
@@ -23,11 +24,19 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerReadyArrowEvent) {
         val bow = PylonItem.fromStack(event.bow)
+        if (bow != null && !event.player.canUse(bow, true)) {
+            event.isCancelled = true
+            return
+        }
         if (bow is Bow) {
             bow.onBowReady(event)
         }
 
         val arrow = PylonItem.fromStack(event.arrow)
+        if (arrow != null && !event.player.canUse(arrow, true)) {
+            event.isCancelled = true
+            return
+        }
         if (arrow is Arrow) {
             arrow.onArrowReady(event)
         }
@@ -49,6 +58,10 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerInteractEvent) {
         val pylonItem = event.item?.let { PylonItem.fromStack(it) } ?: return
+        if (!event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
         if (
             pylonItem is Cooldownable &&
             event.player.getCooldown(pylonItem.stack) > 0 &&
@@ -73,6 +86,10 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerBucketEmptyEvent) {
         val pylonItem = event.itemStack?.let { PylonItem.fromStack(it) }
+        if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
         if (pylonItem is Bucket) {
             pylonItem.onBucketEmptied(event)
         }
@@ -81,6 +98,10 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerBucketFillEvent) {
         val pylonItem = event.itemStack?.let { PylonItem.fromStack(it) }
+        if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
         if (pylonItem is Bucket) {
             pylonItem.onBucketFilled(event)
         }
@@ -89,6 +110,10 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerItemConsumeEvent) {
         val pylonItem = PylonItem.fromStack(event.item)
+        if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
         if (pylonItem is Consumable) {
             pylonItem.onConsumed(event)
         }
@@ -97,6 +122,9 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerItemDamageEvent) {
         val pylonItem = PylonItem.fromStack(event.item)
+        if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
+            return
+        }
         if (pylonItem is Damageable) {
             pylonItem.onItemDamaged(event)
         }
@@ -105,6 +133,9 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerItemBreakEvent) {
         val pylonItem = PylonItem.fromStack(event.brokenItem)
+        if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
+            return
+        }
         if (pylonItem is Damageable) {
             pylonItem.onItemBreaks(event)
         }
@@ -113,7 +144,11 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerItemMendEvent) {
         val pylonItem = PylonItem.fromStack(event.item)
-        if (pylonItem is Damageable) {
+        if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
+        if (pylonItem is Damageable && event.player.canUse(pylonItem, true)) {
             pylonItem.onItemMended(event)
         }
     }
@@ -121,12 +156,24 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: PlayerInteractEntityEvent) {
         val pylonItemMainHand = PylonItem.fromStack(event.player.inventory.itemInMainHand)
-        if (pylonItemMainHand is EntityInteractor && !(event.player.getCooldown(pylonItemMainHand.stack) > 0 && pylonItemMainHand.respectCooldown)) {
+        if (pylonItemMainHand != null && !event.player.canUse(pylonItemMainHand, true)) {
+            event.isCancelled = true
+            return
+        }
+        if (pylonItemMainHand is EntityInteractor &&
+            !(event.player.getCooldown(pylonItemMainHand.stack) > 0 && pylonItemMainHand.respectCooldown)
+        ) {
             pylonItemMainHand.onUsedToRightClickEntity(event)
         }
 
         val pylonItemOffHand = PylonItem.fromStack(event.player.inventory.itemInOffHand)
-        if (pylonItemOffHand is EntityInteractor && !(event.player.getCooldown(pylonItemOffHand.stack) > 0 && pylonItemOffHand.respectCooldown)) {
+        if (pylonItemOffHand != null && !event.player.canUse(pylonItemOffHand, true)) {
+            event.isCancelled = true
+            return
+        }
+        if (pylonItemOffHand is EntityInteractor &&
+            !(event.player.getCooldown(pylonItemOffHand.stack) > 0 && pylonItemOffHand.respectCooldown)
+        ) {
             pylonItemOffHand.onUsedToRightClickEntity(event)
         }
     }
@@ -144,6 +191,10 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: BlockDamageEvent) {
         val pylonItem = PylonItem.fromStack(event.itemInHand)
+        if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
         if (pylonItem is Tool) {
             pylonItem.onUsedToDamageBlock(event)
         }
@@ -152,11 +203,19 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: BlockBreakEvent) {
         val pylonItemMainHand = PylonItem.fromStack(event.player.inventory.itemInMainHand)
+        if (pylonItemMainHand != null && !event.player.canUse(pylonItemMainHand, true)) {
+            event.isCancelled = true
+            return
+        }
         if (pylonItemMainHand is Tool) {
             pylonItemMainHand.onUsedToBreakBlock(event)
         }
 
         val pylonItemOffHand = PylonItem.fromStack(event.player.inventory.itemInOffHand)
+        if (pylonItemOffHand != null && !event.player.canUse(pylonItemOffHand, true)) {
+            event.isCancelled = true
+            return
+        }
         if (pylonItemOffHand is Tool) {
             pylonItemOffHand.onUsedToBreakBlock(event)
         }
@@ -168,11 +227,19 @@ internal object PylonItemListener : Listener {
         if (!event.damageSource.isIndirect) {
             if (damager is Player) {
                 val pylonItemMainHand = PylonItem.fromStack(damager.inventory.itemInMainHand)
+                if (pylonItemMainHand != null && !damager.canUse(pylonItemMainHand, true)) {
+                    event.isCancelled = true
+                    return
+                }
                 if (pylonItemMainHand is Weapon) {
                     pylonItemMainHand.onUsedToDamageEntity(event)
                 }
 
                 val pylonItemOffHand = PylonItem.fromStack(damager.inventory.itemInOffHand)
+                if (pylonItemOffHand != null && !damager.canUse(pylonItemOffHand, true)) {
+                    event.isCancelled = true
+                    return
+                }
                 if (pylonItemOffHand is Weapon) {
                     pylonItemOffHand.onUsedToDamageEntity(event)
                 }
@@ -185,11 +252,19 @@ internal object PylonItemListener : Listener {
         val killer = event.damageSource.causingEntity
         if (killer is Player) {
             val pylonItemMainHand = PylonItem.fromStack(killer.inventory.itemInMainHand)
+            if (pylonItemMainHand != null && !killer.canUse(pylonItemMainHand, true)) {
+                event.isCancelled = true
+                return
+            }
             if (pylonItemMainHand is Weapon) {
                 pylonItemMainHand.onUsedToKillEntity(event)
             }
 
             val pylonItemOffHand = PylonItem.fromStack(killer.inventory.itemInMainHand)
+            if (pylonItemOffHand != null && !killer.canUse(pylonItemOffHand, true)) {
+                event.isCancelled = true
+                return
+            }
             if (pylonItemOffHand is Weapon) {
                 pylonItemOffHand.onUsedToKillEntity(event)
             }

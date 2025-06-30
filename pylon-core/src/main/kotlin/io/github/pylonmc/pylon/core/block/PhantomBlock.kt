@@ -5,9 +5,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
@@ -84,7 +82,7 @@ class PhantomBlock(
         companion object {
             val KEY = pylonKey("error_item")
             val BLOCK_KEY = pylonKey("block")
-            val STACK = ItemStackBuilder.pylonItem(Material.BARRIER, key)
+            val STACK = ItemStackBuilder.pylonItem(Material.BARRIER, KEY)
                 .build()
         }
     }

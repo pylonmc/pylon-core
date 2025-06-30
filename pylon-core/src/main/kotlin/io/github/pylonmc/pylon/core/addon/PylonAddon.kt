@@ -4,10 +4,17 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Keyed
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.Locale
 
@@ -17,10 +24,12 @@ interface PylonAddon : Keyed {
 
     val languages: Set<Locale>
 
-    /**
-     * The display name used, for example, at the bottom of items to show which addon an item is from
-     */
-    val displayName: String
+    val material: Material
+
+    val displayName: TranslatableComponent
+        get() = Component.translatable("pylon.${key.namespace}.addon")
+                        .decoration(TextDecoration.ITALIC, true)
+                        .color(NamedTextColor.BLUE)
 
     override fun getKey(): NamespacedKey
             = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
@@ -31,6 +40,15 @@ interface PylonAddon : Keyed {
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)
         AddonTranslator.register(this)
+
+        if (key !in addonNameWarningsSupressed) {
+            val translator = AddonTranslator.translators[this]!!
+            for (locale in languages) {
+                if (!translator.canTranslate("pylon.${key.namespace}.addon", locale)) {
+                    PylonCore.logger.warning("${key.namespace} is missing the 'addon' translation key for ${locale.displayName}")
+                }
+            }
+        }
     }
 
     /**
@@ -64,5 +82,15 @@ interface PylonAddon : Keyed {
             config.save()
         }
         return config
+    }
+
+    companion object {
+
+        private val addonNameWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
+
+        @JvmStatic
+        fun supressAddonNameWarnings(key: NamespacedKey) {
+            addonNameWarningsSupressed.add(key)
+        }
     }
 }

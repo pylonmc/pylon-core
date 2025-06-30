@@ -2,6 +2,8 @@ package io.github.pylonmc.pylon.core.entity.display.transform
 
 import org.bukkit.Location
 import org.bukkit.block.BlockFace
+import org.bukkit.util.Transformation
+import org.joml.Matrix4f
 import org.joml.Vector3d
 import org.joml.Vector3f
 import kotlin.math.roundToInt
@@ -70,5 +72,15 @@ object TransformUtil {
     @JvmStatic
     fun getMidpoint(from: Vector3d, to: Vector3d): Vector3d {
         return Vector3d(from).add(to).mul(0.5)
+    }
+
+    @JvmStatic
+    @JvmName("transformationToMatrix")
+    fun Transformation.toMatrix(): Matrix4f {
+        return Matrix4f()
+            .translate(translation)
+            .rotate(leftRotation)
+            .scale(scale)
+            .rotate(rightRotation)
     }
 }

@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.fluid
 
+import net.kyori.adventure.text.Component
+
 interface PylonFluidTag {
-    // TODO add text display methods once the guide is added
+    val displayText: Component
 }
