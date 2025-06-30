@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
@@ -35,6 +36,29 @@ import org.jetbrains.annotations.ApiStatus
 @CommandAlias("pylon|py")
 @ApiStatus.Internal
 internal class PylonCommand : BaseCommand() {
+
+    @Default
+    @Description("Open the Pylon guide")
+    @CommandPermission("pylon.command.guide")
+    fun default(player: Player) {
+        PylonGuide.open(player)
+    }
+
+    @Subcommand("guide")
+    @Description("Obtain the Pylon guide")
+    @CommandPermission("pylon.command.guide")
+    fun guide(player: Player) {
+        player.inventory.addItem(PylonGuide.STACK)
+    }
+
+    init {
+        Bukkit.getPluginManager().addPermission(
+            Permission(
+                "pylon.command.guide",
+                PermissionDefault.TRUE
+            )
+        )
+    }
 
     @Subcommand("give")
     @CommandCompletion("@players @items")
@@ -223,9 +247,24 @@ internal class PylonCommand : BaseCommand() {
                 player.sendRichMessage("<red>Research not found: $research")
                 return
             }
-            player.removeResearch(res)
-            val name = MiniMessage.miniMessage().serialize(res.name)
-            player.sendRichMessage("<green>Removed research $name from ${player.name}")
+            if (player.hasResearch(res)) {
+                player.removeResearch(res)
+                val name = MiniMessage.miniMessage().serialize(res.name)
+                player.sendRichMessage("<green>Removed research $name from ${player.name}")
+            } else {
+                player.sendRichMessage("<red>${player.name} does not have $name")
+            }
+        }
+
+        @Subcommand("removeall")
+        @CommandCompletion("@players")
+        @Description("Remove all researches from a player")
+        @CommandPermission("pylon.command.research.modify")
+        fun removeAll(p: OnlinePlayer) {
+            val player = p.player
+            for (research in player.researches) {
+                player.removeResearch(research)
+            }
         }
 
         @Subcommand("points")

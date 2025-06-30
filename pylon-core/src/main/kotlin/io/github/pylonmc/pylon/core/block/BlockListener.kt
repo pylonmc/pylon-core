@@ -28,8 +28,8 @@ import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.event.player.PlayerTakeLecternBookEvent
 
 
 /**

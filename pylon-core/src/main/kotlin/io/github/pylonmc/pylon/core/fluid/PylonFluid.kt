@@ -1,6 +1,10 @@
 package io.github.pylonmc.pylon.core.fluid
 
+import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.key.getAddon
 import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.Material
@@ -21,6 +25,18 @@ open class PylonFluid(
     )
 
     override fun getKey(): NamespacedKey = key
+
+    init {
+        val addon = PylonRegistry.ADDONS[NamespacedKey(key.namespace, key.namespace)]!!
+        val translator = AddonTranslator.translators[addon]!!
+
+        for (locale in addon.languages) {
+            val translationKey = "pylon.${key.namespace}.fluid.${key.key}"
+            check(translator.canTranslate(translationKey, locale)) {
+                PylonCore.logger.warning("${key.namespace} is missing a translation key for fluid ${key.key} (locale: ${locale.displayName} | expected translation key: $translationKey")
+            }
+        }
+    }
 
     fun addTag(tag: PylonFluidTag) = apply {
         check(!hasTag(tag.javaClass)) { "Fluid already has a tag of the same type" }
@@ -44,6 +60,19 @@ open class PylonFluid(
 
     fun register() {
         PylonRegistry.FLUIDS.register(this)
+    }
+
+    fun getItem(): ItemStackBuilder {
+        val item = ItemStackBuilder.of(material)
+            .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}"))
+
+        for (tag in tags) {
+            item.lore(tag.displayText)
+        }
+
+        item.lore(getAddon(key).displayName)
+
+        return item
     }
 
     override fun equals(other: Any?): Boolean = other is PylonFluid && key == other.key

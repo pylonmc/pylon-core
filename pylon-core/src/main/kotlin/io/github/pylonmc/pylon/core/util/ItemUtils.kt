@@ -20,6 +20,9 @@ fun findPylonItemInInventory(inventory: Inventory, targetItem: PylonItem): Int? 
     return null
 }
 
+/**
+ * Disregards item amounts
+ */
 fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
     // Both items null
     if (this == null && item2 == null) {
@@ -45,6 +48,11 @@ fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
     }
 
     return pylonItem1.schema.key == pylonItem2.schema.key
+}
+
+inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
+    val pylonItem = PylonItem.fromStack(this)
+    return pylonItem != null && pylonItem !is T
 }
 
 @JvmName("recipeChoiceFromItem")

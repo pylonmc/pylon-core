@@ -25,7 +25,7 @@ class PlayerTranslationHandler(val player: Player) {
             GlobalTranslator.render(attacher.render(it, Unit), player.locale())
         }
         item.stack.editData(DataComponentTypes.LORE) { lore ->
-            val newLore = lore.lines().flatMapTo(mutableListOf()) { line ->
+            val newLore: MutableList<Component> = (lore.lines() + item.addon.displayName).flatMapTo(mutableListOf()) { line ->
                 val translated = GlobalTranslator.render(attacher.render(line, Unit), player.locale())
                 val encoded = LineWrapEncoder.encode(translated)
                 val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
@@ -37,11 +37,7 @@ class PlayerTranslationHandler(val player: Player) {
                         .build()
                 }
             }
-            newLore.add(
-                Component.text(item.schema.addon.displayName)
-                    .decoration(TextDecoration.ITALIC, true)
-                    .color(NamedTextColor.BLUE)
-            )
+
             ItemLore.lore(newLore)
         }
     }

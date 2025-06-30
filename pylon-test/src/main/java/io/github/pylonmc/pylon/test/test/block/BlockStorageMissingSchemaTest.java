@@ -20,7 +20,9 @@ public class BlockStorageMissingSchemaTest extends AsyncTest {
 
     @Override
     protected void test() {
-        PylonBlock.register(BLOCK_KEY, Material.AMETHYST_BLOCK, PylonBlock.class);
+        TestUtil.runSync(() -> {
+                    PylonBlock.register(BLOCK_KEY, Material.AMETHYST_BLOCK, PylonBlock.class);
+        }).join();
 
         Chunk chunk = TestUtil.getRandomChunk(false).join();
         Block block = chunk.getBlock(7, 100, 7);

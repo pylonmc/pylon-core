@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.registry
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
+import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
@@ -18,6 +20,7 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
             if (value is RegistryHandler) {
                 value.onRegister(this)
             }
+            PylonRegisterEvent(this, value).callEvent()
         }
     }
 
@@ -34,6 +37,7 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
             if (value is RegistryHandler) {
                 value.onUnregister(this)
             }
+            PylonUnregisterEvent(this, value!!).callEvent()
         }
     }
 

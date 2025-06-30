@@ -10,7 +10,7 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
-import io.github.pylonmc.pylon.core.recipe.RecipeTypes
+import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -21,6 +21,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import org.bukkit.GameMode
 import org.bukkit.Keyed
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -29,6 +30,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.Recipe
 import java.util.UUID
 
 /**
@@ -37,13 +39,15 @@ import java.util.UUID
  */
 data class Research(
     private val key: NamespacedKey,
+    val material: Material,
     val name: Component,
     val cost: Long?,
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
-    constructor(key: NamespacedKey, cost: Long?, vararg unlocks: NamespacedKey) : this(
+    constructor(key: NamespacedKey, material: Material, cost: Long?, vararg unlocks: NamespacedKey) : this(
         key,
+        material,
         Component.translatable("pylon.${key.namespace}.research.${key.key}"),
         cost,
         unlocks.toSet()
@@ -58,8 +62,8 @@ data class Research(
         if (this in player.researches) return
 
         player.researches += this
-        for (recipe in RecipeTypes.VANILLA_CRAFTING) {
-            val pylonItem = PylonItem.fromStack(recipe.result) ?: continue
+        for (recipe in RecipeType.vanillaCraftingRecipes()) {
+            val pylonItem = PylonItem.fromStack(recipe.craftingRecipe.result) ?: continue
             if (pylonItem.key in unlocks) {
                 player.discoverRecipe(recipe.key)
             }
@@ -78,8 +82,8 @@ data class Research(
         if (this !in player.researches) return
 
         player.researches -= this
-        for (recipe in RecipeTypes.VANILLA_CRAFTING) {
-            val pylonItem = PylonItem.fromStack(recipe.result) ?: continue
+        for (recipe in RecipeType.vanillaCraftingRecipes()) {
+            val pylonItem = PylonItem.fromStack(recipe.craftingRecipe.result) ?: continue
             if (pylonItem.key in unlocks) {
                 player.undiscoverRecipe(recipe.key)
             }
@@ -116,11 +120,7 @@ data class Research(
         @JvmOverloads
         @JvmName("canPlayerUse")
         fun Player.canUse(item: PylonItem, sendMessage: Boolean = false): Boolean {
-            if (
-                !PylonConfig.researchesEnabled
-                || this.gameMode == GameMode.CREATIVE
-                || this.hasPermission(item.researchBypassPermission)
-            ) return true
+            if (!PylonConfig.researchesEnabled || this.hasPermission(item.researchBypassPermission)) return true
 
             val research = item.research ?: return true
 

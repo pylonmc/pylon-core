@@ -1,9 +1,16 @@
+addon: "Core"
+
 item:
   error_item:
     name: "<red>Error"
     lore: |-
       <red>This item dropped from a block that, for some reason, failed to load
       <red>Errored block:</red> <yellow>%block%
+
+  guide:
+    name: "<white>Pylon Guide"
+    lore: |-
+      <insn>Right click</insn> to open
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"
@@ -16,9 +23,10 @@ item:
 
 fluid:
   temperature:
-    cold: "cold"
-    normal: "normal"
-    hot: "hot"
+    display-text: "<arrow> <attr>Temperature:</attr> %temperature%"
+    cold: "<#1cb3d8>cold"
+    normal: "<#c9d81c>normal"
+    hot: "<#d81c1c>hot"
 
 message:
   debug:
@@ -54,6 +62,62 @@ gui:
     previous: "Previous page (%current%/%total%)"
 
   time_left: "Time left: %time%"
+
+guide:
+  title: "Pylon Guide"
+  button:
+    back:
+      name: "<yellow>Back"
+      lore: ""
+    fluids:
+      name: "<yellow>Fluids"
+      lore: ""
+    researches:
+      name: "<yellow>Researches"
+      lore: ""
+    settings-and-info:
+      name: "<yellow>Settings & info"
+      lore: ""
+    guides:
+      name: "<yellow>Guides"
+      lore: ""
+    search:
+      name: "<yellow>Search"
+      lore: ""
+    research:
+      cost:
+        not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
+        enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%points%/%cost%"
+        researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%cost% (researched)"
+      instructions: "<arrow:#3a293> <guideinsn>Left click</guideinsn> to research"
+      unlocks-title: "<u>Unlocks</u>"
+      unlocks-item: "<diamond> <white>%item%"
+      more-researches: "<diamond> <gray>And <aqua>%amount% <gray>more - <guideinsn>right click</guideinsn> <gray>to see all"
+    fluid:
+      name: "%fluid% <gray>(%amount%<gray>)"
+    item:
+      not-researched: "<#ff0000>Not researched yet"
+      research-instructions: |-
+        <arrow:#3a2939> <guideinsn>Shift left click</guideinsn> to research
+        <arrow:#3a2939> <guideinsn>Shift right click</guideinsn> to see other research unlocks
+    toggle-waila:
+      name: "Toggle WAILA"
+      lore: "<arrow:#3a2939> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
+  recipe:
+    cooking: "<attr>Cooking time:</attr> %time%"
+
+  page:
+    fluids: "Fluids"
+    info: "Info"
+    researches: "Researches"
+    research-items: "Research items"
+    root: "Pylon guide"
+    search: "Search"
+    settings_and_info: "Settings & info"
+    item_recipes: "Item recipes"
+    fluid_recipes: "Fluid recipes"
+    item_usages: "Item usages"
+    fluid_usages: "Fluid usages"
 
 unit:
   prefix:
