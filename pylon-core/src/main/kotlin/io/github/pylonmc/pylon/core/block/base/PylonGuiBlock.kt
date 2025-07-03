@@ -39,6 +39,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
             event.useInteractedBlock() != Event.Result.DENY &&
             !event.player.isSneaking
         ) {
+            event.setUseInteractedBlock(Event.Result.DENY)
             event.setUseItemInHand(Event.Result.DENY)
             val window = Window.single()
                 .setGui(gui)
