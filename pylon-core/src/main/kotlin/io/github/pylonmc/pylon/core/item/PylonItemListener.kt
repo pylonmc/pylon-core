@@ -28,7 +28,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (bow is Bow) {
+        if (bow is PylonBow) {
             bow.onBowReady(event)
         }
 
@@ -37,7 +37,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (arrow is Arrow) {
+        if (arrow is PylonArrow) {
             arrow.onArrowReady(event)
         }
     }
@@ -45,12 +45,12 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: EntityShootBowEvent) {
         val bow = event.bow?.let { PylonItem.fromStack(it) }
-        if (bow is Bow) {
+        if (bow is PylonBow) {
             bow.onBowFired(event)
         }
 
         val arrow = event.consumable?.let { PylonItem.fromStack(it) }
-        if (arrow is Arrow) {
+        if (arrow is PylonArrow) {
             arrow.onArrowShotFromBow(event)
         }
     }
@@ -63,14 +63,14 @@ internal object PylonItemListener : Listener {
             return
         }
         if (
-            pylonItem is Cooldownable &&
+            pylonItem is PylonCooldownable &&
             event.player.getCooldown(pylonItem.stack) > 0 &&
             pylonItem.respectCooldown
         ) return
-        if (pylonItem is BlockInteractor && event.hasBlock()) {
+        if (pylonItem is PylonBlockInteractor && event.hasBlock()) {
             pylonItem.onUsedToClickBlock(event)
         }
-        if (pylonItem is Interactor) {
+        if (pylonItem is PylonInteractor) {
             pylonItem.onUsedToRightClick(event)
         }
     }
@@ -78,7 +78,7 @@ internal object PylonItemListener : Listener {
     @EventHandler
     private fun handle(event: BrewingStandFuelEvent) {
         val pylonItem = PylonItem.fromStack(event.fuel)
-        if (pylonItem is BrewingStandFuel) {
+        if (pylonItem is PylonBrewingStandFuel) {
             pylonItem.onUsedAsBrewingStandFuel(event)
         }
     }
@@ -90,7 +90,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItem is Bucket) {
+        if (pylonItem is PylonBucket) {
             pylonItem.onBucketEmptied(event)
         }
     }
@@ -102,7 +102,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItem is Bucket) {
+        if (pylonItem is PylonBucket) {
             pylonItem.onBucketFilled(event)
         }
     }
@@ -114,7 +114,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItem is Consumable) {
+        if (pylonItem is PylonConsumable) {
             pylonItem.onConsumed(event)
         }
     }
@@ -125,7 +125,7 @@ internal object PylonItemListener : Listener {
         if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
             return
         }
-        if (pylonItem is Damageable) {
+        if (pylonItem is PylonItemDamageable) {
             pylonItem.onItemDamaged(event)
         }
     }
@@ -136,7 +136,7 @@ internal object PylonItemListener : Listener {
         if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
             return
         }
-        if (pylonItem is Damageable) {
+        if (pylonItem is PylonItemDamageable) {
             pylonItem.onItemBreaks(event)
         }
     }
@@ -148,7 +148,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItem is Damageable && event.player.canUse(pylonItem, true)) {
+        if (pylonItem is PylonItemDamageable && event.player.canUse(pylonItem, true)) {
             pylonItem.onItemMended(event)
         }
     }
@@ -160,7 +160,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItemMainHand is EntityInteractor &&
+        if (pylonItemMainHand is PylonItemEntityInteractor &&
             !(event.player.getCooldown(pylonItemMainHand.stack) > 0 && pylonItemMainHand.respectCooldown)
         ) {
             pylonItemMainHand.onUsedToRightClickEntity(event)
@@ -171,7 +171,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItemOffHand is EntityInteractor &&
+        if (pylonItemOffHand is PylonItemEntityInteractor &&
             !(event.player.getCooldown(pylonItemOffHand.stack) > 0 && pylonItemOffHand.respectCooldown)
         ) {
             pylonItemOffHand.onUsedToRightClickEntity(event)
@@ -195,7 +195,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItem is Tool) {
+        if (pylonItem is PylonTool) {
             pylonItem.onUsedToDamageBlock(event)
         }
     }
@@ -207,7 +207,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItemMainHand is Tool) {
+        if (pylonItemMainHand is PylonTool) {
             pylonItemMainHand.onUsedToBreakBlock(event)
         }
 
@@ -216,7 +216,7 @@ internal object PylonItemListener : Listener {
             event.isCancelled = true
             return
         }
-        if (pylonItemOffHand is Tool) {
+        if (pylonItemOffHand is PylonTool) {
             pylonItemOffHand.onUsedToBreakBlock(event)
         }
     }
@@ -231,7 +231,7 @@ internal object PylonItemListener : Listener {
                     event.isCancelled = true
                     return
                 }
-                if (pylonItemMainHand is Weapon) {
+                if (pylonItemMainHand is PylonWeapon) {
                     pylonItemMainHand.onUsedToDamageEntity(event)
                 }
 
@@ -240,7 +240,7 @@ internal object PylonItemListener : Listener {
                     event.isCancelled = true
                     return
                 }
-                if (pylonItemOffHand is Weapon) {
+                if (pylonItemOffHand is PylonWeapon) {
                     pylonItemOffHand.onUsedToDamageEntity(event)
                 }
             }
@@ -256,7 +256,7 @@ internal object PylonItemListener : Listener {
                 event.isCancelled = true
                 return
             }
-            if (pylonItemMainHand is Weapon) {
+            if (pylonItemMainHand is PylonWeapon) {
                 pylonItemMainHand.onUsedToKillEntity(event)
             }
 
@@ -265,7 +265,7 @@ internal object PylonItemListener : Listener {
                 event.isCancelled = true
                 return
             }
-            if (pylonItemOffHand is Weapon) {
+            if (pylonItemOffHand is PylonWeapon) {
                 pylonItemOffHand.onUsedToKillEntity(event)
             }
         }
