@@ -8,7 +8,9 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
+import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
@@ -27,6 +29,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.jetbrains.annotations.ApiStatus
@@ -35,6 +38,29 @@ import org.jetbrains.annotations.ApiStatus
 @CommandAlias("pylon|py")
 @ApiStatus.Internal
 internal class PylonCommand : BaseCommand() {
+
+    @Default
+    @Description("Open the Pylon guide")
+    @CommandPermission("pylon.command.guide")
+    fun default(player: Player) {
+        PylonGuide.open(player)
+    }
+
+    @Subcommand("guide")
+    @Description("Obtain the Pylon guide")
+    @CommandPermission("pylon.command.guide")
+    fun guide(player: Player) {
+        player.inventory.addItem(PylonGuide.STACK)
+    }
+
+    init {
+        Bukkit.getPluginManager().addPermission(
+            Permission(
+                "pylon.command.guide",
+                PermissionDefault.TRUE
+            )
+        )
+    }
 
     @Subcommand("give")
     @CommandCompletion("@players @items")
@@ -57,6 +83,18 @@ internal class PylonCommand : BaseCommand() {
     @CommandPermission("pylon.command.debug")
     fun debug(player: Player) {
         player.give(DebugWaxedWeatheredCutCopperStairs.STACK)
+    }
+
+    @Subcommand("key")
+    @Description("Shows you the key of the item in your main hand")
+    @CommandPermission("pylon.command.key")
+    fun key(player: Player) {
+        val item = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
+        if (item == null) {
+            player.sendRichMessage("<red>You are not holding a Pylon item")
+            return
+        }
+        player.sendRichMessage(item.key.toString())
     }
 
     @Subcommand("setblock")
@@ -223,9 +261,24 @@ internal class PylonCommand : BaseCommand() {
                 player.sendRichMessage("<red>Research not found: $research")
                 return
             }
-            player.removeResearch(res)
-            val name = MiniMessage.miniMessage().serialize(res.name)
-            player.sendRichMessage("<green>Removed research $name from ${player.name}")
+            if (player.hasResearch(res)) {
+                player.removeResearch(res)
+                val name = MiniMessage.miniMessage().serialize(res.name)
+                player.sendRichMessage("<green>Removed research $name from ${player.name}")
+            } else {
+                player.sendRichMessage("<red>${player.name} does not have $name")
+            }
+        }
+
+        @Subcommand("removeall")
+        @CommandCompletion("@players")
+        @Description("Remove all researches from a player")
+        @CommandPermission("pylon.command.research.modify")
+        fun removeAll(p: OnlinePlayer) {
+            val player = p.player
+            for (research in player.researches) {
+                player.removeResearch(research)
+            }
         }
 
         @Subcommand("points")

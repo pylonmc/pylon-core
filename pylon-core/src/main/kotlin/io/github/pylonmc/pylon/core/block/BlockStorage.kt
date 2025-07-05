@@ -176,7 +176,7 @@ object BlockStorage : Listener {
     fun placeBlock(
         blockPosition: BlockPosition,
         key: NamespacedKey,
-        context: BlockCreateContext = BlockCreateContext.Default
+        context: BlockCreateContext = BlockCreateContext.Default(blockPosition.block)
     ): PylonBlock? {
         require(blockPosition.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
         require(!isPylonBlock(blockPosition)) { "You cannot place a new Pylon block in place of an existing Pylon blocks" }
@@ -218,7 +218,7 @@ object BlockStorage : Listener {
     fun placeBlock(
         block: Block,
         key: NamespacedKey,
-        context: BlockCreateContext = BlockCreateContext.Default
+        context: BlockCreateContext = BlockCreateContext.Default(block)
     ) = placeBlock(block.position, key, context)
 
     /**
@@ -233,7 +233,7 @@ object BlockStorage : Listener {
     fun placeBlock(
         location: Location,
         key: NamespacedKey,
-        context: BlockCreateContext = BlockCreateContext.Default
+        context: BlockCreateContext = BlockCreateContext.Default(location.block)
     ) = placeBlock(BlockPosition(location), key, context)
 
     /**
@@ -276,11 +276,11 @@ object BlockStorage : Listener {
             block.postBreak()
         }
 
+        PylonBlockBreakEvent(blockPosition.block, block, context, drops).callEvent()
+
         for (drop in drops) {
             block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
         }
-
-        PylonBlockBreakEvent(blockPosition.block, block, context).callEvent()
     }
 
     /**
@@ -342,15 +342,13 @@ object BlockStorage : Listener {
                 // Wait a random delay before starting, this is to help smooth out lag from saving
                 delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
 
-                chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
-                    while (true) {
-                        lockBlockRead {
-                            val blocksInChunk = blocksByChunk[event.chunk.position]
-                            check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
-                            save(event.chunk, blocksInChunk)
-                        }
-                        delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
+                while (true) {
+                    lockBlockRead {
+                        val blocksInChunk = blocksByChunk[event.chunk.position]
+                        check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
+                        save(event.chunk, blocksInChunk)
                     }
+                    delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
                 }
             }
         }
@@ -377,13 +375,11 @@ object BlockStorage : Listener {
 
         save(event.chunk, chunkBlocks)
 
-        Bukkit.getScheduler().runTask(PylonCore, Runnable {
-            for (block in chunkBlocks) {
-                PylonBlockUnloadEvent(block.block, block).callEvent()
-            }
+        for (block in chunkBlocks) {
+            PylonBlockUnloadEvent(block.block, block).callEvent()
+        }
 
-            PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
-        })
+        PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
     }
 
     /**

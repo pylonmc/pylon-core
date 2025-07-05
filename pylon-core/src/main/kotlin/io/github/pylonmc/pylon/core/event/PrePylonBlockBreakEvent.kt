@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import org.bukkit.block.Block
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event

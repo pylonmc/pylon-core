@@ -3,11 +3,12 @@ package io.github.pylonmc.pylon.core.block.waila
 import io.github.pylonmc.pylon.core.i18n.PlaceholderAttacher
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import org.bukkit.entity.Player
 
 data class WailaConfig @JvmOverloads constructor(
     val text: Component,
-    val placeholders: Map<String, Component> = emptyMap(),
+    val placeholders: Map<String, ComponentLike> = emptyMap(),
     val color: BossBar.Color = BossBar.Color.WHITE,
     val style: BossBar.Overlay = BossBar.Overlay.PROGRESS,
     val progress: Float = 1F

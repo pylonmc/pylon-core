@@ -1,13 +1,20 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
-import org.bukkit.persistence.PersistentDataContainer
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.jetbrains.annotations.ApiStatus
+import org.jetbrains.annotations.MustBeInvokedByOverriders
+import java.util.IdentityHashMap
 import java.util.UUID
-import javax.annotation.CheckReturnValue
-import javax.annotation.OverridingMethodsMustInvokeSuper
 
 /**
  * A block that has one or more associated Pylon entities. For example, a pedestal that
@@ -18,17 +25,20 @@ import javax.annotation.OverridingMethodsMustInvokeSuper
  */
 interface PylonEntityHolderBlock : PylonBreakHandler {
 
-    /**
-     * Must be set in your create constructor when you spawn in the entity.
-     */
+    fun createEntities(context: BlockCreateContext): Map<String, PylonEntity<*>> = emptyMap()
+
+    @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
+        get() = holders[this] ?: error("You cannot access held entities before the block is placed")
 
-    fun getHeldEntityUuid(name: String)
-        = heldEntities[name] ?: throw IllegalArgumentException("Entity $name not found")
+    @ApiStatus.NonExtendable
+    fun getHeldEntityUuid(name: String) = heldEntities[name] ?: throw IllegalArgumentException("Entity $name not found")
 
+    @ApiStatus.NonExtendable
     fun getHeldEntity(name: String): PylonEntity<*>?
         = EntityStorage.get(getHeldEntityUuid(name))
 
+    @ApiStatus.NonExtendable
     fun <T: PylonEntity<*>> getHeldEntity(clazz: Class<T>, name: String): T?
         = EntityStorage.getAs(clazz, getHeldEntityUuid(name))
 
@@ -37,32 +47,16 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
      *
      * Will error if there is no entity with the provided name.
      */
-    fun isHeldEntityPresent(name: String)
-        = EntityStorage.isPylonEntity(getHeldEntityUuid(name))
+    @ApiStatus.NonExtendable
+    fun isHeldEntityPresent(name: String) = EntityStorage.isPylonEntity(getHeldEntityUuid(name))
 
     /**
      * Returns false if any entity is unloaded or does not exist.
      */
-    fun areAllHeldEntitiesLoaded()
-        = heldEntities.keys.all { isHeldEntityPresent(it) }
+    @ApiStatus.NonExtendable
+    fun areAllHeldEntitiesLoaded() = heldEntities.keys.all { isHeldEntityPresent(it) }
 
-    /**
-     * Must be called in your load constructor.
-     */
-    @CheckReturnValue
-    fun loadHeldEntities(pdc: PersistentDataContainer): Map<String, UUID> {
-        return pdc.get(entityKey, PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID))
-            ?: throw IllegalStateException("Failed to load entity holder; did you forget to call saveHeldEntities() in your write() method?")
-    }
-
-    /**
-     * Must be called in your write() method.
-     */
-    fun saveHeldEntities(pdc: PersistentDataContainer) {
-        pdc.set(entityKey, PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID), heldEntities)
-    }
-
-    @OverridingMethodsMustInvokeSuper
+    @MustBeInvokedByOverriders
     override fun postBreak() {
         // Best-effort removal; unlikely to cause issues
         for (name in heldEntities.keys) {
@@ -70,7 +64,46 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         }
     }
 
-    companion object {
-        val entityKey = pylonKey("entity_holder_entity_uuids")
+    companion object : Listener {
+        private val entityKey = pylonKey("entity_holder_entity_uuids")
+        private val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
+
+        private val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
+
+        @EventHandler
+        private fun onPlace(event: PylonBlockPlaceEvent) {
+            val block = event.pylonBlock
+            if (block !is PylonEntityHolderBlock) return
+            val entities = mutableMapOf<String, UUID>()
+            for ((name, entity) in block.createEntities(event.context)) {
+                val uuid = entity.uuid
+                if (!EntityStorage.isPylonEntity(uuid)) {
+                    EntityStorage.add(entity)
+                }
+                entities[name] = uuid
+            }
+            holders[block] = entities
+        }
+
+        @EventHandler
+        private fun onDeserialize(event: PylonBlockDeserializeEvent) {
+            val block = event.pylonBlock
+            if (block !is PylonEntityHolderBlock) return
+            holders[block] = event.pdc.get(entityKey, entityType)?.toMutableMap() ?: error("Held entities not found for ${block.key}")
+        }
+
+        @EventHandler
+        private fun onSerialize(event: PylonBlockSerializeEvent) {
+            val block = event.pylonBlock
+            if (block !is PylonEntityHolderBlock) return
+            event.pdc.set(entityKey, entityType, holders[block]!!)
+        }
+
+        @EventHandler
+        private fun onUnload(event: PylonBlockUnloadEvent) {
+            val block = event.pylonBlock
+            if (block !is PylonEntityHolderBlock) return
+            holders.remove(block)
+        }
     }
 }

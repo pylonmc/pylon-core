@@ -67,8 +67,8 @@ internal object MultiblockCache : Listener {
                     continue
                 }
 
-                val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)!!
-                if (multiblock.checkFormed()) {
+                val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)
+                if (multiblock != null && multiblock.checkFormed()) {
                     formedMultiblocks.add(multiblockPosition)
                 } else {
                     formedMultiblocks.remove(multiblockPosition)
@@ -120,13 +120,13 @@ internal object MultiblockCache : Listener {
 
     private fun onBlockModified(block: Block)
         = loadedMultiblocksWithComponent(block).forEach {
-            markDirty(BlockStorage.getAs<PylonMultiblock>(it)!!)
+            BlockStorage.getAs<PylonMultiblock>(it)?.let { markDirty(it) }
         }
 
     private fun loadedMultiblocksWithComponent(block: Block): List<BlockPosition>
-        = loadedMultiblocksWithComponentsInChunk(block.position.chunk).filter {
-            BlockStorage.getAs<PylonMultiblock>(it)!!.isPartOfMultiblock(block)
-        }
+            = loadedMultiblocksWithComponentsInChunk(block.position.chunk).filter {
+        BlockStorage.getAs<PylonMultiblock>(it)?.isPartOfMultiblock(block) == true
+    }
 
     private fun loadedMultiblocksWithComponentsInChunk(chunkPosition: ChunkPosition): Set<BlockPosition>
         = multiblocksWithComponentsInChunk[chunkPosition] ?: emptySet()
@@ -135,7 +135,7 @@ internal object MultiblockCache : Listener {
     private fun handle(event: PylonChunkBlocksLoadEvent) {
         // Refresh existing multiblocks with a component in the chunk that was just loaded
         for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
-            refreshFullyLoaded(BlockStorage.getAs<PylonMultiblock>(multiblockPosition)!!)
+            BlockStorage.getAs<PylonMultiblock>(multiblockPosition)?.let { refreshFullyLoaded(it) }
         }
 
         // Add new multiblocks
