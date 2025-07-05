@@ -126,7 +126,7 @@ object EntityStorage : Listener {
         = get(entity) != null
 
     @JvmStatic
-    fun add(entity: PylonEntity<*>) = lockEntityWrite {
+    fun <E : Entity> add(entity: PylonEntity<E>): PylonEntity<E> = lockEntityWrite {
         entities[entity.uuid] = entity
         entitiesByKey.getOrPut(entity.schema.key, ::mutableSetOf).add(entity)
 
@@ -136,15 +136,14 @@ object EntityStorage : Listener {
             // Wait a random delay before starting, this is to help smooth out lag from saving
             delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
 
-            entityAutosaveTasks[entity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
-                while (true) {
-                    lockEntityRead {
-                        entity.write(entity.entity.persistentDataContainer)
-                    }
-                    delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
+            while (true) {
+                lockEntityRead {
+                    entity.write(entity.entity.persistentDataContainer)
                 }
+                delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
             }
         }
+        entity
     }
 
     @EventHandler

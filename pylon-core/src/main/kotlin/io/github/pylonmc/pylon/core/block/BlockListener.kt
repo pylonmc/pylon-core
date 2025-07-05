@@ -1,11 +1,13 @@
 package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
+import com.destroystokyo.paper.event.player.PlayerJumpEvent
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
-import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -15,6 +17,7 @@ import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -26,8 +29,9 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
-import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.event.player.PlayerTakeLecternBookEvent
 
 
 /**
@@ -46,13 +50,20 @@ internal object BlockListener : Listener {
         val item = event.itemInHand
         val player = event.player
 
-        val pylonItem = PylonItem.fromStack(item)
-        val context = BlockCreateContext.PlayerPlace(player, item)
+        val pylonItem = PylonItem.fromStack(item) ?: return
+        if (!event.player.canUse(pylonItem, true)) {
+            event.isCancelled = true
+            return
+        }
+        val relative = event.blockPlaced.position - event.blockAgainst.position
+        val blockFace = BlockFace.entries.find { it.modX == relative.x && it.modY == relative.y && it.modZ == relative.z }
+            ?: BlockFace.SELF
+        val pylonBlock = pylonItem.place(BlockCreateContext.PlayerPlace(player, item, event))
 
-        val pylonBlock = pylonItem?.place(context, event.block)
-        if (pylonItem != null && pylonBlock == null) {
+        if (pylonBlock == null) {
             event.isCancelled = true
         }
+
         if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
             player.inventory.getItem(event.hand).subtract()
         }
@@ -483,6 +494,34 @@ internal object BlockListener : Listener {
         val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
         if (pylonBlock is PylonInteractableBlock) {
             pylonBlock.onInteract(event)
+        }
+    }
+
+    @EventHandler
+    private fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) {
+        val blockUnder = event.player.location.add(0.0, -1.0, 0.0).block
+        val blockIn = event.player.location.add(0.0, 0.0, 0.0).block
+        val pylonBlock = BlockStorage.get(blockUnder) ?: BlockStorage.get(blockIn)
+        if (pylonBlock is PylonSneakableBlock) {
+            /*
+            * Event player is from before the event is triggered, so when the player
+            * is marked as *not* sneaking, they just toggled it.
+            */
+            if (!event.player.isSneaking) {
+                pylonBlock.onSneakStart(event)
+            } else {
+                pylonBlock.onSneakEnd(event)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun onPlayerJumpEvent(event: PlayerJumpEvent) {
+        val blockUnder = event.player.location.add(0.0, -1.0, 0.0).block
+        val blockIn = event.player.location.add(0.0, 0.0, 0.0).block
+        val pylonBlock = BlockStorage.get(blockUnder) ?: BlockStorage.get(blockIn)
+        if (pylonBlock is PylonJumpableBlock) {
+            pylonBlock.onJump(event)
         }
     }
 

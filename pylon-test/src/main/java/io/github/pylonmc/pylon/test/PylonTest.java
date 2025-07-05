@@ -7,45 +7,18 @@ import io.github.pylonmc.pylon.test.block.Blocks;
 import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.fluid.Fluids;
 import io.github.pylonmc.pylon.test.item.Items;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageAddTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageChunkReloadTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageFilledChunkTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageMissingSchemaTest;
-import io.github.pylonmc.pylon.test.test.block.BlockStorageRemoveTest;
-import io.github.pylonmc.pylon.test.test.block.SimpleMultiblockRotatedTest;
-import io.github.pylonmc.pylon.test.test.block.SimpleMultiblockTest;
-import io.github.pylonmc.pylon.test.test.block.TickingBlockErrorTest;
-import io.github.pylonmc.pylon.test.test.block.TickingBlockTest;
+import io.github.pylonmc.pylon.test.test.block.*;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
-import io.github.pylonmc.pylon.test.test.entity.EntityStorageUnregisteredEntityTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidConnectionTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidCyclicConnectionsTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidFlowRateTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidPartialReloadTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidPredicateTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidTickerLoopTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTest;
-import io.github.pylonmc.pylon.test.test.fluid.FluidTickerTestWithMixedFluids;
+import io.github.pylonmc.pylon.test.test.entity.EntityStorageUnregisteredEntityTest;
+import io.github.pylonmc.pylon.test.test.fluid.*;
 import io.github.pylonmc.pylon.test.test.item.PylonItemStackInterfaceTest;
 import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.misc.WrapTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
 import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
 import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPosition;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestBlockPositionNoWorld;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChar;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChunkPosition;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestChunkPositionNoWorld;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestEnum;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestItemStack;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestLocation;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestNamespacedKey;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestSetOfInts;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestSetOfSetOfStrings;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestUUID;
-import io.github.pylonmc.pylon.test.test.serializer.SerializerTestVector;
+import io.github.pylonmc.pylon.test.test.serializer.*;
 import io.github.pylonmc.pylon.test.util.BedrockWorldGenerator;
 import io.github.pylonmc.pylon.test.util.TestUtil;
 import lombok.Getter;
@@ -70,11 +43,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
     private static PylonTest instance;
     public static World testWorld;
     private static final boolean MANUAL_SHUTDOWN = Boolean.parseBoolean(System.getenv("MANUAL_SHUTDOWN"));
-
-    @Override
-    public @NotNull String getDisplayName() {
-        return "Pylon Test";
-    }
 
     private static @NotNull List<Test> initTests() {
         List<Test> tests = new ArrayList<>();
@@ -120,7 +88,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new FluidCyclicConnectionsTest());
         tests.add(new FluidTickerTest());
         tests.add(new FluidTickerTestWithMixedFluids());
-        tests.add(new FluidTickerLoopTest());
         tests.add(new FluidPartialReloadTest());
         tests.add(new FluidFlowRateTest());
         tests.add(new FluidPredicateTest());
@@ -143,22 +110,22 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
             testWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
             testWorld.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
             testWorld.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
-        }).join();
 
-        try {
-            // TODO get rid of these and convert registration to static blocks
-            Blocks.register();
-            Items.register();
-            Entities.register();
-            Fluids.register();
-        } catch (Exception e) {
-            instance().getLogger().severe("Failed to set up tests");
-            e.printStackTrace();
-            communicateFailure();
-            if (!MANUAL_SHUTDOWN) {
-                Bukkit.shutdown();
+            try {
+                // TODO get rid of these and convert registration to static blocks
+                Blocks.register();
+                Items.register();
+                Entities.register();
+                Fluids.register();
+            } catch (Exception e) {
+                instance().getLogger().severe("Failed to set up tests");
+                e.printStackTrace();
+                communicateFailure();
+                if (!MANUAL_SHUTDOWN) {
+                    Bukkit.shutdown();
+                }
             }
-        }
+        }).join();
 
         // Tests must be initialised on main thread
         List<Test> tests = TestUtil.runSync(PylonTest::initTests).join();
@@ -239,5 +206,10 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
     public static @NotNull NamespacedKey key(String key) {
         return new NamespacedKey(instance, key);
+    }
+
+    @Override
+    public @NotNull Material getMaterial() {
+        return Material.WAXED_WEATHERED_CUT_COPPER_STAIRS;
     }
 }

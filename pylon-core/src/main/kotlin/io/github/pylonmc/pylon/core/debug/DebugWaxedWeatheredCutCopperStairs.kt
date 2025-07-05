@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonBlockInteractor
@@ -51,6 +52,7 @@ class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         // chunk to get a PDC context
         val pdc = block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer()
         pylonBlock.write(pdc)
+        PylonBlockSerializeEvent(block, pylonBlock, pdc).callEvent()
         val serialized = NmsAccessor.instance.serializePdc(pdc)
         player.sendDebug(
             "data",

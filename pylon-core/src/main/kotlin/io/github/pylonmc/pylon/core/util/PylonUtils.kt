@@ -38,17 +38,19 @@ fun vectorToBlockFace(vector: Vector3i): BlockFace {
     }
 }
 
-fun vectorToBlockFace(vector: Vector3f)
-    = vectorToBlockFace(Vector3i(vector, RoundingMode.HALF_DOWN))
+fun vectorToBlockFace(vector: Vector3f) = vectorToBlockFace(Vector3i(vector, RoundingMode.HALF_DOWN))
 
 // use toVector3f rather than toVector3i because toVector3i will floor components
-fun vectorToBlockFace(vector: Vector)
-    = vectorToBlockFace(vector.toVector3f())
+fun vectorToBlockFace(vector: Vector) = vectorToBlockFace(vector.toVector3f())
 
 /**
  * Rotates a BlockFace to the player's reference frame. Where the player is facing becomes NORTH.
  */
-fun rotateToPlayerFacing(player: Player, face: BlockFace): BlockFace {
-    val rotationAngle = yawToCardinalDirection(player.eyeLocation.yaw)
-    return vectorToBlockFace(face.direction.clone().rotateAroundY(rotationAngle.toDouble()))
+fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean): BlockFace {
+    var vector = face.direction.clone().rotateAroundY(yawToCardinalDirection(player.eyeLocation.yaw).toDouble())
+    if (allowVertical) {
+        val rightVector = vector.getCrossProduct(Vector(0.0, 1.0, 0.0)) // never thought cross product would come in useful but here we go
+        vector = vector.rotateAroundNonUnitAxis(rightVector, -yawToCardinalDirection(player.eyeLocation.pitch).toDouble())
+    }
+    return vectorToBlockFace(vector)
 }

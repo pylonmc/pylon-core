@@ -21,7 +21,9 @@ val customMiniMessage = MiniMessage.builder()
     .tags(TagResolver.standard())
     .editTags {
         it.tag("arrow", ::arrow)
+        it.tag("diamond", ::diamond)
         it.tag(setOf("instruction", "insn")) { _, _ -> Tag.styling(TextColor.color(0xf9d104)) }
+        it.tag(setOf("guideinstruction", "guideinsn")) { _, _ -> Tag.styling(TextColor.color(0xc907f4)) }
         it.tag(setOf("attribute", "attr")) { _, _ -> Tag.styling(TextColor.color(0xa9d9e8)) }
         it.tag(setOf("unit", "u"), ::unit)
         // No break space
@@ -34,6 +36,11 @@ val customMiniMessage = MiniMessage.builder()
 private fun arrow(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
     val color = args.peek()?.value()?.let(::parseColor) ?: TextColor.color(0x666666)
     return Tag.selfClosingInserting(Component.text("\u2192").color(color))
+}
+
+private fun diamond(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
+    val color = args.peek()?.value()?.let(::parseColor) ?: TextColor.color(0x666666)
+    return Tag.selfClosingInserting(Component.text("\u25C6").color(color))
 }
 
 private fun star(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {

@@ -12,6 +12,7 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     maven("https://repo.xenondevs.xyz/releases") {
         name = "InvUI"
     }
@@ -27,6 +28,8 @@ dependencies {
     }
 
     runtimeOnly(project(":nms"))
+
+    implementation("info.debatty:java-string-similarity:2.0.0")
 
     paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
