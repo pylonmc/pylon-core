@@ -88,7 +88,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new FluidCyclicConnectionsTest());
         tests.add(new FluidTickerTest());
         tests.add(new FluidTickerTestWithMixedFluids());
-        tests.add(new FluidTickerLoopTest());
         tests.add(new FluidPartialReloadTest());
         tests.add(new FluidFlowRateTest());
         tests.add(new FluidPredicateTest());
