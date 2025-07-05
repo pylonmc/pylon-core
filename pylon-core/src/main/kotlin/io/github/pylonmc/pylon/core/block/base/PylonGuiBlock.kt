@@ -64,7 +64,8 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
 
     fun getItems() : List<ItemStack> {
         val items = mutableListOf<ItemStack>()
-        for (inv in inventories) {
+        val invs = inventories.get(this) ?: return listOf()
+        for (inv in invs) {
             for (item in inv.items) {
                 item?.let(items::add)
             }
