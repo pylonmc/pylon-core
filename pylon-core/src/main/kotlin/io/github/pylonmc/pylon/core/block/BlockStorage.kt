@@ -342,15 +342,13 @@ object BlockStorage : Listener {
                 // Wait a random delay before starting, this is to help smooth out lag from saving
                 delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
 
-                chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
-                    while (true) {
-                        lockBlockRead {
-                            val blocksInChunk = blocksByChunk[event.chunk.position]
-                            check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
-                            save(event.chunk, blocksInChunk)
-                        }
-                        delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
+                while (true) {
+                    lockBlockRead {
+                        val blocksInChunk = blocksByChunk[event.chunk.position]
+                        check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
+                        save(event.chunk, blocksInChunk)
                     }
+                    delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
                 }
             }
         }
