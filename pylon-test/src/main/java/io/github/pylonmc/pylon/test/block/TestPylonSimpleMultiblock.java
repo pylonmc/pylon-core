@@ -28,10 +28,10 @@ public class TestPylonSimpleMultiblock extends PylonBlock implements PylonSimple
     }
 
     @Override
-    public @NotNull Map<Vector3i, Component> getComponents() {
+    public @NotNull Map<Vector3i, MultiblockComponent> getComponents() {
         return Map.of(
-                new Vector3i(1, 1, 4), new PylonComponent(Blocks.SIMPLE_BLOCK_KEY),
-                new Vector3i(2, -1, 0), new PylonComponent(Blocks.SIMPLE_BLOCK_KEY)
+                new Vector3i(1, 1, 4), new PylonMultiblockComponent(Blocks.SIMPLE_BLOCK_KEY),
+                new Vector3i(2, -1, 0), new PylonMultiblockComponent(Blocks.SIMPLE_BLOCK_KEY)
         );
     }
 }

@@ -29,7 +29,7 @@ import kotlin.math.min
 
 interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
-    interface Component {
+    interface MultiblockComponent {
         fun matches(block: Block): Boolean
         fun spawnGhostBlock(block: Block): UUID
     }
@@ -54,7 +54,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
-    data class VanillaComponent(val material: Material) : Component {
+    data class VanillaMultiblockComponent(val material: Material) : MultiblockComponent {
         override fun matches(block: Block): Boolean
             = !BlockStorage.isPylonBlock(block) && block.type == material
 
@@ -68,7 +68,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
-    data class PylonComponent(val key: NamespacedKey) : Component {
+    data class PylonMultiblockComponent(val key: NamespacedKey) : MultiblockComponent {
         override fun matches(block: Block): Boolean
             = BlockStorage.get(block)?.schema?.key == key
 
@@ -87,9 +87,9 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
     /**
      * Rotation will automatically be accounted for.
      */
-    val components: Map<Vector3i, Component>
+    val components: Map<Vector3i, MultiblockComponent>
 
-    fun validStructures(): List<Map<Vector3i, Component>> = listOf(
+    fun validStructures(): List<Map<Vector3i, MultiblockComponent>> = listOf(
         // 0 degrees
         components,
         // 90 degrees (anticlockwise)

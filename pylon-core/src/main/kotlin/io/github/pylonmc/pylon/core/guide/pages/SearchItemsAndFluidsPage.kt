@@ -21,26 +21,23 @@ class SearchItemsAndFluidsPage : SearchPage(
 
     fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.ITEMS.getKeys().filter {
         !PylonGuide.hiddenItems.contains(it)
-    }.map {
-        val translator = AddonTranslator.translators[getAddon(it)]!!
+    }.mapNotNull { item ->
+        val translator = AddonTranslator.translators[getAddon(item)]!!
         val name = translator.translate(
-            Component.translatable("pylon.${it.namespace}.item.${it.key}.name"), player.locale()
+            Component.translatable("pylon.${item.namespace}.item.${item.key}.name"), player.locale()
         )
-        check(name != null)
-        val plainTextName = serializer.serialize(name).lowercase()
-        Pair(ItemButton(it), plainTextName)
+        name?.let { Pair(ItemButton(item), serializer.serialize(name).lowercase()) }
+
     }.toMutableList()
 
     fun getFluidButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.FLUIDS.getKeys().filter {
         !PylonGuide.hiddenFluids.contains(it)
-    }.map {
-        val translator = AddonTranslator.translators[getAddon(it)]!!
+    }.mapNotNull { fluid ->
+        val translator = AddonTranslator.translators[getAddon(fluid)]!!
         val name = translator.translate(
-            Component.translatable("pylon.${it.namespace}.fluid.${it.key}"), player.locale()
+            Component.translatable("pylon.${fluid.namespace}.fluid.${fluid.key}"), player.locale()
         )
-        check(name != null)
-        val plainTextName = serializer.serialize(name).lowercase()
-        Pair(FluidButton(it), plainTextName)
+        name?.let { Pair(FluidButton(fluid), serializer.serialize(name).lowercase()) }
     }.toMutableList()
 
     override fun getItemNamePairs(player: Player, search: String): List<Pair<Item, String>> {

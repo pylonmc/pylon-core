@@ -36,18 +36,17 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
         if (
             event.action.isRightClick &&
             event.hand == EquipmentSlot.HAND &&
-            event.useInteractedBlock() != Event.Result.DENY
+            event.useInteractedBlock() != Event.Result.DENY &&
+            !event.player.isSneaking
         ) {
             event.setUseInteractedBlock(Event.Result.DENY)
-            if (!event.player.isSneaking) {
-                event.setUseItemInHand(Event.Result.DENY)
-                val window = Window.single()
-                    .setGui(gui)
-                    .setTitle(AdventureComponentWrapper((this as PylonBlock).name))
-                    .setViewer(event.player)
-                    .build()
-                window.open()
-            }
+            event.setUseItemInHand(Event.Result.DENY)
+            val window = Window.single()
+                .setGui(gui)
+                .setTitle(AdventureComponentWrapper((this as PylonBlock).name))
+                .setViewer(event.player)
+                .build()
+            window.open()
         }
     }
 
