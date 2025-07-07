@@ -20,8 +20,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.display.*
 import org.bukkit.craftbukkit.inventory.CraftItemStack
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
+import sun.misc.Unsafe
 import java.util.WeakHashMap
 import java.util.logging.Level
 
@@ -126,18 +125,22 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
     private fun resetItem(item: ItemStack) = handleItem(item, ::reset)
 
+    @Suppress("DEPRECATION")
     companion object {
         private const val HANDLER_NAME = "pylon_packet_handler"
         private var CURRENT: PlayerPacketHandler? = null
 
         init {
-            val fieldModifiers = Field::class.java.getDeclaredField("modifiers")
-            fieldModifiers.isAccessible = true
+            val unsafeField = Unsafe::class.java.getDeclaredField("theUnsafe")
+            unsafeField.isAccessible = true
+            val unsafe = unsafeField.get(null) as Unsafe
+
             val field = SlotDisplay.ItemStackContentsFactory::class.java.getDeclaredField("INSTANCE")
-            field.isAccessible = true
-            fieldModifiers.setInt(field, field.modifiers and Modifier.FINAL.inv())
-            field.set(
-                null,
+            val staticFieldBase = unsafe.staticFieldBase(field)
+            val staticFieldOffset = unsafe.staticFieldOffset(field)
+            unsafe.putObject(
+                staticFieldBase,
+                staticFieldOffset,
                 object : SlotDisplay.ItemStackContentsFactory() {
                     override fun forStack(stack: ItemStack): ItemStack {
                         val stack = super.forStack(stack)
