@@ -13,6 +13,11 @@ import java.text.MessageFormat
 import java.util.Locale
 import kotlin.io.path.*
 
+/**
+ * Since Pylon has automatic line wrapping for items, it needs to know the length of the translated strings.
+ * However, this is not possible with Minecraft translation keys since that's done client-side.
+ * This class downloads the Minecraft language files and uses them to translate some keys server-side.
+ */
 internal object MinecraftTranslator : Translator {
 
     private const val LAUNCHER_META_URL = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json"
