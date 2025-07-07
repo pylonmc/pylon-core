@@ -1,10 +1,11 @@
 package io.github.pylonmc.pylon.core.addon
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -14,34 +15,58 @@ import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.inventory.ItemStack
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.Locale
 
+/**
+ * Welcome to the place where it all begins: the Pylon addon!
+ */
 interface PylonAddon : Keyed {
 
+    /**
+     * Must return `this`
+     */
     val javaPlugin: JavaPlugin
 
+    /**
+     * The set of languages this addon has translations for
+     */
     val languages: Set<Locale>
 
+    /**
+     * The material to represent this addon in menus
+     */
     val material: Material
 
+    /**
+     * The name used to represent this addon in the item tooltips.
+     * By default, a blue italic `pylon.[addon].addon` translation key.
+     */
     val displayName: TranslatableComponent
         get() = Component.translatable("pylon.${key.namespace}.addon")
-                        .decoration(TextDecoration.ITALIC, true)
-                        .color(NamedTextColor.BLUE)
-
-    override fun getKey(): NamespacedKey
-            = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
+            .decoration(TextDecoration.ITALIC, true)
+            .color(NamedTextColor.BLUE)
 
     /**
-     * Must be called as the first thing in your plugin's onEnable
+     * If you use something besides the default `pylon.[addon].addon` translation key for the addon name,
+     * set this to true to suppress warnings about the "missing" key
+     */
+    val suppressAddonNameWarning: Boolean
+        get() = false
+
+    override fun getKey(): NamespacedKey = NamespacedKey(javaPlugin, javaPlugin.name.lowercase())
+
+    /**
+     * Must be called as the first thing in your plugin's `onEnable`
      */
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)
         AddonTranslator.register(this)
 
-        if (key !in addonNameWarningsSupressed) {
+        if (!suppressAddonNameWarning) {
             val translator = AddonTranslator.translators[this]!!
             for (locale in languages) {
                 if (!translator.canTranslate("pylon.${key.namespace}.addon", locale)) {
@@ -84,13 +109,22 @@ interface PylonAddon : Keyed {
         return config
     }
 
-    companion object {
-
-        private val addonNameWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
-
-        @JvmStatic
-        fun supressAddonNameWarnings(key: NamespacedKey) {
-            addonNameWarningsSupressed.add(key)
+    companion object : Listener {
+        @EventHandler
+        private fun onPluginDisable(event: PluginDisableEvent) {
+            val plugin = event.plugin
+            if (plugin is PylonAddon) {
+                BlockStorage.cleanup(plugin)
+                PylonRegistry.BLOCKS.unregisterAllFromAddon(plugin)
+                EntityStorage.cleanup(plugin)
+                PylonRegistry.ENTITIES.unregisterAllFromAddon(plugin)
+                PylonRegistry.GAMETESTS.unregisterAllFromAddon(plugin)
+                PylonRegistry.ITEMS.unregisterAllFromAddon(plugin)
+                PylonRegistry.RECIPE_TYPES.unregisterAllFromAddon(plugin)
+                PylonRegistry.MOB_DROPS.unregisterAllFromAddon(plugin)
+                PylonRegistry.ADDONS.unregister(plugin)
+                AddonTranslator.unregister(plugin)
+            }
         }
     }
 }

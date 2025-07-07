@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
@@ -41,6 +40,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         saveDefaultConfig()
 
+        Bukkit.getPluginManager().registerEvents(PylonAddon, this)
         registerWithPylon()
 
         GlobalTranslator.translator().addSource(MinecraftTranslator)
@@ -50,7 +50,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
         Bukkit.getPluginManager().registerEvents(MobDropListener, this)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
-        Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
         Bukkit.getPluginManager().registerEvents(AddonTranslator, this)
