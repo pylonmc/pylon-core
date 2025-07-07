@@ -15,6 +15,8 @@ interface NmsAccessor {
 
     fun resendInventory(player: Player)
 
+    fun resendRecipeBook(player: Player)
+
     fun serializePdc(pdc: PersistentDataContainer): String
 
     companion object {

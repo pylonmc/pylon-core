@@ -12,12 +12,10 @@ import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
-import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket
+import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.crafting.display.*
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import java.util.WeakHashMap
 import java.util.logging.Level
@@ -54,7 +52,10 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                     packet.items.forEach(::translateItem)
                     translateItem(packet.carriedItem)
                 }
+
                 is ClientboundContainerSetSlotPacket -> translateItem(packet.item)
+                is ClientboundRecipeBookAddPacket -> packet.entries
+                    .forEach { handleRecipeDisplay(it.contents.display) }
             }
             super.write(ctx, packet, promise)
         }
@@ -65,6 +66,60 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                 is ServerboundSetCreativeModeSlotPacket -> resetItem(packet.itemStack)
             }
             super.channelRead(ctx, packet)
+        }
+    }
+
+    private fun handleRecipeDisplay(display: RecipeDisplay) {
+        when (display) {
+            is FurnaceRecipeDisplay -> display.run {
+                handleSlotDisplay(ingredient)
+                handleSlotDisplay(fuel)
+                handleSlotDisplay(result)
+            }
+
+            is ShapedCraftingRecipeDisplay -> display.run {
+                ingredients.forEach(::handleSlotDisplay)
+                handleSlotDisplay(result)
+            }
+
+            is ShapelessCraftingRecipeDisplay -> display.run {
+                ingredients.forEach(::handleSlotDisplay)
+                handleSlotDisplay(result)
+            }
+
+            is SmithingRecipeDisplay -> display.run {
+                handleSlotDisplay(template)
+                handleSlotDisplay(base)
+                handleSlotDisplay(addition)
+                handleSlotDisplay(result)
+            }
+
+            is StonecutterRecipeDisplay -> return // Do nothing, we don't support stonecutter recipes
+            else -> throw IllegalArgumentException("Unknown recipe display type: ${display::class.simpleName}")
+        }
+    }
+
+    private fun handleSlotDisplay(display: SlotDisplay) {
+        when (display) {
+            is SlotDisplay.AnyFuel,
+            is SlotDisplay.ItemSlotDisplay,
+            is SlotDisplay.TagSlotDisplay,
+            is SlotDisplay.Empty -> return
+
+            is SlotDisplay.Composite -> display.contents.forEach(::handleSlotDisplay)
+            is SlotDisplay.ItemStackSlotDisplay -> translateItem(display.stack)
+            is SlotDisplay.SmithingTrimDemoSlotDisplay -> display.run {
+                handleSlotDisplay(base)
+                handleSlotDisplay(material)
+                handleSlotDisplay(pattern)
+            }
+
+            is SlotDisplay.WithRemainder -> display.run {
+                handleSlotDisplay(input)
+                handleSlotDisplay(remainder)
+            }
+
+            else -> throw IllegalArgumentException("Unknown slot display type: ${display::class.simpleName}")
         }
     }
 
