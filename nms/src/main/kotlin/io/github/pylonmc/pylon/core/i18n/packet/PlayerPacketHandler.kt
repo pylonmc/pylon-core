@@ -12,15 +12,11 @@ import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
-import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket
+import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.display.*
 import org.bukkit.craftbukkit.inventory.CraftItemStack
-import sun.misc.Unsafe
 import java.util.WeakHashMap
 import java.util.logging.Level
 
@@ -51,7 +47,6 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
-            CURRENT = this@PlayerPacketHandler
             when (packet) {
                 is ClientboundContainerSetContentPacket -> {
                     packet.items.forEach(::translateItem)
@@ -59,9 +54,10 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                 }
 
                 is ClientboundContainerSetSlotPacket -> translateItem(packet.item)
+                is ClientboundRecipeBookAddPacket -> packet.entries
+                    .forEach { handleRecipeDisplay(it.contents.display) }
             }
             super.write(ctx, packet, promise)
-            CURRENT = null
         }
 
         override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
@@ -104,7 +100,27 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     }
 
     private fun handleSlotDisplay(display: SlotDisplay) {
-        TODO()
+        when (display) {
+            is SlotDisplay.AnyFuel,
+            is SlotDisplay.ItemSlotDisplay,
+            is SlotDisplay.TagSlotDisplay,
+            is SlotDisplay.Empty -> return
+
+            is SlotDisplay.Composite -> display.contents.forEach(::handleSlotDisplay)
+            is SlotDisplay.ItemStackSlotDisplay -> translateItem(display.stack)
+            is SlotDisplay.SmithingTrimDemoSlotDisplay -> display.run {
+                handleSlotDisplay(base)
+                handleSlotDisplay(material)
+                handleSlotDisplay(pattern)
+            }
+
+            is SlotDisplay.WithRemainder -> display.run {
+                handleSlotDisplay(input)
+                handleSlotDisplay(remainder)
+            }
+
+            else -> throw IllegalArgumentException("Unknown slot display type: ${display::class.simpleName}")
+        }
     }
 
     private inline fun handleItem(item: ItemStack, handler: (PylonItem) -> Unit) {
@@ -125,31 +141,8 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
     private fun resetItem(item: ItemStack) = handleItem(item, ::reset)
 
-    @Suppress("DEPRECATION")
     companion object {
         private const val HANDLER_NAME = "pylon_packet_handler"
-        private var CURRENT: PlayerPacketHandler? = null
-
-        init {
-            val unsafeField = Unsafe::class.java.getDeclaredField("theUnsafe")
-            unsafeField.isAccessible = true
-            val unsafe = unsafeField.get(null) as Unsafe
-
-            val field = SlotDisplay.ItemStackContentsFactory::class.java.getDeclaredField("INSTANCE")
-            val staticFieldBase = unsafe.staticFieldBase(field)
-            val staticFieldOffset = unsafe.staticFieldOffset(field)
-            unsafe.putObject(
-                staticFieldBase,
-                staticFieldOffset,
-                object : SlotDisplay.ItemStackContentsFactory() {
-                    override fun forStack(stack: ItemStack): ItemStack {
-                        val stack = super.forStack(stack)
-                        CURRENT?.translateItem(stack)
-                        return stack
-                    }
-                }
-            )
-        }
     }
 }
 

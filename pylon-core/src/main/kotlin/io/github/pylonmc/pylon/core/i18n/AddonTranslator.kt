@@ -100,6 +100,10 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
         private fun onPlayerJoin(event: PlayerJoinEvent) {
             val player = event.player
             NmsAccessor.instance.registerTranslationHandler(player, PlayerTranslationHandler(player))
+            // Since the recipe book is initially sent before the event, and therefore before
+            // we can register the translation handler, we need to resend it here so that it
+            // gets translated properly.
+            NmsAccessor.instance.resendRecipeBook(player)
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
