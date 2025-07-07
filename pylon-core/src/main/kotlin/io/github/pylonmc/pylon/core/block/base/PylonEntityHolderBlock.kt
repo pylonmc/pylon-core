@@ -25,7 +25,7 @@ import java.util.UUID
  */
 interface PylonEntityHolderBlock : PylonBreakHandler {
 
-    fun createEntities(context: BlockCreateContext): Map<String, PylonEntity<*>> = emptyMap()
+    fun createEntities(context: BlockCreateContext): Map<String, PylonEntity<*>> = mutableMapOf()
 
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
@@ -36,11 +36,19 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
 
     @ApiStatus.NonExtendable
     fun getHeldEntity(name: String): PylonEntity<*>?
-        = EntityStorage.get(getHeldEntityUuid(name))
+            = EntityStorage.get(getHeldEntityUuid(name))
+
+    @ApiStatus.NonExtendable
+    fun getHeldEntityOrThrow(name: String): PylonEntity<*>
+            = getHeldEntity(name) ?: throw IllegalArgumentException("Entity $name does not exist")
 
     @ApiStatus.NonExtendable
     fun <T: PylonEntity<*>> getHeldEntity(clazz: Class<T>, name: String): T?
-        = EntityStorage.getAs(clazz, getHeldEntityUuid(name))
+            = EntityStorage.getAs(clazz, getHeldEntityUuid(name))
+
+    @ApiStatus.NonExtendable
+    fun <T: PylonEntity<*>> getHeldEntityOrThrow(clazz: Class<T>, name: String): T
+            = getHeldEntity(clazz, name) ?: throw IllegalArgumentException("Entity $name does not exist or is not of type ${clazz.simpleName}")
 
     /**
      * Returns false if the entity is unloaded or does not physically exist.
