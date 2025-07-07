@@ -25,7 +25,7 @@ import java.util.UUID
  */
 interface PylonEntityHolderBlock : PylonBreakHandler {
 
-    fun createEntities(context: BlockCreateContext): Map<String, PylonEntity<*>> = emptyMap()
+    fun createEntities(context: BlockCreateContext): Map<String, PylonEntity<*>> = mutableMapOf()
 
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
@@ -40,7 +40,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
 
     @ApiStatus.NonExtendable
     fun getHeldEntityOrThrow(name: String): PylonEntity<*>
-            = getHeldEntity(name) ?: throw java.lang.IllegalArgumentException("Entity $name does not exist")
+            = getHeldEntity(name) ?: throw IllegalArgumentException("Entity $name does not exist")
 
     @ApiStatus.NonExtendable
     fun <T: PylonEntity<*>> getHeldEntity(clazz: Class<T>, name: String): T?
