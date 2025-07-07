@@ -138,7 +138,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
+    private fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
     private fun resetItem(item: ItemStack) = handleItem(item, ::reset)
 
     companion object {
