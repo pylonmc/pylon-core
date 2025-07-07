@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.item.base
 
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 
-interface BrewingStandFuel {
+interface PylonBrewingStandFuel {
     /**
      * Called when the item is consumed as fuel in a brewing stand
      */
