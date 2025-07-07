@@ -12,11 +12,16 @@ import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.minecraft.network.protocol.game.*
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.display.*
 import org.bukkit.craftbukkit.inventory.CraftItemStack
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 import java.util.WeakHashMap
 import java.util.logging.Level
 
@@ -47,6 +52,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
+            CURRENT = this@PlayerPacketHandler
             when (packet) {
                 is ClientboundContainerSetContentPacket -> {
                     packet.items.forEach(::translateItem)
@@ -54,10 +60,9 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                 }
 
                 is ClientboundContainerSetSlotPacket -> translateItem(packet.item)
-                is ClientboundRecipeBookAddPacket -> packet.entries
-                    .forEach { handleRecipeDisplay(it.contents.display) }
             }
             super.write(ctx, packet, promise)
+            CURRENT = null
         }
 
         override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
@@ -118,11 +123,30 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    private fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
+    fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
     private fun resetItem(item: ItemStack) = handleItem(item, ::reset)
 
     companion object {
         private const val HANDLER_NAME = "pylon_packet_handler"
+        private var CURRENT: PlayerPacketHandler? = null
+
+        init {
+            val fieldModifiers = Field::class.java.getDeclaredField("modifiers")
+            fieldModifiers.isAccessible = true
+            val field = SlotDisplay.ItemStackContentsFactory::class.java.getDeclaredField("INSTANCE")
+            field.isAccessible = true
+            fieldModifiers.setInt(field, field.modifiers and Modifier.FINAL.inv())
+            field.set(
+                null,
+                object : SlotDisplay.ItemStackContentsFactory() {
+                    override fun forStack(stack: ItemStack): ItemStack {
+                        val stack = super.forStack(stack)
+                        CURRENT?.translateItem(stack)
+                        return stack
+                    }
+                }
+            )
+        }
     }
 }
 
