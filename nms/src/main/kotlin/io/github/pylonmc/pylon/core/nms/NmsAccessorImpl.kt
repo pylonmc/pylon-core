@@ -31,6 +31,11 @@ object NmsAccessorImpl : NmsAccessor {
         handler.resendInventory()
     }
 
+    override fun resendRecipeBook(player: Player) {
+        val player = (player as CraftPlayer).handle
+        player.recipeBook.sendInitialRecipeBook(player)
+    }
+
     override fun serializePdc(pdc: PersistentDataContainer): String
         = (pdc as CraftPersistentDataContainer).serialize()
 }

@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.item.base
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDamageEvent
 
-interface Tool {
+interface PylonTool {
     /**
      * Called when the item is used to damage a block
      */

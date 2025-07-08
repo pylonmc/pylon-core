@@ -40,7 +40,12 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
         val fallback = component.fallback()
         var translated = getTranslation(component, locale)
-            ?: fallback?.let { getTranslation(it, locale) ?: Component.text(fallback) } ?: return null
+            ?: fallback?.let {
+                val translatable = Component.translatable(it)
+                val translated = GlobalTranslator.render(translatable, locale)
+                if (translated == translatable) Component.text(it) else translated
+            }
+            ?: return null
         for (arg in component.arguments()) {
             val component = arg.asComponent()
             if (component !is VirtualComponent) continue
@@ -100,6 +105,10 @@ class AddonTranslator(private val addon: PylonAddon) : Translator {
         private fun onPlayerJoin(event: PlayerJoinEvent) {
             val player = event.player
             NmsAccessor.instance.registerTranslationHandler(player, PlayerTranslationHandler(player))
+            // Since the recipe book is initially sent before the event, and therefore before
+            // we can register the translation handler, we need to resend it here so that it
+            // gets translated properly.
+            NmsAccessor.instance.resendRecipeBook(player)
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
