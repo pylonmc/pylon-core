@@ -20,7 +20,9 @@ class PlayerTranslationHandler(val player: Player) {
     private val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
 
     fun handleItem(item: PylonItem) {
+        GlobalTranslator.translator().addSource(MinecraftTranslator)
         val attacher = PlaceholderAttacher(item.getPlaceholders())
+
         item.stack.editData(DataComponentTypes.ITEM_NAME) {
             GlobalTranslator.render(attacher.render(it, Unit), player.locale())
         }
@@ -45,5 +47,7 @@ class PlayerTranslationHandler(val player: Player) {
 
             ItemLore.lore(newLore)
         }
+
+        GlobalTranslator.translator().removeSource(MinecraftTranslator)
     }
 }

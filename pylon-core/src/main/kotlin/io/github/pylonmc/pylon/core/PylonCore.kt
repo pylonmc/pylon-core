@@ -15,7 +15,6 @@ import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.guide.PylonGuide
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
-import io.github.pylonmc.pylon.core.i18n.MinecraftTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
@@ -23,7 +22,6 @@ import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -42,8 +40,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         saveDefaultConfig()
 
         registerWithPylon()
-
-        GlobalTranslator.translator().addSource(MinecraftTranslator)
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
@@ -101,7 +97,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
     override fun onDisable() {
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
-        GlobalTranslator.translator().removeSource(MinecraftTranslator)
     }
 
     private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {
