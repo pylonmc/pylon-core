@@ -66,9 +66,7 @@ object BlockStorage : Listener {
 
     private val blocks: MutableMap<BlockPosition, PylonBlock> = ConcurrentHashMap()
 
-    /**
-     * Only contains chunks that have been loaded (including chunks with no Pylon blocks)
-     */
+    // Only contains chunks that have been loaded (including chunks with no Pylon blocks)
     private val blocksByChunk: MutableMap<ChunkPosition, MutableList<PylonBlock>> = ConcurrentHashMap()
 
     private val blocksByKey: MutableMap<NamespacedKey, MutableList<PylonBlock>> = ConcurrentHashMap()

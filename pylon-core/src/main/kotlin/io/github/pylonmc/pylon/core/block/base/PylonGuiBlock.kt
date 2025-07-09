@@ -23,6 +23,10 @@ import xyz.xenondevs.invui.inventory.Inventory
 import xyz.xenondevs.invui.window.Window
 import java.util.IdentityHashMap
 
+/**
+ * A block that has an associated GUI that can be opened by right-clicking the block.
+ * The GUI's inventories will be saved and loaded with the block.
+ */
 interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
 
     fun createGui(): Gui
