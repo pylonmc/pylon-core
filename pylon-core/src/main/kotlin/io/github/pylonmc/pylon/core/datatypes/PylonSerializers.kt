@@ -7,6 +7,9 @@ import org.bukkit.Registry
 import org.bukkit.block.BlockFace
 import org.bukkit.persistence.PersistentDataType
 
+/**
+ * A collection of various [PersistentDataType]s used by Pylon.
+ */
 object PylonSerializers {
     @JvmField
     val BYTE = PersistentDataType.BYTE!!
