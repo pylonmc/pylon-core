@@ -14,7 +14,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.entity.Player
+import org.jetbrains.annotations.ApiStatus
 
+@ApiStatus.Internal
 class PlayerTranslationHandler(val player: Player) {
 
     private val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
