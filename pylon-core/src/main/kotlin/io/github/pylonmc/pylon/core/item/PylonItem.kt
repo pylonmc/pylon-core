@@ -18,6 +18,12 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
+/**
+ * Unline [PylonBlock], **PylonItem is extremely transient** and you should avoid storing either
+ * items or anything within the item, as it may be created and destroyed *very* frequently.
+ *
+ * An implementation of PylonItem must have a constructor that takes an [ItemStack] as its only parameter.
+ */
 open class PylonItem(val stack: ItemStack) : Keyed {
 
     private val key = stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
@@ -25,7 +31,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
-    val isDisabled: Boolean = PylonConfig.disabledItems.contains(key)
+    val isDisabled = key in PylonConfig.disabledItems
 
     fun getSettings() = Settings.get(key)
 
@@ -41,8 +47,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     companion object {
 
-        private val nameWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
+        private val nameWarningsSuppressed: MutableSet<NamespacedKey> = mutableSetOf()
 
+        @Suppress("UnstableApiUsage")
         private fun checkName(schema: PylonItemSchema) {
             val translator = AddonTranslator.translators[schema.addon]
             check(translator != null) {
@@ -74,7 +81,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         private fun register(schema: PylonItemSchema) {
-            if (schema.key !in nameWarningsSupressed) {
+            if (schema.key !in nameWarningsSuppressed) {
                 checkName(schema)
             }
             PylonRegistry.ITEMS.register(schema)
@@ -106,9 +113,13 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             return stack != null && stack.persistentDataContainer.has(PylonItemSchema.pylonItemKeyKey)
         }
 
+        /**
+         * Suppresses warnings about missing/incorrect translation keys for item names and lores
+         * for the given item key
+         */
         @JvmStatic
         fun supressNameWarnings(key: NamespacedKey) {
-            nameWarningsSupressed.add(key)
+            nameWarningsSuppressed.add(key)
         }
 
         @JvmStatic

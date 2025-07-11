@@ -10,7 +10,7 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickup
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
@@ -105,6 +105,9 @@ data class Research(
         @JvmStatic
         var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, emptySet())
 
+        /**
+         * Returns the research that unlocks this item, or null if no such research exists
+         */
         @JvmStatic
         @get:JvmName("getResearchFor")
         val PylonItem.research: Research?
@@ -147,8 +150,8 @@ data class Research(
 
         @JvmStatic
         @JvmOverloads
-        @JvmName("canPlayerPickup")
-        fun Player.canPickup(item: PylonItem, sendMessage: Boolean = false): Boolean
+        @JvmName("canPlayerPickUp")
+        fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean
             = canCraft(item, sendMessage)
 
         @JvmStatic
@@ -204,10 +207,10 @@ data class Research(
     }
 }
 
-fun Player.ejectUnknownItems() {
+private fun Player.ejectUnknownItems() {
     val toRemove = inventory.contents.filterNotNull().filter { item ->
         val pylonItem = PylonItem.fromStack(item)
-        pylonItem != null && !canPickup(pylonItem, sendMessage = true)
+        pylonItem != null && !canPickUp(pylonItem, sendMessage = true)
     }
     for (item in toRemove) {
         inventory.remove(item)
