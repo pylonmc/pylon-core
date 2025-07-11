@@ -14,11 +14,11 @@ interface PylonRecipe : Keyed {
     fun getInputFluids(): List<PylonFluid> = listOf()
     fun getOutputItems(): List<ItemStack>
     fun getOutputFluids(): List<PylonFluid> = listOf()
-    // I have found it's very easy to return null input item by accident, hence the seemingly redundant null check
     fun isInput(stack: ItemStack) = getInputItems().any {
         if (it is RecipeChoice.MaterialChoice && PylonItem.fromStack(stack) != null) {
             return false
         }
+        @Suppress("SENSELESS_COMPARISON") // I have found it's very easy to return null input item by accident, hence the seemingly redundant null check
         it != null && it.test(stack)
     }
     fun isInput(fluid: PylonFluid) = getInputFluids().contains(fluid)
