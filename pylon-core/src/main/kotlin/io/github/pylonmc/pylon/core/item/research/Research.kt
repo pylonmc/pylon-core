@@ -195,7 +195,7 @@ data class Research(
                 return
             }
 
-            val canCraft = event.recipe.getOutputItems().all {
+            val canCraft = event.recipe.outputItems.all {
                 val item = PylonItem.fromStack(it)
                 item == null || event.player.canCraft(item, true)
             }

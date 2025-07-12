@@ -9,7 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.inventory.Recipe
 
 sealed interface VanillaRecipeWrapper : PylonRecipe {
-    fun getRecipe(): Recipe
+    val recipe: Recipe
 }
 
 sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(
@@ -22,7 +22,7 @@ sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(
 
     override fun addRecipe(recipe: T) {
         super.addRecipe(recipe)
-        Bukkit.addRecipe(recipe.getRecipe())
+        Bukkit.addRecipe(recipe.recipe)
     }
 
     internal fun addRecipeWithoutRegister(recipe: T) {

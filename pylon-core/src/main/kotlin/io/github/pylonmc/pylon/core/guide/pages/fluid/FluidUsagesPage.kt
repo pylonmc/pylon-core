@@ -22,7 +22,7 @@ open class FluidUsagesPage(fluidKey: NamespacedKey) : GuidePage {
     init {
         for (type in PylonRegistry.RECIPE_TYPES) {
             for (recipe in type.recipes) {
-                if (!recipe.isHidden() && recipe.isInput(fluid)) {
+                if (!recipe.isHidden && recipe.isInput(fluid)) {
                     pages.add(recipe.display())
                 }
             }
