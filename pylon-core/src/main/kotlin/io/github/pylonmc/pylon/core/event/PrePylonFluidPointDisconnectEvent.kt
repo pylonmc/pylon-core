@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.fluid.FluidConnectionPoint
+import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
@@ -9,8 +9,8 @@ import org.bukkit.event.HandlerList
  * Called before two fluid points are connected
  */
 class PrePylonFluidPointDisconnectEvent(
-    val point1: FluidConnectionPoint,
-    val point2: FluidConnectionPoint,
+    val point1: VirtualFluidPoint,
+    val point2: VirtualFluidPoint,
 ) : Event(), Cancellable {
 
     private var cancelled = false

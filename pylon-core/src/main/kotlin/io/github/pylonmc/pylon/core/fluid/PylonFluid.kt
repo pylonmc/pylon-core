@@ -43,7 +43,11 @@ open class PylonFluid(
         tags.add(tag)
     }
 
-    fun hasTag(type: Class<out PylonFluidTag>): Boolean = tags.any { type.isInstance(it) }
+    fun hasTag(type: Class<out PylonFluidTag>): Boolean
+        = tags.any { type.isInstance(it) }
+
+    inline fun <reified T: PylonFluidTag>hasTag(): Boolean
+        = hasTag(T::class.java)
 
     /**
      * @throws IllegalArgumentException if the fluid does not have a tag of the given type

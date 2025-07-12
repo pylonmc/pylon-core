@@ -47,7 +47,7 @@ import kotlin.math.min
 object FluidManager {
 
     private class Segment(
-        val points: MutableSet<FluidConnectionPoint> = mutableSetOf(),
+        val points: MutableSet<VirtualFluidPoint> = mutableSetOf(),
         var fluidPerSecond: Double = Double.MAX_VALUE,
         var predicate: Predicate<PylonFluid>? = null,
     )
@@ -55,7 +55,7 @@ object FluidManager {
     /**
      * A point is just a connection in a fluid network, like a machine's output or the end of a pipe
      */
-    private val points: MutableMap<UUID, FluidConnectionPoint> = mutableMapOf()
+    private val points: MutableMap<UUID, VirtualFluidPoint> = mutableMapOf()
 
     /**
      * A segment is a collection of connection points
@@ -70,7 +70,7 @@ object FluidManager {
     /**
      * Adds the point to its stored segment, creating the segment and starting a ticker for it if it does not exist
      */
-    private fun addToSegment(point: FluidConnectionPoint) {
+    private fun addToSegment(point: VirtualFluidPoint) {
         if (point.segment !in segments) {
             segments[point.segment] = Segment()
             startTicker(point.segment)
@@ -82,7 +82,7 @@ object FluidManager {
      * Removes the point from its segment, deleting the segment and cancelling the ticker if the segment is
      * now empty
      */
-    private fun removeFromSegment(point: FluidConnectionPoint) {
+    private fun removeFromSegment(point: VirtualFluidPoint) {
         segments[point.segment]!!.points.remove(point)
         if (segments[point.segment]!!.points.isEmpty()) {
             segments.remove(point.segment)
@@ -91,14 +91,14 @@ object FluidManager {
     }
 
     @JvmStatic
-    fun getById(uuid: UUID): FluidConnectionPoint?
+    fun getById(uuid: UUID): VirtualFluidPoint?
         = points[uuid]
 
     /**
      * Call when creating a new connection point, or when one has been loaded
      */
     @JvmStatic
-    fun add(point: FluidConnectionPoint) {
+    fun add(point: VirtualFluidPoint) {
         check(point.id !in points) { "Duplicate connection point" }
 
         points[point.id] = point
@@ -116,7 +116,7 @@ object FluidManager {
      * Call when removing a connection point. Use [unload] for when a connection point is unloaded.
      */
     @JvmStatic
-    fun remove(point: FluidConnectionPoint) {
+    fun remove(point: VirtualFluidPoint) {
         check(point.id in points) { "Nonexistant connection point" }
 
         // Clone to prevent ConcurrentModificationException; disconnect modifies point.connectedPoints
@@ -135,7 +135,7 @@ object FluidManager {
      * Removes a connection point from the cache, but keeps its connection information intact.
      */
     @JvmStatic
-    fun unload(point: FluidConnectionPoint) {
+    fun unload(point: VirtualFluidPoint) {
         check(point.id in points) { "Nonexistant connection point" }
 
         removeFromSegment(point)
@@ -186,7 +186,7 @@ object FluidManager {
      * flow rate and predicate of the first point's segment.
      */
     @JvmStatic
-    fun connect(point1: FluidConnectionPoint, point2: FluidConnectionPoint) {
+    fun connect(point1: VirtualFluidPoint, point2: VirtualFluidPoint) {
         check(point1.segment in segments) { "Attempt to connect a nonexistant segment" }
         check(point2.segment in segments) { "Attempt to connect a nonexistant segment" }
 
@@ -221,7 +221,7 @@ object FluidManager {
      * other link between them.
      */
     @JvmStatic
-    fun disconnect(point1: FluidConnectionPoint, point2: FluidConnectionPoint) {
+    fun disconnect(point1: VirtualFluidPoint, point2: VirtualFluidPoint) {
         check(point1.segment in segments) { "Attempt to disconnect a nonexistant segment" }
         check(point2.segment in segments) { "Attempt to disconnect a nonexistant segment" }
         check(point2.id in point1.connectedPoints) { "Attempt to disconnect two points that are not connected" }
@@ -260,9 +260,9 @@ object FluidManager {
      * Recursively gets all the points connected to another point *that are loaded*
      */
     @JvmStatic
-    fun getAllConnected(point: FluidConnectionPoint): Set<FluidConnectionPoint> {
-        val visitedPoints: MutableSet<FluidConnectionPoint> = mutableSetOf()
-        val pointsToVisit: MutableList<FluidConnectionPoint> = mutableListOf(point)
+    fun getAllConnected(point: VirtualFluidPoint): Set<VirtualFluidPoint> {
+        val visitedPoints: MutableSet<VirtualFluidPoint> = mutableSetOf()
+        val pointsToVisit: MutableList<VirtualFluidPoint> = mutableListOf(point)
         while (pointsToVisit.isNotEmpty()) {
             val nextPoint = pointsToVisit.removeFirst()
             visitedPoints.add(nextPoint)
@@ -276,22 +276,22 @@ object FluidManager {
     }
 
     @JvmStatic
-    fun getPoints(segment: UUID, type: FluidConnectionPoint.Type): List<FluidConnectionPoint>
+    fun getPoints(segment: UUID, type: FluidPointType): List<VirtualFluidPoint>
         = segments[segment]!!.points.filter { it.type == type }
 
     /**
      * A temporary representation of a block supplying a specific fluid. Exists to make ticking logic nicer.
      */
-    data class FluidSupplier(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Double)
+    data class FluidSupplier(val block: PylonFluidBlock, val fluid: PylonFluid, val amount: Double)
 
     /**
      * A temporary representation of a block requesting a specific fluid. Exists to make ticking logic nicer.
      */
-    data class FluidRequester(val block: PylonFluidBlock, val name: String, val fluid: PylonFluid, val amount: Double)
+    data class FluidRequester(val block: PylonFluidBlock, val fluid: PylonFluid, val amount: Double)
 
     @JvmStatic
-    fun getSuppliedFluids(point: FluidConnectionPoint, deltaSeconds: Double): Set<FluidSupplier> {
-        check(point.type == FluidConnectionPoint.Type.OUTPUT) { "Can only get supplied fluids of output point" }
+    fun getSuppliedFluids(point: VirtualFluidPoint, deltaSeconds: Double): Set<FluidSupplier> {
+        check(point.type == FluidPointType.OUTPUT) { "Can only get supplied fluids of output point" }
 
         val block: PylonFluidBlock
         val blockSuppliedFluids: Map<PylonFluid, Double>
@@ -300,7 +300,7 @@ object FluidManager {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockSuppliedFluids = block.getSuppliedFluids(point.name, deltaSeconds)
+            blockSuppliedFluids = block.getSuppliedFluids(deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -309,7 +309,7 @@ object FluidManager {
         val suppliedFluids: MutableSet<FluidSupplier> = mutableSetOf()
         for ((fluid, amount) in blockSuppliedFluids) {
             if (amount.absoluteValue > 1.0e-9) {
-                suppliedFluids.add(FluidSupplier(block, point.name, fluid,amount))
+                suppliedFluids.add(FluidSupplier(block, fluid, amount))
             }
         }
         return suppliedFluids
@@ -318,7 +318,7 @@ object FluidManager {
     @JvmStatic
     fun getSuppliedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidSupplier>> {
         val suppliedFluids: MutableMap<PylonFluid, MutableSet<FluidSupplier>> = mutableMapOf()
-        for (point in getPoints(segment, FluidConnectionPoint.Type.OUTPUT)) {
+        for (point in getPoints(segment, FluidPointType.OUTPUT)) {
             for (supplier in getSuppliedFluids(point, deltaSeconds)) {
                 suppliedFluids.getOrPut(supplier.fluid, ::mutableSetOf).add(supplier)
             }
@@ -327,8 +327,8 @@ object FluidManager {
     }
 
     @JvmStatic
-    fun getRequestedFluids(point: FluidConnectionPoint, deltaSeconds: Double): Set<FluidRequester> {
-        check(point.type == FluidConnectionPoint.Type.INPUT) { "Can only get requested fluids of input point" }
+    fun getRequestedFluids(point: VirtualFluidPoint, deltaSeconds: Double): Set<FluidRequester> {
+        check(point.type == FluidPointType.INPUT) { "Can only get requested fluids of input point" }
 
         val block: PylonFluidBlock
         val blockRequestedFluids: Map<PylonFluid, Double>
@@ -337,7 +337,7 @@ object FluidManager {
                 return setOf()
             }
             block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockRequestedFluids = block.getRequestedFluids(point.name, deltaSeconds)
+            blockRequestedFluids = block.getRequestedFluids(deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()
             return setOf()
@@ -347,7 +347,7 @@ object FluidManager {
         val requestedFluids: MutableSet<FluidRequester> = mutableSetOf()
         for ((fluid, amount) in blockRequestedFluids) {
             if (amount.absoluteValue > 1.0e-9) {
-                requestedFluids.add(FluidRequester(block, point.name, fluid, amount))
+                requestedFluids.add(FluidRequester(block, fluid, amount))
             }
         }
         return requestedFluids
@@ -356,7 +356,7 @@ object FluidManager {
     @JvmStatic
     fun getRequestedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidRequester>> {
         val requestedFluids: MutableMap<PylonFluid, MutableSet<FluidRequester>> = mutableMapOf()
-        for (point in getPoints(segment, FluidConnectionPoint.Type.INPUT)) {
+        for (point in getPoints(segment, FluidPointType.INPUT)) {
             for (requester in getRequestedFluids(point, deltaSeconds)) {
                 requestedFluids.getOrPut(requester.fluid, ::mutableSetOf).add(requester)
             }
@@ -393,7 +393,7 @@ object FluidManager {
 
                 val toTake = min(remaining, supplier.amount)
                 try {
-                    supplier.block.removeFluid(supplier.name, supplier.fluid, toTake)
+                    supplier.block.removeFluid(supplier.fluid, toTake)
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     continue
@@ -408,11 +408,11 @@ object FluidManager {
                 while (iterator.hasNext()) {
                     val requester = iterator.next()
                     if (requester.amount < maxFluidPerRequester) {
-                        requester.block.addFluid(requester.name, requester.fluid, requester.amount)
+                        requester.block.addFluid(requester.fluid, requester.amount)
                         iterator.remove()
                         totalSupplied -= requester.amount
                     } else {
-                        requester.block.addFluid(requester.name, requester.fluid, maxFluidPerRequester)
+                        requester.block.addFluid(requester.fluid, maxFluidPerRequester)
                         totalSupplied -= maxFluidPerRequester
                     }
                 }

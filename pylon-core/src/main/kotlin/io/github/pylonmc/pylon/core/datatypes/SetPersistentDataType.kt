@@ -25,7 +25,7 @@ class SetPersistentDataType<P, C>(
     }
 
     override fun fromPrimitive(primitive: PersistentDataContainer, context: PersistentDataAdapterContext): Set<C> =
-        primitive.get(setValues, PersistentDataType.LIST.listTypeFrom(elementType))!!.toMutableSet()
+        primitive.get(setValues, PersistentDataType.LIST.listTypeFrom(elementType))!!.toSet()
 
     companion object {
         fun <P, C> setTypeFrom(elementType: PersistentDataType<P, C>): PersistentDataType<PersistentDataContainer, Set<C>> =

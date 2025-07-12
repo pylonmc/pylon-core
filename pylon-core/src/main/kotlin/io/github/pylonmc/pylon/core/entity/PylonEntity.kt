@@ -42,6 +42,11 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
             PylonRegistry.ENTITIES.register(PylonEntitySchema(key, entityClass, pylonEntityClass))
         }
 
+        @JvmStatic
+        inline fun <reified E: Entity, reified T: PylonEntity<E>>register(key: NamespacedKey) {
+            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, E::class.java, T::class.java))
+        }
+
         @JvmSynthetic
         internal fun <E: Entity> initialisePylonEntity(key: NamespacedKey, entity: E): E {
             entity.persistentDataContainer.set(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY, key)

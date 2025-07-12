@@ -103,7 +103,7 @@ data class Research(
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
-        var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, emptySet())
+        var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, mutableSetOf())
 
         @JvmStatic
         @get:JvmName("getResearchFor")

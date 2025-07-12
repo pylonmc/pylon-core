@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.guide.pages.base
 
 import info.debatty.java.stringsimilarity.JaroWinkler
-import io.github.pylonmc.pylon.core.guide.PylonGuide
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
