@@ -10,10 +10,13 @@ import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import kotlin.properties.Delegates
 
+/**
+ * Represents the configuration for a game test. Prefer using the [Builder] to create instances of this class.
+ */
 class GameTestConfig(
     private val key: NamespacedKey,
     val size: Int,
-    val setUp: (GameTest) -> Unit,
+    val setUp: Consumer<GameTest>,
     val delayTicks: Int,
     val timeoutTicks: Int,
     val positionOverride: BlockPosition?
@@ -22,20 +25,46 @@ class GameTestConfig(
 
     class Builder(val key: NamespacedKey) {
         private var size by Delegates.notNull<Int>()
-        private var setUp: (GameTest) -> Unit = {}
+        private var setUp: Consumer<GameTest> = Consumer {}
         private var delayTicks = 0
         private var timeoutTicks = 5 * 60 * 20
         private var positionOverride: BlockPosition? = null
 
+        /**
+         * Size is the buffer around the central block. A size of 0 means the test will only run
+         * on the central block, a size of 1 means the test will run on a 3x3x3 area centered on
+         * the central block, etc.
+         */
         fun size(size: Int): Builder = apply { this.size = size }
-        fun setUp(setUp: Consumer<GameTest>): Builder = apply { this.setUp = setUp::accept }
+
+        /**
+         * Run before the test starts
+         */
+        fun setUp(setUp: Consumer<GameTest>): Builder = apply { this.setUp = setUp }
+
+        /**
+         * Delay in ticks before the test starts. Defaults to 0.
+         */
         fun delayTicks(delayTicks: Int): Builder = apply { this.delayTicks = delayTicks }
+
+        /**
+         * Timeout in ticks before the test fails. Defaults to 5 minutes.
+         */
         fun timeoutTicks(timeoutTicks: Int): Builder = apply { this.timeoutTicks = timeoutTicks }
+
+        /**
+         * Override the position where the test will be launched.
+         */
         fun positionOverride(position: BlockPosition): Builder = apply { this.positionOverride = position }
 
         fun build() = GameTestConfig(key, size, setUp, delayTicks, timeoutTicks, positionOverride)
     }
 
+    /**
+     * Launches the game test at the given position.
+     * If [positionOverride] is set, it will be used instead of the given position.
+     * Returns a future that completes with a [GameTestFailException] if the test fails, or null if it succeeds.
+     */
     fun launch(position: BlockPosition): CompletableFuture<GameTestFailException?> {
         val realPosition = positionOverride ?: position
         val boundingBox = BoundingBox(
@@ -78,7 +107,7 @@ class GameTestConfig(
         }
 
         try {
-            setUp(gameTest)
+            setUp.accept(gameTest)
         } catch (e: Throwable) {
             return CompletableFuture.completedFuture(GameTestFailException(gameTest, "Error on setup", e))
         }
@@ -86,6 +115,5 @@ class GameTestConfig(
         return GameTest.submit(gameTest, delayTicks)
     }
 
-    fun register()
-            = PylonRegistry.GAMETESTS.register(this)
+    fun register() = PylonRegistry.GAMETESTS.register(this)
 }

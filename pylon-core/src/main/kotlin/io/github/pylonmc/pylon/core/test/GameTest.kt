@@ -13,6 +13,9 @@ import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
 import java.util.concurrent.CompletableFuture
 
+/**
+ * Represents a running game test. Will succeed by default.]
+ */
 class GameTest(
     val config: GameTestConfig,
     val world: World,
@@ -46,11 +49,34 @@ class GameTest(
         }
     }
 
+    /**
+     * Returns the center position of the game test
+     */
     fun position(): BlockPosition = center
+
+    /**
+     * Returns a position relative to the center of the game test
+     */
     fun position(offset: BlockPosition): BlockPosition = center + offset
+
+    /**
+     * Returns a position relative to the center of the game test
+     */
     fun position(x: Int, y: Int, z: Int): BlockPosition = center + BlockPosition(world, x, y, z)
+
+    /**
+     * Returns the center location of the game test
+     */
     fun location(): Location = center.location
+
+    /**
+     * Returns a location relative to the center of the game test
+     */
     fun location(location: Location): Location = location.clone().add(center.location)
+
+    /**
+     * Returns a location relative to the center of the game test
+     */
     fun location(x: Double, y: Double, z: Double): Location = center.location.clone().add(x, y, z)
 
     companion object {
