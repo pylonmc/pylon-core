@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.config
 
-import io.github.pylonmc.pylon.core.util.key.getAddon
+import io.github.pylonmc.pylon.core.util.getAddon
 import org.bukkit.NamespacedKey
 
 object Settings {

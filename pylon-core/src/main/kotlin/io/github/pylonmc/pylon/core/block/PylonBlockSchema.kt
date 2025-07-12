@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
-import io.github.pylonmc.pylon.core.util.key.getAddon
+import io.github.pylonmc.pylon.core.util.getAddon
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.Keyed

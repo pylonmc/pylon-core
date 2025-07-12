@@ -4,7 +4,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.key.getAddon
+import io.github.pylonmc.pylon.core.util.getAddon
 import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.Material
