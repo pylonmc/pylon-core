@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.guide.pages.research
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.guide.PylonGuide
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleDynamicGuidePage
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder

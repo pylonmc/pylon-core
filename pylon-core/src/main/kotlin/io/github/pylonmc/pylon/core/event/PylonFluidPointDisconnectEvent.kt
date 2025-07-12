@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.fluid.FluidConnectionPoint
+import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
@@ -8,8 +8,8 @@ import org.bukkit.event.HandlerList
  * Called after two fluid points have been disconnected
  */
 class PylonFluidPointDisconnectEvent(
-    val point1: FluidConnectionPoint,
-    val point2: FluidConnectionPoint,
+    val point1: VirtualFluidPoint,
+    val point2: VirtualFluidPoint,
 ) : Event() {
 
     override fun getHandlers(): HandlerList

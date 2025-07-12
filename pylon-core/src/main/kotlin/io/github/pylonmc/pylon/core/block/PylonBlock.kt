@@ -75,6 +75,10 @@ open class PylonBlock protected constructor(val block: Block) {
             PylonRegistry.BLOCKS.register(schema)
         }
 
+        @JvmStatic
+        inline fun <reified T: PylonBlock>register(key: NamespacedKey, material: Material)
+            = register(key, material, T::class.java)
+
         @JvmSynthetic
         internal fun serialize(
             block: PylonBlock,

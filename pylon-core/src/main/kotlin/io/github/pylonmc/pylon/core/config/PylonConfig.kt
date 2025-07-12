@@ -28,8 +28,10 @@ object PylonConfig {
     @JvmStatic
     val researchesEnabled: Boolean = config.getOrThrow("research.enabled")
 
-    @JvmStatic
-    val researchCheckInterval: Int = config.getOrThrow("research.interval")
+    val PIPE_PLACEMENT_TASK_INTERVAL_TICKS: Long = config.getOrThrow<Int>("pipe-placement.task-interval-ticks").toLong()
+
+    val PIPE_PLACEMENT_MAX_DISTANCE: Long = config.getOrThrow<Int>("pipe-placement.max-distance").toLong()
+
 
     @JvmStatic
     val translationWrapLimit: Int by config
