@@ -173,6 +173,12 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
+        val METERS_PER_SECOND = UnitFormat("meters_per_second",
+            TextColor.color(0x0ae256),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE)
+
+        @JvmField
         val DAYS = UnitFormat(
             "days",
             TextColor.color(0xc9c786),

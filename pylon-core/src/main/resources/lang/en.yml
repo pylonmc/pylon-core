@@ -230,6 +230,10 @@ unit:
     singular: "bucket per second"
     plural: "buckets per second"
     abbr: "B/s"
+  meters_per_second:
+    singular: "meter per second"
+    plural: "meters per second"
+    abbr: "m/s"
   days:
     singular: "day"
     plural: "days"
