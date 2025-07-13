@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.block.fluid;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.base.PylonFluidBlock;
+import io.github.pylonmc.pylon.core.block.base.PylonMultiBufferFluidBlock;
 import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 
-public class FluidConsumer extends PylonBlock implements PylonFluidBlock, PylonUnloadBlock {
+public class FluidConsumer extends PylonBlock implements PylonMultiBufferFluidBlock, PylonUnloadBlock {
 
     public static final NamespacedKey LAVA_CONSUMER_KEY = PylonTest.key("lava_consumer");
     public static final NamespacedKey WATER_CONSUMER_KEY = PylonTest.key("water_consumer");

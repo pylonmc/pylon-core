@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
+import io.github.pylonmc.pylon.core.block.base.PylonMultiBufferFluidBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
@@ -21,6 +22,7 @@ import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.i18n.MinecraftTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
@@ -49,6 +51,9 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         registerWithPylon()
 
+        // trigger all the init blocks in MinecraftTranslator by referencing it
+        MinecraftTranslator
+
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
@@ -64,6 +69,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
+        Bukkit.getPluginManager().registerEvents(PylonMultiBufferFluidBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
         Bukkit.getPluginManager().registerEvents(ConnectingService, this)
 

@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.block.base.PylonFluidBlock
+import io.github.pylonmc.pylon.core.block.base.PylonMultiBufferFluidBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PrePylonFluidPointConnectEvent
 import io.github.pylonmc.pylon.core.event.PrePylonFluidPointDisconnectEvent
@@ -282,24 +282,24 @@ object FluidManager {
     /**
      * A temporary representation of a block supplying a specific fluid. Exists to make ticking logic nicer.
      */
-    data class FluidSupplier(val block: PylonFluidBlock, val fluid: PylonFluid, val amount: Double)
+    data class FluidSupplier(val block: PylonMultiBufferFluidBlock, val fluid: PylonFluid, val amount: Double)
 
     /**
      * A temporary representation of a block requesting a specific fluid. Exists to make ticking logic nicer.
      */
-    data class FluidRequester(val block: PylonFluidBlock, val fluid: PylonFluid, val amount: Double)
+    data class FluidRequester(val block: PylonMultiBufferFluidBlock, val fluid: PylonFluid, val amount: Double)
 
     @JvmStatic
     fun getSuppliedFluids(point: VirtualFluidPoint, deltaSeconds: Double): Set<FluidSupplier> {
         check(point.type == FluidPointType.OUTPUT) { "Can only get supplied fluids of output point" }
 
-        val block: PylonFluidBlock
+        val block: PylonMultiBufferFluidBlock
         val blockSuppliedFluids: Map<PylonFluid, Double>
         try {
             if (!point.position.chunk.isLoaded) {
                 return setOf()
             }
-            block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
+            block = BlockStorage.getAs<PylonMultiBufferFluidBlock>(point.position) ?: return setOf()
             blockSuppliedFluids = block.getSuppliedFluids(deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()
@@ -330,13 +330,13 @@ object FluidManager {
     fun getRequestedFluids(point: VirtualFluidPoint, deltaSeconds: Double): Set<FluidRequester> {
         check(point.type == FluidPointType.INPUT) { "Can only get requested fluids of input point" }
 
-        val block: PylonFluidBlock
+        val block: PylonMultiBufferFluidBlock
         val blockRequestedFluids: Map<PylonFluid, Double>
         try {
             if (!point.position.chunk.isLoaded) {
                 return setOf()
             }
-            block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
+            block = BlockStorage.getAs<PylonMultiBufferFluidBlock>(point.position) ?: return setOf()
             blockRequestedFluids = block.getRequestedFluids(deltaSeconds)
         } catch (t: Throwable) {
             t.printStackTrace()

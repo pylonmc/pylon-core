@@ -99,5 +99,8 @@ object PylonSerializers {
     val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid>(PylonRegistry.FLUIDS::getOrThrow)
 
     @JvmField
+    internal val FLUID_DATA = FluidDataPersistentDataType
+
+    @JvmField
     val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
 }

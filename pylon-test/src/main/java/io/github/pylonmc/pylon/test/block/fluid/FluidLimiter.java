@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.block.fluid;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.base.PylonFluidBlock;
+import io.github.pylonmc.pylon.core.block.base.PylonMultiBufferFluidBlock;
 import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
@@ -25,7 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
-public class FluidLimiter extends PylonBlock implements PylonFluidBlock, PylonUnloadBlock {
+public class FluidLimiter extends PylonBlock implements PylonMultiBufferFluidBlock, PylonUnloadBlock {
 
     public static final NamespacedKey KEY = PylonTest.key("fluid_limiter");
     private static final NamespacedKey INPUT_KEY = PylonTest.key("input");
