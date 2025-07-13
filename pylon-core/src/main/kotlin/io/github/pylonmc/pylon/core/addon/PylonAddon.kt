@@ -54,6 +54,8 @@ interface PylonAddon : Keyed {
      * If you use something besides the default `pylon.[addon].addon` translation key for the addon name,
      * set this to true to suppress warnings about the "missing" key
      */
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @get:JvmName("suppressAddonNameWarning")
     val suppressAddonNameWarning: Boolean
         get() = false
 

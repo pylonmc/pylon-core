@@ -71,14 +71,17 @@ open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, 
             VANILLA_SMOKING.register()
         }
 
+        @JvmStatic
         fun vanillaCraftingRecipes() = VANILLA_SHAPED
             .union(VANILLA_SHAPELESS)
 
+        @JvmStatic
         fun vanillaCookingRecipes() = VANILLA_BLASTING.recipes
             .union(VANILLA_CAMPFIRE.recipes)
             .union(VANILLA_FURNACE.recipes)
             .union(VANILLA_SMOKING.recipes)
 
+        @JvmSynthetic
         internal fun addVanillaRecipes() {
             for (recipe in Bukkit.recipeIterator()) {
                 when (recipe) {

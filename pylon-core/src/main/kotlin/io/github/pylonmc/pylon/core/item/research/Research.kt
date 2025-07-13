@@ -1,5 +1,3 @@
-@file:JvmSynthetic // hide the extension functions
-
 package io.github.pylonmc.pylon.core.item.research
 
 import com.github.shynixn.mccoroutine.bukkit.launch
@@ -99,18 +97,20 @@ data class Research(
         private val researchPointsKey = pylonKey("research_points")
         private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
-        @JvmStatic
+        @get:JvmStatic
+        @set:JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
-        @JvmStatic
+        @get:JvmStatic
+        @set:JvmStatic
         var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, emptySet())
 
-        /**
-         * Returns the research that unlocks this item, or null if no such research exists
-         */
-        @JvmStatic
+        @get:JvmStatic
         @get:JvmName("getResearchFor")
         val PylonItem.research: Research?
+            /**
+             * Returns the research that unlocks this item, or null if no such research exists
+             */
             get() = PylonRegistry.RESEARCHES.find { this.key in it.unlocks }
 
         @JvmStatic
@@ -207,6 +207,7 @@ data class Research(
     }
 }
 
+@JvmSynthetic
 private fun Player.ejectUnknownItems() {
     val toRemove = inventory.contents.filterNotNull().filter { item ->
         val pylonItem = PylonItem.fromStack(item)
@@ -218,14 +219,17 @@ private fun Player.ejectUnknownItems() {
     }
 }
 
+@JvmSynthetic
 fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
     research.addTo(this, sendMessage)
 }
 
+@JvmSynthetic
 fun Player.removeResearch(research: Research) {
     research.removeFrom(this)
 }
 
+@JvmSynthetic
 fun Player.hasResearch(research: Research): Boolean {
     return research.isResearchedBy(this)
 }

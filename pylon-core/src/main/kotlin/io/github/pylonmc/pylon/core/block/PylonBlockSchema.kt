@@ -24,7 +24,6 @@ class PylonBlockSchema(
 
     val addon = getAddon(key)
 
-    @JvmSynthetic
     private val createConstructor: MethodHandle = blockClass.findConstructorMatching(
         Block::class.java,
         BlockCreateContext::class.java
@@ -32,7 +31,6 @@ class PylonBlockSchema(
         "Block '$key' ($blockClass) is missing a create constructor (${javaClass.simpleName}, Block, BlockCreateContext)"
     )
 
-    @JvmSynthetic
     private val loadConstructor: MethodHandle = blockClass.findConstructorMatching(
         Block::class.java,
         PersistentDataContainer::class.java

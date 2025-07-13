@@ -15,6 +15,8 @@ interface BlockBreakContext {
     /**
      * Determines the default drop behavior of the context
      */
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @get:JvmName("normallyDrops")
     val normallyDrops: Boolean
 
     /**
