@@ -4,9 +4,9 @@ package io.github.pylonmc.pylon.core.i18n
 
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
-import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.editData
+import io.github.pylonmc.pylon.core.util.wrapText
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
@@ -18,8 +18,6 @@ import org.jetbrains.annotations.ApiStatus
 
 @ApiStatus.Internal
 class PlayerTranslationHandler(val player: Player) {
-
-    private val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
 
     fun handleItem(item: PylonItem) {
         val attacher = PlaceholderAttacher(item.getPlaceholders())
@@ -35,7 +33,9 @@ class PlayerTranslationHandler(val player: Player) {
             val newLore: MutableList<Component> = toTranslate.flatMapTo(mutableListOf()) { line ->
                 val translated = GlobalTranslator.render(attacher.render(line, Unit), player.locale())
                 val encoded = LineWrapEncoder.encode(translated)
-                val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
+                val wrapped = encoded.copy(
+                    lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
+                )
                 wrapped.toComponentLines().map {
                     Component.text()
                         .decoration(TextDecoration.ITALIC, false)

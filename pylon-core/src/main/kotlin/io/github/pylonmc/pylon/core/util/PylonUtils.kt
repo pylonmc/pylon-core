@@ -60,3 +60,25 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Key does not have a corresponding addon; does your addon call registerWithPylon()?")
+
+fun wrapText(text: String, limit: Int): List<String> {
+    val words = text.split(" ")
+    val lines = mutableListOf<String>()
+    var currentLine = StringBuilder()
+
+    for (word in words) {
+        if (currentLine.length + word.length + 1 > limit) {
+            currentLine.append(' ')
+            lines.add(currentLine.toString())
+            currentLine = StringBuilder()
+        }
+        if (currentLine.isNotEmpty()) {
+            currentLine.append(" ")
+        }
+        currentLine.append(word)
+    }
+    if (currentLine.isNotEmpty()) {
+        lines.add(currentLine.toString())
+    }
+    return lines
+}

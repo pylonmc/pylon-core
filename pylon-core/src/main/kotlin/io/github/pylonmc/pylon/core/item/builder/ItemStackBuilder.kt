@@ -3,10 +3,10 @@ package io.github.pylonmc.pylon.core.item.builder
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
-import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
+import io.github.pylonmc.pylon.core.util.wrapText
 import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -104,12 +104,13 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
             GlobalTranslator.render(it, locale)
         }
         item.editData(DataComponentTypes.LORE) { lore ->
-            val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
             val newLore = lore.lines()
                 .flatMap {
                     val translated = GlobalTranslator.render(it, locale)
                     val encoded = LineWrapEncoder.encode(translated)
-                    val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
+                    val wrapped = encoded.copy(
+                        lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
+                    )
                     wrapped.toComponentLines()
                 }
                 .map {
