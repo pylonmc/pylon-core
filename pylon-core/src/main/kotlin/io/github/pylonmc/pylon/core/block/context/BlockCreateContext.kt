@@ -5,9 +5,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
 
-/**
- * Represents the context in which a Pylon block is created
- */
 interface BlockCreateContext {
 
     val block: Block

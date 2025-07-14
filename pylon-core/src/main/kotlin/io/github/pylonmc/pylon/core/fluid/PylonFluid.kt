@@ -17,7 +17,7 @@ open class PylonFluid(
     private val key: NamespacedKey,
     val name: Component,
     /**
-     * Used to display the fluid in fluid tanks, pipes, etc.
+     * Used to display the fluid in fluid tanks
      */
     val material: Material,
     /**

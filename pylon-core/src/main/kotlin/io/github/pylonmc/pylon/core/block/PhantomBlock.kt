@@ -19,7 +19,7 @@ import org.bukkit.persistence.PersistentDataContainer
 /**
  * Phantom blocks are used where a block failed to load.
  *
- * The intention behind placeholder blocks is to make BlockStorage act consistently even
+ * The intention behind phantom blocks is to make [BlockStorage] act consistently even
  * if the block is not loaded - i.e., if a block is broken, its block storage data should also be
  * deleted. Additionally, phantom blocks allow us to persist data from blocks that have
  * failed to load. In such cases, the data should not be deleted to avoid cases where an

@@ -12,6 +12,8 @@ import kotlin.properties.Delegates
 
 /**
  * Represents the configuration for a game test. Prefer using the [Builder] to create instances of this class.
+ *
+ * @see GameTest
  */
 class GameTestConfig(
     private val key: NamespacedKey,

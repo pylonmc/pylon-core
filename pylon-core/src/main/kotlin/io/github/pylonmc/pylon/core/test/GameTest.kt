@@ -14,7 +14,13 @@ import org.bukkit.util.BoundingBox
 import java.util.concurrent.CompletableFuture
 
 /**
- * Represents a running game test. Will succeed by default.]
+ * Represents a running game test. A game test is a special blocked-off area in the world
+ * that allows you to test blocks, items, entities, and other game mechanics in a controlled environment.
+ * It contains a success condition that looks at the world and determines when the test has succeeded.
+ *
+ * Will succeed by default.
+ *
+ * @see GameTestConfig
  */
 class GameTest(
     val config: GameTestConfig,

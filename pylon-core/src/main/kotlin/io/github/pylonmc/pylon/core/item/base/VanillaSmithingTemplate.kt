@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.item.base
 
 /**
- * Implement this interface to allow an item to be used as a smithing template in vanilla smithing recipes
+ * Implement this interface to allow an item to allow an item to act as a normal vanilla smithing template
+ * in the vanilla smithing table.
  */
 interface VanillaSmithingTemplate

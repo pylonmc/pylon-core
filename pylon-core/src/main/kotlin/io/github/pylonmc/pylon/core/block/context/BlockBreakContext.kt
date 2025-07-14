@@ -8,7 +8,9 @@ import org.bukkit.event.block.BlockFadeEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 
 /**
- * Represents the context in which a block is being broken
+ * Information surrounding a block break event. Used to centralize block breaking logic so that
+ * [BlockBreakEvent], [BlockExplodeEvent], etc. can all be references by one interface rather than
+ * having to be dealt with individually.
  */
 interface BlockBreakContext {
 

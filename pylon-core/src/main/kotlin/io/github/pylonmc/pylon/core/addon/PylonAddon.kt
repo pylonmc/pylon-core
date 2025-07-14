@@ -32,7 +32,7 @@ interface PylonAddon : Keyed {
     val javaPlugin: JavaPlugin
 
     /**
-     * The set of languages this addon has translations for
+     * The set of [Locale]s this addon has translations for
      */
     val languages: Set<Locale>
 

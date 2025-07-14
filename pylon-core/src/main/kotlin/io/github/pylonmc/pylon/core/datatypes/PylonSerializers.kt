@@ -8,7 +8,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.persistence.PersistentDataType
 
 /**
- * A collection of various [PersistentDataType]s used by Pylon.
+ * A collection of various [PersistentDataType]s for use by Pylon and Pylon addons
  */
 object PylonSerializers {
     @JvmField

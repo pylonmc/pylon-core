@@ -91,7 +91,7 @@ class Waila private constructor(private val player: Player, private val job: Job
         private val wailas = mutableMapOf<UUID, Waila>()
 
         /**
-         * Forcibly adds a WAILA display for the given player without checking if it is enabled
+         * Forcibly adds a WAILA display for the given player
          */
         @JvmStatic
         fun addPlayer(player: Player) {
@@ -106,7 +106,7 @@ class Waila private constructor(private val player: Player, private val job: Job
         }
 
         /**
-         * Forcibly removes a WAILA display for the given player without checking if it is enabled
+         * Forcibly removes a WAILA display for the given player
          */
         @JvmStatic
         fun removePlayer(player: Player) {

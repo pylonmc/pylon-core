@@ -31,7 +31,7 @@ import org.bukkit.persistence.PersistentDataContainer
  * All custom Pylon blocks extend this class. Every instance of this class is wrapping a real block
  * in the world, and is stored in [BlockStorage]. All new block *types* must be registered using [register].
  *
- * An implementation fo PylonBlock must have two constructors: one that takes a [Block] and a
+ * An implementation of PylonBlock must have two constructors: one that takes a [Block] and a
  * [BlockCreateContext], and one that takes a [Block] and a [PersistentDataContainer]. The first
  * constructor is known as the "create constructor", and is used when the block is created in the world.
  * The second constructor is known as the "load constructor", and is used to reconstruct the block when
