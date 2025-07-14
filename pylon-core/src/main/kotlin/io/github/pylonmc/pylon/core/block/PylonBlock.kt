@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.register
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
@@ -72,7 +73,9 @@ open class PylonBlock protected constructor(val block: Block) {
 
     /**
      * Called when the corresponding item of the block is requested. By default,
-     * returns the item with the same key as the block
+     * returns the item with the same key as the block. If the block is
+     * being broken, the item will only be returned if [BlockBreakContext.normallyDrops]
+     * is true, otherwise it will return null.
      *
      * @return the item, or null if none
      */
