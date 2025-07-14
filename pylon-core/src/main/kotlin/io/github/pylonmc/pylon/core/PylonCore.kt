@@ -43,7 +43,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         registerWithPylon()
 
         // Start loading of vanilla translations as to not hang the server when it is first needed
-        MinecraftTranslator.load()
+        MinecraftTranslator
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
