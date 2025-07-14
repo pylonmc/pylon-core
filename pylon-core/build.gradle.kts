@@ -72,6 +72,23 @@ kotlin {
     }
 }
 
+dokka {
+    dokkaSourceSets.configureEach {
+        externalDocumentationLinks.register("Paper") {
+            url("https://jd.papermc.io/paper/1.21.4/")
+            packageListUrl("https://jd.papermc.io/paper/1.21.4/element-list")
+        }
+        externalDocumentationLinks.register("Adventure") {
+            url("https://javadoc.io/doc/net.kyori/adventure-api/latest/")
+            packageListUrl("https://javadoc.io/doc/net.kyori/adventure-api/latest/element-list")
+        }
+        externalDocumentationLinks.register("InvUI") {
+            url("https://invui.javadoc.xenondevs.xyz/")
+            packageListUrl("https://invui.javadoc.xenondevs.xyz/element-list")
+        }
+    }
+}
+
 tasks.shadowJar {
     mergeServiceFiles()
 
@@ -89,7 +106,7 @@ paper {
     bootstrapper = "io.github.pylonmc.pylon.core.PylonBootstrapper"
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
-    authors = listOf() // TODO
+    authors = listOf("Pylon team")
     apiVersion = "1.21"
     load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }
