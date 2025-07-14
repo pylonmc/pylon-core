@@ -73,6 +73,12 @@ kotlin {
 }
 
 dokka {
+    dokkaPublications.html {
+        outputDirectory.set(layout.buildDirectory.dir("dokka/docs/kdoc"))
+    }
+    dokkaPublications.javadoc {
+        outputDirectory.set(layout.buildDirectory.dir("dokka/docs/javadoc"))
+    }
     dokkaSourceSets.configureEach {
         externalDocumentationLinks.register("Paper") {
             url("https://jd.papermc.io/paper/1.21.4/")
@@ -85,6 +91,11 @@ dokka {
         externalDocumentationLinks.register("InvUI") {
             url("https://invui.javadoc.xenondevs.xyz/")
             packageListUrl("https://invui.javadoc.xenondevs.xyz/element-list")
+        }
+        sourceLink {
+            localDirectory.set(file("src/main/kotlin"))
+            remoteUrl("https://github.com/pylonmc/pylon-core")
+            remoteLineSuffix.set("#L")
         }
     }
 }
