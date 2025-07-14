@@ -36,7 +36,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
 
     override fun getPlaceholders(): Map<String, ComponentLike>
         = mapOf<String, ComponentLike>(
-            "fluid_per_second" to UnitFormat.Companion.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond),
+            "fluid_per_second" to UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond),
             "fluids" to Component.join(
                 JoinConfiguration.separator(Component.text(", ")),
                 allowedFluids.map(FluidTemperature::valueText)

@@ -32,7 +32,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val KEY = pylonKey("guide")
 
         @JvmField
-        val STACK = ItemStackBuilder.Companion.pylonItem(Material.ENCHANTED_BOOK, KEY)
+        val STACK = ItemStackBuilder.pylonItem(Material.ENCHANTED_BOOK, KEY)
             .build()
 
         /**

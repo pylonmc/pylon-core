@@ -160,7 +160,7 @@ class ConnectingTask(
             }
         }
 
-        var distance = Float.Companion.MAX_VALUE
+        var distance = Float.MAX_VALUE
         distance = processAxis(Vector3i(1, 0, 0), distance)
         distance = processAxis(Vector3i(0, 1, 0), distance)
         processAxis(Vector3i(0, 0, 1), distance)
