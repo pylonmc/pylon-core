@@ -63,15 +63,15 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
         pdc.set(TO_KEY, PylonSerializers.UUID, to)
     }
 
-    fun getFrom(): FluidPointInteraction?
-        = EntityStorage.getAs<FluidPointInteraction>(from)
+    fun getFrom(): FluidPointInteraction
+        = EntityStorage.getAs<FluidPointInteraction>(from)!!
 
-    fun getTo(): FluidPointInteraction?
-        = EntityStorage.getAs<FluidPointInteraction>(to)
+    fun getTo(): FluidPointInteraction
+        = EntityStorage.getAs<FluidPointInteraction>(to)!!
 
     fun delete(removeMarkersIfEmpty: Boolean, player: Player?) {
-        val from = getFrom()!!
-        val to = getTo()!!
+        val from = getFrom()
+        val to = getTo()
 
         val itemToGive = pipe.stack.clone()
         itemToGive.amount = amount
