@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.content.fluid.FluidPipeMarker
 import io.github.pylonmc.pylon.core.content.fluid.FluidPointInteraction
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipe
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.util.isCardinalDirection
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vectorToBlockFace
 import net.kyori.adventure.text.Component
@@ -230,11 +231,6 @@ class ConnectingTask(
     companion object {
         fun pipesUsed(from: BlockPosition, to: BlockPosition)
             = blocksOnPath(from, to).size + 1
-
-        private fun isCardinalDirection(vector: Vector3i)
-            = vector.x != 0 && vector.y == 0 && vector.z == 0
-                || vector.x == 0 && vector.y != 0 && vector.z == 0
-                || vector.x == 0 && vector.y == 0 && vector.z != 0
 
         /**
          * Does not include first or last block

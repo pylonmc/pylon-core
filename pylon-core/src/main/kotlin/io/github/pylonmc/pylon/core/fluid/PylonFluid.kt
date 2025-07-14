@@ -46,7 +46,7 @@ open class PylonFluid(
     fun hasTag(type: Class<out PylonFluidTag>): Boolean
         = tags.any { type.isInstance(it) }
 
-    inline fun <reified T: PylonFluidTag>hasTag(): Boolean
+    inline fun <reified T: PylonFluidTag> hasTag(): Boolean
         = hasTag(T::class.java)
 
     /**

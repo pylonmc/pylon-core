@@ -54,3 +54,9 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
     }
     return vectorToBlockFace(vector)
 }
+
+fun isCardinalDirection(vector: Vector3i)
+    = vector.x != 0 && vector.y == 0 && vector.z == 0
+        || vector.x == 0 && vector.y != 0 && vector.z == 0
+        || vector.x == 0 && vector.y == 0 && vector.z != 0
+
