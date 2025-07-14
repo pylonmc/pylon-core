@@ -27,6 +27,9 @@ import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.min
 
+/**
+ * A multiblock that is made of a static defined set of components
+ */
 interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     interface MultiblockComponent {

@@ -20,9 +20,19 @@ import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.Inventory
+import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.window.Window
 import java.util.IdentityHashMap
 
+/**
+ * A block that has an associated InvUI GUI that can be opened by right-clicking the block.
+ * The GUI's inventories will be saved and loaded with the block.
+ *
+ * See [InvUI docs](https://docs.xenondevs.xyz/invui/) for information on how to make GUIs.
+ *
+ * @see Gui
+ * @see VirtualInventory
+ */
 interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
 
     fun createGui(): Gui

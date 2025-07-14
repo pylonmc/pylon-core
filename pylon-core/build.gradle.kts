@@ -9,6 +9,8 @@ plugins {
     `maven-publish`
     signing
     id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
+    id("org.jetbrains.dokka") version "2.0.0"
+    id("org.jetbrains.dokka-javadoc") version "2.0.0"
 }
 
 repositories {
@@ -47,6 +49,8 @@ dependencies {
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
     testImplementation("net.kyori:adventure-api:4.20.0")
     testImplementation("net.kyori:adventure-text-minimessage:4.20.0")
+
+    dokkaJavadocPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }
 
 idea {
@@ -68,6 +72,34 @@ kotlin {
     }
 }
 
+dokka {
+    dokkaPublications.html {
+        outputDirectory.set(layout.buildDirectory.dir("dokka/docs/kdoc"))
+    }
+    dokkaPublications.javadoc {
+        outputDirectory.set(layout.buildDirectory.dir("dokka/docs/javadoc"))
+    }
+    dokkaSourceSets.configureEach {
+        externalDocumentationLinks.register("Paper") {
+            url("https://jd.papermc.io/paper/1.21.4/")
+            packageListUrl("https://jd.papermc.io/paper/1.21.4/element-list")
+        }
+        externalDocumentationLinks.register("Adventure") {
+            url("https://javadoc.io/doc/net.kyori/adventure-api/latest/")
+            packageListUrl("https://javadoc.io/doc/net.kyori/adventure-api/latest/element-list")
+        }
+        externalDocumentationLinks.register("InvUI") {
+            url("https://invui.javadoc.xenondevs.xyz/")
+            packageListUrl("https://invui.javadoc.xenondevs.xyz/element-list")
+        }
+        sourceLink {
+            localDirectory.set(file("src/main/kotlin"))
+            remoteUrl("https://github.com/pylonmc/pylon-core")
+            remoteLineSuffix.set("#L")
+        }
+    }
+}
+
 tasks.shadowJar {
     mergeServiceFiles()
 
@@ -85,7 +117,7 @@ paper {
     bootstrapper = "io.github.pylonmc.pylon.core.PylonBootstrapper"
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
-    authors = listOf() // TODO
+    authors = listOf("Pylon team")
     apiVersion = "1.21"
     load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }

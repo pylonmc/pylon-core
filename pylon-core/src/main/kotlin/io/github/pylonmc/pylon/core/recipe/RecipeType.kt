@@ -5,13 +5,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
-import org.bukkit.inventory.BlastingRecipe
-import org.bukkit.inventory.CampfireRecipe
-import org.bukkit.inventory.FurnaceRecipe
-import org.bukkit.inventory.ShapedRecipe
-import org.bukkit.inventory.ShapelessRecipe
-import org.bukkit.inventory.SmithingRecipe
-import org.bukkit.inventory.SmokingRecipe
+import org.bukkit.inventory.*
 
 /**
  * Iteration order will be the order in which recipes were added unless overridden.
@@ -77,24 +71,27 @@ open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, 
             VANILLA_SMOKING.register()
         }
 
+        @JvmStatic
         fun vanillaCraftingRecipes() = VANILLA_SHAPED
             .union(VANILLA_SHAPELESS)
 
+        @JvmStatic
         fun vanillaCookingRecipes() = VANILLA_BLASTING.recipes
             .union(VANILLA_CAMPFIRE.recipes)
             .union(VANILLA_FURNACE.recipes)
             .union(VANILLA_SMOKING.recipes)
 
+        @JvmSynthetic
         internal fun addVanillaRecipes() {
             for (recipe in Bukkit.recipeIterator()) {
                 when (recipe) {
-                    is BlastingRecipe -> RecipeType.VANILLA_BLASTING.addRecipeWithoutRegister(BlastingRecipeWrapper(recipe))
-                    is CampfireRecipe -> RecipeType.VANILLA_CAMPFIRE.addRecipeWithoutRegister(CampfireRecipeWrapper(recipe))
-                    is FurnaceRecipe -> RecipeType.VANILLA_FURNACE.addRecipeWithoutRegister(FurnaceRecipeWrapper(recipe))
-                    is ShapedRecipe -> RecipeType.VANILLA_SHAPED.addRecipeWithoutRegister(ShapedRecipeWrapper(recipe))
-                    is ShapelessRecipe -> RecipeType.VANILLA_SHAPELESS.addRecipeWithoutRegister(ShapelessRecipeWrapper(recipe))
-                    is SmithingRecipe -> RecipeType.VANILLA_SMITHING.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
-                    is SmokingRecipe -> RecipeType.VANILLA_SMOKING.addRecipeWithoutRegister(SmokingRecipeWrapper(recipe))
+                    is BlastingRecipe -> VANILLA_BLASTING.addRecipeWithoutRegister(BlastingRecipeWrapper(recipe))
+                    is CampfireRecipe -> VANILLA_CAMPFIRE.addRecipeWithoutRegister(CampfireRecipeWrapper(recipe))
+                    is FurnaceRecipe -> VANILLA_FURNACE.addRecipeWithoutRegister(FurnaceRecipeWrapper(recipe))
+                    is ShapedRecipe -> VANILLA_SHAPED.addRecipeWithoutRegister(ShapedRecipeWrapper(recipe))
+                    is ShapelessRecipe -> VANILLA_SHAPELESS.addRecipeWithoutRegister(ShapelessRecipeWrapper(recipe))
+                    is SmithingRecipe -> VANILLA_SMITHING.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
+                    is SmokingRecipe -> VANILLA_SMOKING.addRecipeWithoutRegister(SmokingRecipeWrapper(recipe))
                 }
             }
         }
