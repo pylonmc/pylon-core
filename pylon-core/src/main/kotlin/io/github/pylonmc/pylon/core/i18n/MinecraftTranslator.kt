@@ -99,4 +99,6 @@ internal object MinecraftTranslator : Translator {
 
     override fun translate(key: String, locale: Locale): MessageFormat? = translations[locale]?.get(key)
     override fun name(): Key = pylonKey("minecraft")
+
+    fun load() {}
 }
