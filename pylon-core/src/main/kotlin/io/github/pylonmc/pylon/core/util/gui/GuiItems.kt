@@ -31,6 +31,10 @@ object GuiItems {
             .set(DataComponentTypes.HIDE_TOOLTIP)
     )
 
+    /**
+     * Item that cycles through durability to represent processing time. Intended for use in
+     * recipe displays. For a proper progress bar item, see [ProgressItem]
+     */
     @JvmStatic
     fun progressCyclingItem(timeTicks: Int, template: ItemStackBuilder): Item {
         val states: MutableList<ItemStackBuilder> = mutableListOf()

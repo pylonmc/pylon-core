@@ -8,11 +8,11 @@ import org.bukkit.NamespacedKey
 import org.bukkit.event.Listener
 import org.bukkit.inventory.Recipe
 
-interface VanillaRecipeWrapper : PylonRecipe {
-    fun getRecipe(): Recipe
+sealed interface VanillaRecipeWrapper : PylonRecipe {
+    val recipe: Recipe
 }
 
-abstract class VanillaRecipeType<T : VanillaRecipeWrapper>(
+sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(
     key: String
 ) : RecipeType<T>(NamespacedKey.minecraft(key)), Listener {
 
@@ -22,7 +22,7 @@ abstract class VanillaRecipeType<T : VanillaRecipeWrapper>(
 
     override fun addRecipe(recipe: T) {
         super.addRecipe(recipe)
-        Bukkit.addRecipe(recipe.getRecipe())
+        Bukkit.addRecipe(recipe.recipe)
     }
 
     internal fun addRecipeWithoutRegister(recipe: T) {

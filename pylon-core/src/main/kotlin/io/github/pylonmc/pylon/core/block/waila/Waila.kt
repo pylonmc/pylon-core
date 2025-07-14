@@ -90,6 +90,9 @@ class Waila private constructor(private val player: Player, private val job: Job
         private val wailaKey = pylonKey("waila")
         private val wailas = mutableMapOf<UUID, Waila>()
 
+        /**
+         * Forcibly adds a WAILA display for the given player
+         */
         @JvmStatic
         fun addPlayer(player: Player) {
             wailas[player.uniqueId] = Waila(player, PylonCore.launch {
@@ -102,12 +105,16 @@ class Waila private constructor(private val player: Player, private val job: Job
             })
         }
 
+        /**
+         * Forcibly removes a WAILA display for the given player
+         */
         @JvmStatic
         fun removePlayer(player: Player) {
             wailas.remove(player.uniqueId)?.destroy()
         }
 
-        @JvmStatic
+        @get:JvmStatic
+        @set:JvmStatic
         var Player.wailaEnabled: Boolean
             get() = this.persistentDataContainer.getOrDefault(wailaKey, PersistentDataType.BOOLEAN, true)
             set(value) {

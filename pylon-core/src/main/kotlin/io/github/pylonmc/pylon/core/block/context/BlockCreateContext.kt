@@ -9,6 +9,9 @@ interface BlockCreateContext {
 
     val block: Block
 
+    /**
+     * A player has placed the block
+     */
     data class PlayerPlace(
         val player: Player,
         val item: ItemStack,
@@ -17,5 +20,8 @@ interface BlockCreateContext {
         override val block = event.blockPlaced
     }
 
+    /**
+     * A context in which no other reason is specified
+     */
     data class Default(override val block: Block) : BlockCreateContext
 }

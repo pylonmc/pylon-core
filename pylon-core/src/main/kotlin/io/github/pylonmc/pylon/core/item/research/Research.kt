@@ -1,5 +1,3 @@
-@file:JvmSynthetic // hide the extension functions
-
 package io.github.pylonmc.pylon.core.item.research
 
 import com.github.shynixn.mccoroutine.bukkit.launch
@@ -10,7 +8,7 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickup
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
@@ -99,15 +97,20 @@ data class Research(
         private val researchPointsKey = pylonKey("research_points")
         private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
-        @JvmStatic
+        @get:JvmStatic
+        @set:JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
-        @JvmStatic
+        @get:JvmStatic
+        @set:JvmStatic
         var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, mutableSetOf())
 
-        @JvmStatic
+        @get:JvmStatic
         @get:JvmName("getResearchFor")
         val PylonItem.research: Research?
+            /**
+             * Returns the research that unlocks this item, or null if no such research exists
+             */
             get() = PylonRegistry.RESEARCHES.find { this.key in it.unlocks }
 
         @JvmStatic
@@ -147,8 +150,8 @@ data class Research(
 
         @JvmStatic
         @JvmOverloads
-        @JvmName("canPlayerPickup")
-        fun Player.canPickup(item: PylonItem, sendMessage: Boolean = false): Boolean
+        @JvmName("canPlayerPickUp")
+        fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean
             = canCraft(item, sendMessage)
 
         @JvmStatic
@@ -192,7 +195,7 @@ data class Research(
                 return
             }
 
-            val canCraft = event.recipe.getOutputItems().all {
+            val canCraft = event.recipe.outputItems.all {
                 val item = PylonItem.fromStack(it)
                 item == null || event.player.canCraft(item, true)
             }
@@ -204,10 +207,11 @@ data class Research(
     }
 }
 
-fun Player.ejectUnknownItems() {
+@JvmSynthetic
+private fun Player.ejectUnknownItems() {
     val toRemove = inventory.contents.filterNotNull().filter { item ->
         val pylonItem = PylonItem.fromStack(item)
-        pylonItem != null && !canPickup(pylonItem, sendMessage = true)
+        pylonItem != null && !canPickUp(pylonItem, sendMessage = true)
     }
     for (item in toRemove) {
         inventory.remove(item)
@@ -215,14 +219,17 @@ fun Player.ejectUnknownItems() {
     }
 }
 
+@JvmSynthetic
 fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
     research.addTo(this, sendMessage)
 }
 
+@JvmSynthetic
 fun Player.removeResearch(research: Research) {
     research.removeFrom(this)
 }
 
+@JvmSynthetic
 fun Player.hasResearch(research: Research): Boolean {
     return research.isResearchedBy(this)
 }

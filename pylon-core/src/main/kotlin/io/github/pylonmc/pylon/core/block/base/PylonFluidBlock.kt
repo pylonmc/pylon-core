@@ -2,6 +2,9 @@ package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 
+/**
+ * A block that can supply or request fluids through fluid connections.
+ */
 interface PylonFluidBlock {
 
     /**

@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.addon.PylonAddonListener
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
@@ -29,7 +28,6 @@ import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -49,16 +47,17 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         saveDefaultConfig()
 
+        Bukkit.getPluginManager().registerEvents(PylonAddon, this)
         registerWithPylon()
 
-        GlobalTranslator.translator().addSource(MinecraftTranslator)
+        // Start loading of vanilla translations as to not hang the server when it is first needed
+        MinecraftTranslator
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
         Bukkit.getPluginManager().registerEvents(MobDropListener, this)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
-        Bukkit.getPluginManager().registerEvents(PylonAddonListener, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
         Bukkit.getPluginManager().registerEvents(AddonTranslator, this)
@@ -116,7 +115,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
-        GlobalTranslator.translator().removeSource(MinecraftTranslator)
     }
 
     private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {

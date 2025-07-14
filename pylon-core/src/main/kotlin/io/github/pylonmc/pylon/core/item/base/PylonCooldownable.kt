@@ -1,10 +1,12 @@
 package io.github.pylonmc.pylon.core.item.base
 
+import org.jetbrains.annotations.ApiStatus
+
 /**
- * To be extended by interfaces that can be affected by cooldowns.
- * Not to be directly implemented by items.
+ * Implemented by interfaces affected by cooldowns
  */
-interface PylonCooldownable {
+@ApiStatus.Internal
+sealed interface PylonCooldownable {
     @Suppress("INAPPLICABLE_JVM_NAME") // tfw suppressing errors
     @get:JvmName("respectCooldown")
     val respectCooldown: Boolean

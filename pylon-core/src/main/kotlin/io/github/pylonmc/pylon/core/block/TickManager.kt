@@ -79,7 +79,7 @@ object TickManager : Listener {
     }
 
     private suspend fun handleBlockError(pylonBlock: PylonBlock, error: Throwable, errors: Int) {
-        // Drop onto main thread for error logging and stuff
+        // Drop onto the main thread for error logging and stuff
         withContext(PylonCore.minecraftDispatcher) {
             val block = pylonBlock.block
             PylonCore.logger.log(
