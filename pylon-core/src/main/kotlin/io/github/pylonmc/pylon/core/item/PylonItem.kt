@@ -99,6 +99,10 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockKey: NamespacedKey? = null) =
             register(PylonItemSchema(itemClass, template, pylonBlockKey))
 
+        @JvmSynthetic
+        inline fun <reified T: PylonItem> register(template: ItemStack, pylonBlockKey: NamespacedKey? = null) =
+            register(T::class.java, template, pylonBlockKey)
+
         /**
          * Converts a regular ItemStack to a PylonItemStack
          * Returns null if the ItemStack is not a Pylon item

@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.debug
+package io.github.pylonmc.pylon.core.content.debug
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.TickManager

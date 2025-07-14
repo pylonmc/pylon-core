@@ -8,11 +8,17 @@ import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.PylonCommand
-import io.github.pylonmc.pylon.core.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
+import io.github.pylonmc.pylon.core.content.fluid.FluidPipeConnector
+import io.github.pylonmc.pylon.core.content.fluid.FluidPipeDisplay
+import io.github.pylonmc.pylon.core.content.fluid.FluidPipeMarker
+import io.github.pylonmc.pylon.core.content.fluid.FluidPointDisplay
+import io.github.pylonmc.pylon.core.content.fluid.FluidPointInteraction
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.guide.PylonGuide
+import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.i18n.MinecraftTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -26,6 +32,8 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.Interaction
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
 import java.util.Locale
@@ -60,6 +68,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
+        Bukkit.getPluginManager().registerEvents(ConnectingService, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,
@@ -79,25 +88,31 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         manager.registerCommand(PylonCommand())
 
-        PylonItem.register(DebugWaxedWeatheredCutCopperStairs::class.java, DebugWaxedWeatheredCutCopperStairs.STACK)
+        PylonItem.register<DebugWaxedWeatheredCutCopperStairs>(DebugWaxedWeatheredCutCopperStairs.STACK)
         PylonGuide.hideItem(DebugWaxedWeatheredCutCopperStairs.KEY)
 
-        PylonItem.register(PhantomBlock.ErrorItem::class.java, PhantomBlock.ErrorItem.STACK)
+        PylonItem.register<PhantomBlock.ErrorItem>(PhantomBlock.ErrorItem.STACK)
         PylonGuide.hideItem(PhantomBlock.ErrorItem.KEY)
 
-        PylonItem.register(PylonGuide::class.java, PylonGuide.STACK)
+        PylonItem.register<PylonGuide>(PylonGuide.STACK)
         PylonGuide.hideItem(PylonGuide.KEY)
 
-        PylonEntity.register(
+        PylonEntity.register<BlockDisplay, PylonSimpleMultiblock.MultiblockGhostBlock>(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
-            BlockDisplay::class.java,
-            PylonSimpleMultiblock.MultiblockGhostBlock::class.java
         )
+
+        PylonEntity.register<ItemDisplay, FluidPointDisplay>(FluidPointDisplay.KEY)
+        PylonEntity.register<Interaction, FluidPointInteraction>(FluidPointInteraction.KEY)
+        PylonEntity.register<ItemDisplay, FluidPipeDisplay>(FluidPipeDisplay.KEY)
+
+        PylonBlock.register<FluidPipeMarker>(FluidPipeMarker.KEY, Material.STRUCTURE_VOID)
+        PylonBlock.register<FluidPipeConnector>(FluidPipeConnector.KEY, Material.STRUCTURE_VOID)
 
         RecipeType.addVanillaRecipes()
     }
 
     override fun onDisable() {
+        ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
     }
