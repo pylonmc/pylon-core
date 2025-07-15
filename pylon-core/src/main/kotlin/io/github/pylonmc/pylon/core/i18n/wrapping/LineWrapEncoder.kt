@@ -2,10 +2,14 @@ package io.github.pylonmc.pylon.core.i18n.wrapping
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
+/**
+ * @see LineWrapRepresentation
+ */
 class LineWrapEncoder private constructor() {
 
     private var pos = 0
@@ -16,9 +20,13 @@ class LineWrapEncoder private constructor() {
     private fun encode(component: Component) {
         var comp = component
         if (comp !is TextComponent) {
-            val content = PlainTextComponentSerializer.plainText().serialize(comp)
-            comp = Component.text("{ERROR ${comp.javaClass.simpleName} $content}")
-                .color(NamedTextColor.RED)
+            if (comp is TranslatableComponent && comp.fallback() != null) {
+                comp = Component.text(comp.fallback()!!).style(comp.style())
+            } else {
+                val content = PlainTextComponentSerializer.plainText().serialize(comp)
+                comp = Component.text("{ERROR ${comp.javaClass.simpleName} $content}")
+                    .color(NamedTextColor.RED)
+            }
         }
         val startPos = pos
         val text = comp.content()

@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -61,7 +62,7 @@ class FluidPipeMarker : PylonBlock, PylonBreakHandler {
     }
 
     override fun getWaila(player: Player): WailaConfig
-        = WailaConfig(name, mapOf(Pair("pipe", getPipeDisplay()!!.pipe.stack.effectiveName())))
+        = WailaConfig(name, listOf(PylonArgument.of("pipe", getPipeDisplay()!!.pipe.stack.effectiveName())))
 
     companion object {
         val KEY = pylonKey("fluid_pipe_marker")

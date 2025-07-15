@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.guide.pages.base
 
-import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton

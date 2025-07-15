@@ -4,11 +4,11 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.bossbar.BossBar
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
@@ -50,7 +50,7 @@ class PhantomBlock(
     override fun getWaila(player: Player): WailaConfig {
         return WailaConfig(
             text = name,
-            placeholders = mapOf("block" to Component.text(erroredBlockKey.toString())),
+            placeholders = listOf(PylonArgument.of("block", erroredBlockKey.toString())),
             color = BossBar.Color.RED
         )
     }
@@ -74,10 +74,10 @@ class PhantomBlock(
             stack.editPersistentDataContainer { pdc -> pdc.set(ErrorItem.BLOCK_KEY, PylonSerializers.NAMESPACED_KEY, erroredBlock) }
         }
 
-        override fun getPlaceholders(): Map<String, Component> {
+        override fun getPlaceholders(): List<PylonArgument> {
             val block = stack.persistentDataContainer.get(BLOCK_KEY, PylonSerializers.NAMESPACED_KEY)
-                ?: return emptyMap()
-            return mapOf("block" to Component.text(block.toString()))
+                ?: return emptyList()
+            return listOf(PylonArgument.of("block", block.toString()))
         }
 
         companion object {

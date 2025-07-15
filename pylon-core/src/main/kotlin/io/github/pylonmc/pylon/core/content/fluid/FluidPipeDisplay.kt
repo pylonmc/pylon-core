@@ -7,14 +7,13 @@ import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.fluid.FluidManager
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipe
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.GameMode
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataContainer
-import java.util.*
+import java.util.UUID
 
 class FluidPipeDisplay : PylonEntity<ItemDisplay> {
     val pipe: FluidPipe
@@ -36,14 +35,14 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
         // we wait for them to load and then set their segments' fluid per second and predicate
         EntityStorage.whenEntityLoads(from, FluidPointInteraction::class.java) { interaction ->
             FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe.getPredicate())
+            FluidManager.setFluidPredicate(interaction.point.segment, pipe::canPass)
         }
 
         // Technically only need to do this for one of the end points since they're part of the same segment, but
         // we do it twice just to be safe
         EntityStorage.whenEntityLoads(to, FluidPointInteraction::class.java) { interaction ->
             FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe.getPredicate())
+            FluidManager.setFluidPredicate(interaction.point.segment, pipe::canPass)
         }
     }
 
