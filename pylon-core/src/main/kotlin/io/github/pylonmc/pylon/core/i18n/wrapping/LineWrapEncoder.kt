@@ -7,6 +7,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
+/**
+ * @see LineWrapRepresentation
+ */
 class LineWrapEncoder private constructor() {
 
     private var pos = 0

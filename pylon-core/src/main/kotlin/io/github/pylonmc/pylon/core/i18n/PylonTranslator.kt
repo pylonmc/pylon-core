@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument.Companion.attachPylonArguments
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
@@ -36,7 +37,10 @@ import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
 
-class PylonTranslator(private val addon: PylonAddon) : Translator {
+/**
+ * The [Translator] for a given [PylonAddon]. Use [translator] to obtain an instance.
+ */
+class PylonTranslator private constructor(private val addon: PylonAddon) : Translator {
 
     private val addonNamespace = addon.key.namespace
 
@@ -115,6 +119,9 @@ class PylonTranslator(private val addon: PylonAddon) : Translator {
         val PylonAddon.translator: PylonTranslator
             get() = translators[this.key] ?: error("Addon does not have a translator; did you forget to call registerWithPylon()?")
 
+        /**
+         * Modifies the [ItemStack] to translate its name and lore into the specified [locale].
+         */
         @JvmStatic
         @JvmOverloads
         @JvmName("translateItem")
