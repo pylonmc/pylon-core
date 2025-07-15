@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.pages.base
 
-import io.github.pylonmc.pylon.core.guide.PylonGuide
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.entity.Player

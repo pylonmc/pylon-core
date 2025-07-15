@@ -6,9 +6,10 @@ import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent;
-import io.github.pylonmc.pylon.core.fluid.FluidConnectionPoint;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
+import io.github.pylonmc.pylon.core.fluid.FluidPointType;
 import io.github.pylonmc.pylon.core.fluid.PylonFluid;
+import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.fluid.Fluids;
 import lombok.Getter;
@@ -28,12 +29,12 @@ public class FluidProducer extends PylonBlock implements PylonFluidBlock, PylonU
     public static final double FLUID_PER_SECOND = 200.0;
 
     private final NamespacedKey pointKey = PylonTest.key("point");
-    @Getter private final FluidConnectionPoint point;
+    @Getter private final VirtualFluidPoint point;
 
     @SuppressWarnings("unused")
     public FluidProducer(@NotNull Block block, @NotNull BlockCreateContext context) {
         super(block);
-        point = new FluidConnectionPoint(block, "output", FluidConnectionPoint.Type.OUTPUT);
+        point = new VirtualFluidPoint(block, FluidPointType.OUTPUT);
         FluidManager.add(point);
     }
 
@@ -55,14 +56,14 @@ public class FluidProducer extends PylonBlock implements PylonFluidBlock, PylonU
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Double> getSuppliedFluids(@NotNull String connectionPoint, double deltaSeconds) {
+    public @NotNull Map<PylonFluid, Double> getSuppliedFluids(double deltaSeconds) {
         return Map.of(
                 getFluidType(), FLUID_PER_SECOND * deltaSeconds
         );
     }
 
     @Override
-    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, double amount) {
+    public void removeFluid(@NotNull PylonFluid fluid, double amount) {
         // do nothing
     }
 

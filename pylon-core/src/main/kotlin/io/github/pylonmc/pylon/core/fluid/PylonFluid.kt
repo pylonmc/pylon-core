@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.fluid
 
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.getAddon
@@ -35,11 +35,9 @@ open class PylonFluid(
 
     init {
         val addon = PylonRegistry.ADDONS[NamespacedKey(key.namespace, key.namespace)]!!
-        val translator = AddonTranslator.translators[addon]!!
-
         for (locale in addon.languages) {
             val translationKey = "pylon.${key.namespace}.fluid.${key.key}"
-            check(translator.canTranslate(translationKey, locale)) {
+            check(addon.translator.canTranslate(translationKey, locale)) {
                 PylonCore.logger.warning("${key.namespace} is missing a translation key for fluid ${key.key} (locale: ${locale.displayName} | expected translation key: $translationKey")
             }
         }
@@ -50,7 +48,11 @@ open class PylonFluid(
         tags.add(tag)
     }
 
-    fun hasTag(type: Class<out PylonFluidTag>): Boolean = tags.any { type.isInstance(it) }
+    fun hasTag(type: Class<out PylonFluidTag>): Boolean
+        = tags.any { type.isInstance(it) }
+
+    inline fun <reified T: PylonFluidTag> hasTag(): Boolean
+        = hasTag(T::class.java)
 
     /**
      * @throws IllegalArgumentException if the fluid does not have a tag of the given type

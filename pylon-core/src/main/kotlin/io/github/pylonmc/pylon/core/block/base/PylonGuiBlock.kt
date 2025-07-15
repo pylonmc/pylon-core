@@ -72,6 +72,17 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
         }
     }
 
+    fun getItems() : List<ItemStack> {
+        val items = mutableListOf<ItemStack>()
+        val invs = inventories.get(this) ?: return listOf()
+        for (inv in invs) {
+            for (item in inv.items) {
+                item?.let(items::add)
+            }
+        }
+        return items
+    }
+
     companion object : Listener {
         private val inventoryKey = pylonKey("inventories")
         private val inventoryType =

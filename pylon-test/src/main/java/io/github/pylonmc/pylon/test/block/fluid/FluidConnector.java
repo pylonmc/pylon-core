@@ -5,8 +5,9 @@ import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent;
-import io.github.pylonmc.pylon.core.fluid.FluidConnectionPoint;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
+import io.github.pylonmc.pylon.core.fluid.FluidPointType;
+import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint;
 import io.github.pylonmc.pylon.test.PylonTest;
 import lombok.Getter;
 import org.bukkit.NamespacedKey;
@@ -21,12 +22,12 @@ public class FluidConnector extends PylonBlock implements PylonUnloadBlock {
     private static final NamespacedKey POINT_KEY = PylonTest.key("point");
 
     @Getter
-    private final FluidConnectionPoint point;
+    private final VirtualFluidPoint point;
 
     @SuppressWarnings("unused")
     public FluidConnector(Block block, BlockCreateContext context) {
         super(block);
-        point = new FluidConnectionPoint(block, "point", FluidConnectionPoint.Type.CONNECTOR);
+        point = new VirtualFluidPoint(block, FluidPointType.CONNECTOR);
         FluidManager.add(point);
     }
 

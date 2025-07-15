@@ -57,6 +57,11 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
     return vectorToBlockFace(vector)
 }
 
+fun isCardinalDirection(vector: Vector3i)
+    = vector.x != 0 && vector.y == 0 && vector.z == 0
+        || vector.x == 0 && vector.y != 0 && vector.z == 0
+        || vector.x == 0 && vector.y == 0 && vector.z != 0
+
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Key does not have a corresponding addon; does your addon call registerWithPylon()?")
