@@ -1,10 +1,10 @@
 package io.github.pylonmc.pylon.core.i18n
 
-import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
+import io.github.pylonmc.pylon.core.i18n.PylonArgument.Companion.attachPylonArguments
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
@@ -14,7 +14,10 @@ import io.github.pylonmc.pylon.core.util.wrapText
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.key.Key
-import net.kyori.adventure.text.*
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextReplacementConfig
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.VirtualComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
@@ -52,7 +55,7 @@ class PylonTranslator(private val addon: PylonAddon) : Translator {
             ?: component.fallback()?.let {
                 val translatable = Component.translatable(it)
                 val translated = GlobalTranslator.render(translatable, locale)
-                if (translated == translatable) Component.text(it) else translated
+                if (translated == translatable) null else translated
             }
             ?: return null
         for (arg in component.arguments()) {
@@ -80,17 +83,11 @@ class PylonTranslator(private val addon: PylonAddon) : Translator {
             val translations = commonLocale?.let(this.translations::get)
             if (translations == null) {
                 if (warn) {
-                    PylonCore.logger.warning("No translations found for locale '$locale' in addon '$addon'")
+                    this.addon.javaPlugin.logger.warning("No translations found for locale '$locale'")
                 }
                 return null
             }
-            val translation = translations.get<String>(key)
-            if (translation == null) {
-                if (warn) {
-                    PylonCore.logger.warning("Missing translation for key '$translationKey' in addon '$addon' for locale '$commonLocale'")
-                }
-                return null
-            }
+            val translation = translations.get<String>(key) ?: return null
             customMiniMessage.deserialize(translation)
         }
     }
@@ -122,16 +119,20 @@ class PylonTranslator(private val addon: PylonAddon) : Translator {
         @JvmOverloads
         @JvmName("translateItem")
         @Suppress("UnstableApiUsage")
-        fun ItemStack.translate(locale: Locale, arguments: Map<String, ComponentLike> = emptyMap()) {
+        fun ItemStack.translate(locale: Locale, arguments: List<PylonArgument> = emptyList()) {
             GlobalTranslator.translator().addSource(MinecraftTranslator)
-            val attacher = PlaceholderAttacher(arguments)
 
             editData(DataComponentTypes.ITEM_NAME) {
-                GlobalTranslator.render(attacher.render(it, Unit), locale)
+                val translated = GlobalTranslator.render(it.attachPylonArguments(arguments), locale)
+                if (translated is TranslatableComponent && translated.fallback() != null) {
+                    Component.text(translated.fallback()!!)
+                } else {
+                    translated
+                }
             }
             editData(DataComponentTypes.LORE) { lore ->
                 val newLore = lore.lines().flatMap { line ->
-                    val translated = GlobalTranslator.render(attacher.render(line, Unit), locale)
+                    val translated = GlobalTranslator.render(line.attachPylonArguments(arguments), locale)
                     val encoded = LineWrapEncoder.encode(translated)
                     val wrapped = encoded.copy(
                         lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }

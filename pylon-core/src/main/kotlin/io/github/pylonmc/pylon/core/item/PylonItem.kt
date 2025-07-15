@@ -8,11 +8,11 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.PylonEntity
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.datacomponent.DataComponentTypes
-import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
@@ -48,7 +48,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     override fun getKey(): NamespacedKey = key
 
-    open fun getPlaceholders(): Map<String, ComponentLike> = emptyMap()
+    open fun getPlaceholders(): List<PylonArgument> = emptyList()
 
     open fun place(context: BlockCreateContext): PylonBlock? = schema.place(context)
 

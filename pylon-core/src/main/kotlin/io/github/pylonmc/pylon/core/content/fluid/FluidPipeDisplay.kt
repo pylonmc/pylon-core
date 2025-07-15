@@ -35,14 +35,14 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
         // we wait for them to load and then set their segments' fluid per second and predicate
         EntityStorage.whenEntityLoads(from, FluidPointInteraction::class.java) { interaction ->
             FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe.getPredicate())
+            FluidManager.setFluidPredicate(interaction.point.segment, pipe::canPass)
         }
 
         // Technically only need to do this for one of the end points since they're part of the same segment, but
         // we do it twice just to be safe
         EntityStorage.whenEntityLoads(to, FluidPointInteraction::class.java) { interaction ->
             FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe.getPredicate())
+            FluidManager.setFluidPredicate(interaction.point.segment, pipe::canPass)
         }
     }
 

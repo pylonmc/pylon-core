@@ -15,7 +15,6 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslationArgument
 import org.bukkit.Material
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -102,6 +101,6 @@ class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
     }
 }
 
-private fun Audience.sendDebug(subkey: String, vararg args: TranslationArgument) {
+private fun Audience.sendDebug(subkey: String, vararg args: PylonArgument) {
     return sendMessage(Component.translatable("pylon.pyloncore.message.debug.$subkey", *args))
 }
