@@ -15,7 +15,7 @@ import org.bukkit.entity.Player
 import org.jetbrains.annotations.ApiStatus
 
 @ApiStatus.Internal
-class PlayerTranslationHandler(private val player: Player) {
+class PlayerTranslationHandler internal constructor(private val player: Player) {
 
     fun handleItem(item: PylonItem) {
         val stack = item.stack
