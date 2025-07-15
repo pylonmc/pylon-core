@@ -1,21 +1,16 @@
 package io.github.pylonmc.pylon.core.item.builder
 
-import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
-import io.github.pylonmc.pylon.core.util.wrapText
 import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
-import net.kyori.adventure.translation.GlobalTranslator
 import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -100,27 +95,7 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
             split[1] = split[1].uppercase()
         }
         val locale = LocaleUtils.toLocale(split.joinToString("_"))
-        item.editData(DataComponentTypes.ITEM_NAME) {
-            GlobalTranslator.render(it, locale)
-        }
-        item.editData(DataComponentTypes.LORE) { lore ->
-            val newLore = lore.lines()
-                .flatMap {
-                    val translated = GlobalTranslator.render(it, locale)
-                    val encoded = LineWrapEncoder.encode(translated)
-                    val wrapped = encoded.copy(
-                        lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
-                    )
-                    wrapped.toComponentLines()
-                }
-                .map {
-                    Component.text()
-                        .decoration(TextDecoration.ITALIC, false)
-                        .color(NamedTextColor.GRAY)
-                        .append(it)
-                }
-            ItemLore.lore(newLore)
-        }
+        item.translate(locale)
         return item
     }
 

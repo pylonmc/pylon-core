@@ -2,16 +2,22 @@ package io.github.pylonmc.pylon.core.i18n
 
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
+import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.editData
+import io.github.pylonmc.pylon.core.util.wrapText
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.key.Key
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextReplacementConfig
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.VirtualComponent
+import net.kyori.adventure.text.*
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.Style
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.translation.GlobalTranslator
 import net.kyori.adventure.translation.Translator
 import org.apache.commons.lang3.LocaleUtils
@@ -22,6 +28,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLocaleChangeEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
@@ -59,7 +66,9 @@ class PylonTranslator(private val addon: PylonAddon) : Translator {
                 .build()
             translation = translation.replaceText(replacer)
         }
-        return translation.children(translation.children().map { GlobalTranslator.render(it, locale) })
+        return translation
+            .children(translation.children().map { GlobalTranslator.render(it, locale) })
+            .style(translation.style().merge(component.style(), Style.Merge.Strategy.IF_ABSENT_ON_TARGET))
     }
 
     private fun getRawTranslation(translationKey: String, locale: Locale, warn: Boolean): Component? {
@@ -108,6 +117,38 @@ class PylonTranslator(private val addon: PylonAddon) : Translator {
         @get:JvmName("getTranslatorForAddon")
         val PylonAddon.translator: PylonTranslator
             get() = translators[this.key] ?: error("Addon does not have a translator; did you forget to call registerWithPylon()?")
+
+        @JvmStatic
+        @JvmOverloads
+        @JvmName("translateItem")
+        @Suppress("UnstableApiUsage")
+        fun ItemStack.translate(locale: Locale, arguments: Map<String, ComponentLike> = emptyMap()) {
+            GlobalTranslator.translator().addSource(MinecraftTranslator)
+            val attacher = PlaceholderAttacher(arguments)
+
+            editData(DataComponentTypes.ITEM_NAME) {
+                GlobalTranslator.render(attacher.render(it, Unit), locale)
+            }
+            editData(DataComponentTypes.LORE) { lore ->
+                val newLore = lore.lines().flatMap { line ->
+                    val translated = GlobalTranslator.render(attacher.render(line, Unit), locale)
+                    val encoded = LineWrapEncoder.encode(translated)
+                    val wrapped = encoded.copy(
+                        lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
+                    )
+                    wrapped.toComponentLines().map {
+                        Component.text()
+                            .decoration(TextDecoration.ITALIC, false)
+                            .color(NamedTextColor.GRAY)
+                            .append(it)
+                            .build()
+                    }
+                }
+                ItemLore.lore(newLore)
+            }
+
+            GlobalTranslator.translator().removeSource(MinecraftTranslator)
+        }
 
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onAddonRegister(event: PylonRegisterEvent) {
