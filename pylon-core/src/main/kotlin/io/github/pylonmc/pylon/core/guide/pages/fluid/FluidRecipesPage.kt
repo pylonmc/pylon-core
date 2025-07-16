@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.pages.fluid
 
-import io.github.pylonmc.pylon.core.guide.PylonGuide
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
@@ -22,7 +22,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
     init {
         for (type in PylonRegistry.RECIPE_TYPES) {
             for (recipe in type.recipes) {
-                if (!recipe.isHidden() && recipe.isOutput(fluid)) {
+                if (!recipe.isHidden && recipe.isOutput(fluid)) {
                     pages.add(recipe.display())
                 }
             }

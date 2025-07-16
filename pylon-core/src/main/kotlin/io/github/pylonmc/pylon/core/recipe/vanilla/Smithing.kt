@@ -12,10 +12,11 @@ import xyz.xenondevs.invui.gui.Gui
 
 
 class SmithingRecipeWrapper(val smithingRecipe: SmithingRecipe) : VanillaRecipeWrapper {
-    override fun getKey(): NamespacedKey = smithingRecipe.key
-    override fun getRecipe(): Recipe = smithingRecipe
-    override fun getInputItems(): List<RecipeChoice> = listOf(smithingRecipe.base, smithingRecipe.addition)
-    override fun getOutputItems(): List<ItemStack> = listOf(smithingRecipe.result)
+
+    override val recipe: Recipe = smithingRecipe
+    override val inputItems: List<RecipeChoice> = listOf(smithingRecipe.base, smithingRecipe.addition)
+    override val outputItems: List<ItemStack> = listOf(smithingRecipe.result)
+
     override fun display() = Gui.normal()
         .setStructure(
             "# # # # # # # # #",
@@ -31,6 +32,8 @@ class SmithingRecipeWrapper(val smithingRecipe: SmithingRecipe) : VanillaRecipeW
         .addIngredient('2', ItemButton.fromChoice(smithingRecipe.addition))
         .addIngredient('r', ItemButton.fromStack(smithingRecipe.result))
         .build()
+
+    override fun getKey(): NamespacedKey = smithingRecipe.key
 }
 
 object SmithingRecipeType : VanillaRecipeType<SmithingRecipeWrapper>("smithing") {

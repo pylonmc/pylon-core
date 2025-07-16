@@ -44,12 +44,18 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
         stack.setData(type)
     }
 
-    fun unset(type: DataComponentType.NonValued) = apply {
+    /**
+     * @see ItemStack.unsetData
+     */
+    fun unset(type: DataComponentType) = apply {
         stack.unsetData(type)
     }
 
-    fun reset(type: DataComponentType.NonValued) = apply {
-        stack.unsetData(type)
+    /**
+     * @see ItemStack.resetData
+     */
+    fun reset(type: DataComponentType) = apply {
+        stack.resetData(type)
     }
 
     fun editMeta(consumer: Consumer<in ItemMeta>) = apply {

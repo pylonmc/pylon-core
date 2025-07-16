@@ -21,6 +21,12 @@ item:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
     lore: "<insn>Right click</insn> a block to view its Pylon block data"
 
+  fluid_pipe_connector:
+    waila: "%pipe%"
+
+  fluid_pipe_marker:
+    waila: "%pipe%"
+
 fluid:
   temperature:
     display-text: "<arrow> <attr>Temperature:</attr> %temperature%"

@@ -9,6 +9,9 @@ import org.bukkit.persistence.PersistentDataType
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+/**
+ * Sets a value in the [PersistentDataContainer] if it is not null, otherwise removes the key
+ */
 fun <P, C> PersistentDataContainer.setNullable(key: NamespacedKey, type: PersistentDataType<P, C>, value: C?) {
     if (value != null) {
         set(key, type, value)

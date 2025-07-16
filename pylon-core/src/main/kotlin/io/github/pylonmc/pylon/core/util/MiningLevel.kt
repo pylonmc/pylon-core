@@ -32,7 +32,8 @@ enum class MiningLevel(val numericalLevel: Int, private val incorrectTag: Tag<Ma
     }
 
     companion object {
-        private val UNBREAKABLE: Set<Material> = setOf(
+        @JvmField
+        val UNBREAKABLE: Set<Material> = setOf(
             Material.BARRIER,
             Material.BEDROCK,
             Material.STRUCTURE_BLOCK,

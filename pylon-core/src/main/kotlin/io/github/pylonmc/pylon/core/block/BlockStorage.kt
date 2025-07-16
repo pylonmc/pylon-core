@@ -66,9 +66,7 @@ object BlockStorage : Listener {
 
     private val blocks: MutableMap<BlockPosition, PylonBlock> = ConcurrentHashMap()
 
-    /**
-     * Only contains chunks that have been loaded (including chunks with no Pylon blocks)
-     */
+    // Only contains chunks that have been loaded (including chunks with no Pylon blocks)
     private val blocksByChunk: MutableMap<ChunkPosition, MutableList<PylonBlock>> = ConcurrentHashMap()
 
     private val blocksByKey: MutableMap<NamespacedKey, MutableList<PylonBlock>> = ConcurrentHashMap()
@@ -340,7 +338,7 @@ object BlockStorage : Listener {
             chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
 
                 // Wait a random delay before starting, this is to help smooth out lag from saving
-                delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
+                delay(Random.nextLong(PylonConfig.blockDataAutosaveIntervalSeconds * 1000))
 
                 while (true) {
                     lockBlockRead {
@@ -348,7 +346,7 @@ object BlockStorage : Listener {
                         check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
                         save(event.chunk, blocksInChunk)
                     }
-                    delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
+                    delay(PylonConfig.blockDataAutosaveIntervalSeconds * 1000)
                 }
             }
         }

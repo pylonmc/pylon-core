@@ -21,6 +21,10 @@ import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
 
+/**
+ * This class's API is not stable yet and needs an API rewrite, if Pylon is past 1.0 and this
+ * doc is still here, nag Seggan until he does it
+ */
 class AddonTranslator(private val addon: PylonAddon) : Translator {
 
     private val addonNamespace = addon.key.namespace

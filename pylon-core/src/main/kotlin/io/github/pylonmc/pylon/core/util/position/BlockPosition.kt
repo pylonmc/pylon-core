@@ -1,5 +1,3 @@
-@file:JvmSynthetic // Hide the ugly `BlockPositionKt.getPosition` function in Java
-
 package io.github.pylonmc.pylon.core.util.position
 
 import org.bukkit.Location
@@ -94,5 +92,6 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
         get() = world?.getBlockAt(x, y, z) ?: error("World is null")
 }
 
+@get:JvmSynthetic
 val Block.position: BlockPosition
     get() = BlockPosition(this)

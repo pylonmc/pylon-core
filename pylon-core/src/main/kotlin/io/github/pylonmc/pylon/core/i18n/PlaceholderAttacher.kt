@@ -5,6 +5,10 @@ import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.renderer.ComponentRenderer
 
+/**
+ * A [ComponentRenderer] for attaching [PylonArgument]s to [Component]s before putting them
+ * into a Pylon item
+ */
 class PlaceholderAttacher(placeholders: Map<String, ComponentLike>) : ComponentRenderer<Unit> {
 
     private val arguments = placeholders.map { (name, value) -> PylonArgument.of(name, value) }
