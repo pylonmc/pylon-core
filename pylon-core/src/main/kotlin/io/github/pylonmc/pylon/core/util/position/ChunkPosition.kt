@@ -1,5 +1,3 @@
-@file:JvmSynthetic // Hide the ugly `ChunkPositionKt.getPosition` function in Java
-
 package io.github.pylonmc.pylon.core.util.position
 
 import org.bukkit.Chunk
@@ -56,5 +54,6 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
     }
 }
 
+@get:JvmSynthetic
 val Chunk.position: ChunkPosition
     get() = ChunkPosition(this)

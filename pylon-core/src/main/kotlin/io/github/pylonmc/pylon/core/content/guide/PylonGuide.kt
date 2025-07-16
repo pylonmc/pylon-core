@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.guide
+package io.github.pylonmc.pylon.core.content.guide
 
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
@@ -16,7 +16,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
-import java.util.*
+import java.util.UUID
 
 class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
 

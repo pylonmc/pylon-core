@@ -19,10 +19,10 @@ import org.bukkit.event.entity.PotionSplashEvent
 import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
-object EntityListener : Listener {
+internal object EntityListener : Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
-    fun handle(event: PlayerInteractEntityEvent) {
+    private fun handle(event: PlayerInteractEntityEvent) {
         val pylonEntity = EntityStorage.get(event.rightClicked)
         if (pylonEntity is PylonInteractableEntity) {
             pylonEntity.onInteract(event)
@@ -30,21 +30,21 @@ object EntityListener : Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    fun handle(event: PylonEntityUnloadEvent) {
+    private fun handle(event: PylonEntityUnloadEvent) {
         if (event.pylonEntity is PylonUnloadEntity) {
             event.pylonEntity.onUnload(event)
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    fun handle(event: PylonEntityDeathEvent) {
+    private fun handle(event: PylonEntityDeathEvent) {
         if (event.pylonEntity is PylonDeathEntity) {
             event.pylonEntity.onDeath(event)
         }
     }
 
     @EventHandler
-    fun handle(event: ProjectileHitEvent) {
+    private fun handle(event: ProjectileHitEvent) {
         if (event.entity is AbstractArrow) {
             val arrowItem = PylonItem.fromStack((event.entity as AbstractArrow).itemStack)
             if (arrowItem is PylonArrow) {
@@ -54,7 +54,7 @@ object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityDamageByEntityEvent) {
+    private fun handle(event: EntityDamageByEntityEvent) {
         if (event.damager is AbstractArrow) {
             val arrowItem = PylonItem.fromStack((event.damager as AbstractArrow).itemStack)
             if (arrowItem is PylonArrow) {

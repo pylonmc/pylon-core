@@ -6,7 +6,8 @@ import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent;
-import io.github.pylonmc.pylon.core.fluid.FluidConnectionPoint;
+import io.github.pylonmc.pylon.core.fluid.FluidPointType;
+import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
 import io.github.pylonmc.pylon.core.fluid.PylonFluid;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
@@ -34,8 +35,8 @@ public class FluidLimiter extends PylonBlock implements PylonFluidBlock, PylonUn
 
     public static final double MAX_FLOW_RATE = 50.0;
 
-    @Getter private final FluidConnectionPoint input;
-    @Getter private final FluidConnectionPoint output;
+    @Getter private final VirtualFluidPoint input;
+    @Getter private final VirtualFluidPoint output;
     @Getter private @Nullable PylonFluid fluid;
     @Getter private double amount;
 
@@ -43,8 +44,8 @@ public class FluidLimiter extends PylonBlock implements PylonFluidBlock, PylonUn
     public FluidLimiter(Block block, BlockCreateContext context) {
         super(block);
 
-        input = new FluidConnectionPoint(block, "input", FluidConnectionPoint.Type.INPUT);
-        output = new FluidConnectionPoint(block, "output", FluidConnectionPoint.Type.OUTPUT);
+        input = new VirtualFluidPoint(block, FluidPointType.INPUT);
+        output = new VirtualFluidPoint(block, FluidPointType.OUTPUT);
         fluid = null;
         amount = 0;
 
@@ -80,7 +81,7 @@ public class FluidLimiter extends PylonBlock implements PylonFluidBlock, PylonUn
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Double> getRequestedFluids(@NotNull String connectionPoint, double deltaSeconds) {
+    public @NotNull Map<PylonFluid, Double> getRequestedFluids(double deltaSeconds) {
         return amount == 0
                 ? PylonRegistry.FLUIDS.getValues()
                         .stream()
@@ -89,20 +90,20 @@ public class FluidLimiter extends PylonBlock implements PylonFluidBlock, PylonUn
     }
 
     @Override
-    public void addFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, double amount) {
+    public void addFluid(@NotNull PylonFluid fluid, double amount) {
         this.fluid = fluid;
         this.amount += amount;
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Double> getSuppliedFluids(@NotNull String connectionPoint, double deltaSeconds) {
+    public @NotNull Map<PylonFluid, Double> getSuppliedFluids(double deltaSeconds) {
         return fluid == null
                 ? Map.of()
                 : Map.of(fluid, amount);
     }
 
     @Override
-    public void removeFluid(@NotNull String connectionPoint, @NotNull PylonFluid fluid, double amount) {
+    public void removeFluid(@NotNull PylonFluid fluid, double amount) {
         this.amount -= amount;
         if (this.amount == 0) {
             this.fluid = null;

@@ -6,6 +6,9 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import org.bukkit.entity.Player
 
+/**
+ * The configuration for a WAILA bar, returned by a block or entity
+ */
 data class WailaConfig @JvmOverloads constructor(
     val text: Component,
     val placeholders: Map<String, ComponentLike> = emptyMap(),
@@ -14,7 +17,8 @@ data class WailaConfig @JvmOverloads constructor(
     val progress: Float = 1F
 ) {
 
-    fun apply(bar: BossBar) {
+    @JvmSynthetic
+    internal fun apply(bar: BossBar) {
         val player = bar.viewers().singleOrNull() as? Player
         if (player != null) {
             val attacher = PlaceholderAttacher(placeholders)

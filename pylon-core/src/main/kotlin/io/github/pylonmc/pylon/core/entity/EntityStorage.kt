@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
@@ -24,7 +25,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.function.Consumer
 import kotlin.random.Random
 
-
+/**
+ * Basically [BlockStorage], but for entities
+ */
 object EntityStorage : Listener {
 
     private val entities: MutableMap<UUID, PylonEntity<*>> = ConcurrentHashMap()
@@ -47,6 +50,9 @@ object EntityStorage : Listener {
     fun get(entity: Entity): PylonEntity<*>?
         = get(entity.uniqueId)
 
+    /**
+     * Returns null if the entity is not of the expected class
+     */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, uuid: UUID): T? {
         val entity = get(uuid) ?: return null
@@ -56,13 +62,22 @@ object EntityStorage : Listener {
         return clazz.cast(entity)
     }
 
+    /**
+     * Returns null if the entity is not of the expected class
+     */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, entity: Entity): T?
         = getAs(clazz, entity.uniqueId)
 
+    /**
+     * Returns null if the entity is not of the expected class
+     */
     inline fun <reified T> getAs(uuid: UUID): T?
         = getAs(T::class.java, uuid)
 
+    /**
+     * Returns null if the entity is not of the expected class
+     */
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 

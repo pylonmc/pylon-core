@@ -4,16 +4,25 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.key.getAddon
+import io.github.pylonmc.pylon.core.util.getAddon
 import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 
+/**
+ * Fluids aren't necessarily just liquids, they can also be gases or other substances that can flow
+ */
 open class PylonFluid(
     private val key: NamespacedKey,
     val name: Component,
-    val material: Material, // used eg in fluid tanks to display the liquid
+    /**
+     * Used to display the fluid in fluid tanks
+     */
+    val material: Material,
+    /**
+     * @see PylonFluidTag
+     */
     private val tags: MutableList<PylonFluidTag>,
 ) : Keyed {
 
@@ -23,8 +32,6 @@ open class PylonFluid(
         material,
         tags.toMutableList()
     )
-
-    override fun getKey(): NamespacedKey = key
 
     init {
         val addon = PylonRegistry.ADDONS[NamespacedKey(key.namespace, key.namespace)]!!
@@ -43,7 +50,11 @@ open class PylonFluid(
         tags.add(tag)
     }
 
-    fun hasTag(type: Class<out PylonFluidTag>): Boolean = tags.any { type.isInstance(it) }
+    fun hasTag(type: Class<out PylonFluidTag>): Boolean
+        = tags.any { type.isInstance(it) }
+
+    inline fun <reified T: PylonFluidTag> hasTag(): Boolean
+        = hasTag(T::class.java)
 
     /**
      * @throws IllegalArgumentException if the fluid does not have a tag of the given type
@@ -74,6 +85,8 @@ open class PylonFluid(
 
         return item
     }
+
+    override fun getKey(): NamespacedKey = key
 
     override fun equals(other: Any?): Boolean = other is PylonFluid && key == other.key
     override fun hashCode(): Int = key.hashCode()

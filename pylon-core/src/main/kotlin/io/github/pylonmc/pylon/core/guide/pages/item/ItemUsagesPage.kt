@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
-import io.github.pylonmc.pylon.core.guide.PylonGuide
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
@@ -22,7 +22,7 @@ open class ItemUsagesPage(val stack: ItemStack) : GuidePage {
     init {
         for (type in PylonRegistry.RECIPE_TYPES) {
             for (recipe in type.recipes) {
-                if (!recipe.isHidden() && recipe.isInput(stack)) {
+                if (!recipe.isHidden && recipe.isInput(stack)) {
                     pages.add(recipe.display())
                 }
             }

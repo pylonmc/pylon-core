@@ -9,20 +9,24 @@ import org.bukkit.inventory.RecipeChoice
 import xyz.xenondevs.invui.gui.Gui
 
 interface PylonRecipe : Keyed {
-    fun isHidden() = false
-    fun getInputItems(): List<RecipeChoice>
-    fun getInputFluids(): List<PylonFluid> = listOf()
-    fun getOutputItems(): List<ItemStack>
-    fun getOutputFluids(): List<PylonFluid> = listOf()
-    // I have found it's very easy to return null input item by accident, hence the seemingly redundant null check
-    fun isInput(stack: ItemStack) = getInputItems().any {
+
+    val isHidden: Boolean
+        get() = false
+
+    val inputItems: List<RecipeChoice>
+    val inputFluids: List<PylonFluid> get() = emptyList()
+    val outputItems: List<ItemStack>
+    val outputFluids: List<PylonFluid> get() = emptyList()
+
+    fun isInput(stack: ItemStack) = inputItems.any {
         if (it is RecipeChoice.MaterialChoice && PylonItem.fromStack(stack) != null) {
             return false
         }
+        @Suppress("SENSELESS_COMPARISON") // I have found it's very easy to return null input item by accident, hence the seemingly redundant null check
         it != null && it.test(stack)
     }
-    fun isInput(fluid: PylonFluid) = getInputFluids().contains(fluid)
-    fun isOutput(stack: ItemStack) = getOutputItems().any { stack.isPylonSimilar(it) }
-    fun isOutput(fluid: PylonFluid) = getOutputFluids().contains(fluid)
+    fun isInput(fluid: PylonFluid) = fluid in inputFluids
+    fun isOutput(stack: ItemStack) = outputItems.any { stack.isPylonSimilar(it) }
+    fun isOutput(fluid: PylonFluid) = fluid in outputFluids
     fun display(): Gui
 }
