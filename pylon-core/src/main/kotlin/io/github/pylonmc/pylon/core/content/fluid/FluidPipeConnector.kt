@@ -25,7 +25,7 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
 
     override fun createEntities(context: BlockCreateContext)
         = mutableMapOf(
-            Pair("connector", FluidPointInteraction.make(context, FluidPointType.CONNECTOR))
+            "connector" to FluidPointInteraction.make(context, FluidPointType.CONNECTOR)
         )
 
     val fluidPointInteraction
@@ -38,7 +38,7 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
         }
 
         // Clone to prevent ConcurrentModificationException if pipeDisplay.delete modified connectedPipeDisplays
-        for (pipeDisplayId in HashSet(fluidPointInteraction.connectedPipeDisplays)) {
+        for (pipeDisplayId in fluidPointInteraction.connectedPipeDisplays.toSet()) {
             val pipeDisplay = EntityStorage.getAs<FluidPipeDisplay>(pipeDisplayId)
             // can be null if called from two different location (eg two different connection points removing the display)
             pipeDisplay?.delete(true, player)
@@ -48,13 +48,13 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
     }
 
     override fun getWaila(player: Player): WailaConfig
-        = WailaConfig(name, mapOf(Pair("pipe", this.pipe.stack.effectiveName())))
+        = WailaConfig(name, mapOf("pipe" to this.pipe.stack.effectiveName()))
 
     val pipe: PylonItem
         get() {
-            check(!fluidPointInteraction.connectedPipeDisplays.isEmpty())
+            check(fluidPointInteraction.connectedPipeDisplays.isNotEmpty())
             val uuid = fluidPointInteraction.connectedPipeDisplays.iterator().next()
-            return  EntityStorage.getAs<FluidPipeDisplay?>(uuid)!!.pipe
+            return EntityStorage.getAs<FluidPipeDisplay?>(uuid)!!.pipe
         }
 
     companion object {

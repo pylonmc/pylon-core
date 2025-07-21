@@ -16,6 +16,9 @@ import java.time.Duration
 
 abstract class ProgressItem @JvmOverloads constructor(
     private val material: Material,
+    /**
+     * If true, the progress bar will be inverted, meaning that 0.0 is full and 1.0 is empty.
+     */
     private val inverse: Boolean = false
 ) : AbstractItem() {
 

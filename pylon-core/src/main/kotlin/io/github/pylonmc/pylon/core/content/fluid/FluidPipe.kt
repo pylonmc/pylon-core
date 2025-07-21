@@ -35,16 +35,16 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
         .map { s -> FluidTemperature.valueOf(s.uppercase()) }
 
     override fun getPlaceholders(): Map<String, ComponentLike>
-        = mapOf<String, ComponentLike>(
-            Pair("fluid_per_second", UnitFormat.Companion.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond)),
-            Pair("fluids", Component.join(
+        = mapOf(
+            "fluid_per_second" to UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond),
+            "fluids" to Component.join(
                 JoinConfiguration.separator(Component.text(", ")),
                 allowedFluids.map(FluidTemperature::valueText)
-            ))
+            )
         )
 
-    val predicate: Predicate<PylonFluid>
-        get() = Predicate { fluid ->
+    fun getPredicate(): Predicate<PylonFluid>
+        = Predicate<PylonFluid> { fluid ->
             fluid.hasTag<FluidTemperature>() && allowedFluids.contains(fluid.getTag<FluidTemperature>())
         }
 
@@ -61,11 +61,11 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
             }
         }
 
-        if (ConnectingService.isConnecting(event.getPlayer())) {
-            val segment = ConnectingService.placeConnection(event.getPlayer())
+        if (ConnectingService.isConnecting(event.player)) {
+            val segment = ConnectingService.placeConnection(event.player)
             if (segment != null) {
                 FluidManager.setFluidPerSecond(segment, fluidPerSecond)
-                FluidManager.setFluidPredicate(segment, this.predicate)
+                FluidManager.setFluidPredicate(segment, this.getPredicate())
             }
         }
     }
@@ -75,13 +75,13 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
             return
         }
 
-        val action = event.getAction()
+        val action = event.action
         val block: Block? = event.clickedBlock
-        val player: Player = event.getPlayer()
+        val player: Player = event.player
 
         if (block != null && action == Action.RIGHT_CLICK_BLOCK && !ConnectingService.isConnecting(player)) {
             if (!tryStartConnection(player, block)) {
-                tryStartConnection(player, block.getRelative(event.getBlockFace()))
+                tryStartConnection(player, block.getRelative(event.blockFace))
             }
         }
 
@@ -89,7 +89,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
             val segment = ConnectingService.placeConnection(player)
             if (segment != null) {
                 FluidManager.setFluidPerSecond(segment, fluidPerSecond)
-                FluidManager.setFluidPredicate(segment, this.predicate)
+                FluidManager.setFluidPredicate(segment, this.getPredicate())
             }
         }
     }

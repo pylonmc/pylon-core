@@ -41,11 +41,11 @@ class FluidPipeMarker : PylonBlock, PylonBreakHandler {
     fun getPipeDisplay(): FluidPipeDisplay?
         = EntityStorage.getAs<FluidPipeDisplay>(pipeDisplay!!)
 
-    fun getFrom(): FluidPointInteraction?
-        = EntityStorage.getAs<FluidPointInteraction>(from!!)
+    fun getFrom(): FluidPointInteraction
+        = EntityStorage.getAs<FluidPointInteraction>(from!!)!!
 
-    fun getTo(): FluidPointInteraction?
-        = EntityStorage.getAs<FluidPointInteraction>(to!!)
+    fun getTo(): FluidPointInteraction
+        = EntityStorage.getAs<FluidPointInteraction>(to!!)!!
 
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
         var player: Player? = null

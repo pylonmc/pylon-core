@@ -22,7 +22,7 @@ open class ItemRecipesPage(val stack: ItemStack) : GuidePage {
     init {
         for (type in PylonRegistry.RECIPE_TYPES) {
             for (recipe in type.recipes) {
-                if (!recipe.isHidden() && recipe.isOutput(stack)) {
+                if (!recipe.isHidden && recipe.isOutput(stack)) {
                     pages.add(recipe.display())
                 }
             }

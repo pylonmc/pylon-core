@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.content.fluid.FluidPipeMarker
 import io.github.pylonmc.pylon.core.content.fluid.FluidPointInteraction
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipe
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.util.isCardinalDirection
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vectorToBlockFace
 import net.kyori.adventure.text.Component
@@ -159,7 +160,7 @@ class ConnectingTask(
             }
         }
 
-        var distance = Float.Companion.MAX_VALUE
+        var distance = Float.MAX_VALUE
         distance = processAxis(Vector3i(1, 0, 0), distance)
         distance = processAxis(Vector3i(0, 1, 0), distance)
         processAxis(Vector3i(0, 0, 1), distance)

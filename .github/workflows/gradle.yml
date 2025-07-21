@@ -3,15 +3,15 @@ name: Kotlin CI with Gradle
 on:
   push:
     branches:
-    - master
+      - master
     paths:
-    - 'pylon-core/**'
-    - 'pylon-test/**'
+      - 'pylon-core/**'
+      - 'pylon-test/**'
   pull_request:
     branches: [ "*" ]
     paths:
-    - 'pylon-core/**'
-    - 'pylon-test/**'
+      - 'pylon-core/**'
+      - 'pylon-test/**'
   workflow_call:
     inputs:
       version:
@@ -50,7 +50,7 @@ jobs:
           path: 'pylon-core/build/libs/pylon-core-${{ inputs.version || github.run_number }}.jar'
 
   dependency-submission:
-    needs: [build]
+    needs: [ build ]
 
     runs-on: ubuntu-latest
     permissions:
@@ -70,5 +70,5 @@ jobs:
         uses: gradle/actions/dependency-submission@v4.2.2
 
   test-build:
-    needs: [build]
+    needs: [ build ]
     uses: ./.github/workflows/live-testing.yml

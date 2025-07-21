@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -16,16 +17,28 @@ import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.Contract
 
+/**
+ * PylonItems are wrappers around ItemStacks that allow you to easily add extra functionality.
+ *
+ * Unlike [PylonBlock] and [PylonEntity], PylonItem isn't persisted in memory, so you should
+ * avoid storing any fields in your PylonItem classes. Instead, use the stack's [PersistentDataContainer]
+ * to store data persistently.
+ *
+ * An implementation of PylonItem must have a constructor that takes an [ItemStack] as its only parameter.
+ * This will be used to load an in-world ItemStack as this particular PylonItem class.
+ */
 open class PylonItem(val stack: ItemStack) : Keyed {
 
-    private val key = stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
+    private val key =
+        stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
     val schema = PylonRegistry.ITEMS.getOrThrow(key)
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
-    val isDisabled: Boolean = PylonConfig.disabledItems.contains(key)
+    val isDisabled = key in PylonConfig.disabledItems
 
     fun getSettings() = Settings.get(key)
 
@@ -41,8 +54,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     companion object {
 
-        private val nameWarningsSupressed: MutableSet<NamespacedKey> = mutableSetOf()
+        private val nameWarningsSuppressed: MutableSet<NamespacedKey> = mutableSetOf()
 
+        @Suppress("UnstableApiUsage")
         private fun checkName(schema: PylonItemSchema) {
             val translator = AddonTranslator.translators[schema.addon]
             check(translator != null) {
@@ -74,7 +88,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         private fun register(schema: PylonItemSchema) {
-            if (schema.key !in nameWarningsSupressed) {
+            if (schema.key !in nameWarningsSuppressed) {
                 checkName(schema)
             }
             PylonRegistry.ITEMS.register(schema)
@@ -111,9 +125,13 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             return stack != null && stack.persistentDataContainer.has(PylonItemSchema.pylonItemKeyKey)
         }
 
+        /**
+         * Suppresses warnings about missing/incorrect translation keys for item names and lores
+         * for the given item key
+         */
         @JvmStatic
         fun supressNameWarnings(key: NamespacedKey) {
-            nameWarningsSupressed.add(key)
+            nameWarningsSuppressed.add(key)
         }
 
         @JvmStatic

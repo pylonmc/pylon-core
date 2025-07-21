@@ -15,6 +15,7 @@ class FluidPointDisplay(entity: ItemDisplay) : PylonEntity<ItemDisplay>(KEY, ent
 
         val KEY = pylonKey("fluid_connection_display")
 
+        @JvmStatic
         fun make(point: VirtualFluidPoint, translation: Vector): FluidPointDisplay {
             val display = ItemDisplayBuilder()
                 .material(point.type.material)

@@ -36,14 +36,14 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
         // we wait for them to load and then set their segments' fluid per second and predicate
         EntityStorage.whenEntityLoads(from, FluidPointInteraction::class.java) { interaction ->
             FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe.predicate)
+            FluidManager.setFluidPredicate(interaction.point.segment, pipe.getPredicate())
         }
 
         // Technically only need to do this for one of the end points since they're part of the same segment, but
         // we do it twice just to be safe
         EntityStorage.whenEntityLoads(to, FluidPointInteraction::class.java) { interaction ->
             FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe.predicate)
+            FluidManager.setFluidPredicate(interaction.point.segment, pipe.getPredicate())
         }
     }
 
@@ -63,15 +63,15 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
         pdc.set(TO_KEY, PylonSerializers.UUID, to)
     }
 
-    fun getFrom(): FluidPointInteraction?
-        = EntityStorage.getAs<FluidPointInteraction>(from)
+    fun getFrom(): FluidPointInteraction
+        = EntityStorage.getAs<FluidPointInteraction>(from)!!
 
-    fun getTo(): FluidPointInteraction?
-        = EntityStorage.getAs<FluidPointInteraction>(to)
+    fun getTo(): FluidPointInteraction
+        = EntityStorage.getAs<FluidPointInteraction>(to)!!
 
     fun delete(removeMarkersIfEmpty: Boolean, player: Player?) {
-        val from = getFrom()!!
-        val to = getTo()!!
+        val from = getFrom()
+        val to = getTo()
 
         val itemToGive = pipe.stack.clone()
         itemToGive.amount = amount
@@ -119,6 +119,7 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
         /**
          * Convenience function that constructs the display, but then also adds it to EntityStorage
          */
+        @JvmStatic
         fun make(pipe: FluidPipe, amount: Int, from: FluidPointInteraction, to: FluidPointInteraction): FluidPipeDisplay {
             val display = FluidPipeDisplay(pipe, amount, from, to)
             EntityStorage.add(display)

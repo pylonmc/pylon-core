@@ -13,11 +13,10 @@ import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 
 
-abstract class CookingRecipeWrapper(val recipe: CookingRecipe<*>) : VanillaRecipeWrapper {
+abstract class CookingRecipeWrapper(override val recipe: CookingRecipe<*>) : VanillaRecipeWrapper {
+    override val inputItems: List<RecipeChoice> = listOf(recipe.inputChoice)
+    override val outputItems: List<ItemStack> = listOf(recipe.result)
     override fun getKey(): NamespacedKey = recipe.key
-    override fun getRecipe(): Recipe = recipe
-    override fun getInputItems(): List<RecipeChoice> = listOf(recipe.inputChoice)
-    override fun getOutputItems(): List<ItemStack> = listOf(recipe.result)
 }
 
 class BlastingRecipeWrapper(recipe: BlastingRecipe) : CookingRecipeWrapper(recipe) {

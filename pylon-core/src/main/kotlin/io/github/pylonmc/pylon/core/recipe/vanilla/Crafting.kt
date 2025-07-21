@@ -4,24 +4,18 @@ import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.inventory.CraftingRecipe
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.Recipe
-import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.ShapedRecipe
-import org.bukkit.inventory.ShapelessRecipe
+import org.bukkit.inventory.*
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 
 
 abstract class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : VanillaRecipeWrapper {
     override fun getKey(): NamespacedKey = craftingRecipe.key
-    override fun getRecipe(): Recipe = craftingRecipe
-    override fun getOutputItems(): List<ItemStack> = listOf(craftingRecipe.result)
+    override val outputItems: List<ItemStack> = listOf(craftingRecipe.result)
 }
 
-class ShapedRecipeWrapper(val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
-    override fun getInputItems(): List<RecipeChoice> = recipe.choiceMap.values.filter { it != null }.toList()
+class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
+    override val inputItems: List<RecipeChoice> = recipe.choiceMap.values.filter { it != null }.toList()
     override fun display(): Gui {
         val gui = Gui.normal()
             .setStructure(
@@ -53,8 +47,8 @@ class ShapedRecipeWrapper(val recipe: ShapedRecipe) : CraftingRecipeWrapper(reci
     }
 }
 
-class ShapelessRecipeWrapper(val recipe: ShapelessRecipe) : CraftingRecipeWrapper(recipe) {
-    override fun getInputItems(): List<RecipeChoice> = recipe.choiceList.filter { it != null }
+class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : CraftingRecipeWrapper(recipe) {
+    override val inputItems: List<RecipeChoice> = recipe.choiceList.filter { it != null }
     override fun display() = Gui.normal()
             .setStructure(
                 "# # # # # # # # #",

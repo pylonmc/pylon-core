@@ -5,6 +5,9 @@ import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslationArgument
 import net.kyori.adventure.text.VirtualComponentRenderer
 
+/**
+ * A [TranslationArgument] only to be used when translating Pylon keys
+ */
 class PylonArgument private constructor(val name: String, val value: ComponentLike) : VirtualComponentRenderer<Unit> {
 
     override fun apply(context: Unit): ComponentLike {

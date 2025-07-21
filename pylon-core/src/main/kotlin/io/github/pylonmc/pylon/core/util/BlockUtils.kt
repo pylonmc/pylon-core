@@ -4,6 +4,9 @@ package io.github.pylonmc.pylon.core.util
 
 import org.bukkit.block.BlockFace
 
+/**
+ * [BlockFace.UP], [BlockFace.DOWN], [BlockFace.EAST], [BlockFace.WEST], [BlockFace.SOUTH], [BlockFace.NORTH]
+ */
 @JvmField
 val IMMEDIATE_FACES: Array<BlockFace> = arrayOf(
     BlockFace.UP,
@@ -14,6 +17,9 @@ val IMMEDIATE_FACES: Array<BlockFace> = arrayOf(
     BlockFace.NORTH
 )
 
+/**
+ * Same as [IMMEDIATE_FACES] but includes diagonal faces, not including the vertical directions.
+ */
 @JvmField
 val IMMEDIATE_FACES_WITH_DIAGONALS: Array<BlockFace> = arrayOf(
     BlockFace.UP,

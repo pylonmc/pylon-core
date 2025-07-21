@@ -50,11 +50,15 @@ fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
     return pylonItem1.schema.key == pylonItem2.schema.key
 }
 
+@JvmSynthetic
 inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
     val pylonItem = PylonItem.fromStack(this)
     return pylonItem != null && pylonItem !is T
 }
 
+/**
+ * Returns a [RecipeChoice] for this [ItemStack]
+ */
 @JvmName("recipeChoiceFromItem")
 fun ItemStack.asRecipeChoice(): RecipeChoice {
     return if (PylonItem.isPylonItem(this)) {
