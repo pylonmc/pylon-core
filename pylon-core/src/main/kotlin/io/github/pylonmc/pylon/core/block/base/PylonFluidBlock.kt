@@ -3,10 +3,13 @@ package io.github.pylonmc.pylon.core.block.base
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 
 /**
- * Represents a fluid block which can supply and request fluids.
+ * PylonFluidBlock must be implemented by any block that has fluid inputs/outputs.
+ * This interface allowed you to request fluids from input points, supply fluids to
+ * output points, and specify how to add/remove fluids from your block.
  *
  * At this time, having multiple inputs/outputs is not supported.
  */
+// TODO 'Confused? [Here is an explanation on how this works.](link)'
 interface PylonFluidBlock {
 
     /**
@@ -18,35 +21,41 @@ interface PylonFluidBlock {
      *
      * Any implementation of this method must NEVER call the same method for any other connection
      * point, otherwise you risk creating infinite loops.
+     *
+     * Called exactly one per fluid tick.
      */
     fun getSuppliedFluids(deltaSeconds: Double): Map<PylonFluid, Double> = mapOf()
 
     /**
-     * Returns a map of fluid types - and their corresponding amounts - that can be taken in by
-     * the block for this fluid tick. For example, a tank should request enough fluid to fill up
-     * to capacity.
+     * Returns the amount of the given fluid that the machine wants to receive next tick.
      *
-     * If you have a machine that consumes 100 fluid per second, it should request
-     * 100*deltaSeconds of that fluid
+     * If you have a machine that consumes 100 water per second, it should request
+     * 100*deltaSeconds of water, and return 0 for every other fluid.
      *
      * Any implementation of this method must NEVER call the same method for any other connection
      * point, otherwise you risk creating infinite loops.
+     *
+     * Called at most once for any given fluid type per tick.
      */
-    fun getRequestedFluids(deltaSeconds: Double): Map<PylonFluid, Double> = mapOf()
+    fun fluidAmountRequested(fluid: PylonFluid, deltaSeconds: Double): Double = 0.0
 
     /**
-     * `amount` is always at most `getRequestedFluids(connectionPoint).get(fluid)` and will never
+     * `amount` is always at most `getRequestedFluids().get(fluid)` and will never
      * be zero or less.
+     *
+     * Called at most once per fluid tick.
      */
-    fun addFluid(fluid: PylonFluid, amount: Double) {
-        error("Block requested fluids, but does not implement addFluid")
+    fun onFluidAdded(fluid: PylonFluid, amount: Double) {
+        error("Block requested fluids, but does not implement onFluidAdded")
     }
 
     /**
-     * `amount` is always at least `getSuppliedFluids(connectionPoint).get(fluid)` and will never
+     * `amount` is always at least `getSuppliedFluids().get(fluid)` and will never
      * be zero or less.
+     *
+     * Called at most once per fluid tick.
      */
-    fun removeFluid(fluid: PylonFluid, amount: Double) {
+    fun onFluidRemoved(fluid: PylonFluid, amount: Double) {
         error("Block supplied fluids, but does not implement removeFluid")
     }
 }

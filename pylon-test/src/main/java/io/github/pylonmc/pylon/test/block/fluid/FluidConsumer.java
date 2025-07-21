@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.block.fluid;
 
 import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.base.PylonMultiBufferFluidBlock;
+import io.github.pylonmc.pylon.core.block.base.PylonFluidBufferBlock;
 import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
@@ -21,25 +21,23 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 
-public class FluidConsumer extends PylonBlock implements PylonMultiBufferFluidBlock, PylonUnloadBlock {
+public class FluidConsumer extends PylonBlock implements PylonFluidBufferBlock, PylonUnloadBlock {
 
     public static final NamespacedKey LAVA_CONSUMER_KEY = PylonTest.key("lava_consumer");
     public static final NamespacedKey WATER_CONSUMER_KEY = PylonTest.key("water_consumer");
 
     private static final NamespacedKey pointKey = PylonTest.key("point");
-    private static final NamespacedKey amountKey = PylonTest.key("amount");
 
     private static final double CAPACITY = 100.0;
 
     @Getter private final VirtualFluidPoint point;
-    @Getter private double amount;
 
     @SuppressWarnings("unused")
     public FluidConsumer(Block block, BlockCreateContext context) {
         super(block);
         point = new VirtualFluidPoint(block, FluidPointType.INPUT);
         FluidManager.add(point);
-        amount = 0;
+        createFluidBuffer(getFluidType(), CAPACITY, true, false);
     }
 
     @SuppressWarnings("unused")
@@ -47,13 +45,11 @@ public class FluidConsumer extends PylonBlock implements PylonMultiBufferFluidBl
         super(block);
         point = pdc.get(pointKey, PylonSerializers.FLUID_CONNECTION_POINT);
         FluidManager.add(point);
-        amount = pdc.get(amountKey, PylonSerializers.DOUBLE);
     }
 
     @Override
     public void write(@NotNull PersistentDataContainer pdc) {
         pdc.set(pointKey, PylonSerializers.FLUID_CONNECTION_POINT, point);
-        pdc.set(amountKey, PylonSerializers.DOUBLE, amount);
     }
 
     @Override
@@ -61,16 +57,8 @@ public class FluidConsumer extends PylonBlock implements PylonMultiBufferFluidBl
         FluidManager.remove(point);
     }
 
-    @Override
-    public @NotNull Map<PylonFluid, Double> getRequestedFluids(double deltaSeconds) {
-        return Map.of(
-                getFluidType(), CAPACITY - amount
-        );
-    }
-
-    @Override
-    public void addFluid(@NotNull PylonFluid fluid, double amount) {
-        this.amount += amount;
+    public double getAmount() {
+        return fluidAmount(getFluidType());
     }
 
     private PylonFluid getFluidType() {

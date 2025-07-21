@@ -33,12 +33,16 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
 
     fun getFluid(key: String): PylonFluid? {
         val name = get<String>(key) ?: return null
-        return PylonRegistry.FLUIDS[NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")]
+        return PylonRegistry.FLUIDS[
+            NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")
+        ]
     }
 
     fun getFluidOrThrow(key: String): PylonFluid {
         val name = getOrThrow<String>(key)
-        return getFluid(name) ?: error("No such fluid '$name'")
+        return PylonRegistry.FLUIDS[
+            NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")
+        ] ?: error("No such fluid '$name'")
     }
 
     fun getMaterial(key: String): Material? {
@@ -48,7 +52,7 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
 
     fun getMaterialOrThrow(key: String): Material {
         val name = getOrThrow<String>(key)
-        return getMaterial(name) ?: error("No such material '$name'")
+        return Material.getMaterial(name.uppercase()) ?: error("No such material '$name'")
     }
 
     fun getItem(key: String): ItemStack? {
