@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
@@ -195,9 +196,14 @@ data class Research(
                 return
             }
 
-            val canCraft = event.recipe.outputItems.all {
-                val item = PylonItem.fromStack(it)
-                item == null || event.player.canCraft(item, true)
+            val canCraft = event.recipe.results.all {
+                when (it) {
+                    is FluidOrItem.Item ->  {
+                        val item = PylonItem.fromStack(it.item)
+                        item == null || event.player.canCraft(item, true)
+                    }
+                    else -> true
+                }
             }
 
             if (!canCraft) {
