@@ -1,63 +1,80 @@
 package io.github.pylonmc.pylon.core.i18n
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.TranslationArgument
-import net.kyori.adventure.text.VirtualComponentRenderer
+import net.kyori.adventure.text.*
 
 /**
  * A [TranslationArgument] only to be used when translating Pylon keys
  */
-class PylonArgument private constructor(val name: String, val value: ComponentLike) : VirtualComponentRenderer<Unit> {
+class PylonArgument private constructor(val name: String, val value: ComponentLike) :
+    VirtualComponentRenderer<Unit>, TranslationArgumentLike {
 
     override fun apply(context: Unit): ComponentLike {
         return value
     }
 
+    override fun asTranslationArgument(): TranslationArgument {
+        return TranslationArgument.component(
+            Component.virtual(
+                Unit::class.java,
+                this
+            ).append(value) // Append the value for comparison purposes, it'll get thrown out anyway
+        )
+    }
+
     companion object {
         @JvmStatic
-        fun of(name: String, value: ComponentLike): TranslationArgument {
-            return TranslationArgument.component(
-                Component.virtual(
-                    Unit::class.java,
-                    PylonArgument(name, value)
-                ).append(value) // Append the value for comparison purposes, it'll get thrown out anyway
-            )
+        fun of(name: String, value: ComponentLike): PylonArgument {
+            return PylonArgument(name, value)
         }
 
         @JvmStatic
-        fun of(name: String, value: String): TranslationArgument {
+        fun of(name: String, value: String): PylonArgument {
             return of(name, Component.text(value))
         }
 
         @JvmStatic
-        fun of(name: String, value: Int): TranslationArgument {
+        fun of(name: String, value: Int): PylonArgument {
             return of(name, Component.text(value))
         }
 
         @JvmStatic
-        fun of(name: String, value: Long): TranslationArgument {
+        fun of(name: String, value: Long): PylonArgument {
             return of(name, Component.text(value))
         }
 
         @JvmStatic
-        fun of(name: String, value: Double): TranslationArgument {
+        fun of(name: String, value: Double): PylonArgument {
             return of(name, Component.text(value))
         }
 
         @JvmStatic
-        fun of(name: String, value: Float): TranslationArgument {
+        fun of(name: String, value: Float): PylonArgument {
             return of(name, Component.text(value))
         }
 
         @JvmStatic
-        fun of(name: String, value: Boolean): TranslationArgument {
+        fun of(name: String, value: Boolean): PylonArgument {
             return of(name, Component.text(value))
         }
 
         @JvmStatic
-        fun of(name: String, value: Char): TranslationArgument {
+        fun of(name: String, value: Char): PylonArgument {
             return of(name, Component.text(value))
+        }
+
+        /**
+         * Attaches arguments to a Pylon translation key, making sure they are replaced
+         * correctly when the translation is rendered.
+         */
+        @JvmStatic
+        @JvmName("attachArguments")
+        fun Component.attachPylonArguments(args: List<PylonArgument>): Component {
+            if (args.isEmpty()) return this
+            var result = this
+            if (this is TranslatableComponent) {
+                result = this.arguments(args)
+            }
+            return result.children(result.children().map { it.attachPylonArguments(args) })
         }
     }
 }

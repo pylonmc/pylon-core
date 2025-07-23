@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.test.test.misc;
 
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder;
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapRepresentation;
-import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper;
+import io.github.pylonmc.pylon.core.util.PylonUtils;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class WrapTest extends AsyncTest {
 
-    private final TextWrapper wrapper = new TextWrapper(8);
     private final MiniMessage mm = MiniMessage.miniMessage();
 
     @Override
@@ -56,7 +55,7 @@ public class WrapTest extends AsyncTest {
         LineWrapRepresentation repr = LineWrapEncoder.encode(component);
         List<String> newLines = new ArrayList<>();
         for (String line : repr.getLines()) {
-            newLines.addAll(wrapper.wrap(line));
+            newLines.addAll(PylonUtils.wrapText(line, 8));
         }
         List<TextComponent> lines = new LineWrapRepresentation(newLines, repr.getStyles()).toComponentLines();
         return Component.join(JoinConfiguration.newlines(), lines);

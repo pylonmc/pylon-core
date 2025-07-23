@@ -1,9 +1,9 @@
 package io.github.pylonmc.pylon.core.block.waila
 
-import io.github.pylonmc.pylon.core.i18n.PlaceholderAttacher
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
+import io.github.pylonmc.pylon.core.i18n.PylonArgument.Companion.attachPylonArguments
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.ComponentLike
 import org.bukkit.entity.Player
 
 /**
@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
  */
 data class WailaConfig @JvmOverloads constructor(
     val text: Component,
-    val placeholders: Map<String, ComponentLike> = emptyMap(),
+    val placeholders: List<PylonArgument> = emptyList(),
     val color: BossBar.Color = BossBar.Color.WHITE,
     val style: BossBar.Overlay = BossBar.Overlay.PROGRESS,
     val progress: Float = 1F
@@ -21,8 +21,7 @@ data class WailaConfig @JvmOverloads constructor(
     internal fun apply(bar: BossBar) {
         val player = bar.viewers().singleOrNull() as? Player
         if (player != null) {
-            val attacher = PlaceholderAttacher(placeholders)
-            bar.name(attacher.render(text, Unit))
+            bar.name(text.attachPylonArguments(placeholders))
         } else {
             bar.name(text)
         }

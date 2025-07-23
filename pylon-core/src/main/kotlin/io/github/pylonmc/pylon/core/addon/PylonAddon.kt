@@ -5,7 +5,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.entity.EntityStorage
-import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -66,10 +66,7 @@ interface PylonAddon : Keyed {
      */
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)
-        AddonTranslator.register(this)
-
         if (!suppressAddonNameWarning) {
-            val translator = AddonTranslator.translators[this]!!
             for (locale in languages) {
                 if (!translator.canTranslate("pylon.${key.namespace}.addon", locale)) {
                     PylonCore.logger.warning("${key.namespace} is missing the 'addon' translation key for ${locale.displayName}")
@@ -125,7 +122,6 @@ interface PylonAddon : Keyed {
                 PylonRegistry.RECIPE_TYPES.unregisterAllFromAddon(plugin)
                 PylonRegistry.MOB_DROPS.unregisterAllFromAddon(plugin)
                 PylonRegistry.ADDONS.unregister(plugin)
-                AddonTranslator.unregister(plugin)
             }
         }
     }

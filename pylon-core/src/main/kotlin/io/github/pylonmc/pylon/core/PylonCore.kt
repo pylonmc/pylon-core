@@ -9,18 +9,14 @@ import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.PylonCommand
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipeConnector
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipeDisplay
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipeMarker
-import io.github.pylonmc.pylon.core.content.fluid.FluidPointDisplay
-import io.github.pylonmc.pylon.core.content.fluid.FluidPointInteraction
+import io.github.pylonmc.pylon.core.content.fluid.*
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
-import io.github.pylonmc.pylon.core.content.guide.PylonGuide
-import io.github.pylonmc.pylon.core.i18n.AddonTranslator
 import io.github.pylonmc.pylon.core.i18n.MinecraftTranslator
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
@@ -47,6 +43,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         saveDefaultConfig()
 
+        Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
         Bukkit.getPluginManager().registerEvents(PylonAddon, this)
         registerWithPylon()
 
@@ -60,7 +57,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
-        Bukkit.getPluginManager().registerEvents(AddonTranslator, this)
         Bukkit.getPluginManager().registerEvents(EntityListener, this)
         Bukkit.getPluginManager().registerEvents(Waila, this)
         Bukkit.getPluginManager().registerEvents(Research, this)

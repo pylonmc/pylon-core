@@ -4,19 +4,15 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidManager
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingPointInteraction
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingPointNewBlock
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingPointPipeConnector
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingPointPipeMarker
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
+import io.github.pylonmc.pylon.core.fluid.connecting.*
 import io.github.pylonmc.pylon.core.fluid.tags.FluidTemperature
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
 import io.github.pylonmc.pylon.core.item.base.PylonItemEntityInteractor
 import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -26,7 +22,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
-import java.util.function.Predicate
 
 open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityInteractor, PylonInteractor {
     val material = Material.valueOf(getSettings().getOrThrow<String>("material").uppercase())
@@ -34,19 +29,19 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
     val allowedFluids = getSettings().getOrThrow<List<String>>("allow-fluids")
         .map { s -> FluidTemperature.valueOf(s.uppercase()) }
 
-    override fun getPlaceholders(): Map<String, ComponentLike>
-        = mapOf<String, ComponentLike>(
-            "fluid_per_second" to UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond),
-            "fluids" to Component.join(
+    override fun getPlaceholders(): List<PylonArgument> = listOf(
+        PylonArgument.of("fluid_per_second", UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond)),
+        PylonArgument.of(
+            "fluids", Component.join(
                 JoinConfiguration.separator(Component.text(", ")),
                 allowedFluids.map(FluidTemperature::valueText)
             )
         )
+    )
 
-    fun getPredicate(): Predicate<PylonFluid>
-        = Predicate<PylonFluid> { fluid ->
-            fluid.hasTag<FluidTemperature>() && allowedFluids.contains(fluid.getTag<FluidTemperature>())
-        }
+    open fun canPass(fluid: PylonFluid): Boolean {
+        return fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedFluids
+    }
 
     override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
         if (event.hand != EquipmentSlot.HAND) {
@@ -65,7 +60,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
             val segment = ConnectingService.placeConnection(event.getPlayer())
             if (segment != null) {
                 FluidManager.setFluidPerSecond(segment, fluidPerSecond)
-                FluidManager.setFluidPredicate(segment, this.getPredicate())
+                FluidManager.setFluidPredicate(segment, this::canPass)
             }
         }
     }
@@ -85,11 +80,14 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
             }
         }
 
-        if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) && ConnectingService.isConnecting(player)) {
+        if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) && ConnectingService.isConnecting(
+                player
+            )
+        ) {
             val segment = ConnectingService.placeConnection(player)
             if (segment != null) {
                 FluidManager.setFluidPerSecond(segment, fluidPerSecond)
-                FluidManager.setFluidPredicate(segment, this.getPredicate())
+                FluidManager.setFluidPredicate(segment, this::canPass)
             }
         }
     }
