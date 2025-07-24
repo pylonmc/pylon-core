@@ -116,7 +116,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
     val components: Map<Vector3i, MultiblockComponent>
 
     /**
-     * Sets the 'direction' we expect the multiblock to be built in. North is considered the default facing direction.
+     * Sets the 'direction' we expect the multiblock to be built in. North is considered the default facing direction -
+     * ie setFacing(BlockFace.NORTH) will have no effect.
+     *
+     * Leave this unset to accept any direction.
      */
     fun setFacing(facing: BlockFace?) {
         simpleMultiblockData.facing = facing

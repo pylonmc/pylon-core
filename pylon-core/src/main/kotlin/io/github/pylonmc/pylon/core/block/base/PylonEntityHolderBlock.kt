@@ -34,23 +34,29 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
     }
 
     @ApiStatus.NonExtendable
-    fun getHeldEntityUuid(name: String) = heldEntities[name] ?: throw IllegalArgumentException("Entity $name not found")
+    fun getHeldEntityUuid(name: String) = heldEntities[name]
+
+    @ApiStatus.NonExtendable
+    fun getHeldEntityUuidOrThrow(name: String) = getHeldEntityUuid(name)
+        ?: throw IllegalArgumentException("Entity $name not found")
 
     @ApiStatus.NonExtendable
     fun getHeldEntity(name: String): PylonEntity<*>?
-            = EntityStorage.get(getHeldEntityUuid(name))
+            = getHeldEntityUuid(name)?.let { EntityStorage.get(it) }
 
     @ApiStatus.NonExtendable
     fun getHeldEntityOrThrow(name: String): PylonEntity<*>
-            = getHeldEntity(name) ?: throw IllegalArgumentException("Entity $name does not exist")
+            = getHeldEntity(name)
+        ?: throw IllegalArgumentException("Entity $name does not exist")
 
     @ApiStatus.NonExtendable
     fun <T: PylonEntity<*>> getHeldEntity(clazz: Class<T>, name: String): T?
-            = EntityStorage.getAs(clazz, getHeldEntityUuid(name))
+            = getHeldEntityUuid(name)?.let { EntityStorage.getAs(clazz, it) }
 
     @ApiStatus.NonExtendable
     fun <T: PylonEntity<*>> getHeldEntityOrThrow(clazz: Class<T>, name: String): T
-            = getHeldEntity(clazz, name) ?: throw IllegalArgumentException("Entity $name does not exist or is not of type ${clazz.simpleName}")
+            = getHeldEntity(clazz, name)
+        ?: throw IllegalArgumentException("Entity $name does not exist or is not of type ${clazz.simpleName}")
 
     /**
      * Returns false if the entity is unloaded or does not physically exist.
@@ -58,7 +64,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
      * Will error if there is no entity with the provided name.
      */
     @ApiStatus.NonExtendable
-    fun isHeldEntityPresent(name: String) = EntityStorage.isPylonEntity(getHeldEntityUuid(name))
+    fun isHeldEntityPresent(name: String) = getHeldEntityUuid(name)?.let { EntityStorage.isPylonEntity(it) } ?: false
 
     /**
      * Returns false if any entity is unloaded or does not exist.
