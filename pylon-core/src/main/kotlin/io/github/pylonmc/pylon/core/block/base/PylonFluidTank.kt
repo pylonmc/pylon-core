@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import java.util.*
+import kotlin.math.max
 
 /**
  * A common pattern is a 'fluid tank' which can only store one fluid at a
@@ -71,8 +72,8 @@ interface PylonFluidTank : PylonFluidBlock {
      * Sets the capacity of the fluid tank
      */
     fun setCapacity(capacity: Double) {
-        check(capacity > 0)
-        fluidData.capacity = capacity
+        check(capacity > -1.0e-6)
+        fluidData.capacity = max(0.0, capacity)
     }
 
     /**
