@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -79,6 +80,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         override fun spawnGhostBlock(block: Block): UUID {
             val display = BlockDisplayBuilder()
                 .material(material)
+                .glow(Color.WHITE)
                 .transformation(TransformBuilder().scale(0.5))
                 .build(block.location.toCenterLocation())
             EntityStorage.add(MultiblockGhostBlock(display, material.name))
@@ -95,6 +97,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
                 ?: throw IllegalArgumentException("Block schema $key does not exist")
             val display = BlockDisplayBuilder()
                 .material(schema.material)
+                .glow(Color.WHITE)
                 .transformation(TransformBuilder().scale(0.5))
                 .build(block.location.toCenterLocation())
             EntityStorage.add(MultiblockGhostBlock(display, key.key))
@@ -107,10 +110,14 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         get() = simpleMultiblocks.getOrPut(this) { SimpleMultiblockData(null) }
 
     /**
-     * Rotation will automatically be accounted for, unless setFacing has been called
+     * Any rotation of these components will be considered valid, unless setFacing has been called, in which case
+     * only a multiblock constructed facing in the specified direction will be considered valid.
      */
     val components: Map<Vector3i, MultiblockComponent>
 
+    /**
+     * Sets the 'direction' we expect the multiblock to be built in. North is considered the default facing direction.
+     */
     fun setFacing(facing: BlockFace?) {
         simpleMultiblockData.facing = facing
     }
@@ -138,8 +145,11 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
             heldEntities[key] = ghostBlock
         }
+        updateGhostBlockColors()
     }
 
+    // Just assumes any rotation of the multiblock is valid, probably not worth the extra logic to account for
+    // different facing directions
     val horizontalRadius
         get() = maxOf(
             abs(components.keys.minOf { it.x }),
@@ -169,11 +179,14 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
 
     override fun checkFormed(): Boolean {
+        // Actual formed checking logic
         val formed = validStructures().any { struct ->
             struct.all {
                 it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
             }
         }
+
+        // Remove ghosts if fully formed
         if (formed) {
             val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
             for (key in toRemove) {
@@ -181,6 +194,9 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
                 heldEntities.remove(key)
             }
         }
+
+        updateGhostBlockColors()
+
         return formed
     }
 
@@ -188,6 +204,29 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         = validStructures().any {
             it.contains((otherBlock.position - block.position).vector3i)
         }
+
+    fun updateGhostBlockColors() {
+        if (MultiblockCache.isFormed(this)) {
+            return // ghosts should have been deleted
+        }
+
+        val block = (this as PylonBlock).block
+        val facing = simpleMultiblockData.facing
+        val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
+        for ((offset, component) in rotatedComponents) {
+            val entity = getHeldEntity(
+                MultiblockGhostBlock::class.java,
+                "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
+            )
+            if (entity != null) {
+                entity.entity.glowColorOverride = if (component.matches((block.position + offset).block)) {
+                    Color.GREEN
+                } else {
+                    Color.RED
+                }
+            }
+        }
+    }
 
     data class SimpleMultiblockData(var facing: BlockFace?)
 
