@@ -65,3 +65,19 @@ fun isCardinalDirection(vector: Vector3i)
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Key does not have a corresponding addon; does your addon call registerWithPylon()?")
+
+/**
+ * Rotates a vector to face a direction
+ *
+ * The direction given must be a horizontal cardinal direction (north, east, south, west)
+ *
+ * Assumes north to be the default direction (supplying north will result in no rotation)
+ */
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
+    = when (face) {
+        BlockFace.NORTH -> vector
+        BlockFace.EAST -> Vector3i(vector.z, vector.y, -vector.x)
+        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+        BlockFace.WEST -> Vector3i(-vector.z, vector.y, vector.x)
+        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+    }

@@ -17,6 +17,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.util.rotateVectorToFace
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -271,21 +272,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             }
         }
 
-        /**
-         * Rotates a list of components to face a direction
-         *
-         * The direction given must be a cardinal direction (north, east, south, west)
-         *
-         * Assumes north to be the default direction (supplying north will result in no rotation)
-         */
         @JvmStatic
         fun rotateComponentsToFace(components: Map<Vector3i, MultiblockComponent>, face: BlockFace)
-                = when (face) {
-                    BlockFace.NORTH -> components
-                    BlockFace.EAST -> components.mapKeys { Vector3i(it.key.z, it.key.y, -it.key.x) }
-                    BlockFace.SOUTH -> components.mapKeys { Vector3i(-it.key.x, it.key.y, -it.key.z) }
-                    BlockFace.WEST -> components.mapKeys { Vector3i(-it.key.z, it.key.y, it.key.x) }
-                    else -> throw IllegalArgumentException("$face is not a cardinal direction")
-                }
+                = components.mapKeys { rotateVectorToFace(it.key, face) }
     }
 }
