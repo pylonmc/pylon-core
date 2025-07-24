@@ -16,6 +16,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -35,6 +36,15 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
     interface MultiblockComponent {
         fun matches(block: Block): Boolean
         fun spawnGhostBlock(block: Block): UUID
+
+        companion object {
+
+            @JvmStatic
+            fun of(material: Material) = VanillaMultiblockComponent(material)
+
+            @JvmStatic
+            fun of(key: NamespacedKey) = PylonMultiblockComponent(key)
+        }
     }
 
     class MultiblockGhostBlock(entity: BlockDisplay, val name: String)
@@ -96,11 +106,6 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         // 0 degrees
         components,
         // 90 degrees (anticlockwise)
-        components.mapKeys { Vector3i(-it.key.z, it.key.y, it.key.x) },
-        // 180 degrees
-        components.mapKeys { Vector3i(-it.key.x, it.key.y, -it.key.z) },
-        // 270 degrees (anticlockwise)
-        components.mapKeys { Vector3i(it.key.z, it.key.y, -it.key.x) }
     )
 
     fun spawnGhostBlocks() {
@@ -176,5 +181,22 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             if (block !is PylonSimpleMultiblock) return
             block.spawnGhostBlocks()
         }
+
+        /**
+         * Rotates a list of components to face a direction
+         *
+         * The direction given must be a cardinal direction (north, east, south, west)
+         *
+         * Assumes north to be the default direction (supplying north will result in no rotation)
+         */
+        @JvmStatic
+        fun rotateComponentsToFace(components: Map<Vector3i, MultiblockComponent>, face: BlockFace)
+                = when (face) {
+                    BlockFace.NORTH -> components
+                    BlockFace.EAST -> components.mapKeys { Vector3i(it.key.z, it.key.y, -it.key.x) }
+                    BlockFace.SOUTH -> components.mapKeys { Vector3i(-it.key.x, it.key.y, -it.key.z) }
+                    BlockFace.WEST -> components.mapKeys { Vector3i(-it.key.z, it.key.y, it.key.x) }
+                    else -> throw IllegalArgumentException("$face is not a cardinal direction")
+                }
     }
 }
