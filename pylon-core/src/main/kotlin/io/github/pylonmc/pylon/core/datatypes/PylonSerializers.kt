@@ -108,5 +108,8 @@ object PylonSerializers {
     internal val FLUID_TANK_DATA = FluidTankDataPersistentDataType
 
     @JvmField
+    internal val SIMPLE_MULTIBLOCK_DATA = SimpleMultiblockDataPersistentDataType
+
+    @JvmField
     val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
 }

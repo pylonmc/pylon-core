@@ -8,11 +8,15 @@ import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
+import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
@@ -23,8 +27,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
+import org.jetbrains.annotations.ApiStatus
 import org.joml.Vector3i
-import java.util.UUID
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -90,38 +95,48 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
                 ?: throw IllegalArgumentException("Block schema $key does not exist")
             val display = BlockDisplayBuilder()
                 .material(schema.material)
-                .transformation(TransformBuilder().scale(0.7))
+                .transformation(TransformBuilder().scale(0.5))
                 .build(block.location.toCenterLocation())
             EntityStorage.add(MultiblockGhostBlock(display, key.key))
             return display.uniqueId
         }
     }
 
+    @get:ApiStatus.NonExtendable
+    val simpleMultiblockData: SimpleMultiblockData
+        get() = simpleMultiblocks.getOrPut(this) { SimpleMultiblockData(null) }
+
     /**
-     * Rotation will automatically be accounted for.
+     * Rotation will automatically be accounted for, unless setFacing has been called
      */
     val components: Map<Vector3i, MultiblockComponent>
 
-    fun validStructures(): List<Map<Vector3i, MultiblockComponent>> = listOf(
-        // 0 degrees
-        components,
-        // 90 degrees (anticlockwise)
-    )
+    fun setFacing(facing: BlockFace?) {
+        simpleMultiblockData.facing = facing
+    }
 
-    fun spawnGhostBlocks() {
-        val block = (this as PylonBlock).block
-        for ((offset, component) in components) {
-            val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
-            val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
-            heldEntities[key] = ghostBlock
+    fun validStructures(): List<Map<Vector3i, MultiblockComponent>> {
+        val facing = simpleMultiblockData.facing
+        return if (facing == null) {
+            listOf(
+                components,
+                rotateComponentsToFace(components, BlockFace.EAST),
+                rotateComponentsToFace(components, BlockFace.NORTH),
+                rotateComponentsToFace(components, BlockFace.WEST)
+            )
+        } else {
+            listOf(rotateComponentsToFace(components, facing))
         }
     }
 
-    fun removeMultiblockGhosts() {
-        val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
-        for (key in toRemove) {
-            EntityStorage.get(heldEntities[key]!!)!!.entity.remove()
-            heldEntities.remove(key)
+    fun spawnGhostBlocks() {
+        val block = (this as PylonBlock).block
+        val facing = simpleMultiblockData.facing
+        val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
+        for ((offset, component) in rotatedComponents) {
+            val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
+            val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
+            heldEntities[key] = ghostBlock
         }
     }
 
@@ -174,12 +189,44 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             it.contains((otherBlock.position - block.position).vector3i)
         }
 
+    data class SimpleMultiblockData(var facing: BlockFace?)
+
     companion object : Listener {
+
+        private val simpleMultiblockKey = pylonKey("fluid_tank_data")
+
+        private val simpleMultiblocks = IdentityHashMap<PylonSimpleMultiblock, SimpleMultiblockData>()
+
         @EventHandler
         private fun onPlace(event: PylonBlockPlaceEvent) {
             val block = event.pylonBlock
             if (block !is PylonSimpleMultiblock) return
             block.spawnGhostBlocks()
+        }
+
+        @EventHandler
+        private fun onDeserialize(event: PylonBlockDeserializeEvent) {
+            val block = event.pylonBlock
+            if (block is PylonSimpleMultiblock) {
+                simpleMultiblocks[block] = event.pdc.get(simpleMultiblockKey, PylonSerializers.SIMPLE_MULTIBLOCK_DATA)
+                        ?: error("Fluid tank data not found for ${block.key}")
+            }
+        }
+
+        @EventHandler
+        private fun onSerialize(event: PylonBlockSerializeEvent) {
+            val block = event.pylonBlock
+            if (block is PylonSimpleMultiblock) {
+                event.pdc.set(simpleMultiblockKey, PylonSerializers.SIMPLE_MULTIBLOCK_DATA, simpleMultiblocks[block]!!)
+            }
+        }
+
+        @EventHandler
+        private fun onUnload(event: PylonBlockUnloadEvent) {
+            val block = event.pylonBlock
+            if (block is PylonSimpleMultiblock) {
+                simpleMultiblocks.remove(block)
+            }
         }
 
         /**
