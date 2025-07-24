@@ -304,6 +304,36 @@ object FluidManager {
         return suppliedFluids
     }
 
+    /**
+     * Find how much of the fluid each input point on the block is requesting
+     * Ignore input points requesting zero or effectively zero of the fluid
+     */
+    fun getRequestedFluids(
+        segment: UUID, fluid: PylonFluid, deltaSeconds: Double
+    ): Pair<MutableMap<PylonFluidBlock, Double>, Double> {
+        val requesters: MutableMap<PylonFluidBlock, Double> = mutableMapOf()
+        var totalRequested = 0.0
+        for (point in getPoints(segment, FluidPointType.INPUT)) {
+            try {
+                if (!point.position.chunk.isLoaded) {
+                    continue
+                }
+                val block = BlockStorage.getAs<PylonFluidBlock>(point.position)
+                    ?: continue
+                val fluidAmountRequested = block.fluidAmountRequested(fluid, deltaSeconds)
+                if (fluidAmountRequested < 1.0e-9) {
+                    continue
+                }
+                requesters[block] = fluidAmountRequested
+                totalRequested += fluidAmountRequested
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                continue
+            }
+        }
+        return Pair(requesters, totalRequested)
+    }
+
     private fun tick(segment: UUID, deltaSeconds: Double) {
         val suppliedFluids = getSuppliedFluids(segment, deltaSeconds)
 
@@ -315,28 +345,7 @@ object FluidManager {
                 continue
             }
 
-            // Find how much of the fluid each input point on the block is requesting
-            // Ignore input points requesting zero or effectively zero of the fluid
-            val requesters: MutableMap<PylonFluidBlock, Double> = mutableMapOf()
-            var totalRequested = 0.0
-            for (point in getPoints(segment, FluidPointType.INPUT)) {
-                try {
-                    if (!point.position.chunk.isLoaded) {
-                        continue
-                    }
-                    val block = BlockStorage.getAs<PylonFluidBlock>(point.position)
-                        ?: continue
-                    val fluidAmountRequested = block.fluidAmountRequested(fluid, deltaSeconds)
-                    if (fluidAmountRequested < 1.0e-9) {
-                        continue
-                    }
-                    requesters[block] = fluidAmountRequested
-                    totalRequested += fluidAmountRequested
-                } catch (t: Throwable) {
-                    t.printStackTrace()
-                    continue
-                }
-            }
+            var (requesters, totalRequested) = getRequestedFluids(segment, fluid, deltaSeconds)
 
             // Continue if no machine is requesting the fluid
             if (requesters.isEmpty()) {
