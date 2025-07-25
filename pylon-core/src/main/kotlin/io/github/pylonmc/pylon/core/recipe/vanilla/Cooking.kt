@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.recipe.vanilla
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import net.kyori.adventure.text.Component
@@ -13,9 +14,9 @@ import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 
 
-abstract class CookingRecipeWrapper(override val recipe: CookingRecipe<*>) : VanillaRecipeWrapper {
-    override val inputItems: List<RecipeChoice> = listOf(recipe.inputChoice)
-    override val outputItems: List<ItemStack> = listOf(recipe.result)
+abstract class CookingRecipeWrapper(final override val recipe: CookingRecipe<*>) : VanillaRecipeWrapper {
+    override val inputs: List<FluidOrItem> = FluidOrItem.of(recipe.inputChoice)
+    override val results: List<FluidOrItem> = listOf(FluidOrItem.of(recipe.result))
     override fun getKey(): NamespacedKey = recipe.key
 }
 
