@@ -31,21 +31,21 @@ import java.util.function.Predicate
 open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityInteractor, PylonInteractor {
     val material = Material.valueOf(getSettings().getOrThrow<String>("material").uppercase())
     val fluidPerSecond = getSettings().getOrThrow<Double>("fluid-per-second")
-    val allowedFluids = getSettings().getOrThrow<List<String>>("allow-fluids")
+    val allowedTemperatures = getSettings().getOrThrow<List<String>>("allowed-temperatures")
         .map { s -> FluidTemperature.valueOf(s.uppercase()) }
 
     override fun getPlaceholders(): Map<String, ComponentLike>
         = mapOf(
             "fluid_per_second" to UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond),
-            "fluids" to Component.join(
+            "temperatures" to Component.join(
                 JoinConfiguration.separator(Component.text(", ")),
-                allowedFluids.map(FluidTemperature::valueText)
+                allowedTemperatures.map(FluidTemperature::valueText)
             )
         )
 
     fun getPredicate(): Predicate<PylonFluid>
         = Predicate<PylonFluid> { fluid ->
-            fluid.hasTag<FluidTemperature>() && allowedFluids.contains(fluid.getTag<FluidTemperature>())
+            fluid.hasTag<FluidTemperature>() && allowedTemperatures.contains(fluid.getTag<FluidTemperature>())
         }
 
     override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {

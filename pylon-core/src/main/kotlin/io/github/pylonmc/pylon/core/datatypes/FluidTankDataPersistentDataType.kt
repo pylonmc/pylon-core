@@ -9,7 +9,6 @@ import org.bukkit.persistence.PersistentDataType
 
 object FluidTankDataPersistentDataType : PersistentDataType<PersistentDataContainer, PylonFluidTank.FluidTankData> {
     val fluidKey = pylonKey("fluid")
-    val allowedFluidsKey = pylonKey("allowed_fluids")
     val amountKey = pylonKey("amount")
     val capacityKey = pylonKey("capacity")
     val inputKey = pylonKey("input")

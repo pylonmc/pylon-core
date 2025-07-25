@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import java.util.*
+import kotlin.math.max
 
 /**
  * Usually, fluid machines store fluids in internal fluids. For example,
@@ -80,8 +81,8 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
      * than it technically has capacity for.
      */
     fun setFluidCapacity(fluid: PylonFluid, capacity: Double) {
-        check(capacity > 0)
-        fluidData(fluid).capacity = capacity
+        check(capacity > -1.0e6)
+        fluidData(fluid).capacity = max(0.0, capacity)
     }
 
     /**
