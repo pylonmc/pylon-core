@@ -100,7 +100,7 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
      */
     fun setFluid(fluid: PylonFluid, amount: Double): Boolean {
         if (canSetFluid(fluid, amount)) {
-            fluidData(fluid).amount = amount
+            fluidData(fluid).amount = max(0.0, amount)
             return true
         }
         return false

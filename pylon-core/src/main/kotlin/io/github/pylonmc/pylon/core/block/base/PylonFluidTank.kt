@@ -91,7 +91,7 @@ interface PylonFluidTank : PylonFluidBlock {
      */
     fun setFluid(amount: Double): Boolean {
         if (canSetFluid(amount)) {
-            fluidData.amount = amount
+            fluidData.amount = max(0.0, amount)
             return true
         }
         return false
