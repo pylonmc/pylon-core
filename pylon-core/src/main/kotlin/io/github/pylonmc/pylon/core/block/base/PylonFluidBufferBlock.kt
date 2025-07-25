@@ -94,7 +94,7 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
 
     /**
      * Sets a fluid buffer only if the new amount of fluid is greater
-     * than zero and fits in the buffer.
+     * than or equal to zero and fits in the buffer.
      *
      * @return true only if the buffer was set successfully
      */
@@ -108,7 +108,7 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
 
     /**
      * Adds to a fluid buffer only if the new amount of fluid is greater
-     * than zero and fits in the buffer.
+     * than or equal to zero and fits in the buffer.
      *
      * @return true only if the buffer was added to successfully
      */
