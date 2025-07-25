@@ -126,6 +126,9 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         simpleMultiblockData.facing = facing
     }
 
+    fun getFacing(): BlockFace?
+            = simpleMultiblockData.facing
+
     fun validStructures(): List<Map<Vector3i, MultiblockComponent>> {
         val facing = simpleMultiblockData.facing
         return if (facing == null) {
