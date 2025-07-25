@@ -128,9 +128,10 @@ public final class TestUtil {
     @CheckReturnValue
     public static @NotNull CompletableFuture<Void> waitUntil(BooleanSupplier supplier, int intervalTicks) {
         CompletableFuture<Void> future = new CompletableFuture<>();
-        Bukkit.getScheduler().runTaskTimer(PylonTest.instance(), () -> {
+        Bukkit.getScheduler().runTaskTimer(PylonTest.instance(), task -> {
             if (supplier.getAsBoolean()) {
                 future.complete(null);
+                task.cancel();
             }
         }, 0, intervalTicks);
         return future;
