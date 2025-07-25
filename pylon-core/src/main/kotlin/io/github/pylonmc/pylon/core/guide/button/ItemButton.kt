@@ -41,11 +41,17 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             return ItemStackBuilder.of(stack)
         }
 
-        val placeholders = PylonItem.fromStack(stack)!!.getPlaceholders().map { (name, value) -> PylonArgument.of(name, value) }
+        val placeholders = item.getPlaceholders().map { (name, value) -> PylonArgument.of(name, value) }
         val builder = ItemStackBuilder.of(stack.clone())
             .editData(DataComponentTypes.LORE) { lore ->
                 ItemLore.lore(lore.lines().map {
-                    (it as TranslatableComponent).arguments(placeholders)
+                    if (it is TranslatableComponent) {
+                        val arguments = it.arguments().toMutableList()
+                        arguments.addAll(placeholders)
+                        it.arguments(arguments)
+                    } else {
+                        it
+                    }
                 })
             }
 
