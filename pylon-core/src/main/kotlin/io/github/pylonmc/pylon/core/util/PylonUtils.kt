@@ -76,8 +76,8 @@ fun getAddon(key: NamespacedKey): PylonAddon =
 fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
     = when (face) {
         BlockFace.NORTH -> vector
-        BlockFace.EAST -> Vector3i(vector.z, vector.y, -vector.x)
+        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
         BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
-        BlockFace.WEST -> Vector3i(-vector.z, vector.y, vector.x)
+        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
         else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
     }
