@@ -135,7 +135,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             listOf(
                 components,
                 rotateComponentsToFace(components, BlockFace.EAST),
-                rotateComponentsToFace(components, BlockFace.NORTH),
+                rotateComponentsToFace(components, BlockFace.SOUTH),
                 rotateComponentsToFace(components, BlockFace.WEST)
             )
         } else {
