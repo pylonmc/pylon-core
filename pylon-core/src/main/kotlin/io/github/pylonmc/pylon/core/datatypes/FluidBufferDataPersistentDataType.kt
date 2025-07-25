@@ -23,7 +23,7 @@ object FluidBufferDataPersistentDataType : PersistentDataType<PersistentDataCont
         val amount = primitive.get(amountKey, PersistentDataType.DOUBLE)!!
         val capacity = primitive.get(capacityKey, PersistentDataType.DOUBLE)!!
         val input = primitive.get(inputKey, PersistentDataType.BOOLEAN)!!
-        val output = primitive.get(inputKey, PersistentDataType.BOOLEAN)!!
+        val output = primitive.get(outputKey, PersistentDataType.BOOLEAN)!!
         return PylonFluidBufferBlock.FluidBufferData(amount, capacity, input, output)
     }
 
