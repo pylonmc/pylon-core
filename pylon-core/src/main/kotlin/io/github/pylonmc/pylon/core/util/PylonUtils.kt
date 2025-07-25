@@ -5,9 +5,11 @@ package io.github.pylonmc.pylon.core.util
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
@@ -81,3 +83,22 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
         BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
         else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
     }
+
+fun itemFromName(name: String): ItemStack? {
+    if (name.contains(':')) {
+        val namespacedKey = NamespacedKey.fromString(name)
+        if (namespacedKey != null) {
+            val pylonItem = PylonRegistry.ITEMS[namespacedKey]
+            if (pylonItem != null) {
+                return pylonItem.itemStack
+            }
+        }
+    }
+
+    val material = Material.getMaterial(name.uppercase())
+    if (material != null) {
+        return ItemStack(material)
+    }
+
+    return null
+}
