@@ -255,7 +255,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             val block = event.pylonBlock
             if (block is PylonSimpleMultiblock) {
                 simpleMultiblocks[block] = event.pdc.get(simpleMultiblockKey, PylonSerializers.SIMPLE_MULTIBLOCK_DATA)
-                        ?: error("Fluid tank data not found for ${block.key}")
+                        ?: error("Simple multiblock data not found for ${block.key}")
             }
         }
 
