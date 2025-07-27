@@ -424,7 +424,7 @@ object FluidManager {
         tickers[segment] = PylonCore.launch {
             var lastTickNanos = System.nanoTime()
             while (true) {
-                delay(PylonConfig.fluidIntervalTicks.ticks)
+                delay(PylonConfig.fluidTickInterval.ticks)
                 val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                 lastTickNanos = System.nanoTime()
                 tick(segment, dt)

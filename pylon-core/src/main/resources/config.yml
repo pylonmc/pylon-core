@@ -1,26 +1,28 @@
-# The amount of Minecraft ticks between each Pylon tick
-tick-rate: 1
+# The default interval (in Minecraft ticks) between each block tick
+# Most blocks have a custom tick interval which can be changed in their settings
+default-tick-interval: 20
 
 # The number of errors a ticking block can throw before it is disabled
 allowed-block-errors: 5
 
-# The interval, in ticks, between WAILA checks
-waila-interval-ticks: 1
+# The interval (in Minecraft ticks), between WAILA checks
+waila-tick-interval: 1
 
-# The interval between fluid network ticks
-fluid-interval-ticks: 1
+# The interval (in Minecraft ticks) between fluid network ticks
+fluid-tick-interval: 5
 
-block-data-autosave-interval-seconds: 3
+block-data-autosave-interval-seconds: 60
 
-entity-data-autosave-interval-seconds: 3
+entity-data-autosave-interval-seconds: 60
 
 research:
   enabled: true
-  # The interval, in ticks, between when Pylon checks for unresearched items in inventories
-  interval: 20
+  # The interval (in Minecraft ticks) between when Pylon checks for unresearched items in inventories
+  tick-interval: 20
 
 pipe-placement:
-  task-interval-ticks: 1
+  # The interval (in Minecraft ticks) between pipe placement task ticks
+  tick-interval: 1
 
   # Recommended to keep this low to make pipe placement easier
   # Might break pipe placement if set very high due to chunkloading mechanics

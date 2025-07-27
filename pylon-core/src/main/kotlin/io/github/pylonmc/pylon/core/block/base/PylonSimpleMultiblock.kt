@@ -239,7 +239,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     companion object : Listener {
 
-        private val simpleMultiblockKey = pylonKey("fluid_tank_data")
+        private val simpleMultiblockKey = pylonKey("simple_multiblock_data")
 
         private val simpleMultiblocks = IdentityHashMap<PylonSimpleMultiblock, SimpleMultiblockData>()
 

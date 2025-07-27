@@ -69,6 +69,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
         Bukkit.getPluginManager().registerEvents(ConnectingService, this)
+        Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,
