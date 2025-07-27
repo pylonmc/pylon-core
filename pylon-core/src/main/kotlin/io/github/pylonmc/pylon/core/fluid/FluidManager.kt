@@ -13,9 +13,9 @@ import io.github.pylonmc.pylon.core.event.PylonFluidPointDisconnectEvent
 import io.github.pylonmc.pylon.core.fluid.FluidManager.unload
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import java.util.IdentityHashMap
 import java.util.UUID
 import java.util.function.Predicate
-import kotlin.math.absoluteValue
 import kotlin.math.min
 
 /**
@@ -39,9 +39,7 @@ import kotlin.math.min
  * - Use disjoint sets data structure to reduce overhead of connecting/disconnecting and getting
  *   connected nodes
  * - We currently use round-robin for input and output, this would be more efficient to do first-come-
- *   first-serve. The current algorithm could also be improved to get better performance I think
- * - There is some indirection in getting requested fluids when ticking; we might be able to reduce
- *   the performance overhead here with a different program flow but needs testing
+ *   first-serve but would also be much less intuitive so probably not a good idea.
  * - Currently not asynchronous, I think parts of this can definitely be made asynchronous
  */
 object FluidManager {
@@ -279,146 +277,141 @@ object FluidManager {
     fun getPoints(segment: UUID, type: FluidPointType): List<VirtualFluidPoint>
         = segments[segment]!!.points.filter { it.type == type }
 
-    /**
-     * A temporary representation of a block supplying a specific fluid. Exists to make ticking logic nicer.
-     */
-    data class FluidSupplier(val block: PylonFluidBlock, val fluid: PylonFluid, val amount: Double)
-
-    /**
-     * A temporary representation of a block requesting a specific fluid. Exists to make ticking logic nicer.
-     */
-    data class FluidRequester(val block: PylonFluidBlock, val fluid: PylonFluid, val amount: Double)
+    data class FluidSupplyInfo(var amount: Double, val blocks: IdentityHashMap<PylonFluidBlock, Double>)
 
     @JvmStatic
-    fun getSuppliedFluids(point: VirtualFluidPoint, deltaSeconds: Double): Set<FluidSupplier> {
-        check(point.type == FluidPointType.OUTPUT) { "Can only get supplied fluids of output point" }
-
-        val block: PylonFluidBlock
-        val blockSuppliedFluids: Map<PylonFluid, Double>
-        try {
-            if (!point.position.chunk.isLoaded) {
-                return setOf()
-            }
-            block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockSuppliedFluids = block.getSuppliedFluids(deltaSeconds)
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            return setOf()
-        }
-
-        val suppliedFluids: MutableSet<FluidSupplier> = mutableSetOf()
-        for ((fluid, amount) in blockSuppliedFluids) {
-            if (amount.absoluteValue > 1.0e-9) {
-                suppliedFluids.add(FluidSupplier(block, fluid, amount))
-            }
-        }
-        return suppliedFluids
-    }
-
-    @JvmStatic
-    fun getSuppliedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidSupplier>> {
-        val suppliedFluids: MutableMap<PylonFluid, MutableSet<FluidSupplier>> = mutableMapOf()
+    fun getSuppliedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, FluidSupplyInfo> {
+        val suppliedFluids: MutableMap<PylonFluid, FluidSupplyInfo> = mutableMapOf()
         for (point in getPoints(segment, FluidPointType.OUTPUT)) {
-            for (supplier in getSuppliedFluids(point, deltaSeconds)) {
-                suppliedFluids.getOrPut(supplier.fluid, ::mutableSetOf).add(supplier)
+            try {
+                if (!point.position.chunk.isLoaded) {
+                    continue
+                }
+                val block = BlockStorage.getAs<PylonFluidBlock>(point.position)
+                    ?: continue
+                for ((fluid, amount) in block.getSuppliedFluids(deltaSeconds)) {
+                    val pair = suppliedFluids.getOrPut(fluid) {
+                        FluidSupplyInfo(0.0, IdentityHashMap())
+                    }
+                    pair.amount += amount
+                    pair.blocks[block] = amount
+                }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                continue
             }
         }
         return suppliedFluids
     }
 
-    @JvmStatic
-    fun getRequestedFluids(point: VirtualFluidPoint, deltaSeconds: Double): Set<FluidRequester> {
-        check(point.type == FluidPointType.INPUT) { "Can only get requested fluids of input point" }
-
-        val block: PylonFluidBlock
-        val blockRequestedFluids: Map<PylonFluid, Double>
-        try {
-            if (!point.position.chunk.isLoaded) {
-                return setOf()
-            }
-            block = BlockStorage.getAs<PylonFluidBlock>(point.position) ?: return setOf()
-            blockRequestedFluids = block.getRequestedFluids(deltaSeconds)
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            return setOf()
-        }
-
-        // Create requester for each request
-        val requestedFluids: MutableSet<FluidRequester> = mutableSetOf()
-        for ((fluid, amount) in blockRequestedFluids) {
-            if (amount.absoluteValue > 1.0e-9) {
-                requestedFluids.add(FluidRequester(block, fluid, amount))
-            }
-        }
-        return requestedFluids
-    }
-
-    @JvmStatic
-    fun getRequestedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, Set<FluidRequester>> {
-        val requestedFluids: MutableMap<PylonFluid, MutableSet<FluidRequester>> = mutableMapOf()
+    /**
+     * Find how much of the fluid each input point on the block is requesting
+     * Ignore input points requesting zero or effectively zero of the fluid
+     */
+    fun getRequestedFluids(
+        segment: UUID, fluid: PylonFluid, deltaSeconds: Double
+    ): Pair<MutableMap<PylonFluidBlock, Double>, Double> {
+        val requesters: MutableMap<PylonFluidBlock, Double> = mutableMapOf()
+        var totalRequested = 0.0
         for (point in getPoints(segment, FluidPointType.INPUT)) {
-            for (requester in getRequestedFluids(point, deltaSeconds)) {
-                requestedFluids.getOrPut(requester.fluid, ::mutableSetOf).add(requester)
+            try {
+                if (!point.position.chunk.isLoaded) {
+                    continue
+                }
+                val block = BlockStorage.getAs<PylonFluidBlock>(point.position)
+                    ?: continue
+                val fluidAmountRequested = block.fluidAmountRequested(fluid, deltaSeconds)
+                if (fluidAmountRequested < 1.0e-9) {
+                    continue
+                }
+                requesters[block] = fluidAmountRequested
+                totalRequested += fluidAmountRequested
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                continue
             }
         }
-        return requestedFluids
+        return Pair(requesters, totalRequested)
     }
 
     private fun tick(segment: UUID, deltaSeconds: Double) {
         val suppliedFluids = getSuppliedFluids(segment, deltaSeconds)
-        val requestedFluids = getRequestedFluids(segment, deltaSeconds)
 
-        for ((fluid, suppliers) in suppliedFluids) {
+        for ((fluid, info) in suppliedFluids) {
+
+            // Check if the segment is capable of passing the fluid
             val predicate = segments[segment]!!.predicate
             if (predicate != null && !predicate.test(fluid)) {
                 continue
             }
 
-            val requesters = requestedFluids[fluid]?.toMutableSet()
-            if (requesters.isNullOrEmpty()) {
+            var (requesters, totalRequested) = getRequestedFluids(segment, fluid, deltaSeconds)
+
+            // Continue if no machine is requesting the fluid
+            if (requesters.isEmpty()) {
                 continue
             }
 
-            // Take fluids on a first-come-first-serve basis from suppliers
-            val totalRequested = min(requesters.sumOf { it.amount }, segments[segment]!!.fluidPerSecond * deltaSeconds)
-            if (totalRequested.absoluteValue < 1.0e-9) {
-                continue
-            }
-            var totalSupplied = 0.0
-            for (supplier in suppliers) {
-                val remaining = totalRequested - totalSupplied
-                if (remaining.absoluteValue < 1.0e-9) {
-                    break
-                }
+            // Use round-robin to compute how much fluid to take from each supplier
+            // Done in-place using the info's 'blocks' map to reduce memory operations
+            totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * deltaSeconds)
+            val suppliers = info.blocks
+            var remainingFluidNeeded = totalRequested
+            var changed = true
+            // First phase: Repeatedly find all suppliers that we'd try to take more fluid
+            // from than possible, were we to take fluid evenly, and take all their fluid
+            // and remove them from the list.
+            while (changed) {
+                changed = false
+                val iterator = suppliers.iterator()
+                while (iterator.hasNext()) {
+                    val (block, amountSupplied) = iterator.next()
+                    if (amountSupplied > remainingFluidNeeded / suppliers.size) {
+                        continue
+                    }
 
-                val toTake = min(remaining, supplier.amount)
-                try {
-                    supplier.block.removeFluid(supplier.fluid, toTake)
-                } catch (e: Throwable) {
-                    e.printStackTrace()
-                    continue
+                    remainingFluidNeeded -= amountSupplied
+                    block.onFluidRemoved(fluid, amountSupplied)
+                    iterator.remove()
+                    changed = true
                 }
-                totalSupplied += toTake
+            }
+            // Second phase: All remaining suppliers supply more than we need from them
+            // (assuming we take fluid evenly), so take the same amount of fluid from
+            // each one
+            for ((block, _) in suppliers) {
+                block.onFluidRemoved(fluid, remainingFluidNeeded / suppliers.size)
             }
 
-            // Round-robin distribute to requesters
-            while (totalSupplied.absoluteValue > 1.0e-9) {
-                val maxFluidPerRequester = totalSupplied / requesters.size
+            // Now do the same thing for requesters
+            var remainingFluidSupply = totalRequested
+            changed = true
+            // First phase: Repeatedly find all requesters that we have more than enough
+            // fluid to saturate them, add as much fluid as possible, and remove them
+            // from the list.
+            while (changed) {
+                changed = false
                 val iterator = requesters.iterator()
                 while (iterator.hasNext()) {
-                    val requester = iterator.next()
-                    if (requester.amount < maxFluidPerRequester) {
-                        requester.block.addFluid(requester.fluid, requester.amount)
-                        iterator.remove()
-                        totalSupplied -= requester.amount
-                    } else {
-                        requester.block.addFluid(requester.fluid, maxFluidPerRequester)
-                        totalSupplied -= maxFluidPerRequester
+                    val (block, amountRequested) = iterator.next()
+                    if (amountRequested > remainingFluidSupply / requesters.size) {
+                        continue
                     }
+
+                    remainingFluidSupply -= amountRequested
+                    block.onFluidAdded(fluid, amountRequested)
+                    iterator.remove()
+                    changed = true
                 }
             }
+            // Second phase: All remaining requesters want more than we can supply
+            // (assuming we distribute fluid evenly), so give the same amount of fluid to
+            // each one
+            for ((block, _) in requesters) {
+                block.onFluidAdded(fluid, remainingFluidSupply / requesters.size)
+            }
 
-            // Only allow one type of fluid to be distributed per tick
+            // Break to only allow one type of fluid to be distributed per tick
             break
         }
     }

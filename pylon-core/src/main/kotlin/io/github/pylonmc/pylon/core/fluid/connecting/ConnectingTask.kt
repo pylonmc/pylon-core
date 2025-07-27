@@ -232,6 +232,11 @@ class ConnectingTask(
         fun pipesUsed(from: BlockPosition, to: BlockPosition)
             = blocksOnPath(from, to).size + 1
 
+        private fun isCardinalDirection(vector: Vector3i)
+            = vector.x != 0 && vector.y == 0 && vector.z == 0
+                || vector.x == 0 && vector.y != 0 && vector.z == 0
+                || vector.x == 0 && vector.y == 0 && vector.z != 0
+
         /**
          * Does not include first or last block
          */
