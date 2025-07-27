@@ -110,6 +110,9 @@ object PylonSerializers {
     @JvmSynthetic
     internal val SIMPLE_MULTIBLOCK_DATA = SimpleMultiblockDataPersistentDataType
 
+    @JvmSynthetic
+    internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
+
     @JvmField
     val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
 }
