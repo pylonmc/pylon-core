@@ -38,7 +38,11 @@ import java.util.Locale
 import java.util.WeakHashMap
 
 /**
- * The [Translator] for a given [PylonAddon]. Use [translator] to obtain an instance.
+ * The [Translator] for a given [PylonAddon]. This translator handles the translation of
+ * any keys in the form of `pylon.<addon>.<key>`, where `<addon>` is the namespace of the addon
+ * and `<key>` is the path to the translation key within the language files for that addon.
+ *
+ * Use [translator] to obtain an instance.
  */
 class PylonTranslator private constructor(private val addon: PylonAddon) : Translator {
 
