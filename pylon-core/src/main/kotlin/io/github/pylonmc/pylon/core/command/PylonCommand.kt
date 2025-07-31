@@ -28,7 +28,6 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -85,7 +84,7 @@ internal object PylonCommand {
         executesWithPlayer { player ->
             val item = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
             if (item == null) {
-                player.sendRichMessage("<red>You are not holding a Pylon item")
+                player.sendMessage(Component.translatable("pylon.pyloncore.message.command.key.not_item"))
                 return@executesWithPlayer
             }
             player.sendMessage(item.key.toString())
@@ -122,9 +121,20 @@ internal object PylonCommand {
                     PylonCore.launch {
                         val result = test.launch(BlockPosition(location.toLocation(player.world))).await()
                         if (result != null) {
-                            player.sendRichMessage("<red>Game test $test failed: ${result.message}")
+                            player.sendMessage(
+                                Component.translatable(
+                                    "pylon.pyloncore.message.command.gametest.failed",
+                                    PylonArgument.of("test", test.key.toString()),
+                                    PylonArgument.of("reason", result.message ?: "Unknown error")
+                                )
+                            )
                         } else {
-                            player.sendRichMessage("<green>Game test $test succeeded")
+                            player.sendMessage(
+                                Component.translatable(
+                                    "pylon.pyloncore.message.command.gametest.success",
+                                    PylonArgument.of("test", test.key.toString())
+                                )
+                            )
                         }
                     }
                 }
@@ -138,8 +148,13 @@ internal object PylonCommand {
                 for (player in context.getArgument<List<Player>>("player")) {
                     for (res in researches) {
                         player.addResearch(res, sendMessage = false)
-                        val name = MiniMessage.miniMessage().serialize(res.name)
-                        context.source.sender.sendRichMessage("<green>Added research $name to ${player.name}")
+                        context.source.sender.sendMessage(
+                            Component.translatable(
+                                "pylon.pyloncore.message.command.research.added",
+                                PylonArgument.of("research", res.name),
+                                PylonArgument.of("player", player.name)
+                            )
+                        )
                     }
                 }
             }
@@ -165,15 +180,17 @@ internal object PylonCommand {
         fun listResearches(sender: CommandSender, player: Player) {
             val researches = player.researches
             if (researches.isEmpty()) {
-                sender.sendMessage(Component.translatable("pylon.pyloncore.message.research.list.none"))
+                sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.research.list.none"))
                 return
             }
             val names = Component.join(JoinConfiguration.commas(true), researches.map(Research::name))
-            sender.sendMessage(Component.translatable(
-                "pylon.pyloncore.message.research.list.discovered",
-                PylonArgument.of("count", researches.size),
-                PylonArgument.of("list", names)
-            ))
+            sender.sendMessage(
+                Component.translatable(
+                    "pylon.pyloncore.message.command.research.list.discovered",
+                    PylonArgument.of("count", researches.size),
+                    PylonArgument.of("list", names)
+                )
+            )
         }
 
         requiresPlayer(permission = "pylon.command.research.list.self")
@@ -196,17 +213,27 @@ internal object PylonCommand {
             executesWithPlayer { player ->
                 val res = getArgument<Research>("research")
                 if (player.hasResearch(res)) {
-                    player.sendRichMessage("<red>You have already discovered this research")
+                    player.sendMessage(
+                        Component.translatable(
+                            "pylon.pyloncore.message.command.research.already_discovered",
+                            PylonArgument.of("research", res.name)
+                        )
+                    )
                     return@executesWithPlayer
                 }
                 if (res.cost == null) {
-                    player.sendRichMessage("<red>This research cannot be unlocked using research points")
+                    player.sendMessage(
+                        Component.translatable(
+                            "pylon.pyloncore.message.command.research.cannot_unlock",
+                            PylonArgument.of("research", res.name)
+                        )
+                    )
                     return@executesWithPlayer
                 }
                 if (player.researchPoints < res.cost) {
                     player.sendMessage(
                         Component.translatable(
-                            "pylon.pyloncore.message.research.not_enough_points",
+                            "pylon.pyloncore.message.command.research.not_enough_points",
                             PylonArgument.of("research", res.name),
                             PylonArgument.of("points", player.researchPoints),
                             PylonArgument.of("cost", res.cost)
@@ -227,8 +254,13 @@ internal object PylonCommand {
                     for (res in researches) {
                         if (player.hasResearch(res)) {
                             player.removeResearch(res)
-                            val name = MiniMessage.miniMessage().serialize(res.name)
-                            context.source.sender.sendRichMessage("<green>Removed research $name from ${player.name}")
+                            context.source.sender.sendMessage(
+                                Component.translatable(
+                                    "pylon.pyloncore.message.command.research.removed",
+                                    PylonArgument.of("research", res.name),
+                                    PylonArgument.of("player", player.name)
+                                )
+                            )
                         }
                     }
                 }
@@ -259,7 +291,13 @@ internal object PylonCommand {
                     val player = getArgument<Player>("player")
                     val points = getArgument<Long>("points")
                     player.researchPoints = points
-                    sender.sendRichMessage("<green>Set research points of ${player.name} to $points")
+                    sender.sendMessage(
+                        Component.translatable(
+                            "pylon.pyloncore.message.command.research.points.set",
+                            PylonArgument.of("player", player.name),
+                            PylonArgument.of("points", points)
+                        )
+                    )
                 }
             }
         }
@@ -273,7 +311,13 @@ internal object PylonCommand {
                     val player = getArgument<Player>("player")
                     val points = getArgument<Long>("points")
                     player.researchPoints += points
-                    sender.sendRichMessage("<green>Added $points research points to ${player.name}")
+                    sender.sendMessage(
+                        Component.translatable(
+                            "pylon.pyloncore.message.command.research.points.added",
+                            PylonArgument.of("player", player.name),
+                            PylonArgument.of("points", points)
+                        )
+                    )
                 }
             }
         }
@@ -287,7 +331,13 @@ internal object PylonCommand {
                     val player = getArgument<Player>("player")
                     val points = getArgument<Long>("points")
                     player.researchPoints -= points
-                    sender.sendRichMessage("<green>Removed $points research points from ${player.name}")
+                    sender.sendMessage(
+                        Component.translatable(
+                            "pylon.pyloncore.message.command.research.points.removed",
+                            PylonArgument.of("player", player.name),
+                            PylonArgument.of("points", points)
+                        )
+                    )
                 }
             }
         }
@@ -296,7 +346,13 @@ internal object PylonCommand {
     private val researchPointsGet = buildCommand("get") {
         fun getPoints(sender: CommandSender, player: Player) {
             val points = player.researchPoints
-            sender.sendRichMessage("<green>Research points of ${player.name}: $points")
+            sender.sendMessage(
+                Component.translatable(
+                    "pylon.pyloncore.message.command.research.points.get",
+                    PylonArgument.of("player", player.name),
+                    PylonArgument.of("points", points)
+                )
+            )
         }
 
         requiresPlayer(permission = "pylon.command.research.points.get.self")
