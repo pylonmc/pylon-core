@@ -1,6 +1,7 @@
+@file:Suppress("UnstableApiUsage")
+
 package io.github.pylonmc.pylon.core
 
-import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
@@ -23,10 +24,9 @@ import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
@@ -35,8 +35,6 @@ import xyz.xenondevs.invui.InvUI
 import java.util.Locale
 
 object PylonCore : JavaPlugin(), PylonAddon {
-
-    private lateinit var manager: PaperCommandManager
 
     override fun onEnable() {
         InvUI.getInstance().setPlugin(this)
@@ -73,16 +71,10 @@ object PylonCore : JavaPlugin(), PylonAddon {
             MultiblockCache.MultiblockChecker.INTERVAL_TICKS
         )
 
-        manager = PaperCommandManager(this)
-        manager.commandContexts.registerContext(NamespacedKey::class.java) {
-            NamespacedKey.fromString(it.popFirstArg())
+        lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
+            it.registrar().register(PylonCommand.ROOT)
+            it.registrar().register(PylonCommand.PY_ALIAS)
         }
-        addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
-        addRegistryCompletion("items", PylonRegistry.ITEMS)
-        addRegistryCompletion("blocks", PylonRegistry.BLOCKS)
-        addRegistryCompletion("researches", PylonRegistry.RESEARCHES)
-
-        manager.registerCommand(PylonCommand())
 
         PylonItem.register<DebugWaxedWeatheredCutCopperStairs>(DebugWaxedWeatheredCutCopperStairs.STACK)
         PylonGuide.hideItem(DebugWaxedWeatheredCutCopperStairs.KEY)
@@ -111,12 +103,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
-    }
-
-    private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {
-        manager.commandCompletions.registerCompletion(name) { _ ->
-            registry.map { it.key.toString() }.sorted()
-        }
     }
 
     override val javaPlugin = this
