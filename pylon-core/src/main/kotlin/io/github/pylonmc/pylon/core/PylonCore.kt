@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package io.github.pylonmc.pylon.core
 
 import co.aikar.commands.PaperCommandManager
@@ -24,9 +26,9 @@ import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
@@ -73,16 +75,10 @@ object PylonCore : JavaPlugin(), PylonAddon {
             MultiblockCache.MultiblockChecker.INTERVAL_TICKS
         )
 
-        manager = PaperCommandManager(this)
-        manager.commandContexts.registerContext(NamespacedKey::class.java) {
-            NamespacedKey.fromString(it.popFirstArg())
+        lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
+            it.registrar().register(PylonCommand.ROOT)
+            it.registrar().register(PylonCommand.PY_ALIAS)
         }
-        addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
-        addRegistryCompletion("items", PylonRegistry.ITEMS)
-        addRegistryCompletion("blocks", PylonRegistry.BLOCKS)
-        addRegistryCompletion("researches", PylonRegistry.RESEARCHES)
-
-        manager.registerCommand(PylonCommand())
 
         PylonItem.register<DebugWaxedWeatheredCutCopperStairs>(DebugWaxedWeatheredCutCopperStairs.STACK)
         PylonGuide.hideItem(DebugWaxedWeatheredCutCopperStairs.KEY)
