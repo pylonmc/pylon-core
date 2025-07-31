@@ -7,11 +7,15 @@ import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonArrow
+import io.github.pylonmc.pylon.core.item.base.PylonLingeringPotion
+import io.github.pylonmc.pylon.core.item.base.PylonSplashPotion
 import org.bukkit.entity.AbstractArrow
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.LingeringPotionSplashEvent
+import org.bukkit.event.entity.PotionSplashEvent
 import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
@@ -56,6 +60,22 @@ internal object EntityListener : Listener {
             if (arrowItem is PylonArrow) {
                 arrowItem.onArrowDamage(event)
             }
+        }
+    }
+
+    @EventHandler
+    fun handle(event: PotionSplashEvent) {
+        val pylonPotion = PylonItem.fromStack(event.potion.item)
+        if (pylonPotion is PylonSplashPotion) {
+            pylonPotion.onSplash(event)
+        }
+    }
+
+    @EventHandler
+    fun handle(event: LingeringPotionSplashEvent) {
+        val pylonPotion = PylonItem.fromStack(event.entity.item)
+        if (pylonPotion is PylonLingeringPotion) {
+            pylonPotion.onSplash(event)
         }
     }
 }
