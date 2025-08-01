@@ -22,11 +22,20 @@ interface BlockBreakContext {
     val normallyDrops: Boolean
 
     /**
+     * If true, the block will be set to air after the Pylon data is removed
+     */
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @get:JvmName("shouldSetToAir")
+    val shouldSetToAir: Boolean
+        get() = true
+
+    /**
      * The block is being broken by a plugin
      */
-    data object PluginBreak : BlockBreakContext {
-        override val normallyDrops = true
-    }
+    class PluginBreak @JvmOverloads constructor(
+        override val normallyDrops: Boolean = true,
+        override val shouldSetToAir: Boolean = true
+    ) : BlockBreakContext
 
     /**
      * The block is being broken by a player
