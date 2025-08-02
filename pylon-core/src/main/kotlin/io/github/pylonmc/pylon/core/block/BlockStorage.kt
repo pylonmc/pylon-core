@@ -182,7 +182,7 @@ object BlockStorage : Listener {
         val schema = PylonRegistry.BLOCKS[key]
         require(schema != null) { "Block $key does not exist" }
 
-        if (context !is BlockCreateContext.PlayerPlace) {
+        if (context.shouldSetType) {
             blockPosition.block.type = schema.material
         }
 
@@ -245,7 +245,7 @@ object BlockStorage : Listener {
     @JvmOverloads
     fun breakBlock(
         blockPosition: BlockPosition,
-        context: BlockBreakContext = BlockBreakContext.PluginBreak
+        context: BlockBreakContext = BlockBreakContext.PluginBreak()
     ) {
         require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
@@ -269,7 +269,9 @@ object BlockStorage : Listener {
             blocksByChunk[blockPosition.chunk]?.remove(block)
         }
 
-        blockPosition.block.type = Material.AIR
+        if (context.shouldSetToAir) {
+            blockPosition.block.type = Material.AIR
+        }
         if (block is PylonBreakHandler) {
             block.postBreak()
         }
@@ -290,7 +292,7 @@ object BlockStorage : Listener {
      */
     @JvmStatic
     @JvmOverloads
-    fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+    fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
         breakBlock(block.position, context)
 
     /**
@@ -302,7 +304,7 @@ object BlockStorage : Listener {
      */
     @JvmStatic
     @JvmOverloads
-    fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+    fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
         breakBlock(BlockPosition(location), context)
 
     private fun load(world: World, chunk: Chunk): List<PylonBlock> {
