@@ -280,7 +280,7 @@ private val researchRemove = buildCommand("remove") {
 private val researchPointsSet = buildCommand("set") {
     argument("players", ArgumentTypes.players()) {
         argument("points", LongArgumentType.longArg(0)) {
-            requiresPlayer(permission = "pylon.command.research.points.set")
+            permission("pylon.command.research.points.set")
             executes { sender ->
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
@@ -301,7 +301,7 @@ private val researchPointsSet = buildCommand("set") {
 private val researchPointsAdd = buildCommand("add") {
     argument("players", ArgumentTypes.players()) {
         argument("points", LongArgumentType.longArg()) {
-            requiresPlayer(permission = "pylon.command.research.points.set")
+            permission("pylon.command.research.points.set")
             executes { sender ->
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
@@ -322,7 +322,7 @@ private val researchPointsAdd = buildCommand("add") {
 private val researchPointsSubtract = buildCommand("subtract") {
     argument("players", ArgumentTypes.players()) {
         argument("points", LongArgumentType.longArg()) {
-            requiresPlayer(permission = "pylon.command.research.points.set")
+            permission("pylon.command.research.points.set")
             executes { sender ->
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
