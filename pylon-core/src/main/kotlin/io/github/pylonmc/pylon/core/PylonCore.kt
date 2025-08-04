@@ -8,7 +8,8 @@ import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
 import io.github.pylonmc.pylon.core.block.waila.Waila
-import io.github.pylonmc.pylon.core.command.PylonCommand
+import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
+import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -30,6 +31,8 @@ import org.bukkit.Material
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.permissions.Permission
+import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
 import java.util.Locale
@@ -71,9 +74,14 @@ object PylonCore : JavaPlugin(), PylonAddon {
             MultiblockCache.MultiblockChecker.INTERVAL_TICKS
         )
 
+        addDefaultPermission("pylon.command.guide")
+        addDefaultPermission("pylon.command.waila")
+        addDefaultPermission("pylon.command.research.list.self")
+        addDefaultPermission("pylon.command.research.discover")
+        addDefaultPermission("pylon.command.research.points.get.self")
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
-            it.registrar().register(PylonCommand.ROOT)
-            it.registrar().register(PylonCommand.PY_ALIAS)
+            it.registrar().register(ROOT_COMMAND)
+            it.registrar().register(ROOT_COMMAND_PY_ALIAS)
         }
 
         PylonItem.register<DebugWaxedWeatheredCutCopperStairs>(DebugWaxedWeatheredCutCopperStairs.STACK)
@@ -113,4 +121,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Locale.ENGLISH,
         Locale.of("enws")
     )
+}
+
+private fun addDefaultPermission(permission: String) {
+    Bukkit.getPluginManager().addPermission(Permission(permission, PermissionDefault.TRUE))
 }

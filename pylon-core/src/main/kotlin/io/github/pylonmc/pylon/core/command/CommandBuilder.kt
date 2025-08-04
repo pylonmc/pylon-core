@@ -58,6 +58,10 @@ class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
 
     fun redirect(node: CommandNode<CommandSourceStack>) {
         command.redirect(node)
+        // Fix for https://github.com/Mojang/brigadier/issues/46
+        if (command.command == null) {
+            command.executes(node.command)
+        }
     }
 
     inline fun executes(crossinline handler: CommandContext<CommandSourceStack>.(CommandSender) -> Unit) {
