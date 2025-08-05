@@ -55,11 +55,11 @@ private val give = buildCommand("give") {
                 }
             }
 
-            requiresPlayer(permission = "pylon.command.give")
+            permission("pylon.command.give")
             executes { givePlayers(this, 1) }
 
             argument("amount", IntegerArgumentType.integer(1)) {
-                requiresPlayer(permission = "pylon.command.give")
+                permission("pylon.command.give")
                 executes { givePlayers(this, IntegerArgumentType.getInteger(this, "amount")) }
             }
         }
