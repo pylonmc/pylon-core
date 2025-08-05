@@ -78,7 +78,7 @@ private val key = buildCommand("key") {
     executesWithPlayer { player ->
         val item = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
         if (item == null) {
-            player.sendMessage(Component.translatable("pylon.pyloncore.message.command.key.not_item"))
+            player.sendMessage(Component.translatable("pylon.pyloncore.message.command.key.no_item"))
             return@executesWithPlayer
         }
         player.sendMessage(item.key.toString())
