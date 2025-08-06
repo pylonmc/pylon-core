@@ -30,6 +30,12 @@ interface PylonTickingBlock {
         tickingData.tickInterval = tickInterval
     }
 
+    /**
+     * WARNING: Settings a block to tick asynchronously could have unintended consequences.
+     *
+     * Only set this option if you understand what 'asynchronous' means, and note that you
+     * cannot interact with the world asynchronously.
+     */
     fun setAsync(isAsync: Boolean) {
         tickingData.isAsync = isAsync
     }
