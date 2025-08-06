@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -13,6 +15,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import kotlinx.coroutines.delay
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
@@ -26,6 +29,7 @@ import org.joml.Vector3i
 import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * A multiblock that is made of a static defined set of components
@@ -37,11 +41,11 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         fun spawnGhostBlock(block: Block): UUID
     }
 
-    class MultiblockGhostBlock(entity: BlockDisplay, val name: String)
-        : PylonEntity<BlockDisplay>(KEY, entity), PylonInteractableEntity {
+    class MultiblockGhostBlock(entity: BlockDisplay, val name: String) :
+        PylonEntity<BlockDisplay>(KEY, entity), PylonInteractableEntity {
 
         constructor(entity: BlockDisplay)
-            : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
+                : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
 
         override fun onInteract(event: PlayerInteractEntityEvent) {
             event.player.sendMessage(name)
@@ -57,23 +61,43 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
-    data class VanillaMultiblockComponent(val material: Material) : MultiblockComponent {
-        override fun matches(block: Block): Boolean
-            = !BlockStorage.isPylonBlock(block) && block.type == material
+    data class VanillaMultiblockComponent(val materials: List<Material>) : MultiblockComponent {
+
+        // Enforce at least 1
+        constructor(first: Material, vararg materials: Material) : this(listOf(first) + materials)
+
+        init {
+            check(materials.isNotEmpty()) { "Materials list cannot be empty" }
+        }
+
+        override fun matches(block: Block): Boolean = !BlockStorage.isPylonBlock(block) && block.type in materials
 
         override fun spawnGhostBlock(block: Block): UUID {
             val display = BlockDisplayBuilder()
-                .material(material)
+                .material(materials.first())
                 .transformation(TransformBuilder().scale(0.5))
                 .build(block.location.toCenterLocation())
-            EntityStorage.add(MultiblockGhostBlock(display, material.name))
+            EntityStorage.add(MultiblockGhostBlock(display, materials.joinToString(", ") { it.key.toString() }))
+
+            if (materials.size > 1) {
+                PylonCore.launch {
+                    val datas = materials.map(Material::createBlockData)
+                    var i = 0
+                    while (display.isValid) {
+                        display.block = datas[i]
+                        i++
+                        i %= datas.size
+                        delay(1.seconds)
+                    }
+                }
+            }
+
             return display.uniqueId
         }
     }
 
     data class PylonMultiblockComponent(val key: NamespacedKey) : MultiblockComponent {
-        override fun matches(block: Block): Boolean
-            = BlockStorage.get(block)?.schema?.key == key
+        override fun matches(block: Block): Boolean = BlockStorage.get(block)?.schema?.key == key
 
         override fun spawnGhostBlock(block: Block): UUID {
             val schema = PylonRegistry.BLOCKS[key]
@@ -82,7 +106,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
                 .material(schema.material)
                 .transformation(TransformBuilder().scale(0.7))
                 .build(block.location.toCenterLocation())
-            EntityStorage.add(MultiblockGhostBlock(display, key.key))
+            EntityStorage.add(MultiblockGhostBlock(display, key.toString()))
             return display.uniqueId
         }
     }
@@ -164,10 +188,9 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         return formed
     }
 
-    override fun isPartOfMultiblock(otherBlock: Block): Boolean
-        = validStructures().any {
-            it.contains((otherBlock.position - block.position).vector3i)
-        }
+    override fun isPartOfMultiblock(otherBlock: Block): Boolean = validStructures().any {
+        it.contains((otherBlock.position - block.position).vector3i)
+    }
 
     companion object : Listener {
         @EventHandler
