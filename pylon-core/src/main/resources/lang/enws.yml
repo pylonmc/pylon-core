@@ -60,7 +60,7 @@ message:
       added: "<green>Added research %research% to player %player%"
       removed: "<green>Removed research %research% from player %player%"
       list:
-        none: "Thou do not know anything"
+        none: "Thou dost not knoweth anything"
         discovered: "Thou hast discovered %count% researches: %list%"
       already_discovered: "<red>Thou hast already discovered %research%"
       cannot_unlock: "<red>Thou cannot unlock %research% using research points"
