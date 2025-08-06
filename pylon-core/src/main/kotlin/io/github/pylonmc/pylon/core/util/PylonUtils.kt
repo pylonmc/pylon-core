@@ -5,6 +5,9 @@ package io.github.pylonmc.pylon.core.util
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
@@ -86,4 +89,17 @@ fun wrapText(text: String, limit: Int): List<String> {
         lines.add(currentLine.toString())
     }
     return lines
+}
+
+/**
+ * Attaches arguments to a component and all its children.
+ */
+@JvmName("attachArguments")
+fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
+    if (args.isEmpty()) return this
+    var result = this
+    if (this is TranslatableComponent) {
+        result = this.arguments(args)
+    }
+    return result.children(result.children().map { it.withArguments(args) })
 }
