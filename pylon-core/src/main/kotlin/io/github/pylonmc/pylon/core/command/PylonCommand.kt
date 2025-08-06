@@ -36,7 +36,7 @@ import org.bukkit.inventory.EquipmentSlot
 import io.papermc.paper.math.BlockPosition as PaperBlockPosition
 
 private val guide = buildCommand("guide") {
-    requiresPlayer(permission = "pylon.command.guide")
+    permission("pylon.command.guide")
     executesWithPlayer { player ->
         player.inventory.addItem(PylonGuide.STACK)
     }
@@ -67,14 +67,14 @@ private val give = buildCommand("give") {
 }
 
 private val debug = buildCommand("debug") {
-    requiresPlayer(permission = "pylon.command.debug")
+    permission("pylon.command.debug")
     executesWithPlayer { player ->
         player.inventory.addItem(DebugWaxedWeatheredCutCopperStairs.STACK)
     }
 }
 
 private val key = buildCommand("key") {
-    requiresPlayer(permission = "pylon.command.key")
+    permission("pylon.command.key")
     executesWithPlayer { player ->
         val item = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
         if (item == null) {
@@ -88,7 +88,7 @@ private val key = buildCommand("key") {
 private val setblock = buildCommand("setblock") {
     argument("location", ArgumentTypes.blockPosition()) {
         argument("block", RegistryCommandArgument(PylonRegistry.BLOCKS)) {
-            requiresPlayer(permission = "pylon.command.setblock")
+            permission("pylon.command.setblock")
             executesWithPlayer { player ->
                 val location = getArgument<PaperBlockPosition>("location")
                 val block = getArgument<PylonBlockSchema>("block")
@@ -99,7 +99,7 @@ private val setblock = buildCommand("setblock") {
 }
 
 private val waila = buildCommand("waila") {
-    requiresPlayer(permission = "pylon.command.waila")
+    permission("pylon.command.waila")
     executesWithPlayer { player ->
         player.wailaEnabled = !player.wailaEnabled
     }
@@ -108,7 +108,7 @@ private val waila = buildCommand("waila") {
 private val gametest = buildCommand("gametest") {
     argument("location", ArgumentTypes.blockPosition()) {
         argument("test", RegistryCommandArgument(PylonRegistry.GAMETESTS)) {
-            requiresPlayer(permission = "pylon.command.gametest")
+            permission("pylon.command.gametest")
             executesWithPlayer { player ->
                 val location = getArgument<PaperBlockPosition>("location")
                 val test = getArgument<GameTestConfig>("test")
@@ -187,7 +187,7 @@ private val researchList = buildCommand("list") {
         )
     }
 
-    requiresPlayer(permission = "pylon.command.research.list.self")
+    permission("pylon.command.research.list.self")
     executesWithPlayer { player ->
         listResearches(player, player)
     }
@@ -203,7 +203,7 @@ private val researchList = buildCommand("list") {
 
 private val researchDiscover = buildCommand("discover") {
     argument("research", RegistryCommandArgument(PylonRegistry.RESEARCHES)) {
-        requiresPlayer(permission = "pylon.command.research.discover")
+        permission("pylon.command.research.discover")
         executesWithPlayer { player ->
             val res = getArgument<Research>("research")
             if (player.hasResearch(res)) {
@@ -352,7 +352,7 @@ private val researchPointsGet = buildCommand("get") {
         )
     }
 
-    requiresPlayer(permission = "pylon.command.research.points.get.self")
+    permission("pylon.command.research.points.get.self")
     executesWithPlayer { player ->
         getPoints(player, player)
     }
@@ -383,7 +383,7 @@ private val research = buildCommand("research") {
 
 @JvmSynthetic
 internal val ROOT_COMMAND = buildCommand("pylon") {
-    requiresPlayer(permission = "pylon.command.guide")
+    permission("pylon.command.guide")
     executesWithPlayer { player ->
         PylonGuide.open(player)
     }

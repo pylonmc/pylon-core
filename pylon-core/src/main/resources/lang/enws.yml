@@ -48,6 +48,9 @@ message:
     click_to_research: "<green>Click to research (%points% points)"
 
   command:
+    error:
+      no_permission: "<red>Thou art not permitted to execute this command"
+      not_a_player: "<red>Thou art not a player"
     key:
       no_item: "<red>Thou art not holding a Pylon item"
     gametest:

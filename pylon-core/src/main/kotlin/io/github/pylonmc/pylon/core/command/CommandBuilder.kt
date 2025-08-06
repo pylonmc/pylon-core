@@ -10,6 +10,7 @@ import com.mojang.brigadier.tree.CommandNode
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
+import net.kyori.adventure.text.Component
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -20,7 +21,7 @@ import org.bukkit.entity.Player
  */
 class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
 
-    var requirement: (CommandSourceStack) -> Boolean = { true }
+    var requirement: CommandContext<CommandSourceStack>.(CommandSender) -> Boolean = { true }
 
     inline fun literal(name: String, block: CommandBuilder.() -> Unit): CommandNode<CommandSourceStack> {
         val builder = CommandBuilder(Commands.literal(name))
@@ -42,19 +43,19 @@ class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
         command.then(node)
     }
 
-    inline fun requires(crossinline predicate: (CommandSourceStack) -> Boolean) {
+    inline fun requires(errorMessage: Component, crossinline predicate: CommandContext<CommandSourceStack>.(CommandSender) -> Boolean) {
         val currentRequirement = requirement
-        requirement = { currentRequirement(it) && predicate(it) }
-    }
-
-    fun requiresPlayer(permission: String? = null) {
-        requires { it.sender is Player }
-        if (permission != null) {
-            permission(permission)
+        requirement = {
+            if (!predicate(it)) {
+                it.sendMessage(errorMessage)
+                false
+            } else {
+                currentRequirement(it)
+            }
         }
     }
 
-    fun permission(permission: String) = requires { it.sender.hasPermission(permission) }
+    fun permission(permission: String) = requires(Component.translatable("pylon.pyloncore.message.command.error.no_permission")) { it.hasPermission(permission) }
 
     fun redirect(node: CommandNode<CommandSourceStack>) {
         command.redirect(node)
@@ -65,21 +66,23 @@ class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
     }
 
     inline fun executes(crossinline handler: CommandContext<CommandSourceStack>.(CommandSender) -> Unit) {
+        val currentRequirement = requirement
         command.executes { context ->
-            context.handler(context.source.sender)
+            if (context.currentRequirement(context.source.sender)) {
+                context.handler(context.source.sender)
+            }
             Command.SINGLE_SUCCESS
         }
     }
 
     inline fun executesWithPlayer(crossinline handler: CommandContext<CommandSourceStack>.(Player) -> Unit) {
-        requiresPlayer()
+        requires(Component.translatable("pylon.pyloncore.message.command.error.must_be_player")) { it is Player }
         executes {
             handler(source.sender as Player)
         }
     }
 
     fun build(): CommandNode<CommandSourceStack> {
-        command.requires(requirement)
         return command.build()
     }
 }
