@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.TextColor
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
+import java.time.Duration
 import java.util.EnumSet
 
 class UnitFormat @JvmOverloads constructor(
@@ -223,5 +224,41 @@ class UnitFormat @JvmOverloads constructor(
             abbreviate = true,
             prefix = MetricPrefix.NONE
         )
+
+        @JvmStatic
+        fun formatDuration(duration: Duration): Component {
+            var component = Component.text()
+            val days = duration.toDaysPart()
+            if (days > 0) {
+                component = component.append(
+                    DAYS.format(days)
+                        .abbreviate(false)
+                        .unitStyle(Style.empty())
+                )
+            }
+            val hours = duration.toHoursPart()
+            if (hours > 0) {
+                component = component.append(
+                    HOURS.format(hours)
+                        .abbreviate(false)
+                        .unitStyle(Style.empty())
+                )
+            }
+            val minutes = duration.toMinutesPart()
+            if (minutes > 0) {
+                component = component.append(
+                    MINUTES.format(minutes)
+                        .abbreviate(false)
+                        .unitStyle(Style.empty())
+                )
+            }
+            val seconds = duration.toSecondsPart()
+            component = component.append(
+                SECONDS.format(seconds)
+                    .abbreviate(false)
+                    .unitStyle(Style.empty())
+            )
+            return component.build()
+        }
     }
 }
