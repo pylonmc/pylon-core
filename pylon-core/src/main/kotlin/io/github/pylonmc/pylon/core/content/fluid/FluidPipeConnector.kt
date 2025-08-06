@@ -48,8 +48,8 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
         super<PylonEntityHolderBlock>.onBreak(drops, context)
     }
 
-    override fun getWaila(player: Player): WailaConfig
-        = WailaConfig(name, listOf(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
+    override fun getWaila(player: Player): WailaConfig?
+        = WailaConfig(getName(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
 
     val pipe: PylonItem
         get() {
