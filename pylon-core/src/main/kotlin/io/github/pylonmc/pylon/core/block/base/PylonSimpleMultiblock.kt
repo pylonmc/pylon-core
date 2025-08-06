@@ -118,7 +118,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     /**
      * Sets the 'direction' we expect the multiblock to be built in. North is considered the default facing direction -
-     * ie setFacing(BlockFace.NORTH) will have no effect.
+     * ie setFacing(BlockFace.NORTH) will preserve the original multiblock structure without rotatnig it.
      *
      * Leave this unset to accept any direction.
      */

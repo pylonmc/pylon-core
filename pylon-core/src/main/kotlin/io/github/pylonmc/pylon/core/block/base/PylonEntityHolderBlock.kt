@@ -59,12 +59,10 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         ?: throw IllegalArgumentException("Entity $name does not exist or is not of type ${clazz.simpleName}")
 
     /**
-     * Returns false if the entity is unloaded or does not physically exist.
-     *
-     * Will error if there is no entity with the provided name.
+     * Returns false if the block holds no entity with the provided name, the entity is unloaded or does not physically exist.
      */
     @ApiStatus.NonExtendable
-    fun isHeldEntityPresent(name: String) = getHeldEntityUuid(name)?.let { EntityStorage.isPylonEntity(it) } ?: false
+    fun isHeldEntityPresent(name: String) = getHeldEntityUuid(name)?.let { EntityStorage.isPylonEntity(it) } == true
 
     /**
      * Returns false if any entity is unloaded or does not exist.

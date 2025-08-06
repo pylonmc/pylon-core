@@ -118,8 +118,4 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
 
     class KeyNotFoundException(path: String?, key: String) :
         Exception(if (!path.isNullOrEmpty()) "Config key not found: $path.$key" else "Config key not found: $key")
-
-    companion object {
-
-    }
 }
