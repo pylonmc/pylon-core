@@ -47,7 +47,7 @@ class PhantomBlock(
         throw UnsupportedOperationException("Phantom block cannot be loaded")
     }
 
-    override fun getWaila(player: Player): WailaConfig {
+    override fun getWaila(player: Player): WailaConfig? {
         return WailaConfig(
             text = name,
             placeholders = listOf(PylonArgument.of("block", erroredBlockKey.toString())),
