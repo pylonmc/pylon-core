@@ -6,6 +6,8 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.EntityStorage
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
+import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -69,18 +71,21 @@ class Waila private constructor(private val player: Player, private val job: Job
             }
         } else {
             val blockReach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
-            val config = try {
-                player.rayTraceBlocks(blockReach)?.hitBlock?.let(BlockStorage::get)?.getWaila(player)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                off()
-                return
-            }
-            if (config != null) {
-                config.apply(bossbar)
-                on()
-            } else {
-                off()
+            val block = player.rayTraceBlocks(blockReach)?.hitBlock
+            if (block != null) {
+                val config = try {
+                    overrides[block.position]?.invoke(player) ?: block.let(BlockStorage::get)?.getWaila(player)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    off()
+                    return
+                }
+                if (config != null) {
+                    config.apply(bossbar)
+                    on()
+                } else {
+                    off()
+                }
             }
         }
     }
@@ -89,6 +94,8 @@ class Waila private constructor(private val player: Player, private val job: Job
 
         private val wailaKey = pylonKey("waila")
         private val wailas = mutableMapOf<UUID, Waila>()
+
+        private val overrides = mutableMapOf<BlockPosition, (Player) -> WailaConfig?>()
 
         /**
          * Forcibly adds a WAILA display for the given player
@@ -125,6 +132,21 @@ class Waila private constructor(private val player: Player, private val job: Job
                     removePlayer(this)
                 }
             }
+
+        /**
+         * Adds a WAILA override for the given position. This will always show the provided WAILA config when
+         * a WAILA-enabled player looks at the block at the given position, regardless of the block type or
+         * even if the block is not a Pylon block.
+         */
+        @JvmStatic
+        fun addWailaOverride(position: BlockPosition, provider: (Player) -> WailaConfig?) {
+            overrides[position] = provider
+        }
+
+        @JvmStatic
+        fun removeWailaOverride(position: BlockPosition) {
+            overrides.remove(position)
+        }
 
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerJoin(event: PlayerJoinEvent) {
