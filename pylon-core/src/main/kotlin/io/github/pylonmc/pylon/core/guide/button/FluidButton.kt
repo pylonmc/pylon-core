@@ -26,7 +26,7 @@ open class FluidButton(val key: NamespacedKey, val amount: Double?) : AbstractIt
             .name(Component.translatable(
                 "pylon.pyloncore.guide.button.fluid.name",
                 PylonArgument.of("fluid", fluid.getItem().stack.getData(DataComponentTypes.ITEM_NAME)!!),
-                PylonArgument.of("amount", UnitFormat.MILLIBUCKETS.format(amount))
+                PylonArgument.of("amount", UnitFormat.MILLIBUCKETS.format(amount).decimalPlaces(2))
             ))
     }
 
