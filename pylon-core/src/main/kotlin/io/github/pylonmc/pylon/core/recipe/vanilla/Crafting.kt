@@ -16,9 +16,7 @@ abstract class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : Vanil
 }
 
 class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputs: List<FluidOrItem> = recipe.choiceMap.values.filterNotNull().flatMap {
-        FluidOrItem.of(it)
-    }.toList()
+    override val inputs: List<FluidOrItem> = recipe.choiceMap.values.filterNotNull().flatMap(FluidOrItem::of)
 
     override fun display(): Gui {
         val gui = Gui.normal()
@@ -36,8 +34,8 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
 
         val height = recipe.shape.size
         val width = recipe.shape[0].length
-        for (x in 0..<width) {
-            for (y in 0..<height) {
+        for (x in 0 until width) {
+            for (y in 0 until height) {
                 gui.setItem(12 + x + 9 * y, getDisplaySlot(recipe, x, y))
             }
         }
@@ -52,9 +50,7 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
 }
 
 class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputs: List<FluidOrItem> = recipe.choiceList.filterNotNull().flatMap {
-        FluidOrItem.of(it)
-    }.toList()
+    override val inputs: List<FluidOrItem> = recipe.choiceList.filterNotNull().flatMap(FluidOrItem::of)
 
     override fun display() = Gui.normal()
             .setStructure(
