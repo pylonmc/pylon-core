@@ -61,28 +61,5 @@ class PylonArgument private constructor(val name: String, val value: ComponentLi
         fun of(name: String, value: Char): PylonArgument {
             return of(name, Component.text(value))
         }
-
-        /**
-         * Attaches arguments to a Pylon translation key, making sure they are replaced
-         * correctly when the translation is rendered.
-         */
-        @JvmStatic
-        @JvmName("attachArguments")
-        fun Component.attachPylonArguments(args: List<PylonArgument>): Component {
-            if (args.isEmpty()) return this
-            var result = this
-            if (this is TranslatableComponent) {
-                result = this.arguments(args)
-            }
-            return result.children(result.children().map { it.attachPylonArguments(args) })
-        }
-
-        /**
-         * Attaches arguments to a Pylon translation key, making sure they are replaced
-         * correctly when the translation is rendered.
-         */
-        @JvmStatic
-        @JvmName("attachArguments")
-        fun Component.attachPylonArguments(vararg args: PylonArgument): Component = attachPylonArguments(args.toList())
     }
 }

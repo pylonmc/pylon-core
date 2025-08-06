@@ -36,12 +36,14 @@ class PhantomBlock(
 ) : PylonBlock(block) {
 
     // Hacky placeholder
+    @Suppress("unused")
     internal constructor(block: Block, context: BlockCreateContext)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), pylonKey("bruh"), block) {
         throw UnsupportedOperationException("Phantom block cannot be placed")
     }
 
     // Hacky placeholder
+    @Suppress("unused")
     internal constructor(block: Block, pdc: PersistentDataContainer)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), pylonKey("bruh"), block) {
         throw UnsupportedOperationException("Phantom block cannot be loaded")
@@ -49,8 +51,7 @@ class PhantomBlock(
 
     override fun getWaila(player: Player): WailaConfig? {
         return WailaConfig(
-            text = name,
-            placeholders = listOf(PylonArgument.of("block", erroredBlockKey.toString())),
+            text = getName(PylonArgument.of("block", erroredBlockKey.toString())),
             color = BossBar.Color.RED
         )
     }

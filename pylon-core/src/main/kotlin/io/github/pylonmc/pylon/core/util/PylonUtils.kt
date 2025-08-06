@@ -18,6 +18,9 @@ import io.papermc.paper.math.BlockPosition
 import io.papermc.paper.math.FinePosition
 import io.papermc.paper.math.Rotation
 import org.bukkit.Material
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
@@ -154,4 +157,17 @@ inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: Stri
         typeOf<Rotation>() -> getArgument(name, RotationResolver::class.java).resolve(source)
         else -> getArgument(name, T::class.java)
     } as T
+}
+
+/**
+ * Attaches arguments to a component and all its children.
+ */
+@JvmName("attachArguments")
+fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
+    if (args.isEmpty()) return this
+    var result = this
+    if (this is TranslatableComponent) {
+        result = this.arguments(args)
+    }
+    return result.children(result.children().map { it.withArguments(args) })
 }

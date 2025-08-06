@@ -18,6 +18,7 @@ import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
@@ -52,7 +53,13 @@ open class PylonBlock protected constructor(val block: Block) {
     /**
      * The name is used for WAILA, and as the title of the block's GUI, should it have one
      */
-    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.item.${schema.key.key}.waila", "pylon.${schema.key.namespace}.item.${schema.key.key}.name")
+    open fun getName(arguments: List<TranslationArgumentLike>): Component =
+        Component.translatable(
+            "pylon.${schema.key.namespace}.item.${schema.key.key}.waila", "pylon.${schema.key.namespace}.item.${schema.key.key}.name",
+            *arguments.toTypedArray()
+        )
+
+    fun getName(vararg arguments: TranslationArgumentLike): Component = getName(arguments.toList())
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
@@ -70,7 +77,7 @@ open class PylonBlock protected constructor(val block: Block) {
      * @return the WAILA configuration, or null if WAILA should not be shown for this block
      */
     open fun getWaila(player: Player): WailaConfig? {
-        return WailaConfig(name)
+        return WailaConfig(getName())
     }
 
     /**
