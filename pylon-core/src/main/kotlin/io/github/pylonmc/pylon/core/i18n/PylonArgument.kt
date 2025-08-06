@@ -76,5 +76,13 @@ class PylonArgument private constructor(val name: String, val value: ComponentLi
             }
             return result.children(result.children().map { it.attachPylonArguments(args) })
         }
+
+        /**
+         * Attaches arguments to a Pylon translation key, making sure they are replaced
+         * correctly when the translation is rendered.
+         */
+        @JvmStatic
+        @JvmName("attachArguments")
+        fun Component.attachPylonArguments(vararg args: PylonArgument): Component = attachPylonArguments(args.toList())
     }
 }

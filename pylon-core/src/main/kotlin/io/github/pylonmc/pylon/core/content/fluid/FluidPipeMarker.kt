@@ -61,7 +61,7 @@ class FluidPipeMarker : PylonBlock, PylonBreakHandler {
         }
     }
 
-    override fun getWaila(player: Player): WailaConfig
+    override fun getWaila(player: Player): WailaConfig?
         = WailaConfig(name, listOf(PylonArgument.of("pipe", getPipeDisplay()!!.pipe.stack.effectiveName())))
 
     companion object {

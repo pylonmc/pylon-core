@@ -66,8 +66,10 @@ open class PylonBlock protected constructor(val block: Block) {
 
     /**
      * This will only be called for the player if the player has WAILA enabled
+     *
+     * @return the WAILA configuration, or null if WAILA should not be shown for this block
      */
-    open fun getWaila(player: Player): WailaConfig {
+    open fun getWaila(player: Player): WailaConfig? {
         return WailaConfig(name)
     }
 
