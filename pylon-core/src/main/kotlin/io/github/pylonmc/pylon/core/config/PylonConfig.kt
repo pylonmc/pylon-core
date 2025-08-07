@@ -8,16 +8,16 @@ object PylonConfig {
     private val config = Config(PylonCore, "config.yml")
 
     @JvmStatic
-    val tickRate: Int by config
+    val defaultTickInterval: Int by config
 
     @JvmStatic
     val allowedBlockErrors: Int by config
 
     @JvmStatic
-    val wailaIntervalTicks: Int by config
+    val wailaTickInterval: Int by config
 
     @JvmStatic
-    val fluidIntervalTicks: Int by config
+    val fluidTickInterval: Int by config
 
     @JvmStatic
     val blockDataAutosaveIntervalSeconds: Long = config.getOrThrow<Int>("block-data-autosave-interval-seconds").toLong()
@@ -28,7 +28,7 @@ object PylonConfig {
     @JvmStatic
     val researchesEnabled: Boolean = config.getOrThrow("research.enabled")
 
-    val PIPE_PLACEMENT_TASK_INTERVAL_TICKS: Long = config.getOrThrow<Int>("pipe-placement.task-interval-ticks").toLong()
+    val PIPE_PLACEMENT_TASK_INTERVAL_TICKS: Long = config.getOrThrow<Int>("pipe-placement.tick-interval").toLong()
 
     val PIPE_PLACEMENT_MAX_DISTANCE: Long = config.getOrThrow<Int>("pipe-placement.max-distance").toLong()
 
