@@ -91,7 +91,7 @@ interface PylonFluidTank : PylonFluidBlock {
      */
     fun setFluid(amount: Double): Boolean {
         if (canSetFluid(amount)) {
-            fluidData.amount = amount
+            fluidData.amount = max(0.0, amount)
             return true
         }
         return false
@@ -165,7 +165,6 @@ interface PylonFluidTank : PylonFluidBlock {
     companion object : Listener {
 
         private val fluidTankKey = pylonKey("fluid_tank_data")
-        private val fluidTankDatatype = PylonSerializers.FLUID_TANK_DATA
 
         private val fluidTankBlocks = IdentityHashMap<PylonFluidTank, FluidTankData>()
 
@@ -173,7 +172,7 @@ interface PylonFluidTank : PylonFluidBlock {
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
             if (block is PylonFluidTank) {
-                fluidTankBlocks[block] = event.pdc.get(fluidTankKey, fluidTankDatatype)
+                fluidTankBlocks[block] = event.pdc.get(fluidTankKey, PylonSerializers.FLUID_TANK_DATA)
                     ?: error("Fluid tank data not found for ${block.key}")
             }
         }
@@ -182,7 +181,7 @@ interface PylonFluidTank : PylonFluidBlock {
         private fun onSerialize(event: PylonBlockSerializeEvent) {
             val block = event.pylonBlock
             if (block is PylonFluidTank) {
-                event.pdc.set(fluidTankKey, fluidTankDatatype, fluidTankBlocks[block]!!)
+                event.pdc.set(fluidTankKey, PylonSerializers.FLUID_TANK_DATA, fluidTankBlocks[block]!!)
             }
         }
 

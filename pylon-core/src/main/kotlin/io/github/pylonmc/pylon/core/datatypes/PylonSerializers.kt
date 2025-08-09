@@ -101,11 +101,17 @@ object PylonSerializers {
     @JvmField
     val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid>(PylonRegistry.FLUIDS::getOrThrow)
 
-    @JvmField
+    @JvmSynthetic
     internal val FLUID_BUFFER_DATA = FluidBufferDataPersistentDataType
 
-    @JvmField
+    @JvmSynthetic
     internal val FLUID_TANK_DATA = FluidTankDataPersistentDataType
+
+    @JvmSynthetic
+    internal val SIMPLE_MULTIBLOCK_DATA = SimpleMultiblockDataPersistentDataType
+
+    @JvmSynthetic
+    internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
 
     @JvmField
     val FLUID_CONNECTION_POINT = FluidConnectionPointDataType

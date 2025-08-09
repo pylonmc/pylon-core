@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.config
 import com.google.common.base.CaseFormat
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.itemFromName
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.ConfigurationSection
@@ -55,44 +56,12 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
         return Material.getMaterial(name.uppercase()) ?: error("No such material '$name'")
     }
 
-    fun getItem(key: String): ItemStack? {
-        if (key.contains(':')) {
-            val namespacedKey = NamespacedKey.fromString(key)
-            if (namespacedKey != null) {
-                val pylonItem = PylonRegistry.ITEMS[namespacedKey]
-                if (pylonItem != null) {
-                    return pylonItem.itemStack
-                }
-            }
-        }
+    fun getItem(key: String): ItemStack?
+            = get(key, String::class.java)?.let { itemFromName(it) }
 
-        val material = Material.getMaterial(key.uppercase())
-        if (material != null) {
-            return ItemStack(material)
-        }
-
-        return null
-    }
-
-    fun getItemOrThrow(key: String): ItemStack {
-        if (key.contains(':')) {
-            val namespacedKey = NamespacedKey.fromString(key)
-            if (namespacedKey != null) {
-                val pylonItem = PylonRegistry.ITEMS[namespacedKey]
-                if (pylonItem != null) {
-                    return pylonItem.itemStack
-                }
-                error("No such Pylon item $key")
-            }
-        }
-
-        val material = Material.getMaterial(key.uppercase())
-        if (material != null) {
-            return ItemStack(material)
-        }
-
-        error("No such material $key")
-    }
+    fun getItemOrThrow(key: String): ItemStack
+            = itemFromName(getOrThrow(key, String::class.java))
+        ?: error("No such item $key")
 
     fun <T> get(key: String, type: Class<out T>): T? {
         val value = internalSection.get(key) ?: return null

@@ -5,9 +5,11 @@ package io.github.pylonmc.pylon.core.util
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
@@ -65,6 +67,41 @@ fun isCardinalDirection(vector: Vector3i)
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Key does not have a corresponding addon; does your addon call registerWithPylon()?")
+
+/**
+ * Rotates a vector to face a direction
+ *
+ * The direction given must be a horizontal cardinal direction (north, east, south, west)
+ *
+ * Assumes north to be the default direction (supplying north will result in no rotation)
+ */
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
+    = when (face) {
+        BlockFace.NORTH -> vector
+        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
+        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+    }
+
+fun itemFromName(name: String): ItemStack? {
+    if (name.contains(':')) {
+        val namespacedKey = NamespacedKey.fromString(name)
+        if (namespacedKey != null) {
+            val pylonItem = PylonRegistry.ITEMS[namespacedKey]
+            if (pylonItem != null) {
+                return pylonItem.itemStack
+            }
+        }
+    }
+
+    val material = Material.getMaterial(name.uppercase())
+    if (material != null) {
+        return ItemStack(material)
+    }
+
+    return null
+}
 
 fun wrapText(text: String, limit: Int): List<String> {
     val words = text.split(" ")

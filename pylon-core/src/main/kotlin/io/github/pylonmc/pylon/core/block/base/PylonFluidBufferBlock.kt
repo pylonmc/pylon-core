@@ -94,13 +94,13 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
 
     /**
      * Sets a fluid buffer only if the new amount of fluid is greater
-     * than zero and fits in the buffer.
+     * than or equal to zero and fits in the buffer.
      *
      * @return true only if the buffer was set successfully
      */
     fun setFluid(fluid: PylonFluid, amount: Double): Boolean {
         if (canSetFluid(fluid, amount)) {
-            fluidData(fluid).amount = amount
+            fluidData(fluid).amount = max(0.0, amount)
             return true
         }
         return false
@@ -108,7 +108,7 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
 
     /**
      * Adds to a fluid buffer only if the new amount of fluid is greater
-     * than zero and fits in the buffer.
+     * than or equal to zero and fits in the buffer.
      *
      * @return true only if the buffer was added to successfully
      */

@@ -357,6 +357,7 @@ object FluidManager {
             totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * deltaSeconds)
             val suppliers = info.blocks
             var remainingFluidNeeded = totalRequested
+            var totalFluidSupplied = 0.0;
             var changed = true
             // First phase: Repeatedly find all suppliers that we'd try to take more fluid
             // from than possible, were we to take fluid evenly, and take all their fluid
@@ -372,6 +373,7 @@ object FluidManager {
 
                     remainingFluidNeeded -= amountSupplied
                     block.onFluidRemoved(fluid, amountSupplied)
+                    totalFluidSupplied += amountSupplied;
                     iterator.remove()
                     changed = true
                 }
@@ -381,10 +383,10 @@ object FluidManager {
             // each one
             for ((block, _) in suppliers) {
                 block.onFluidRemoved(fluid, remainingFluidNeeded / suppliers.size)
+                totalFluidSupplied += remainingFluidNeeded / suppliers.size
             }
 
             // Now do the same thing for requesters
-            var remainingFluidSupply = totalRequested
             changed = true
             // First phase: Repeatedly find all requesters that we have more than enough
             // fluid to saturate them, add as much fluid as possible, and remove them
@@ -394,11 +396,11 @@ object FluidManager {
                 val iterator = requesters.iterator()
                 while (iterator.hasNext()) {
                     val (block, amountRequested) = iterator.next()
-                    if (amountRequested > remainingFluidSupply / requesters.size) {
+                    if (amountRequested > totalFluidSupplied / requesters.size) {
                         continue
                     }
 
-                    remainingFluidSupply -= amountRequested
+                    totalFluidSupplied -= amountRequested
                     block.onFluidAdded(fluid, amountRequested)
                     iterator.remove()
                     changed = true
@@ -408,7 +410,7 @@ object FluidManager {
             // (assuming we distribute fluid evenly), so give the same amount of fluid to
             // each one
             for ((block, _) in requesters) {
-                block.onFluidAdded(fluid, remainingFluidSupply / requesters.size)
+                block.onFluidAdded(fluid, totalFluidSupplied / requesters.size)
             }
 
             // Break to only allow one type of fluid to be distributed per tick
@@ -422,7 +424,7 @@ object FluidManager {
         tickers[segment] = PylonCore.launch {
             var lastTickNanos = System.nanoTime()
             while (true) {
-                delay(PylonConfig.fluidIntervalTicks.ticks)
+                delay(PylonConfig.fluidTickInterval.ticks)
                 val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                 lastTickNanos = System.nanoTime()
                 tick(segment, dt)
