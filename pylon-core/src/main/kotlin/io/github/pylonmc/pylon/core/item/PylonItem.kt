@@ -8,11 +8,11 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.i18n.AddonTranslator
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.datacomponent.DataComponentTypes
-import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
@@ -48,7 +48,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     override fun getKey(): NamespacedKey = key
 
-    open fun getPlaceholders(): Map<String, ComponentLike> = emptyMap()
+    open fun getPlaceholders(): List<PylonArgument> = emptyList()
 
     open fun place(context: BlockCreateContext): PylonBlock? = schema.place(context)
 
@@ -58,11 +58,6 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
         @Suppress("UnstableApiUsage")
         private fun checkName(schema: PylonItemSchema) {
-            val translator = AddonTranslator.translators[schema.addon]
-            check(translator != null) {
-                "Addon does not have a translator; did you forget to call registerWithPylon()?"
-            }
-
             // Adventure is a perfect API with absolutely no problems whatsoever.
             val name = schema.itemStack.getData(DataComponentTypes.ITEM_NAME) as? TranslatableComponent
 
@@ -73,8 +68,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             }
 
             if (isNameValid) {
+                val translator = schema.addon.translator
                 for (locale in schema.addon.languages) {
-                    if (!translator.translationKeyExists(name!!.key(), locale)) {
+                    if (!translator.canTranslate(name!!.key(), locale)) {
                         PylonCore.logger.warning(
                             "${schema.key.namespace} is missing a name translation key for item ${schema.key} (locale: ${locale.displayName} | expected translation key: ${
                                 ItemStackBuilder.nameKey(
@@ -99,8 +95,6 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         fun register(itemClass: Class<out PylonItem>, template: ItemStack, pylonBlockKey: NamespacedKey? = null) =
             register(PylonItemSchema(itemClass, template, pylonBlockKey))
 
-        @JvmStatic
-        @JvmOverloads
         inline fun <reified T: PylonItem>register(template: ItemStack, pylonBlockKey: NamespacedKey? = null) =
             register(T::class.java, template, pylonBlockKey)
 

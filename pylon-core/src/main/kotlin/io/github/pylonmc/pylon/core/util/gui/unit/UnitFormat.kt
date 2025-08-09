@@ -126,6 +126,14 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
+        val BLOCKS_PER_SECOND = UnitFormat(
+            "blocks_per_second",
+            TextColor.color(0x0ae256),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
+        )
+
+        @JvmField
         val CHUNKS = UnitFormat(
             "chunks",
             TextColor.color(0x136D37),

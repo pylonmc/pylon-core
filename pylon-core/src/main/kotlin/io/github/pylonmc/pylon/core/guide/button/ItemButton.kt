@@ -4,18 +4,17 @@ import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addRes
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
-import io.github.pylonmc.pylon.core.i18n.PylonArgument
+import io.github.pylonmc.pylon.core.i18n.PylonArgument.Companion.attachPylonArguments
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -35,6 +34,7 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
         PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no fluid with key $key")
     )
 
+    @Suppress("UnstableApiUsage")
     override fun getItemProvider(player: Player): ItemProvider {
         val item = PylonItem.fromStack(stack)
         if (item == null) {
@@ -57,9 +57,8 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
 
         // buffoonery to bypass InvUI's translation mess
         // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
-        val stackName = stack.getData(DataComponentTypes.ITEM_NAME)
-        if (stackName is TranslatableComponent) {
-            builder.name(stackName.arguments(placeholders))
+        builder.editData(DataComponentTypes.ITEM_NAME) {
+            it.attachPylonArguments(placeholders)
         }
 
         if (item.isDisabled) {

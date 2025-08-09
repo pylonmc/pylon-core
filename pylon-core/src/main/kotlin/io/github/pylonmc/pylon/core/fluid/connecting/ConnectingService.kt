@@ -1,14 +1,10 @@
 package io.github.pylonmc.pylon.core.fluid.connecting
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidManager
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipeConnector
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipeMarker
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingTask.Companion.blocksOnPath
-import io.github.pylonmc.pylon.core.content.fluid.FluidPointInteraction
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipeDisplay
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipe
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import org.bukkit.GameMode

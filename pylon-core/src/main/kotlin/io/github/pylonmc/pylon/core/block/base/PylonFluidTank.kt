@@ -14,14 +14,14 @@ import kotlin.math.max
 
 /**
  * A common pattern is a 'fluid tank' which can only store one fluid at a
- * time, but can store many types of fluids. PylonFluidTank implements this
+ * time, but can store many types of fluids. `PylonFluidTank` implements this
  * pattern.
  *
  * You must call [setCapacity] for this
  * block to work.
  *
- * As with PylonFluidBufferBlock, you do not need to handle saving buffers
- * or implement any of the `PylonFluidBlock` methods for this; this is all
+ * As with [PylonFluidBufferBlock], you do not need to handle saving buffers
+ * or implement any of the [PylonFluidBlock] methods for this; this is all
  * done automatically.
  *
  */
@@ -38,28 +38,28 @@ interface PylonFluidTank : PylonFluidBlock {
         )}
 
     /**
-     * Returns the type of fluid stored in the tank
+     * The type of fluid stored in the tank
      */
-    fun fluidType(): PylonFluid?
-            = fluidData.fluid
+    val fluidType: PylonFluid?
+        get() = fluidData.fluid
 
     /**
-     * Returns the capacity of the tank
+     * The capacity of the tank
      */
-    fun fluidCapacity(): Double
-            = fluidData.capacity
+    val fluidCapacity: Double
+            get() = fluidData.capacity
 
     /**
-     * Returns the amount of fluid stored in the tank
+     * The amount of fluid stored in the tank
      */
-    fun fluidAmount(): Double
-            = fluidData.amount
+    val fluidAmount: Double
+            get() = fluidData.amount
 
     /**
-     * Returns the amount of space remaining in the tank
+     * The amount of space remaining in the tank
      */
-    fun fluidSpaceRemaining(): Double
-            = fluidData.capacity - fluidData.amount
+    val fluidSpaceRemaining: Double
+            get() = fluidData.capacity - fluidData.amount
 
     /**
      * Sets the type of fluid in the fluid tank
@@ -104,7 +104,7 @@ interface PylonFluidTank : PylonFluidBlock {
      * @return true only if the tank was added to successfully
      */
     fun addFluid(amount: Double): Boolean
-            = setFluid(fluidAmount() + amount)
+            = setFluid(fluidAmount + amount)
 
     /**
      * Removes from the tank only if the new amount of fluid is greater
@@ -113,7 +113,7 @@ interface PylonFluidTank : PylonFluidBlock {
      * @return true only if the tank was added to successfully
      */
     fun removeFluid(amount: Double): Boolean
-            = setFluid(fluidAmount() - amount)
+            = setFluid(fluidAmount - amount)
 
     fun isAllowedFluid(fluid: PylonFluid): Boolean
 
@@ -138,14 +138,14 @@ interface PylonFluidTank : PylonFluidBlock {
     }
 
     override fun onFluidAdded(fluid: PylonFluid, amount: Double) {
-        if (fluid != fluidType()) {
+        if (fluid != fluidType) {
             setFluidType(fluid)
         }
         addFluid(amount)
     }
 
     override fun onFluidRemoved(fluid: PylonFluid, amount: Double) {
-        check(fluid == fluidType())
+        check(fluid == fluidType)
         removeFluid(amount)
         if (fluidData.amount < 1.0e-6) {
             setFluidType(null)

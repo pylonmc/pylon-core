@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidPointType
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.block.Block
@@ -45,7 +46,7 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
     }
 
     override fun getWaila(player: Player): WailaConfig
-        = WailaConfig(name, mapOf("pipe" to this.pipe.stack.effectiveName()))
+        = WailaConfig(name, listOf(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
 
     val pipe: PylonItem
         get() {

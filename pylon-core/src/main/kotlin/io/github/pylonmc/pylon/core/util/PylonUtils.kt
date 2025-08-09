@@ -60,9 +60,9 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
 }
 
 fun isCardinalDirection(vector: Vector3i)
-    = vector.x != 0 && vector.y == 0 && vector.z == 0
-        || vector.x == 0 && vector.y != 0 && vector.z == 0
-        || vector.x == 0 && vector.y == 0 && vector.z != 0
+    = (vector.x != 0 && vector.y == 0 && vector.z == 0)
+        || (vector.x == 0 && vector.y != 0 && vector.z == 0)
+        || (vector.x == 0 && vector.y == 0 && vector.z != 0)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
@@ -101,4 +101,26 @@ fun itemFromName(name: String): ItemStack? {
     }
 
     return null
+}
+
+fun wrapText(text: String, limit: Int): List<String> {
+    val words = text.split(" ")
+    val lines = mutableListOf<String>()
+    var currentLine = StringBuilder()
+
+    for (word in words) {
+        if (currentLine.length + word.length + 1 > limit) {
+            currentLine.append(' ')
+            lines.add(currentLine.toString())
+            currentLine = StringBuilder()
+        }
+        if (currentLine.isNotEmpty()) {
+            currentLine.append(" ")
+        }
+        currentLine.append(word)
+    }
+    if (currentLine.isNotEmpty()) {
+        lines.add(currentLine.toString())
+    }
+    return lines
 }

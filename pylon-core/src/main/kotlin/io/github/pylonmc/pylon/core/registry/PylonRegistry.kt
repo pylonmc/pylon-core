@@ -76,6 +76,10 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
     fun stream(): Stream<T> = values.values.stream()
 
+    override fun equals(other: Any?): Boolean = other is PylonRegistry<*> && key == other.key
+    override fun hashCode(): Int = key.hashCode()
+    override fun toString(): String = key.toString()
+
     companion object {
         private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 

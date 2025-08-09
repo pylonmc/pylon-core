@@ -15,7 +15,6 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslationArgument
 import org.bukkit.Material
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -35,7 +34,7 @@ class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         }
         player.sendDebug(
             "key.block",
-            PylonArgument.Companion.of("key", pylonBlock.schema.key.toString())
+            PylonArgument.of("key", pylonBlock.schema.key.toString())
         )
         player.sendDebug(
             when (pylonBlock) {
@@ -53,10 +52,10 @@ class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         val pdc = block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer()
         pylonBlock.write(pdc)
         PylonBlockSerializeEvent(block, pylonBlock, pdc).callEvent()
-        val serialized = NmsAccessor.Companion.instance.serializePdc(pdc)
+        val serialized = NmsAccessor.instance.serializePdc(pdc)
         player.sendDebug(
             "data",
-            PylonArgument.Companion.of("data", serialized)
+            PylonArgument.of("data", serialized)
         )
     }
 
@@ -69,7 +68,7 @@ class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         }
         player.sendDebug(
             "key.entity",
-            PylonArgument.Companion.of("key", pylonEntity.schema.key.toString())
+            PylonArgument.of("key", pylonEntity.schema.key.toString())
         )
 
         // TODO implement this once entities can tick
@@ -87,21 +86,21 @@ class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
 //                )
 //            )
         pylonEntity.write(pylonEntity.entity.persistentDataContainer)
-        val serialized = NmsAccessor.Companion.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
+        val serialized = NmsAccessor.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
         player.sendDebug(
             "data",
-            PylonArgument.Companion.of("data", serialized)
+            PylonArgument.of("data", serialized)
         )
     }
 
     companion object {
         val KEY = pylonKey("debug_waxed_weathered_cut_copper_stairs")
-        val STACK = ItemStackBuilder.Companion.pylonItem(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
+        val STACK = ItemStackBuilder.pylonItem(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
     }
 }
 
-private fun Audience.sendDebug(subkey: String, vararg args: TranslationArgument) {
+private fun Audience.sendDebug(subkey: String, vararg args: PylonArgument) {
     return sendMessage(Component.translatable("pylon.pyloncore.message.debug.$subkey", *args))
 }

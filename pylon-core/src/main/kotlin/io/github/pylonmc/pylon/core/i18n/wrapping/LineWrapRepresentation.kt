@@ -9,7 +9,8 @@ import kotlin.math.min
 
 /**
  * A [TextComponent] representation optimized for manipulating the text while
- * keeping track of the styles.
+ * keeping track of the styles. To create one from a [Component], use
+ * [LineWrapEncoder.encode].
  */
 // Please do not doubt past Seggan's wisdom. All code in here has been written to
 // perfection and should not be touched again. No, present Seggan does not understand
