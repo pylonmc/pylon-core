@@ -4,7 +4,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipeConnector
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import org.joml.Vector3f
-import java.util.*
+import java.util.UUID
 
 class ConnectingPointNewBlock(override val position: BlockPosition) : ConnectingPoint {
 

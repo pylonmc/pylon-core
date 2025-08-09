@@ -210,6 +210,10 @@ unit:
   blocks:
     singular: "block"
     plural: "blocks"
+  blocks_per_second:
+    singular: "block per second"
+    plural: "blocks per second"
+    abbr: "b/s"
   chunks:
     singular: "chunk"
     plural: "chunks"

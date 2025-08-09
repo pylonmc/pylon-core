@@ -2,54 +2,42 @@
 
 package io.github.pylonmc.pylon.core.i18n
 
-import io.github.pylonmc.pylon.core.config.PylonConfig
-import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
-import io.github.pylonmc.pylon.core.i18n.wrapping.TextWrapper
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.editData
+import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.entity.Player
 import org.jetbrains.annotations.ApiStatus
 
 @ApiStatus.Internal
-class PlayerTranslationHandler(val player: Player) {
-
-    private val wrapper = TextWrapper(PylonConfig.translationWrapLimit)
+class PlayerTranslationHandler internal constructor(private val player: Player) {
 
     fun handleItem(item: PylonItem) {
-        GlobalTranslator.translator().addSource(MinecraftTranslator)
-        val attacher = PlaceholderAttacher(item.getPlaceholders())
+        val stack = item.stack
+        if (stack.persistentDataContainer.has(translatedKey)) return
 
-        item.stack.editData(DataComponentTypes.ITEM_NAME) {
-            GlobalTranslator.render(attacher.render(it, Unit), player.locale())
-        }
-        item.stack.editData(DataComponentTypes.LORE) { lore ->
-            val toTranslate = (lore.lines() + item.addon.displayName).toMutableList()
+        stack.translate(player.locale(), item.getPlaceholders())
+        stack.editData(DataComponentTypes.LORE) { lore ->
+            val newLore = lore.lines().toMutableList()
+            newLore.add(GlobalTranslator.render(item.addon.displayName, player.locale()))
             if (item.isDisabled) {
-                toTranslate.add(Component.translatable("pylon.pyloncore.message.disabled.lore"))
+                newLore.add(GlobalTranslator.render(
+                    Component.translatable("pylon.pyloncore.message.disabled.lore"),
+                    player.locale()
+                ))
             }
-
-            val newLore: MutableList<Component> = toTranslate.flatMapTo(mutableListOf()) { line ->
-                val translated = GlobalTranslator.render(attacher.render(line, Unit), player.locale())
-                val encoded = LineWrapEncoder.encode(translated)
-                val wrapped = encoded.copy(lines = encoded.lines.flatMap(wrapper::wrap))
-                wrapped.toComponentLines().map {
-                    Component.text()
-                        .decoration(TextDecoration.ITALIC, false)
-                        .color(NamedTextColor.GRAY)
-                        .append(it)
-                        .build()
-                }
-            }
-
             ItemLore.lore(newLore)
         }
 
-        GlobalTranslator.translator().removeSource(MinecraftTranslator)
+        stack.itemMeta.persistentDataContainer.set(translatedKey, PylonSerializers.BOOLEAN, true)
+    }
+
+    companion object {
+        private val translatedKey = pylonKey("translated")
     }
 }
