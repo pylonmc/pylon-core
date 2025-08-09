@@ -16,11 +16,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.bukkit.Bukkit
 import org.bukkit.Color.RED
+import org.bukkit.Material
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.joml.Matrix4f
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level.SEVERE
 
@@ -89,7 +92,8 @@ object TickManager : Listener {
             error.printStackTrace()
             if (errors >= PylonConfig.allowedBlockErrors && pylonBlock.errorBlock == null) {
                 val display = block.world.spawn(block.location, BlockDisplay::class.java)
-                display.isInvisible = true
+                display.block = block.type.createBlockData()
+                display.setTransformationMatrix(Matrix4f().translate(0.005F, 0.0F, 0.005F).scale(0.99F)) // prevent z-fighting
                 display.glowColorOverride = RED
                 display.isGlowing = true
                 pylonBlock.errorBlock = display
