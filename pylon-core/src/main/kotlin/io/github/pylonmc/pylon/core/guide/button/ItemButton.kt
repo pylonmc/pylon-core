@@ -15,6 +15,8 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -41,12 +43,12 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             return ItemStackBuilder.of(stack)
         }
 
-        val placeholders = item.getPlaceholders().map { (name, value) -> PylonArgument.of(name, value) }
+        val placeholders = item.getPlaceholders()
         val builder = ItemStackBuilder.of(stack.clone())
             .editData(DataComponentTypes.LORE) { lore ->
                 ItemLore.lore(lore.lines().map {
                     if (it is TranslatableComponent) {
-                        val arguments = it.arguments().toMutableList()
+                        val arguments: MutableList<TranslationArgumentLike> = it.arguments().toMutableList()
                         arguments.addAll(placeholders)
                         it.arguments(arguments)
                     } else {
