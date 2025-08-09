@@ -17,10 +17,12 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import io.papermc.paper.math.BlockPosition
 import io.papermc.paper.math.FinePosition
 import io.papermc.paper.math.Rotation
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
@@ -72,13 +74,48 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
 }
 
 fun isCardinalDirection(vector: Vector3i)
-    = vector.x != 0 && vector.y == 0 && vector.z == 0
-        || vector.x == 0 && vector.y != 0 && vector.z == 0
-        || vector.x == 0 && vector.y == 0 && vector.z != 0
+    = (vector.x != 0 && vector.y == 0 && vector.z == 0)
+        || (vector.x == 0 && vector.y != 0 && vector.z == 0)
+        || (vector.x == 0 && vector.y == 0 && vector.z != 0)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Key does not have a corresponding addon; does your addon call registerWithPylon()?")
+
+/**
+ * Rotates a vector to face a direction
+ *
+ * The direction given must be a horizontal cardinal direction (north, east, south, west)
+ *
+ * Assumes north to be the default direction (supplying north will result in no rotation)
+ */
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
+    = when (face) {
+        BlockFace.NORTH -> vector
+        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
+        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+    }
+
+fun itemFromName(name: String): ItemStack? {
+    if (name.contains(':')) {
+        val namespacedKey = NamespacedKey.fromString(name)
+        if (namespacedKey != null) {
+            val pylonItem = PylonRegistry.ITEMS[namespacedKey]
+            if (pylonItem != null) {
+                return pylonItem.itemStack
+            }
+        }
+    }
+
+    val material = Material.getMaterial(name.uppercase())
+    if (material != null) {
+        return ItemStack(material)
+    }
+
+    return null
+}
 
 fun wrapText(text: String, limit: Int): List<String> {
     val words = text.split(" ")

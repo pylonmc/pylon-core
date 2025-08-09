@@ -1,7 +1,9 @@
 package io.github.pylonmc.pylon.core.config
 
 import com.google.common.base.CaseFormat
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.itemFromName
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.ConfigurationSection
@@ -30,44 +32,36 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     fun getSectionOrThrow(key: String): ConfigSection =
         getSection(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
 
-    fun getItem(key: String): ItemStack? {
-        if (key.contains(':')) {
-            val namespacedKey = NamespacedKey.fromString(key)
-            if (namespacedKey != null) {
-                val pylonItem = PylonRegistry.ITEMS[namespacedKey]
-                if (pylonItem != null) {
-                    return pylonItem.itemStack
-                }
-            }
-        }
-
-        val material = Material.getMaterial(key.uppercase())
-        if (material != null) {
-            return ItemStack(material)
-        }
-
-        return null
+    fun getFluid(key: String): PylonFluid? {
+        val name = get<String>(key) ?: return null
+        return PylonRegistry.FLUIDS[
+            NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")
+        ]
     }
 
-    fun getItemOrThrow(key: String): ItemStack {
-        if (key.contains(':')) {
-            val namespacedKey = NamespacedKey.fromString(key)
-            if (namespacedKey != null) {
-                val pylonItem = PylonRegistry.ITEMS[namespacedKey]
-                if (pylonItem != null) {
-                    return pylonItem.itemStack
-                }
-                error("No such Pylon item $key")
-            }
-        }
-
-        val material = Material.getMaterial(key.uppercase())
-        if (material != null) {
-            return ItemStack(material)
-        }
-
-        error("No such material $key")
+    fun getFluidOrThrow(key: String): PylonFluid {
+        val name = getOrThrow<String>(key)
+        return PylonRegistry.FLUIDS[
+            NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")
+        ] ?: error("No such fluid '$name'")
     }
+
+    fun getMaterial(key: String): Material? {
+        val name = get<String>(key) ?: return null
+        return Material.getMaterial(name.uppercase())
+    }
+
+    fun getMaterialOrThrow(key: String): Material {
+        val name = getOrThrow<String>(key)
+        return Material.getMaterial(name.uppercase()) ?: error("No such material '$name'")
+    }
+
+    fun getItem(key: String): ItemStack?
+            = get(key, String::class.java)?.let { itemFromName(it) }
+
+    fun getItemOrThrow(key: String): ItemStack
+            = itemFromName(getOrThrow(key, String::class.java))
+        ?: error("No such item $key")
 
     fun <T> get(key: String, type: Class<out T>): T? {
         val value = internalSection.get(key) ?: return null

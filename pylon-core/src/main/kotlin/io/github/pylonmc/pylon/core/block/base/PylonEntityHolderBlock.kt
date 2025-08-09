@@ -1,11 +1,9 @@
 package io.github.pylonmc.pylon.core.block.base
 
-import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -13,8 +11,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.MustBeInvokedByOverriders
-import java.util.IdentityHashMap
-import java.util.UUID
+import java.util.*
 
 /**
  * A block that has one or more associated Pylon entities. For example, a pedestal that
@@ -25,38 +22,47 @@ import java.util.UUID
  */
 interface PylonEntityHolderBlock : PylonBreakHandler {
 
-    fun createEntities(context: BlockCreateContext): Map<String, PylonEntity<*>> = mutableMapOf()
-
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
-        get() = holders[this] ?: error("You cannot access held entities before the block is placed")
+        get() = holders.getOrPut(this) { mutableMapOf() }
+
+    fun addEntity(name: String, entity: PylonEntity<*>) {
+        if (!EntityStorage.isPylonEntity(entity.uuid)) {
+            EntityStorage.add(entity)
+        }
+        heldEntities[name] = entity.uuid
+    }
 
     @ApiStatus.NonExtendable
-    fun getHeldEntityUuid(name: String) = heldEntities[name] ?: throw IllegalArgumentException("Entity $name not found")
+    fun getHeldEntityUuid(name: String) = heldEntities[name]
+
+    @ApiStatus.NonExtendable
+    fun getHeldEntityUuidOrThrow(name: String) = getHeldEntityUuid(name)
+        ?: throw IllegalArgumentException("Entity $name not found")
 
     @ApiStatus.NonExtendable
     fun getHeldEntity(name: String): PylonEntity<*>?
-            = EntityStorage.get(getHeldEntityUuid(name))
+            = getHeldEntityUuid(name)?.let { EntityStorage.get(it) }
 
     @ApiStatus.NonExtendable
     fun getHeldEntityOrThrow(name: String): PylonEntity<*>
-            = getHeldEntity(name) ?: throw IllegalArgumentException("Entity $name does not exist")
+            = getHeldEntity(name)
+        ?: throw IllegalArgumentException("Entity $name does not exist")
 
     @ApiStatus.NonExtendable
     fun <T: PylonEntity<*>> getHeldEntity(clazz: Class<T>, name: String): T?
-            = EntityStorage.getAs(clazz, getHeldEntityUuid(name))
+            = getHeldEntityUuid(name)?.let { EntityStorage.getAs(clazz, it) }
 
     @ApiStatus.NonExtendable
     fun <T: PylonEntity<*>> getHeldEntityOrThrow(clazz: Class<T>, name: String): T
-            = getHeldEntity(clazz, name) ?: throw IllegalArgumentException("Entity $name does not exist or is not of type ${clazz.simpleName}")
+            = getHeldEntity(clazz, name)
+        ?: throw IllegalArgumentException("Entity $name does not exist or is not of type ${clazz.simpleName}")
 
     /**
-     * Returns false if the entity is unloaded or does not physically exist.
-     *
-     * Will error if there is no entity with the provided name.
+     * Returns false if the block holds no entity with the provided name, the entity is unloaded or does not physically exist.
      */
     @ApiStatus.NonExtendable
-    fun isHeldEntityPresent(name: String) = EntityStorage.isPylonEntity(getHeldEntityUuid(name))
+    fun isHeldEntityPresent(name: String) = getHeldEntityUuid(name)?.let { EntityStorage.isPylonEntity(it) } == true
 
     /**
      * Returns false if any entity is unloaded or does not exist.
@@ -77,21 +83,6 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         private val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
 
         private val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
-
-        @EventHandler
-        private fun onPlace(event: PylonBlockPlaceEvent) {
-            val block = event.pylonBlock
-            if (block !is PylonEntityHolderBlock) return
-            val entities = mutableMapOf<String, UUID>()
-            for ((name, entity) in block.createEntities(event.context)) {
-                val uuid = entity.uuid
-                if (!EntityStorage.isPylonEntity(uuid)) {
-                    EntityStorage.add(entity)
-                }
-                entities[name] = uuid
-            }
-            holders[block] = entities
-        }
 
         @EventHandler
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {

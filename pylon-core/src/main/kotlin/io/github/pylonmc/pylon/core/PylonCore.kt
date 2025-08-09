@@ -4,9 +4,7 @@ package io.github.pylonmc.pylon.core
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
-import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
-import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
-import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
+import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
@@ -64,8 +62,11 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
+        Bukkit.getPluginManager().registerEvents(PylonFluidBufferBlock, this)
+        Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
         Bukkit.getPluginManager().registerEvents(ConnectingService, this)
+        Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,

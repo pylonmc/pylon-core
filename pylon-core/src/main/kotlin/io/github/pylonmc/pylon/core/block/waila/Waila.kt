@@ -100,7 +100,7 @@ class Waila private constructor(private val player: Player, private val job: Job
                 val waila = wailas[player.uniqueId]!!
                 while (true) {
                     waila.updateDisplay()
-                    delay(PylonConfig.wailaIntervalTicks.ticks)
+                    delay(PylonConfig.wailaTickInterval.ticks)
                 }
             })
         }
