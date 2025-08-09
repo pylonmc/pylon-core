@@ -3,9 +3,7 @@ package io.github.pylonmc.pylon.core
 import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
-import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
-import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
-import io.github.pylonmc.pylon.core.block.base.PylonSimpleMultiblock
+import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.PylonCommand
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
@@ -63,6 +61,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
+        Bukkit.getPluginManager().registerEvents(PylonFluidBufferBlock, this)
+        Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
         Bukkit.getPluginManager().registerEvents(ConnectingService, this)
 

@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.config
 
 import com.google.common.base.CaseFormat
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -29,6 +30,30 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
 
     fun getSectionOrThrow(key: String): ConfigSection =
         getSection(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
+
+    fun getFluid(key: String): PylonFluid? {
+        val name = get<String>(key) ?: return null
+        return PylonRegistry.FLUIDS[
+            NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")
+        ]
+    }
+
+    fun getFluidOrThrow(key: String): PylonFluid {
+        val name = getOrThrow<String>(key)
+        return PylonRegistry.FLUIDS[
+            NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")
+        ] ?: error("No such fluid '$name'")
+    }
+
+    fun getMaterial(key: String): Material? {
+        val name = get<String>(key) ?: return null
+        return Material.getMaterial(name.uppercase())
+    }
+
+    fun getMaterialOrThrow(key: String): Material {
+        val name = getOrThrow<String>(key)
+        return Material.getMaterial(name.uppercase()) ?: error("No such material '$name'")
+    }
 
     fun getItem(key: String): ItemStack? {
         if (key.contains(':')) {

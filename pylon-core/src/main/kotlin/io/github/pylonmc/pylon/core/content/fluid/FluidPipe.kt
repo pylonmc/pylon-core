@@ -22,25 +22,26 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import java.util.function.Predicate
 
 open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityInteractor, PylonInteractor {
     val material = Material.valueOf(getSettings().getOrThrow<String>("material").uppercase())
     val fluidPerSecond = getSettings().getOrThrow<Double>("fluid-per-second")
-    val allowedFluids = getSettings().getOrThrow<List<String>>("allow-fluids")
+    val allowedTemperatures = getSettings().getOrThrow<List<String>>("allowed-temperatures")
         .map { s -> FluidTemperature.valueOf(s.uppercase()) }
 
     override fun getPlaceholders(): List<PylonArgument> = listOf(
         PylonArgument.of("fluid_per_second", UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond)),
         PylonArgument.of(
-            "fluids", Component.join(
+            "temperatures", Component.join(
                 JoinConfiguration.separator(Component.text(", ")),
-                allowedFluids.map(FluidTemperature::valueText)
+                allowedTemperatures.map(FluidTemperature::valueText)
             )
         )
     )
 
     open fun canPass(fluid: PylonFluid): Boolean {
-        return fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedFluids
+        return fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedTemperatures
     }
 
     override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
@@ -56,8 +57,8 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
             }
         }
 
-        if (ConnectingService.isConnecting(event.getPlayer())) {
-            val segment = ConnectingService.placeConnection(event.getPlayer())
+        if (ConnectingService.isConnecting(event.player)) {
+            val segment = ConnectingService.placeConnection(event.player)
             if (segment != null) {
                 FluidManager.setFluidPerSecond(segment, fluidPerSecond)
                 FluidManager.setFluidPredicate(segment, this::canPass)
@@ -70,13 +71,13 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
             return
         }
 
-        val action = event.getAction()
+        val action = event.action
         val block: Block? = event.clickedBlock
-        val player: Player = event.getPlayer()
+        val player: Player = event.player
 
         if (block != null && action == Action.RIGHT_CLICK_BLOCK && !ConnectingService.isConnecting(player)) {
             if (!tryStartConnection(player, block)) {
-                tryStartConnection(player, block.getRelative(event.getBlockFace()))
+                tryStartConnection(player, block.getRelative(event.blockFace))
             }
         }
 
