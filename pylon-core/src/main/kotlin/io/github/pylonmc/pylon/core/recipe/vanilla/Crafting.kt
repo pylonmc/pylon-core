@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -11,11 +12,12 @@ import xyz.xenondevs.invui.item.Item
 
 abstract class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : VanillaRecipeWrapper {
     override fun getKey(): NamespacedKey = craftingRecipe.key
-    override val outputItems: List<ItemStack> = listOf(craftingRecipe.result)
+    override val results: List<FluidOrItem> = listOf(FluidOrItem.of(craftingRecipe.result))
 }
 
 class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputItems: List<RecipeChoice> = recipe.choiceMap.values.filter { it != null }.toList()
+    override val inputs: List<FluidOrItem> = recipe.choiceMap.values.filterNotNull().flatMap(FluidOrItem::of)
+
     override fun display(): Gui {
         val gui = Gui.normal()
             .setStructure(
@@ -32,8 +34,8 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
 
         val height = recipe.shape.size
         val width = recipe.shape[0].length
-        for (x in 0..width-1) {
-            for (y in 0..height-1) {
+        for (x in 0 until width) {
+            for (y in 0 until height) {
                 gui.setItem(12 + x + 9 * y, getDisplaySlot(recipe, x, y))
             }
         }
@@ -48,7 +50,8 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
 }
 
 class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputItems: List<RecipeChoice> = recipe.choiceList.filter { it != null }
+    override val inputs: List<FluidOrItem> = recipe.choiceList.filterNotNull().flatMap(FluidOrItem::of)
+
     override fun display() = Gui.normal()
             .setStructure(
                 "# # # # # # # # #",

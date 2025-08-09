@@ -1,12 +1,12 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.Recipe
-import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.SmithingRecipe
 import xyz.xenondevs.invui.gui.Gui
 
@@ -14,8 +14,8 @@ import xyz.xenondevs.invui.gui.Gui
 class SmithingRecipeWrapper(val smithingRecipe: SmithingRecipe) : VanillaRecipeWrapper {
 
     override val recipe: Recipe = smithingRecipe
-    override val inputItems: List<RecipeChoice> = listOf(smithingRecipe.base, smithingRecipe.addition)
-    override val outputItems: List<ItemStack> = listOf(smithingRecipe.result)
+    override val inputs: List<FluidOrItem> = FluidOrItem.of(smithingRecipe.base) + FluidOrItem.of(smithingRecipe.addition)
+    override val results: List<FluidOrItem> = listOf(FluidOrItem.of(smithingRecipe.result))
 
     override fun display() = Gui.normal()
         .setStructure(
