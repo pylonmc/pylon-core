@@ -38,6 +38,7 @@ import org.bukkit.inventory.ItemStack
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
+import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.nameWithoutExtension
 
@@ -62,7 +63,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             addon.mergeGlobalConfig("lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
         }
         val langsDir = PylonCore.dataPath.resolve("lang").resolve(addonNamespace)
-        translations = if (!langsDir.toFile().exists()) {
+        translations = if (!langsDir.exists()) {
             emptyMap()
         } else {
             langsDir.listDirectoryEntries("*.yml").associate {
