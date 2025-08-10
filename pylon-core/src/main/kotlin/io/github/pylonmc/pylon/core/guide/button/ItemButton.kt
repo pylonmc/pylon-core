@@ -46,15 +46,7 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
         val placeholders = item.getPlaceholders()
         val builder = ItemStackBuilder.of(stack.clone())
             .editData(DataComponentTypes.LORE) { lore ->
-                ItemLore.lore(lore.lines().map {
-                    if (it is TranslatableComponent) {
-                        val arguments: MutableList<TranslationArgumentLike> = it.arguments().toMutableList()
-                        arguments.addAll(placeholders)
-                        it.arguments(arguments)
-                    } else {
-                        it
-                    }
-                })
+                ItemLore.lore(lore.lines().map { it.withArguments(placeholders) })
             }
 
         // buffoonery to bypass InvUI's translation mess
