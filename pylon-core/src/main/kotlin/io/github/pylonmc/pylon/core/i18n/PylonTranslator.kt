@@ -110,7 +110,9 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                     this.addon.javaPlugin.logger.warning("No translations found for locale '$locale'")
                     warned.add(locale)
                 }
-                return null
+                return Component.text("Language '$locale' not supported")
+                    .color(NamedTextColor.RED)
+                    .decoration(TextDecoration.ITALIC, true)
             }
             val translation = translations.get<String>(key) ?: return null
             customMiniMessage.deserialize(translation)
