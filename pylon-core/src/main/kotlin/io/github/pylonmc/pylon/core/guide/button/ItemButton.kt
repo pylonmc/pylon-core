@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.button
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
@@ -38,86 +39,101 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
 
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(player: Player): ItemProvider {
-        val item = PylonItem.fromStack(stack)
-        if (item == null) {
-            return ItemStackBuilder.of(stack)
-        }
-
-        val placeholders = item.getPlaceholders()
-        val builder = ItemStackBuilder.of(stack.clone())
-            .editData(DataComponentTypes.LORE) { lore ->
-                ItemLore.lore(lore.lines().map {
-                    if (it is TranslatableComponent) {
-                        val arguments: MutableList<TranslationArgumentLike> = it.arguments().toMutableList()
-                        arguments.addAll(placeholders)
-                        it.arguments(arguments)
-                    } else {
-                        it
-                    }
-                })
+        try {
+            val item = PylonItem.fromStack(stack)
+            if (item == null) {
+                return ItemStackBuilder.of(stack)
             }
 
-        // buffoonery to bypass InvUI's translation mess
-        // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
-        builder.editData(DataComponentTypes.ITEM_NAME) {
-            it.attachPylonArguments(placeholders)
-        }
+            val placeholders = item.getPlaceholders()
+            val builder = ItemStackBuilder.of(stack.clone())
+                .editData(DataComponentTypes.LORE) { lore ->
+                    ItemLore.lore(lore.lines().map {
+                        if (it is TranslatableComponent) {
+                            val arguments: MutableList<TranslationArgumentLike> = it.arguments().toMutableList()
+                            arguments.addAll(placeholders)
+                            it.arguments(arguments)
+                        } else {
+                            it
+                        }
+                    })
+                }
 
-        if (item.isDisabled) {
-            builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
-        }
-
-        if (!player.canCraft(item)) {
-            builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
-                .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
-                .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
-            if (item.research != null) {
-                addResearchCostLore(builder, player, item.research!!)
+            // buffoonery to bypass InvUI's translation mess
+            // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
+            builder.editData(DataComponentTypes.ITEM_NAME) {
+                it.attachPylonArguments(placeholders)
             }
-            builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
-        }
 
-        return builder
+            if (item.isDisabled) {
+                builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
+            }
+
+            if (!player.canCraft(item)) {
+                builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
+                    .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
+                    .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
+                if (item.research != null) {
+                    addResearchCostLore(builder, player, item.research!!)
+                }
+                builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
+            }
+
+            return builder
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            return ItemStackBuilder.of(Material.BARRIER)
+                .name(Component.translatable("pylon.pyloncore.guide.button.item.error"))
+        }
     }
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-        when (clickType) {
-            ClickType.LEFT -> {
-                val page = ItemRecipesPage(stack)
-                if (page.pages.isNotEmpty()) {
-                    page.open(player)
-                }
-            }
-            ClickType.SHIFT_LEFT -> {
-                val item = PylonItem.fromStack(stack)
-                val research = item?.research
-                if (item != null && research != null) {
-                    if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
-                        return
+        try {
+            when (clickType) {
+                ClickType.LEFT -> {
+                    val page = ItemRecipesPage(stack)
+                    if (page.pages.isNotEmpty()) {
+                        page.open(player)
                     }
-                    research.addTo(player, false)
-                    player.researchPoints -= research.cost
-                    windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
                 }
-            }
-            ClickType.RIGHT -> {
-                val page = ItemUsagesPage(stack)
-                if (page.pages.isNotEmpty()) {
-                    page.open(player)
+
+                ClickType.SHIFT_LEFT -> {
+                    val item = PylonItem.fromStack(stack)
+                    val research = item?.research
+                    if (item != null && research != null) {
+                        if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
+                            return
+                        }
+                        research.addTo(player, false)
+                        player.researchPoints -= research.cost
+                        windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
+                    }
                 }
-            }
-            ClickType.SHIFT_RIGHT -> {
-                val item = PylonItem.fromStack(stack)
-                if (item != null && item.research != null && !player.canUse(item)) {
-                    ResearchItemsPage(item.research!!).open(player)
+
+                ClickType.RIGHT -> {
+                    val page = ItemUsagesPage(stack)
+                    if (page.pages.isNotEmpty()) {
+                        page.open(player)
+                    }
                 }
-            }
-            ClickType.MIDDLE -> {
-                if (player.hasPermission("pylon.command.give")) {
-                    player.setItemOnCursor(stack)
+
+                ClickType.SHIFT_RIGHT -> {
+                    val item = PylonItem.fromStack(stack)
+                    if (item != null && item.research != null && !player.canUse(item)) {
+                        ResearchItemsPage(item.research!!).open(player)
+                    }
                 }
+
+                ClickType.MIDDLE -> {
+                    if (player.hasPermission("pylon.command.give")) {
+                        player.setItemOnCursor(stack)
+                    }
+                }
+
+                else -> {}
             }
-            else -> {}
+        } catch (t: Throwable) {
+            t.printStackTrace()
         }
     }
 
