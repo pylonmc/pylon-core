@@ -55,6 +55,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
     private val translations: Map<Locale, Config>
 
     private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()
+    private val warned = mutableSetOf<Locale>()
 
     init {
         for (lang in addon.languages) {
@@ -103,11 +104,11 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             if (!translationKey.startsWith("pylon.")) return null
             val (_, addon, key) = translationKey.split('.', limit = 3)
             if (addon != addonNamespace) return null
-            val commonLocale = findCommonLocale(locale)
-            val translations = commonLocale?.let(this.translations::get)
+            val translations = findCommonLocale(locale)?.let(this.translations::get)
             if (translations == null) {
-                if (warn) {
+                if (warn && locale !in warned) {
                     this.addon.javaPlugin.logger.warning("No translations found for locale '$locale'")
+                    warned.add(locale)
                 }
                 return null
             }
