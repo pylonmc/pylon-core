@@ -14,6 +14,7 @@ import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
+import kotlin.math.absoluteValue
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
     return namespace == addon.key.namespace
@@ -63,6 +64,11 @@ fun isCardinalDirection(vector: Vector3i)
     = (vector.x != 0 && vector.y == 0 && vector.z == 0)
         || (vector.x == 0 && vector.y != 0 && vector.z == 0)
         || (vector.x == 0 && vector.y == 0 && vector.z != 0)
+
+fun isCardinalDirection(vector: Vector3f)
+    = (vector.x.absoluteValue > 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x < 1.0e-6 && vector.y > 1.0e-6 && vector.z < 1.0e-6)
+        || (vector.x < 1.0e-6 && vector.y < 1.0e-6 && vector.z > 1.0e-6)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
