@@ -61,14 +61,15 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         for (lang in addon.languages) {
             addon.mergeGlobalConfig("lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
         }
-        translations = PylonCore.dataPath
-            .resolve("lang")
-            .resolve(addonNamespace)
-            .listDirectoryEntries("*.yml")
-            .associate {
+        val langsDir = PylonCore.dataPath.resolve("lang").resolve(addonNamespace)
+        translations = if (!langsDir.toFile().exists()) {
+            emptyMap()
+        } else {
+            langsDir.listDirectoryEntries("*.yml").associate {
                 val split = it.nameWithoutExtension.split('_', limit = 3)
                 Locale.of(split.first(), split.getOrNull(1).orEmpty(), split.getOrNull(2).orEmpty()) to Config(it)
             }
+        }
     }
 
     override fun canTranslate(key: String, locale: Locale): Boolean {
