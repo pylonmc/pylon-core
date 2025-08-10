@@ -22,8 +22,10 @@ class ConnectingPointPipeMarker(val marker: FluidPipeMarker) : ConnectingPoint {
     override val interaction = null
 
     override fun create(): FluidPointInteraction {
-        val from = marker.getFrom()!!
-        val to = marker.getTo()!!
+        val from = marker.getFrom()
+        val to = marker.getTo()
+
+        val pipe = marker.getPipeDisplay()!!.pipe
 
         // disconnect from/to
         ConnectingService.disconnect(from, to, false)
@@ -36,12 +38,12 @@ class ConnectingPointPipeMarker(val marker: FluidPipeMarker) : ConnectingPoint {
         ConnectingService.connect(
             ConnectingPointInteraction(from),
             ConnectingPointInteraction(connectorInteraction),
-            marker.getPipeDisplay()!!.pipe
+            pipe
         )
         ConnectingService.connect(
             ConnectingPointInteraction(to),
             ConnectingPointInteraction(connectorInteraction),
-            marker.getPipeDisplay()!!.pipe
+            pipe
         )
 
         return connectorInteraction
