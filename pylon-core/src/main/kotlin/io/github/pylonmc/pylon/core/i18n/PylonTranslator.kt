@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.i18n
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
@@ -36,6 +38,8 @@ import org.bukkit.inventory.ItemStack
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.nameWithoutExtension
 
 /**
  * The [Translator] for a given [PylonAddon]. This translator handles the translation of
@@ -48,11 +52,23 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
     private val addonNamespace = addon.key.namespace
 
-    private val translations = addon.languages.associateWith {
-        addon.mergeGlobalConfig("lang/$it.yml", "lang/$addonNamespace/$it.yml")
-    }
+    private val translations: Map<Locale, Config>
 
     private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()
+
+    init {
+        for (lang in addon.languages) {
+            addon.mergeGlobalConfig("lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
+        }
+        translations = PylonCore.dataPath
+            .resolve("lang")
+            .resolve(addonNamespace)
+            .listDirectoryEntries("*.yml")
+            .associate {
+                val split = it.nameWithoutExtension.split('_', limit = 3)
+                Locale.of(split.first(), split.getOrNull(1).orEmpty(), split.getOrNull(2).orEmpty()) to Config(it)
+            }
+    }
 
     override fun canTranslate(key: String, locale: Locale): Boolean {
         return getRawTranslation(key, locale, warn = false) != null
@@ -121,7 +137,8 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         @get:JvmStatic
         @get:JvmName("getTranslatorForAddon")
         val PylonAddon.translator: PylonTranslator
-            get() = translators[this.key] ?: error("Addon does not have a translator; did you forget to call registerWithPylon()?")
+            get() = translators[this.key]
+                ?: error("Addon does not have a translator; did you forget to call registerWithPylon()?")
 
         /**
          * Modifies the [ItemStack] to translate its name and lore into the specified [locale].
@@ -195,6 +212,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerChangeLanguage(event: PlayerLocaleChangeEvent) {
+            if (!event.player.isOnline) return
             NmsAccessor.instance.resendInventory(event.player)
             NmsAccessor.instance.resendRecipeBook(event.player)
         }
