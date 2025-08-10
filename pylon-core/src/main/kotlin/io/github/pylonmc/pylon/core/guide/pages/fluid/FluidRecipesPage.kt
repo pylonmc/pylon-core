@@ -20,11 +20,6 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
     val pages: MutableList<Gui> = mutableListOf()
 
     init {
-        for (recipe in PylonGuide.virtualRecipes.values) {
-            if (recipe.isOutput(fluid)) {
-                pages.add(recipe.display())
-            }
-        }
         for (type in PylonRegistry.RECIPE_TYPES) {
             for (recipe in type.recipes) {
                 if (!recipe.isHidden && recipe.isOutput(fluid)) {

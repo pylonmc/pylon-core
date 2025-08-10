@@ -10,7 +10,6 @@ import io.github.pylonmc.pylon.core.guide.pages.research.ResearchesPage
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.recipe.PylonVirtualRecipe
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -79,9 +78,6 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         @JvmStatic
         var settingsAndInfoPage = SettingsAndInfoPage()
 
-        @JvmStatic
-        val virtualRecipes: MutableMap<NamespacedKey, PylonVirtualRecipe> = mutableMapOf()
-
         /**
          * Hide an item from showing up in searches
          */
@@ -104,13 +100,6 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         @JvmStatic
         fun hideResearch(key: NamespacedKey) {
             hiddenResearches.add(key)
-        }
-
-        /**
-         * Adds a virtual recipe for display
-         */
-        fun addVirtualRecipe(recipe: PylonVirtualRecipe) {
-            virtualRecipes[recipe.key] = recipe
         }
 
         /**
