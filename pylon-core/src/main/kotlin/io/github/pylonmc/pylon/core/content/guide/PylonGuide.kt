@@ -33,7 +33,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val KEY = pylonKey("guide")
 
         @JvmField
-        val STACK = ItemStackBuilder.pylonItem(Material.ENCHANTED_BOOK, KEY)
+        val STACK = ItemStackBuilder.Companion.pylonItem(Material.ENCHANTED_BOOK, KEY)
             .build()
 
         /**
@@ -85,6 +85,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         /**
          * Hide an item from showing up in searches
          */
+        @JvmStatic
         fun hideItem(key: NamespacedKey) {
             hiddenItems.add(key)
         }
@@ -92,6 +93,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         /**
          * Hide a fluid from showing up in searches
          */
+        @JvmStatic
         fun hideFluid(key: NamespacedKey) {
             hiddenFluids.add(key)
         }
@@ -99,6 +101,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         /**
          * Hide a fluid from showing up in searches
          */
+        @JvmStatic
         fun hideResearch(key: NamespacedKey) {
             hiddenResearches.add(key)
         }
@@ -113,6 +116,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         /**
          * Opens the guide to the last page that the player was on
          */
+        @JvmStatic
         fun open(player: Player) {
             val history = history.getOrPut(player.uniqueId) { mutableListOf() }
             if (history.isEmpty()) {

@@ -2,16 +2,32 @@
 
 package io.github.pylonmc.pylon.core.util
 
+import com.destroystokyo.paper.profile.PlayerProfile
+import com.mojang.brigadier.context.CommandContext
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.RotationResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
+import io.papermc.paper.math.BlockPosition
+import io.papermc.paper.math.FinePosition
+import io.papermc.paper.math.Rotation
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
+import kotlin.reflect.typeOf
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
     return namespace == addon.key.namespace
@@ -58,13 +74,48 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
 }
 
 fun isCardinalDirection(vector: Vector3i)
-    = vector.x != 0 && vector.y == 0 && vector.z == 0
-        || vector.x == 0 && vector.y != 0 && vector.z == 0
-        || vector.x == 0 && vector.y == 0 && vector.z != 0
+    = (vector.x != 0 && vector.y == 0 && vector.z == 0)
+        || (vector.x == 0 && vector.y != 0 && vector.z == 0)
+        || (vector.x == 0 && vector.y == 0 && vector.z != 0)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Key does not have a corresponding addon; does your addon call registerWithPylon()?")
+
+/**
+ * Rotates a vector to face a direction
+ *
+ * The direction given must be a horizontal cardinal direction (north, east, south, west)
+ *
+ * Assumes north to be the default direction (supplying north will result in no rotation)
+ */
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
+    = when (face) {
+        BlockFace.NORTH -> vector
+        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
+        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+    }
+
+fun itemFromName(name: String): ItemStack? {
+    if (name.contains(':')) {
+        val namespacedKey = NamespacedKey.fromString(name)
+        if (namespacedKey != null) {
+            val pylonItem = PylonRegistry.ITEMS[namespacedKey]
+            if (pylonItem != null) {
+                return pylonItem.itemStack
+            }
+        }
+    }
+
+    val material = Material.getMaterial(name.uppercase())
+    if (material != null) {
+        return ItemStack(material)
+    }
+
+    return null
+}
 
 fun wrapText(text: String, limit: Int): List<String> {
     val words = text.split(" ")
@@ -86,4 +137,21 @@ fun wrapText(text: String, limit: Int): List<String> {
         lines.add(currentLine.toString())
     }
     return lines
+}
+
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
+    return when (typeOf<T>()) {
+        typeOf<BlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
+        typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)
+        typeOf<Entity>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source).first()
+        typeOf<FinePosition>() -> getArgument(name, FinePositionResolver::class.java).resolve(source)
+        typeOf<List<PlayerProfile>>() -> getArgument(name, PlayerProfileListResolver::class.java).resolve(source)
+        typeOf<PlayerProfile>() -> getArgument(name, PlayerProfileListResolver::class.java).resolve(source).first()
+        typeOf<List<Player>>() -> getArgument(name, PlayerSelectorArgumentResolver::class.java).resolve(source)
+        typeOf<Player>() -> getArgument(name, PlayerSelectorArgumentResolver::class.java).resolve(source).first()
+        typeOf<Rotation>() -> getArgument(name, RotationResolver::class.java).resolve(source)
+        else -> getArgument(name, T::class.java)
+    } as T
 }

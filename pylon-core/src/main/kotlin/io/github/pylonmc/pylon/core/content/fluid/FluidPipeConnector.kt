@@ -19,15 +19,12 @@ import org.bukkit.persistence.PersistentDataContainer
 class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
 
     @Suppress("unused")
-    constructor(block: Block, context: BlockCreateContext) : super(block)
+    constructor(block: Block, context: BlockCreateContext) : super(block) {
+        addEntity("connector", FluidPointInteraction.make(context, FluidPointType.CONNECTOR))
+    }
 
     @Suppress("unused")
     constructor(block: Block, pdc: PersistentDataContainer) : super(block)
-
-    override fun createEntities(context: BlockCreateContext)
-        = mutableMapOf(
-            "connector" to FluidPointInteraction.make(context, FluidPointType.CONNECTOR)
-        )
 
     val fluidPointInteraction
         get() = getHeldEntityOrThrow(FluidPointInteraction::class.java, "connector")
