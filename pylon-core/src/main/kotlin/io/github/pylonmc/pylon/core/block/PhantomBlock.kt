@@ -51,7 +51,7 @@ class PhantomBlock(
 
     override fun getWaila(player: Player): WailaConfig? {
         return WailaConfig(
-            text = getName(PylonArgument.of("block", erroredBlockKey.toString())),
+            text = defaultTranslationKey.arguments(PylonArgument.of("block", erroredBlockKey.toString())),
             color = BossBar.Color.RED
         )
     }

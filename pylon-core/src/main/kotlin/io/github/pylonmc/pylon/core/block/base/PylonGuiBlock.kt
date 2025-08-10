@@ -39,7 +39,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
     fun createGui(): Gui
 
     val guiTitle: Component
-        get() = (this as PylonBlock).getName()
+        get() = (this as PylonBlock).defaultTranslationKey
 
     @get:ApiStatus.NonExtendable
     val gui: AbstractGui
