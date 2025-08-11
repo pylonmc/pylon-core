@@ -294,6 +294,18 @@ object BlockStorage : Listener {
         breakBlock(block.position, context)
 
     /**
+     * Removes a block from teh world and the storage.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread
+     *
+     * @return The list of drops, or null if the block is not a Pylon block
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun breakBlock(block: PylonBlock, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+        breakBlock(block.block, context)
+
+    /**
      * Removes a block from the world and the storage.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
