@@ -51,7 +51,7 @@ open class PylonBlock protected constructor(val block: Block) {
 
     val defaultTranslationKey = Component.translatable(
         "pylon.${schema.key.namespace}.item.${schema.key.key}.waila",
-        "pylon.${schema.key.namespace}.block.${schema.key.key}.name"
+        "pylon.${schema.key.namespace}.item.${schema.key.key}.name"
     )
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
