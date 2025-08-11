@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonArrow
 import io.github.pylonmc.pylon.core.item.base.PylonLingeringPotion
 import io.github.pylonmc.pylon.core.item.base.PylonSplashPotion
+import io.github.pylonmc.pylon.core.util.logEventHandleErr
 import org.bukkit.entity.AbstractArrow
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -25,21 +26,33 @@ internal object EntityListener : Listener {
     private fun handle(event: PlayerInteractEntityEvent) {
         val pylonEntity = EntityStorage.get(event.rightClicked)
         if (pylonEntity is PylonInteractableEntity) {
-            pylonEntity.onInteract(event)
+            try {
+                pylonEntity.onInteract(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonEntity)
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun handle(event: PylonEntityUnloadEvent) {
         if (event.pylonEntity is PylonUnloadEntity) {
-            event.pylonEntity.onUnload(event)
+            try {
+                event.pylonEntity.onUnload(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, event.pylonEntity)
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun handle(event: PylonEntityDeathEvent) {
         if (event.pylonEntity is PylonDeathEntity) {
-            event.pylonEntity.onDeath(event)
+            try {
+                event.pylonEntity.onDeath(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, event.pylonEntity)
+            }
         }
     }
 
@@ -48,7 +61,11 @@ internal object EntityListener : Listener {
         if (event.entity is AbstractArrow) {
             val arrowItem = PylonItem.fromStack((event.entity as AbstractArrow).itemStack)
             if (arrowItem is PylonArrow) {
-                arrowItem.onArrowHit(event)
+                try {
+                    arrowItem.onArrowHit(event)
+                } catch (e: Exception) {
+                    logEventHandleErr(event, e, arrowItem)
+                }
             }
         }
     }
@@ -58,7 +75,11 @@ internal object EntityListener : Listener {
         if (event.damager is AbstractArrow) {
             val arrowItem = PylonItem.fromStack((event.damager as AbstractArrow).itemStack)
             if (arrowItem is PylonArrow) {
-                arrowItem.onArrowDamage(event)
+                try {
+                    arrowItem.onArrowDamage(event)
+                } catch (e: Exception) {
+                    logEventHandleErr(event, e, arrowItem)
+                }
             }
         }
     }
@@ -67,7 +88,11 @@ internal object EntityListener : Listener {
     fun handle(event: PotionSplashEvent) {
         val pylonPotion = PylonItem.fromStack(event.potion.item)
         if (pylonPotion is PylonSplashPotion) {
-            pylonPotion.onSplash(event)
+            try {
+                pylonPotion.onSplash(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonPotion)
+            }
         }
     }
 
@@ -75,7 +100,11 @@ internal object EntityListener : Listener {
     fun handle(event: LingeringPotionSplashEvent) {
         val pylonPotion = PylonItem.fromStack(event.entity.item)
         if (pylonPotion is PylonLingeringPotion) {
-            pylonPotion.onSplash(event)
+            try {
+                pylonPotion.onSplash(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonPotion)
+            }
         }
     }
 }

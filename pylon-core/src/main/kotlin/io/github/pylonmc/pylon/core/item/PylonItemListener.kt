@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
+import io.github.pylonmc.pylon.core.util.logEventHandleErr
 import io.papermc.paper.event.player.PlayerPickItemEvent
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -29,7 +30,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (bow is PylonBow) {
-            bow.onBowReady(event)
+            try {
+                bow.onBowReady(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, bow)
+            }
         }
 
         val arrow = PylonItem.fromStack(event.arrow)
@@ -38,7 +43,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (arrow is PylonArrow) {
-            arrow.onArrowReady(event)
+            try {
+                arrow.onArrowReady(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, arrow)
+            }
         }
     }
 
@@ -46,12 +55,20 @@ internal object PylonItemListener : Listener {
     private fun handle(event: EntityShootBowEvent) {
         val bow = event.bow?.let { PylonItem.fromStack(it) }
         if (bow is PylonBow) {
-            bow.onBowFired(event)
+            try {
+                bow.onBowFired(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, bow)
+            }
         }
 
         val arrow = event.consumable?.let { PylonItem.fromStack(it) }
         if (arrow is PylonArrow) {
-            arrow.onArrowShotFromBow(event)
+            try {
+                arrow.onArrowShotFromBow(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, arrow)
+            }
         }
     }
 
@@ -68,10 +85,18 @@ internal object PylonItemListener : Listener {
             pylonItem.respectCooldown
         ) return
         if (pylonItem is PylonBlockInteractor && event.hasBlock()) {
-            pylonItem.onUsedToClickBlock(event)
+            try {
+                pylonItem.onUsedToClickBlock(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
         if (pylonItem is PylonInteractor) {
-            pylonItem.onUsedToRightClick(event)
+            try {
+                pylonItem.onUsedToRightClick(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -79,7 +104,11 @@ internal object PylonItemListener : Listener {
     private fun handle(event: BrewingStandFuelEvent) {
         val pylonItem = PylonItem.fromStack(event.fuel)
         if (pylonItem is PylonBrewingStandFuel) {
-            pylonItem.onUsedAsBrewingStandFuel(event)
+            try {
+                pylonItem.onUsedAsBrewingStandFuel(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -91,7 +120,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItem is PylonBucket) {
-            pylonItem.onBucketEmptied(event)
+            try {
+                pylonItem.onBucketEmptied(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -103,7 +136,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItem is PylonBucket) {
-            pylonItem.onBucketFilled(event)
+            try {
+                pylonItem.onBucketFilled(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -115,7 +152,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItem is PylonConsumable) {
-            pylonItem.onConsumed(event)
+            try {
+                pylonItem.onConsumed(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -126,7 +167,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItem is PylonItemDamageable) {
-            pylonItem.onItemDamaged(event)
+            try {
+                pylonItem.onItemDamaged(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -137,7 +182,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItem is PylonItemDamageable) {
-            pylonItem.onItemBreaks(event)
+            try {
+                pylonItem.onItemBreaks(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -149,7 +198,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItem is PylonItemDamageable && event.player.canUse(pylonItem, true)) {
-            pylonItem.onItemMended(event)
+            try {
+                pylonItem.onItemMended(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -163,7 +216,11 @@ internal object PylonItemListener : Listener {
         if (pylonItemMainHand is PylonItemEntityInteractor &&
             !(event.player.getCooldown(pylonItemMainHand.stack) > 0 && pylonItemMainHand.respectCooldown)
         ) {
-            pylonItemMainHand.onUsedToRightClickEntity(event)
+            try {
+                pylonItemMainHand.onUsedToRightClickEntity(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItemMainHand)
+            }
         }
 
         val pylonItemOffHand = PylonItem.fromStack(event.player.inventory.itemInOffHand)
@@ -174,7 +231,11 @@ internal object PylonItemListener : Listener {
         if (pylonItemOffHand is PylonItemEntityInteractor &&
             !(event.player.getCooldown(pylonItemOffHand.stack) > 0 && pylonItemOffHand.respectCooldown)
         ) {
-            pylonItemOffHand.onUsedToRightClickEntity(event)
+            try {
+                pylonItemOffHand.onUsedToRightClickEntity(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItemOffHand)
+            }
         }
     }
 
@@ -182,7 +243,11 @@ internal object PylonItemListener : Listener {
     private fun handle(event: FurnaceBurnEvent) {
         val pylonItem = PylonItem.fromStack(event.fuel) ?: return
         if (pylonItem is VanillaCookingFuel) {
-            pylonItem.onBurntAsFuel(event)
+            try {
+                pylonItem.onBurntAsFuel(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         } else {
             event.isCancelled = true
         }
@@ -196,7 +261,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItem is PylonTool) {
-            pylonItem.onUsedToDamageBlock(event)
+            try {
+                pylonItem.onUsedToDamageBlock(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItem)
+            }
         }
     }
 
@@ -208,7 +277,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItemMainHand is PylonTool) {
-            pylonItemMainHand.onUsedToBreakBlock(event)
+            try {
+                pylonItemMainHand.onUsedToBreakBlock(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItemMainHand)
+            }
         }
 
         val pylonItemOffHand = PylonItem.fromStack(event.player.inventory.itemInOffHand)
@@ -217,7 +290,11 @@ internal object PylonItemListener : Listener {
             return
         }
         if (pylonItemOffHand is PylonTool) {
-            pylonItemOffHand.onUsedToBreakBlock(event)
+            try {
+                pylonItemOffHand.onUsedToBreakBlock(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, pylonItemOffHand)
+            }
         }
     }
 
@@ -232,7 +309,11 @@ internal object PylonItemListener : Listener {
                     return
                 }
                 if (pylonItemMainHand is PylonWeapon) {
-                    pylonItemMainHand.onUsedToDamageEntity(event)
+                    try {
+                        pylonItemMainHand.onUsedToDamageEntity(event)
+                    } catch (e: Exception) {
+                        logEventHandleErr(event, e, pylonItemMainHand)
+                    }
                 }
 
                 val pylonItemOffHand = PylonItem.fromStack(damager.inventory.itemInOffHand)
@@ -241,7 +322,11 @@ internal object PylonItemListener : Listener {
                     return
                 }
                 if (pylonItemOffHand is PylonWeapon) {
-                    pylonItemOffHand.onUsedToDamageEntity(event)
+                    try {
+                        pylonItemOffHand.onUsedToDamageEntity(event)
+                    } catch (e: Exception) {
+                        logEventHandleErr(event, e, pylonItemOffHand)
+                    }
                 }
             }
         }
@@ -257,7 +342,11 @@ internal object PylonItemListener : Listener {
                 return
             }
             if (pylonItemMainHand is PylonWeapon) {
-                pylonItemMainHand.onUsedToKillEntity(event)
+                try {
+                    pylonItemMainHand.onUsedToKillEntity(event)
+                } catch (e: Exception) {
+                    logEventHandleErr(event, e, pylonItemMainHand)
+                }
             }
 
             val pylonItemOffHand = PylonItem.fromStack(killer.inventory.itemInMainHand)
@@ -266,7 +355,11 @@ internal object PylonItemListener : Listener {
                 return
             }
             if (pylonItemOffHand is PylonWeapon) {
-                pylonItemOffHand.onUsedToKillEntity(event)
+                try {
+                    pylonItemOffHand.onUsedToKillEntity(event)
+                } catch (e: Exception) {
+                    logEventHandleErr(event, e, pylonItemOffHand)
+                }
             }
         }
     }

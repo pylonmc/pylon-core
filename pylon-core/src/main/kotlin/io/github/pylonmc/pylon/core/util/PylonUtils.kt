@@ -4,8 +4,12 @@ package io.github.pylonmc.pylon.core.util
 
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.mojang.brigadier.context.CommandContext
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
+import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
@@ -22,6 +26,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
@@ -73,8 +78,7 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
     return vectorToBlockFace(vector)
 }
 
-fun isCardinalDirection(vector: Vector3i)
-    = (vector.x != 0 && vector.y == 0 && vector.z == 0)
+fun isCardinalDirection(vector: Vector3i) = (vector.x != 0 && vector.y == 0 && vector.z == 0)
         || (vector.x == 0 && vector.y != 0 && vector.z == 0)
         || (vector.x == 0 && vector.y == 0 && vector.z != 0)
 
@@ -89,14 +93,13 @@ fun getAddon(key: NamespacedKey): PylonAddon =
  *
  * Assumes north to be the default direction (supplying north will result in no rotation)
  */
-fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
-    = when (face) {
-        BlockFace.NORTH -> vector
-        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
-        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
-        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
-        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
-    }
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
+    BlockFace.NORTH -> vector
+    BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
+    BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+    BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+    else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+}
 
 fun itemFromName(name: String): ItemStack? {
     if (name.contains(':')) {
@@ -154,4 +157,19 @@ inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: Stri
         typeOf<Rotation>() -> getArgument(name, RotationResolver::class.java).resolve(source)
         else -> getArgument(name, T::class.java)
     } as T
+}
+
+fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock){
+    PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+    e.printStackTrace()
+}
+
+fun logEventHandleErr(event: Event, e: Exception, item: PylonItem){
+    PylonCore.logger.severe("Error when handling item(${item.key}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+    e.printStackTrace()
+}
+
+fun logEventHandleErr(event: Event, e: Exception, entity: PylonEntity<*>){
+    PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+    e.printStackTrace()
 }
