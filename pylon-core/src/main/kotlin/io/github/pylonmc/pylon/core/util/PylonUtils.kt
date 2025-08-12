@@ -6,9 +6,7 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import com.mojang.brigadier.context.CommandContext
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
@@ -25,7 +23,6 @@ import io.papermc.paper.math.BlockPosition
 import io.papermc.paper.math.FinePosition
 import io.papermc.paper.math.Rotation
 import org.bukkit.Color.RED
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
@@ -38,7 +35,7 @@ import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.typeOf
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
@@ -166,12 +163,12 @@ inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: Stri
     } as T
 }
 
-private val blockErrMap: MutableMap<PylonBlock, Int> = mutableMapOf()
-fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock){
+private val blockErrMap: MutableMap<PylonBlock, Int> = WeakHashMap();
+internal fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock) {
     PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
     e.printStackTrace()
     blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
-    if(blockErrMap[block]!! > PylonConfig.allowedBlockErrors){
+    if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
         val display = block.block.world.spawn(block.block.location, BlockDisplay::class.java)
         display.isInvisible = true
         display.glowColorOverride = RED
@@ -180,12 +177,12 @@ fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock){
     }
 }
 
-fun logEventHandleErr(event: Event, e: Exception, item: PylonItem){
+internal fun logEventHandleErr(event: Event, e: Exception, item: PylonItem) {
     PylonCore.logger.severe("Error when handling item(${item.key}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
     e.printStackTrace()
 }
 
-fun logEventHandleErr(event: Event, e: Exception, entity: PylonEntity<*>){
+internal fun logEventHandleErr(event: Event, e: Exception, entity: PylonEntity<*>) {
     PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
     e.printStackTrace()
 }
