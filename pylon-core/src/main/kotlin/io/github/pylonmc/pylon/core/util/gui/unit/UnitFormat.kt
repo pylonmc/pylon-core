@@ -228,6 +228,8 @@ class UnitFormat @JvmOverloads constructor(
         @JvmStatic
         fun formatDuration(duration: Duration): Component {
             var component = Component.text()
+            var isEmpty = true
+
             val days = duration.toDaysPart()
             if (days > 0) {
                 component = component.append(
@@ -235,29 +237,43 @@ class UnitFormat @JvmOverloads constructor(
                         .abbreviate(false)
                         .unitStyle(Style.empty())
                 )
+                isEmpty = false
             }
             val hours = duration.toHoursPart()
             if (hours > 0) {
+                if (!isEmpty) {
+                    component = component.append(Component.text(" "))
+                }
                 component = component.append(
                     HOURS.format(hours)
                         .abbreviate(false)
                         .unitStyle(Style.empty())
                 )
+                isEmpty = false
             }
             val minutes = duration.toMinutesPart()
             if (minutes > 0) {
+                if (!isEmpty) {
+                    component = component.append(Component.text(" "))
+                }
                 component = component.append(
                     MINUTES.format(minutes)
                         .abbreviate(false)
                         .unitStyle(Style.empty())
                 )
+                isEmpty = false
             }
             val seconds = duration.toSecondsPart()
-            component = component.append(
-                SECONDS.format(seconds)
-                    .abbreviate(false)
-                    .unitStyle(Style.empty())
-            )
+            if (seconds > 0 || isEmpty) {
+                if (!isEmpty) {
+                    component = component.append(Component.text(" "))
+                }
+                component = component.append(
+                    SECONDS.format(seconds)
+                        .abbreviate(false)
+                        .unitStyle(Style.empty())
+                )
+            }
             return component.build()
         }
     }
