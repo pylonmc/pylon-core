@@ -43,21 +43,25 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
 
     @MustBeInvokedByOverriders
     override fun onInteract(event: PlayerInteractEvent) {
-        if (
-            event.action.isRightClick &&
-            event.hand == EquipmentSlot.HAND &&
-            event.useInteractedBlock() != Event.Result.DENY &&
-            !event.player.isSneaking
-        ) {
-            event.setUseInteractedBlock(Event.Result.DENY)
-            event.setUseItemInHand(Event.Result.DENY)
-            val window = Window.single()
-                .setGui(gui)
-                .setTitle(AdventureComponentWrapper((this as PylonBlock).name))
-                .setViewer(event.player)
-                .build()
-            window.open()
+        if (!event.action.isRightClick
+            || event.hand != EquipmentSlot.HAND
+            || event.useInteractedBlock() == Event.Result.DENY) {
+            return
         }
+
+        event.setUseInteractedBlock(Event.Result.DENY)
+        event.setUseItemInHand(Event.Result.DENY)
+
+        if (event.player.isSneaking) {
+            return
+        }
+
+        Window.single()
+            .setGui(gui)
+            .setTitle(AdventureComponentWrapper((this as PylonBlock).name))
+            .setViewer(event.player)
+            .build()
+            .open()
     }
 
     @MustBeInvokedByOverriders

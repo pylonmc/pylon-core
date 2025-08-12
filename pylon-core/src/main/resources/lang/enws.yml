@@ -115,13 +115,16 @@ guide:
       unlocks-title: "<u>Revelations</u>"
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>additional revelations - <guideinsn>right click</guideinsn> <gray>to see all"
+      error: "<red>Thy research hath faileth to loadeth!!! Repent!!!"
     fluid:
       name: "%fluid% <gray>(%amount%<gray>)"
+      error: "<red>Thy fluid item hath faileth to loadeth!!! Repent!!!"
     item:
       not-researched: "<#ff0000>Not revealed yet"
       research-instructions: |-
         <arrow> <guideinsn>Strike with thy left hand while crouching</guideinsn> to reveal
         <arrow> <guideinsn>Strike with thy right hand while crouching</guideinsn> to see other revelations
+      error: "<red>Thy item hath faileth to loadeth!!! Repent!!!"
     toggle-waila:
       name: "Toggle WAILA"
       lore: "<arrow> WAILA is thy bossbar at the top of your computational device's screen that reveals itself when thy camera is pointed at a Pylon block"

@@ -15,6 +15,7 @@ import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
+import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
@@ -29,6 +30,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
+import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -155,6 +157,14 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     private fun preventReplacingStructureVoids(event: BlockPlaceEvent) {
+        val pylonBlock = BlockStorage.get(event.block)
+        if (pylonBlock != null && pylonBlock.schema.material == Material.STRUCTURE_VOID) {
+            event.isCancelled = true
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    private fun onFluidPlace(event: PlayerBucketEmptyEvent) {
         val pylonBlock = BlockStorage.get(event.block)
         if (pylonBlock != null && pylonBlock.schema.material == Material.STRUCTURE_VOID) {
             event.isCancelled = true

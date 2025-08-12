@@ -131,7 +131,6 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         @JvmName("translateItem")
         @Suppress("UnstableApiUsage")
         fun ItemStack.translate(locale: Locale, arguments: List<PylonArgument> = emptyList()) {
-            GlobalTranslator.translator().addSource(MinecraftTranslator)
 
             editData(DataComponentTypes.ITEM_NAME) {
                 val translated = GlobalTranslator.render(it.attachPylonArguments(arguments), locale)
@@ -158,8 +157,6 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                 }
                 ItemLore.lore(newLore)
             }
-
-            GlobalTranslator.translator().removeSource(MinecraftTranslator)
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
