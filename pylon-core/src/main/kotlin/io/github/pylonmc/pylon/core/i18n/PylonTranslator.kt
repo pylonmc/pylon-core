@@ -124,9 +124,11 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
     private fun findCommonLocale(locale: Locale): Locale? {
         val languageRange = languageRanges.getOrPut(locale) {
             val lookupList = LocaleUtils.localeLookupList(locale).reversed()
-            lookupList.mapIndexed { index, value ->
-                Locale.LanguageRange(value.toString().replace('_', '-'), (index + 1.0) / lookupList.size)
-            }
+            lookupList
+                .mapIndexed { index, value ->
+                    Locale.LanguageRange(value.toString().replace('_', '-'), (index + 1.0) / lookupList.size)
+                }
+                .sortedByDescending { it.weight }
         }
         return Locale.lookup(languageRange, translations.keys)
     }
