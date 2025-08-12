@@ -164,6 +164,8 @@ inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: Stri
 }
 
 private val blockErrMap: MutableMap<PylonBlock, Int> = WeakHashMap();
+
+@JvmSynthetic
 internal fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock) {
     PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
     e.printStackTrace()
@@ -177,11 +179,13 @@ internal fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock) {
     }
 }
 
+@JvmSynthetic
 internal fun logEventHandleErr(event: Event, e: Exception, item: PylonItem) {
     PylonCore.logger.severe("Error when handling item(${item.key}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
     e.printStackTrace()
 }
 
+@JvmSynthetic
 internal fun logEventHandleErr(event: Event, e: Exception, entity: PylonEntity<*>) {
     PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
     e.printStackTrace()
