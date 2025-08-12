@@ -32,6 +32,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
+import org.joml.Matrix4f
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
@@ -170,10 +171,12 @@ internal fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock) {
     PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
     e.printStackTrace()
     blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
-    if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
+    if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors && block.errorBlock == null) {
+        // Credit to Idra from whom I shamelessly stole this code
         val display = block.block.world.spawn(block.block.location, BlockDisplay::class.java)
-        display.isInvisible = true
         display.glowColorOverride = RED
+        display.block = block.block.type.createBlockData()
+        display.setTransformationMatrix(Matrix4f().translate(0.005F, 0.0F, 0.005F).scale(0.99F)) // prevent z-fighting
         display.isGlowing = true
         block.errorBlock = display
     }
