@@ -294,7 +294,7 @@ object BlockStorage : Listener {
         breakBlock(block.position, context)
 
     /**
-     * Removes a block from teh world and the storage.
+     * Removes a block from the world and the storage.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread
      *
