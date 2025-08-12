@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addRes
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
-import io.github.pylonmc.pylon.core.i18n.PylonArgument.Companion.attachPylonArguments
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
@@ -12,6 +11,7 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
@@ -46,21 +46,13 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
         val placeholders = item.getPlaceholders()
         val builder = ItemStackBuilder.of(stack.clone())
             .editData(DataComponentTypes.LORE) { lore ->
-                ItemLore.lore(lore.lines().map {
-                    if (it is TranslatableComponent) {
-                        val arguments: MutableList<TranslationArgumentLike> = it.arguments().toMutableList()
-                        arguments.addAll(placeholders)
-                        it.arguments(arguments)
-                    } else {
-                        it
-                    }
-                })
+                ItemLore.lore(lore.lines().map { it.withArguments(placeholders) })
             }
 
         // buffoonery to bypass InvUI's translation mess
         // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
         builder.editData(DataComponentTypes.ITEM_NAME) {
-            it.attachPylonArguments(placeholders)
+            it.withArguments(placeholders)
         }
 
         if (item.isDisabled) {

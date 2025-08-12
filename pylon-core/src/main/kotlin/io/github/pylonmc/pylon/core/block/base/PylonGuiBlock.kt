@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
+import net.kyori.adventure.text.Component
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -37,6 +38,9 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
 
     fun createGui(): Gui
 
+    val guiTitle: Component
+        get() = (this as PylonBlock).defaultTranslationKey
+
     @get:ApiStatus.NonExtendable
     val gui: AbstractGui
         get() = guiBlocks.getOrPut(this) { createGui() as AbstractGui }
@@ -53,7 +57,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
             event.setUseItemInHand(Event.Result.DENY)
             val window = Window.single()
                 .setGui(gui)
-                .setTitle(AdventureComponentWrapper((this as PylonBlock).name))
+                .setTitle(AdventureComponentWrapper(guiTitle))
                 .setViewer(event.player)
                 .build()
             window.open()
