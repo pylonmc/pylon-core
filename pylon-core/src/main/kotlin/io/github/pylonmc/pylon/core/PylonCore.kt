@@ -21,6 +21,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
+import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
@@ -105,6 +106,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonBlock.register<FluidPipeMarker>(FluidPipeMarker.KEY, Material.STRUCTURE_VOID)
         PylonBlock.register<FluidPipeConnector>(FluidPipeConnector.KEY, Material.STRUCTURE_VOID)
 
+        DisplayRecipeType.register()
         RecipeType.addVanillaRecipes()
     }
 
