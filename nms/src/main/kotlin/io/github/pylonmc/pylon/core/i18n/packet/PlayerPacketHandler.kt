@@ -12,6 +12,7 @@ import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
+import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
@@ -85,8 +86,22 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
 
         override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
+            var packet = packet
             when (packet) {
-                is ServerboundContainerClickPacket -> resetItem(packet.carriedItem)
+                is ServerboundContainerClickPacket -> {
+                    val isEmpty = packet.carriedItem == HashedStack.EMPTY
+                    // force server to resend the item
+                    packet = ServerboundContainerClickPacket(
+                        packet.containerId,
+                        if (isEmpty) -1 else packet.stateId,
+                        packet.slotNum,
+                        packet.buttonNum,
+                        packet.clickType,
+                        packet.changedSlots,
+                        if (isEmpty) packet.carriedItem else HashedStack.EMPTY,
+                    )
+                }
+
                 is ServerboundSetCreativeModeSlotPacket -> resetItem(packet.itemStack)
             }
             super.channelRead(ctx, packet)
@@ -146,7 +161,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
             is SlotDisplay.SmithingTrimDemoSlotDisplay -> SlotDisplay.SmithingTrimDemoSlotDisplay(
                 handleSlotDisplay(display.base),
                 handleSlotDisplay(display.material),
-                handleSlotDisplay(display.pattern)
+                display.pattern
             )
 
             is SlotDisplay.WithRemainder -> SlotDisplay.WithRemainder(
