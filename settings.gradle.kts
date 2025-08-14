@@ -12,4 +12,3 @@ plugins {
 include("pylon-core")
 include("pylon-test")
 include("nms")
-include("dokka-plugin")
