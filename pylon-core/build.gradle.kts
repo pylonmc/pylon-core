@@ -32,14 +32,14 @@ dependencies {
 
     paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
-    paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
-    paperLibrary("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
-    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.45")
+    paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
+    paperLibrary("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
+    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.46")
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
-    paperLibrary("xyz.xenondevs.invui:inventory-access-r22:1.45:remapped-mojang")
-    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.45")
+    paperLibrary("xyz.xenondevs.invui:inventory-access-r24:1.46:remapped-mojang")
+    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.46")
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
@@ -77,8 +77,8 @@ dokka {
     }
     dokkaSourceSets.configureEach {
         externalDocumentationLinks.register("Paper") {
-            url("https://jd.papermc.io/paper/1.21.4/")
-            packageListUrl("https://jd.papermc.io/paper/1.21.4/element-list")
+            url("https://jd.papermc.io/paper/1.21.8/")
+            packageListUrl("https://jd.papermc.io/paper/1.21.8/element-list")
         }
         externalDocumentationLinks.register("Adventure") {
             url("https://javadoc.io/doc/net.kyori/adventure-api/latest/")

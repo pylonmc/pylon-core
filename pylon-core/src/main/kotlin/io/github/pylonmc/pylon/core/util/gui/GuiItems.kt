@@ -5,6 +5,7 @@ package io.github.pylonmc.pylon.core.util.gui
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.TooltipDisplay
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import xyz.xenondevs.invui.gui.PagedGui
@@ -21,14 +22,14 @@ object GuiItems {
     fun background(): Item = SimpleItem(
         ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
             .name("")
-            .set(DataComponentTypes.HIDE_TOOLTIP)
+            .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
 
     @JvmStatic
     fun backgroundBlack(): Item = SimpleItem(
         ItemStackBuilder.of(Material.BLACK_STAINED_GLASS_PANE)
             .name("")
-            .set(DataComponentTypes.HIDE_TOOLTIP)
+            .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
 
     /**

@@ -46,7 +46,13 @@ public final class PylonLoader implements PluginLoader {
 
         public Stream<RemoteRepository> asRepositories() {
             return repositories.entrySet().stream()
-                    .map(e -> new RemoteRepository.Builder(e.getKey(), "default", e.getValue()).build());
+                    .map(e -> new RemoteRepository.Builder(
+                            e.getKey(),
+                            "default",
+                            e.getValue().startsWith("https://repo.maven.apache.org/maven2") // avoid breaking Maven Central TOS
+                                    ? MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR
+                                    : e.getValue()
+                    ).build());
         }
     }
 }
