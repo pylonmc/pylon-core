@@ -304,7 +304,7 @@ object BlockStorage : Listener {
      */
     @JvmStatic
     @JvmOverloads
-    fun breakBlock(block: PylonBlock, context: BlockBreakContext = BlockBreakContext.PluginBreak) =
+    fun breakBlock(block: PylonBlock, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
         breakBlock(block.block, context)
 
     /**
