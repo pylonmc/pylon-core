@@ -184,8 +184,12 @@ fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
 private val blockErrMap: MutableMap<PylonBlock, Int> = WeakHashMap();
 
 @JvmSynthetic
-internal fun logEventHandleErr(event: Event, e: Exception, block: PylonBlock) {
-    PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+internal fun logEventHandleErr(event: Event?, e: Exception, block: PylonBlock) {
+    if(event != null) {
+        PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+    } else {
+        PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) ticking: ${e.localizedMessage}")
+    }
     e.printStackTrace()
     blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
     if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors && block.errorBlock == null) {
@@ -206,7 +210,11 @@ internal fun logEventHandleErr(event: Event, e: Exception, item: PylonItem) {
 }
 
 @JvmSynthetic
-internal fun logEventHandleErr(event: Event, e: Exception, entity: PylonEntity<*>) {
-    PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+internal fun logEventHandleErr(event: Event?, e: Exception, entity: PylonEntity<*>) {
+    if(event != null) {
+        PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+    } else {
+        PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) ticking: ${e.localizedMessage}")
+    }
     e.printStackTrace()
 }
