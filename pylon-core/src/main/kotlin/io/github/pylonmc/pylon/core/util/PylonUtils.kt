@@ -9,6 +9,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
@@ -123,4 +124,8 @@ fun wrapText(text: String, limit: Int): List<String> {
         lines.add(currentLine.toString())
     }
     return lines
+}
+
+fun isFakeEvent(event: Event): Boolean {
+    return event.javaClass.name.contains("Fake");
 }
