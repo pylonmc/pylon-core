@@ -12,7 +12,9 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -54,7 +56,24 @@ open class PylonBlock protected constructor(val block: Block) {
         "pylon.${schema.key.namespace}.item.${schema.key.key}.name"
     )
 
+    /**
+     * This constructor is called when a *new* block is created in the world
+     * ex:
+     * - A player places a block
+     * - `BlockStorage.placeBlock` called
+     *
+     * @see PylonBlockSchema.create
+     * @see PylonBlockUnloadEvent
+     */
     constructor(block: Block, context: BlockCreateContext) : this(block)
+
+    /**
+     * This constructor is called while the chunk is being loaded
+     *
+     * @see PylonBlockSchema.load
+     * @see PylonBlockLoadEvent
+     * @see deserialize
+     */
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
 
     /**
@@ -96,6 +115,10 @@ open class PylonBlock protected constructor(val block: Block) {
 
     /**
      * Called when the block is saved
+     *
+     * As known as `onSaveBlock`
+     *
+     * @see serialize
      */
     open fun write(pdc: PersistentDataContainer) {}
 
