@@ -4,6 +4,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.plugin.Plugin
 
 interface BlockCreateContext {
 
@@ -31,6 +32,18 @@ interface BlockCreateContext {
         override val block = event.blockPlaced
         override val shouldSetType = false // The action of the placement sets the block
     }
+
+    /**
+     * A plugin generated the block
+     * ex:
+     * - Growing of Pylon Trees
+     * - Evolution of Pylon Sponges
+     */
+    data class PluginGenerate(
+        val plugin: Plugin,
+        override val block: Block,
+        val item: ItemStack
+    ) : BlockCreateContext
 
     /**
      * A context in which no other reason is specified

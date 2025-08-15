@@ -7,7 +7,9 @@ import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.base.NotPlaceable
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.util.isFakeEvent
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -55,9 +57,29 @@ internal object BlockListener : Listener {
             event.isCancelled = true
             return
         }
+
+        if (item is NotPlaceable) {
+            // Fix #222: BlockListener cancelled specify BlockPlaceEvent accidentally
+            // In this case, we don't need to handle the event, because the PylonItem
+            // was NOT placeable in design, but it triggered a BlockPlaceEvent.
+            // Therefore, we just pass the event for the weird event/case.
+            return
+        }
+
+        if (isFakeEvent(event)) {
+            // Fake events are for checking permissions, no need to do anything but check permission.
+            if (pylonItem.schema.pylonBlockKey == null
+                || BlockStorage.isPylonBlock(event.block)
+            ) {
+                event.isCancelled = true;
+                return
+            }
+        }
+        
         val relative = event.blockPlaced.position - event.blockAgainst.position
         val blockFace = BlockFace.entries.find { it.modX == relative.x && it.modY == relative.y && it.modZ == relative.z }
             ?: BlockFace.SELF
+
         val pylonBlock = pylonItem.place(BlockCreateContext.PlayerPlace(player, item, event))
 
         if (pylonBlock == null) {
