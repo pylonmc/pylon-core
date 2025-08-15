@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.test.entity.Entities;
 import io.github.pylonmc.pylon.test.fluid.Fluids;
 import io.github.pylonmc.pylon.test.item.Items;
 import io.github.pylonmc.pylon.test.test.block.*;
+import io.github.pylonmc.pylon.test.test.entity.EntityEventErrorTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageChunkReloadTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.pylon.test.test.entity.EntityStorageUnregisteredEntityTest;
@@ -56,6 +57,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new SimpleMultiblockRotatedTest());
         tests.add(new TickingBlockTest());
         tests.add(new TickingBlockErrorTest());
+        tests.add(new BlockEventErrorTest());
 
         tests.add(new PylonItemStackInterfaceTest());
 
@@ -83,6 +85,7 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
         tests.add(new EntityStorageSimpleTest());
         tests.add(new EntityStorageUnregisteredEntityTest());
         tests.add(new EntityStorageChunkReloadTest());
+        tests.add(new EntityEventErrorTest());
 
         tests.add(new FluidConnectionTest());
         tests.add(new FluidCyclicConnectionsTest());

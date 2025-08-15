@@ -14,6 +14,9 @@ object PylonConfig {
     val allowedBlockErrors: Int by config
 
     @JvmStatic
+    val allowedEntityErrors: Int by config
+
+    @JvmStatic
     val wailaTickInterval: Int by config
 
     @JvmStatic

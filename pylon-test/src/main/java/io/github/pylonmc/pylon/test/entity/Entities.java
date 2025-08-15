@@ -10,5 +10,6 @@ public final class Entities {
 
     public static void register() {
         PylonEntity.register(SimpleEntity.KEY, LivingEntity.class, SimpleEntity.class);
+        PylonEntity.register(EntityEventError.KEY, LivingEntity.class, EntityEventError.class);
     }
 }
