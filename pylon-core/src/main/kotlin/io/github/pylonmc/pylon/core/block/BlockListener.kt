@@ -2,13 +2,14 @@ package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import com.destroystokyo.paper.event.player.PlayerJumpEvent
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
-import io.github.pylonmc.pylon.core.util.logEventHandleErr
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -19,6 +20,7 @@ import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -33,6 +35,7 @@ import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
+import java.util.*
 
 
 /**
@@ -45,6 +48,7 @@ import org.bukkit.event.player.PlayerToggleSneakEvent
 // TODO add ignoreCancelled = true, and priority monitory where relevant
 @Suppress("UnstableApiUsage")
 internal object BlockListener : Listener {
+    private val blockErrMap: MutableMap<PylonBlock, Int> = WeakHashMap()
 
     @EventHandler(ignoreCancelled = true)
     private fun blockPlace(event: BlockPlaceEvent) {
@@ -726,6 +730,21 @@ internal object BlockListener : Listener {
             } catch (e: Exception) {
                 logEventHandleErr(event, e, event.pylonBlock)
             }
+        }
+    }
+
+    @JvmSynthetic
+    internal fun logEventHandleErr(event: Event?, e: Exception, block: PylonBlock) {
+        if(event != null) {
+            PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+        } else {
+            PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) ticking: ${e.localizedMessage}")
+        }
+        e.printStackTrace()
+        blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
+        if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
+            BlockStorage.makePhantom(block)
+            TickManager.stopTicking(block)
         }
     }
 }

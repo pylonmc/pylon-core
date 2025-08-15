@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.item
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.item.base.*
@@ -9,6 +10,7 @@ import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.github.pylonmc.pylon.core.util.logEventHandleErr
 import io.papermc.paper.event.player.PlayerPickItemEvent
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
@@ -420,5 +422,11 @@ internal object PylonItemListener : Listener {
             event.player.inventory.setItem(event.sourceSlot, target)
             event.player.inventory.setItem(event.targetSlot, source)
         }
+    }
+
+    @JvmSynthetic
+    internal fun logEventHandleErr(event: Event, e: Exception, item: PylonItem) {
+        PylonCore.logger.severe("Error when handling item(${item.key}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+        e.printStackTrace()
     }
 }

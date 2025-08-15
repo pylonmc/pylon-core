@@ -1,16 +1,19 @@
 package io.github.pylonmc.pylon.core.entity
 
+import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.base.PylonDeathEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonUnloadEntity
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.PylonItemListener.logEventHandleErr
 import io.github.pylonmc.pylon.core.item.base.PylonArrow
 import io.github.pylonmc.pylon.core.item.base.PylonLingeringPotion
 import io.github.pylonmc.pylon.core.item.base.PylonSplashPotion
-import io.github.pylonmc.pylon.core.util.logEventHandleErr
 import org.bukkit.entity.AbstractArrow
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -19,8 +22,10 @@ import org.bukkit.event.entity.LingeringPotionSplashEvent
 import org.bukkit.event.entity.PotionSplashEvent
 import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import java.util.*
 
 internal object EntityListener : Listener {
+    private val entityErrMap: MutableMap<UUID, Int> = mutableMapOf()
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun handle(event: PlayerInteractEntityEvent) {
@@ -106,5 +111,20 @@ internal object EntityListener : Listener {
                 logEventHandleErr(event, e, pylonPotion)
             }
         }
+    }
+
+    @JvmSynthetic
+    internal fun logEventHandleErr(event: Event, e: Exception, entity: PylonEntity<*>) {
+        PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+        e.printStackTrace()
+        entityErrMap[entity.uuid] = entityErrMap[entity.uuid]?.plus(1) ?: 1
+        if(entityErrMap[entity.uuid]!! > PylonConfig.allowedEntityErrors){
+            entity.entity.remove()
+        }
+    }
+
+    @EventHandler
+    private fun onEntityUnload(event: PylonEntityUnloadEvent){
+        entityErrMap.remove(event.pylonEntity.uuid)
     }
 }

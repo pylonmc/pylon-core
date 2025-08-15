@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
+import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.command.brigadier.CommandSourceStack
@@ -33,6 +34,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
+import org.bukkit.event.EventHandler
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
@@ -177,38 +179,4 @@ fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
         result = this.arguments(args)
     }
     return result.children(result.children().map { it.withArguments(args) })
-}
-
-
-private val blockErrMap: MutableMap<PylonBlock, Int> = WeakHashMap();
-
-@JvmSynthetic
-internal fun logEventHandleErr(event: Event?, e: Exception, block: PylonBlock) {
-    if(event != null) {
-        PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
-    } else {
-        PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) ticking: ${e.localizedMessage}")
-    }
-    e.printStackTrace()
-    blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
-    if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
-        BlockStorage.makePhantom(block)
-        TickManager.stopTicking(block)
-    }
-}
-
-@JvmSynthetic
-internal fun logEventHandleErr(event: Event, e: Exception, item: PylonItem) {
-    PylonCore.logger.severe("Error when handling item(${item.key}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
-    e.printStackTrace()
-}
-
-@JvmSynthetic
-internal fun logEventHandleErr(event: Event?, e: Exception, entity: PylonEntity<*>) {
-    if(event != null) {
-        PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
-    } else {
-        PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) ticking: ${e.localizedMessage}")
-    }
-    e.printStackTrace()
 }
