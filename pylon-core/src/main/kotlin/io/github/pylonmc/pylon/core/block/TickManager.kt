@@ -5,12 +5,12 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.BlockListener.logEventHandleErr
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.event.PrePylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PrePylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
-import io.github.pylonmc.pylon.core.util.logEventHandleErr
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import org.bukkit.event.EventHandler
