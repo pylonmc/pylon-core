@@ -47,6 +47,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
+            var packet = packet
             when (packet) {
                 is ClientboundContainerSetContentPacket -> {
                     packet.items.forEach(::translateItem)
@@ -54,8 +55,31 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                 }
 
                 is ClientboundContainerSetSlotPacket -> translateItem(packet.item)
-                is ClientboundRecipeBookAddPacket -> packet.entries
-                    .forEach { handleRecipeDisplay(it.contents.display) }
+                is ClientboundRecipeBookAddPacket -> {
+                    // This requires a full copy for some reason
+                    packet = ClientboundRecipeBookAddPacket(
+                        packet.entries.map {
+                            ClientboundRecipeBookAddPacket.Entry(
+                                RecipeDisplayEntry(
+                                    it.contents.id,
+                                    handleRecipeDisplay(it.contents.display),
+                                    it.contents.group,
+                                    it.contents.category,
+                                    it.contents.craftingRequirements
+                                ),
+                                it.flags
+                            )
+                        },
+                        packet.replace
+                    )
+                }
+
+                is ClientboundPlaceGhostRecipePacket -> {
+                    packet = ClientboundPlaceGhostRecipePacket(
+                        packet.containerId,
+                        handleRecipeDisplay(packet.recipeDisplay)
+                    )
+                }
             }
             super.write(ctx, packet, promise)
         }
@@ -69,55 +93,66 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    private fun handleRecipeDisplay(display: RecipeDisplay) {
-        when (display) {
-            is FurnaceRecipeDisplay -> display.run {
-                handleSlotDisplay(ingredient)
-                handleSlotDisplay(fuel)
-                handleSlotDisplay(result)
-            }
+    private fun handleRecipeDisplay(display: RecipeDisplay): RecipeDisplay {
+        return when (display) {
+            is FurnaceRecipeDisplay -> FurnaceRecipeDisplay(
+                handleSlotDisplay(display.ingredient),
+                handleSlotDisplay(display.fuel),
+                handleSlotDisplay(display.result),
+                handleSlotDisplay(display.craftingStation),
+                display.duration,
+                display.experience
+            )
 
-            is ShapedCraftingRecipeDisplay -> display.run {
-                ingredients.forEach(::handleSlotDisplay)
-                handleSlotDisplay(result)
-            }
+            is ShapedCraftingRecipeDisplay -> ShapedCraftingRecipeDisplay(
+                display.width,
+                display.height,
+                display.ingredients.map(::handleSlotDisplay),
+                handleSlotDisplay(display.result),
+                handleSlotDisplay(display.craftingStation)
+            )
 
-            is ShapelessCraftingRecipeDisplay -> display.run {
-                ingredients.forEach(::handleSlotDisplay)
-                handleSlotDisplay(result)
-            }
+            is ShapelessCraftingRecipeDisplay -> ShapelessCraftingRecipeDisplay(
+                display.ingredients.map(::handleSlotDisplay),
+                handleSlotDisplay(display.result),
+                handleSlotDisplay(display.craftingStation)
+            )
 
-            is SmithingRecipeDisplay -> display.run {
-                handleSlotDisplay(template)
-                handleSlotDisplay(base)
-                handleSlotDisplay(addition)
-                handleSlotDisplay(result)
-            }
+            is SmithingRecipeDisplay -> SmithingRecipeDisplay(
+                handleSlotDisplay(display.template),
+                handleSlotDisplay(display.base),
+                handleSlotDisplay(display.addition),
+                handleSlotDisplay(display.result),
+                handleSlotDisplay(display.craftingStation)
+            )
 
-            is StonecutterRecipeDisplay -> return // Do nothing, we don't support stonecutter recipes
+            is StonecutterRecipeDisplay -> display
             else -> throw IllegalArgumentException("Unknown recipe display type: ${display::class.simpleName}")
         }
     }
 
-    private fun handleSlotDisplay(display: SlotDisplay) {
-        when (display) {
+    private fun handleSlotDisplay(display: SlotDisplay): SlotDisplay {
+        return when (display) {
             is SlotDisplay.AnyFuel,
             is SlotDisplay.ItemSlotDisplay,
             is SlotDisplay.TagSlotDisplay,
-            is SlotDisplay.Empty -> return
+            is SlotDisplay.Empty -> display
 
-            is SlotDisplay.Composite -> display.contents.forEach(::handleSlotDisplay)
-            is SlotDisplay.ItemStackSlotDisplay -> translateItem(display.stack)
-            is SlotDisplay.SmithingTrimDemoSlotDisplay -> display.run {
-                handleSlotDisplay(base)
-                handleSlotDisplay(material)
-                handleSlotDisplay(pattern)
-            }
+            is SlotDisplay.Composite -> SlotDisplay.Composite(display.contents.map(::handleSlotDisplay))
+            is SlotDisplay.ItemStackSlotDisplay -> SlotDisplay.ItemStackSlotDisplay(
+                display.stack.copy().apply(::translateItem)
+            )
 
-            is SlotDisplay.WithRemainder -> display.run {
-                handleSlotDisplay(input)
-                handleSlotDisplay(remainder)
-            }
+            is SlotDisplay.SmithingTrimDemoSlotDisplay -> SlotDisplay.SmithingTrimDemoSlotDisplay(
+                handleSlotDisplay(display.base),
+                handleSlotDisplay(display.material),
+                handleSlotDisplay(display.pattern)
+            )
+
+            is SlotDisplay.WithRemainder -> SlotDisplay.WithRemainder(
+                handleSlotDisplay(display.input),
+                handleSlotDisplay(display.remainder)
+            )
 
             else -> throw IllegalArgumentException("Unknown slot display type: ${display::class.simpleName}")
         }

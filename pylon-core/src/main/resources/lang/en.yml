@@ -54,11 +54,31 @@ message:
   research:
     unknown: "<red>You do not know how to use %item%. Try thinking about %research%"
     unlocked: "<green>You have discovered %research%"
-    not_enough_points: "<red>You do not yet know enough to discover %research% (%points%/%cost% points)"
     click_to_research: "<green>Click to research (%points% points)"
-    list:
-      none: "You have no discovered researches"
-      discovered: "You have discovered %count% researches: %list%"
+
+  command:
+    error:
+      no_permission: "<red>You do not have permission to use this command"
+      must_be_player: "<red>You must be a player to use this command"
+    key:
+      no_item: "<red>You are not holding a Pylon item"
+    gametest:
+      failed: "<red>Game test %test% failed: %reason%"
+      success: "<green>Game test %test% succeeded"
+    research:
+      added: "<green>Added research %research% to player %player%"
+      removed: "<green>Removed research %research% from player %player%"
+      list:
+        none: "You have no discovered researches"
+        discovered: "You have discovered %count% researches: %list%"
+      already_discovered: "<red>You have already discovered %research%"
+      cannot_unlock: "<red>You cannot unlock %research% using research points"
+      not_enough_points: "<red>You do not yet know enough to discover %research% (%points%/%cost% points)"
+      points:
+        set: "<green>Set %player%'s research points to %points%"
+        added: "<green>Added %points% research points to %player%"
+        removed: "<green>Removed %points% research points from %player%"
+        get: "<green>%player% has %points% research points"
 
 gui:
   scroll:

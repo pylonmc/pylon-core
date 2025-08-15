@@ -2,12 +2,28 @@
 
 package io.github.pylonmc.pylon.core.util
 
+import com.destroystokyo.paper.profile.PlayerProfile
+import com.mojang.brigadier.context.CommandContext
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.RotationResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
+import io.papermc.paper.math.BlockPosition
+import io.papermc.paper.math.FinePosition
+import io.papermc.paper.math.Rotation
 import org.bukkit.Material
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
@@ -15,6 +31,7 @@ import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
+import kotlin.reflect.typeOf
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
     return namespace == addon.key.namespace
@@ -124,6 +141,36 @@ fun wrapText(text: String, limit: Int): List<String> {
         lines.add(currentLine.toString())
     }
     return lines
+}
+
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
+    return when (typeOf<T>()) {
+        typeOf<BlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
+        typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)
+        typeOf<Entity>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source).first()
+        typeOf<FinePosition>() -> getArgument(name, FinePositionResolver::class.java).resolve(source)
+        typeOf<List<PlayerProfile>>() -> getArgument(name, PlayerProfileListResolver::class.java).resolve(source)
+        typeOf<PlayerProfile>() -> getArgument(name, PlayerProfileListResolver::class.java).resolve(source).first()
+        typeOf<List<Player>>() -> getArgument(name, PlayerSelectorArgumentResolver::class.java).resolve(source)
+        typeOf<Player>() -> getArgument(name, PlayerSelectorArgumentResolver::class.java).resolve(source).first()
+        typeOf<Rotation>() -> getArgument(name, RotationResolver::class.java).resolve(source)
+        else -> getArgument(name, T::class.java)
+    } as T
+}
+
+/**
+ * Attaches arguments to a component and all its children.
+ */
+@JvmName("attachArguments")
+fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
+    if (args.isEmpty()) return this
+    var result = this
+    if (this is TranslatableComponent) {
+        result = this.arguments(args)
+    }
+    return result.children(result.children().map { it.withArguments(args) })
 }
 
 fun isFakeEvent(event: Event): Boolean {

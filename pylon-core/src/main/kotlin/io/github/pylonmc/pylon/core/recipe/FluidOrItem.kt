@@ -15,10 +15,10 @@ sealed interface FluidOrItem {
     companion object {
 
         @JvmStatic
-        fun of(item: ItemStack) = Item(item)
+        fun of(item: ItemStack): FluidOrItem = Item(item)
 
         @JvmStatic
-        fun of(fluid: PylonFluid, amountMillibuckets: Double) = Fluid(fluid, amountMillibuckets)
+        fun of(fluid: PylonFluid, amountMillibuckets: Double): FluidOrItem = Fluid(fluid, amountMillibuckets)
 
         @JvmStatic
         fun of(choice: RecipeChoice): List<FluidOrItem>

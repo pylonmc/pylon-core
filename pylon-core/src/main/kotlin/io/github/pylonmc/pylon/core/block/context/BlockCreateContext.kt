@@ -8,7 +8,18 @@ import org.bukkit.plugin.Plugin
 
 interface BlockCreateContext {
 
+    /**
+     * The block at the position where the context is created
+     */
     val block: Block
+
+    /**
+     * If true, the type of the block will be set to the type of the Pylon block
+     */
+    @Suppress("INAPPLICABLE_JVM_NAME")
+    @get:JvmName("shouldSetType")
+    val shouldSetType: Boolean
+        get() = true
 
     /**
      * A player has placed the block
@@ -19,6 +30,7 @@ interface BlockCreateContext {
         val event: BlockPlaceEvent
     ) : BlockCreateContext {
         override val block = event.blockPlaced
+        override val shouldSetType = false // The action of the placement sets the block
     }
 
     /**
@@ -36,5 +48,8 @@ interface BlockCreateContext {
     /**
      * A context in which no other reason is specified
      */
-    data class Default(override val block: Block) : BlockCreateContext
+    data class Default @JvmOverloads constructor(
+        override val block: Block,
+        override val shouldSetType: Boolean = true
+    ) : BlockCreateContext
 }

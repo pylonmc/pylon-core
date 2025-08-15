@@ -1,11 +1,13 @@
+@file:Suppress("UnstableApiUsage")
+
 package io.github.pylonmc.pylon.core
 
-import co.aikar.commands.PaperCommandManager
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.waila.Waila
-import io.github.pylonmc.pylon.core.command.PylonCommand
+import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
+import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -19,22 +21,22 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
+import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.permissions.Permission
+import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
 import java.util.Locale
 
 object PylonCore : JavaPlugin(), PylonAddon {
-
-    private lateinit var manager: PaperCommandManager
 
     override fun onEnable() {
         InvUI.getInstance().setPlugin(this)
@@ -74,16 +76,15 @@ object PylonCore : JavaPlugin(), PylonAddon {
             MultiblockCache.MultiblockChecker.INTERVAL_TICKS
         )
 
-        manager = PaperCommandManager(this)
-        manager.commandContexts.registerContext(NamespacedKey::class.java) {
-            NamespacedKey.fromString(it.popFirstArg())
+        addDefaultPermission("pylon.command.guide")
+        addDefaultPermission("pylon.command.waila")
+        addDefaultPermission("pylon.command.research.list.self")
+        addDefaultPermission("pylon.command.research.discover")
+        addDefaultPermission("pylon.command.research.points.get.self")
+        lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
+            it.registrar().register(ROOT_COMMAND)
+            it.registrar().register(ROOT_COMMAND_PY_ALIAS)
         }
-        addRegistryCompletion("gametests", PylonRegistry.GAMETESTS)
-        addRegistryCompletion("items", PylonRegistry.ITEMS)
-        addRegistryCompletion("blocks", PylonRegistry.BLOCKS)
-        addRegistryCompletion("researches", PylonRegistry.RESEARCHES)
-
-        manager.registerCommand(PylonCommand())
 
         PylonItem.register<DebugWaxedWeatheredCutCopperStairs>(DebugWaxedWeatheredCutCopperStairs.STACK)
         PylonGuide.hideItem(DebugWaxedWeatheredCutCopperStairs.KEY)
@@ -105,6 +106,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonBlock.register<FluidPipeMarker>(FluidPipeMarker.KEY, Material.STRUCTURE_VOID)
         PylonBlock.register<FluidPipeConnector>(FluidPipeConnector.KEY, Material.STRUCTURE_VOID)
 
+        DisplayRecipeType.register()
         RecipeType.addVanillaRecipes()
     }
 
@@ -112,12 +114,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
-    }
-
-    private fun addRegistryCompletion(name: String, registry: PylonRegistry<*>) {
-        manager.commandCompletions.registerCompletion(name) { _ ->
-            registry.map { it.key.toString() }.sorted()
-        }
     }
 
     override val javaPlugin = this
@@ -128,4 +124,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Locale.ENGLISH,
         Locale.of("enws")
     )
+}
+
+private fun addDefaultPermission(permission: String) {
+    Bukkit.getPluginManager().addPermission(Permission(permission, PermissionDefault.TRUE))
 }

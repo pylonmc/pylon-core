@@ -22,6 +22,11 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
 
     constructor(key: NamespacedKey, entity: E): this(initialisePylonEntity<E>(key, entity))
 
+    /**
+     * This will only be called for the player if the player has WAILA enabled
+     *
+     * @return the WAILA configuration, or null if WAILA should not be shown for this block
+     */
     open fun getWaila(player: Player): WailaConfig? = null
 
     /**
