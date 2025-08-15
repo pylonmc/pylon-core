@@ -27,6 +27,11 @@ object TickManager : Listener {
         return tickingBlocks[block]?.isActive == true
     }
 
+    @JvmSynthetic
+    internal fun stopTicking(block: PylonBlock) {
+        tickingBlocks.remove(block)?.cancel()
+    }
+
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun onPylonBlockPlace(e: PrePylonBlockPlaceEvent) {
         startTicker(e.pylonBlock)
@@ -36,8 +41,6 @@ object TickManager : Listener {
     private fun onPylonBlockBreak(e: PrePylonBlockBreakEvent) {
         val pylonBlock = e.pylonBlock
         tickingBlocks.remove(pylonBlock)?.cancel()
-        pylonBlock.errorBlock?.remove()
-        pylonBlock.errorBlock = null
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

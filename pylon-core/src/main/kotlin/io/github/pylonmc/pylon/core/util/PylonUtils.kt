@@ -6,7 +6,9 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import com.mojang.brigadier.context.CommandContext
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
@@ -22,20 +24,17 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import io.papermc.paper.math.BlockPosition
 import io.papermc.paper.math.FinePosition
 import io.papermc.paper.math.Rotation
-import org.bukkit.Color.RED
-import org.bukkit.Material
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import org.joml.Matrix4f
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
@@ -192,14 +191,9 @@ internal fun logEventHandleErr(event: Event?, e: Exception, block: PylonBlock) {
     }
     e.printStackTrace()
     blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
-    if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors && block.errorBlock == null) {
-        // Credit to Idra from whom I shamelessly stole this code
-        val display = block.block.world.spawn(block.block.location, BlockDisplay::class.java)
-        display.glowColorOverride = RED
-        display.block = block.block.type.createBlockData()
-        display.setTransformationMatrix(Matrix4f().translate(0.005F, 0.0F, 0.005F).scale(0.99F)) // prevent z-fighting
-        display.isGlowing = true
-        block.errorBlock = display
+    if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
+        BlockStorage.makePhantom(block)
+        TickManager.stopTicking(block)
     }
 }
 
