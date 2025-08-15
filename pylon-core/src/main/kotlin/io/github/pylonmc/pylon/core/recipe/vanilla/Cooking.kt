@@ -56,18 +56,18 @@ fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
         .addIngredient('o', ItemButton.fromStack(recipe.result))
         .build() as AbstractGui
 
-object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting") {
+object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting", BlastingRecipeWrapper::class.java) {
     fun addRecipe(recipe: BlastingRecipe) = super.addRecipe(BlastingRecipeWrapper(recipe))
 }
 
-object CampfireRecipeType : VanillaRecipeType<CampfireRecipeWrapper>("campfire") {
+object CampfireRecipeType : VanillaRecipeType<CampfireRecipeWrapper>("campfire", CampfireRecipeWrapper::class.java) {
     fun addRecipe(recipe: CampfireRecipe) = super.addRecipe(CampfireRecipeWrapper(recipe))
 }
 
-object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("furnace") {
+object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("furnace", FurnaceRecipeWrapper::class.java) {
     fun addRecipe(recipe: FurnaceRecipe) = super.addRecipe(FurnaceRecipeWrapper(recipe))
 }
 
-object SmokingRecipeType : VanillaRecipeType<SmokingRecipeWrapper>("smoking") {
+object SmokingRecipeType : VanillaRecipeType<SmokingRecipeWrapper>("smoking", SmokingRecipeWrapper::class.java) {
     fun addRecipe(recipe: SmokingRecipe) = super.addRecipe(SmokingRecipeWrapper(recipe))
 }

@@ -36,6 +36,6 @@ class SmithingRecipeWrapper(val smithingRecipe: SmithingRecipe) : VanillaRecipeW
     override fun getKey(): NamespacedKey = smithingRecipe.key
 }
 
-object SmithingRecipeType : VanillaRecipeType<SmithingRecipeWrapper>("smithing") {
+object SmithingRecipeType : VanillaRecipeType<SmithingRecipeWrapper>("smithing", SmithingRecipeWrapper::class.java) {
     fun addRecipe(recipe: SmithingRecipe) = super.addRecipe(SmithingRecipeWrapper(recipe))
 }

@@ -5,7 +5,10 @@ import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.inventory.*
+import org.bukkit.inventory.CraftingRecipe
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.ShapedRecipe
+import org.bukkit.inventory.ShapelessRecipe
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 
@@ -79,10 +82,10 @@ class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : CraftingRec
     }
 }
 
-object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("shaped") {
+object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("shaped", ShapedRecipeWrapper::class.java) {
     fun addRecipe(recipe: ShapedRecipe) = super.addRecipe(ShapedRecipeWrapper(recipe))
 }
 
-object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("shapeless") {
+object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("shapeless", ShapelessRecipeWrapper::class.java) {
     fun addRecipe(recipe: ShapelessRecipe) = super.addRecipe(ShapelessRecipeWrapper(recipe))
 }

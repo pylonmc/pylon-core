@@ -2,12 +2,15 @@
 
 package io.github.pylonmc.pylon.core
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -24,9 +27,12 @@ import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
+import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
@@ -108,6 +114,17 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         DisplayRecipeType.register()
         RecipeType.addVanillaRecipes()
+
+        launch {
+            delay(1.ticks)
+            for (type in PylonRegistry.RECIPE_TYPES) {
+                for (addon in PylonRegistry.ADDONS) {
+                    val configStream = addon.javaPlugin.getResource("recipes/${type.key}.yml") ?: continue
+                    val config = configStream.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
+                    type.loadFromConfig(config)
+                }
+            }
+        }
     }
 
     override fun onDisable() {
