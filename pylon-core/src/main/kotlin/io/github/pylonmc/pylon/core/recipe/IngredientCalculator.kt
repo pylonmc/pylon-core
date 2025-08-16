@@ -3,6 +3,8 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.Companion.calculateBase
+import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.Companion.calculateFinal
 import io.github.pylonmc.pylon.core.util.findRecipeFor
 import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import org.bukkit.inventory.ItemStack
@@ -22,7 +24,7 @@ import kotlin.math.ceil
  *        |
  *        | PylonItems/PylonFluid
  *        ↓
- *  [calculateBase] ---------------------------------------> [findRecipe] <-----------------------╮
+ *  [calculateBase] ---------------------------------------> [Find recipe] <----------------------╮
  *  (calculate out all the inputs, along products)                |                               |
  *  (and the final main product's amount)                         |                               |
  *  (see `baseCalculation`)                                       ↓                               |
@@ -122,6 +124,7 @@ class IngredientCalculator {
                         val subCalculation = calculateFinal(fluidOrItem.item)
                         baseResult.mergeSubCalculation(subCalculation)
                     }
+
                     is FluidOrItem.Fluid -> {
                         val subCalculation = calculateFinal(fluidOrItem)
                         baseResult.mergeSubCalculation(subCalculation)
@@ -137,6 +140,7 @@ class IngredientCalculator {
                             baseResult.alongProducts += outputResult
                         }
                     }
+
                     is FluidOrItem.Fluid -> baseResult.alongProducts += outputResult
                 }
             }
