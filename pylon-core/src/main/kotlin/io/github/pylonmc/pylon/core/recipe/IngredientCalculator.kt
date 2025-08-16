@@ -37,17 +37,15 @@ import kotlin.math.ceil
  *        |     outputAmount  = 3                        ╰-- [Merge ingredients and return value]
  *        | }
  *        | ```
- *        | After scaling, it will be:
+ *        | After scaling (×4), it will be:
  *        | baseCalculation = {
  *        |     inputs        = [Ax4, Bx52, Cx76]
  *        |     alongProducts = [Mx64, Nx36]
  *        |     outputAmount  = 12
  *        | }
  *        |
- *        | That's what `scaleBy` did, quite vitally
- *        |
  *        ↓
- *  [baseCalculation.scaleBy]
+ *  [scaling and return value]
  *
  * @author balugaq
  */
@@ -121,7 +119,7 @@ class IngredientCalculator {
             recipe.inputs.forEach { fluidOrItem ->
                 when (fluidOrItem) {
                     is FluidOrItem.Item -> {
-                        val subCalculation = calculateBase(fluidOrItem.item)
+                        val subCalculation = calculateFinal(fluidOrItem.item)
                         baseResult.mergeSubCalculation(subCalculation)
                     }
                     is FluidOrItem.Fluid -> {
