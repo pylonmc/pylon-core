@@ -14,7 +14,7 @@ import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 
 
-abstract class CookingRecipeWrapper(final override val recipe: CookingRecipe<*>) : VanillaRecipeWrapper {
+sealed class CookingRecipeWrapper(final override val recipe: CookingRecipe<*>) : VanillaRecipeWrapper {
     override val inputs: List<FluidOrItem> = FluidOrItem.of(recipe.inputChoice)
     override val results: List<FluidOrItem> = listOf(FluidOrItem.of(recipe.result))
     override fun getKey(): NamespacedKey = recipe.key
@@ -36,7 +36,7 @@ class SmokingRecipeWrapper(recipe: SmokingRecipe) : CookingRecipeWrapper(recipe)
     override fun display() = display(recipe, Material.CAMPFIRE)
 }
 
-fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
+private fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
         .setStructure(
             "# # # # # # # # #",
             "# # # # # # # # #",

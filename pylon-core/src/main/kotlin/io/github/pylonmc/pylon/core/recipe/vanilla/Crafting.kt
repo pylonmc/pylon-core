@@ -10,7 +10,7 @@ import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 
 
-abstract class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : VanillaRecipeWrapper {
+sealed class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : VanillaRecipeWrapper {
     override fun getKey(): NamespacedKey = craftingRecipe.key
     override val results: List<FluidOrItem> = listOf(FluidOrItem.of(craftingRecipe.result))
 }
@@ -49,7 +49,7 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
     }
 }
 
-abstract class AShapelessRecipeWrapper(recipe: CraftingRecipe) : CraftingRecipeWrapper(recipe) {
+sealed class AShapelessRecipeWrapper(recipe: CraftingRecipe) : CraftingRecipeWrapper(recipe) {
 
     protected abstract val choiceList: List<RecipeChoice?>
 
