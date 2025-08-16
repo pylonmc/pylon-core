@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.recipe.vanilla.*
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import org.bukkit.*
+import org.bukkit.block.data.BlockData
 import org.bukkit.inventory.*
 import java.lang.invoke.MethodHandles
 import java.lang.reflect.ParameterizedType
@@ -49,6 +50,9 @@ open class RecipeType<T : PylonRecipe>(
 
         val components = recipeClass.recordComponents.filterNot { it.isAnnotationPresent(RecipeKey::class.java) }
         val recipeKey = recipeClass.recordComponents.indexOfFirst { it.isAnnotationPresent(RecipeKey::class.java) }
+        if (recipeKey == -1) {
+            error("Recipe type $key must have a @RecipeKey annotated component to load from config.")
+        }
 
         val canonicalConstructor = recipeClass.getDeclaredConstructor(
             *recipeClass.recordComponents.map { it.type }.toTypedArray()
@@ -57,8 +61,11 @@ open class RecipeType<T : PylonRecipe>(
 
         for (key in config.keys) {
             val subSection = config.getSectionOrThrow(key)
-            val values = components.mapTo(mutableListOf()) {
-                convertType(subSection.getOrThrow<Any>(it.name), it.genericType)
+            val values = components.mapTo(mutableListOf()) { component ->
+                subSection.getOrThrow<Any?>(component.name)?.let { value ->
+                    convertType(value, component.genericType)
+                        ?: error("Failed to convert value '$value' for ${component.name} in recipe $key")
+                }
             }
             if (recipeKey >= 0) {
                 values.add(recipeKey, NamespacedKey.fromString(key) ?: error("Invalid NamespacedKey: $key"))
@@ -97,6 +104,7 @@ open class RecipeType<T : PylonRecipe>(
             Char::class.javaObjectType, Char::class.javaPrimitiveType -> (value as? String)?.singleOrNull()
             NamespacedKey::class.java -> NamespacedKey.fromString((value as? String) ?: return null)
             Material::class.java -> Material.matchMaterial((value as? String) ?: return null)
+            BlockData::class.java -> Bukkit.createBlockData((value as? String) ?: return null)
             ItemStack::class.java -> when (value) {
                 is Pair<*, *> -> {
                     val itemKey = value.first as? String ?: return null
