@@ -54,17 +54,26 @@ import kotlin.math.ceil
 class IngredientCalculator {
     companion object {
         /**
+         * The maximum recursive depth allowed
+         *
+         * @see checkRecursiveDepth
+         */
+        internal const val RECURSIVE_THRESHOLD = 100
+
+        /**
          * Calculate the final material requirements for an item stack with quantity (including quantity scaling)
          * @param stack Target item stack (including quantity information to be calculated)
          * @return Calculation result including raw materials, along products and target output quantity
          */
         @JvmStatic
-        fun calculateFinal(stack: ItemStack): IngredientCalculation {
+        fun calculateFinal(stack: ItemStack, depth: Int = 1): IngredientCalculation {
+            checkRecursiveDepth(depth)
+
             val pylonItem = PylonItem.fromStack(stack)
             return pylonItem?.let {
                 // PylonItem has recipes
                 val requiredAmount = stack.amount.toDouble()
-                val baseCalculation = calculateBase(it)
+                val baseCalculation = calculateBase(it, depth + 1)
                 val recipeOutputAmount = baseCalculation.outputAmount
                 val scaleMultiplier = ceil(requiredAmount / recipeOutputAmount)
                 baseCalculation.scaleBy(scaleMultiplier).copy(outputAmount = requiredAmount)
@@ -77,7 +86,9 @@ class IngredientCalculator {
          * @return Calculation result including raw materials, along products and target fluid output quantity
          */
         @JvmStatic
-        fun calculateFinal(fluid: FluidOrItem.Fluid): IngredientCalculation {
+        fun calculateFinal(fluid: FluidOrItem.Fluid, depth: Int = 1): IngredientCalculation {
+            checkRecursiveDepth(depth)
+
             val recipe = findRecipeFor(fluid.fluid)
                 ?: return IngredientCalculation(
                     inputs = mutableListOf(fluid),
@@ -105,12 +116,14 @@ class IngredientCalculator {
         }
 
         /**
-         * Calculate the basic recipe data of a single item (for recursive calculation)
+         * Calculate the basic recipe data of a single item (for *recursive* calculation)
          * @param pylonItem Target item (without quantity scaling, only calculate single recipe)
          * @return Basic recipe raw materials, along products and single output quantity
          */
         @JvmStatic
-        fun calculateBase(pylonItem: PylonItem): IngredientCalculation {
+        fun calculateBase(pylonItem: PylonItem, depth: Int = 1): IngredientCalculation {
+            checkRecursiveDepth(depth)
+
             val baseResult = IngredientCalculation.empty()
             val recipe = findRecipeFor(pylonItem) ?: return baseResult.copy(outputAmount = 1.toDouble())
 
@@ -121,12 +134,12 @@ class IngredientCalculator {
             recipe.inputs.forEach { fluidOrItem ->
                 when (fluidOrItem) {
                     is FluidOrItem.Item -> {
-                        val subCalculation = calculateFinal(fluidOrItem.item)
+                        val subCalculation = calculateFinal(fluidOrItem.item, depth + 1)
                         baseResult.mergeSubCalculation(subCalculation)
                     }
 
                     is FluidOrItem.Fluid -> {
-                        val subCalculation = calculateFinal(fluidOrItem)
+                        val subCalculation = calculateFinal(fluidOrItem, depth + 1)
                         baseResult.mergeSubCalculation(subCalculation)
                     }
                 }
@@ -148,13 +161,6 @@ class IngredientCalculator {
             return baseResult
         }
 
-        @JvmStatic
-        fun calculateBase(itemStack: ItemStack): IngredientCalculation {
-            val pylonItem = PylonItem.fromStack(itemStack)
-            return pylonItem?.let { calculateBase(it) }
-                ?: IngredientCalculation.asIngredient(itemStack)
-        }
-
         /**
          * Calculate the single output quantity of the main product in the recipe separately
          * @param recipe Target recipe
@@ -173,6 +179,12 @@ class IngredientCalculator {
             }
             // Fallback: If the recipe does not explicitly specify the main product, default to 1 output per cycle
             return (if (outputAmount > 0) outputAmount else 1).toDouble()
+        }
+
+        internal fun checkRecursiveDepth(depth: Int) {
+            if (depth > RECURSIVE_THRESHOLD) {
+                throw RuntimeException("Recursive depth exceeded the threshold of $RECURSIVE_THRESHOLD")
+            }
         }
     }
 
