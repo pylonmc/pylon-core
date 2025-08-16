@@ -60,11 +60,11 @@ object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting",
     fun addRecipe(recipe: BlastingRecipe) = super.addRecipe(BlastingRecipeWrapper(recipe))
 }
 
-object CampfireRecipeType : VanillaRecipeType<CampfireRecipeWrapper>("campfire", CampfireRecipeWrapper::class.java) {
+object CampfireRecipeType : VanillaRecipeType<CampfireRecipeWrapper>("campfire_cooking", CampfireRecipeWrapper::class.java) {
     fun addRecipe(recipe: CampfireRecipe) = super.addRecipe(CampfireRecipeWrapper(recipe))
 }
 
-object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("furnace", FurnaceRecipeWrapper::class.java) {
+object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("smelting", FurnaceRecipeWrapper::class.java) {
     fun addRecipe(recipe: FurnaceRecipe) = super.addRecipe(FurnaceRecipeWrapper(recipe))
 }
 

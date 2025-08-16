@@ -199,7 +199,13 @@ open class RecipeType<T : PylonRecipe>(
         val VANILLA_SHAPELESS = ShapelessRecipeType
 
         @JvmField
-        val VANILLA_SMITHING = SmithingRecipeType
+        val VANILLA_TRANSMUTE = TransmuteRecipeType
+
+        @JvmField
+        val VANILLA_SMITHING_TRANSFORM = SmithingTransformRecipeType
+
+        @JvmField
+        val VANILLA_SMITHING_TRIM = SmithingTrimRecipeType
 
         @JvmField
         val VANILLA_SMOKING = SmokingRecipeType
@@ -210,13 +216,15 @@ open class RecipeType<T : PylonRecipe>(
             VANILLA_FURNACE.register()
             VANILLA_SHAPED.register()
             VANILLA_SHAPELESS.register()
-            VANILLA_SMITHING.register()
+            VANILLA_SMITHING_TRANSFORM.register()
+            VANILLA_SMITHING_TRIM.register()
             VANILLA_SMOKING.register()
         }
 
         @JvmStatic
         fun vanillaCraftingRecipes() = VANILLA_SHAPED
             .union(VANILLA_SHAPELESS)
+            .union(VANILLA_TRANSMUTE)
 
         @JvmStatic
         fun vanillaCookingRecipes() = VANILLA_BLASTING.recipes
@@ -233,7 +241,9 @@ open class RecipeType<T : PylonRecipe>(
                     is FurnaceRecipe -> VANILLA_FURNACE.addRecipeWithoutRegister(FurnaceRecipeWrapper(recipe))
                     is ShapedRecipe -> VANILLA_SHAPED.addRecipeWithoutRegister(ShapedRecipeWrapper(recipe))
                     is ShapelessRecipe -> VANILLA_SHAPELESS.addRecipeWithoutRegister(ShapelessRecipeWrapper(recipe))
-                    is SmithingRecipe -> VANILLA_SMITHING.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
+                    is TransmuteRecipe -> VANILLA_TRANSMUTE.addRecipeWithoutRegister(TransmuteRecipeWrapper(recipe))
+                    is SmithingTransformRecipe -> VANILLA_SMITHING_TRANSFORM.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
+                    is SmithingTrimRecipe -> VANILLA_SMITHING_TRIM.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
                     is SmokingRecipe -> VANILLA_SMOKING.addRecipeWithoutRegister(SmokingRecipeWrapper(recipe))
                 }
             }

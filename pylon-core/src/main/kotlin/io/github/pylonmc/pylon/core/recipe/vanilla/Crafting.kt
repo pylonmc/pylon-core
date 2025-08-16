@@ -5,10 +5,7 @@ import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.inventory.CraftingRecipe
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.ShapedRecipe
-import org.bukkit.inventory.ShapelessRecipe
+import org.bukkit.inventory.*
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 
@@ -52,40 +49,55 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
     }
 }
 
-class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputs: List<FluidOrItem> = recipe.choiceList.filterNotNull().flatMap(FluidOrItem::of)
+abstract class AShapelessRecipeWrapper(recipe: CraftingRecipe) : CraftingRecipeWrapper(recipe) {
+
+    protected abstract val choiceList: List<RecipeChoice?>
+
+    override val inputs = choiceList.filterNotNull().flatMap(FluidOrItem::of)
 
     override fun display() = Gui.normal()
-            .setStructure(
-                "# # # # # # # # #",
-                "# # # 0 1 2 # # #",
-                "# b # 3 4 5 # r #",
-                "# # # 6 7 8 # # #",
-                "# # # # # # # # #",
-            )
-            .addIngredient('#', GuiItems.backgroundBlack())
-            .addIngredient('b', ItemButton.fromStack(ItemStack(Material.CRAFTING_TABLE)))
-            .addIngredient('0', getDisplaySlot(recipe, 0))
-            .addIngredient('1', getDisplaySlot(recipe, 1))
-            .addIngredient('2', getDisplaySlot(recipe, 2))
-            .addIngredient('3', getDisplaySlot(recipe, 3))
-            .addIngredient('4', getDisplaySlot(recipe, 4))
-            .addIngredient('5', getDisplaySlot(recipe, 5))
-            .addIngredient('6', getDisplaySlot(recipe, 6))
-            .addIngredient('7', getDisplaySlot(recipe, 7))
-            .addIngredient('8', getDisplaySlot(recipe, 8))
-            .addIngredient('r', recipe.result)
-            .build()
+        .setStructure(
+            "# # # # # # # # #",
+            "# # # 0 1 2 # # #",
+            "# b # 3 4 5 # r #",
+            "# # # 6 7 8 # # #",
+            "# # # # # # # # #",
+        )
+        .addIngredient('#', GuiItems.backgroundBlack())
+        .addIngredient('b', ItemButton.fromStack(ItemStack(Material.CRAFTING_TABLE)))
+        .addIngredient('0', getDisplaySlot(0))
+        .addIngredient('1', getDisplaySlot(1))
+        .addIngredient('2', getDisplaySlot(2))
+        .addIngredient('3', getDisplaySlot(3))
+        .addIngredient('4', getDisplaySlot(4))
+        .addIngredient('5', getDisplaySlot(5))
+        .addIngredient('6', getDisplaySlot(6))
+        .addIngredient('7', getDisplaySlot(7))
+        .addIngredient('8', getDisplaySlot(8))
+        .addIngredient('r', recipe.result)
+        .build()
 
-    fun getDisplaySlot(recipe: ShapelessRecipe, index: Int): Item {
-        return ItemButton.fromChoice(recipe.choiceList.getOrNull(index))
+    private fun getDisplaySlot(index: Int): Item {
+        return ItemButton.fromChoice(choiceList.getOrNull(index))
     }
 }
 
-object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("shaped", ShapedRecipeWrapper::class.java) {
+class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : AShapelessRecipeWrapper(recipe) {
+    override val choiceList = recipe.choiceList
+}
+
+class TransmuteRecipeWrapper(override val recipe: TransmuteRecipe) : AShapelessRecipeWrapper(recipe) {
+    override val choiceList = listOf(recipe.input, recipe.material)
+}
+
+object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shaped", ShapedRecipeWrapper::class.java) {
     fun addRecipe(recipe: ShapedRecipe) = super.addRecipe(ShapedRecipeWrapper(recipe))
 }
 
-object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("shapeless", ShapelessRecipeWrapper::class.java) {
+object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting_shapeless", ShapelessRecipeWrapper::class.java) {
     fun addRecipe(recipe: ShapelessRecipe) = super.addRecipe(ShapelessRecipeWrapper(recipe))
+}
+
+object TransmuteRecipeType : VanillaRecipeType<TransmuteRecipeWrapper>("crafting_transmute", TransmuteRecipeWrapper::class.java) {
+    fun addRecipe(recipe: TransmuteRecipe) = super.addRecipe(TransmuteRecipeWrapper(recipe))
 }

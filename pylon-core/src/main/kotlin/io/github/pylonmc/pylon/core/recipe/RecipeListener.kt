@@ -74,7 +74,7 @@ internal object PylonRecipeListener : Listener {
 
         // Prevent the erroneous smithing of vanilla items with Pylon ingredients
         if (
-            RecipeType.VANILLA_SMITHING.all { it.key != recipe.key } &&
+            RecipeType.VANILLA_SMITHING_TRANSFORM.all { it.key != recipe.key } &&
             (
                     inv.inputMineral.isPylonAndIsNot<VanillaSmithingMaterial>() ||
                             inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
