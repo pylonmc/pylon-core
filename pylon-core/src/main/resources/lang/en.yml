@@ -79,6 +79,11 @@ message:
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
         get: "<green>%player% has %points% research points"
+  guide:
+    ingredients-page:
+      input_stack: "<yellow>Consumes %amount% items"
+      input_fluid: "<yellow>Consumes %amount% mB"
+      stack_info: "<green> Produces %amount%"
 
 gui:
   scroll:
@@ -133,6 +138,9 @@ guide:
     toggle-waila:
       name: "Toggle WAILA"
       lore: "<arrow:#3a2939> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
+    along-product:
+      name: "Along products ↓"
+      lore: ""
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 
