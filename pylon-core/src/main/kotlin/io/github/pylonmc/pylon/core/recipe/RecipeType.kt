@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.recipe.vanilla.*
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
@@ -66,51 +67,81 @@ open class RecipeType<T : PylonRecipe>(
         }
     }
 
-    private fun convertType(value: Any, type: Type): Any {
+    private fun convertType(value: Any, type: Type): Any? {
         return when {
             type is ParameterizedType -> convertParameterizedType(type, value)
-            type is Class<*> && type.isEnum -> {
+            type is Class<*> && type.isEnum && type != Material::class.java -> {
                 type.enumConstants.find { it.toString().equals(value.toString(), ignoreCase = true) }
-                    ?: error("No enum constant found for value '$value' in enum type ${type.name}")
             }
+
             else -> convertConcreteType(type, value)
         }
     }
 
-    // @formatter:off
-    private fun convertConcreteType(type: Type, value: Any): Any = when (type) {
-        String::class.java -> value as String
-        Byte::class.javaObjectType, Byte::class.javaPrimitiveType -> (value as Number).toByte()
-        Short::class.javaObjectType, Short::class.javaPrimitiveType -> (value as Number).toShort()
-        Int::class.javaObjectType, Int::class.javaPrimitiveType -> (value as Number).toInt()
-        Long::class.javaObjectType, Long::class.javaPrimitiveType -> (value as Number).toLong()
-        Double::class.javaObjectType, Double::class.javaPrimitiveType -> (value as Number).toDouble()
-        Float::class.javaObjectType, Float::class.javaPrimitiveType -> (value as Number).toFloat()
-        Boolean::class.javaObjectType, Boolean::class.javaPrimitiveType -> (value as Boolean)
-        Char::class.javaObjectType, Char::class.javaPrimitiveType -> (value as String).singleOrNull() ?: error("Expected a single character string, got: $value")
-        NamespacedKey::class.java -> NamespacedKey.fromString(value as String) ?: error("Invalid NamespacedKey: $value")
-        Material::class.java -> Material.matchMaterial(value as String) ?: error("No such material: ${value.uppercase()}")
-        ItemStack::class.java -> when (value) {
-            is Pair<*, *> -> {
-                val itemKey = value.first as String
-                val amount = (value.second as Number).toInt()
-                getItemFromKey(itemKey).apply { this.amount = amount }
-            }
-            is String -> getItemFromKey(value)
-            else -> error("Unsupported type $type for value $value")
+    // yes this function is a mess please don't judge me :sob:
+    private fun convertConcreteType(type: Type, value: Any): Any? {
+        fun getItemFromKey(key: String): ItemStack? {
+            val key = NamespacedKey.fromString(key) ?: return null
+            return PylonRegistry.ITEMS[key]?.itemStack ?: Registry.ITEM.get(key)?.createItemStack()
         }
-        else -> error("Unsupported type $type for value $value")
-    }
-    // @formatter:on
 
-    private fun convertParameterizedType(type: ParameterizedType, value: Any): Any = when (type.rawType) {
+        return when (type) {
+            String::class.java -> value as? String
+            Byte::class.javaObjectType, Byte::class.javaPrimitiveType -> (value as? Number)?.toByte()
+            Short::class.javaObjectType, Short::class.javaPrimitiveType -> (value as Number).toShort()
+            Int::class.javaObjectType, Int::class.javaPrimitiveType -> (value as? Number)?.toInt()
+            Long::class.javaObjectType, Long::class.javaPrimitiveType -> (value as? Number)?.toLong()
+            Double::class.javaObjectType, Double::class.javaPrimitiveType -> (value as? Number)?.toDouble()
+            Float::class.javaObjectType, Float::class.javaPrimitiveType -> (value as? Number)?.toFloat()
+            Boolean::class.javaObjectType, Boolean::class.javaPrimitiveType -> value as? Boolean
+            Char::class.javaObjectType, Char::class.javaPrimitiveType -> (value as? String)?.singleOrNull()
+            NamespacedKey::class.java -> NamespacedKey.fromString((value as? String) ?: return null)
+            Material::class.java -> Material.matchMaterial((value as? String) ?: return null)
+            ItemStack::class.java -> when (value) {
+                is Pair<*, *> -> {
+                    val itemKey = value.first as? String ?: return null
+                    val amount = (value.second as? Number)?.toInt() ?: return null
+                    getItemFromKey(itemKey)?.asQuantity(amount)
+                }
+
+                is Map<*, *> -> convertConcreteType(type, value.entries.firstOrNull() ?: return null)
+                is String -> getItemFromKey(value)
+                else -> null
+            }
+
+            PylonFluid::class.java -> {
+                val key = (value as? String)?.let(NamespacedKey::fromString) ?: return null
+                PylonRegistry.FLUIDS[key]
+            }
+
+            FluidOrItem::class.java -> {
+                val item = convertConcreteType(ItemStack::class.java, value)
+                if (item != null) {
+                    FluidOrItem.of(item as ItemStack)
+                } else when (value) {
+                    is Pair<*, *> -> {
+                        val fluidKey = (value.first as? String)?.let(NamespacedKey::fromString) ?: return null
+                        val amount = (value.second as? Number)?.toDouble() ?: return null
+                        FluidOrItem.of(PylonRegistry.FLUIDS[fluidKey] ?: return null, amount)
+                    }
+
+                    is Map<*, *> -> convertConcreteType(type, value.entries.firstOrNull() ?: return null)
+                    else -> null
+                }
+            }
+
+            else -> null
+        }
+    }
+
+    private fun convertParameterizedType(type: ParameterizedType, value: Any): Any? = when (type.rawType) {
         Set::class.java -> {
             val elementType = type.actualTypeArguments.first()
             var value = value
             if (value is Map<*, *>) {
                 value = value.toList()
             }
-            (value as Collection<*>).mapTo(mutableSetOf()) { convertType(it!!, elementType) }
+            (value as? Collection<*>)?.mapTo(mutableSetOf()) { convertType(it!!, elementType) }
         }
 
         List::class.java -> {
@@ -119,20 +150,24 @@ open class RecipeType<T : PylonRecipe>(
             if (value is Map<*, *>) {
                 value = value.toList()
             }
-            (value as Collection<*>).mapTo(mutableListOf()) { convertType(it!!, elementType) }
+            (value as? Collection<*>)?.map { convertType(it!!, elementType) }
         }
 
         Map::class.java -> {
             val keyType = type.actualTypeArguments[0]
             val valueType = type.actualTypeArguments[1]
-            buildMap {
-                for ((k, v) in value as Map<*, *>) {
-                    put(convertType(k!!, keyType), convertType(v!!, valueType))
+            if (value !is Map<*, *>) {
+                null
+            } else {
+                buildMap {
+                    for ((k, v) in value) {
+                        put(convertType(k!!, keyType), convertType(v!!, valueType))
+                    }
                 }
             }
         }
 
-        else -> error("Unsupported type $type for value $value")
+        else -> null
     }
 
     override fun iterator(): Iterator<T> = registeredRecipes.values.iterator()
@@ -196,11 +231,4 @@ open class RecipeType<T : PylonRecipe>(
             }
         }
     }
-}
-
-private fun getItemFromKey(key: String): ItemStack {
-    val key = NamespacedKey.fromString(key) ?: error("Invalid NamespacedKey: $key")
-    return PylonRegistry.ITEMS[key]?.itemStack
-        ?: Registry.ITEM.get(key)?.createItemStack()
-        ?: error("No such item with key $key")
 }
