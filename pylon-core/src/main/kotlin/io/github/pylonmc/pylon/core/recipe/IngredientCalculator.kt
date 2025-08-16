@@ -12,7 +12,7 @@ import kotlin.math.ceil
 
 /**
  * Used to recursively calculate raw material requirements and
- * along products of items/fluids, supporting quantity scaling
+ * along products of items/fluids, supporting amount scaling
  *
  * The two `calculateFinal` methods are the main entry points,
  * It's supposed to only call them from here.
@@ -61,9 +61,9 @@ class IngredientCalculator {
         internal const val RECURSIVE_THRESHOLD = 100
 
         /**
-         * Calculate the final material requirements for an item stack with quantity (including quantity scaling)
-         * @param stack Target item stack (including quantity information to be calculated)
-         * @return Calculation result including raw materials, along products and target output quantity
+         * Calculate the final material requirements for an item stack with amount (including amount scaling)
+         * @param stack Target item stack (including amount information to be calculated)
+         * @return Calculation result including raw materials, along products and target output amount
          */
         @JvmStatic
         fun calculateFinal(stack: ItemStack, depth: Int = 1): IngredientCalculation {
@@ -82,8 +82,8 @@ class IngredientCalculator {
 
         /**
          * Calculate material requirements and along products for fluids
-         * @param fluid Target fluid (including quantity information to be calculated)
-         * @return Calculation result including raw materials, along products and target fluid output quantity
+         * @param fluid Target fluid (including amount information to be calculated)
+         * @return Calculation result including raw materials, along products and target fluid output amount
          */
         @JvmStatic
         fun calculateFinal(fluid: FluidOrItem.Fluid, depth: Int = 1): IngredientCalculation {
@@ -117,8 +117,8 @@ class IngredientCalculator {
 
         /**
          * Calculate the basic recipe data of a single item (for *recursive* calculation)
-         * @param pylonItem Target item (without quantity scaling, only calculate single recipe)
-         * @return Basic recipe raw materials, along products and single output quantity
+         * @param pylonItem Target item (without amount scaling, only calculate single recipe)
+         * @return Basic recipe raw materials, along products and single output amount
          */
         @JvmStatic
         fun calculateBase(pylonItem: PylonItem, depth: Int = 1): IngredientCalculation {
@@ -127,7 +127,7 @@ class IngredientCalculator {
             val baseResult = IngredientCalculation.empty()
             val recipe = findRecipeFor(pylonItem) ?: return baseResult.copy(outputAmount = 1.toDouble())
 
-            // Calculate the main product quantity output by the recipe per cycle
+            // Calculate the main product amount output by the recipe per cycle
             val recipeOutputAmount = getRecipeOutputAmount(recipe, pylonItem)
             baseResult.outputAmount = recipeOutputAmount
 
@@ -162,10 +162,10 @@ class IngredientCalculator {
         }
 
         /**
-         * Calculate the single output quantity of the main product in the recipe separately
+         * Calculate the single output amount of the main product in the recipe separately
          * @param recipe Target recipe
          * @param targetItem Main product item
-         * @return Total quantity of main product output per recipe cycle
+         * @return Total amount of main product output per recipe cycle
          */
         @JvmStatic
         fun getRecipeOutputAmount(recipe: PylonRecipe, targetItem: PylonItem): Double {
@@ -195,9 +195,9 @@ class IngredientCalculator {
         val inputs: MutableList<FluidOrItem>,
         val alongProducts: MutableList<FluidOrItem>,
         /**
-         * Main product output quantity:
-         * - In basic recipe calculation  -> the quantity of main product output per recipe cycle
-         * - In final calculation results -> the total quantity of main product to be produced (after scaling)
+         * Output amount:
+         * - In basic recipe calculation  -> the amount of main product output per recipe cycle
+         * - In final calculation results -> the total amount of main product to be produced (after scaling)
          */
         var outputAmount: Double
     ) {
@@ -206,7 +206,7 @@ class IngredientCalculator {
 
         /**
          * Merge sub-recipe calculation results (only merge raw materials and along products,
-         * without affecting main product quantity)
+         * without affecting main product amount)
          * Used in recursive calculation to integrate inputs and along products from sub-recipes
          */
         fun mergeSubCalculation(other: IngredientCalculation) {
@@ -215,7 +215,7 @@ class IngredientCalculator {
         }
 
         /**
-         * Scale raw materials, along products and main product quantities by multiplier
+         * Scale raw materials, along products and main product amounts by multiplier
          * @param multiplier Scaling multiplier (must be greater than 0)
          * @return Scaled calculation result
          */
@@ -234,7 +234,7 @@ class IngredientCalculator {
         }
 
         /**
-         * Scale the quantity of a single component (item or fluid)
+         * Scale the amount of a single component (item or fluid)
          * @param component Component to be scaled
          * @param multiplier Scaling multiplier
          * @return Scaled component
@@ -254,7 +254,7 @@ class IngredientCalculator {
 
         companion object {
             /**
-             * Create an empty calculation result (empty raw materials and along products, output quantity is 0)
+             * Create an empty calculation result (empty raw materials and along products, output amount is 0)
              */
             @JvmStatic
             fun empty(): IngredientCalculation {
