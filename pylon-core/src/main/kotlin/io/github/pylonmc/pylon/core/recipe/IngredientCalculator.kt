@@ -10,7 +10,44 @@ import kotlin.math.ceil
 
 /**
  * Used to recursively calculate raw material requirements and
- * by-products of items/fluids, supporting quantity scaling
+ * along products of items/fluids, supporting quantity scaling
+ *
+ * The two `calculateFinal` methods are the main entry points,
+ * It's supposed to only call them from here.
+ *
+ * How it works:
+ *
+ *                    Vanilla items (Not support yet)
+ *  [calculateFinal] ----------------> [IngredientCalculation.asIngredient]
+ *        |
+ *        | PylonItems/PylonFluid
+ *        ↓
+ *  [calculateBase] ---------------------------------------> [findRecipe] <-----------------------╮
+ *  (calculate out all the inputs, along products)                |                               |
+ *  (and the final main product's amount)                         |                               |
+ *  (see `baseCalculation`)                                       ↓                               |
+ *        |   ←------------------------------------------╮   [Filter inputs and along products]   |
+ *        | Finally calculate the actual inputs' amount  |        |                               |
+ *        | For example:                                 |        |                               |
+ *        | ```                                          |        ↓                               |
+ *        | stack.amount = 11 (the arg)                  |   [Try to find ingredients' recipe] ---╯
+ *        | baseCalculation = {                          |        |
+ *        |     inputs        = [Ax1, Bx13, Cx19]        |        |
+ *        |     alongProducts = [Mx16, Nx9]              |        ↓
+ *        |     outputAmount  = 3                        ╰-- [Merge ingredients and return value]
+ *        | }
+ *        | ```
+ *        | After scaling, it will be:
+ *        | baseCalculation = {
+ *        |     inputs        = [Ax4, Bx52, Cx76]
+ *        |     alongProducts = [Mx64, Nx36]
+ *        |     outputAmount  = 12
+ *        | }
+ *        |
+ *        | That's what `scaleBy` did, quite vitally
+ *        |
+ *        ↓
+ *  [baseCalculation.scaleBy]
  *
  * @author balugaq
  */
@@ -19,7 +56,7 @@ class IngredientCalculator {
         /**
          * Calculate the final material requirements for an item stack with quantity (including quantity scaling)
          * @param stack Target item stack (including quantity information to be calculated)
-         * @return Calculation result including raw materials, by-products and target output quantity
+         * @return Calculation result including raw materials, along products and target output quantity
          */
         @JvmStatic
         fun calculateFinal(stack: ItemStack): IngredientCalculation {
@@ -35,9 +72,9 @@ class IngredientCalculator {
         }
 
         /**
-         * Calculate material requirements and by-products for fluids
+         * Calculate material requirements and along products for fluids
          * @param fluid Target fluid (including quantity information to be calculated)
-         * @return Calculation result including raw materials, by-products and target fluid output quantity
+         * @return Calculation result including raw materials, along products and target fluid output quantity
          */
         @JvmStatic
         fun calculateFinal(fluid: FluidOrItem.Fluid): IngredientCalculation {
@@ -70,7 +107,7 @@ class IngredientCalculator {
         /**
          * Calculate the basic recipe data of a single item (for recursive calculation)
          * @param pylonItem Target item (without quantity scaling, only calculate single recipe)
-         * @return Basic recipe raw materials, by-products and single output quantity
+         * @return Basic recipe raw materials, along products and single output quantity
          */
         @JvmStatic
         fun calculateBase(pylonItem: PylonItem): IngredientCalculation {
@@ -137,16 +174,15 @@ class IngredientCalculator {
     }
 
     /**
-     * Ingredient calculation result data class
-     * Contains raw materials, by-products and corresponding main product output quantity
+     * @author balugaq
      */
     data class IngredientCalculation(
         val inputs: MutableList<FluidOrItem>,
         val alongProducts: MutableList<FluidOrItem>,
         /**
          * Main product output quantity:
-         * - In basic recipe calculation: represents the quantity of main product output per recipe cycle
-         * - In final calculation results: represents the total quantity of main product to be produced (after scaling)
+         * - In basic recipe calculation  -> the quantity of main product output per recipe cycle
+         * - In final calculation results -> the total quantity of main product to be produced (after scaling)
          */
         var outputAmount: Double
     ) {
@@ -154,8 +190,9 @@ class IngredientCalculator {
                 this(inputs.toMutableList(), alongProducts.toMutableList(), outputAmount)
 
         /**
-         * Merge sub-recipe calculation results (only merge raw materials and by-products, without affecting main product quantity)
-         * Used in recursive calculation to integrate inputs and by-products from sub-recipes
+         * Merge sub-recipe calculation results (only merge raw materials and along products,
+         * without affecting main product quantity)
+         * Used in recursive calculation to integrate inputs and along products from sub-recipes
          */
         fun mergeSubCalculation(other: IngredientCalculation) {
             this.inputs += other.inputs
@@ -163,7 +200,7 @@ class IngredientCalculator {
         }
 
         /**
-         * Scale raw materials, by-products and main product quantities by multiplier
+         * Scale raw materials, along products and main product quantities by multiplier
          * @param multiplier Scaling multiplier (must be greater than 0)
          * @return Scaled calculation result
          */
@@ -202,7 +239,7 @@ class IngredientCalculator {
 
         companion object {
             /**
-             * Create an empty calculation result (empty raw materials and by-products, output quantity is 0)
+             * Create an empty calculation result (empty raw materials and along products, output quantity is 0)
              */
             @JvmStatic
             fun empty(): IngredientCalculation {
