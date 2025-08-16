@@ -157,7 +157,8 @@ class IngredientCalculator {
          * @param targetItem Main product item
          * @return Total quantity of main product output per recipe cycle
          */
-        private fun getRecipeOutputAmount(recipe: PylonRecipe, targetItem: PylonItem): Double {
+        @JvmStatic
+        fun getRecipeOutputAmount(recipe: PylonRecipe, targetItem: PylonItem): Double {
             var outputAmount = 0
             recipe.results.forEach { outputResult ->
                 if (outputResult is FluidOrItem.Item &&
@@ -222,7 +223,7 @@ class IngredientCalculator {
          * @param multiplier Scaling multiplier
          * @return Scaled component
          */
-        private fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
+        internal fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
             return when (component) {
                 is FluidOrItem.Fluid ->
                     FluidOrItem.of(component.fluid, component.amountMillibuckets * multiplier)
