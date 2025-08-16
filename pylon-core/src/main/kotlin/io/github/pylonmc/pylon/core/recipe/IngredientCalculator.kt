@@ -13,25 +13,36 @@ class IngredientCalculator {
         @JvmStatic
         fun calculate(stack: ItemStack): IngredientCalculation {
             val pylonItem = PylonItem.fromStack(stack)
-            return pylonItem?.let { calculate(it) }
-                ?: IngredientCalculation.asIngredient(stack)
+            return pylonItem?.let {
+                val requiredAmount = stack.amount
+                val baseCalculation = calculateWithOutputAmount(it)
+                val multiplier = ceil(requiredAmount.toDouble() / baseCalculation.outputAmount)
+                (baseCalculation * multiplier).copy(outputAmount = requiredAmount)
+            } ?: IngredientCalculation.asIngredient(stack)
         }
 
-        @JvmStatic
-        fun calculate(pylonItem: PylonItem): IngredientCalculation {
-            val res = IngredientCalculation.empty()
+        private fun calculateWithOutputAmount(pylonItem: PylonItem): IngredientCalculation {
+            val baseResult = IngredientCalculation.empty()
+            val recipe = findRecipeFor(pylonItem) ?: return baseResult.copy(outputAmount = 1)
 
-            val recipe = findRecipeFor(pylonItem)
-                ?: return res
+            var recipeOutputAmount = 0
+            recipe.results.forEach { outputResult ->
+                if (outputResult is FluidOrItem.Item &&
+                    outputResult.item.isPylonSimilar(pylonItem.stack)
+                ) {
+                    recipeOutputAmount += outputResult.item.amount
+                }
+            }
+            baseResult.outputAmount = if (recipeOutputAmount > 0) recipeOutputAmount else 1
 
             recipe.inputs.forEach { inputComponent ->
                 when (inputComponent) {
                     is FluidOrItem.Item -> {
                         val subCalculation = calculate(inputComponent.item)
-                        res.inputs += subCalculation.inputs
-                        res.alongProducts += subCalculation.alongProducts
+                        baseResult += subCalculation
                     }
-                    is FluidOrItem.Fluid -> res.inputs += inputComponent
+
+                    is FluidOrItem.Fluid -> baseResult.inputs += inputComponent
                 }
             }
 
@@ -39,40 +50,60 @@ class IngredientCalculator {
                 when (outputResult) {
                     is FluidOrItem.Item -> {
                         if (!outputResult.item.isPylonSimilar(pylonItem.stack)) {
-                            res.alongProducts += outputResult
+                            baseResult.alongProducts += outputResult
                         }
                     }
-                    is FluidOrItem.Fluid -> res.alongProducts += outputResult
+
+                    is FluidOrItem.Fluid -> baseResult.alongProducts += outputResult
                 }
             }
 
-            return res
+            return baseResult
+        }
+
+        @JvmStatic
+        fun calculate(pylonItem: PylonItem): IngredientCalculation {
+            return calculateWithOutputAmount(pylonItem)
         }
 
         @JvmStatic
         fun calculate(fluid: FluidOrItem.Fluid): IngredientCalculation {
             val recipe = findRecipeFor(fluid.fluid)
-                ?: return IngredientCalculation(listOf(fluid), emptyList())
+                ?: return IngredientCalculation(
+                    inputs = mutableListOf(fluid),
+                    alongProducts = mutableListOf(),
+                    outputAmount = fluid.amountMillibuckets.toInt()
+                )
 
             val targetFluid = recipe.results
                 .find { it is FluidOrItem.Fluid && it.fluid == fluid.fluid } as? FluidOrItem.Fluid
-                ?: return IngredientCalculation(listOf(fluid), emptyList())
+                ?: return IngredientCalculation(
+                    inputs = mutableListOf(fluid),
+                    alongProducts = mutableListOf(),
+                    outputAmount = fluid.amountMillibuckets.toInt()
+                )
 
             val additionalAlongProducts = recipe.results.filter { it != targetFluid }
             val quantityMultiplier = ceil(fluid.amountMillibuckets / targetFluid.amountMillibuckets)
 
-            return IngredientCalculation(recipe.inputs, additionalAlongProducts) * quantityMultiplier
+            return (IngredientCalculation(
+                recipe.inputs,
+                additionalAlongProducts,
+                targetFluid.amountMillibuckets.toInt()
+            ) * quantityMultiplier)
+                .copy(outputAmount = fluid.amountMillibuckets.toInt())
         }
     }
 
     data class IngredientCalculation(
         val inputs: MutableList<FluidOrItem>,
-        val alongProducts: MutableList<FluidOrItem>
+        val alongProducts: MutableList<FluidOrItem>,
+        var outputAmount: Int
     ) {
-        constructor(inputs: List<FluidOrItem>, alongProducts: List<FluidOrItem>) :
-                this(inputs.toMutableList(), alongProducts.toMutableList())
+        constructor(inputs: List<FluidOrItem>, alongProducts: List<FluidOrItem>, outputAmount: Int) :
+                this(inputs.toMutableList(), alongProducts.toMutableList(), outputAmount)
 
-        @JvmName("plus")
+        @JvmName("add")
         operator fun plusAssign(other: IngredientCalculation) {
             this.inputs.addAll(other.inputs)
             this.alongProducts.addAll(other.alongProducts)
@@ -80,32 +111,42 @@ class IngredientCalculator {
 
         @JvmName("multiply")
         operator fun times(multiplier: Double): IngredientCalculation {
-            val scaledInputs = inputs.map { component ->
-                when (component) {
-                    is FluidOrItem.Fluid ->
-                        FluidOrItem.of(component.fluid, component.amountMillibuckets * multiplier)
+            if (multiplier <= 0.0) return this
 
-                    is FluidOrItem.Item -> {
-                        val newItem = component.item.clone().apply {
-                            amount *= ceil(multiplier).toInt()
-                        }
-                        FluidOrItem.of(newItem)
-                    }
+            val scaledInputs = inputs.map { scaleComponent(it, multiplier) }
+            val scaledAlongProducts = alongProducts.map { scaleComponent(it, multiplier) }
+            val scaledOutputAmount = ceil(outputAmount * multiplier).toInt()
+            return IngredientCalculation(scaledInputs, scaledAlongProducts, scaledOutputAmount)
+        }
+
+        private fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
+            return when (component) {
+                is FluidOrItem.Fluid ->
+                    FluidOrItem.of(component.fluid, component.amountMillibuckets * multiplier)
+
+                is FluidOrItem.Item -> {
+                    val newAmount = ceil(component.item.amount * multiplier).toInt()
+                    val newItem = component.item.clone().apply { amount = newAmount }
+                    FluidOrItem.of(newItem)
                 }
             }
-            return IngredientCalculation(scaledInputs, alongProducts.toList())
         }
 
         companion object {
             @JvmStatic
-            fun asIngredient(stack: ItemStack): IngredientCalculation {
-                return IngredientCalculation(listOf(FluidOrItem.of(stack)), emptyList())
+            fun empty(): IngredientCalculation {
+                return IngredientCalculation(emptyList(), emptyList(), 0)
             }
 
             @JvmStatic
-            fun empty(): IngredientCalculation {
-                return IngredientCalculation(emptyList(), emptyList())
+            fun asIngredient(stack: ItemStack): IngredientCalculation {
+                return IngredientCalculation(
+                    inputs = listOf(FluidOrItem.of(stack)),
+                    alongProducts = emptyList(),
+                    outputAmount = stack.amount
+                )
             }
         }
     }
 }
+    
