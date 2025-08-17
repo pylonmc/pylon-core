@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
+import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
@@ -38,7 +40,7 @@ class SmokingRecipeWrapper(recipe: SmokingRecipe) : CookingRecipeWrapper(recipe)
 
 fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
         .setStructure(
-            "# # # # # # # # #",
+            "# # # # g # # # #",
             "# # # # # # # # #",
             "# b # # i f o # #",
             "# # # # # # # # #",
@@ -54,6 +56,7 @@ fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
                     PylonArgument.of("time", UnitFormat.SECONDS.format(recipe.cookingTime / 20))
                 ))))
         .addIngredient('o', ItemButton.fromStack(recipe.result))
+        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(recipe.result)))
         .build() as AbstractGui
 
 object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting") {

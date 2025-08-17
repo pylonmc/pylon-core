@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
+import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
@@ -21,7 +23,7 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
     override fun display(): Gui {
         val gui = Gui.normal()
             .setStructure(
-                "# # # # # # # # #",
+                "# # # # g # # # #",
                 "# # # . . . # # #",
                 "# b # . . . # r #",
                 "# # # . . . # # #",
@@ -30,6 +32,7 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
             .addIngredient('#', GuiItems.backgroundBlack())
             .addIngredient('b', ItemButton.fromStack(ItemStack(Material.CRAFTING_TABLE)))
             .addIngredient('r', ItemButton.fromStack(recipe.result))
+            .addIngredient('g', PageButton(PylonGuide.ingredientsPage(recipe.result)))
             .build()
 
         val height = recipe.shape.size
@@ -54,7 +57,7 @@ class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : CraftingRec
 
     override fun display() = Gui.normal()
             .setStructure(
-                "# # # # # # # # #",
+                "# # # # g # # # #",
                 "# # # 0 1 2 # # #",
                 "# b # 3 4 5 # r #",
                 "# # # 6 7 8 # # #",
@@ -72,6 +75,7 @@ class ShapelessRecipeWrapper(override val recipe: ShapelessRecipe) : CraftingRec
             .addIngredient('7', getDisplaySlot(recipe, 7))
             .addIngredient('8', getDisplaySlot(recipe, 8))
             .addIngredient('r', recipe.result)
+            .addIngredient('g', PageButton(PylonGuide.ingredientsPage(recipe.result)))
             .build()
 
     fun getDisplaySlot(recipe: ShapelessRecipe, index: Int): Item {
