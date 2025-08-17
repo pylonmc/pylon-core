@@ -23,6 +23,13 @@ import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.math.max
 
+/**
+ * Magic numbers:
+ * 36 -> 36 "i" in sub-page, which means input items/fluid
+ * 9  -> 9  "o" in sub-page, which means along-products
+ *
+ * @author balugaq
+ */
 @Suppress("UnstableApiUsage")
 open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     override val item = ItemStackBuilder.of(stack)
@@ -30,7 +37,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     override fun getKey() = KEY
 
     // page is 0 based
-    open fun getPage(player: Player, stack: ItemStack, calculation: IngredientCalculation, page: Int, maxPage: Int) =
+    open fun getSubPage(player: Player, stack: ItemStack, calculation: IngredientCalculation, page: Int, maxPage: Int) =
         PagedGui.guis()
             .setStructure(
                 "i i i i i i i i i",
@@ -85,7 +92,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
         val calculation = IngredientCalculator.calculateFinal(stack)
         val maxPage = max(calculation.inputs.size / 36, calculation.alongProducts.size / 9)
         for (i in 0..maxPage) {
-            pages += getPage(player, stack, calculation, i, maxPage)
+            pages += getSubPage(player, stack, calculation, i, maxPage)
         }
 
         val gui = getHeader(player, pages)
@@ -99,6 +106,9 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
         val KEY = pylonKey("item_ingredients")
     }
 
+    /**
+     * Display info about the main product stack
+     */
     fun info(stack: ItemStack, outputAmount: Double) = ItemStackBuilder.of(stack)
         .amount(1)
         .lore(
@@ -109,26 +119,33 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
         )
         .build()
 
+    /**
+     * Display amount in the input/along-product stacks
+     */
     fun flatWithAmount(fluidOrItem: FluidOrItem?): Item {
         fluidOrItem ?: return GuiItems.background()
         return SimpleItem(
             when (fluidOrItem) {
                 is FluidOrItem.Fluid -> ItemStackBuilder.of(fluidOrItem.fluid.getItem().build())
+                    .lore("")
                     .lore(
                         Component.translatable(
                             "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
                             PylonArgument.of("amount", fluidOrItem.amountMillibuckets)
                         )
                     )
+                    .amount(1)
 
                 is FluidOrItem.Item -> ItemStackBuilder.of(fluidOrItem.item)
+                    .lore("")
                     .lore(
                         Component.translatable(
                             "pylon.pyloncore.message.guide.ingredients-page.input_stack",
                             PylonArgument.of("amount", fluidOrItem.item.amount)
                         )
                     )
-            }.amount(1)
+                    .amount(1)
+            }
         )
     }
 
