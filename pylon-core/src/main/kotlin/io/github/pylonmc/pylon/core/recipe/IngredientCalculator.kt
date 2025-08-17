@@ -57,6 +57,7 @@ object IngredientCalculator {
          *
          * @see checkRecursiveDepth
          */
+		@JvmSynthetic
         internal const val RECURSIVE_THRESHOLD = 100
 
         /**
