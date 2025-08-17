@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
@@ -43,7 +44,7 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
         return gui
     }
 
-    fun getDisplaySlot(recipe: ShapedRecipe, x: Int, y: Int): Item {
+    private fun getDisplaySlot(recipe: ShapedRecipe, x: Int, y: Int): Item {
         val character = recipe.shape[y][x]
         return ItemButton.fromChoice(recipe.choiceMap[character])
     }
@@ -94,19 +95,54 @@ class TransmuteRecipeWrapper(override val recipe: TransmuteRecipe) : AShapelessR
  * Key: `minecraft:crafting_shaped`
  */
 object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shaped", ShapedRecipeWrapper::class.java) {
+
     fun addRecipe(recipe: ShapedRecipe) = super.addRecipe(ShapedRecipeWrapper(recipe))
+
+    override fun loadRecipe(key: NamespacedKey, section: ConfigSection): ShapedRecipeWrapper {
+        val ingredientKey = convertTypeOrThrow<Map<Char, ItemStack>>(section.getOrThrow("key"))
+        val pattern = section.getOrThrow<List<String>>("pattern")
+        val result = convertTypeOrThrow<ItemStack>(section.getOrThrow("result"))
+
+        val recipe = ShapedRecipe(key, result)
+        recipe.shape(*pattern.toTypedArray())
+        for ((character, itemStack) in ingredientKey) {
+            recipe.setIngredient(character, RecipeChoice.ExactChoice(itemStack))
+        }
+        return ShapedRecipeWrapper(recipe)
+    }
 }
 
 /**
  * Key: `minecraft:crafting_shapeless`
  */
 object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting_shapeless", ShapelessRecipeWrapper::class.java) {
+
     fun addRecipe(recipe: ShapelessRecipe) = super.addRecipe(ShapelessRecipeWrapper(recipe))
+
+    override fun loadRecipe(key: NamespacedKey, section: ConfigSection): ShapelessRecipeWrapper {
+        val ingredients = convertTypeOrThrow<List<ItemStack>>(section.getOrThrow("ingredients"))
+        val result = convertTypeOrThrow<ItemStack>(section.getOrThrow("result"))
+
+        val recipe = ShapelessRecipe(key, result)
+        for (ingredient in ingredients) {
+            recipe.addIngredient(RecipeChoice.ExactChoice(ingredient))
+        }
+        return ShapelessRecipeWrapper(recipe)
+    }
 }
 
 /**
  * Key: `minecraft:crafting_transmute`
  */
 object TransmuteRecipeType : VanillaRecipeType<TransmuteRecipeWrapper>("crafting_transmute", TransmuteRecipeWrapper::class.java) {
+
     fun addRecipe(recipe: TransmuteRecipe) = super.addRecipe(TransmuteRecipeWrapper(recipe))
+
+    override fun loadRecipe(key: NamespacedKey, section: ConfigSection): TransmuteRecipeWrapper {
+        val input = convertTypeOrThrow<ItemStack>(section.getOrThrow("input"))
+        val material = convertTypeOrThrow<ItemStack>(section.getOrThrow("material"))
+        val result = convertTypeOrThrow<Material>(section.getOrThrow("result"))
+        val recipe = TransmuteRecipe(key, result, RecipeChoice.ExactChoice(input), RecipeChoice.ExactChoice(material))
+        return TransmuteRecipeWrapper(recipe)
+    }
 }
