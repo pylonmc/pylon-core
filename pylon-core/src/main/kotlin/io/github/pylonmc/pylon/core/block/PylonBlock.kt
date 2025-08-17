@@ -116,8 +116,6 @@ open class PylonBlock protected constructor(val block: Block) {
     /**
      * Called when the block is saved
      *
-     * As known as `onSaveBlock`
-     *
      * @see serialize
      */
     open fun write(pdc: PersistentDataContainer) {}
