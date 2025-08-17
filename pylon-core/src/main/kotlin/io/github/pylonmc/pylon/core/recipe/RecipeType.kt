@@ -183,30 +183,57 @@ open class RecipeType<T : PylonRecipe>(
     override fun getKey(): NamespacedKey = key
 
     companion object {
+        /**
+         * Key: `minecraft:blasting`
+         */
         @JvmField
         val VANILLA_BLASTING = BlastingRecipeType
 
+        /**
+         * Key: `minecraft:campfire_cooking`
+         */
         @JvmField
         val VANILLA_CAMPFIRE = CampfireRecipeType
 
+        /**
+         * Key: `minecraft:smelting`
+         */
         @JvmField
         val VANILLA_FURNACE = FurnaceRecipeType
 
+        /**
+         * Key: `minecraft:crafting_shaped`
+         */
         @JvmField
         val VANILLA_SHAPED = ShapedRecipeType
 
+        /**
+         * Key: `minecraft:crafting_shapeless`
+         */
         @JvmField
         val VANILLA_SHAPELESS = ShapelessRecipeType
 
+        /**
+         * Key: `minecraft:crafting_transmute`
+         */
         @JvmField
         val VANILLA_TRANSMUTE = TransmuteRecipeType
 
+        /**
+         * Key: `minecraft:smithing_transform`
+         */
         @JvmField
         val VANILLA_SMITHING_TRANSFORM = SmithingTransformRecipeType
 
+        /**
+         * Key: `minecraft:smithing_trim`
+         */
         @JvmField
         val VANILLA_SMITHING_TRIM = SmithingTrimRecipeType
 
+        /**
+         * Key: `minecraft:smoking`
+         */
         @JvmField
         val VANILLA_SMOKING = SmokingRecipeType
 
@@ -242,8 +269,8 @@ open class RecipeType<T : PylonRecipe>(
                     is ShapedRecipe -> VANILLA_SHAPED.addRecipeWithoutRegister(ShapedRecipeWrapper(recipe))
                     is ShapelessRecipe -> VANILLA_SHAPELESS.addRecipeWithoutRegister(ShapelessRecipeWrapper(recipe))
                     is TransmuteRecipe -> VANILLA_TRANSMUTE.addRecipeWithoutRegister(TransmuteRecipeWrapper(recipe))
-                    is SmithingTransformRecipe -> VANILLA_SMITHING_TRANSFORM.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
-                    is SmithingTrimRecipe -> VANILLA_SMITHING_TRIM.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
+                    is SmithingTransformRecipe -> VANILLA_SMITHING_TRANSFORM.addRecipeWithoutRegister(SmithingTransformRecipeWrapper(recipe))
+                    is SmithingTrimRecipe -> VANILLA_SMITHING_TRIM.addRecipeWithoutRegister(SmithingTrimRecipeWrapper(recipe))
                     is SmokingRecipe -> VANILLA_SMOKING.addRecipeWithoutRegister(SmokingRecipeWrapper(recipe))
                 }
             }

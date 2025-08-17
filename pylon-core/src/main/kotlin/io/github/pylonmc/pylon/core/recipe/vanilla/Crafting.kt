@@ -90,14 +90,23 @@ class TransmuteRecipeWrapper(override val recipe: TransmuteRecipe) : AShapelessR
     override val choiceList = listOf(recipe.input, recipe.material)
 }
 
+/**
+ * Key: `minecraft:crafting_shaped`
+ */
 object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shaped", ShapedRecipeWrapper::class.java) {
     fun addRecipe(recipe: ShapedRecipe) = super.addRecipe(ShapedRecipeWrapper(recipe))
 }
 
+/**
+ * Key: `minecraft:crafting_shapeless`
+ */
 object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting_shapeless", ShapelessRecipeWrapper::class.java) {
     fun addRecipe(recipe: ShapelessRecipe) = super.addRecipe(ShapelessRecipeWrapper(recipe))
 }
 
+/**
+ * Key: `minecraft:crafting_transmute`
+ */
 object TransmuteRecipeType : VanillaRecipeType<TransmuteRecipeWrapper>("crafting_transmute", TransmuteRecipeWrapper::class.java) {
     fun addRecipe(recipe: TransmuteRecipe) = super.addRecipe(TransmuteRecipeWrapper(recipe))
 }

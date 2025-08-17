@@ -40,10 +40,16 @@ sealed class SmithingRecipeWrapper(recipe: SmithingRecipe) : VanillaRecipeWrappe
 class SmithingTransformRecipeWrapper(override val recipe: SmithingTransformRecipe) : SmithingRecipeWrapper(recipe)
 class SmithingTrimRecipeWrapper(override val recipe: SmithingTrimRecipe) : SmithingRecipeWrapper(recipe)
 
+/**
+ * Key: `minecraft:smithing_transform`
+ */
 object SmithingTransformRecipeType : VanillaRecipeType<SmithingTransformRecipeWrapper>("smithing_transform", SmithingTransformRecipeWrapper::class.java) {
     fun addRecipe(recipe: SmithingTransformRecipe) = super.addRecipe(SmithingTransformRecipeWrapper(recipe))
 }
 
+/**
+ * Key: `minecraft:smithing_trim`
+ */
 object SmithingTrimRecipeType : VanillaRecipeType<SmithingTrimRecipeWrapper>("smithing_trim", SmithingTrimRecipeWrapper::class.java) {
     fun addRecipe(recipe: SmithingTrimRecipe) = super.addRecipe(SmithingTrimRecipeWrapper(recipe))
 }

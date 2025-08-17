@@ -56,18 +56,30 @@ private fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
         .addIngredient('o', ItemButton.fromStack(recipe.result))
         .build() as AbstractGui
 
+/**
+ * Key: `minecraft:blasting`
+ */
 object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting", BlastingRecipeWrapper::class.java) {
     fun addRecipe(recipe: BlastingRecipe) = super.addRecipe(BlastingRecipeWrapper(recipe))
 }
 
+/**
+ * Key: `minecraft:campfire_cooking`
+ */
 object CampfireRecipeType : VanillaRecipeType<CampfireRecipeWrapper>("campfire_cooking", CampfireRecipeWrapper::class.java) {
     fun addRecipe(recipe: CampfireRecipe) = super.addRecipe(CampfireRecipeWrapper(recipe))
 }
 
+/**
+ * Key: `minecraft:smelting`
+ */
 object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("smelting", FurnaceRecipeWrapper::class.java) {
     fun addRecipe(recipe: FurnaceRecipe) = super.addRecipe(FurnaceRecipeWrapper(recipe))
 }
 
+/**
+ * Key: `minecraft:smoking`
+ */
 object SmokingRecipeType : VanillaRecipeType<SmokingRecipeWrapper>("smoking", SmokingRecipeWrapper::class.java) {
     fun addRecipe(recipe: SmokingRecipe) = super.addRecipe(SmokingRecipeWrapper(recipe))
 }
