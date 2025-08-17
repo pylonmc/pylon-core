@@ -3,8 +3,9 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.Companion.calculateBase
-import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.Companion.calculateFinal
+import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateBase
+import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateFinal
+import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.checkRecursiveDepth
 import io.github.pylonmc.pylon.core.util.findRecipeFor
 import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import org.bukkit.inventory.ItemStack
@@ -52,228 +53,227 @@ import kotlin.math.ceil
  * @author balugaq
  */
 object IngredientCalculator {
-        /**
-         * The maximum recursive depth allowed
-         *
-         * @see checkRecursiveDepth
-         */
-		@JvmSynthetic
-        internal const val RECURSIVE_THRESHOLD = 100
+    /**
+     * The maximum recursive depth allowed
+     *
+     * @see checkRecursiveDepth
+     */
+    @JvmSynthetic
+    internal const val RECURSIVE_THRESHOLD = 100
 
-        /**
-         * Calculate the final material requirements for an item stack with amount (including amount scaling)
-         * @param stack Target item stack (including amount information to be calculated)
-         * @return Calculation result including raw materials, along products and target output amount
-         */
-        @JvmStatic
-        fun calculateFinal(stack: ItemStack, depth: Int = 1): IngredientCalculation {
-            checkRecursiveDepth(depth)
+    /**
+     * Calculate the final material requirements for an item stack with amount (including amount scaling)
+     * @param stack Target item stack (including amount information to be calculated)
+     * @return Calculation result including raw materials, along products and target output amount
+     */
+    @JvmStatic
+    fun calculateFinal(stack: ItemStack, depth: Int = 1): IngredientCalculation {
+        checkRecursiveDepth(depth)
 
-            val pylonItem = PylonItem.fromStack(stack)
-            return pylonItem?.let {
-                // PylonItem has recipes
-                val requiredAmount = stack.amount.toDouble()
-                val baseCalculation = calculateBase(it, depth + 1)
-                val recipeOutputAmount = baseCalculation.outputAmount
-                val scaleMultiplier = ceil(requiredAmount / recipeOutputAmount)
-                baseCalculation.scaleBy(scaleMultiplier).copy(outputAmount = requiredAmount)
-            } ?: IngredientCalculation.asIngredient(stack) // Not PylonItem, no recipes for vanilla items so far.
-        }
+        val pylonItem = PylonItem.fromStack(stack)
+        return pylonItem?.let {
+            // PylonItem has recipes
+            val requiredAmount = stack.amount.toDouble()
+            val baseCalculation = calculateBase(it, depth + 1)
+            val recipeOutputAmount = baseCalculation.outputAmount
+            val scaleMultiplier = ceil(requiredAmount / recipeOutputAmount)
+            baseCalculation.scaleBy(scaleMultiplier).copy(outputAmount = requiredAmount)
+        } ?: IngredientCalculation.asIngredient(stack) // Not PylonItem, no recipes for vanilla items so far.
+    }
 
-        /**
-         * Calculate material requirements and along products for fluids
-         * @param fluid Target fluid (including amount information to be calculated)
-         * @return Calculation result including raw materials, along products and target fluid output amount
-         */
-        @JvmStatic
-        fun calculateFinal(fluid: FluidOrItem.Fluid, depth: Int = 1): IngredientCalculation {
-            checkRecursiveDepth(depth)
+    /**
+     * Calculate material requirements and along products for fluids
+     * @param fluid Target fluid (including amount information to be calculated)
+     * @return Calculation result including raw materials, along products and target fluid output amount
+     */
+    @JvmStatic
+    fun calculateFinal(fluid: FluidOrItem.Fluid, depth: Int = 1): IngredientCalculation {
+        checkRecursiveDepth(depth)
 
-            val recipe = findRecipeFor(fluid.fluid)
-                ?: return IngredientCalculation(
-                    inputs = mutableListOf(fluid),
-                    alongProducts = mutableListOf(),
-                    outputAmount = fluid.amountMillibuckets
-                )
+        val recipe = findRecipeFor(fluid.fluid)
+            ?: return IngredientCalculation(
+                inputs = mutableListOf(fluid),
+                alongProducts = mutableListOf(),
+                outputAmount = fluid.amountMillibuckets
+            )
 
-            val targetFluid = recipe.results
-                .find { it is FluidOrItem.Fluid && it.fluid == fluid.fluid } as? FluidOrItem.Fluid
-                ?: return IngredientCalculation(
-                    inputs = mutableListOf(fluid),
-                    alongProducts = mutableListOf(),
-                    outputAmount = fluid.amountMillibuckets
-                )
+        val targetFluid = recipe.results
+            .find { it is FluidOrItem.Fluid && it.fluid == fluid.fluid } as? FluidOrItem.Fluid
+            ?: return IngredientCalculation(
+                inputs = mutableListOf(fluid),
+                alongProducts = mutableListOf(),
+                outputAmount = fluid.amountMillibuckets
+            )
 
-            val additionalAlongProducts = recipe.results.filter { it != targetFluid }
-            val scaleMultiplier = ceil(fluid.amountMillibuckets / targetFluid.amountMillibuckets)
+        val additionalAlongProducts = recipe.results.filter { it != targetFluid }
+        val scaleMultiplier = ceil(fluid.amountMillibuckets / targetFluid.amountMillibuckets)
 
-            return IngredientCalculation(
-                inputs = recipe.inputs.toMutableList(),
-                alongProducts = additionalAlongProducts.toMutableList(),
-                outputAmount = targetFluid.amountMillibuckets
-            ).scaleBy(scaleMultiplier)
-                .copy(outputAmount = fluid.amountMillibuckets)
-        }
+        return IngredientCalculation(
+            inputs = recipe.inputs.toMutableList(),
+            alongProducts = additionalAlongProducts.toMutableList(),
+            outputAmount = targetFluid.amountMillibuckets
+        ).scaleBy(scaleMultiplier)
+            .copy(outputAmount = fluid.amountMillibuckets)
+    }
 
-        /**
-         * Calculate the basic recipe data of a single item (for *recursive* calculation)
-         * @param pylonItem Target item (without amount scaling, only calculate single recipe)
-         * @return Basic recipe raw materials, along products and single output amount
-         */
-        @JvmStatic
-        fun calculateBase(pylonItem: PylonItem, depth: Int = 1): IngredientCalculation {
-            checkRecursiveDepth(depth)
+    /**
+     * Calculate the basic recipe data of a single item (for *recursive* calculation)
+     * @param pylonItem Target item (without amount scaling, only calculate single recipe)
+     * @return Basic recipe raw materials, along products and single output amount
+     */
+    @JvmStatic
+    fun calculateBase(pylonItem: PylonItem, depth: Int = 1): IngredientCalculation {
+        checkRecursiveDepth(depth)
 
-            val baseResult = IngredientCalculation.empty()
-            val recipe = findRecipeFor(pylonItem) ?: return baseResult.copy(outputAmount = 1.toDouble())
+        val baseResult = IngredientCalculation.empty()
+        val recipe = findRecipeFor(pylonItem) ?: return baseResult.copy(outputAmount = 1.toDouble())
 
-            // Calculate the main product amount output by the recipe per cycle
-            val recipeOutputAmount = getRecipeOutputAmount(recipe, pylonItem)
-            baseResult.outputAmount = recipeOutputAmount
+        // Calculate the main product amount output by the recipe per cycle
+        val recipeOutputAmount = getRecipeOutputAmount(recipe, pylonItem)
+        baseResult.outputAmount = recipeOutputAmount
 
-            recipe.inputs.forEach { fluidOrItem ->
-                when (fluidOrItem) {
-                    is FluidOrItem.Item -> {
-                        val subCalculation = calculateFinal(fluidOrItem.item, depth + 1)
-                        baseResult.mergeSubCalculation(subCalculation)
-                    }
+        recipe.inputs.forEach { fluidOrItem ->
+            when (fluidOrItem) {
+                is FluidOrItem.Item -> {
+                    val subCalculation = calculateFinal(fluidOrItem.item, depth + 1)
+                    baseResult.mergeSubCalculation(subCalculation)
+                }
 
-                    is FluidOrItem.Fluid -> {
-                        val subCalculation = calculateFinal(fluidOrItem, depth + 1)
-                        baseResult.mergeSubCalculation(subCalculation)
-                    }
+                is FluidOrItem.Fluid -> {
+                    val subCalculation = calculateFinal(fluidOrItem, depth + 1)
+                    baseResult.mergeSubCalculation(subCalculation)
                 }
             }
+        }
 
-            // exclude main product, but including along products
-            recipe.results.forEach { outputResult ->
-                when (outputResult) {
-                    is FluidOrItem.Item -> {
-                        if (!outputResult.item.isPylonSimilar(pylonItem.stack)) {
-                            baseResult.alongProducts += outputResult
-                        }
+        // exclude main product, but including along products
+        recipe.results.forEach { outputResult ->
+            when (outputResult) {
+                is FluidOrItem.Item -> {
+                    if (!outputResult.item.isPylonSimilar(pylonItem.stack)) {
+                        baseResult.alongProducts += outputResult
                     }
-
-                    is FluidOrItem.Fluid -> baseResult.alongProducts += outputResult
                 }
-            }
 
-            return baseResult
+                is FluidOrItem.Fluid -> baseResult.alongProducts += outputResult
+            }
         }
 
-        /**
-         * Calculate the single output amount of the main product in the recipe separately
-         * @param recipe Target recipe
-         * @param targetItem Main product item
-         * @return Total amount of main product output per recipe cycle
-         */
-        @JvmStatic
-        fun getRecipeOutputAmount(recipe: PylonRecipe, targetItem: PylonItem): Double {
-            var outputAmount = 0
-            recipe.results.forEach { outputResult ->
-                if (outputResult is FluidOrItem.Item &&
-                    outputResult.item.isPylonSimilar(targetItem.stack)
-                ) {
-                    outputAmount += outputResult.item.amount
-                }
-            }
-            // Fallback: If the recipe does not explicitly specify the main product, default to 1 output per cycle
-            return if (outputAmount > 0) outputAmount.toDouble() else 1.0
-        }
+        return baseResult
+    }
 
-        internal fun checkRecursiveDepth(depth: Int) {
-            if (depth > RECURSIVE_THRESHOLD) {
-                throw RuntimeException("Recursive depth exceeded the threshold of $RECURSIVE_THRESHOLD")
+    /**
+     * Calculate the single output amount of the main product in the recipe separately
+     * @param recipe Target recipe
+     * @param targetItem Main product item
+     * @return Total amount of main product output per recipe cycle
+     */
+    @JvmStatic
+    fun getRecipeOutputAmount(recipe: PylonRecipe, targetItem: PylonItem): Double {
+        var outputAmount = 0
+        recipe.results.forEach { outputResult ->
+            if (outputResult is FluidOrItem.Item &&
+                outputResult.item.isPylonSimilar(targetItem.stack)
+            ) {
+                outputAmount += outputResult.item.amount
+            }
+        }
+        // Fallback: If the recipe does not explicitly specify the main product, default to 1 output per cycle
+        return if (outputAmount > 0) outputAmount.toDouble() else 1.0
+    }
+
+    internal fun checkRecursiveDepth(depth: Int) {
+        if (depth > RECURSIVE_THRESHOLD) {
+            throw RuntimeException("Recursive depth exceeded the threshold of $RECURSIVE_THRESHOLD")
+        }
+    }
+}
+
+/**
+ * @author balugaq
+ */
+data class IngredientCalculation(
+    val inputs: MutableList<FluidOrItem>,
+    val alongProducts: MutableList<FluidOrItem>,
+    /**
+     * Output amount:
+     * - In basic recipe calculation  -> the amount of main product output per recipe cycle
+     * - In final calculation results -> the total amount of main product to be produced (after scaling)
+     */
+    var outputAmount: Double
+) {
+    constructor(inputs: List<FluidOrItem>, alongProducts: List<FluidOrItem>, outputAmount: Double) :
+            this(inputs.toMutableList(), alongProducts.toMutableList(), outputAmount)
+
+    /**
+     * Merge sub-recipe calculation results (only merge raw materials and along products,
+     * without affecting main product amount)
+     * Used in recursive calculation to integrate inputs and along products from sub-recipes
+     */
+    fun mergeSubCalculation(other: IngredientCalculation) {
+        this.inputs += other.inputs
+        this.alongProducts += other.alongProducts
+    }
+
+    /**
+     * Scale raw materials, along products and main product amounts by multiplier
+     * @param multiplier Scaling multiplier (must be greater than 0)
+     * @return Scaled calculation result
+     */
+    fun scaleBy(multiplier: Double): IngredientCalculation {
+        if (multiplier <= 0.0) return this
+
+        val scaledInputs = inputs.map { scaleComponent(it, multiplier) }
+        val scaledAlongProducts = alongProducts.map { scaleComponent(it, multiplier) }
+        val scaledOutputAmount = ceil(outputAmount * multiplier)
+
+        return IngredientCalculation(
+            scaledInputs.toMutableList(),
+            scaledAlongProducts.toMutableList(),
+            scaledOutputAmount
+        )
+    }
+
+    /**
+     * Scale the amount of a single component (item or fluid)
+     * @param component Component to be scaled
+     * @param multiplier Scaling multiplier
+     * @return Scaled component
+     */
+    internal fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
+        return when (component) {
+            is FluidOrItem.Fluid ->
+                FluidOrItem.of(component.fluid, component.amountMillibuckets * multiplier)
+
+            is FluidOrItem.Item -> {
+                val newAmount = ceil(component.item.amount * multiplier)
+                val newItem = component.item.clone().apply { amount = newAmount.toInt() }
+                FluidOrItem.of(newItem)
             }
         }
     }
 
-    /**
-     * @author balugaq
-     */
-    data class IngredientCalculation(
-        val inputs: MutableList<FluidOrItem>,
-        val alongProducts: MutableList<FluidOrItem>,
+    companion object {
         /**
-         * Output amount:
-         * - In basic recipe calculation  -> the amount of main product output per recipe cycle
-         * - In final calculation results -> the total amount of main product to be produced (after scaling)
+         * Create an empty calculation result (empty raw materials and along products, output amount is 0)
          */
-        var outputAmount: Double
-    ) {
-        constructor(inputs: List<FluidOrItem>, alongProducts: List<FluidOrItem>, outputAmount: Double) :
-                this(inputs.toMutableList(), alongProducts.toMutableList(), outputAmount)
-
-        /**
-         * Merge sub-recipe calculation results (only merge raw materials and along products,
-         * without affecting main product amount)
-         * Used in recursive calculation to integrate inputs and along products from sub-recipes
-         */
-        fun mergeSubCalculation(other: IngredientCalculation) {
-            this.inputs += other.inputs
-            this.alongProducts += other.alongProducts
+        @JvmStatic
+        fun empty(): IngredientCalculation {
+            return IngredientCalculation(emptyList(), emptyList(), 0.toDouble())
         }
 
         /**
-         * Scale raw materials, along products and main product amounts by multiplier
-         * @param multiplier Scaling multiplier (must be greater than 0)
-         * @return Scaled calculation result
+         * Directly convert an item stack to a basic raw material (for items without recipes)
+         * @param stack Target item stack
+         * @return Calculation result with this item as raw material
          */
-        fun scaleBy(multiplier: Double): IngredientCalculation {
-            if (multiplier <= 0.0) return this
-
-            val scaledInputs = inputs.map { scaleComponent(it, multiplier) }
-            val scaledAlongProducts = alongProducts.map { scaleComponent(it, multiplier) }
-            val scaledOutputAmount = ceil(outputAmount * multiplier)
-
+        @JvmStatic
+        fun asIngredient(stack: ItemStack): IngredientCalculation {
             return IngredientCalculation(
-                scaledInputs.toMutableList(),
-                scaledAlongProducts.toMutableList(),
-                scaledOutputAmount
+                inputs = mutableListOf(FluidOrItem.of(stack)),
+                alongProducts = mutableListOf(),
+                outputAmount = stack.amount.toDouble()
             )
-        }
-
-        /**
-         * Scale the amount of a single component (item or fluid)
-         * @param component Component to be scaled
-         * @param multiplier Scaling multiplier
-         * @return Scaled component
-         */
-        internal fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
-            return when (component) {
-                is FluidOrItem.Fluid ->
-                    FluidOrItem.of(component.fluid, component.amountMillibuckets * multiplier)
-
-                is FluidOrItem.Item -> {
-                    val newAmount = ceil(component.item.amount * multiplier)
-                    val newItem = component.item.clone().apply { amount = newAmount.toInt() }
-                    FluidOrItem.of(newItem)
-                }
-            }
-        }
-
-        companion object {
-            /**
-             * Create an empty calculation result (empty raw materials and along products, output amount is 0)
-             */
-            @JvmStatic
-            fun empty(): IngredientCalculation {
-                return IngredientCalculation(emptyList(), emptyList(), 0.toDouble())
-            }
-
-            /**
-             * Directly convert an item stack to a basic raw material (for items without recipes)
-             * @param stack Target item stack
-             * @return Calculation result with this item as raw material
-             */
-            @JvmStatic
-            fun asIngredient(stack: ItemStack): IngredientCalculation {
-                return IngredientCalculation(
-                    inputs = mutableListOf(FluidOrItem.of(stack)),
-                    alongProducts = mutableListOf(),
-                    outputAmount = stack.amount.toDouble()
-                )
-            }
         }
     }
 }
