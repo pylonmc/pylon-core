@@ -27,8 +27,8 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     val pages: MutableList<Gui> = mutableListOf()
 
     init {
-        val calculation: IngredientCalculator.IngredientCalculation = IngredientCalculator.calculateFinal(stack)
-        val maxPage: Int = max(calculation.inputs.size / 27, calculation.alongProducts.size / 9)
+        val calculation = IngredientCalculator.calculateFinal(stack)
+        val maxPage = max(calculation.inputs.size / 27, calculation.alongProducts.size / 9)
         for (i in 0..maxPage) {
             pages += getPage(stack, calculation, i)
         }
