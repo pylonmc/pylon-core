@@ -132,7 +132,7 @@ object IngredientCalculator {
         val recipeOutputAmount = getRecipeOutputAmount(recipe, pylonItem)
         baseResult.outputAmount = recipeOutputAmount
 
-        recipe.inputs.forEach { fluidOrItem ->
+        for (fluidOrItem in recipe.inputs) {
             when (fluidOrItem) {
                 is FluidOrItem.Item -> {
                     val subCalculation = calculateFinal(fluidOrItem.item, depth + 1)
@@ -147,7 +147,7 @@ object IngredientCalculator {
         }
 
         // exclude main product, but including along products
-        recipe.results.forEach { outputResult ->
+        for (outputResult in recipe.results) {
             when (outputResult) {
                 is FluidOrItem.Item -> {
                     if (!outputResult.item.isPylonSimilar(pylonItem.stack)) {
