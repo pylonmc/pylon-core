@@ -51,8 +51,7 @@ import kotlin.math.ceil
  *
  * @author balugaq
  */
-class IngredientCalculator {
-    companion object {
+object IngredientCalculator {
         /**
          * The maximum recursive depth allowed
          *
