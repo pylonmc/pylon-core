@@ -178,7 +178,7 @@ object IngredientCalculator {
                 }
             }
             // Fallback: If the recipe does not explicitly specify the main product, default to 1 output per cycle
-            return (if (outputAmount > 0) outputAmount else 1).toDouble()
+            return if (outputAmount > 0) outputAmount.toDouble() else 1.0
         }
 
         internal fun checkRecursiveDepth(depth: Int) {
