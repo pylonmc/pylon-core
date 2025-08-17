@@ -34,8 +34,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
         }
     }
 
-    override val item: ItemProvider
-        get() = ItemStackBuilder.of(stack)
+    override val item = ItemStackBuilder.of(stack)
 
     override fun getKey() = KEY
 
