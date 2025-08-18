@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
 import org.apache.commons.lang3.reflect.TypeUtils
+import org.bukkit.configuration.ConfigurationSection
 import java.lang.reflect.Type
 
 class ListConfigAdapter<E>(private val elementAdapter: ConfigAdapter<E>) : ConfigAdapter<List<E>> {
@@ -10,7 +11,7 @@ class ListConfigAdapter<E>(private val elementAdapter: ConfigAdapter<E>) : Confi
     override fun convert(value: Any): List<E> {
         val list = when (value) {
             is List<*> -> value
-            is Map<*, *> -> value.toList()
+            is ConfigurationSection -> value.getValues(false).toList()
             else -> throw IllegalArgumentException("Expected a List or Map, but got: ${value::class.java.name}")
         }
         return list.map {

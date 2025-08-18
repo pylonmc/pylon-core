@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
 import org.apache.commons.lang3.reflect.TypeUtils
+import org.bukkit.configuration.ConfigurationSection
 import java.lang.reflect.Type
 
 class MapConfigAdapter<K, V>(
@@ -12,7 +13,7 @@ class MapConfigAdapter<K, V>(
 
     override fun convert(value: Any): Map<K, V> {
         return buildMap {
-            for ((k, v) in value as Map<*, *>) {
+            for ((k, v) in (value as ConfigurationSection).getValues(false)) {
                 @Suppress("UNCHECKED_CAST")
                 put(keyAdapter.convert(k!!), v?.let(valueAdapter::convert) as V)
             }

@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
 import io.github.pylonmc.pylon.core.util.itemFromName
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
 
 object ItemStackConfigAdapter : ConfigAdapter<ItemStack> {
@@ -15,7 +16,7 @@ object ItemStackConfigAdapter : ConfigAdapter<ItemStack> {
                 itemFromName(itemKey)!!.asQuantity(amount)
             }
 
-            is Map<*, *> -> convert(value.toList().single())
+            is ConfigurationSection -> convert(value.getValues(false).toList().single())
             is String -> itemFromName(value)!!
             else -> throw IllegalArgumentException("Cannot convert $value to ItemStack")
         }

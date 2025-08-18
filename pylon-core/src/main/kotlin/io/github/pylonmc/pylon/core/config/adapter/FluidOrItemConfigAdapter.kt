@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
+import org.bukkit.configuration.ConfigurationSection
 
 object FluidOrItemConfigAdapter : ConfigAdapter<FluidOrItem> {
 
@@ -17,7 +18,7 @@ object FluidOrItemConfigAdapter : ConfigAdapter<FluidOrItem> {
                 FluidOrItem.of(fluid, amount)
             }
 
-            is Map<*, *> -> convert(value.toList().single())
+            is ConfigurationSection -> convert(value.getValues(false).toList().single())
             else -> throw IllegalArgumentException("Cannot convert $value to FluidOrItem")
         }
     }
