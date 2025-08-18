@@ -1,11 +1,11 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.config.adapter.*
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.recipe.vanilla.*
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
-import io.github.pylonmc.pylon.core.util.itemFromName
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
@@ -17,8 +17,6 @@ import java.lang.invoke.MethodHandles
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.RecordComponent
 import java.lang.reflect.Type
-import kotlin.reflect.javaType
-import kotlin.reflect.typeOf
 
 /**
  * Iteration order will be the order in which recipes were added unless overridden.
@@ -80,10 +78,7 @@ open class RecipeType<T : PylonRecipe>(
         check(recipeKey >= 0) { "Recipe type $key must have a @RecipeKey annotated component to load from config." }
 
         val values = components.mapTo(mutableListOf()) { component ->
-            section.get<Any?>(component.name)?.let { value ->
-                convertType(value, component.genericType)
-                    ?: error("Failed to convert value '$value' for ${component.name} in recipe $key")
-            }
+            section.get(component.name, component.type.toAdapter())
         }
         values.add(recipeKey, key)
         return recipeClass.cast(constructorHandle.invokeWithArguments(values))
@@ -188,129 +183,43 @@ open class RecipeType<T : PylonRecipe>(
                 // @formatter:on
             }
         }
-
-        /**
-         * Converts a value obtained from a recipe config file to the specified type.
-         * TODO document the input formats
-         *
-         * @param value the value to convert
-         * @param type the type to convert to
-         * @return the converted value, or null if the conversion failed
-         */
-        @JvmStatic
-        fun convertType(value: Any, type: Type): Any? {
-            return when {
-                type is ParameterizedType -> convertParameterizedType(type, value)
-                type is Class<*> && type.isEnum && type != Material::class.java -> {
-                    type.enumConstants.find { it.toString().equals(value.toString(), ignoreCase = true) }
-                }
-
-                else -> convertConcreteType(type, value)
-            }
-        }
-
-        @JvmStatic
-        fun convertTypeOrThrow(value: Any, type: Type): Any {
-            return convertType(value, type) ?: error("Failed to convert value '$value' to type $type")
-        }
-
-        @JvmSynthetic
-        @OptIn(ExperimentalStdlibApi::class)
-        inline fun <reified T> convertType(value: Any): T? {
-            return convertType(value, typeOf<T>().javaType) as? T
-        }
-
-        @JvmSynthetic
-        inline fun <reified T> convertTypeOrThrow(value: Any): T {
-            return convertType<T>(value) ?: error { "Failed to convert value '$value' to type ${typeOf<T>()}" }
-        }
-
-        // yes this function is a mess please don't judge me :sob:
-        private fun convertConcreteType(type: Type, value: Any): Any? {
-            return when (type) {
-                String::class.java -> value as? String
-                Byte::class.javaObjectType, Byte::class.javaPrimitiveType -> (value as? Number)?.toByte()
-                Short::class.javaObjectType, Short::class.javaPrimitiveType -> (value as Number).toShort()
-                Int::class.javaObjectType, Int::class.javaPrimitiveType -> (value as? Number)?.toInt()
-                Long::class.javaObjectType, Long::class.javaPrimitiveType -> (value as? Number)?.toLong()
-                Double::class.javaObjectType, Double::class.javaPrimitiveType -> (value as? Number)?.toDouble()
-                Float::class.javaObjectType, Float::class.javaPrimitiveType -> (value as? Number)?.toFloat()
-                Boolean::class.javaObjectType, Boolean::class.javaPrimitiveType -> value as? Boolean
-                Char::class.javaObjectType, Char::class.javaPrimitiveType -> (value as? String)?.singleOrNull()
-                NamespacedKey::class.java -> NamespacedKey.fromString((value as? String) ?: return null)
-                Material::class.java -> Material.matchMaterial((value as? String) ?: return null)
-                BlockData::class.java -> Bukkit.createBlockData((value as? String) ?: return null)
-                ItemStack::class.java -> when (value) {
-                    is Pair<*, *> -> {
-                        val itemKey = value.first as? String ?: return null
-                        val amount = (value.second as? Number)?.toInt() ?: return null
-                        itemFromName(itemKey)?.asQuantity(amount)
-                    }
-
-                    is Map<*, *> -> convertConcreteType(type, value.entries.firstOrNull() ?: return null)
-                    is String -> itemFromName(value)
-                    else -> null
-                }
-
-                PylonFluid::class.java -> {
-                    val key = (value as? String)?.let(NamespacedKey::fromString) ?: return null
-                    PylonRegistry.FLUIDS[key]
-                }
-
-                FluidOrItem::class.java -> {
-                    val item = convertConcreteType(ItemStack::class.java, value)
-                    if (item != null) {
-                        FluidOrItem.of(item as ItemStack)
-                    } else when (value) {
-                        is Pair<*, *> -> {
-                            val fluidKey = (value.first as? String)?.let(NamespacedKey::fromString) ?: return null
-                            val amount = (value.second as? Number)?.toDouble() ?: return null
-                            FluidOrItem.of(PylonRegistry.FLUIDS[fluidKey] ?: return null, amount)
-                        }
-
-                        is Map<*, *> -> convertConcreteType(type, value.entries.firstOrNull() ?: return null)
-                        else -> null
-                    }
-                }
-
-                else -> null
-            }
-        }
-
-        private fun convertParameterizedType(type: ParameterizedType, value: Any): Any? = when (type.rawType) {
-            Set::class.java -> {
-                val elementType = type.actualTypeArguments.first()
-                var value = value
-                if (value is Map<*, *>) {
-                    value = value.toList()
-                }
-                (value as? Collection<*>)?.mapTo(mutableSetOf()) { convertType(it!!, elementType) }
-            }
-
-            List::class.java -> {
-                val elementType = type.actualTypeArguments.first()
-                var value = value
-                if (value is Map<*, *>) {
-                    value = value.toList()
-                }
-                (value as? Collection<*>)?.map { convertType(it!!, elementType) }
-            }
-
-            Map::class.java -> {
-                val keyType = type.actualTypeArguments[0]
-                val valueType = type.actualTypeArguments[1]
-                if (value !is Map<*, *>) {
-                    null
-                } else {
-                    buildMap {
-                        for ((k, v) in value) {
-                            put(convertType(k!!, keyType), convertType(v!!, valueType))
-                        }
-                    }
-                }
-            }
-
-            else -> null
-        }
     }
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun Type.toAdapter(): ConfigAdapter<*> = when (this) {
+
+    is Class<*> if this.isEnum && this != Material::class.java -> EnumConfigAdapter(this as Class<out Enum<*>>)
+
+    is Class<*> -> when (this) {
+        String::class.java -> ConfigAdapter.STRING
+        Byte::class.javaObjectType, Byte::class.javaPrimitiveType -> ConfigAdapter.BYTE
+        Short::class.javaObjectType, Short::class.javaPrimitiveType -> ConfigAdapter.SHORT
+        Int::class.javaObjectType, Int::class.javaPrimitiveType -> ConfigAdapter.INT
+        Long::class.javaObjectType, Long::class.javaPrimitiveType -> ConfigAdapter.LONG
+        Float::class.javaObjectType, Float::class.javaPrimitiveType -> ConfigAdapter.FLOAT
+        Double::class.javaObjectType, Double::class.javaPrimitiveType -> ConfigAdapter.DOUBLE
+        Char::class.javaObjectType, Char::class.javaPrimitiveType -> ConfigAdapter.CHAR
+        Boolean::class.javaObjectType, Boolean::class.javaPrimitiveType -> ConfigAdapter.BOOLEAN
+        Material::class.java -> ConfigAdapter.MATERIAL
+        NamespacedKey::class.java -> ConfigAdapter.NAMESPACED_KEY
+        ItemStack::class.java -> ConfigAdapter.ITEM_STACK
+        BlockData::class.java -> ConfigAdapter.BLOCK_DATA
+        PylonFluid::class.java -> ConfigAdapter.PYLON_FLUID
+        FluidOrItem::class.java -> ConfigAdapter.FLUID_OR_ITEM
+        else -> throw IllegalArgumentException("Unsupported type: $this")
+    }
+
+    is ParameterizedType -> when (this.rawType) {
+        List::class.java -> ListConfigAdapter(this.actualTypeArguments[0].toAdapter())
+        Set::class.java -> SetConfigAdapter(this.actualTypeArguments[0].toAdapter())
+        Map::class.java -> MapConfigAdapter(
+            this.actualTypeArguments[0].toAdapter(),
+            this.actualTypeArguments[1].toAdapter()
+        )
+
+        else -> throw IllegalArgumentException("Unsupported parameterized type: $this")
+    }
+
+    else -> throw IllegalArgumentException("Unsupported type: $this")
 }

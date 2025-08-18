@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
@@ -116,7 +117,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                     .color(NamedTextColor.RED)
                     .decoration(TextDecoration.ITALIC, true)
             }
-            val translation = translations.get<String>(key) ?: return null
+            val translation = translations.get(key, ConfigAdapter.STRING) ?: return null
             customMiniMessage.deserialize(translation)
         }
     }

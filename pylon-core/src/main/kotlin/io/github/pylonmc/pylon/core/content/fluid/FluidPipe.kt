@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.content.fluid
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidManager
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
@@ -14,7 +15,6 @@ import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
-import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
@@ -22,13 +22,14 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
-import java.util.function.Predicate
 
 open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityInteractor, PylonInteractor {
-    val material = Material.valueOf(getSettings().getOrThrow<String>("material").uppercase())
-    val fluidPerSecond = getSettings().getOrThrow<Double>("fluid-per-second")
-    val allowedTemperatures = getSettings().getOrThrow<List<String>>("allowed-temperatures")
-        .map { s -> FluidTemperature.valueOf(s.uppercase()) }
+    val material = getSettings().getOrThrow("material", ConfigAdapter.MATERIAL)
+    val fluidPerSecond = getSettings().getOrThrow("fluid-per-second", ConfigAdapter.DOUBLE)
+    val allowedTemperatures = getSettings().getOrThrow(
+        "allowed-temperatures",
+        ConfigAdapter.LIST.from(ConfigAdapter.ENUM.from<FluidTemperature>())
+    )
 
     override fun getPlaceholders(): List<PylonArgument> = listOf(
         PylonArgument.of("fluid_per_second", UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond)),

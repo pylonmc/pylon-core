@@ -1,11 +1,11 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
-import io.github.pylonmc.pylon.core.recipe.RecipeType.Companion.convertTypeOrThrow
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import net.kyori.adventure.text.Component
@@ -69,10 +69,10 @@ private inline fun <T : CookingRecipe<T>> loadCookingRecipe(
     config: ConfigSection,
     cons: (NamespacedKey, ItemStack, RecipeChoice, Float, Int) -> T
 ): T {
-    val cookingTime = config.get<Number>("cookingtime", 200).toInt()
-    val experience = config.get<Number>("experience", 0).toFloat()
-    val ingredient = convertTypeOrThrow<ItemStack>(config.getOrThrow("ingredient"))
-    val result = convertTypeOrThrow<ItemStack>(config.getOrThrow("result"))
+    val cookingTime = config.get("cookingtime", ConfigAdapter.INT, 200)
+    val experience = config.get("experience", ConfigAdapter.FLOAT, 0f)
+    val ingredient = config.getOrThrow("ingredient", ConfigAdapter.ITEM_STACK)
+    val result = config.getOrThrow("result", ConfigAdapter.ITEM_STACK)
     return cons(key, result, RecipeChoice.ExactChoice(ingredient), experience, cookingTime)
 }
 

@@ -1,13 +1,15 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
+import io.papermc.paper.registry.RegistryAccess
+import io.papermc.paper.registry.RegistryKey
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.*
-import org.bukkit.inventory.meta.trim.TrimPattern
 import xyz.xenondevs.invui.gui.Gui
 
 
@@ -50,10 +52,10 @@ object SmithingTransformRecipeType : VanillaRecipeType<SmithingTransformRecipeWr
     fun addRecipe(recipe: SmithingTransformRecipe) = super.addRecipe(SmithingTransformRecipeWrapper(recipe))
 
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): SmithingTransformRecipeWrapper {
-        val template = convertTypeOrThrow<ItemStack>(section.getOrThrow("template"))
-        val base = convertTypeOrThrow<ItemStack>(section.getOrThrow("base"))
-        val addition = convertTypeOrThrow<ItemStack>(section.getOrThrow("addition"))
-        val result = convertTypeOrThrow<ItemStack>(section.getOrThrow("result"))
+        val template = section.getOrThrow("template", ConfigAdapter.ITEM_STACK)
+        val base = section.getOrThrow("base", ConfigAdapter.ITEM_STACK)
+        val addition = section.getOrThrow("addition", ConfigAdapter.ITEM_STACK)
+        val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
         return SmithingTransformRecipeWrapper(
             SmithingTransformRecipe(
                 key,
@@ -69,15 +71,20 @@ object SmithingTransformRecipeType : VanillaRecipeType<SmithingTransformRecipeWr
 /**
  * Key: `minecraft:smithing_trim`
  */
-object SmithingTrimRecipeType : VanillaRecipeType<SmithingTrimRecipeWrapper>("smithing_trim", SmithingTrimRecipeWrapper::class.java) {
+object SmithingTrimRecipeType :
+    VanillaRecipeType<SmithingTrimRecipeWrapper>("smithing_trim", SmithingTrimRecipeWrapper::class.java) {
+
+    private val TRIM_PATTERN_ADAPTER = ConfigAdapter.KEYED.fromRegistry(
+        RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN)
+    )
 
     fun addRecipe(recipe: SmithingTrimRecipe) = super.addRecipe(SmithingTrimRecipeWrapper(recipe))
 
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): SmithingTrimRecipeWrapper {
-        val pattern = convertTypeOrThrow<TrimPattern>(section.getOrThrow("pattern"))
-        val template = convertTypeOrThrow<ItemStack>(section.getOrThrow("template"))
-        val base = convertTypeOrThrow<ItemStack>(section.getOrThrow("base"))
-        val addition = convertTypeOrThrow<ItemStack>(section.getOrThrow("addition"))
+        val pattern = section.getOrThrow("pattern", TRIM_PATTERN_ADAPTER)
+        val template = section.getOrThrow("template", ConfigAdapter.ITEM_STACK)
+        val base = section.getOrThrow("base", ConfigAdapter.ITEM_STACK)
+        val addition = section.getOrThrow("addition", ConfigAdapter.ITEM_STACK)
         return SmithingTrimRecipeWrapper(
             SmithingTrimRecipe(
                 key,

@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
@@ -54,7 +55,7 @@ sealed class AShapelessRecipeWrapper(recipe: CraftingRecipe) : CraftingRecipeWra
 
     protected abstract val choiceList: List<RecipeChoice?>
 
-    override val inputs = choiceList.filterNotNull().flatMap(FluidOrItem::of)
+    override val inputs: List<FluidOrItem> by lazy { choiceList.filterNotNull().flatMap(FluidOrItem::of) }
 
     override fun display() = Gui.normal()
         .setStructure(
@@ -99,9 +100,9 @@ object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shape
     fun addRecipe(recipe: ShapedRecipe) = super.addRecipe(ShapedRecipeWrapper(recipe))
 
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): ShapedRecipeWrapper {
-        val ingredientKey = convertTypeOrThrow<Map<Char, ItemStack>>(section.getOrThrow("key"))
-        val pattern = section.getOrThrow<List<String>>("pattern")
-        val result = convertTypeOrThrow<ItemStack>(section.getOrThrow("result"))
+        val ingredientKey = section.getOrThrow("key", ConfigAdapter.MAP.from(ConfigAdapter.CHAR, ConfigAdapter.ITEM_STACK))
+        val pattern = section.getOrThrow("pattern", ConfigAdapter.LIST.from(ConfigAdapter.STRING))
+        val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
 
         val recipe = ShapedRecipe(key, result)
         recipe.shape(*pattern.toTypedArray())
@@ -120,8 +121,8 @@ object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting
     fun addRecipe(recipe: ShapelessRecipe) = super.addRecipe(ShapelessRecipeWrapper(recipe))
 
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): ShapelessRecipeWrapper {
-        val ingredients = convertTypeOrThrow<List<ItemStack>>(section.getOrThrow("ingredients"))
-        val result = convertTypeOrThrow<ItemStack>(section.getOrThrow("result"))
+        val ingredients = section.getOrThrow("ingredients", ConfigAdapter.LIST.from(ConfigAdapter.ITEM_STACK))
+        val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
 
         val recipe = ShapelessRecipe(key, result)
         for (ingredient in ingredients) {
@@ -139,9 +140,9 @@ object TransmuteRecipeType : VanillaRecipeType<TransmuteRecipeWrapper>("crafting
     fun addRecipe(recipe: TransmuteRecipe) = super.addRecipe(TransmuteRecipeWrapper(recipe))
 
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): TransmuteRecipeWrapper {
-        val input = convertTypeOrThrow<ItemStack>(section.getOrThrow("input"))
-        val material = convertTypeOrThrow<ItemStack>(section.getOrThrow("material"))
-        val result = convertTypeOrThrow<Material>(section.getOrThrow("result"))
+        val input = section.getOrThrow("input", ConfigAdapter.ITEM_STACK)
+        val material = section.getOrThrow("material", ConfigAdapter.ITEM_STACK)
+        val result = section.getOrThrow("result", ConfigAdapter.MATERIAL)
         val recipe = TransmuteRecipe(key, result, RecipeChoice.ExactChoice(input), RecipeChoice.ExactChoice(material))
         return TransmuteRecipeWrapper(recipe)
     }
