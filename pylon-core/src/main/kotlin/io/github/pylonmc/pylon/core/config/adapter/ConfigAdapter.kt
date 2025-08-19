@@ -41,6 +41,7 @@ interface ConfigAdapter<T> {
 
         @JvmField val PYLON_FLUID = KEYED.fromRegistry(PylonRegistry.FLUIDS)
         @JvmField val FLUID_OR_ITEM = FluidOrItemConfigAdapter
+        @JvmField val WEIGHTED_SET = WeightedSetConfigAdapter
         // @formatter:on
     }
 }
