@@ -196,7 +196,7 @@ fun findRecipeFor(item: PylonItem): PylonRecipe? {
     val multiOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
         .flatMap { it.recipes }
         .filter { recipe -> recipe.isOutput(item.stack) }
-        .sortedWith { a: PylonRecipe, b: PylonRecipe -> a.key.compareTo(b.key) }
+        .sortedBy { it.key }
         .toList()
 
     if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
