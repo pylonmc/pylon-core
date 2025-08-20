@@ -26,11 +26,10 @@ import kotlin.math.max
 /**
  * Magic numbers:
  * 36 -> 36 "i" in sub-page, which means input items/fluid
- * 9  -> 9  "o" in sub-page, which means along-products
+ * 9  -> 9  "o" in sub-page, which means intermediates
  *
  * @author balugaq
  */
-@Suppress("UnstableApiUsage")
 open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     override val item = ItemStackBuilder.of(stack)
 
@@ -54,8 +53,8 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
             .addIngredient('>', if (maxPage > 1) GuiItems.pageNext() else GuiItems.background())
             .addIngredient('f', info(stack, calculation.outputAmount))
             .addIngredient(
-                'a', if (!calculation.alongProducts.isEmpty()) {
-                    alongProductsButton
+                'a', if (!calculation.intermediates.isEmpty()) {
+                    intermediatesButton
                 } else {
                     GuiItems.background()
                 }
@@ -67,7 +66,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
             }
             .addModifier {
                 for (i in 0..8) {
-                    it.setItem(45 + i, flatWithAmount(calculation.alongProducts.getOrNull(9 * page + i)))
+                    it.setItem(45 + i, flatWithAmount(calculation.intermediates.getOrNull(9 * page + i)))
                 }
             }
             .build()
@@ -90,7 +89,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     override fun getGui(player: Player): Gui {
         val pages = mutableListOf<Gui>()
         val calculation = IngredientCalculator.calculateFinal(stack)
-        val maxPage = max(calculation.inputs.size / 36, calculation.alongProducts.size / 9)
+        val maxPage = max(calculation.inputs.size / 36, calculation.intermediates.size / 9)
         for (i in 0..maxPage) {
             pages += getSubPage(player, stack, calculation, i, maxPage)
         }
@@ -120,14 +119,13 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
         .build()
 
     /**
-     * Display amount in the input/along-product stacks
+     * Display amount in the input/intermediate stacks
      */
     fun flatWithAmount(fluidOrItem: FluidOrItem?): Item {
         if (fluidOrItem == null) return GuiItems.background()
         return SimpleItem(
             when (fluidOrItem) {
-                is FluidOrItem.Fluid -> ItemStackBuilder.of(fluidOrItem.fluid.getItem().build())
-                    .lore("")
+                is FluidOrItem.Fluid -> ItemStackBuilder.of(fluidOrItem.fluid.getItem().build()) // Must be cloned
                     .lore(
                         Component.translatable(
                             "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
@@ -136,8 +134,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
                     )
                     .amount(1)
 
-                is FluidOrItem.Item -> ItemStackBuilder.of(fluidOrItem.item)
-                    .lore("")
+                is FluidOrItem.Item -> ItemStackBuilder.of(fluidOrItem.item.clone()) // Must be cloned
                     .lore(
                         Component.translatable(
                             "pylon.pyloncore.message.guide.ingredients-page.input_stack",
@@ -149,11 +146,10 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
         )
     }
 
-    val alongProductsButton: Item = SimpleItem(
+    val intermediatesButton: Item = SimpleItem(
         ItemStackBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)
             .amount(1)
             .name(Component.translatable("pylon.pyloncore.guide.button.back.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.back.lore"))
-            .set(DataComponentTypes.HIDE_TOOLTIP)
     )
 }

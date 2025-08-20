@@ -156,6 +156,7 @@ guide:
     fluid_recipes: "Fluid recipes"
     item_usages: "Item usages"
     fluid_usages: "Fluid usages"
+    item_ingredients: "Item ingredients"
 
 unit:
   prefix:

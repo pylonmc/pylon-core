@@ -18,7 +18,26 @@ abstract class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : Vanil
 }
 
 class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputs: List<FluidOrItem> = recipe.choiceMap.values.filterNotNull().flatMap(FluidOrItem::of)
+    override val inputs: List<FluidOrItem> = run {
+        recipe.shape
+            .flatMap { it.asIterable() }
+            .groupingBy { it }
+            .eachCount()
+            .mapNotNull {(char, cnt) ->
+                val choice = recipe.choiceMap[char]
+                if (choice == null) {
+                    return@mapNotNull null
+                }
+
+                val scaled = when (choice) {
+                    is RecipeChoice.MaterialChoice -> choice * cnt
+                    is RecipeChoice.ExactChoice -> choice * cnt
+                    else -> choice
+                }
+                FluidOrItem.of(scaled) }
+            .flatMap { it -> it }
+            .toList()
+    }
 
     override fun display(): Gui {
         val gui = Gui.normal()
@@ -89,4 +108,16 @@ object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("shaped") {
 
 object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("shapeless") {
     fun addRecipe(recipe: ShapelessRecipe) = super.addRecipe(ShapelessRecipeWrapper(recipe))
+}
+
+operator fun RecipeChoice.MaterialChoice.times(n: Int): RecipeChoice.MaterialChoice {
+    val clone = this.clone() // already cloned choices
+    clone.itemStack.amount *= n
+    return clone
+}
+
+operator fun RecipeChoice.ExactChoice.times(n: Int): RecipeChoice.ExactChoice {
+    val clone = this.clone() // already cloned choices
+    clone.choices.map { it.amount *= n; it }.toList()
+    return clone
 }

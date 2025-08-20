@@ -1,5 +1,3 @@
-@file:JvmName("IngredientCalculator")
-
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -36,14 +34,14 @@ import kotlin.math.ceil
  *        | stack.amount = 11 (the arg)                  |   [Try to find ingredients' recipe] ---╯
  *        | baseCalculation = {                          |        |
  *        |     inputs        = [Ax1, Bx13, Cx19]        |        |
- *        |     alongProducts = [Mx16, Nx9]              |        ↓
+ *        |     intermediates = [Mx16, Nx9]              |        ↓
  *        |     outputAmount  = 3                        ╰-- [Merge ingredients and return value]
  *        | }
  *        | ```
  *        | After scaling (×4), it will be:
  *        | baseCalculation = {
  *        |     inputs        = [Ax4, Bx52, Cx76]
- *        |     alongProducts = [Mx64, Nx36]
+ *        |     intermediates = [Mx64, Nx36]
  *        |     outputAmount  = 12
  *        | }
  *        |
@@ -93,7 +91,7 @@ object IngredientCalculator {
         val recipe = findRecipeFor(fluid.fluid)
             ?: return IngredientCalculation(
                 inputs = mutableListOf(fluid),
-                alongProducts = mutableListOf(),
+                intermediates = mutableListOf(),
                 outputAmount = fluid.amountMillibuckets
             )
 
@@ -101,16 +99,16 @@ object IngredientCalculator {
             .find { it is FluidOrItem.Fluid && it.fluid == fluid.fluid } as? FluidOrItem.Fluid
             ?: return IngredientCalculation(
                 inputs = mutableListOf(fluid),
-                alongProducts = mutableListOf(),
+                intermediates = mutableListOf(),
                 outputAmount = fluid.amountMillibuckets
             )
 
-        val additionalAlongProducts = recipe.results.filter { it != targetFluid }
+        val additionalIntermediates = recipe.results.filter { it != targetFluid }
         val scaleMultiplier = ceil(fluid.amountMillibuckets / targetFluid.amountMillibuckets)
 
         return IngredientCalculation(
             inputs = recipe.inputs.toMutableList(),
-            alongProducts = additionalAlongProducts.toMutableList(),
+            intermediates = additionalIntermediates.toMutableList(),
             outputAmount = targetFluid.amountMillibuckets
         ).scaleBy(scaleMultiplier)
             .copy(outputAmount = fluid.amountMillibuckets)
@@ -146,16 +144,16 @@ object IngredientCalculator {
             }
         }
 
-        // exclude main product, but including along products
+        // exclude main product, but including intermediates // fixme: not work seems, but not a big deal
         for (outputResult in recipe.results) {
             when (outputResult) {
                 is FluidOrItem.Item -> {
                     if (!outputResult.item.isPylonSimilar(pylonItem.stack)) {
-                        baseResult.alongProducts += outputResult
+                        baseResult.intermediates += outputResult
                     }
                 }
 
-                is FluidOrItem.Fluid -> baseResult.alongProducts += outputResult
+                is FluidOrItem.Fluid -> baseResult.intermediates += outputResult
             }
         }
 
@@ -195,7 +193,7 @@ object IngredientCalculator {
  */
 data class IngredientCalculation(
     val inputs: MutableList<FluidOrItem>,
-    val alongProducts: MutableList<FluidOrItem>,
+    val intermediates: MutableList<FluidOrItem>,
     /**
      * Output amount:
      * - In basic recipe calculation  -> the amount of main product output per recipe cycle
@@ -203,9 +201,6 @@ data class IngredientCalculation(
      */
     var outputAmount: Double
 ) {
-    constructor(inputs: List<FluidOrItem>, alongProducts: List<FluidOrItem>, outputAmount: Double) :
-            this(inputs.toMutableList(), alongProducts.toMutableList(), outputAmount)
-
     /**
      * Merge sub-recipe calculation results (only merge raw materials and along products,
      * without affecting main product amount)
@@ -213,7 +208,7 @@ data class IngredientCalculation(
      */
     fun mergeSubCalculation(other: IngredientCalculation) {
         this.inputs += other.inputs
-        this.alongProducts += other.alongProducts
+        this.intermediates += other.intermediates
     }
 
     /**
@@ -225,12 +220,12 @@ data class IngredientCalculation(
         if (multiplier <= 0.0) return this
 
         val scaledInputs = inputs.map { scaleComponent(it, multiplier) }
-        val scaledAlongProducts = alongProducts.map { scaleComponent(it, multiplier) }
+        val scaledIntermediates = intermediates.map { scaleComponent(it, multiplier) }
         val scaledOutputAmount = ceil(outputAmount * multiplier)
 
         return IngredientCalculation(
             scaledInputs.toMutableList(),
-            scaledAlongProducts.toMutableList(),
+            scaledIntermediates.toMutableList(),
             scaledOutputAmount
         )
     }
@@ -260,7 +255,7 @@ data class IngredientCalculation(
          */
         @JvmStatic
         fun empty(): IngredientCalculation {
-            return IngredientCalculation(emptyList(), emptyList(), 0.toDouble())
+            return IngredientCalculation(mutableListOf(), mutableListOf(), 0.toDouble())
         }
 
         /**
@@ -272,7 +267,7 @@ data class IngredientCalculation(
         fun asIngredient(stack: ItemStack): IngredientCalculation {
             return IngredientCalculation(
                 inputs = mutableListOf(FluidOrItem.of(stack)),
-                alongProducts = mutableListOf(),
+                intermediates = mutableListOf(),
                 outputAmount = stack.amount.toDouble()
             )
         }
