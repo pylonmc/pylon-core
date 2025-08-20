@@ -182,6 +182,7 @@ object IngredientCalculator {
         return if (outputAmount > 0) outputAmount.toDouble() else 1.0
     }
 
+    @JvmSynthetic
     internal fun checkRecursiveDepth(depth: Int) {
         if (depth > RECURSIVE_THRESHOLD) {
             throw RuntimeException("Recursive depth exceeded the threshold of $RECURSIVE_THRESHOLD")
