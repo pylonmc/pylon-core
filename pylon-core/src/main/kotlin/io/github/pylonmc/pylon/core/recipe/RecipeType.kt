@@ -1,30 +1,18 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
-import io.github.pylonmc.pylon.core.config.adapter.*
-import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.recipe.vanilla.*
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
-import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.block.data.BlockData
 import org.bukkit.inventory.*
-import java.lang.invoke.MethodHandle
-import java.lang.invoke.MethodHandles
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.RecordComponent
-import java.lang.reflect.Type
 
 /**
  * Iteration order will be the order in which recipes were added unless overridden.
  */
-open class RecipeType<T : PylonRecipe>(
-    private val key: NamespacedKey,
-    private val recipeClass: Class<T>
-) : Keyed, Iterable<T>, RegistryHandler {
+abstract class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, Iterable<T>, RegistryHandler {
 
     protected open val registeredRecipes = mutableMapOf<NamespacedKey, T>()
     val recipes: Collection<T>
@@ -55,34 +43,7 @@ open class RecipeType<T : PylonRecipe>(
         }
     }
 
-    private val components: List<RecordComponent> by lazy {
-        recipeClass.recordComponents.filterNot { it.isAnnotationPresent(RecipeKey::class.java) }
-    }
-
-    private val recipeKey: Int by lazy {
-        recipeClass.recordComponents.indexOfFirst { it.isAnnotationPresent(RecipeKey::class.java) }
-    }
-
-    private val constructorHandle: MethodHandle by lazy {
-        val canonicalConstructor = recipeClass.getDeclaredConstructor(
-            *recipeClass.recordComponents.map { it.type }.toTypedArray()
-        )
-        MethodHandles.lookup().unreflectConstructor(canonicalConstructor)
-    }
-
-    protected open fun loadRecipe(key: NamespacedKey, section: ConfigSection): T {
-        check(recipeClass.isRecord) {
-            "Recipe type $key must be a record class to load from config. " +
-                    "Use a custom implementation of RecipeType.loadRecipe if you need to load from config."
-        }
-        check(recipeKey >= 0) { "Recipe type $key must have a @RecipeKey annotated component to load from config." }
-
-        val values = components.mapTo(mutableListOf()) { component ->
-            section.get(component.name, component.type.toAdapter())
-        }
-        values.add(recipeKey, key)
-        return recipeClass.cast(constructorHandle.invokeWithArguments(values))
-    }
+    protected abstract fun loadRecipe(key: NamespacedKey, section: ConfigSection): T
 
     override fun iterator(): Iterator<T> = registeredRecipes.values.iterator()
 
@@ -184,42 +145,4 @@ open class RecipeType<T : PylonRecipe>(
             }
         }
     }
-}
-
-@Suppress("UNCHECKED_CAST")
-private fun Type.toAdapter(): ConfigAdapter<*> = when (this) {
-
-    is Class<*> if this.isEnum && this != Material::class.java -> EnumConfigAdapter(this as Class<out Enum<*>>)
-
-    is Class<*> -> when (this) {
-        String::class.java -> ConfigAdapter.STRING
-        Byte::class.javaObjectType, Byte::class.javaPrimitiveType -> ConfigAdapter.BYTE
-        Short::class.javaObjectType, Short::class.javaPrimitiveType -> ConfigAdapter.SHORT
-        Int::class.javaObjectType, Int::class.javaPrimitiveType -> ConfigAdapter.INT
-        Long::class.javaObjectType, Long::class.javaPrimitiveType -> ConfigAdapter.LONG
-        Float::class.javaObjectType, Float::class.javaPrimitiveType -> ConfigAdapter.FLOAT
-        Double::class.javaObjectType, Double::class.javaPrimitiveType -> ConfigAdapter.DOUBLE
-        Char::class.javaObjectType, Char::class.javaPrimitiveType -> ConfigAdapter.CHAR
-        Boolean::class.javaObjectType, Boolean::class.javaPrimitiveType -> ConfigAdapter.BOOLEAN
-        Material::class.java -> ConfigAdapter.MATERIAL
-        NamespacedKey::class.java -> ConfigAdapter.NAMESPACED_KEY
-        ItemStack::class.java -> ConfigAdapter.ITEM_STACK
-        BlockData::class.java -> ConfigAdapter.BLOCK_DATA
-        PylonFluid::class.java -> ConfigAdapter.PYLON_FLUID
-        FluidOrItem::class.java -> ConfigAdapter.FLUID_OR_ITEM
-        else -> throw IllegalArgumentException("Unsupported type: $this")
-    }
-
-    is ParameterizedType -> when (this.rawType) {
-        List::class.java -> ListConfigAdapter(this.actualTypeArguments[0].toAdapter())
-        Set::class.java -> SetConfigAdapter(this.actualTypeArguments[0].toAdapter())
-        Map::class.java -> MapConfigAdapter(
-            this.actualTypeArguments[0].toAdapter(),
-            this.actualTypeArguments[1].toAdapter()
-        )
-
-        else -> throw IllegalArgumentException("Unsupported parameterized type: $this")
-    }
-
-    else -> throw IllegalArgumentException("Unsupported type: $this")
 }

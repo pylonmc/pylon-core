@@ -15,7 +15,7 @@ sealed interface VanillaRecipeWrapper : PylonRecipe {
 sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(
     key: String,
     recipeClass: Class<T>,
-) : RecipeType<T>(NamespacedKey.minecraft(key), recipeClass), Listener {
+) : RecipeType<T>(NamespacedKey.minecraft(key)), Listener {
 
     init {
         Bukkit.getPluginManager().registerEvents(this, PylonCore)
