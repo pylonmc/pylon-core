@@ -10,6 +10,7 @@ import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
+import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
@@ -32,6 +33,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
@@ -41,6 +43,9 @@ import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
 import java.util.Locale
+import kotlin.io.path.extension
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.walk
 
 object PylonCore : JavaPlugin(), PylonAddon {
 
@@ -123,6 +128,17 @@ object PylonCore : JavaPlugin(), PylonAddon {
                     val config = configStream.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
                     type.loadFromConfig(config)
                 }
+            }
+            val recipesDir = dataPath.resolve("recipes")
+            if (recipesDir.toFile().exists()) {
+                recipesDir.walk()
+                    .filter { it.extension == "yml" }
+                    .mapNotNull {
+                        NamespacedKey.fromString(it.nameWithoutExtension)
+                            ?.let(PylonRegistry.RECIPE_TYPES::get)
+                            ?.let { type -> type to Config(it) }
+                    }
+                    .forEach { (type, config) -> type.loadFromConfig(config) }
             }
         }
     }
