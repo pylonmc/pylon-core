@@ -2,6 +2,8 @@ package io.github.pylonmc.pylon.core.guide.pages.item
 
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
+import io.github.pylonmc.pylon.core.guide.pages.base.SimpleDynamicGuidePage
+import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.recipe.Container
@@ -27,9 +29,10 @@ import kotlin.math.max
  *
  * @author balugaq
  */
-open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
-    override val item = ItemStackBuilder.of(stack)
-
+open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
+    pylonKey("item_ingredients"),
+    Material.SCULK_SENSOR
+) {
     override fun getKey() = KEY
 
     // page is 0 based
@@ -72,7 +75,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
             }
             .build()
 
-    open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
+    open fun getGuiHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
         .setStructure(
             "< b # # # # # # >",
             "x x x x x x x x x",
@@ -95,7 +98,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
             pages += getSubPage(player, stack, calculation, i, maxPage)
         }
 
-        val gui = getHeader(player, pages)
+        val gui = getGuiHeader(player, pages)
         for (page in pages) {
             gui.addContent(page)
         }
@@ -147,13 +150,11 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
         ItemStackBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)
             .amount(1)
             .name(Component.translatable("pylon.pyloncore.guide.button.intermediates.name"))
-            .lore(Component.translatable("pylon.pyloncore.guide.button.intermediates.lore"))
     )
 
     val mainProductButton: Item = SimpleItem(
         ItemStackBuilder.of(Material.GREEN_STAINED_GLASS_PANE)
             .amount(1)
             .name(Component.translatable("pylon.pyloncore.guide.button.main_product.name"))
-            .lore(Component.translatable("pylon.pyloncore.guide.button.main_product.lore"))
     )
 }
