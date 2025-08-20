@@ -55,7 +55,13 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
                 "f o o o o o o o o",
             )
             .addIngredient('x', GuiItems.background())
-            .addIngredient('f', info(player, stack, calculation.outputAmount))
+            .addIngredient('f', toDisplay(
+                stack,
+                Component.translatable(
+                    "pylon.pyloncore.message.guide.ingredients-page.stack_info",
+                    PylonArgument.of("amount", calculation.outputAmount)
+                )
+            ))
             .addIngredient('m', mainProductButton)
             .addIngredient(
                 'a', if (!calculation.intermediates.isEmpty()) {
@@ -111,24 +117,10 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     }
 
     /**
-     * Display info about the main product stack
+     * @param icon The origin stack, must be cloned when calling this method
      */
-    fun info(player: Player, stack: ItemStack, outputAmount: Double) = toDisplay(
-        player,
-        stack,
-        Component.translatable(
-            "pylon.pyloncore.message.guide.ingredients-page.stack_info",
-            PylonArgument.of("amount", outputAmount)
-        )
-    )
-
-    fun toDisplay(player: Player, icon: ItemStack, addition: Component): ItemStack {
-        icon.editData(DataComponentTypes.LORE) {
-            ItemLore.lore(it.lines().toList() + addition)
-        }
-        icon.amount = 1
-        return icon
-    }
+    fun toDisplay(icon: ItemStack, addition: Component): ItemStack =
+        ItemStackBuilder.of(icon).lore(addition).amount(1).build()
 
     /**
      * Display amount in the input/intermediate stacks
@@ -138,13 +130,13 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
 
         return SimpleItem(ItemStackBuilder.of(when (fluidOrItem) {
             is Container.Fluid -> {
-                toDisplay(player, fluidOrItem.fluid.getItem().build(), Component.translatable(
+                toDisplay(fluidOrItem.fluid.getItem().build(), Component.translatable(
                     "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
                     PylonArgument.of("amount", fluidOrItem.amountMillibuckets)
                 ))
             }
             is Container.Item -> {
-                toDisplay(player, fluidOrItem.item.clone(), Component.translatable(
+                toDisplay(fluidOrItem.item.clone(), Component.translatable(
                     "pylon.pyloncore.message.guide.ingredients-page.input_stack",
                     PylonArgument.of("amount", fluidOrItem.item.amount)
                 ))
