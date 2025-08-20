@@ -338,16 +338,20 @@ data class IngredientCalculation(
  */
 internal class InternalRecipe(private val recipe: PylonRecipe) : PylonRecipe by recipe {
     override val inputs: List<FluidOrItem>
-        get() = recipe.inputs.map { when (it) {
-            is FluidOrItem.Fluid -> FluidOrItem.of(it.fluid, it.amountMillibuckets)
-            is FluidOrItem.Item -> FluidOrItem.of(it.item.clone())
-        }}
+        get() = recipe.inputs.map {
+            when (it) {
+                is FluidOrItem.Fluid -> FluidOrItem.of(it.fluid, it.amountMillibuckets)
+                is FluidOrItem.Item -> FluidOrItem.of(it.item.clone())
+            }
+        }
 
     override val results: List<FluidOrItem>
-        get() = recipe.results.map { when (it) {
-            is FluidOrItem.Fluid -> FluidOrItem.of(it.fluid, it.amountMillibuckets)
-            is FluidOrItem.Item -> FluidOrItem.of(it.item.clone())
-        }}
+        get() = recipe.results.map {
+            when (it) {
+                is FluidOrItem.Fluid -> FluidOrItem.of(it.fluid, it.amountMillibuckets)
+                is FluidOrItem.Item -> FluidOrItem.of(it.item.clone())
+            }
+        }
 
     override fun key(): Key {
         return recipe.key()
@@ -369,6 +373,7 @@ sealed class Container {
                 is Item -> item.isPylonSimilar(other.item)
                 is Fluid -> false
             }
+
             is Fluid -> when (other) {
                 is Item -> false
                 is Fluid -> fluid == other.fluid
@@ -383,12 +388,15 @@ sealed class Container {
                 is FluidOrItem.Item -> Item(fluidOrItem.item.clone())
             }
         }
+
         fun of(fluid: PylonFluid, amountMillibuckets: Double): Container {
             return Fluid(fluid, amountMillibuckets)
         }
+
         fun of(item: ItemStack): Container {
             return Item(item.clone())
         }
+
         fun of(choice: RecipeChoice): Container {
             return Item(choice.itemStack.clone())
         }

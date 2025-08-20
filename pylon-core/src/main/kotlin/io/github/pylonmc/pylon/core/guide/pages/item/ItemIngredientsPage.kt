@@ -1,27 +1,15 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
-import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
-import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
-import io.github.pylonmc.pylon.core.i18n.PylonTranslator
-import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
-import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.recipe.Container
-import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculation
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator
-import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -55,13 +43,15 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
                 "f o o o o o o o o",
             )
             .addIngredient('x', GuiItems.background())
-            .addIngredient('f', toDisplay(
-                stack,
-                Component.translatable(
-                    "pylon.pyloncore.message.guide.ingredients-page.stack_info",
-                    PylonArgument.of("amount", calculation.outputAmount)
+            .addIngredient(
+                'f', toDisplay(
+                    stack,
+                    Component.translatable(
+                        "pylon.pyloncore.message.guide.ingredients-page.stack_info",
+                        PylonArgument.of("amount", calculation.outputAmount)
+                    )
                 )
-            ))
+            )
             .addIngredient('m', mainProductButton)
             .addIngredient(
                 'a', if (!calculation.intermediates.isEmpty()) {
@@ -72,12 +62,12 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
             )
             .addModifier {
                 for (i in 0..26) {
-                    it.setItem(i, flatWithAmount(player, calculation.inputs.getOrNull(27 * page + i)))
+                    it.setItem(i, flatWithAmount(calculation.inputs.getOrNull(27 * page + i)))
                 }
             }
             .addModifier {
                 for (i in 1..8) {
-                    it.setItem(36 + i, flatWithAmount(player, calculation.intermediates.getOrNull(9 * page + i)))
+                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(9 * page + i)))
                 }
             }
             .build()
@@ -125,23 +115,32 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     /**
      * Display amount in the input/intermediate stacks
      */
-    fun flatWithAmount(player: Player, fluidOrItem: Container?): Item {
+    fun flatWithAmount(fluidOrItem: Container?): Item {
         if (fluidOrItem == null) return GuiItems.background()
 
-        return SimpleItem(ItemStackBuilder.of(when (fluidOrItem) {
-            is Container.Fluid -> {
-                toDisplay(fluidOrItem.fluid.getItem().build(), Component.translatable(
-                    "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
-                    PylonArgument.of("amount", fluidOrItem.amountMillibuckets)
-                ))
-            }
-            is Container.Item -> {
-                toDisplay(fluidOrItem.item.clone(), Component.translatable(
-                    "pylon.pyloncore.message.guide.ingredients-page.input_stack",
-                    PylonArgument.of("amount", fluidOrItem.item.amount)
-                ))
-            }
-        }))
+        return SimpleItem(
+            ItemStackBuilder.of(
+                when (fluidOrItem) {
+                    is Container.Fluid -> {
+                        toDisplay(
+                            fluidOrItem.fluid.getItem().build(), Component.translatable(
+                                "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
+                                PylonArgument.of("amount", fluidOrItem.amountMillibuckets)
+                            )
+                        )
+                    }
+
+                    is Container.Item -> {
+                        toDisplay(
+                            fluidOrItem.item.clone(), Component.translatable(
+                                "pylon.pyloncore.message.guide.ingredients-page.input_stack",
+                                PylonArgument.of("amount", fluidOrItem.item.amount)
+                            )
+                        )
+                    }
+                }
+            )
+        )
     }
 
     val intermediatesButton: Item = SimpleItem(
