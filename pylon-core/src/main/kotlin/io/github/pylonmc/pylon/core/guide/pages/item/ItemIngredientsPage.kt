@@ -123,7 +123,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
      * Display amount in the input/along-product stacks
      */
     fun flatWithAmount(fluidOrItem: FluidOrItem?): Item {
-        fluidOrItem ?: return GuiItems.background()
+        if (fluidOrItem == null) return GuiItems.background()
         return SimpleItem(
             when (fluidOrItem) {
                 is FluidOrItem.Fluid -> ItemStackBuilder.of(fluidOrItem.fluid.getItem().build())
