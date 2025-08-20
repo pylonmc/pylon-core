@@ -240,7 +240,7 @@ data class IngredientCalculation(
      * @param multiplier Scaling multiplier
      * @return Scaled component
      */
-    internal fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
+    private fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
         return when (component) {
             is FluidOrItem.Fluid ->
                 FluidOrItem.of(component.fluid, component.amountMillibuckets * multiplier)
