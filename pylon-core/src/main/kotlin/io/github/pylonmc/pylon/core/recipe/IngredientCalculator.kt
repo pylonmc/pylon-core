@@ -1,12 +1,15 @@
 package io.github.pylonmc.pylon.core.recipe
 
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateBase
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateFinal
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.checkRecursiveDepth
 import io.github.pylonmc.pylon.core.util.findRecipeFor
 import io.github.pylonmc.pylon.core.util.isPylonSimilar
+import net.kyori.adventure.key.Key
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.RecipeChoice
 import kotlin.math.ceil
 
 /**
@@ -90,7 +93,7 @@ object IngredientCalculator {
 
         val recipe = findRecipeFor(fluid.fluid)
             ?: return IngredientCalculation(
-                inputs = mutableListOf(fluid),
+                inputs = mutableListOf(Container.of(fluid)),
                 intermediates = mutableListOf(),
                 outputAmount = fluid.amountMillibuckets
             )
@@ -98,7 +101,7 @@ object IngredientCalculator {
         val targetFluid = recipe.results
             .find { it is FluidOrItem.Fluid && it.fluid == fluid.fluid } as? FluidOrItem.Fluid
             ?: return IngredientCalculation(
-                inputs = mutableListOf(fluid),
+                inputs = Container.of(mutableListOf(fluid)),
                 intermediates = mutableListOf(),
                 outputAmount = fluid.amountMillibuckets
             )
@@ -107,8 +110,8 @@ object IngredientCalculator {
         val scaleMultiplier = ceil(fluid.amountMillibuckets / targetFluid.amountMillibuckets)
 
         return IngredientCalculation(
-            inputs = recipe.inputs.toMutableList(),
-            intermediates = additionalIntermediates.toMutableList(),
+            inputs = Container.of(recipe.inputs.toMutableList()),
+            intermediates = Container.of(additionalIntermediates.toMutableList()),
             outputAmount = targetFluid.amountMillibuckets
         ).scaleBy(scaleMultiplier)
             .copy(outputAmount = fluid.amountMillibuckets)
@@ -124,7 +127,8 @@ object IngredientCalculator {
         checkRecursiveDepth(depth)
 
         val baseResult = IngredientCalculation.empty()
-        val recipe = findRecipeFor(pylonItem) ?: return baseResult.copy(outputAmount = 1.toDouble())
+        val rawRecipe = findRecipeFor(pylonItem) ?: return baseResult.copy(outputAmount = 1.toDouble())
+        val recipe = copyRecipe(rawRecipe)
 
         // Calculate the main product amount output by the recipe per cycle
         val recipeOutputAmount = getRecipeOutputAmount(recipe, pylonItem)
@@ -144,16 +148,16 @@ object IngredientCalculator {
             }
         }
 
-        // exclude main product, but including intermediates // fixme: not work seems, but not a big deal
+        // exclude main product, but including intermediates
         for (outputResult in recipe.results) {
             when (outputResult) {
                 is FluidOrItem.Item -> {
                     if (!outputResult.item.isPylonSimilar(pylonItem.stack)) {
-                        baseResult.intermediates += outputResult
+                        baseResult.intermediates += Container.of(outputResult)
                     }
                 }
 
-                is FluidOrItem.Fluid -> baseResult.intermediates += outputResult
+                is FluidOrItem.Fluid -> baseResult.intermediates += Container.of(outputResult)
             }
         }
 
@@ -186,14 +190,19 @@ object IngredientCalculator {
             throw RuntimeException("Recursive depth exceeded the threshold of $RECURSIVE_THRESHOLD")
         }
     }
+
+    @JvmSynthetic
+    internal fun copyRecipe(recipe: PylonRecipe): PylonRecipe {
+        return InternalRecipe(recipe)
+    }
 }
 
 /**
  * @author balugaq
  */
 data class IngredientCalculation(
-    val inputs: MutableList<FluidOrItem>,
-    val intermediates: MutableList<FluidOrItem>,
+    val inputs: MutableList<Container>,
+    val intermediates: MutableList<Container>,
     /**
      * Output amount:
      * - In basic recipe calculation  -> the amount of main product output per recipe cycle
@@ -231,20 +240,68 @@ data class IngredientCalculation(
     }
 
     /**
+     * Merge all the similar components and return a clone
+     */
+    fun flat(): IngredientCalculation {
+        val flattedInput = mutableListOf<Container>()
+        for (component in inputs) {
+            var flag = true
+            for (exist in flattedInput) {
+                if (exist.isPylonSimilar(component)) {
+                    if (exist is Container.Item && component is Container.Item) {
+                        exist.item.amount += component.item.amount
+                        flag = false
+                    } else if (exist is Container.Fluid && component is Container.Fluid) {
+                        exist.amountMillibuckets += component.amountMillibuckets
+                        flag = false
+                    }
+                }
+            }
+            if (flag) {
+                flattedInput += component
+            }
+        }
+
+        val flattedIntermediates = mutableListOf<Container>()
+        for (component in intermediates) {
+            var flag = true
+            for (exist in flattedIntermediates) {
+                if (exist.isPylonSimilar(component)) {
+                    if (exist is Container.Item && component is Container.Item) {
+                        exist.item.amount += component.item.amount
+                        flag = false
+                    } else if (exist is Container.Fluid && component is Container.Fluid) {
+                        exist.amountMillibuckets += component.amountMillibuckets
+                        flag = false
+                    }
+                }
+            }
+            if (flag) {
+                flattedIntermediates += component
+            }
+        }
+        return IngredientCalculation(
+            flattedInput.toMutableList(),
+            flattedIntermediates.toMutableList(),
+            outputAmount
+        )
+    }
+
+    /**
      * Scale the amount of a single component (item or fluid)
      * @param component Component to be scaled
      * @param multiplier Scaling multiplier
      * @return Scaled component
      */
-    private fun scaleComponent(component: FluidOrItem, multiplier: Double): FluidOrItem {
+    private fun scaleComponent(component: Container, multiplier: Double): Container {
         return when (component) {
-            is FluidOrItem.Fluid ->
-                FluidOrItem.of(component.fluid, component.amountMillibuckets * multiplier)
+            is Container.Fluid ->
+                Container.of(component.fluid, component.amountMillibuckets * multiplier)
 
-            is FluidOrItem.Item -> {
+            is Container.Item -> {
                 val newAmount = ceil(component.item.amount * multiplier)
                 val newItem = component.item.clone().apply { amount = newAmount.toInt() }
-                FluidOrItem.of(newItem)
+                Container.of(newItem)
             }
         }
     }
@@ -266,10 +323,78 @@ data class IngredientCalculation(
         @JvmStatic
         fun asIngredient(stack: ItemStack): IngredientCalculation {
             return IngredientCalculation(
-                inputs = mutableListOf(FluidOrItem.of(stack)),
+                inputs = mutableListOf(Container.of(stack)),
                 intermediates = mutableListOf(),
                 outputAmount = stack.amount.toDouble()
             )
+        }
+    }
+}
+
+/**
+ * For internal use only (Copy recipe)
+ *
+ * @author balugaq
+ */
+internal class InternalRecipe(private val recipe: PylonRecipe) : PylonRecipe by recipe {
+    override val inputs: List<FluidOrItem>
+        get() = recipe.inputs.map { when (it) {
+            is FluidOrItem.Fluid -> FluidOrItem.of(it.fluid, it.amountMillibuckets)
+            is FluidOrItem.Item -> FluidOrItem.of(it.item.clone())
+        }}
+
+    override val results: List<FluidOrItem>
+        get() = recipe.results.map { when (it) {
+            is FluidOrItem.Fluid -> FluidOrItem.of(it.fluid, it.amountMillibuckets)
+            is FluidOrItem.Item -> FluidOrItem.of(it.item.clone())
+        }}
+
+    override fun key(): Key {
+        return recipe.key()
+    }
+}
+
+/**
+ * A variable FluidOrItem container
+ *
+ * @author balugaq
+ */
+sealed class Container {
+    data class Item(val item: ItemStack) : Container()
+    data class Fluid(val fluid: PylonFluid, var amountMillibuckets: Double) : Container()
+
+    fun isPylonSimilar(other: Container): Boolean {
+        return when (this) {
+            is Item -> when (other) {
+                is Item -> item.isPylonSimilar(other.item)
+                is Fluid -> false
+            }
+            is Fluid -> when (other) {
+                is Item -> false
+                is Fluid -> fluid == other.fluid
+            }
+        }
+    }
+
+    companion object {
+        fun of(fluidOrItem: FluidOrItem): Container {
+            return when (fluidOrItem) {
+                is FluidOrItem.Fluid -> Fluid(fluidOrItem.fluid, fluidOrItem.amountMillibuckets)
+                is FluidOrItem.Item -> Item(fluidOrItem.item.clone())
+            }
+        }
+        fun of(fluid: PylonFluid, amountMillibuckets: Double): Container {
+            return Fluid(fluid, amountMillibuckets)
+        }
+        fun of(item: ItemStack): Container {
+            return Item(item.clone())
+        }
+        fun of(choice: RecipeChoice): Container {
+            return Item(choice.itemStack.clone())
+        }
+
+        fun of(list: List<FluidOrItem>): MutableList<Container> {
+            return list.map { of(it) }.toMutableList()
         }
     }
 }

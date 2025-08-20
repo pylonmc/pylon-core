@@ -138,8 +138,11 @@ guide:
     toggle-waila:
       name: "Toggle WAILA"
       lore: "<arrow:#3a2939> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
-    along-product:
-      name: "Along products ↓"
+    intermediates:
+      name: "↓ Intermediates ↓"
+      lore: ""
+    main_product:
+      name: "↓ Main product ↓"
       lore: ""
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"

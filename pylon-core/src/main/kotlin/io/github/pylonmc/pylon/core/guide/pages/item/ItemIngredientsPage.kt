@@ -1,18 +1,27 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
+import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.recipe.Container
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculation
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator
+import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -25,7 +34,7 @@ import kotlin.math.max
 
 /**
  * Magic numbers:
- * 36 -> 36 "i" in sub-page, which means input items/fluid
+ * 27 -> 27 "i" in sub-page, which means input items/fluid
  * 9  -> 9  "o" in sub-page, which means intermediates
  *
  * @author balugaq
@@ -42,16 +51,12 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
                 "i i i i i i i i i",
                 "i i i i i i i i i",
                 "i i i i i i i i i",
-                "i i i i i i i i i",
-                "b f x x x x x a x",
-                "o o o o o o o o o",
+                "m a x x x x x x x",
+                "f o o o o o o o o",
             )
-            .addIngredient('#', GuiItems.background())
-            .addIngredient('<', if (maxPage > 1) GuiItems.pagePrevious() else GuiItems.background())
-            .addIngredient('b', BackButton(player))
-            .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
-            .addIngredient('>', if (maxPage > 1) GuiItems.pageNext() else GuiItems.background())
-            .addIngredient('f', info(stack, calculation.outputAmount))
+            .addIngredient('x', GuiItems.background())
+            .addIngredient('f', info(player, stack, calculation.outputAmount))
+            .addIngredient('m', mainProductButton)
             .addIngredient(
                 'a', if (!calculation.intermediates.isEmpty()) {
                     intermediatesButton
@@ -60,13 +65,13 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
                 }
             )
             .addModifier {
-                for (i in 0..35) {
-                    it.setItem(i, flatWithAmount(calculation.inputs.getOrNull(36 * page + i)))
+                for (i in 0..26) {
+                    it.setItem(i, flatWithAmount(player, calculation.inputs.getOrNull(27 * page + i)))
                 }
             }
             .addModifier {
-                for (i in 0..8) {
-                    it.setItem(45 + i, flatWithAmount(calculation.intermediates.getOrNull(9 * page + i)))
+                for (i in 1..8) {
+                    it.setItem(36 + i, flatWithAmount(player, calculation.intermediates.getOrNull(9 * page + i)))
                 }
             }
             .build()
@@ -88,8 +93,8 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
 
     override fun getGui(player: Player): Gui {
         val pages = mutableListOf<Gui>()
-        val calculation = IngredientCalculator.calculateFinal(stack)
-        val maxPage = max(calculation.inputs.size / 36, calculation.intermediates.size / 9)
+        val calculation = IngredientCalculator.calculateFinal(stack).flat()
+        val maxPage = max(calculation.inputs.size / 27, calculation.intermediates.size / 9)
         for (i in 0..maxPage) {
             pages += getSubPage(player, stack, calculation, i, maxPage)
         }
@@ -108,48 +113,56 @@ open class ItemIngredientsPage(val stack: ItemStack) : GuidePage {
     /**
      * Display info about the main product stack
      */
-    fun info(stack: ItemStack, outputAmount: Double) = ItemStackBuilder.of(stack)
-        .amount(1)
-        .lore(
-            Component.translatable(
-                "pylon.pyloncore.message.guide.ingredients-page.stack_info",
-                PylonArgument.of("amount", outputAmount)
-            )
+    fun info(player: Player, stack: ItemStack, outputAmount: Double) = toDisplay(
+        player,
+        stack,
+        Component.translatable(
+            "pylon.pyloncore.message.guide.ingredients-page.stack_info",
+            PylonArgument.of("amount", outputAmount)
         )
-        .build()
+    )
+
+    fun toDisplay(player: Player, icon: ItemStack, addition: Component): ItemStack {
+        icon.editData(DataComponentTypes.LORE) {
+            ItemLore.lore(it.lines().toList() + addition)
+        }
+        icon.amount = 1
+        return icon
+    }
 
     /**
      * Display amount in the input/intermediate stacks
      */
-    fun flatWithAmount(fluidOrItem: FluidOrItem?): Item {
+    fun flatWithAmount(player: Player, fluidOrItem: Container?): Item {
         if (fluidOrItem == null) return GuiItems.background()
-        return SimpleItem(
-            when (fluidOrItem) {
-                is FluidOrItem.Fluid -> ItemStackBuilder.of(fluidOrItem.fluid.getItem().build()) // Must be cloned
-                    .lore(
-                        Component.translatable(
-                            "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
-                            PylonArgument.of("amount", fluidOrItem.amountMillibuckets)
-                        )
-                    )
-                    .amount(1)
 
-                is FluidOrItem.Item -> ItemStackBuilder.of(fluidOrItem.item.clone()) // Must be cloned
-                    .lore(
-                        Component.translatable(
-                            "pylon.pyloncore.message.guide.ingredients-page.input_stack",
-                            PylonArgument.of("amount", fluidOrItem.item.amount)
-                        )
-                    )
-                    .amount(1)
+        return SimpleItem(ItemStackBuilder.of(when (fluidOrItem) {
+            is Container.Fluid -> {
+                toDisplay(player, fluidOrItem.fluid.getItem().build(), Component.translatable(
+                    "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
+                    PylonArgument.of("amount", fluidOrItem.amountMillibuckets)
+                ))
             }
-        )
+            is Container.Item -> {
+                toDisplay(player, fluidOrItem.item.clone(), Component.translatable(
+                    "pylon.pyloncore.message.guide.ingredients-page.input_stack",
+                    PylonArgument.of("amount", fluidOrItem.item.amount)
+                ))
+            }
+        }))
     }
 
     val intermediatesButton: Item = SimpleItem(
         ItemStackBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)
             .amount(1)
-            .name(Component.translatable("pylon.pyloncore.guide.button.back.name"))
-            .lore(Component.translatable("pylon.pyloncore.guide.button.back.lore"))
+            .name(Component.translatable("pylon.pyloncore.guide.button.intermediates.name"))
+            .lore(Component.translatable("pylon.pyloncore.guide.button.intermediates.lore"))
+    )
+
+    val mainProductButton: Item = SimpleItem(
+        ItemStackBuilder.of(Material.GREEN_STAINED_GLASS_PANE)
+            .amount(1)
+            .name(Component.translatable("pylon.pyloncore.guide.button.main_product.name"))
+            .lore(Component.translatable("pylon.pyloncore.guide.button.main_product.lore"))
     )
 }

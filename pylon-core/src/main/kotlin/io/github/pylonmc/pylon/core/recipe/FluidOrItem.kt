@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 
