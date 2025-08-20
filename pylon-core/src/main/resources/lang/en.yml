@@ -83,7 +83,7 @@ message:
     ingredients-page:
       input_stack: "<yellow>Consumes %amount% items"
       input_fluid: "<yellow>Consumes %amount% mB"
-      stack_info: "<green> Produces %amount%"
+      stack_info: "<green>Produces %amount%"
 
 gui:
   scroll:
