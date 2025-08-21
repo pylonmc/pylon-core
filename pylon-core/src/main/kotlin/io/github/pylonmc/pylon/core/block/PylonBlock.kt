@@ -17,7 +17,6 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
@@ -49,10 +48,7 @@ open class PylonBlock protected constructor(val block: Block) {
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    val defaultTranslationKey = Component.translatable(
-        "pylon.${schema.key.namespace}.item.${schema.key.key}.waila",
-        "pylon.${schema.key.namespace}.item.${schema.key.key}.name"
-    )
+    val defaultTranslationKey = schema.defaultBlockTranslationKey
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
