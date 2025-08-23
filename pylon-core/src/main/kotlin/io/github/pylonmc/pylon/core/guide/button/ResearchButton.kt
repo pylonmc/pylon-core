@@ -71,8 +71,8 @@ open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
         item.lore(getAddon(key).displayName)
 
         item
-    } catch (t: Throwable) {
-        t.printStackTrace()
+    } catch (e: Exception) {
+        e.printStackTrace()
         ItemStackBuilder.of(Material.BARRIER)
             .name(Component.translatable("pylon.pyloncore.guide.button.fluid.error"))
     }
@@ -94,8 +94,8 @@ open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
                     notifyWindows()
                 }
             }
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

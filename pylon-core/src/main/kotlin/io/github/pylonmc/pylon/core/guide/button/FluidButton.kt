@@ -32,8 +32,8 @@ open class FluidButton(val key: NamespacedKey, val amount: Double?) : AbstractIt
                     PylonArgument.of("amount", UnitFormat.MILLIBUCKETS.format(amount).decimalPlaces(2))
                 ))
         }
-    } catch (t: Throwable) {
-        t.printStackTrace()
+    } catch (e: Exception) {
+        e.printStackTrace()
         ItemStackBuilder.of(Material.BARRIER)
             .name(Component.translatable("pylon.pyloncore.guide.button.fluid.error"))
     }
@@ -51,8 +51,8 @@ open class FluidButton(val key: NamespacedKey, val amount: Double?) : AbstractIt
                     page.open(player)
                 }
             }
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

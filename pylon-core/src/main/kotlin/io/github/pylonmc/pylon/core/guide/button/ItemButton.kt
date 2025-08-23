@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.guide.button
 
-import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
@@ -16,8 +15,6 @@ import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -72,8 +69,8 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             }
 
             return builder
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
             return ItemStackBuilder.of(Material.BARRIER)
                 .name(Component.translatable("pylon.pyloncore.guide.button.item.error"))
         }
@@ -124,8 +121,8 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
 
                 else -> {}
             }
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

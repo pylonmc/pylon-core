@@ -84,8 +84,8 @@ fun isCardinalDirection(vector: Vector3i)
 
 fun isCardinalDirection(vector: Vector3f)
     = (vector.x.absoluteValue > 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
-        || (vector.x < 1.0e-6 && vector.y > 1.0e-6 && vector.z < 1.0e-6)
-        || (vector.x < 1.0e-6 && vector.y < 1.0e-6 && vector.z > 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue > 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue > 1.0e-6)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
