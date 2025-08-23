@@ -18,14 +18,13 @@ abstract class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : Vanil
 }
 
 class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputs: List<FluidOrItem> = run {
+    override val inputs: List<FluidOrItem> =
         recipe.shape
             .flatMap { it.asIterable() }
             .mapNotNull {
                 recipe.choiceMap[it]?.let { FluidOrItem.of(it) }
             }
             .flatMap { it }
-    }
 
     override fun display(): Gui {
         val gui = Gui.normal()

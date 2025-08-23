@@ -215,7 +215,7 @@ fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
     val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
         .flatMap { it.recipes }
         .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size == 1 }
-        .sortedWith { a: PylonRecipe, b: PylonRecipe -> a.key.compareTo(b.key) }
+        .sortedBy { it.key }
         .toList()
 
     if (singleOutputRecipes.isNotEmpty()) return singleOutputRecipes.first()
