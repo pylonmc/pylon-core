@@ -81,8 +81,8 @@ message:
         get: "<green>%player% has %points% research points"
   guide:
     ingredients-page:
-      input_stack: "<yellow>Consumes %amount% items"
-      input_fluid: "<yellow>Consumes %amount% mB"
+      input_stack: "<yellow>Uses %amount%"
+      input_fluid: "<yellow>Uses %amount% mB"
       stack_info: "<green>Produces %amount%"
 
 gui:
