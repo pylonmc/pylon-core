@@ -5,7 +5,6 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.Style
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
@@ -42,42 +41,10 @@ abstract class ProgressItem @JvmOverloads constructor(
             .set(DataComponentTypes.DAMAGE, (progressValue * MAX_DURABILITY).toInt())
         totalTime?.let {
             val remaining = it - it * progress
-
-            var component = Component.text()
-            val days = remaining.toDaysPart()
-            if (days > 0) {
-                component = component.append(
-                    UnitFormat.DAYS.format(days)
-                        .abbreviate(false)
-                        .unitStyle(Style.empty())
-                )
-            }
-            val hours = remaining.toHoursPart()
-            if (hours > 0) {
-                component = component.append(
-                    UnitFormat.HOURS.format(hours)
-                        .abbreviate(false)
-                        .unitStyle(Style.empty())
-                )
-            }
-            val minutes = remaining.toMinutesPart()
-            if (minutes > 0) {
-                component = component.append(
-                    UnitFormat.MINUTES.format(minutes)
-                        .abbreviate(false)
-                        .unitStyle(Style.empty())
-                )
-            }
-            val seconds = remaining.toSecondsPart()
-            component = component.append(
-                UnitFormat.SECONDS.format(seconds)
-                    .abbreviate(false)
-                    .unitStyle(Style.empty())
-            )
             builder.lore(
                 Component.translatable(
                     "pylon.pyloncore.gui.time_left",
-                    PylonArgument.of("time", component.build())
+                    PylonArgument.of("time", UnitFormat.formatDuration(remaining))
                 )
             )
         }

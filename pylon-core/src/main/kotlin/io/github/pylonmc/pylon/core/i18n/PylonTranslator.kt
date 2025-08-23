@@ -1,16 +1,18 @@
 package io.github.pylonmc.pylon.core.i18n
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
-import io.github.pylonmc.pylon.core.i18n.PylonArgument.Companion.attachPylonArguments
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.editData
+import io.github.pylonmc.pylon.core.util.withArguments
 import io.github.pylonmc.pylon.core.util.wrapText
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
@@ -36,6 +38,9 @@ import org.bukkit.inventory.ItemStack
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.WeakHashMap
+import kotlin.io.path.exists
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.nameWithoutExtension
 
 /**
  * The [Translator] for a given [PylonAddon]. This translator handles the translation of
@@ -48,11 +53,25 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
     private val addonNamespace = addon.key.namespace
 
-    private val translations = addon.languages.associateWith {
-        addon.mergeGlobalConfig("lang/$it.yml", "lang/$addonNamespace/$it.yml")
-    }
+    private val translations: Map<Locale, Config>
 
     private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()
+    private val warned = mutableSetOf<Locale>()
+
+    init {
+        for (lang in addon.languages) {
+            addon.mergeGlobalConfig("lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
+        }
+        val langsDir = PylonCore.dataPath.resolve("lang").resolve(addonNamespace)
+        translations = if (!langsDir.exists()) {
+            emptyMap()
+        } else {
+            langsDir.listDirectoryEntries("*.yml").associate {
+                val split = it.nameWithoutExtension.split('_', limit = 3)
+                Locale.of(split.first(), split.getOrNull(1).orEmpty(), split.getOrNull(2).orEmpty()) to Config(it)
+            }
+        }
+    }
 
     override fun canTranslate(key: String, locale: Locale): Boolean {
         return getRawTranslation(key, locale, warn = false) != null
@@ -87,13 +106,15 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             if (!translationKey.startsWith("pylon.")) return null
             val (_, addon, key) = translationKey.split('.', limit = 3)
             if (addon != addonNamespace) return null
-            val commonLocale = findCommonLocale(locale)
-            val translations = commonLocale?.let(this.translations::get)
+            val translations = findCommonLocale(locale)?.let(this.translations::get)
             if (translations == null) {
-                if (warn) {
+                if (warn && locale !in warned) {
                     this.addon.javaPlugin.logger.warning("No translations found for locale '$locale'")
+                    warned.add(locale)
                 }
-                return null
+                return Component.text("Language '$locale' not supported")
+                    .color(NamedTextColor.RED)
+                    .decoration(TextDecoration.ITALIC, true)
             }
             val translation = translations.get<String>(key) ?: return null
             customMiniMessage.deserialize(translation)
@@ -103,9 +124,11 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
     private fun findCommonLocale(locale: Locale): Locale? {
         val languageRange = languageRanges.getOrPut(locale) {
             val lookupList = LocaleUtils.localeLookupList(locale).reversed()
-            lookupList.mapIndexed { index, value ->
-                Locale.LanguageRange(value.toString().replace('_', '-'), (index + 1.0) / lookupList.size)
-            }
+            lookupList
+                .mapIndexed { index, value ->
+                    Locale.LanguageRange(value.toString().replace('_', '-'), (index + 1.0) / lookupList.size)
+                }
+                .sortedByDescending { it.weight }
         }
         return Locale.lookup(languageRange, translations.keys)
     }
@@ -121,7 +144,8 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         @get:JvmStatic
         @get:JvmName("getTranslatorForAddon")
         val PylonAddon.translator: PylonTranslator
-            get() = translators[this.key] ?: error("Addon does not have a translator; did you forget to call registerWithPylon()?")
+            get() = translators[this.key]
+                ?: error("Addon does not have a translator; did you forget to call registerWithPylon()?")
 
         /**
          * Modifies the [ItemStack] to translate its name and lore into the specified [locale].
@@ -133,7 +157,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         fun ItemStack.translate(locale: Locale, arguments: List<PylonArgument> = emptyList()) {
 
             editData(DataComponentTypes.ITEM_NAME) {
-                val translated = GlobalTranslator.render(it.attachPylonArguments(arguments), locale)
+                val translated = GlobalTranslator.render(it.withArguments(arguments), locale)
                 if (translated is TranslatableComponent && translated.fallback() != null) {
                     Component.text(translated.fallback()!!)
                 } else {
@@ -142,7 +166,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             }
             editData(DataComponentTypes.LORE) { lore ->
                 val newLore = lore.lines().flatMap { line ->
-                    val translated = GlobalTranslator.render(line.attachPylonArguments(arguments), locale)
+                    val translated = GlobalTranslator.render(line.withArguments(arguments), locale)
                     val encoded = LineWrapEncoder.encode(translated)
                     val wrapped = encoded.copy(
                         lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
@@ -192,6 +216,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerChangeLanguage(event: PlayerLocaleChangeEvent) {
+            if (!event.player.isOnline) return
             NmsAccessor.instance.resendInventory(event.player)
             NmsAccessor.instance.resendRecipeBook(event.player)
         }

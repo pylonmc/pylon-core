@@ -49,10 +49,10 @@ open class PylonBlock protected constructor(val block: Block) {
     @JvmSynthetic
     internal var errorBlock: BlockDisplay? = null
 
-    /**
-     * The name is used for WAILA, and as the title of the block's GUI, should it have one
-     */
-    open val name: Component = Component.translatable("pylon.${schema.key.namespace}.item.${schema.key.key}.waila", "pylon.${schema.key.namespace}.item.${schema.key.key}.name")
+    val defaultTranslationKey = Component.translatable(
+        "pylon.${schema.key.namespace}.item.${schema.key.key}.waila",
+        "pylon.${schema.key.namespace}.item.${schema.key.key}.name"
+    )
 
     constructor(block: Block, context: BlockCreateContext) : this(block)
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
@@ -66,9 +66,11 @@ open class PylonBlock protected constructor(val block: Block) {
 
     /**
      * This will only be called for the player if the player has WAILA enabled
+     *
+     * @return the WAILA configuration, or null if WAILA should not be shown for this block
      */
-    open fun getWaila(player: Player): WailaConfig {
-        return WailaConfig(name)
+    open fun getWaila(player: Player): WailaConfig? {
+        return WailaConfig(defaultTranslationKey)
     }
 
     /**
@@ -97,8 +99,7 @@ open class PylonBlock protected constructor(val block: Block) {
      */
     open fun write(pdc: PersistentDataContainer) {}
 
-    fun getSettings(): Config
-        = Settings.get(key)
+    fun getSettings(): Config = Settings.get(key)
 
     companion object {
 
@@ -113,8 +114,8 @@ open class PylonBlock protected constructor(val block: Block) {
         }
 
         @JvmSynthetic
-        inline fun <reified T: PylonBlock> register(key: NamespacedKey, material: Material)
-            = register(key, material, T::class.java)
+        inline fun <reified T : PylonBlock> register(key: NamespacedKey, material: Material) =
+            register(key, material, T::class.java)
 
         @JvmSynthetic
         internal fun serialize(
