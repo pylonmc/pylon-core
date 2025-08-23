@@ -51,7 +51,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
                     stack,
                     Component.translatable(
                         "pylon.pyloncore.message.guide.ingredients-page.stack_info",
-                        PylonArgument.of("amount", calculation.outputAmount)
+                        PylonArgument.of("amount", calculation.outputAmount.toInt())
                     )
                 )
             )
