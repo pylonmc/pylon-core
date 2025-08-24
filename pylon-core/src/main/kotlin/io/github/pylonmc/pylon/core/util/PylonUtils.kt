@@ -180,3 +180,7 @@ fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
     }
     return result.children(result.children().map { it.withArguments(args) })
 }
+
+fun isFakeEvent(event: Event): Boolean {
+    return event.javaClass.name.contains("Fake");
+}

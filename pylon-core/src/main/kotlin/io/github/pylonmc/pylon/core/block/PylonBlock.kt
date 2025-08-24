@@ -12,12 +12,13 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
@@ -45,12 +46,26 @@ open class PylonBlock protected constructor(val block: Block) {
     val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
     val key = schema.key
 
-    val defaultTranslationKey = Component.translatable(
-        "pylon.${schema.key.namespace}.item.${schema.key.key}.waila",
-        "pylon.${schema.key.namespace}.item.${schema.key.key}.name"
-    )
+    val defaultTranslationKey = schema.defaultBlockTranslationKey
 
+    /**
+     * This constructor is called when a *new* block is created in the world
+     * ex:
+     * - A player places a block
+     * - `BlockStorage.placeBlock` called
+     *
+     * @see PylonBlockSchema.create
+     * @see PylonBlockUnloadEvent
+     */
     constructor(block: Block, context: BlockCreateContext) : this(block)
+
+    /**
+     * This constructor is called while the chunk is being loaded
+     *
+     * @see PylonBlockSchema.load
+     * @see PylonBlockLoadEvent
+     * @see deserialize
+     */
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
 
     /**
@@ -92,6 +107,8 @@ open class PylonBlock protected constructor(val block: Block) {
 
     /**
      * Called when the block is saved
+     *
+     * @see serialize
      */
     open fun write(pdc: PersistentDataContainer) {}
 
