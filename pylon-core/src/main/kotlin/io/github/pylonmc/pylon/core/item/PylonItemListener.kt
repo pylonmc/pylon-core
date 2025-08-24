@@ -350,7 +350,7 @@ internal object PylonItemListener : Listener {
                 }
             }
 
-            val pylonItemOffHand = PylonItem.fromStack(killer.inventory.itemInMainHand)
+            val pylonItemOffHand = PylonItem.fromStack(killer.inventory.itemInOffHand)
             if (pylonItemOffHand != null && !killer.canUse(pylonItemOffHand, true)) {
                 event.isCancelled = true
                 return

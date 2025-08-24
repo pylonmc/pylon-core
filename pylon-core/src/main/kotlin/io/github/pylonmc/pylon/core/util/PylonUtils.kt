@@ -4,16 +4,8 @@ package io.github.pylonmc.pylon.core.util
 
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.mojang.brigadier.context.CommandContext
-import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.TickManager
-import io.github.pylonmc.pylon.core.config.PylonConfig
-import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
-import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
-import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
@@ -34,13 +26,12 @@ import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
-import org.bukkit.event.EventHandler
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
-import java.util.*
+import kotlin.math.absoluteValue
 import kotlin.reflect.typeOf
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
@@ -90,6 +81,11 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
 fun isCardinalDirection(vector: Vector3i) = (vector.x != 0 && vector.y == 0 && vector.z == 0)
         || (vector.x == 0 && vector.y != 0 && vector.z == 0)
         || (vector.x == 0 && vector.y == 0 && vector.z != 0)
+
+fun isCardinalDirection(vector: Vector3f)
+    = (vector.x.absoluteValue > 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue > 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue > 1.0e-6)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }

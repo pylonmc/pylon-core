@@ -152,7 +152,7 @@ class ConnectingTask(
                         .toVector().toVector3f()
                 val newTargetDifference = from.position
                     .minus(fluidConnectionInteraction.point.position)
-                    .vector3i
+                    .location.toVector().toVector3f()
                 if (isValidTarget(interactionOffset, from.allowedFace) && isCardinalDirection(newTargetDifference)) {
                     to = ConnectingPointInteraction(fluidConnectionInteraction)
                     return
@@ -232,11 +232,6 @@ class ConnectingTask(
         fun pipesUsed(from: BlockPosition, to: BlockPosition)
             = blocksOnPath(from, to).size + 1
 
-        private fun isCardinalDirection(vector: Vector3i)
-            = vector.x != 0 && vector.y == 0 && vector.z == 0
-                || vector.x == 0 && vector.y != 0 && vector.z == 0
-                || vector.x == 0 && vector.y == 0 && vector.z != 0
-
         /**
          * Does not include first or last block
          */
@@ -277,10 +272,10 @@ class ConnectingTask(
             return null
         }
 
-        private fun isValidTarget(target: Vector3f, allowedFace: BlockFace?)
+        private fun isValidTarget(target: Vector3f, allowedFaceFrom: BlockFace?)
             = !target.equals(Vector3f(0f, 0f, 0f), 1.0e-3f)
-                    && (allowedFace == null || Vector3f(target).normalize()
-                .equals(allowedFace.getDirection().toVector3f(), 1.0e-3f))
+                    && (allowedFaceFrom == null
+                    || Vector3f(target).normalize().equals(allowedFaceFrom.getDirection().toVector3f(), 1.0e-3f))
 
         // Casts a ray where the player's looking and finds the closest block on a given axis
         private fun getTargetOnAxis(

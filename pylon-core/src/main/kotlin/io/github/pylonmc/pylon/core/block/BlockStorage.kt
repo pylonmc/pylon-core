@@ -429,7 +429,7 @@ object BlockStorage : Listener {
      */
     internal fun makePhantom(block: PylonBlock) = lockBlockWrite {
         PylonBlockSchema.schemaCache[block.block.position] = PhantomBlock.schema
-        val phantomBlock =                 PhantomBlock(
+        val phantomBlock = PhantomBlock(
             PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
             block.schema.key,
             block.block
