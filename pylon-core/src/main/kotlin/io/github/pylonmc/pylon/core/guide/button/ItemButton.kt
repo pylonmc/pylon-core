@@ -33,7 +33,7 @@ import xyz.xenondevs.invui.item.impl.SimpleItem
 class ItemButton(val stack: ItemStack) : AbstractItem() {
 
     constructor(key: NamespacedKey) : this(
-        PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no fluid with key $key")
+        PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no item with key $key")
     )
 
     @Suppress("UnstableApiUsage")
