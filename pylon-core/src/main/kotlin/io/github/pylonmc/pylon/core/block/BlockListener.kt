@@ -9,7 +9,6 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.base.NotPlaceable
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.isFakeEvent
 import io.github.pylonmc.pylon.core.util.position.position
@@ -19,7 +18,6 @@ import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
 import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
@@ -62,14 +60,6 @@ internal object BlockListener : Listener {
         val pylonItem = PylonItem.fromStack(item) ?: return
         if (!event.player.canUse(pylonItem, true)) {
             event.isCancelled = true
-            return
-        }
-
-        if (item is NotPlaceable) {
-            // Fix #222: BlockListener cancelled specify BlockPlaceEvent accidentally
-            // In this case, we don't need to handle the event, because the PylonItem
-            // was NOT placeable in design, but it triggered a BlockPlaceEvent.
-            // Therefore, we just pass the event for the weird event/case.
             return
         }
 
