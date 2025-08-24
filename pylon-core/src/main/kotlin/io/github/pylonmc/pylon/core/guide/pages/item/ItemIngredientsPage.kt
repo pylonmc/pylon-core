@@ -46,15 +46,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
                 "f o o o o o o o o",
             )
             .addIngredient('x', GuiItems.background())
-            .addIngredient(
-                'f', toDisplay(
-                    stack.clone(),
-                    Component.translatable(
-                        "pylon.pyloncore.message.guide.ingredients-page.stack_info",
-                        PylonArgument.of("amount", calculation.outputAmount.toInt())
-                    )
-                )
-            )
+            .addIngredient('f', renderMainProduct(stack, calculation.outputAmount.toInt()))
             .addIngredient('m', mainProductButton)
             .addIngredient(
                 'a', if (!calculation.intermediates.isEmpty()) {
@@ -114,6 +106,16 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
      */
     fun toDisplay(icon: ItemStack, addition: Component): ItemStack =
         ItemStackBuilder.of(icon).lore(addition).amount(1).build()
+
+    fun renderMainProduct(stack: ItemStack, outputAmount: Int): Item =
+        SimpleItem(ItemStackBuilder.of(
+        toDisplay(
+            stack.clone(),
+            Component.translatable(
+                "pylon.pyloncore.message.guide.ingredients-page.stack_info",
+                PylonArgument.of("amount", outputAmount)
+            )
+        )))
 
     /**
      * Display amount in the input/intermediate stacks
