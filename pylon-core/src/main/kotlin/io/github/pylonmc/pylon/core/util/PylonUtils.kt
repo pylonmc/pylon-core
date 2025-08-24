@@ -236,6 +236,8 @@ fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
     if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
 
     return null
+}
+
 fun isFakeEvent(event: Event): Boolean {
     return event.javaClass.name.contains("Fake");
 }
