@@ -13,7 +13,8 @@ sealed interface VanillaRecipeWrapper : PylonRecipe {
 }
 
 sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(
-    key: String
+    key: String,
+    recipeClass: Class<T>,
 ) : RecipeType<T>(NamespacedKey.minecraft(key)), Listener {
 
     init {

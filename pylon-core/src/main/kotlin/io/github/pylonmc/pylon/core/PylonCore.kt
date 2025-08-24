@@ -2,12 +2,16 @@
 
 package io.github.pylonmc.pylon.core
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
+import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -24,9 +28,13 @@ import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
+import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
@@ -35,6 +43,9 @@ import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
 import java.util.Locale
+import kotlin.io.path.extension
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.walk
 
 object PylonCore : JavaPlugin(), PylonAddon {
 
@@ -108,6 +119,28 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         DisplayRecipeType.register()
         RecipeType.addVanillaRecipes()
+
+        launch {
+            delay(1.ticks)
+            for (type in PylonRegistry.RECIPE_TYPES) {
+                for (addon in PylonRegistry.ADDONS) {
+                    val configStream = addon.javaPlugin.getResource("recipes/${type.key}.yml") ?: continue
+                    val config = configStream.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
+                    type.loadFromConfig(config)
+                }
+            }
+            val recipesDir = dataPath.resolve("recipes")
+            if (recipesDir.toFile().exists()) {
+                recipesDir.walk()
+                    .filter { it.extension == "yml" }
+                    .mapNotNull {
+                        NamespacedKey.fromString(it.nameWithoutExtension)
+                            ?.let(PylonRegistry.RECIPE_TYPES::get)
+                            ?.let { type -> type to Config(it) }
+                    }
+                    .forEach { (type, config) -> type.loadFromConfig(config) }
+            }
+        }
     }
 
     override fun onDisable() {

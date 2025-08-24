@@ -12,7 +12,6 @@ import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.util.isCardinalDirection
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vectorToBlockFace
 import net.kyori.adventure.text.Component
@@ -57,7 +56,7 @@ class ConnectingTask(
         PylonCore,
         Runnable { tick(true) },
         0,
-        PylonConfig.PIPE_PLACEMENT_TASK_INTERVAL_TICKS
+        PylonConfig.pipePlacementTaskIntervalTicks
     )
 
     private fun tick(interpolate: Boolean) {
@@ -112,7 +111,7 @@ class ConnectingTask(
 
         if (isCardinalDirection(difference) && interpolate) {
             display.interpolationDelay = 0
-            display.interpolationDuration = PylonConfig.PIPE_PLACEMENT_TASK_INTERVAL_TICKS.toInt()
+            display.interpolationDuration = PylonConfig.pipePlacementTaskIntervalTicks.toInt()
         }
     }
 
@@ -293,8 +292,8 @@ class ConnectingTask(
                 findClosestPointBetweenSkewLines(playerLookPosition, playerLookDirection, origin, Vector3f(axis))
             val lambda = Math.clamp(
                 solution.roundToLong(),
-                -PylonConfig.PIPE_PLACEMENT_MAX_DISTANCE,
-                PylonConfig.PIPE_PLACEMENT_MAX_DISTANCE
+                -PylonConfig.pipePlacementMaxDistance,
+                PylonConfig.pipePlacementMaxDistance
             )
             return Vector3f(axis).mul(lambda.toFloat())
         }
