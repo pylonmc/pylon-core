@@ -48,7 +48,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             .addIngredient('x', GuiItems.background())
             .addIngredient(
                 'f', toDisplay(
-                    stack,
+                    stack.clone(),
                     Component.translatable(
                         "pylon.pyloncore.message.guide.ingredients-page.stack_info",
                         PylonArgument.of("amount", calculation.outputAmount.toInt())
