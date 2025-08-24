@@ -55,6 +55,9 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
     private val translations: Map<Locale, Config>
 
+    val languages: Set<Locale>
+        get() = translations.keys
+
     private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()
     private val warned = mutableSetOf<Locale>()
 
@@ -78,13 +81,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
     }
 
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
-        var translation = getRawTranslation(component.key(), locale, warn = true)
-            ?: component.fallback()?.let {
-                val translatable = Component.translatable(it)
-                val translated = GlobalTranslator.render(translatable, locale)
-                if (translated == translatable) null else translated
-            }
-            ?: return null
+        var translation = getRawTranslation(component.key(), locale, warn = true) ?: return null
         for (arg in component.arguments()) {
             val componentArg = arg.asComponent()
             if (componentArg !is VirtualComponent) continue

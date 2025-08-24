@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     compileOnly(project(":pylon-core"))
     implementation("org.assertj:assertj-core:3.27.2")
 }
@@ -50,7 +50,7 @@ tasks.runServer {
         archive.copyTo(pluginFolder.resolve(archive.name), overwrite = true)
     }
     maxHeapSize = "4G"
-    minecraftVersion("1.21.4")
+    minecraftVersion("1.21.8")
     doLast {
         runFolder.resolve("gametests").deleteRecursively()
         if (testsFailedFile.exists()) {

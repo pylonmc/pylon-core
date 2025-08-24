@@ -1,10 +1,13 @@
 package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
 import io.github.pylonmc.pylon.core.util.getAddon
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -23,6 +26,16 @@ class PylonBlockSchema(
     }
 
     val addon = getAddon(key)
+
+    val defaultBlockTranslationKey: TranslatableComponent
+
+    init {
+        val prefix = "pylon.${key.namespace}.item.${key.key}"
+        val default = "$prefix.waila"
+        defaultBlockTranslationKey = Component.translatable(
+            if (addon.translator.languages.any { addon.translator.canTranslate(default, it) }) default else "$prefix.name"
+        )
+    }
 
     private val createConstructor: MethodHandle = blockClass.findConstructorMatching(
         Block::class.java,
