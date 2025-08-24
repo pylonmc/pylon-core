@@ -5,27 +5,18 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.BlockListener.logEventHandleErr
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
-import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PrePylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PrePylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
-import io.github.pylonmc.pylon.core.util.position.position
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
-import org.bukkit.Bukkit
-import org.bukkit.Color.RED
-import org.bukkit.Material
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.joml.Matrix4f
 import java.util.concurrent.ConcurrentHashMap
-import java.util.logging.Level.SEVERE
 
 object TickManager : Listener {
 
@@ -34,6 +25,11 @@ object TickManager : Listener {
     @JvmStatic
     fun isTicking(block: PylonBlock): Boolean {
         return tickingBlocks[block]?.isActive == true
+    }
+
+    @JvmSynthetic
+    internal fun stopTicking(block: PylonBlock) {
+        tickingBlocks.remove(block)?.cancel()
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -45,8 +41,6 @@ object TickManager : Listener {
     private fun onPylonBlockBreak(e: PrePylonBlockBreakEvent) {
         val pylonBlock = e.pylonBlock
         tickingBlocks.remove(pylonBlock)?.cancel()
-        pylonBlock.errorBlock?.remove()
-        pylonBlock.errorBlock = null
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -65,7 +59,6 @@ object TickManager : Listener {
                 if (pylonBlock.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
             val tickDelay = pylonBlock.tickInterval
             tickingBlocks[pylonBlock] = PylonCore.launch(dispatcher) {
-                var errors = 0
                 var lastTickNanos = System.nanoTime()
                 while (true) {
                     delay(tickDelay.ticks)
@@ -73,34 +66,12 @@ object TickManager : Listener {
                         val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                         lastTickNanos = System.nanoTime()
                         pylonBlock.tick(dt)
-                    } catch (e: Throwable) {
-                        handleBlockError(pylonBlock, e, errors++)
+                    } catch (e: Exception) {
+                        PylonCore.launch(PylonCore.minecraftDispatcher) {
+                            logEventHandleErr(null, e, pylonBlock)
+                        }
                     }
                 }
-            }
-        }
-    }
-
-    private suspend fun handleBlockError(pylonBlock: PylonBlock, error: Throwable, errors: Int) {
-        // Drop onto the main thread for error logging and stuff
-        withContext(PylonCore.minecraftDispatcher) {
-            val block = pylonBlock.block
-            PylonCore.logger.log(
-                SEVERE,
-                "An error occurred while ticking block ${block.position} of type ${pylonBlock.schema.key}",
-            )
-            error.printStackTrace()
-            if (errors >= PylonConfig.allowedBlockErrors && pylonBlock.errorBlock == null) {
-                val display = block.world.spawn(block.location, BlockDisplay::class.java)
-                display.block = block.type.createBlockData()
-                display.setTransformationMatrix(Matrix4f().translate(0.005F, 0.0F, 0.005F).scale(0.99F)) // prevent z-fighting
-                display.glowColorOverride = RED
-                display.isGlowing = true
-                pylonBlock.errorBlock = display
-            }
-
-            if (errors >= PylonConfig.allowedBlockErrors) {
-                cancel()
             }
         }
     }

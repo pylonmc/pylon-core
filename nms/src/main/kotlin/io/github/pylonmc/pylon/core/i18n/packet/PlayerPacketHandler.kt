@@ -85,8 +85,21 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
 
         override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
+            var packet = packet
             when (packet) {
-                is ServerboundContainerClickPacket -> resetItem(packet.carriedItem)
+                is ServerboundContainerClickPacket -> {
+                    // force server to resend the item
+                    packet = ServerboundContainerClickPacket(
+                        packet.containerId,
+                        -1,
+                        packet.slotNum,
+                        packet.buttonNum,
+                        packet.clickType,
+                        packet.changedSlots,
+                        packet.carriedItem,
+                    )
+                }
+
                 is ServerboundSetCreativeModeSlotPacket -> resetItem(packet.itemStack)
             }
             super.channelRead(ctx, packet)
@@ -146,7 +159,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
             is SlotDisplay.SmithingTrimDemoSlotDisplay -> SlotDisplay.SmithingTrimDemoSlotDisplay(
                 handleSlotDisplay(display.base),
                 handleSlotDisplay(display.material),
-                handleSlotDisplay(display.pattern)
+                display.pattern
             )
 
             is SlotDisplay.WithRemainder -> SlotDisplay.WithRemainder(

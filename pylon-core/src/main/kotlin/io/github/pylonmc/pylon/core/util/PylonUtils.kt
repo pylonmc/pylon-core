@@ -17,14 +17,15 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import io.papermc.paper.math.BlockPosition
 import io.papermc.paper.math.FinePosition
 import io.papermc.paper.math.Rotation
-import org.bukkit.Material
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
@@ -77,8 +78,7 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
     return vectorToBlockFace(vector)
 }
 
-fun isCardinalDirection(vector: Vector3i)
-    = (vector.x != 0 && vector.y == 0 && vector.z == 0)
+fun isCardinalDirection(vector: Vector3i) = (vector.x != 0 && vector.y == 0 && vector.z == 0)
         || (vector.x == 0 && vector.y != 0 && vector.z == 0)
         || (vector.x == 0 && vector.y == 0 && vector.z != 0)
 
@@ -98,14 +98,13 @@ fun getAddon(key: NamespacedKey): PylonAddon =
  *
  * Assumes north to be the default direction (supplying north will result in no rotation)
  */
-fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
-    = when (face) {
-        BlockFace.NORTH -> vector
-        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
-        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
-        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
-        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
-    }
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
+    BlockFace.NORTH -> vector
+    BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
+    BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+    BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+    else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+}
 
 fun itemFromName(name: String): ItemStack? {
     if (name.contains(':')) {
@@ -176,4 +175,8 @@ fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
         result = this.arguments(args)
     }
     return result.children(result.children().map { it.withArguments(args) })
+}
+
+fun isFakeEvent(event: Event): Boolean {
+    return event.javaClass.name.contains("Fake");
 }

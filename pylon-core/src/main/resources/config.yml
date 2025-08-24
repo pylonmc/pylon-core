@@ -2,8 +2,11 @@
 # Most blocks have a custom tick interval which can be changed in their settings
 default-tick-interval: 20
 
-# The number of errors a ticking block can throw before it is disabled
+# The number of errors a block can throw before it is disabled
 allowed-block-errors: 5
+
+# The number of errors a entity can throw before it is disabled
+allowed-entity-errors: 5
 
 # The interval (in Minecraft ticks), between WAILA checks
 waila-tick-interval: 1
