@@ -124,17 +124,22 @@ guide:
         not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
         enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%points%/%cost%"
         researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%cost% (researched)"
-      instructions: "<arrow:#3a293> <guideinsn>Left click</guideinsn> to research"
+      instructions: |-
+        <arrow:#3a293> <guideinsn>Left click</guideinsn> to research
+        <arrow:#3a293> <guideinsn>Right click</guideinsn> to see unlocked items
       unlocks-title: "<u>Unlocks</u>"
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>more - <guideinsn>right click</guideinsn> <gray>to see all"
+      error: "Research failed to load"
     fluid:
       name: "%fluid% <gray>(%amount%<gray>)"
+      error: "<red>Fluid item failed to load"
     item:
-      not-researched: "<#ff0000>Not researched yet"
+      not-researched: "<red><u>Not researched yet</u>"
       research-instructions: |-
         <arrow:#3a2939> <guideinsn>Shift left click</guideinsn> to research
         <arrow:#3a2939> <guideinsn>Shift right click</guideinsn> to see other research unlocks
+      error: "<red>Item failed to load"
     toggle-waila:
       name: "Toggle WAILA"
       lore: "<arrow:#3a2939> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"

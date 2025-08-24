@@ -28,5 +28,6 @@ public final class Blocks {
         PylonBlock.register(FluidProducer.WATER_PRODUCER_KEY, Material.AMETHYST_BLOCK, FluidProducer.class);
         PylonBlock.register(FluidLimiter.KEY, Material.AMETHYST_BLOCK, FluidLimiter.class);
         PylonBlock.register(FluidConnector.KEY, Material.AMETHYST_BLOCK, FluidConnector.class);
+        PylonBlock.register(BlockEventError.KEY, Material.TARGET, BlockEventError.class);
     }
 }

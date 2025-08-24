@@ -22,7 +22,7 @@ open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
 
     val research = PylonRegistry.RESEARCHES[key] ?: throw IllegalArgumentException("There is no item with key $key")
 
-    override fun getItemProvider(player: Player): ItemProvider {
+    override fun getItemProvider(player: Player): ItemProvider = try {
         val playerHasResearch = player.researches.contains(research)
         val item = ItemStackBuilder.of(if (playerHasResearch) Material.LIME_STAINED_GLASS_PANE else research.material)
             .name(research.name)
@@ -70,24 +70,32 @@ open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
 
         item.lore(getAddon(key).displayName)
 
-        return item
+        item
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ItemStackBuilder.of(Material.BARRIER)
+            .name(Component.translatable("pylon.pyloncore.guide.button.fluid.error"))
     }
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-        if (clickType.isLeftClick) {
-            if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
-                return
-            }
-            research.addTo(player)
-            player.researchPoints -= research.cost
-            windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
-        } else if (clickType.isRightClick) {
-            ResearchItemsPage(research).open(player)
-        } else if (clickType == ClickType.MIDDLE) {
-            if (player.hasPermission("pylon.command.research.modify")) {
+        try {
+            if (clickType.isLeftClick) {
+                if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
+                    return
+                }
                 research.addTo(player)
-                notifyWindows()
+                player.researchPoints -= research.cost
+                windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
+            } else if (clickType.isRightClick) {
+                ResearchItemsPage(research).open(player)
+            } else if (clickType == ClickType.MIDDLE) {
+                if (player.hasPermission("pylon.command.research.modify")) {
+                    research.addTo(player)
+                    notifyWindows()
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

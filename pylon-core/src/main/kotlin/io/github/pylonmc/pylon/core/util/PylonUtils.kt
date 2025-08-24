@@ -20,19 +20,21 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import io.papermc.paper.math.BlockPosition
 import io.papermc.paper.math.FinePosition
 import io.papermc.paper.math.Rotation
-import org.bukkit.Material
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
+import kotlin.math.absoluteValue
 import kotlin.reflect.typeOf
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
@@ -79,10 +81,14 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
     return vectorToBlockFace(vector)
 }
 
-fun isCardinalDirection(vector: Vector3i)
-    = (vector.x != 0 && vector.y == 0 && vector.z == 0)
+fun isCardinalDirection(vector: Vector3i) = (vector.x != 0 && vector.y == 0 && vector.z == 0)
         || (vector.x == 0 && vector.y != 0 && vector.z == 0)
         || (vector.x == 0 && vector.y == 0 && vector.z != 0)
+
+fun isCardinalDirection(vector: Vector3f)
+    = (vector.x.absoluteValue > 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue > 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue > 1.0e-6)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
@@ -95,14 +101,13 @@ fun getAddon(key: NamespacedKey): PylonAddon =
  *
  * Assumes north to be the default direction (supplying north will result in no rotation)
  */
-fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
-    = when (face) {
-        BlockFace.NORTH -> vector
-        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
-        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
-        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
-        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
-    }
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
+    BlockFace.NORTH -> vector
+    BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
+    BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+    BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+    else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+}
 
 fun itemFromName(name: String): ItemStack? {
     if (name.contains(':')) {
@@ -231,4 +236,6 @@ fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
     if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
 
     return null
+fun isFakeEvent(event: Event): Boolean {
+    return event.javaClass.name.contains("Fake");
 }

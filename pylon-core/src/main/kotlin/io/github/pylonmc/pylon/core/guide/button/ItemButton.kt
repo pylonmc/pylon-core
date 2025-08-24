@@ -15,8 +15,6 @@ import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -38,10 +36,11 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
 
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(player: Player): ItemProvider {
-        val item = PylonItem.fromStack(stack)
-        if (item == null) {
-            return ItemStackBuilder.of(stack)
-        }
+        try {
+            val item = PylonItem.fromStack(stack)
+            if (item == null) {
+                return ItemStackBuilder.of(stack)
+            }
 
         val placeholders = item.getPlaceholders()
         val builder = ItemStackBuilder.of(stack.clone())
@@ -55,61 +54,75 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             it.withArguments(placeholders)
         }
 
-        if (item.isDisabled) {
-            builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
-        }
-
-        if (!player.canCraft(item)) {
-            builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
-                .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
-                .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
-            if (item.research != null) {
-                addResearchCostLore(builder, player, item.research!!)
+            if (item.isDisabled) {
+                builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
             }
-            builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
-        }
 
-        return builder
+            if (!player.canCraft(item)) {
+                builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
+                    .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
+                    .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
+                if (item.research != null) {
+                    addResearchCostLore(builder, player, item.research!!)
+                }
+                builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
+            }
+
+            return builder
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return ItemStackBuilder.of(Material.BARRIER)
+                .name(Component.translatable("pylon.pyloncore.guide.button.item.error"))
+        }
     }
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-        when (clickType) {
-            ClickType.LEFT -> {
-                val page = ItemRecipesPage(stack)
-                if (page.pages.isNotEmpty()) {
-                    page.open(player)
-                }
-            }
-            ClickType.SHIFT_LEFT -> {
-                val item = PylonItem.fromStack(stack)
-                val research = item?.research
-                if (item != null && research != null) {
-                    if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
-                        return
+        try {
+            when (clickType) {
+                ClickType.LEFT -> {
+                    val page = ItemRecipesPage(stack)
+                    if (page.pages.isNotEmpty()) {
+                        page.open(player)
                     }
-                    research.addTo(player, false)
-                    player.researchPoints -= research.cost
-                    windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
                 }
-            }
-            ClickType.RIGHT -> {
-                val page = ItemUsagesPage(stack)
-                if (page.pages.isNotEmpty()) {
-                    page.open(player)
+
+                ClickType.SHIFT_LEFT -> {
+                    val item = PylonItem.fromStack(stack)
+                    val research = item?.research
+                    if (item != null && research != null) {
+                        if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
+                            return
+                        }
+                        research.addTo(player, false)
+                        player.researchPoints -= research.cost
+                        windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
+                    }
                 }
-            }
-            ClickType.SHIFT_RIGHT -> {
-                val item = PylonItem.fromStack(stack)
-                if (item != null && item.research != null && !player.canUse(item)) {
-                    ResearchItemsPage(item.research!!).open(player)
+
+                ClickType.RIGHT -> {
+                    val page = ItemUsagesPage(stack)
+                    if (page.pages.isNotEmpty()) {
+                        page.open(player)
+                    }
                 }
-            }
-            ClickType.MIDDLE -> {
-                if (player.hasPermission("pylon.command.give")) {
-                    player.setItemOnCursor(stack)
+
+                ClickType.SHIFT_RIGHT -> {
+                    val item = PylonItem.fromStack(stack)
+                    if (item != null && item.research != null && !player.canUse(item)) {
+                        ResearchItemsPage(item.research!!).open(player)
+                    }
                 }
+
+                ClickType.MIDDLE -> {
+                    if (player.hasPermission("pylon.command.give")) {
+                        player.setItemOnCursor(stack)
+                    }
+                }
+
+                else -> {}
             }
-            else -> {}
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
