@@ -23,7 +23,6 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
@@ -46,9 +45,6 @@ open class PylonBlock protected constructor(val block: Block) {
      */
     val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
     val key = schema.key
-
-    @JvmSynthetic
-    internal var errorBlock: BlockDisplay? = null
 
     val defaultTranslationKey = schema.defaultBlockTranslationKey
 
@@ -122,7 +118,6 @@ open class PylonBlock protected constructor(val block: Block) {
 
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
-        private val pylonBlockErrorKey = pylonKey("error")
 
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
@@ -147,11 +142,6 @@ open class PylonBlock protected constructor(val block: Block) {
             val pdc = context.newPersistentDataContainer()
             pdc.set(pylonBlockKeyKey, PylonSerializers.NAMESPACED_KEY, block.schema.key)
             pdc.set(pylonBlockPositionKey, PylonSerializers.LONG, block.block.position.asLong)
-
-            val errorBlock = block.errorBlock
-            if (errorBlock != null) {
-                pdc.set(pylonBlockErrorKey, PylonSerializers.UUID, errorBlock.uniqueId)
-            }
 
             block.write(pdc)
             PylonBlockSerializeEvent(block.block, block, pdc).callEvent()
@@ -188,9 +178,6 @@ open class PylonBlock protected constructor(val block: Block) {
                 // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
                 val block = schema.load(position.block, pdc)
-
-                block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
-                    ?.let { world.getEntity(it) as? BlockDisplay }
 
                 PylonBlockDeserializeEvent(block.block, block, pdc).callEvent()
                 block.postLoad()
