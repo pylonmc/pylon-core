@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.item.base;
+package io.github.pylonmc.pylon.core.item.base
 
-public interface NotPlaceable {
+interface NotPlaceable {
 }
