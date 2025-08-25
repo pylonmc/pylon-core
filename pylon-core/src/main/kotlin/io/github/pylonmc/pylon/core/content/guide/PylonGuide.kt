@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.SettingsAndInfoPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidsPage
+import io.github.pylonmc.pylon.core.guide.pages.item.ItemIngredientsPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchesPage
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
@@ -61,22 +62,25 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val hiddenResearches: MutableSet<NamespacedKey> = mutableSetOf()
 
         @JvmStatic
-        var fluidsPage = FluidsPage()
+        val fluidsPage = FluidsPage()
 
         @JvmStatic
-        var infoPage = InfoPage()
+        val infoPage = InfoPage()
 
         @JvmStatic
-        var researchesPage = ResearchesPage()
+        val researchesPage = ResearchesPage()
 
         @JvmStatic
-        var rootPage = RootPage()
+        val rootPage = RootPage()
 
         @JvmStatic
-        var searchItemsAndFluidsPage = SearchItemsAndFluidsPage()
+        val searchItemsAndFluidsPage = SearchItemsAndFluidsPage()
 
         @JvmStatic
-        var settingsAndInfoPage = SettingsAndInfoPage()
+        val settingsAndInfoPage = SettingsAndInfoPage()
+
+        @JvmStatic
+        fun ingredientsPage(stack: ItemStack) = ItemIngredientsPage(stack)
 
         /**
          * Hide an item from showing up in searches

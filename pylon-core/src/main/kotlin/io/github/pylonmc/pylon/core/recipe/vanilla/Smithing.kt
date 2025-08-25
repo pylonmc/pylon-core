@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
+import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
@@ -19,7 +21,7 @@ class SmithingRecipeWrapper(val smithingRecipe: SmithingRecipe) : VanillaRecipeW
 
     override fun display() = Gui.normal()
         .setStructure(
-            "# # # # # # # # #",
+            "# # # # g # # # #",
             "# # # # # # # # #",
             "# b # 0 1 2 # r #",
             "# # # # # # # # #",
@@ -31,6 +33,7 @@ class SmithingRecipeWrapper(val smithingRecipe: SmithingRecipe) : VanillaRecipeW
         .addIngredient('1', ItemButton.fromChoice(smithingRecipe.base))
         .addIngredient('2', ItemButton.fromChoice(smithingRecipe.addition))
         .addIngredient('r', ItemButton.fromStack(smithingRecipe.result))
+        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(smithingRecipe.result)))
         .build()
 
     override fun getKey(): NamespacedKey = smithingRecipe.key

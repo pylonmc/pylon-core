@@ -13,19 +13,20 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
-open class FluidButton(val key: NamespacedKey, val amount: Double?) : AbstractItem() {
-
+open class FluidButton(val key: NamespacedKey, val amount: Double?, val preDisplayDecorator: (ItemStackBuilder) -> ItemStackBuilder) : AbstractItem() {
+    constructor(key: NamespacedKey, amount: Double?) : this(key, amount, { it })
     constructor(key: NamespacedKey) : this(key, null)
 
     val fluid = PylonRegistry.FLUIDS[key] ?: throw IllegalArgumentException("There is no fluid with key $key")
 
     override fun getItemProvider() = try {
         if (amount == null) {
-            fluid.getItem()
+            preDisplayDecorator.invoke(fluid.getItem())
         } else {
-            fluid.getItem()
+            preDisplayDecorator.invoke(fluid.getItem())
                 .name(Component.translatable(
                     "pylon.pyloncore.guide.button.fluid.name",
                     PylonArgument.of("fluid", fluid.getItem().stack.getData(DataComponentTypes.ITEM_NAME)!!),
