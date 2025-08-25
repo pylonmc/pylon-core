@@ -397,6 +397,10 @@ sealed class Container {
             return Item(item.clone())
         }
 
+        fun of(item: ItemStack, amount: Int): Container {
+            return Item(item.asQuantity(amount))
+        }
+
         @Suppress("deprecation")
         fun of(choice: RecipeChoice): Container {
             return Item(choice.itemStack.clone())

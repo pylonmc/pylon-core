@@ -1,6 +1,9 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.guide.button.BackButton
+import io.github.pylonmc.pylon.core.guide.button.FluidButton
+import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
@@ -44,7 +47,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
                 "f o o o o o o o o",
             )
             .addIngredient('x', GuiItems.background())
-            .addIngredient('f', renderMainProduct(stack, calculation.outputAmount.toInt()))
+            .addIngredient('f', flatWithAmount(Container.of(stack, calculation.outputAmount.toInt())))
             .addIngredient('m', mainProductButton)
             .addIngredient(
                 'a', if (!calculation.intermediates.isEmpty()) {
@@ -100,49 +103,36 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
     }
 
     /**
-     * @param icon The origin stack, must be cloned when calling this method
-     */
-    fun toDisplay(icon: ItemStack, addition: Component): ItemStackBuilder =
-        ItemStackBuilder.of(icon).lore(addition).amount(1)
-
-    fun renderMainProduct(stack: ItemStack, outputAmount: Int): Item =
-        SimpleItem(toDisplay(
-        stack.clone(),
-        Component.translatable(
-            "pylon.pyloncore.message.guide.ingredients-page.stack_info",
-            PylonArgument.of("amount", outputAmount)
-        )))
-
-    /**
      * Display amount in the input/intermediate stacks
      */
     fun flatWithAmount(container: Container?): Item {
         if (container == null) return GuiItems.background()
 
-        return SimpleItem(when (container) {
-            is Container.Fluid -> toDisplay(
-            container.fluid.getItem().build(), Component.translatable(
-                "pylon.pyloncore.message.guide.ingredients-page.input_fluid",
-                PylonArgument.of("amount", container.amountMillibuckets)
-            ))
+        return when (container) {
+            is Container.Item -> ItemButton.fromStack(container.item) {
+                ItemStackBuilder.of(it).name(
+                    Component.translatable(
+                        "pylon.pyloncore.message.guide.ingredients-page.item",
+                        PylonArgument.of("amount", container.item.amount),
+                        PylonArgument.of("item", container.item.displayName())
+                )).build()
+            }
 
-            is Container.Item -> toDisplay(
-            container.item.clone(), Component.translatable(
-                "pylon.pyloncore.message.guide.ingredients-page.input_stack",
-                PylonArgument.of("amount", container.item.amount)
-            ))
-        })
+            is Container.Fluid -> FluidButton(container.fluid.key, container.amountMillibuckets)
+        }
     }
 
     val intermediatesButton: Item = SimpleItem(
         ItemStackBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)
             .amount(1)
             .name(Component.translatable("pylon.pyloncore.guide.button.intermediates.name"))
+            .lore(Component.translatable("pylon.pyloncore.guide.button.intermediates.lore"))
     )
 
     val mainProductButton: Item = SimpleItem(
         ItemStackBuilder.of(Material.GREEN_STAINED_GLASS_PANE)
             .amount(1)
             .name(Component.translatable("pylon.pyloncore.guide.button.main_product.name"))
+            .lore(Component.translatable("pylon.pyloncore.guide.button.main_product.lore"))
     )
 }
