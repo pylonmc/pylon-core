@@ -77,6 +77,7 @@ message:
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
         get: "<green>%player% has %points% research points"
+    exposerecipe: "<yellow>Warning: exposing recipe configs will keep them from updating automatically"
 
 gui:
   scroll:

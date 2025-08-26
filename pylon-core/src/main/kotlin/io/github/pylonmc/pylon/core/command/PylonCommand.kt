@@ -388,6 +388,7 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
         argument("recipe", RegistryCommandArgument(PylonRegistry.RECIPE_TYPES)) {
             permission("pylon.command.exposerecipeconfig")
             executes { sender ->
+                sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.exposerecipe"))
                 val addon = getArgument<PylonAddon>("addon")
                 val recipeType = getArgument<RecipeType<*>>("recipe")
                 addon.mergeGlobalConfig(
