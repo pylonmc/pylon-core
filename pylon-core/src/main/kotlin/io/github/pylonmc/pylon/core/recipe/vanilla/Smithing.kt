@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
+import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material

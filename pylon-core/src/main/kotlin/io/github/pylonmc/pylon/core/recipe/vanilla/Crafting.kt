@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
+import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
@@ -16,7 +18,13 @@ abstract class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : Vanil
 }
 
 class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputs: List<FluidOrItem> = recipe.choiceMap.values.filterNotNull().flatMap(FluidOrItem::of)
+    override val inputs: List<FluidOrItem> =
+        recipe.shape
+            .flatMap { it.asIterable() }
+            .mapNotNull {
+                recipe.choiceMap[it]?.let { FluidOrItem.of(it) }
+            }
+            .flatMap { it }
 
     override fun display(): Gui {
         val gui = Gui.normal()

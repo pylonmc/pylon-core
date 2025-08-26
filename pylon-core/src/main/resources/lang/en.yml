@@ -79,6 +79,9 @@ message:
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
         get: "<green>%player% has %points% research points"
+  guide:
+    ingredients-page:
+      item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
 
 gui:
   scroll:
@@ -138,6 +141,14 @@ guide:
     toggle-waila:
       name: "Toggle WAILA"
       lore: "<arrow:#3a2939> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
+    intermediates:
+      name: "<blue>↑ Inputs ↑"
+      lore: |-
+        <yellow>↓ Intermediates ↓
+    main_product:
+      name: "<blue>↑ Inputs ↑"
+      lore: |-
+        <gold>↓ Main product ↓
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 
@@ -153,6 +164,7 @@ guide:
     fluid_recipes: "Fluid recipes"
     item_usages: "Item usages"
     fluid_usages: "Fluid usages"
+    item_ingredients: "Ingredient breakdown"
 
 unit:
   prefix:

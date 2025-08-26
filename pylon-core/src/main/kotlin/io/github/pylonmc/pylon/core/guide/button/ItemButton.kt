@@ -28,7 +28,8 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.AutoCycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
 
-class ItemButton(val stack: ItemStack) : AbstractItem() {
+class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Player) -> ItemStack) : AbstractItem() {
+    constructor(stack: ItemStack) : this(stack, { stack: ItemStack, player: Player -> stack})
 
     constructor(key: NamespacedKey) : this(
         PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no item with key $key")
@@ -37,22 +38,23 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(player: Player): ItemProvider {
         try {
-            val item = PylonItem.fromStack(stack)
+            val displayStack = preDisplayDecorator.invoke(stack.clone(), player)
+            val item = PylonItem.fromStack(displayStack)
             if (item == null) {
-                return ItemStackBuilder.of(stack)
+                return ItemStackBuilder.of(displayStack)
             }
 
-        val placeholders = item.getPlaceholders()
-        val builder = ItemStackBuilder.of(stack.clone())
-            .editData(DataComponentTypes.LORE) { lore ->
-                ItemLore.lore(lore.lines().map { it.withArguments(placeholders) })
-            }
+            val placeholders = item.getPlaceholders()
+            val builder = ItemStackBuilder.of(displayStack.clone())
+                .editData(DataComponentTypes.LORE) { lore ->
+                    ItemLore.lore(lore.lines().map { it.withArguments(placeholders) })
+                }
 
-        // buffoonery to bypass InvUI's translation mess
-        // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
-        builder.editData(DataComponentTypes.ITEM_NAME) {
-            it.withArguments(placeholders)
-        }
+            // buffoonery to bypass InvUI's translation mess
+            // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
+            builder.editData(DataComponentTypes.ITEM_NAME) {
+                it.withArguments(placeholders)
+            }
 
             if (item.isDisabled) {
                 builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
@@ -136,6 +138,15 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             }
 
             return ItemButton(stack)
+        }
+
+        @JvmStatic
+        fun fromStack(stack: ItemStack?, preDisplayDecorator: (ItemStack, Player) -> ItemStack):  Item {
+            if (stack == null) {
+                return SimpleItem(ItemStack(Material.AIR))
+            }
+
+            return ItemButton(stack, preDisplayDecorator)
         }
 
         @JvmStatic
