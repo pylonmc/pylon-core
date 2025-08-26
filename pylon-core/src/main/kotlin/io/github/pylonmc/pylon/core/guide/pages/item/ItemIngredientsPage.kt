@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
-import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
@@ -12,7 +11,9 @@ import io.github.pylonmc.pylon.core.recipe.IngredientCalculation
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -109,13 +110,14 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         if (container == null) return GuiItems.background()
 
         return when (container) {
-            is Container.Item -> ItemButton.fromStack(container.item) {
-                ItemStackBuilder.of(it).name(
-                    Component.translatable(
+            is Container.Item -> ItemButton.fromStack(container.item) { item: ItemStack, player: Player ->
+                ItemStackBuilder.of(item).name(
+                    GlobalTranslator.render(Component.translatable(
                         "pylon.pyloncore.message.guide.ingredients-page.item",
-                        PylonArgument.of("amount", container.item.amount),
-                        PylonArgument.of("item", container.item.displayName())
-                )).build()
+                        PylonArgument.of("item_ingredients_page_amount", container.item.amount),
+                        PylonArgument.of("item_ingredients_page_item", container.item.getData(DataComponentTypes.ITEM_NAME)!!)),
+                        player.locale())
+                ).build()
             }
 
             is Container.Fluid -> FluidButton(container.fluid.key, container.amountMillibuckets)

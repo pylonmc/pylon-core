@@ -27,10 +27,9 @@ import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.AutoCycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
-import java.util.function.Function
 
-class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack) -> ItemStack) : AbstractItem() {
-    constructor(stack: ItemStack) : this(stack, { it })
+class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Player) -> ItemStack) : AbstractItem() {
+    constructor(stack: ItemStack) : this(stack, { stack: ItemStack, player: Player -> stack})
 
     constructor(key: NamespacedKey) : this(
         PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no item with key $key")
@@ -39,7 +38,7 @@ class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack) -> I
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(player: Player): ItemProvider {
         try {
-            val displayStack = preDisplayDecorator.invoke(stack.clone())
+            val displayStack = preDisplayDecorator.invoke(stack.clone(), player)
             val item = PylonItem.fromStack(displayStack)
             if (item == null) {
                 return ItemStackBuilder.of(displayStack)
@@ -142,7 +141,7 @@ class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack) -> I
         }
 
         @JvmStatic
-        fun fromStack(stack: ItemStack?, preDisplayDecorator: (ItemStack) -> ItemStack):  Item {
+        fun fromStack(stack: ItemStack?, preDisplayDecorator: (ItemStack, Player) -> ItemStack):  Item {
             if (stack == null) {
                 return SimpleItem(ItemStack(Material.AIR))
             }

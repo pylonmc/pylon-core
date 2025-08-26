@@ -81,7 +81,7 @@ message:
         get: "<green>%player% has %points% research points"
   guide:
     ingredients-page:
-      item: "<yellow>%amount%x %item%"
+      item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
 
 gui:
   scroll:
