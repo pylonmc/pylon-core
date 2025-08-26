@@ -12,7 +12,7 @@ import org.bukkit.inventory.*
 /**
  * Iteration order will be the order in which recipes were added unless overridden.
  */
-abstract class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, Iterable<T>, RegistryHandler {
+open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, Iterable<T>, RegistryHandler {
 
     protected open val registeredRecipes = mutableMapOf<NamespacedKey, T>()
     val recipes: Collection<T>
@@ -43,7 +43,9 @@ abstract class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Key
         }
     }
 
-    protected abstract fun loadRecipe(key: NamespacedKey, section: ConfigSection): T
+    protected open fun loadRecipe(key: NamespacedKey, section: ConfigSection): T {
+        throw NotImplementedError("loadRecipe is not implemented for ${this.key}")
+    }
 
     override fun iterator(): Iterator<T> = registeredRecipes.values.iterator()
 
