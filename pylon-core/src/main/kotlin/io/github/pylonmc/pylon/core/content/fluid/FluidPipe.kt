@@ -28,7 +28,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
     val fluidPerSecond = getSettings().getOrThrow("fluid-per-second", ConfigAdapter.DOUBLE)
     val allowedTemperatures = getSettings().getOrThrow(
         "allowed-temperatures",
-        ConfigAdapter.LIST.from(ConfigAdapter.ENUM.from<FluidTemperature>())
+        ConfigAdapter.LIST.from(ConfigAdapter.FLUID_TEMPERATURE)
     )
 
     override fun getPlaceholders(): List<PylonArgument> = listOf(

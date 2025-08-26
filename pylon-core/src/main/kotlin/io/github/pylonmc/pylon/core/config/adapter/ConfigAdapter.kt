@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
+import io.github.pylonmc.pylon.core.fluid.tags.FluidTemperature
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
@@ -40,6 +41,7 @@ interface ConfigAdapter<T> {
         @JvmField val SOUND = KEYED.fromRegistry(Registry.SOUNDS)
 
         @JvmField val PYLON_FLUID = KEYED.fromRegistry(PylonRegistry.FLUIDS)
+        @JvmField val FLUID_TEMPERATURE = ENUM.from<FluidTemperature>()
         @JvmField val FLUID_OR_ITEM = FluidOrItemConfigAdapter
         @JvmField val WEIGHTED_SET = WeightedSetConfigAdapter
         // @formatter:on
