@@ -24,13 +24,12 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     fun getSectionOrThrow(key: String): ConfigSection =
         getSection(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
 
+    /**
+     * Returns null either if the key does not exist or if the value cannot be converted to the desired type.
+     */
     fun <T> get(key: String, adapter: ConfigAdapter<T>): T? {
         val value = internalSection.get(key) ?: return null
-        try {
-            return adapter.convert(value)
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Failed to convert value '$value' to type ${adapter.type} for key '$key' in section '${internalSection.currentPath}'", e)
-        }
+        return runCatching { adapter.convert(value) }.getOrNull()
     }
 
     fun <T> get(key: String, adapter: ConfigAdapter<T>, defaultValue: T): T {
@@ -38,7 +37,15 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun <T> getOrThrow(key: String, adapter: ConfigAdapter<T>): T {
-        return get(key, adapter) ?: throw KeyNotFoundException(internalSection.currentPath, key)
+        val value = internalSection.get(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
+        try {
+            return adapter.convert(value)
+        } catch (e: Exception) {
+            throw IllegalArgumentException(
+                "Failed to convert value '$value' to type ${adapter.type} for key '$key' in section '${internalSection.currentPath}'",
+                e
+            )
+        }
     }
 
     fun <T> set(key: String, value: T) {
