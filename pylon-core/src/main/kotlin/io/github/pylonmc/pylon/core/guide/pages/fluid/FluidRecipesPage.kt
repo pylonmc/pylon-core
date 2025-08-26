@@ -36,7 +36,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
 
     open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
         .setStructure(
-            "< b # # # # # s >",
+            "< b # # g # # s >",
             "x x x x x x x x x",
             "x x x x x x x x x",
             "x x x x x x x x x",
@@ -46,6 +46,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', if (pages.size > 1) GuiItems.pagePrevious() else GuiItems.background())
         .addIngredient('b', BackButton(player))
+        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(fluid.getItem().build())))
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', if (pages.size > 1) GuiItems.pageNext() else GuiItems.background())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)

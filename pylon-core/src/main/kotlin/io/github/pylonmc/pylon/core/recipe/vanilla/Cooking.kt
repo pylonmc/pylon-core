@@ -40,7 +40,7 @@ class SmokingRecipeWrapper(recipe: SmokingRecipe) : CookingRecipeWrapper(recipe)
 
 fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
         .setStructure(
-            "# # # # g # # # #",
+            "# # # # # # # # #",
             "# # # # # # # # #",
             "# b # # i f o # #",
             "# # # # # # # # #",
@@ -56,7 +56,6 @@ fun display(recipe: CookingRecipe<*>, block: Material) = Gui.normal()
                     PylonArgument.of("time", UnitFormat.SECONDS.format(recipe.cookingTime / 20))
                 ))))
         .addIngredient('o', ItemButton.fromStack(recipe.result))
-        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(recipe.result)))
         .build() as AbstractGui
 
 object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting") {
