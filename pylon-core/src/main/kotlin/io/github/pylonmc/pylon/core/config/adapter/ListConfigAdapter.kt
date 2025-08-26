@@ -12,7 +12,7 @@ class ListConfigAdapter<E>(private val elementAdapter: ConfigAdapter<E>) : Confi
         val list = when (value) {
             is List<*> -> value
             is ConfigurationSection -> value.getValues(false).toList()
-            else -> throw IllegalArgumentException("Expected a List or Map, but got: ${value::class.java.name}")
+            else -> throw IllegalArgumentException("Expected a List or ConfigurationSection, but got: ${value::class.java.name}")
         }
         return list.map {
             @Suppress("UNCHECKED_CAST")
