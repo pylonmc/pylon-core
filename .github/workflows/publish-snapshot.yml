@@ -4,6 +4,12 @@ on:
   push:
     branches: [ "master" ]
 
+env:
+  SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+  SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+  SIGNING_KEY: ${{ secrets.PGP_KEY }}
+  SIGNING_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -25,8 +31,10 @@ jobs:
 
       - name: Publish snapshot
         run: ./gradlew publishAggregationToCentralPortalSnapshots
-        env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          SIGNING_KEY: ${{ secrets.PGP_KEY }}
-          SIGNING_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+
+      - name: Breakpoint if publish failed
+        if: failure()
+        uses: namespacelabs/breakpoint-action@v0
+        with:
+          duration: 30m
+          authorized-users: Seggan
