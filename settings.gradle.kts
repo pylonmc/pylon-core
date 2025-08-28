@@ -12,3 +12,5 @@ plugins {
 include("plugin")
 include("test")
 include("nms")
+
+rootProject.name = "pylon-core-root"

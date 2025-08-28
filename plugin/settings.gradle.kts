@@ -1,0 +1,1 @@
+project.name = "pylon-core"
