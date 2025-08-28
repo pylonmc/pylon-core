@@ -9,6 +9,6 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-include("pylon-core")
-include("pylon-test")
+include("plugin")
+include("test")
 include("nms")
