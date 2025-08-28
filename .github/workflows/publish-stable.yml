@@ -26,7 +26,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Publish snapshot
+      - name: Publish to Maven Central
         run: ./gradlew publishAggregationToCentralPortal -Pversion=${{ github.ref_name }}
 
       - name: Breakpoint if publish failed
