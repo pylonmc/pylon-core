@@ -36,12 +36,12 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Build docs
-        run: ./gradlew :pylon-core:dokkaGenerate
+        run: ./gradlew :plugin:dokkaGenerate
 
       - name: Upload docs
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'pylon-core/build/dokka'
+          path: 'plugin/build/dokka'
 
       - name: Deploy to GitHub Pages
         id: deployment

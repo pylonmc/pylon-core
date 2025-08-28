@@ -37,7 +37,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
-import java.util.*
+import java.util.WeakHashMap
 
 
 /**

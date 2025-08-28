@@ -106,7 +106,7 @@ tasks.shadowJar {
 
     exclude("kotlin/**")
 
-    archiveBaseName = project.name
+    archiveBaseName = "pylon-core"
     archiveClassifier = null
 }
 
@@ -130,14 +130,14 @@ tasks.withType<Jar> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifactId = project.name
+            artifactId = "pylon-core"
 
             artifact(tasks.jar)
             artifact(tasks.kotlinSourcesJar)
             artifact(javadocJar)
 
             pom {
-                name = project.name
+                name = artifactId
                 description = "The core library for Pylon addons."
                 url = "https://github.com/pylonmc/pylon-core"
                 licenses {
