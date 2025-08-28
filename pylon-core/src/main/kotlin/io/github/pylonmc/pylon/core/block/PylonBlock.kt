@@ -120,14 +120,23 @@ open class PylonBlock protected constructor(val block: Block) {
         private val pylonBlockPositionKey = pylonKey("position")
 
         @JvmStatic
-        fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
-            val schema = PylonBlockSchema(key, material, blockClass)
+        fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>, placementPredicate: (BlockPosition, PylonBlockSchema) -> Boolean) {
+            val schema = PylonBlockSchema(key, material, blockClass, placementPredicate)
             PylonRegistry.BLOCKS.register(schema)
         }
 
+        @JvmStatic
+        fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) =
+            register(key, material, blockClass, {_, _ -> true})
+
         @JvmSynthetic
         inline fun <reified T : PylonBlock> register(key: NamespacedKey, material: Material) =
-            register(key, material, T::class.java)
+            register(key, material, T::class.java, {_,_ -> true})
+
+
+        @JvmSynthetic
+        inline fun <reified T: PylonBlock> register(key: NamespacedKey, material: Material, noinline placementPredicate: (BlockPosition, PylonBlockSchema) -> Boolean) =
+            register(key, material, T::class.java, placementPredicate)
 
         @JvmSynthetic
         internal fun serialize(

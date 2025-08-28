@@ -19,6 +19,7 @@ class PylonBlockSchema(
     private val key: NamespacedKey,
     val material: Material,
     blockClass: Class<out PylonBlock>,
+    private val placementPredicate : (BlockPosition, PylonBlockSchema) -> Boolean
 ) : Keyed {
 
     init {
@@ -60,6 +61,8 @@ class PylonBlockSchema(
         schemaCache[block.position] = this
         return loadConstructor.invoke(block, pdc) as PylonBlock
     }
+
+    fun canPlace(position: BlockPosition) = placementPredicate.invoke(position, this)
 
     override fun getKey(): NamespacedKey = key
 

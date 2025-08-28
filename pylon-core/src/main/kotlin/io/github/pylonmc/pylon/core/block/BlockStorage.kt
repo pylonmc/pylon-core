@@ -186,6 +186,8 @@ object BlockStorage : Listener {
             blockPosition.block.type = schema.material
         }
 
+        if(!schema.canPlace(blockPosition)) return null
+
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.create(blockPosition.block, context)
         val event = PrePylonBlockPlaceEvent(blockPosition.block, block, context)
