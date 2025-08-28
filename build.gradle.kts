@@ -17,6 +17,8 @@ allprojects {
     }
 }
 
+version = "ROOT"
+
 nmcpAggregation {
     centralPortal {
         username = System.getenv("SONATYPE_USERNAME")
