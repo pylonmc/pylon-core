@@ -757,7 +757,7 @@ internal object BlockListener : Listener {
         val block = BlockStorage.get(event.flowerpot)
         if (block is PylonFlowerPot) {
             try {
-                block.onFlowerpotManipulated(event)
+                block.onFlowerPotManipulated(event)
             } catch (e: Exception) {
                 logEventHandleErr(event, e, block)
             }
