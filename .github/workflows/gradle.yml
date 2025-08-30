@@ -5,13 +5,13 @@ on:
     branches:
       - master
     paths:
-      - 'plugin/**'
+      - 'pylon-core/**'
       - 'test/**'
       - 'build.gradle.kts'
   pull_request:
     branches: [ "*" ]
     paths:
-      - 'plugin/**'
+      - 'pylon-core/**'
       - 'test/**'
       - 'build.gradle.kts'
   workflow_call:
@@ -41,13 +41,13 @@ jobs:
         uses: gradle/actions/setup-gradle@v4.2.2
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew :plugin:shadowJar -Pversion=${{ inputs.version || github.run_number }}
+        run: ./gradlew :pylon-core:shadowJar -Pversion=${{ inputs.version || github.run_number }}
 
       - name: Upload the artifact
         uses: actions/upload-artifact@v4.6.0
         with:
           name: pylon-core-${{ inputs.version || github.run_number }}
-          path: 'plugin/build/libs/pylon-core-${{ inputs.version || github.run_number }}.jar'
+          path: 'pylon-core/build/libs/pylon-core-${{ inputs.version || github.run_number }}.jar'
 
   dependency-submission:
     needs: [ build ]
