@@ -9,8 +9,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-include("plugin")
+rootProject.name = "pylon-core-root"
+
+include("pylon-core")
 include("test")
 include("nms")
-
-rootProject.name = "pylon-core-root"

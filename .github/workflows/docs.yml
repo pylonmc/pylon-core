@@ -36,7 +36,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Build docs
-        run: ./gradlew :plugin:dokkaGenerate
+        run: ./gradlew :pylon-core:dokkaGenerate
 
       - name: Upload docs
         uses: actions/upload-pages-artifact@v3
