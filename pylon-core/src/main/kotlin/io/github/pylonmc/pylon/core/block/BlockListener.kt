@@ -21,6 +21,7 @@ import io.papermc.paper.event.player.PlayerOpenSignEvent
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
+import org.bukkit.block.Container
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -33,6 +34,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
+import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -72,7 +74,7 @@ internal object BlockListener : Listener {
                 return
             }
         }
-        
+
         val relative = event.blockPlaced.position - event.blockAgainst.position
         val blockFace = BlockFace.entries.find { it.modX == relative.x && it.modY == relative.y && it.modZ == relative.z }
             ?: BlockFace.SELF
@@ -751,6 +753,24 @@ internal object BlockListener : Listener {
                 event.pylonBlock.onUnload(event)
             } catch (e: Exception) {
                 logEventHandleErr(event, e, event.pylonBlock)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun onItemMove(event: InventoryMoveItemEvent) {
+        val sourceHolder = event.source.holder
+        if (sourceHolder is Container) {
+            val sourceBlock = BlockStorage.get(sourceHolder.block)
+            if (sourceBlock is PylonContainerBlock) {
+                sourceBlock.onItemMoveFrom(event)
+            }
+        }
+        val destHolder = event.destination.holder
+        if (destHolder is Container) {
+            val destBlock = BlockStorage.get(destHolder.block)
+            if (destBlock is PylonContainerBlock) {
+                destBlock.onItemMoveTo(event)
             }
         }
     }
