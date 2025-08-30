@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly(project(":plugin"))
+    compileOnly(project(":pylon-core"))
     implementation("org.assertj:assertj-core:3.27.2")
 }
 
@@ -35,7 +35,7 @@ bukkit {
 }
 
 tasks.runServer {
-    dependsOn(project(":plugin").tasks.shadowJar)
+    dependsOn(project(":pylon-core").tasks.shadowJar)
     val runFolder = project.projectDir.resolve("run")
     val testsFailedFile = runFolder.resolve("tests-failed")
     doFirst {
@@ -46,7 +46,7 @@ tasks.runServer {
 
         val pluginFolder = runFolder.resolve("plugins")
         pluginFolder.mkdirs()
-        val archive = project(":plugin").tasks.shadowJar.map { it.archiveFile }.get().get().asFile
+        val archive = project(":pylon-core").tasks.shadowJar.map { it.archiveFile }.get().get().asFile
         archive.copyTo(pluginFolder.resolve(archive.name), overwrite = true)
     }
     maxHeapSize = "4G"
