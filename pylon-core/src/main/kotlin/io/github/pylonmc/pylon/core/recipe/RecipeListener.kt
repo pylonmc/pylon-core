@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
 import org.bukkit.Keyed
+import org.bukkit.block.Furnace
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -47,6 +48,16 @@ internal object PylonRecipeListener : Listener {
     private fun onCook(e: BlockCookEvent) {
         e.recipe ?: return
         if (e.source.isPylonAndIsNot<VanillaCookingItem>() && e.recipe?.key?.namespace == "minecraft") {
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onFuelBurn(e: FurnaceBurnEvent){
+        if(e.fuel.isPylonAndIsNot<VanillaCookingFuel>()){
+            e.isCancelled = true
+        }
+        if((e.block.state as Furnace).inventory.smelting.isPylonAndIsNot<VanillaCookingItem>()){
             e.isCancelled = true
         }
     }
