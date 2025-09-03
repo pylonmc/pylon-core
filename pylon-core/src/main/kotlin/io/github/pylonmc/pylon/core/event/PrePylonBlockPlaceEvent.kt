@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.event
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import org.bukkit.block.Block
 import org.bukkit.event.Cancellable
@@ -22,6 +23,9 @@ class PrePylonBlockPlaceEvent(
 
     override fun setCancelled(cancel: Boolean) {
         cancelled = cancel
+        if(pylonBlock is PylonBreakHandler){
+            pylonBlock.postBreak()
+        }
     }
 
     override fun getHandlers(): HandlerList
