@@ -7,9 +7,9 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockListener.logEventHandleErr
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
-import io.github.pylonmc.pylon.core.event.PrePylonBlockBreakEvent
-import io.github.pylonmc.pylon.core.event.PrePylonBlockPlaceEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -32,13 +32,13 @@ object TickManager : Listener {
         tickingBlocks.remove(block)?.cancel()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private fun onPylonBlockPlace(e: PrePylonBlockPlaceEvent) {
+    @EventHandler(priority = EventPriority.MONITOR)
+    private fun onPylonBlockPlace(e: PylonBlockPlaceEvent) {
         startTicker(e.pylonBlock)
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private fun onPylonBlockBreak(e: PrePylonBlockBreakEvent) {
+    @EventHandler(priority = EventPriority.MONITOR)
+    private fun onPylonBlockBreak(e: PylonBlockBreakEvent) {
         val pylonBlock = e.pylonBlock
         tickingBlocks.remove(pylonBlock)?.cancel()
     }

@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.event
 
-import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
+import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import org.bukkit.block.Block
 import org.bukkit.event.Cancellable
@@ -9,11 +8,13 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called before a pylon block has been placed.
+ * Called after the material of the block is set,
+ * but before the PylonBlock's constructor is called
+ * @see BlockCreateContext.shouldSetType
  */
 class PrePylonBlockPlaceEvent(
     val block: Block,
-    val pylonBlock: PylonBlock,
+    val blockSchema: PylonBlockSchema,
     val context: BlockCreateContext,
 ) : Event(), Cancellable {
 
@@ -23,9 +24,6 @@ class PrePylonBlockPlaceEvent(
 
     override fun setCancelled(cancel: Boolean) {
         cancelled = cancel
-        if(pylonBlock is PylonBreakHandler){
-            pylonBlock.postBreak()
-        }
     }
 
     override fun getHandlers(): HandlerList
