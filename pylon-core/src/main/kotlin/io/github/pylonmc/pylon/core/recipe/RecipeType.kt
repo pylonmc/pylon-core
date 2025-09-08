@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.recipe
 
-import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.recipe.vanilla.*
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
@@ -34,17 +33,6 @@ open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, 
 
     fun register() {
         PylonRegistry.RECIPE_TYPES.register(this)
-    }
-
-    open fun loadFromConfig(config: ConfigSection) {
-        for (key in config.keys) {
-            val section = config.getSectionOrThrow(key)
-            addRecipe(loadRecipe(NamespacedKey.fromString(key) ?: error("Invalid key: $key"), section))
-        }
-    }
-
-    protected open fun loadRecipe(key: NamespacedKey, section: ConfigSection): T {
-        throw NotImplementedError("loadRecipe is not implemented for ${this.key}")
     }
 
     override fun iterator(): Iterator<T> = registeredRecipes.values.iterator()

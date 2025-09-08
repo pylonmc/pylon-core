@@ -24,6 +24,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
+import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
@@ -118,24 +119,30 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         launch {
             delay(1.ticks)
-            for (type in PylonRegistry.RECIPE_TYPES) {
-                for (addon in PylonRegistry.ADDONS) {
-                    val configStream = addon.javaPlugin.getResource("recipes/${type.key}.yml") ?: continue
-                    val config = configStream.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
-                    type.loadFromConfig(config)
+            postServerStart()
+        }
+    }
+
+    private fun postServerStart() {
+        for (type in PylonRegistry.RECIPE_TYPES) {
+            if (type !is ConfigurableRecipeType) continue
+            for (addon in PylonRegistry.ADDONS) {
+                val configStream = addon.javaPlugin.getResource(type.filePath) ?: continue
+                val config = configStream.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
+                type.loadFromConfig(config)
+            }
+        }
+        val recipesDir = dataPath.resolve("recipes")
+        if (recipesDir.toFile().exists()) {
+            recipesDir.walk()
+                .filter { it.extension == "yml" }
+                .mapNotNull { path ->
+                    NamespacedKey.fromString(path.nameWithoutExtension)
+                        ?.let(PylonRegistry.RECIPE_TYPES::get)
+                        ?.let { it as? ConfigurableRecipeType }
+                        ?.let { type -> type to Config(path) }
                 }
-            }
-            val recipesDir = dataPath.resolve("recipes")
-            if (recipesDir.toFile().exists()) {
-                recipesDir.walk()
-                    .filter { it.extension == "yml" }
-                    .mapNotNull {
-                        NamespacedKey.fromString(it.nameWithoutExtension)
-                            ?.let(PylonRegistry.RECIPE_TYPES::get)
-                            ?.let { type -> type to Config(it) }
-                    }
-                    .forEach { (type, config) -> type.loadFromConfig(config) }
-            }
+                .forEach { (type, config) -> type.loadFromConfig(config) }
         }
     }
 

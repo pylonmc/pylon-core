@@ -2,9 +2,7 @@ package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
-import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
-import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
@@ -12,9 +10,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.*
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.iterator
 
 
 sealed class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : VanillaRecipeWrapper {
@@ -106,7 +101,7 @@ class TransmuteRecipeWrapper(override val recipe: TransmuteRecipe) : AShapelessR
 /**
  * Key: `minecraft:crafting_shaped`
  */
-object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shaped", ShapedRecipeWrapper::class.java) {
+object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shaped") {
 
     fun addRecipe(recipe: ShapedRecipe) = super.addRecipe(ShapedRecipeWrapper(recipe))
 
@@ -127,7 +122,7 @@ object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shape
 /**
  * Key: `minecraft:crafting_shapeless`
  */
-object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting_shapeless", ShapelessRecipeWrapper::class.java) {
+object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting_shapeless") {
 
     fun addRecipe(recipe: ShapelessRecipe) = super.addRecipe(ShapelessRecipeWrapper(recipe))
 
@@ -146,7 +141,7 @@ object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting
 /**
  * Key: `minecraft:crafting_transmute`
  */
-object TransmuteRecipeType : VanillaRecipeType<TransmuteRecipeWrapper>("crafting_transmute", TransmuteRecipeWrapper::class.java) {
+object TransmuteRecipeType : VanillaRecipeType<TransmuteRecipeWrapper>("crafting_transmute") {
 
     fun addRecipe(recipe: TransmuteRecipe) = super.addRecipe(TransmuteRecipeWrapper(recipe))
 

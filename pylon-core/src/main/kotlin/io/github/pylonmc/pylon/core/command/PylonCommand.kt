@@ -22,6 +22,7 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
+import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.test.GameTestConfig
@@ -390,16 +391,17 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
             executes { sender ->
                 val addon = getArgument<PylonAddon>("addon")
                 val recipeType = getArgument<RecipeType<*>>("recipe")
+                if (recipeType !is ConfigurableRecipeType) {
+                    sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.exposerecipe.not-configurable"))
+                    return@executes
+                }
                 sender.sendMessage(
                     Component.translatable(
-                        "pylon.pyloncore.message.command.exposerecipe",
-                        PylonArgument.of("file", "plguins/PylonCore/recipes/${recipeType.key}.yml")
+                        "pylon.pyloncore.message.command.exposerecipe.warning",
+                        PylonArgument.of("file", "plugins/PylonCore/${recipeType.filePath}")
                     )
                 )
-                addon.mergeGlobalConfig(
-                    "recipes/${addon.key.namespace}/${recipeType.key}.yml",
-                    "recipes/${recipeType.key}.yml"
-                )
+                addon.mergeGlobalConfig(recipeType.filePath, recipeType.filePath)
             }
         }
     }

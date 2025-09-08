@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipe
-import io.github.pylonmc.pylon.core.recipe.RecipeType
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.event.Listener
@@ -12,10 +12,8 @@ sealed interface VanillaRecipeWrapper : PylonRecipe {
     val recipe: Recipe
 }
 
-sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(
-    key: String,
-    recipeClass: Class<T>,
-) : RecipeType<T>(NamespacedKey.minecraft(key)), Listener {
+sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(key: String) :
+    ConfigurableRecipeType<T>(NamespacedKey.minecraft(key)), Listener {
 
     init {
         Bukkit.getPluginManager().registerEvents(this, PylonCore)

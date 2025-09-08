@@ -73,7 +73,9 @@ message:
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
         get: "<green>%player% has %points% research points"
-    exposerecipe: "<yellow>Hark! Shouldst thou lay bare the secrets of these recipes, their forms shall no longer mend themselves of their own accord. To undo this act, thou must destroy %file%"
+    exposerecipe:
+      not-configurable: "<red>This recipe is not configurable"
+      warning: "<yellow>Hark! Shouldst thou lay bare the secrets of these recipes, their forms shall no longer mend themselves of their own accord. To undo this act, thou must destroy %file%"
 
 gui:
   scroll:

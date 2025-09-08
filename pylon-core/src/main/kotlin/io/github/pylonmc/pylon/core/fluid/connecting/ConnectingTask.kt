@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.util.isCardinalDirection
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vectorToBlockFace
 import net.kyori.adventure.text.Component
@@ -131,7 +132,7 @@ class ConnectingTask(
         player.sendActionBar(Component.empty())
 
         val pipeDisplay = ConnectingService.connect(from, to, pipe)
-        return Result(pipeDisplay.getTo()!!, pipesUsed(from.position, to.position))
+        return Result(pipeDisplay.getTo(), pipesUsed(from.position, to.position))
     }
 
     fun pathIntersectsBlocks()

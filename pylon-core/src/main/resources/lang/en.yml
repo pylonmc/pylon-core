@@ -77,7 +77,9 @@ message:
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
         get: "<green>%player% has %points% research points"
-    exposerecipe: "<yellow>Warning: exposing recipe configs will keep them from updating automatically. Delete %file% to revert"
+    exposerecipe:
+      not-configurable: "<red>This recipe type is not configurable"
+      warning: "<yellow>Warning: exposing recipe configs will keep them from updating automatically. Delete %file% to revert"
   guide:
     ingredients-page:
       item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"

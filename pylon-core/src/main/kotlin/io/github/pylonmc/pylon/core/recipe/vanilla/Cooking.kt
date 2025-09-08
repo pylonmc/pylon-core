@@ -2,9 +2,7 @@ package io.github.pylonmc.pylon.core.recipe.vanilla
 
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
-import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
-import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
@@ -81,7 +79,7 @@ private inline fun <T : CookingRecipe<T>> loadCookingRecipe(
 /**
  * Key: `minecraft:blasting`
  */
-object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting", BlastingRecipeWrapper::class.java) {
+object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting") {
 
     fun addRecipe(recipe: BlastingRecipe) = super.addRecipe(BlastingRecipeWrapper(recipe))
 
@@ -93,8 +91,7 @@ object BlastingRecipeType : VanillaRecipeType<BlastingRecipeWrapper>("blasting",
  * Key: `minecraft:campfire_cooking`
  */
 object CampfireRecipeType : VanillaRecipeType<CampfireRecipeWrapper>(
-    "campfire_cooking",
-    CampfireRecipeWrapper::class.java
+    "campfire_cooking"
 ) {
 
     fun addRecipe(recipe: CampfireRecipe) = super.addRecipe(CampfireRecipeWrapper(recipe))
@@ -106,7 +103,7 @@ object CampfireRecipeType : VanillaRecipeType<CampfireRecipeWrapper>(
 /**
  * Key: `minecraft:smelting`
  */
-object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("smelting", FurnaceRecipeWrapper::class.java) {
+object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("smelting") {
 
     fun addRecipe(recipe: FurnaceRecipe) = super.addRecipe(FurnaceRecipeWrapper(recipe))
 
@@ -117,7 +114,7 @@ object FurnaceRecipeType : VanillaRecipeType<FurnaceRecipeWrapper>("smelting", F
 /**
  * Key: `minecraft:smoking`
  */
-object SmokingRecipeType : VanillaRecipeType<SmokingRecipeWrapper>("smoking", SmokingRecipeWrapper::class.java) {
+object SmokingRecipeType : VanillaRecipeType<SmokingRecipeWrapper>("smoking") {
 
     fun addRecipe(recipe: SmokingRecipe) = super.addRecipe(SmokingRecipeWrapper(recipe))
 
