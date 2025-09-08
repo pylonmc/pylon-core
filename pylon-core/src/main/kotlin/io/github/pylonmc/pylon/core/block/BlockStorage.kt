@@ -155,12 +155,12 @@ object BlockStorage : Listener {
         }
 
     @JvmStatic
-    fun isPylonBlock(blockPosition: BlockPosition): Boolean
-        = (blockPosition.chunk.isLoaded) && get(blockPosition) != null
+    fun isPylonBlock(blockPosition: BlockPosition): Boolean =
+        (blockPosition.chunk.isLoaded) && get(blockPosition) != null
 
     @JvmStatic
-    fun isPylonBlock(block: Block): Boolean
-        = (block.position.chunk.isLoaded) && get(block) != null
+    fun isPylonBlock(block: Block): Boolean =
+        (block.position.chunk.isLoaded) && get(block) != null
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -186,11 +186,10 @@ object BlockStorage : Listener {
             blockPosition.block.type = schema.material
         }
 
+        if (!PrePylonBlockPlaceEvent(blockPosition.block, schema, context).callEvent()) return null
+
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.create(blockPosition.block, context)
-        val event = PrePylonBlockPlaceEvent(blockPosition.block, block, context)
-        event.callEvent()
-        if (event.isCancelled) return null
 
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
