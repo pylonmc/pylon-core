@@ -72,7 +72,6 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock {
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
         guiBlocks.remove(this)
         val invs = inventories.remove(this) ?: return
-        if (!context.normallyDrops) return
         for (inv in invs) {
             for (item in inv.unsafeItems) {
                 item?.let(drops::add)

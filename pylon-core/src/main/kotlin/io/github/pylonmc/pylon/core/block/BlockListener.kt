@@ -18,6 +18,7 @@ import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
+import org.bukkit.block.Container
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -30,6 +31,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
+import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -760,6 +762,24 @@ internal object BlockListener : Listener {
                 block.onFlowerPotManipulated(event)
             } catch (e: Exception) {
                 logEventHandleErr(event, e, block)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun onItemMove(event: InventoryMoveItemEvent) {
+        val sourceHolder = event.source.holder
+        if (sourceHolder is Container) {
+            val sourceBlock = BlockStorage.get(sourceHolder.block)
+            if (sourceBlock is PylonVanillaContainerBlock) {
+                sourceBlock.onItemMoveFrom(event)
+            }
+        }
+        val destHolder = event.destination.holder
+        if (destHolder is Container) {
+            val destBlock = BlockStorage.get(destHolder.block)
+            if (destBlock is PylonVanillaContainerBlock) {
+                destBlock.onItemMoveTo(event)
             }
         }
     }

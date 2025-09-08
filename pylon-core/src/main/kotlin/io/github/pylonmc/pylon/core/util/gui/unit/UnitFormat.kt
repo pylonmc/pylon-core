@@ -147,7 +147,7 @@ class UnitFormat @JvmOverloads constructor(
         @JvmField
         val PERCENT = UnitFormat(
             "percent",
-            TextColor.color(0xa0cb29),
+            TextColor.color(0xa6dd58),
             abbreviate = true
         )
 
@@ -223,6 +223,20 @@ class UnitFormat @JvmOverloads constructor(
             TextColor.color(0xF2A900),
             abbreviate = true,
             prefix = MetricPrefix.NONE
+        )
+
+        @JvmField
+        val EXPERIENCE = UnitFormat(
+            "experience",
+            TextColor.color(0xb2e01a),
+            abbreviate = true
+        )
+
+        @JvmField
+        val EXPERIENCE_PER_SECOND = UnitFormat(
+            "experience_per_second",
+            TextColor.color(0xb2e01a),
+            abbreviate = true
         )
 
         @JvmStatic
