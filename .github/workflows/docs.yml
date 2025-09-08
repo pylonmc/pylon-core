@@ -41,7 +41,7 @@ jobs:
       - name: Upload docs
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'plugin/build/dokka'
+          path: 'pylon-core/build/dokka'
 
       - name: Deploy to GitHub Pages
         id: deployment
