@@ -24,7 +24,7 @@ sealed interface FluidOrItem {
         fun of(choice: RecipeChoice): List<FluidOrItem>
             = when (choice) {
                 is RecipeChoice.ExactChoice -> listOf(of(choice.itemStack))
-                is RecipeChoice.MaterialChoice -> choice.choices.map { of(ItemStack(it)) }
+                is RecipeChoice.MaterialChoice -> listOf(of(choice.itemStack))
                 else -> emptyList()
             }
     }

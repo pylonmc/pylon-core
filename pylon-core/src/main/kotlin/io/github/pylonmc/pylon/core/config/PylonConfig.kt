@@ -17,6 +17,9 @@ object PylonConfig {
     val wailaTickInterval = config.getOrThrow("waila-tick-interval", ConfigAdapter.INT)
 
     @JvmStatic
+    val allowedEntityErrors: Int by config
+
+    @JvmStatic
     val fluidTickInterval = config.getOrThrow("fluid-tick-interval", ConfigAdapter.INT)
 
     @JvmStatic

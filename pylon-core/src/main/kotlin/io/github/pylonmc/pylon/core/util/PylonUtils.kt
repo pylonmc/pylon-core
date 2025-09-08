@@ -6,6 +6,9 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import com.mojang.brigadier.context.CommandContext
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.recipe.PylonRecipe
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
@@ -20,16 +23,19 @@ import io.papermc.paper.math.Rotation
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.Registry
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
+import kotlin.math.absoluteValue
 import kotlin.reflect.typeOf
 
 fun NamespacedKey.isFromAddon(addon: PylonAddon): Boolean {
@@ -76,10 +82,14 @@ fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean
     return vectorToBlockFace(vector)
 }
 
-fun isCardinalDirection(vector: Vector3i)
-    = (vector.x != 0 && vector.y == 0 && vector.z == 0)
+fun isCardinalDirection(vector: Vector3i) = (vector.x != 0 && vector.y == 0 && vector.z == 0)
         || (vector.x == 0 && vector.y != 0 && vector.z == 0)
         || (vector.x == 0 && vector.y == 0 && vector.z != 0)
+
+fun isCardinalDirection(vector: Vector3f)
+    = (vector.x.absoluteValue > 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue > 1.0e-6 && vector.z.absoluteValue < 1.0e-6)
+        || (vector.x.absoluteValue < 1.0e-6 && vector.y.absoluteValue < 1.0e-6 && vector.z.absoluteValue > 1.0e-6)
 
 fun getAddon(key: NamespacedKey): PylonAddon =
     PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
@@ -92,14 +102,13 @@ fun getAddon(key: NamespacedKey): PylonAddon =
  *
  * Assumes north to be the default direction (supplying north will result in no rotation)
  */
-fun rotateVectorToFace(vector: Vector3i, face: BlockFace)
-    = when (face) {
-        BlockFace.NORTH -> vector
-        BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
-        BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
-        BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
-        else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
-    }
+fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
+    BlockFace.NORTH -> vector
+    BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
+    BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
+    BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+    else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+}
 
 fun itemFromName(name: String): ItemStack? {
     val key = NamespacedKey.fromString(name) ?: return null
@@ -156,4 +165,66 @@ fun Component.withArguments(args: List<TranslationArgumentLike>): Component {
         result = this.arguments(args)
     }
     return result.children(result.children().map { it.withArguments(args) })
+}
+
+fun findRecipeFor(item: PylonItem): PylonRecipe? {
+    // 1. if there's a recipe with the same key as the item, use that
+    PylonRegistry.RECIPE_TYPES
+        .map { it.getRecipe(item.schema.key) }
+        .find { it != null }?.let { return it }
+
+    // 2. if there's a recipe which produces *only* that item, use that
+    // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
+    val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(item.stack) && recipe.results.size == 1 }
+        .sortedBy { it.key }
+        .toList()
+
+    if (singleOutputRecipes.isNotEmpty()) return singleOutputRecipes.first()
+
+    // 4. if there's a recipe which produces the item *alongside* other things, use that
+    // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
+    val multiOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(item.stack) }
+        .sortedBy { it.key }
+        .toList()
+
+    if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
+
+    return null
+}
+
+fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
+    // 1. if there's a recipe with the same key as the item, use that
+    PylonRegistry.RECIPE_TYPES
+        .map { it.getRecipe(fluid.key) }
+        .find { it != null }?.let { return it }
+
+    // 2. if there's a recipe which produces *only* that item, use that
+    // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
+    val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size == 1 }
+        .sortedBy { it.key }
+        .toList()
+
+    if (singleOutputRecipes.isNotEmpty()) return singleOutputRecipes.first()
+
+    // 4. if there's a recipe which produces the item *alongside* other things, use that
+    // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
+    val multiOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(fluid) }
+        .sortedWith { a: PylonRecipe, b: PylonRecipe -> a.key.compareTo(b.key) }
+        .toList()
+
+    if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
+
+    return null
+}
+
+fun isFakeEvent(event: Event): Boolean {
+    return event.javaClass.name.contains("Fake");
 }

@@ -12,17 +12,17 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
@@ -46,15 +46,26 @@ open class PylonBlock protected constructor(val block: Block) {
     val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
     val key = schema.key
 
-    @JvmSynthetic
-    internal var errorBlock: BlockDisplay? = null
+    val defaultTranslationKey = schema.defaultBlockTranslationKey
 
-    val defaultTranslationKey = Component.translatable(
-        "pylon.${schema.key.namespace}.item.${schema.key.key}.waila",
-        "pylon.${schema.key.namespace}.item.${schema.key.key}.name"
-    )
-
+    /**
+     * This constructor is called when a *new* block is created in the world
+     * ex:
+     * - A player places a block
+     * - `BlockStorage.placeBlock` called
+     *
+     * @see PylonBlockSchema.create
+     * @see PylonBlockUnloadEvent
+     */
     constructor(block: Block, context: BlockCreateContext) : this(block)
+
+    /**
+     * This constructor is called while the chunk is being loaded
+     *
+     * @see PylonBlockSchema.load
+     * @see PylonBlockLoadEvent
+     * @see deserialize
+     */
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
 
     /**
@@ -96,6 +107,8 @@ open class PylonBlock protected constructor(val block: Block) {
 
     /**
      * Called when the block is saved
+     *
+     * @see serialize
      */
     open fun write(pdc: PersistentDataContainer) {}
 
@@ -105,7 +118,6 @@ open class PylonBlock protected constructor(val block: Block) {
 
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
-        private val pylonBlockErrorKey = pylonKey("error")
 
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
@@ -130,11 +142,6 @@ open class PylonBlock protected constructor(val block: Block) {
             val pdc = context.newPersistentDataContainer()
             pdc.set(pylonBlockKeyKey, PylonSerializers.NAMESPACED_KEY, block.schema.key)
             pdc.set(pylonBlockPositionKey, PylonSerializers.LONG, block.block.position.asLong)
-
-            val errorBlock = block.errorBlock
-            if (errorBlock != null) {
-                pdc.set(pylonBlockErrorKey, PylonSerializers.UUID, errorBlock.uniqueId)
-            }
 
             block.write(pdc)
             PylonBlockSerializeEvent(block.block, block, pdc).callEvent()
@@ -171,9 +178,6 @@ open class PylonBlock protected constructor(val block: Block) {
                 // We can assume this function is only going to be called when the block's world is loaded, hence the asBlock!!
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
                 val block = schema.load(position.block, pdc)
-
-                block.errorBlock = pdc.get(pylonBlockErrorKey, PylonSerializers.UUID)
-                    ?.let { world.getEntity(it) as? BlockDisplay }
 
                 PylonBlockDeserializeEvent(block.block, block, pdc).callEvent()
                 block.postLoad()

@@ -56,6 +56,9 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
     private val translations: Map<Locale, Config>
 
+    val languages: Set<Locale>
+        get() = translations.keys
+
     private val translationCache = mutableMapOf<Pair<Locale, String>, Component>()
     private val warned = mutableSetOf<Locale>()
 
@@ -79,13 +82,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
     }
 
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
-        var translation = getRawTranslation(component.key(), locale, warn = true)
-            ?: component.fallback()?.let {
-                val translatable = Component.translatable(it)
-                val translated = GlobalTranslator.render(translatable, locale)
-                if (translated == translatable) null else translated
-            }
-            ?: return null
+        var translation = getRawTranslation(component.key(), locale, warn = true) ?: return null
         for (arg in component.arguments()) {
             val componentArg = arg.asComponent()
             if (componentArg !is VirtualComponent) continue
@@ -156,7 +153,6 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         @JvmName("translateItem")
         @Suppress("UnstableApiUsage")
         fun ItemStack.translate(locale: Locale, arguments: List<PylonArgument> = emptyList()) {
-            GlobalTranslator.translator().addSource(MinecraftTranslator)
 
             editData(DataComponentTypes.ITEM_NAME) {
                 val translated = GlobalTranslator.render(it.withArguments(arguments), locale)
@@ -183,8 +179,6 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                 }
                 ItemLore.lore(newLore)
             }
-
-            GlobalTranslator.translator().removeSource(MinecraftTranslator)
         }
 
         @EventHandler(priority = EventPriority.MONITOR)

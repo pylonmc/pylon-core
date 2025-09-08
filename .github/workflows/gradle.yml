@@ -6,12 +6,14 @@ on:
       - master
     paths:
       - 'pylon-core/**'
-      - 'pylon-test/**'
+      - 'test/**'
+      - 'build.gradle.kts'
   pull_request:
     branches: [ "*" ]
     paths:
       - 'pylon-core/**'
-      - 'pylon-test/**'
+      - 'test/**'
+      - 'build.gradle.kts'
   workflow_call:
     inputs:
       version:
@@ -21,8 +23,6 @@ on:
 
 jobs:
   build:
-    if: startsWith(github.event.head_commit.message, '[Skip]') == false
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,6 +52,7 @@ jobs:
   dependency-submission:
     needs: [ build ]
 
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write

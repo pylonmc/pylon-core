@@ -155,12 +155,12 @@ object BlockStorage : Listener {
         }
 
     @JvmStatic
-    fun isPylonBlock(blockPosition: BlockPosition): Boolean
-        = (blockPosition.chunk.isLoaded) && get(blockPosition) != null
+    fun isPylonBlock(blockPosition: BlockPosition): Boolean =
+        (blockPosition.chunk.isLoaded) && get(blockPosition) != null
 
     @JvmStatic
-    fun isPylonBlock(block: Block): Boolean
-        = (block.position.chunk.isLoaded) && get(block) != null
+    fun isPylonBlock(block: Block): Boolean =
+        (block.position.chunk.isLoaded) && get(block) != null
 
     /**
      * Sets a new Pylon block's data in the storage and sets the block in the world.
@@ -186,11 +186,10 @@ object BlockStorage : Listener {
             blockPosition.block.type = schema.material
         }
 
+        if (!PrePylonBlockPlaceEvent(blockPosition.block, schema, context).callEvent()) return null
+
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.create(blockPosition.block, context)
-        val event = PrePylonBlockPlaceEvent(blockPosition.block, block, context)
-        event.callEvent()
-        if (event.isCancelled) return null
 
         lockBlockWrite {
             check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
@@ -294,6 +293,18 @@ object BlockStorage : Listener {
     @JvmOverloads
     fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
         breakBlock(block.position, context)
+
+    /**
+     * Removes a block from the world and the storage.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread
+     *
+     * @return The list of drops, or null if the block is not a Pylon block
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun breakBlock(block: PylonBlock, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
+        breakBlock(block.block, context)
 
     /**
      * Removes a block from the world and the storage.
@@ -409,6 +420,25 @@ object BlockStorage : Listener {
         for (blocks in blocksByChunk.values) {
             blocks.replaceAll(replacer)
         }
+    }
+
+    @JvmSynthetic
+    /**
+     * Turns the block into a [PhantomBlock] which represents a block which has failed for some reason
+     */
+    internal fun makePhantom(block: PylonBlock) = lockBlockWrite {
+        PylonBlockSchema.schemaCache[block.block.position] = PhantomBlock.schema
+        val phantomBlock = PhantomBlock(
+            PylonBlock.serialize(block, block.block.chunk.persistentDataContainer.adapterContext),
+            block.schema.key,
+            block.block
+        )
+
+        blocks.replace(block.block.position, block, phantomBlock)
+        blocksByKey[block.key]!!.remove(block)
+        blocksByKey[block.key]!!.add(phantomBlock)
+        blocksByChunk[block.block.chunk.position]!!.remove(block)
+        blocksByChunk[block.block.chunk.position]!!.add(phantomBlock)
     }
 
     @JvmSynthetic

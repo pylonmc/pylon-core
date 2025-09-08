@@ -15,8 +15,6 @@ import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -30,86 +28,103 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.AutoCycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
 
-class ItemButton(val stack: ItemStack) : AbstractItem() {
+class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Player) -> ItemStack) : AbstractItem() {
+    constructor(stack: ItemStack) : this(stack, { stack: ItemStack, player: Player -> stack})
 
     constructor(key: NamespacedKey) : this(
-        PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no fluid with key $key")
+        PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no item with key $key")
     )
 
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(player: Player): ItemProvider {
-        val item = PylonItem.fromStack(stack)
-        if (item == null) {
-            return ItemStackBuilder.of(stack)
-        }
-
-        val placeholders = item.getPlaceholders()
-        val builder = ItemStackBuilder.of(stack.clone())
-            .editData(DataComponentTypes.LORE) { lore ->
-                ItemLore.lore(lore.lines().map { it.withArguments(placeholders) })
+        try {
+            val displayStack = preDisplayDecorator.invoke(stack.clone(), player)
+            val item = PylonItem.fromStack(displayStack)
+            if (item == null) {
+                return ItemStackBuilder.of(displayStack)
             }
 
-        // buffoonery to bypass InvUI's translation mess
-        // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
-        builder.editData(DataComponentTypes.ITEM_NAME) {
-            it.withArguments(placeholders)
-        }
+            val placeholders = item.getPlaceholders()
+            val builder = ItemStackBuilder.of(displayStack.clone())
+                .editData(DataComponentTypes.LORE) { lore ->
+                    ItemLore.lore(lore.lines().map { it.withArguments(placeholders) })
+                }
 
-        if (item.isDisabled) {
-            builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
-        }
-
-        if (!player.canCraft(item)) {
-            builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
-                .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
-                .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
-            if (item.research != null) {
-                addResearchCostLore(builder, player, item.research!!)
+            // buffoonery to bypass InvUI's translation mess
+            // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
+            builder.editData(DataComponentTypes.ITEM_NAME) {
+                it.withArguments(placeholders)
             }
-            builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
-        }
 
-        return builder
+            if (item.isDisabled) {
+                builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
+            }
+
+            if (!player.canCraft(item)) {
+                builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
+                    .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
+                    .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
+                if (item.research != null) {
+                    addResearchCostLore(builder, player, item.research!!)
+                }
+                builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
+            }
+
+            return builder
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return ItemStackBuilder.of(Material.BARRIER)
+                .name(Component.translatable("pylon.pyloncore.guide.button.item.error"))
+        }
     }
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-        when (clickType) {
-            ClickType.LEFT -> {
-                val page = ItemRecipesPage(stack)
-                if (page.pages.isNotEmpty()) {
-                    page.open(player)
-                }
-            }
-            ClickType.SHIFT_LEFT -> {
-                val item = PylonItem.fromStack(stack)
-                val research = item?.research
-                if (item != null && research != null) {
-                    if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
-                        return
+        try {
+            when (clickType) {
+                ClickType.LEFT -> {
+                    val page = ItemRecipesPage(stack)
+                    if (page.pages.isNotEmpty()) {
+                        page.open(player)
                     }
-                    research.addTo(player, false)
-                    player.researchPoints -= research.cost
-                    windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
                 }
-            }
-            ClickType.RIGHT -> {
-                val page = ItemUsagesPage(stack)
-                if (page.pages.isNotEmpty()) {
-                    page.open(player)
+
+                ClickType.SHIFT_LEFT -> {
+                    val item = PylonItem.fromStack(stack)
+                    val research = item?.research
+                    if (item != null && research != null) {
+                        if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
+                            return
+                        }
+                        research.addTo(player, false)
+                        player.researchPoints -= research.cost
+                        windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
+                    }
                 }
-            }
-            ClickType.SHIFT_RIGHT -> {
-                val item = PylonItem.fromStack(stack)
-                if (item != null && item.research != null && !player.canUse(item)) {
-                    ResearchItemsPage(item.research!!).open(player)
+
+                ClickType.RIGHT -> {
+                    val page = ItemUsagesPage(stack)
+                    if (page.pages.isNotEmpty()) {
+                        page.open(player)
+                    }
                 }
-            }
-            ClickType.MIDDLE -> {
-                if (player.hasPermission("pylon.command.give")) {
-                    player.setItemOnCursor(stack)
+
+                ClickType.SHIFT_RIGHT -> {
+                    val item = PylonItem.fromStack(stack)
+                    if (item != null && item.research != null && !player.canUse(item)) {
+                        ResearchItemsPage(item.research!!).open(player)
+                    }
                 }
+
+                ClickType.MIDDLE -> {
+                    if (player.hasPermission("pylon.command.give")) {
+                        player.setItemOnCursor(stack)
+                    }
+                }
+
+                else -> {}
             }
-            else -> {}
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -123,6 +138,15 @@ class ItemButton(val stack: ItemStack) : AbstractItem() {
             }
 
             return ItemButton(stack)
+        }
+
+        @JvmStatic
+        fun fromStack(stack: ItemStack?, preDisplayDecorator: (ItemStack, Player) -> ItemStack):  Item {
+            if (stack == null) {
+                return SimpleItem(ItemStack(Material.AIR))
+            }
+
+            return ItemButton(stack, preDisplayDecorator)
         }
 
         @JvmStatic

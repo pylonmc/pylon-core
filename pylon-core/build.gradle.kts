@@ -8,7 +8,6 @@ plugins {
     idea
     `maven-publish`
     signing
-    id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
     id("org.jetbrains.dokka") version "2.0.0"
     id("org.jetbrains.dokka-javadoc") version "2.0.0"
 }
@@ -96,12 +95,18 @@ dokka {
     }
 }
 
+val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+    dependsOn(tasks.dokkaGeneratePublicationHtml)
+    archiveClassifier.set("javadoc")
+    from(layout.buildDirectory.dir("dokka/docs/kdoc"))
+}
+
 tasks.shadowJar {
     mergeServiceFiles()
 
     exclude("kotlin/**")
 
-    archiveBaseName = project.name
+    archiveBaseName = "pylon-core"
     archiveClassifier = null
 }
 
@@ -118,44 +123,61 @@ paper {
     load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }
 
-// Disable signing for maven local publish
-if (project.gradle.startParameter.taskNames.any { it.contains("publishToMavenLocal") }) {
-    tasks.withType<Sign>().configureEach {
-        enabled = false
-    }
-}
-
 tasks.withType<Jar> {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-signing {
-    useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
-}
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "pylon-core"
 
-centralPortal {
-    username = System.getenv("SONATYPE_USERNAME")
-    password = System.getenv("SONATYPE_PASSWORD")
-    pom {
-        description = "The core library for Pylon addons."
-        url = "https://github.com/pylonmc/pylon-core"
-        licenses {
-            license {
-                name = "GNU Lesser General Public License Version 3"
-                url = "https://www.gnu.org/licenses/lgpl-3.0.txt"
+            artifact(tasks.jar)
+            artifact(tasks.kotlinSourcesJar)
+            artifact(javadocJar)
+
+            pom {
+                name = artifactId
+                description = "The core library for Pylon addons."
+                url = "https://github.com/pylonmc/pylon-core"
+                licenses {
+                    license {
+                        name = "GNU Lesser General Public License Version 3"
+                        url = "https://www.gnu.org/licenses/lgpl-3.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "PylonMC"
+                        name = "PylonMC"
+                        organizationUrl = "https://github.com/pylonmc"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/pylonmc/pylon-core.git"
+                    developerConnection = "scm:git:ssh://github.com:pylonmc/pylon-core.git"
+                    url = "https://github.com/pylonmc/pylon-core"
+                }
+                // Bypass maven-publish erroring when using `from(components["java"])`
+                withXml {
+                    val root = asNode()
+                    val dependenciesNode = root.appendNode("dependencies")
+                    val configs = listOf(configurations.compileOnlyApi, configurations.api)
+                    configs.flatMap { it.get().dependencies }.forEach {
+                        val dependencyNode = dependenciesNode.appendNode("dependency")
+                        dependencyNode.appendNode("groupId", it.group)
+                        dependencyNode.appendNode("artifactId", it.name)
+                        dependencyNode.appendNode("version", it.version)
+                        dependencyNode.appendNode("scope", "compile")
+                    }
+                }
             }
-        }
-        developers {
-            developer {
-                id = "PylonMC"
-                name = "PylonMC"
-                organizationUrl = "https://github.com/pylonmc"
-            }
-        }
-        scm {
-            connection = "scm:git:git://github.com/pylonmc/pylon-core.git"
-            developerConnection = "scm:git:ssh://github.com:pylonmc/pylon-core.git"
-            url = "https://github.com/pylonmc/pylon-core"
         }
     }
+}
+
+signing {
+    useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
+
+    sign(publishing.publications["maven"])
 }

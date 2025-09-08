@@ -1,0 +1,35 @@
+package io.github.pylonmc.pylon.test.entity;
+
+import io.github.pylonmc.pylon.core.entity.PylonEntity;
+import io.github.pylonmc.pylon.core.entity.base.PylonDeathEntity;
+import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity;
+import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent;
+import io.github.pylonmc.pylon.test.PylonTest;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+
+
+public class EntityEventError extends PylonEntity<LivingEntity> implements PylonInteractableEntity {
+
+    public static final NamespacedKey KEY = PylonTest.key("entity_event_error");
+
+    public EntityEventError(@NotNull Location location) {
+        super(KEY, location.getWorld().spawn(location, Skeleton.class));
+    }
+
+    @SuppressWarnings({"unused", "DataFlowIssue"})
+    public EntityEventError(@NotNull LivingEntity entity) {
+        super(entity);
+    }
+
+    @Override
+    public void onInteract(@NotNull PlayerInteractEntityEvent event) {
+        throw new RuntimeException("This exception is thrown as part of a test");
+    }
+}

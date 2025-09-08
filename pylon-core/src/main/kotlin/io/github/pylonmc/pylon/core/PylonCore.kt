@@ -19,7 +19,6 @@ import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
-import io.github.pylonmc.pylon.core.i18n.MinecraftTranslator
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -57,9 +56,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
         Bukkit.getPluginManager().registerEvents(PylonAddon, this)
         registerWithPylon()
-
-        // Start loading of vanilla translations as to not hang the server when it is first needed
-        MinecraftTranslator
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)

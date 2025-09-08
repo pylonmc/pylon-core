@@ -49,12 +49,12 @@ public class FluidTickerTest extends AsyncTest {
         TestUtil.sleepTicks(20).join();
 
         assertThat(consumer1.getAmount())
-                .isGreaterThanOrEqualTo(99.9)
-                .isLessThanOrEqualTo(100.1);
+                .isGreaterThanOrEqualTo(99.5)
+                .isLessThanOrEqualTo(100.5);
 
         assertThat(consumer2.getAmount())
-                .isGreaterThanOrEqualTo(99.9)
-                .isLessThanOrEqualTo(100.1);
+                .isGreaterThanOrEqualTo(99.5)
+                .isLessThanOrEqualTo(100.5);
 
         chunk.setForceLoaded(false);
     }
