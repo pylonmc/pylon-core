@@ -14,10 +14,7 @@ import io.github.pylonmc.pylon.core.util.isFakeEvent
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
-import io.papermc.paper.event.player.PlayerChangeBeaconEffectEvent
-import io.papermc.paper.event.player.PlayerInsertLecternBookEvent
-import io.papermc.paper.event.player.PlayerLecternPageChangeEvent
-import io.papermc.paper.event.player.PlayerOpenSignEvent
+import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
@@ -39,7 +36,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
-import java.util.WeakHashMap
+import java.util.*
 
 
 /**
@@ -758,6 +755,18 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler
+    private fun onFlowerpotManipulate(event: PlayerFlowerPotManipulateEvent) {
+        val block = BlockStorage.get(event.flowerpot)
+        if (block is PylonFlowerPot) {
+            try {
+                block.onFlowerPotManipulated(event)
+            } catch (e: Exception) {
+                logEventHandleErr(event, e, block)
+            }
+        }
+    }
+
+    @EventHandler
     private fun onItemMove(event: InventoryMoveItemEvent) {
         val sourceHolder = event.source.holder
         if (sourceHolder is Container) {
@@ -777,7 +786,7 @@ internal object BlockListener : Listener {
 
     @JvmSynthetic
     internal fun logEventHandleErr(event: Event?, e: Exception, block: PylonBlock) {
-        if(event != null) {
+        if (event != null) {
             PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
         } else {
             PylonCore.logger.severe("Error when handling block(${block.key}, ${block.block.location}) ticking: ${e.localizedMessage}")
