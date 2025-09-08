@@ -762,14 +762,14 @@ internal object BlockListener : Listener {
         val sourceHolder = event.source.holder
         if (sourceHolder is Container) {
             val sourceBlock = BlockStorage.get(sourceHolder.block)
-            if (sourceBlock is PylonContainerBlock) {
+            if (sourceBlock is PylonVanillaContainerBlock) {
                 sourceBlock.onItemMoveFrom(event)
             }
         }
         val destHolder = event.destination.holder
         if (destHolder is Container) {
             val destBlock = BlockStorage.get(destHolder.block)
-            if (destBlock is PylonContainerBlock) {
+            if (destBlock is PylonVanillaContainerBlock) {
                 destBlock.onItemMoveTo(event)
             }
         }
