@@ -4,9 +4,9 @@ package io.github.pylonmc.pylon.core.util
 
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.papermc.paper.datacomponent.DataComponentType
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
 
 fun findPylonItemInInventory(inventory: Inventory, targetItem: PylonItem): Int? {
     for (i in 0..<inventory.size) {
@@ -56,17 +56,8 @@ inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
     return pylonItem != null && pylonItem !is T
 }
 
-/**
- * Returns a [RecipeChoice] for this [ItemStack]
- */
-@JvmName("recipeChoiceFromItem")
-fun ItemStack.asRecipeChoice(): RecipeChoice {
-    return if (PylonItem.isPylonItem(this)) {
-        RecipeChoice.ExactChoice(this)
-    } else {
-        RecipeChoice.MaterialChoice(this.type)
-    }
-}
+val ItemStack.itemKey: NamespacedKey
+    get() = PylonItem.fromStack(this)?.schema?.key ?: this.type.key
 
 @JvmSynthetic
 @Suppress("UnstableApiUsage")

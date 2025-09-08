@@ -23,7 +23,6 @@ import io.papermc.paper.math.Rotation
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
-import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.Registry
 import org.bukkit.block.BlockFace
@@ -110,10 +109,10 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
     else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
 }
 
-fun itemFromName(name: String): ItemStack? {
-    val key = NamespacedKey.fromString(name) ?: return null
-    return PylonRegistry.ITEMS[key]?.itemStack ?: Registry.ITEM.get(key)?.createItemStack()
-}
+fun itemFromKey(key: String): ItemStack? = NamespacedKey.fromString(key)?.let(::itemFromKey)
+
+fun itemFromKey(key: NamespacedKey): ItemStack? =
+    PylonRegistry.ITEMS[key]?.itemStack ?: Registry.ITEM.get(key)?.createItemStack()
 
 fun wrapText(text: String, limit: Int): List<String> {
     val words = text.split(" ")
@@ -226,5 +225,5 @@ fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
 }
 
 fun isFakeEvent(event: Event): Boolean {
-    return event.javaClass.name.contains("Fake");
+    return event.javaClass.name.contains("Fake")
 }

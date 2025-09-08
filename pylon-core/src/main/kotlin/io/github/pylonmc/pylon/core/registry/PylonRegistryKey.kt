@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.test.GameTestConfig
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.key.Key
 import org.bukkit.NamespacedKey
+import org.bukkit.Tag
 import org.bukkit.plugin.Plugin
 
 @JvmRecord
@@ -24,31 +25,17 @@ data class PylonRegistryKey<T>(val namespace: String, val path: String) {
     }
 
     companion object {
-        @JvmField
-        val ITEMS = PylonRegistryKey<PylonItemSchema>(pylonKey("items"))
-
-        @JvmField
-        val BLOCKS = PylonRegistryKey<PylonBlockSchema>(pylonKey("blocks"))
-
-        @JvmField
-        val ENTITIES = PylonRegistryKey<PylonEntitySchema>(pylonKey("entities"))
-
-        @JvmField
-        val FLUIDS = PylonRegistryKey<PylonFluid>(pylonKey("fluids"))
-
-        @JvmField
-        val GAMETESTS = PylonRegistryKey<GameTestConfig>(pylonKey("gametests"))
-
-        @JvmField
-        val ADDONS = PylonRegistryKey<PylonAddon>(pylonKey("addons"))
-
-        @JvmField
-        val RECIPE_TYPES = PylonRegistryKey<RecipeType<*>>(pylonKey("recipe_types"))
-
-        @JvmField
-        val MOB_DROPS = PylonRegistryKey<MobDrop>(pylonKey("mob_drops"))
-
-        @JvmField
-        val RESEARCHES = PylonRegistryKey<Research>(pylonKey("researches"))
+        // @formatter:off
+        @JvmField val ITEMS = PylonRegistryKey<PylonItemSchema>(pylonKey("items"))
+        @JvmField val BLOCKS = PylonRegistryKey<PylonBlockSchema>(pylonKey("blocks"))
+        @JvmField val ENTITIES = PylonRegistryKey<PylonEntitySchema>(pylonKey("entities"))
+        @JvmField val FLUIDS = PylonRegistryKey<PylonFluid>(pylonKey("fluids"))
+        @JvmField val GAMETESTS = PylonRegistryKey<GameTestConfig>(pylonKey("gametests"))
+        @JvmField val ADDONS = PylonRegistryKey<PylonAddon>(pylonKey("addons"))
+        @JvmField val RECIPE_TYPES = PylonRegistryKey<RecipeType<*>>(pylonKey("recipe_types"))
+        @JvmField val MOB_DROPS = PylonRegistryKey<MobDrop>(pylonKey("mob_drops"))
+        @JvmField val RESEARCHES = PylonRegistryKey<Research>(pylonKey("researches"))
+        @JvmField val TAGS = PylonRegistryKey<Tag<*>>(pylonKey("tags"))
+        // @formatter:on
     }
 }

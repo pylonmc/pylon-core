@@ -54,6 +54,10 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         return values[key] ?: throw NoSuchElementException("No value found for key $key in registry $this")
     }
 
+    fun getOrCreate(key: NamespacedKey, creator: () -> T): T {
+        return values.getOrPut(key) { creator().also { register(it) } }
+    }
+
     fun getKeys(): Set<NamespacedKey> {
         return values.keys
     }
@@ -83,32 +87,18 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
     companion object {
         private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
 
-        @JvmField
-        val ITEMS = PylonRegistry(PylonRegistryKey.ITEMS).also(::addRegistry)
-
-        @JvmField
-        val BLOCKS = PylonRegistry(PylonRegistryKey.BLOCKS).also(::addRegistry)
-
-        @JvmField
-        val ENTITIES = PylonRegistry(PylonRegistryKey.ENTITIES).also(::addRegistry)
-
-        @JvmField
-        val FLUIDS = PylonRegistry(PylonRegistryKey.FLUIDS).also(::addRegistry)
-
-        @JvmField
-        val ADDONS = PylonRegistry(PylonRegistryKey.ADDONS).also(::addRegistry)
-
-        @JvmField
-        val GAMETESTS = PylonRegistry(PylonRegistryKey.GAMETESTS).also(::addRegistry)
-
-        @JvmField
-        val RECIPE_TYPES = PylonRegistry(PylonRegistryKey.RECIPE_TYPES).also(::addRegistry)
-
-        @JvmField
-        val MOB_DROPS = PylonRegistry(PylonRegistryKey.MOB_DROPS).also(::addRegistry)
-
-        @JvmField
-        val RESEARCHES = PylonRegistry(PylonRegistryKey.RESEARCHES).also(::addRegistry)
+        // @formatter:off
+        @JvmField val ITEMS = PylonRegistry(PylonRegistryKey.ITEMS).also(::addRegistry)
+        @JvmField val BLOCKS = PylonRegistry(PylonRegistryKey.BLOCKS).also(::addRegistry)
+        @JvmField val ENTITIES = PylonRegistry(PylonRegistryKey.ENTITIES).also(::addRegistry)
+        @JvmField val FLUIDS = PylonRegistry(PylonRegistryKey.FLUIDS).also(::addRegistry)
+        @JvmField val ADDONS = PylonRegistry(PylonRegistryKey.ADDONS).also(::addRegistry)
+        @JvmField val GAMETESTS = PylonRegistry(PylonRegistryKey.GAMETESTS).also(::addRegistry)
+        @JvmField val RECIPE_TYPES = PylonRegistry(PylonRegistryKey.RECIPE_TYPES).also(::addRegistry)
+        @JvmField val MOB_DROPS = PylonRegistry(PylonRegistryKey.MOB_DROPS).also(::addRegistry)
+        @JvmField val RESEARCHES = PylonRegistry(PylonRegistryKey.RESEARCHES).also(::addRegistry)
+        @JvmField val TAGS = PylonRegistry(PylonRegistryKey.TAGS).also(::addRegistry)
+        // @formatter:on
 
         @JvmStatic
         fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {

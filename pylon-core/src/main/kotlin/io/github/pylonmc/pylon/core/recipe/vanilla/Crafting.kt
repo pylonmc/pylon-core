@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
+import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -19,13 +20,12 @@ sealed class CraftingRecipeWrapper(val craftingRecipe: CraftingRecipe) : Vanilla
 }
 
 class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWrapper(recipe) {
-    override val inputs: List<FluidOrItem> =
+    override val inputs: List<RecipeInput> =
         recipe.shape
             .flatMap { it.asIterable() }
             .mapNotNull {
-                recipe.choiceMap[it]?.let { FluidOrItem.of(it) }
+                recipe.choiceMap[it]?.asRecipeInput()
             }
-            .flatMap { it }
 
     override fun display(): Gui {
         val gui = Gui.normal()
@@ -62,7 +62,7 @@ sealed class AShapelessRecipeWrapper(recipe: CraftingRecipe) : CraftingRecipeWra
 
     protected abstract val choiceList: List<RecipeChoice?>
 
-    override val inputs: List<FluidOrItem> by lazy { choiceList.filterNotNull().flatMap(FluidOrItem::of) }
+    override val inputs: List<RecipeInput> by lazy { choiceList.filterNotNull().map(RecipeChoice::asRecipeInput) }
 
     override fun display() = Gui.normal()
         .setStructure(

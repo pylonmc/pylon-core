@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
+import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
@@ -16,7 +17,7 @@ import xyz.xenondevs.invui.gui.Gui
 sealed class SmithingRecipeWrapper(recipe: SmithingRecipe) : VanillaRecipeWrapper {
 
     abstract override val recipe: SmithingRecipe
-    override val inputs: List<FluidOrItem> = FluidOrItem.of(recipe.base) + FluidOrItem.of(recipe.addition)
+    override val inputs: List<RecipeInput> = listOf(recipe.base.asRecipeInput(), recipe.addition.asRecipeInput())
     override val results: List<FluidOrItem> = listOf(FluidOrItem.of(recipe.result))
 
     override fun display() = Gui.normal()
