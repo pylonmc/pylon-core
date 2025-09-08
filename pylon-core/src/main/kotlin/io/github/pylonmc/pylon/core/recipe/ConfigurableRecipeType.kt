@@ -11,7 +11,15 @@ abstract class ConfigurableRecipeType<T : PylonRecipe>(key: NamespacedKey) : Rec
     open fun loadFromConfig(config: ConfigSection) {
         for (key in config.keys) {
             val section = config.getSectionOrThrow(key)
-            addRecipe(loadRecipe(NamespacedKey.fromString(key) ?: error("Invalid key: $key"), section))
+            val key = NamespacedKey.fromString(key) ?: error("Invalid key: $key")
+            try {
+                addRecipe(loadRecipe(key, section))
+            } catch (e: Exception) {
+                throw IllegalArgumentException(
+                    "Failed to load recipe with key '$key' from config for recipe type ${this.key}",
+                    e
+                )
+            }
         }
     }
 
