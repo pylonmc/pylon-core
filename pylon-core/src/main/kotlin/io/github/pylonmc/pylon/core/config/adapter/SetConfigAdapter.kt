@@ -11,7 +11,7 @@ class SetConfigAdapter<E>(private val elementAdapter: ConfigAdapter<E>) : Config
     override fun convert(value: Any): Set<E> {
         val list = when (value) {
             is List<*> -> value
-            is ConfigurationSection -> value.getValues(false).toList()
+            is ConfigurationSection, is Map<*, *> -> SectionOrMap.of(value).asMap().toList()
             else -> throw IllegalArgumentException("Expected a List or ConfigurationSection, but got: ${value::class.java.name}")
         }
         return list.mapTo(mutableSetOf()) {

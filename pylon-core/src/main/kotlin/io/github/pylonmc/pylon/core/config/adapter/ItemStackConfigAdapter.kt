@@ -16,8 +16,8 @@ object ItemStackConfigAdapter : ConfigAdapter<ItemStack> {
                 itemFromName(itemKey)!!.asQuantity(amount)
             }
 
-            is ConfigurationSection -> convert(value.getValues(false).toList().single())
-            is String -> itemFromName(value)!!
+            is ConfigurationSection, is Map<*, *> -> convert(SectionOrMap.of(value).asMap().toList().single())
+            is String -> itemFromName(value) ?: throw IllegalArgumentException("Cannot find item $value")
             else -> throw IllegalArgumentException("Cannot convert $value to ItemStack")
         }
     }
