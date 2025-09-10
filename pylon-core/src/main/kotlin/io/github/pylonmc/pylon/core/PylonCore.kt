@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
@@ -117,7 +118,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         RecipeType.addVanillaRecipes()
 
         launch {
-            delay(1)
+            delay(1.ticks)
             postStartStuff()
         }
     }
