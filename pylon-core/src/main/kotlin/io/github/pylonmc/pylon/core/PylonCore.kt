@@ -129,10 +129,12 @@ object PylonCore : JavaPlugin(), PylonAddon {
      * Run after the server has fully started
      */
     private fun postStartStuff() {
+        logger.info("Loading recipes...")
         for (type in PylonRegistry.RECIPE_TYPES) {
             if (type !is ConfigurableRecipeType) continue
             for (addon in PylonRegistry.ADDONS) {
                 val configStream = addon.javaPlugin.getResource(type.filePath) ?: continue
+                logger.info("Loading ${type.key} recipes from addon ${addon.key.key}...")
                 val config = configStream.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
                 type.loadFromConfig(config)
             }
@@ -148,8 +150,12 @@ object PylonCore : JavaPlugin(), PylonAddon {
                         ?.let { it as? ConfigurableRecipeType }
                         ?.let { type -> type to Config(path) }
                 }
-                .forEach { (type, config) -> type.loadFromConfig(config) }
+                .forEach { (type, config) ->
+                    logger.info("Loading ${type.key} recipes from config...")
+                    type.loadFromConfig(config)
+                }
         }
+        logger.info("Finished loading recipes")
     }
 
     override fun onDisable() {
