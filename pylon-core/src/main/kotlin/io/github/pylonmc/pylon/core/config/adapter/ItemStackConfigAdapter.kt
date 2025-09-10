@@ -13,7 +13,7 @@ object ItemStackConfigAdapter : ConfigAdapter<ItemStack> {
             is Pair<*, *> -> {
                 val itemKey = ConfigAdapter.STRING.convert(value.first!!)
                 val amount = ConfigAdapter.INT.convert(value.second!!)
-                itemFromName(itemKey)!!.asQuantity(amount)
+                convert(itemKey).asQuantity(amount)
             }
 
             is ConfigurationSection, is Map<*, *> -> convert(SectionOrMap.of(value).asMap().toList().single())
