@@ -2,16 +2,18 @@ package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.recipe.vanilla.*
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.*
 
 /**
- * Iteration order will be the order in which recipes were added unless overridden.
+ * Serves as a registry and container for recipes of a specific type.
+ *
+ * Iteration order will be the order in which recipes were added unless overridden. You should
+ * never assume that the list of recipes is static, as recipes may be added or removed at any time.
  */
-open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, Iterable<T>, RegistryHandler {
+open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, Iterable<T> {
 
     protected open val registeredRecipes = mutableMapOf<NamespacedKey, T>()
     val recipes: Collection<T>
