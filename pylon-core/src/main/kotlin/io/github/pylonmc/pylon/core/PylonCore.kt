@@ -42,10 +42,7 @@ import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
 import java.util.Locale
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.walk
+import kotlin.io.path.*
 
 object PylonCore : JavaPlugin(), PylonAddon {
 
@@ -142,18 +139,17 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         val recipesDir = dataPath.resolve("recipes")
         if (recipesDir.exists()) {
-            recipesDir.walk()
-                .filter { it.extension == "yml" }
-                .mapNotNull { path ->
-                    NamespacedKey.fromString(path.nameWithoutExtension)
-                        ?.let(PylonRegistry.RECIPE_TYPES::get)
-                        ?.let { it as? ConfigurableRecipeType }
-                        ?.let { type -> type to Config(path) }
+            for (recipeDir in recipesDir.listDirectoryEntries()) {
+                if (!recipeDir.isDirectory()) continue
+                val namespace = recipeDir.nameWithoutExtension
+                for (recipe in recipeDir.listDirectoryEntries()) {
+                    if (!recipe.isRegularFile() || recipe.extension != "yml") continue
+                    val key = NamespacedKey(namespace, recipe.nameWithoutExtension)
+                    val type = PylonRegistry.RECIPE_TYPES[key] as? ConfigurableRecipeType ?: continue
+                    logger.info("Loading ${type.key} recipes from folder...")
+                    type.loadFromConfig(Config(recipe))
                 }
-                .forEach { (type, config) ->
-                    logger.info("Loading ${type.key} recipes from config...")
-                    type.loadFromConfig(config)
-                }
+            }
         }
         logger.info("Finished loading recipes")
     }
