@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.*
+import org.bukkit.inventory.recipe.CraftingBookCategory
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 
@@ -109,11 +110,15 @@ object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shape
         val ingredientKey = section.getOrThrow("key", ConfigAdapter.MAP.from(ConfigAdapter.CHAR, ConfigAdapter.ITEM_STACK))
         val pattern = section.getOrThrow("pattern", ConfigAdapter.LIST.from(ConfigAdapter.STRING))
         val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
+        val category = section.get("category", ConfigAdapter.ENUM.from<CraftingBookCategory>())
 
         val recipe = ShapedRecipe(key, result)
         recipe.shape(*pattern.toTypedArray())
         for ((character, itemStack) in ingredientKey) {
             recipe.setIngredient(character, RecipeChoice.ExactChoice(itemStack))
+        }
+        if (category != null) {
+            recipe.category = category
         }
         return ShapedRecipeWrapper(recipe)
     }
@@ -129,10 +134,14 @@ object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): ShapelessRecipeWrapper {
         val ingredients = section.getOrThrow("ingredients", ConfigAdapter.LIST.from(ConfigAdapter.ITEM_STACK))
         val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
+        val category = section.get("category", ConfigAdapter.ENUM.from<CraftingBookCategory>())
 
         val recipe = ShapelessRecipe(key, result)
         for (ingredient in ingredients) {
             recipe.addIngredient(RecipeChoice.ExactChoice(ingredient))
+        }
+        if (category != null) {
+            recipe.category = category
         }
         return ShapelessRecipeWrapper(recipe)
     }
@@ -149,7 +158,11 @@ object TransmuteRecipeType : VanillaRecipeType<TransmuteRecipeWrapper>("crafting
         val input = section.getOrThrow("input", ConfigAdapter.ITEM_STACK)
         val material = section.getOrThrow("material", ConfigAdapter.ITEM_STACK)
         val result = section.getOrThrow("result", ConfigAdapter.MATERIAL)
+        val category = section.get("category", ConfigAdapter.ENUM.from<CraftingBookCategory>())
         val recipe = TransmuteRecipe(key, result, RecipeChoice.ExactChoice(input), RecipeChoice.ExactChoice(material))
+        if (category != null) {
+            recipe.category = category
+        }
         return TransmuteRecipeWrapper(recipe)
     }
 }
