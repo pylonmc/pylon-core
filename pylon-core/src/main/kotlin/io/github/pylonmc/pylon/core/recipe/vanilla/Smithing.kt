@@ -44,9 +44,7 @@ class SmithingTrimRecipeWrapper(override val recipe: SmithingTrimRecipe) : Smith
 /**
  * Key: `minecraft:smithing_transform`
  */
-object SmithingTransformRecipeType : VanillaRecipeType<SmithingTransformRecipeWrapper>(
-    "smithing_transform"
-) {
+object SmithingTransformRecipeType : VanillaRecipeType<SmithingTransformRecipeWrapper>("smithing_transform") {
 
     fun addRecipe(recipe: SmithingTransformRecipe) = super.addRecipe(SmithingTransformRecipeWrapper(recipe))
 
@@ -70,8 +68,7 @@ object SmithingTransformRecipeType : VanillaRecipeType<SmithingTransformRecipeWr
 /**
  * Key: `minecraft:smithing_trim`
  */
-object SmithingTrimRecipeType :
-    VanillaRecipeType<SmithingTrimRecipeWrapper>("smithing_trim") {
+object SmithingTrimRecipeType : VanillaRecipeType<SmithingTrimRecipeWrapper>("smithing_trim") {
 
     private val TRIM_PATTERN_ADAPTER = ConfigAdapter.KEYED.fromRegistry(
         RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN)
