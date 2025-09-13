@@ -1,53 +1,45 @@
 package io.github.pylonmc.pylon.core.config
 
 import io.github.pylonmc.pylon.core.PylonCore
-import org.bukkit.NamespacedKey
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 
 object PylonConfig {
 
     private val config = Config(PylonCore, "config.yml")
 
     @JvmStatic
-    val defaultTickInterval: Int by config
+    val defaultTickInterval = config.getOrThrow("default-tick-interval", ConfigAdapter.INT)
 
     @JvmStatic
-    val allowedBlockErrors: Int by config
+    val allowedBlockErrors = config.getOrThrow("allowed-block-errors", ConfigAdapter.INT)
 
     @JvmStatic
-    val allowedEntityErrors: Int by config
+    val wailaTickInterval = config.getOrThrow("waila-tick-interval", ConfigAdapter.INT)
 
     @JvmStatic
-    val wailaTickInterval: Int by config
+    val allowedEntityErrors = config.getOrThrow("allowed-entity-errors", ConfigAdapter.INT)
 
     @JvmStatic
-    val fluidTickInterval: Int by config
+    val fluidTickInterval = config.getOrThrow("fluid-tick-interval", ConfigAdapter.INT)
 
     @JvmStatic
-    val blockDataAutosaveIntervalSeconds: Long = config.getOrThrow<Int>("block-data-autosave-interval-seconds").toLong()
+    val blockDataAutosaveIntervalSeconds = config.getOrThrow("block-data-autosave-interval-seconds", ConfigAdapter.LONG)
 
     @JvmStatic
-    val entityDataAutosaveIntervalSeconds: Long = config.getOrThrow<Int>("entity-data-autosave-interval-seconds").toLong()
+    val entityDataAutosaveIntervalSeconds = config.getOrThrow("entity-data-autosave-interval-seconds", ConfigAdapter.LONG)
 
     @JvmStatic
-    val researchesEnabled: Boolean = config.getOrThrow("research.enabled")
-
-    val PIPE_PLACEMENT_TASK_INTERVAL_TICKS: Long = config.getOrThrow<Int>("pipe-placement.tick-interval").toLong()
-
-    val PIPE_PLACEMENT_MAX_DISTANCE: Long = config.getOrThrow<Int>("pipe-placement.max-distance").toLong()
-
+    val researchesEnabled = config.getOrThrow("research.enabled", ConfigAdapter.BOOLEAN)
 
     @JvmStatic
-    val translationWrapLimit: Int by config
+    val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
     @JvmStatic
-    val disabledItems: Set<NamespacedKey> =
-        config.getOrThrow<List<String>>("disabled-items")
-            .mapNotNull {
-                val key = NamespacedKey.fromString(it)
-                if (key == null) {
-                    PylonCore.logger.warning { "Invalid disabled-items key '$it'" }
-                }
-                key
-            }
-            .toSet()
+    val pipePlacementMaxDistance = config.getOrThrow("pipe-placement.max-distance", ConfigAdapter.LONG)
+
+    @JvmStatic
+    val translationWrapLimit = config.getOrThrow("translation-wrap-limit", ConfigAdapter.INT)
+
+    @JvmStatic
+    val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
 }

@@ -25,6 +25,7 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.Registry
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -110,22 +111,8 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
 }
 
 fun itemFromName(name: String): ItemStack? {
-    if (name.contains(':')) {
-        val namespacedKey = NamespacedKey.fromString(name)
-        if (namespacedKey != null) {
-            val pylonItem = PylonRegistry.ITEMS[namespacedKey]
-            if (pylonItem != null) {
-                return pylonItem.itemStack
-            }
-        }
-    }
-
-    val material = Material.getMaterial(name.uppercase())
-    if (material != null) {
-        return ItemStack(material)
-    }
-
-    return null
+    val key = NamespacedKey.fromString(name) ?: return null
+    return PylonRegistry.ITEMS[key]?.itemStack ?: Registry.ITEM.get(key)?.createItemStack()
 }
 
 fun wrapText(text: String, limit: Int): List<String> {

@@ -14,8 +14,6 @@ item:
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"
-    lore: ""
-    waila: "<red>Phantom Block (%block%)"
 
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
@@ -79,6 +77,9 @@ message:
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
         get: "<green>%player% has %points% research points"
+    exposerecipe:
+      not-configurable: "<red>This recipe type is not configurable"
+      warning: "<yellow>Warning: exposing recipe configs will keep them from updating automatically. Delete %file% to revert"
   guide:
     ingredients-page:
       item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"

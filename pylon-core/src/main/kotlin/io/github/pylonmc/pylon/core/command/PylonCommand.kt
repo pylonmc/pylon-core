@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.LongArgumentType
 import com.mojang.brigadier.context.CommandContext
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
@@ -21,6 +22,8 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
+import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
+import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.test.GameTestConfig
 import io.github.pylonmc.pylon.core.util.getArgument
@@ -381,6 +384,29 @@ private val research = buildCommand("research") {
     then(researchPoints)
 }
 
+private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
+    argument("addon", RegistryCommandArgument(PylonRegistry.ADDONS)) {
+        argument("recipe", RegistryCommandArgument(PylonRegistry.RECIPE_TYPES)) {
+            permission("pylon.command.exposerecipeconfig")
+            executes { sender ->
+                val addon = getArgument<PylonAddon>("addon")
+                val recipeType = getArgument<RecipeType<*>>("recipe")
+                if (recipeType !is ConfigurableRecipeType) {
+                    sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.exposerecipe.not-configurable"))
+                    return@executes
+                }
+                sender.sendMessage(
+                    Component.translatable(
+                        "pylon.pyloncore.message.command.exposerecipe.warning",
+                        PylonArgument.of("file", "plugins/PylonCore/${recipeType.filePath}")
+                    )
+                )
+                addon.mergeGlobalConfig(recipeType.filePath, recipeType.filePath)
+            }
+        }
+    }
+}
+
 @JvmSynthetic
 internal val ROOT_COMMAND = buildCommand("pylon") {
     permission("pylon.command.guide")
@@ -396,6 +422,7 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
     then(waila)
     then(gametest)
     then(research)
+    then(exposeRecipeConfig)
 }
 
 @JvmSynthetic

@@ -19,6 +19,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.plugin.java.JavaPlugin
+import org.jetbrains.annotations.ApiStatus
 import java.util.Locale
 
 /**
@@ -64,6 +65,7 @@ interface PylonAddon : Keyed {
     /**
      * Must be called as the first thing in your plugin's `onEnable`
      */
+    @ApiStatus.NonExtendable
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)
         if (!suppressAddonNameWarning) {
