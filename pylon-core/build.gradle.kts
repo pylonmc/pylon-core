@@ -27,8 +27,6 @@ dependencies {
 
     runtimeOnly(project(":nms"))
 
-    implementation("info.debatty:java-string-similarity:2.0.0")
-
     paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")

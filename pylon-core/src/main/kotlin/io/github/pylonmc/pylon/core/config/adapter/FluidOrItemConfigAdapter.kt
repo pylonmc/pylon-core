@@ -18,7 +18,7 @@ object FluidOrItemConfigAdapter : ConfigAdapter<FluidOrItem> {
                 FluidOrItem.of(fluid, amount)
             }
 
-            is ConfigurationSection, is Map<*, *> -> convert(SectionOrMap.of(value).asMap().toList().single())
+            is ConfigurationSection, is Map<*, *> -> convert(MapConfigAdapter.STRING_TO_ANY.convert(value).toList().single())
             else -> throw IllegalArgumentException("Cannot convert $value to FluidOrItem")
         }
     }

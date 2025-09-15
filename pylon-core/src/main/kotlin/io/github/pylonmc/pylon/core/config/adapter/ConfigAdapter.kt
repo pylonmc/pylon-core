@@ -26,6 +26,7 @@ interface ConfigAdapter<T> {
         @JvmField val DOUBLE = ConfigAdapter { (it as Number).toDouble() }
         @JvmField val CHAR = ConfigAdapter { (it as String).single() }
         @JvmField val BOOLEAN = ConfigAdapter { it as Boolean }
+        @JvmField val ANY = ConfigAdapter { it }
 
         @JvmField val STRING = ConfigAdapter { it.toString() }
         @JvmField val LIST = ListConfigAdapter

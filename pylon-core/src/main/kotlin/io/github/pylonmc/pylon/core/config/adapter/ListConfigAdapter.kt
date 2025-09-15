@@ -11,8 +11,8 @@ class ListConfigAdapter<E>(private val elementAdapter: ConfigAdapter<E>) : Confi
     override fun convert(value: Any): List<E> {
         val list = when (value) {
             is List<*> -> value
-            is ConfigurationSection, is Map<*, *> -> SectionOrMap.of(value).asMap().toList()
-            else -> throw IllegalArgumentException("Expected a List or ConfigurationSection, but got: ${value::class.java.name}")
+            is ConfigurationSection, is Map<*, *> -> MapConfigAdapter.STRING_TO_ANY.convert(value).toList()
+            else -> throw IllegalArgumentException("Expected a list or section, but got: ${value::class.java.name}")
         }
         return list.map {
             @Suppress("UNCHECKED_CAST")
