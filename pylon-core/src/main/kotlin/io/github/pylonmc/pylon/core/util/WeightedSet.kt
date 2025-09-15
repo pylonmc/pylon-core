@@ -4,12 +4,12 @@ import java.util.Random
 import java.util.concurrent.ThreadLocalRandom
 
 class WeightedSet<E> @JvmOverloads constructor(
-    private val innerSet: MutableSet<WeightedElement<E>> = mutableSetOf()
-) : AbstractMutableSet<WeightedSet.WeightedElement<E>>() {
+    private val innerSet: MutableSet<Element<E>> = mutableSetOf()
+) : AbstractMutableSet<WeightedSet.Element<E>>() {
 
-    constructor(value: E, weight: Float) : this(mutableSetOf(WeightedElement(value, weight)))
+    constructor(value: E, weight: Float) : this(mutableSetOf(Element(value, weight)))
     @SafeVarargs
-    constructor(vararg values: Pair<E, Float>) : this(values.map { WeightedElement(it.first, it.second) }.toMutableSet())
+    constructor(vararg values: Pair<E, Float>) : this(values.map { Element(it.first, it.second) }.toMutableSet())
 
     private var totalWeight: Float = innerSet.fold(0f) { acc, element -> acc + element.weight }
 
@@ -63,7 +63,7 @@ class WeightedSet<E> @JvmOverloads constructor(
         throw AssertionError("Should not reach here")
     }
 
-    override fun add(element: WeightedElement<E>): Boolean {
+    override fun add(element: Element<E>): Boolean {
         if (innerSet.add(element)) {
             totalWeight += element.weight
             return true
@@ -71,12 +71,12 @@ class WeightedSet<E> @JvmOverloads constructor(
         return false
     }
 
-    override fun iterator(): MutableIterator<WeightedElement<E>> {
+    override fun iterator(): MutableIterator<Element<E>> {
         val innerIterator = innerSet.iterator()
-        return object : MutableIterator<WeightedElement<E>> by innerIterator {
-            private lateinit var lastItem: WeightedElement<E>
+        return object : MutableIterator<Element<E>> by innerIterator {
+            private lateinit var lastItem: Element<E>
 
-            override fun next(): WeightedElement<E> {
+            override fun next(): Element<E> {
                 lastItem = innerIterator.next()
                 return lastItem
             }
@@ -89,5 +89,5 @@ class WeightedSet<E> @JvmOverloads constructor(
     }
 
     @JvmRecord
-    data class WeightedElement<E>(val element: E, val weight: Float)
+    data class Element<E>(val element: E, val weight: Float)
 }

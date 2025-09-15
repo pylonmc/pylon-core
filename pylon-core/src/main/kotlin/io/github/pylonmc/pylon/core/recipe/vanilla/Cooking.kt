@@ -34,7 +34,7 @@ sealed class CookingRecipeWrapper(final override val recipe: CookingRecipe<*>) :
         )
         .addIngredient('#', GuiItems.backgroundBlack())
         .addIngredient('b', ItemStack(displayBlock))
-        .addIngredient('i', ItemButton.fromChoice(recipe.inputChoice))
+        .addIngredient('i', ItemButton.from(recipe.inputChoice))
         .addIngredient(
             'f', GuiItems.progressCyclingItem(
                 recipe.cookingTime,
@@ -47,7 +47,7 @@ sealed class CookingRecipeWrapper(final override val recipe: CookingRecipe<*>) :
                     )
             )
         )
-        .addIngredient('o', ItemButton.fromStack(recipe.result))
+        .addIngredient('o', ItemButton.from(recipe.result))
         .build()
 }
 
@@ -75,9 +75,9 @@ private inline fun <T : CookingRecipe<T>> loadCookingRecipe(
 ): T {
     val cookingTime = config.get("cookingtime", ConfigAdapter.INT, defaultCookingTime)
     val experience = config.get("experience", ConfigAdapter.FLOAT, 0f)
-    val ingredient = config.getOrThrow("ingredient", ConfigAdapter.ITEM_STACK)
+    val ingredient = config.getOrThrow("ingredient", ConfigAdapter.RECIPE_INPUT_ITEM)
     val result = config.getOrThrow("result", ConfigAdapter.ITEM_STACK)
-    val recipe = cons(key, result, RecipeChoice.ExactChoice(ingredient), experience, cookingTime)
+    val recipe = cons(key, result, ingredient.asRecipeChoice(), experience, cookingTime)
     config.get("category", ConfigAdapter.ENUM.from<CookingBookCategory>())?.let { recipe.category = it }
     config.get("group", ConfigAdapter.STRING)?.let { recipe.group = it }
     return recipe

@@ -1,22 +1,21 @@
 package io.github.pylonmc.pylon.core.guide.pages.fluid
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.ItemProvider
 
-open class FluidUsagesPage(fluidKey: NamespacedKey) : GuidePage {
+open class FluidUsagesPage(val fluid: PylonFluid) : GuidePage {
 
-    val fluid = PylonRegistry.FLUIDS[fluidKey]!!
     val pages: MutableList<Gui> = mutableListOf()
 
     init {

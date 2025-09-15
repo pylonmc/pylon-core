@@ -14,7 +14,7 @@ class WeightedSetConfigAdapter<E>(private val elementAdapter: ConfigAdapter<E>) 
                 val map = MapConfigAdapter.STRING_TO_ANY.convert(it!!)
                 val element = elementAdapter.convert(map["value"] ?: throw IllegalArgumentException("Missing 'value' key in weighted set element"))
                 val weight = ConfigAdapter.FLOAT.convert(map["weight"] ?: 1f)
-                WeightedSet.WeightedElement(element, weight)
+                WeightedSet.Element(element, weight)
             }
         } else {
             WeightedSet(elementAdapter.convert(value) to 1f)

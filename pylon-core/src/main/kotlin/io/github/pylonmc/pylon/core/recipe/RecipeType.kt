@@ -37,6 +37,8 @@ open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, 
         PylonRegistry.RECIPE_TYPES.register(this)
     }
 
+    fun stream() = registeredRecipes.values.stream()
+
     override fun iterator(): Iterator<T> = registeredRecipes.values.iterator()
 
     override fun getKey(): NamespacedKey = key

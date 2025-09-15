@@ -41,8 +41,24 @@ sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(key: String) :
 @JvmSynthetic
 internal fun RecipeChoice.asRecipeInput(): RecipeInput {
     return when (this) {
-        is RecipeChoice.ExactChoice -> RecipeInput.Item(this.choices.mapTo(mutableSetOf()) { ItemTypeWrapper(it) }, this.itemStack.amount)
-        is RecipeChoice.MaterialChoice -> RecipeInput.Item(this.choices.mapTo(mutableSetOf()) { ItemTypeWrapper(it) }, 1)
+        is RecipeChoice.ExactChoice -> RecipeInput.Item(
+            this.choices.mapTo(mutableSetOf()) { ItemTypeWrapper(it) },
+            this.itemStack.amount
+        )
+
+        is RecipeChoice.MaterialChoice -> RecipeInput.Item(
+            this.choices.mapTo(mutableSetOf()) { ItemTypeWrapper(it) },
+            1
+        )
+
         else -> throw IllegalArgumentException("Unsupported RecipeChoice type: ${this::class.java.name}")
     }
+}
+
+@JvmSynthetic
+internal fun RecipeInput.Item.asRecipeChoice(): RecipeChoice {
+    if (items.all { it is ItemTypeWrapper.Vanilla }) {
+        return RecipeChoice.MaterialChoice(items.map { (it as ItemTypeWrapper.Vanilla).material })
+    }
+    return RecipeChoice.ExactChoice(items.map { it.createItemStack().asQuantity(amount) })
 }

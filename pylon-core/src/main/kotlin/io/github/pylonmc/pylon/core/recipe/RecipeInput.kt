@@ -25,8 +25,10 @@ sealed interface RecipeInput {
 
         fun matches(itemStack: ItemStack): Boolean {
             if (itemStack.amount < amount) return false
-            return ItemTypeWrapper(itemStack) in items
+            return contains(itemStack)
         }
+
+        operator fun contains(itemStack: ItemStack): Boolean = ItemTypeWrapper(itemStack) in items
     }
 
     data class Fluid(val fluids: MutableSet<PylonFluid>, val amountMillibuckets: Double) : RecipeInput {
@@ -37,6 +39,13 @@ sealed interface RecipeInput {
             require(amountMillibuckets > 0) { "Amount in millibuckets must be greater than zero, but was $amountMillibuckets" }
             require(fluids.isNotEmpty()) { "Fluids set must not be empty" }
         }
+
+        fun matches(fluid: PylonFluid, amountMillibuckets: Double): Boolean {
+            if (amountMillibuckets < this.amountMillibuckets) return false
+            return contains(fluid)
+        }
+
+        operator fun contains(fluid: PylonFluid): Boolean = fluid in fluids
     }
 
     companion object {

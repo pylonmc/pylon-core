@@ -13,7 +13,7 @@ import xyz.xenondevs.invui.item.Item
 class FluidsPage : SimpleDynamicGuidePage(
     pylonKey("fluids"),
     Material.WATER_BUCKET,
-    { PylonRegistry.FLUIDS.getKeys().map { FluidButton(it) }.toMutableList() }
+    { PylonRegistry.FLUIDS.map { FluidButton(it) }.toMutableList() }
 ) {
 
     override fun getHeader(player: Player, buttons: List<Item>) = super.getHeader(player, buttons)

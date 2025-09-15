@@ -10,7 +10,10 @@ import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.inventory.*
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.SmithingRecipe
+import org.bukkit.inventory.SmithingTransformRecipe
+import org.bukkit.inventory.SmithingTrimRecipe
 import xyz.xenondevs.invui.gui.Gui
 
 
@@ -29,11 +32,11 @@ sealed class SmithingRecipeWrapper(recipe: SmithingRecipe) : VanillaRecipeWrappe
             "# # # # # # # # #",
         )
         .addIngredient('#', GuiItems.backgroundBlack())
-        .addIngredient('b', ItemButton.fromStack(ItemStack(Material.SMITHING_TABLE)))
+        .addIngredient('b', ItemButton.from(ItemStack(Material.SMITHING_TABLE)))
         .addIngredient('0', ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE))
-        .addIngredient('1', ItemButton.fromChoice(recipe.base))
-        .addIngredient('2', ItemButton.fromChoice(recipe.addition))
-        .addIngredient('r', ItemButton.fromStack(recipe.result))
+        .addIngredient('1', ItemButton.from(recipe.base))
+        .addIngredient('2', ItemButton.from(recipe.addition))
+        .addIngredient('r', ItemButton.from(recipe.result))
         .build()
 
     override fun getKey(): NamespacedKey = recipe.key
@@ -50,17 +53,17 @@ object SmithingTransformRecipeType : VanillaRecipeType<SmithingTransformRecipeWr
     fun addRecipe(recipe: SmithingTransformRecipe) = super.addRecipe(SmithingTransformRecipeWrapper(recipe))
 
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): SmithingTransformRecipeWrapper {
-        val template = section.getOrThrow("template", ConfigAdapter.ITEM_STACK)
-        val base = section.getOrThrow("base", ConfigAdapter.ITEM_STACK)
-        val addition = section.getOrThrow("addition", ConfigAdapter.ITEM_STACK)
+        val template = section.getOrThrow("template", ConfigAdapter.RECIPE_INPUT_ITEM)
+        val base = section.getOrThrow("base", ConfigAdapter.RECIPE_INPUT_ITEM)
+        val addition = section.getOrThrow("addition", ConfigAdapter.RECIPE_INPUT_ITEM)
         val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
         return SmithingTransformRecipeWrapper(
             SmithingTransformRecipe(
                 key,
                 result,
-                RecipeChoice.ExactChoice(template),
-                RecipeChoice.ExactChoice(base),
-                RecipeChoice.ExactChoice(addition)
+                template.asRecipeChoice(),
+                base.asRecipeChoice(),
+                addition.asRecipeChoice()
             )
         )
     }
@@ -79,15 +82,15 @@ object SmithingTrimRecipeType : VanillaRecipeType<SmithingTrimRecipeWrapper>("sm
 
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): SmithingTrimRecipeWrapper {
         val pattern = section.getOrThrow("pattern", TRIM_PATTERN_ADAPTER)
-        val template = section.getOrThrow("template", ConfigAdapter.ITEM_STACK)
-        val base = section.getOrThrow("base", ConfigAdapter.ITEM_STACK)
-        val addition = section.getOrThrow("addition", ConfigAdapter.ITEM_STACK)
+        val template = section.getOrThrow("template", ConfigAdapter.RECIPE_INPUT_ITEM)
+        val base = section.getOrThrow("base", ConfigAdapter.RECIPE_INPUT_ITEM)
+        val addition = section.getOrThrow("addition", ConfigAdapter.RECIPE_INPUT_ITEM)
         return SmithingTrimRecipeWrapper(
             SmithingTrimRecipe(
                 key,
-                RecipeChoice.ExactChoice(template),
-                RecipeChoice.ExactChoice(base),
-                RecipeChoice.ExactChoice(addition),
+                template.asRecipeChoice(),
+                base.asRecipeChoice(),
+                addition.asRecipeChoice(),
                 pattern
             )
         )
