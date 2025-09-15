@@ -4,9 +4,12 @@ class EnumConfigAdapter<E : Enum<E>>(private val enumClass: Class<E>) : ConfigAd
 
     override val type = enumClass
 
+    private val nameMap = enumClass.enumConstants.associateBy { it.name.lowercase() }
+
     override fun convert(value: Any): E {
         val name = ConfigAdapter.STRING.convert(value)
-        return enumClass.enumConstants.first { it.name.equals(name, ignoreCase = true) }
+        return nameMap[name.lowercase()]
+            ?: throw IllegalArgumentException("Cannot convert $value to enum ${enumClass.simpleName}")
     }
 
     companion object {
