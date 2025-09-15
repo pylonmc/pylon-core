@@ -132,7 +132,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
             if (type !is ConfigurableRecipeType) continue
             for (addon in PylonRegistry.ADDONS) {
                 val configStream = addon.javaPlugin.getResource(type.filePath) ?: continue
-                logger.info("Loading ${type.key} recipes from addon ${addon.key.key}...")
                 val config = configStream.reader().use { ConfigSection(YamlConfiguration.loadConfiguration(it)) }
                 type.loadFromConfig(config)
             }
@@ -147,7 +146,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
                     if (!recipe.isRegularFile() || recipe.extension != "yml") continue
                     val key = NamespacedKey(namespace, recipe.nameWithoutExtension)
                     val type = PylonRegistry.RECIPE_TYPES[key] as? ConfigurableRecipeType ?: continue
-                    logger.info("Loading ${type.key} recipes from folder...")
                     type.loadFromConfig(Config(recipe))
                 }
             }

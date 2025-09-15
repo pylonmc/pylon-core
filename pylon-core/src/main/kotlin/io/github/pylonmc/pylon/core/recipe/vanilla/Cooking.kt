@@ -70,18 +70,16 @@ class SmokingRecipeWrapper(recipe: SmokingRecipe) : CookingRecipeWrapper(recipe)
 private inline fun <T : CookingRecipe<T>> loadCookingRecipe(
     key: NamespacedKey,
     config: ConfigSection,
-    cookingTime: Int,
+    defaultCookingTime: Int,
     cons: (NamespacedKey, ItemStack, RecipeChoice, Float, Int) -> T
 ): T {
-    val cookingTime = config.get("cookingtime", ConfigAdapter.INT, cookingTime)
+    val cookingTime = config.get("cookingtime", ConfigAdapter.INT, defaultCookingTime)
     val experience = config.get("experience", ConfigAdapter.FLOAT, 0f)
     val ingredient = config.getOrThrow("ingredient", ConfigAdapter.ITEM_STACK)
     val result = config.getOrThrow("result", ConfigAdapter.ITEM_STACK)
-    val category = config.get("category", ConfigAdapter.ENUM.from(), CookingBookCategory.FOOD)
-    val group = config.get("group", ConfigAdapter.STRING, "")
     val recipe = cons(key, result, RecipeChoice.ExactChoice(ingredient), experience, cookingTime)
-    recipe.category = category
-    recipe.group = group
+    config.get("category", ConfigAdapter.ENUM.from<CookingBookCategory>())?.let { recipe.category = it }
+    config.get("group", ConfigAdapter.STRING)?.let { recipe.group = it }
     return recipe
 }
 

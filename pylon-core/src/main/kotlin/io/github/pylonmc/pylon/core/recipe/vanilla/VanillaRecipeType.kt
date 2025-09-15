@@ -27,6 +27,7 @@ sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(key: String) :
         Bukkit.addRecipe(recipe.recipe)
     }
 
+    @JvmSynthetic
     internal fun addRecipeWithoutRegister(recipe: T) {
         registeredRecipes[recipe.key] = recipe
     }

@@ -112,16 +112,14 @@ object ShapedRecipeType : VanillaRecipeType<ShapedRecipeWrapper>("crafting_shape
         val ingredientKey = section.getOrThrow("key", ConfigAdapter.MAP.from(ConfigAdapter.CHAR, ConfigAdapter.ITEM_STACK))
         val pattern = section.getOrThrow("pattern", ConfigAdapter.LIST.from(ConfigAdapter.STRING))
         val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
-        val category = section.get("category", CRAFTING_BOOK_CATEGORY_ADAPTER, CraftingBookCategory.MISC)
-        val group = section.get("group", ConfigAdapter.STRING, "")
 
         val recipe = ShapedRecipe(key, result)
         recipe.shape(*pattern.toTypedArray())
         for ((character, itemStack) in ingredientKey) {
             recipe.setIngredient(character, RecipeChoice.ExactChoice(itemStack))
         }
-        recipe.category = category
-        recipe.group = group
+        section.get("category", CRAFTING_BOOK_CATEGORY_ADAPTER)?.let { recipe.category = it }
+        section.get("group", ConfigAdapter.STRING)?.let { recipe.group = it }
         return ShapedRecipeWrapper(recipe)
     }
 }
@@ -136,15 +134,13 @@ object ShapelessRecipeType : VanillaRecipeType<ShapelessRecipeWrapper>("crafting
     override fun loadRecipe(key: NamespacedKey, section: ConfigSection): ShapelessRecipeWrapper {
         val ingredients = section.getOrThrow("ingredients", ConfigAdapter.LIST.from(ConfigAdapter.ITEM_STACK))
         val result = section.getOrThrow("result", ConfigAdapter.ITEM_STACK)
-        val category = section.get("category", CRAFTING_BOOK_CATEGORY_ADAPTER, CraftingBookCategory.MISC)
-        val group = section.get("group", ConfigAdapter.STRING, "")
 
         val recipe = ShapelessRecipe(key, result)
         for (ingredient in ingredients) {
             recipe.addIngredient(RecipeChoice.ExactChoice(ingredient))
         }
-        recipe.category = category
-        recipe.group = group
+        section.get("category", CRAFTING_BOOK_CATEGORY_ADAPTER)?.let { recipe.category = it }
+        section.get("group", ConfigAdapter.STRING)?.let { recipe.group = it }
         return ShapelessRecipeWrapper(recipe)
     }
 }
