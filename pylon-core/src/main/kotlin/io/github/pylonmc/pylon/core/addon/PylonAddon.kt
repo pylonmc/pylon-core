@@ -89,7 +89,7 @@ interface PylonAddon : Keyed {
     fun mergeGlobalConfig(from: String, to: String): Config {
         require(from.endsWith(".yml")) { "Config file must be a YAML file" }
         require(to.endsWith(".yml")) { "Config file must be a YAML file" }
-        val cached = globalConfigCache[Pair(from, to)]
+        val cached = globalConfigCache[from to to]
         if (cached != null) {
             return cached
         }
@@ -109,7 +109,7 @@ interface PylonAddon : Keyed {
             config.merge(ConfigSection(newConfig))
             config.save()
         }
-        globalConfigCache[Pair(from, to)] = config
+        globalConfigCache[from to to] = config
         return config
     }
 
