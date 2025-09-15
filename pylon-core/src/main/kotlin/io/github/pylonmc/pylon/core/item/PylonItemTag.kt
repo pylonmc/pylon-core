@@ -1,37 +1,27 @@
 package io.github.pylonmc.pylon.core.item
 
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
 import org.bukkit.inventory.ItemStack
 
-class PylonItemTag(private val key: NamespacedKey) : Tag<PylonItemSchema> {
+class PylonItemTag(private val key: NamespacedKey, items: Set<ItemTypeWrapper>) : Tag<ItemTypeWrapper> {
 
-    private val schemas = mutableSetOf<PylonItemSchema>()
+    private val items = items.toMutableSet()
 
-    fun add(schema: PylonItemSchema) {
-        schemas.add(schema)
+    fun add(wrapper: ItemTypeWrapper) {
+        items.add(wrapper)
     }
 
-    /**
-     * [key] must correspond to a valid [PylonItemSchema]
-     */
-    fun add(key: NamespacedKey) {
-        val schema = PylonRegistry.ITEMS[key]
-        requireNotNull(schema) { "No PylonItemSchema found for key: $key" }
-        schemas.add(schema)
-    }
+    fun add(material: Material) = add(ItemTypeWrapper.Vanilla(material))
 
-    /**
-     * [item] must correspond to a valid [PylonItemSchema]
-     */
-    fun add(item: ItemStack) {
-        val schema = PylonItem.fromStack(item)?.schema
-        requireNotNull(schema) { "ItemStack does not correspond to a valid PylonItemSchema: $item" }
-        schemas.add(schema)
-    }
+    fun add(schema: PylonItemSchema) = add(ItemTypeWrapper.Pylon(schema))
 
-    override fun isTagged(item: PylonItemSchema): Boolean = item in schemas
-    override fun getValues(): Set<PylonItemSchema> = schemas
+    fun add(key: NamespacedKey) = add(ItemTypeWrapper(key))
+
+    fun add(item: ItemStack) = add(ItemTypeWrapper(item))
+
+    override fun isTagged(item: ItemTypeWrapper): Boolean = item in items
+    override fun getValues(): Set<ItemTypeWrapper> = items.toSet()
     override fun getKey(): NamespacedKey = key
 }

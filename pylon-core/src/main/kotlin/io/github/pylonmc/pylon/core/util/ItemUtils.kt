@@ -4,7 +4,6 @@ package io.github.pylonmc.pylon.core.util
 
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.papermc.paper.datacomponent.DataComponentType
-import org.bukkit.NamespacedKey
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
@@ -55,9 +54,6 @@ inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
     val pylonItem = PylonItem.fromStack(this)
     return pylonItem != null && pylonItem !is T
 }
-
-val ItemStack.itemKey: NamespacedKey
-    get() = PylonItem.fromStack(this)?.schema?.key ?: this.type.key
 
 @JvmSynthetic
 @Suppress("UnstableApiUsage")

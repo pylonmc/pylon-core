@@ -24,5 +24,8 @@ class MapConfigAdapter<K, V>(
         fun <K, V> from(keyAdapter: ConfigAdapter<K>, valueAdapter: ConfigAdapter<V>): ConfigAdapter<Map<K, V>> {
             return MapConfigAdapter(keyAdapter, valueAdapter)
         }
+
+        @JvmField
+        val STRING_TO_ANY = from(ConfigAdapter.STRING, ConfigAdapter.ANY)
     }
 }

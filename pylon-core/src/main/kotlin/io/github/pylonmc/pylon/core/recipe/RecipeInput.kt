@@ -1,18 +1,14 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
-import io.github.pylonmc.pylon.core.util.itemFromKey
-import io.github.pylonmc.pylon.core.util.itemKey
-import org.bukkit.Keyed
-import org.bukkit.NamespacedKey
+import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
 import org.bukkit.Tag
 import org.bukkit.inventory.ItemStack
 
 sealed interface RecipeInput {
-    data class Item(val items: MutableSet<NamespacedKey>, val amount: Int) : RecipeInput {
-        constructor(amount: Int, vararg items: ItemStack) : this(items.mapTo(mutableSetOf(), ItemStack::itemKey), amount)
-        constructor(amount: Int, vararg keys: NamespacedKey) : this(keys.toMutableSet(), amount)
-        constructor(tag: Tag<*>, amount: Int) : this(tag.values.mapTo(mutableSetOf(), Keyed::getKey), amount)
+    data class Item(val items: MutableSet<ItemTypeWrapper>, val amount: Int) : RecipeInput {
+        constructor(amount: Int, vararg items: ItemStack) : this(items.mapTo(mutableSetOf()) { ItemTypeWrapper(it) }, amount)
+        constructor(tag: Tag<ItemTypeWrapper>, amount: Int) : this(tag.values, amount)
 
         init {
             require(amount > 0) { "Amount must be greater than zero, but was $amount" }
@@ -20,7 +16,7 @@ sealed interface RecipeInput {
         }
 
         val representativeItems: Set<ItemStack> by lazy {
-            items.mapTo(mutableSetOf()) { itemFromKey(it)!!.asQuantity(amount) }
+            items.mapTo(mutableSetOf()) { it.createItemStack().asQuantity(amount) }
         }
 
         val representativeItem: ItemStack by lazy {
@@ -29,13 +25,13 @@ sealed interface RecipeInput {
 
         fun matches(itemStack: ItemStack): Boolean {
             if (itemStack.amount < amount) return false
-            return itemStack.itemKey in items
+            return ItemTypeWrapper(itemStack) in items
         }
     }
 
     data class Fluid(val fluids: MutableSet<PylonFluid>, val amountMillibuckets: Double) : RecipeInput {
         constructor(amountMillibuckets: Double, vararg fluids: PylonFluid) : this(fluids.toMutableSet(), amountMillibuckets)
-        constructor(amountMillibuckets: Double, tag: Tag<*>) : this(tag.values.mapTo(mutableSetOf()) { it as PylonFluid }, amountMillibuckets)
+        constructor(amountMillibuckets: Double, tag: Tag<PylonFluid>) : this(tag.values, amountMillibuckets)
 
         init {
             require(amountMillibuckets > 0) { "Amount in millibuckets must be greater than zero, but was $amountMillibuckets" }

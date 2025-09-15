@@ -97,7 +97,7 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
         @JvmField val RECIPE_TYPES = PylonRegistry(PylonRegistryKey.RECIPE_TYPES).also(::addRegistry)
         @JvmField val MOB_DROPS = PylonRegistry(PylonRegistryKey.MOB_DROPS).also(::addRegistry)
         @JvmField val RESEARCHES = PylonRegistry(PylonRegistryKey.RESEARCHES).also(::addRegistry)
-        @JvmField val TAGS = PylonRegistry(PylonRegistryKey.TAGS).also(::addRegistry)
+        @JvmField val ITEM_TAGS = PylonRegistry(PylonRegistryKey.ITEM_TAGS).also(::addRegistry)
         // @formatter:on
 
         @JvmStatic

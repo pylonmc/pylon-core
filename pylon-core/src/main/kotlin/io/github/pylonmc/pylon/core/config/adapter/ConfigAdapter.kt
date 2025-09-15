@@ -26,6 +26,7 @@ interface ConfigAdapter<T> {
         @JvmField val DOUBLE = ConfigAdapter { (it as Number).toDouble() }
         @JvmField val CHAR = ConfigAdapter { (it as String).single() }
         @JvmField val BOOLEAN = ConfigAdapter { it as Boolean }
+        @JvmField val ANY = ConfigAdapter { it }
 
         @JvmField val STRING = ConfigAdapter { it.toString() }
         @JvmField val LIST = ListConfigAdapter
@@ -43,6 +44,10 @@ interface ConfigAdapter<T> {
         @JvmField val PYLON_FLUID = KEYED.fromRegistry(PylonRegistry.FLUIDS)
         @JvmField val FLUID_TEMPERATURE = ENUM.from<FluidTemperature>()
         @JvmField val FLUID_OR_ITEM = FluidOrItemConfigAdapter
+        @JvmField val RECIPE_INPUT = RecipeInputConfigAdapter
+        @JvmField val RECIPE_INPUT_ITEM = RecipeInputItemAdapter
+        @JvmField val RECIPE_INPUT_FLUID = RecipeInputFluidAdapter
+        @JvmField val ITEM_TAG = ItemTagConfigAdapter
         @JvmField val WEIGHTED_SET = WeightedSetConfigAdapter
         // @formatter:on
     }

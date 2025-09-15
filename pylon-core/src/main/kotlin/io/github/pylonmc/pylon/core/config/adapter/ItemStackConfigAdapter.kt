@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
-import io.github.pylonmc.pylon.core.util.itemFromKey
+import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
+import org.bukkit.NamespacedKey
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
 
@@ -17,7 +18,10 @@ object ItemStackConfigAdapter : ConfigAdapter<ItemStack> {
             }
 
             is ConfigurationSection, is Map<*, *> -> convert(SectionOrMap.of(value).asMap().toList().single())
-            is String -> itemFromKey(value) ?: throw IllegalArgumentException("Cannot find item $value")
+            is String -> ItemTypeWrapper(
+                NamespacedKey.fromString(value) ?: throw IllegalArgumentException("Could not find item '$value'")
+            ).createItemStack()
+
             else -> throw IllegalArgumentException("Cannot convert $value to ItemStack")
         }
     }

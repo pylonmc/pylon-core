@@ -24,12 +24,10 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import org.bukkit.NamespacedKey
-import org.bukkit.Registry
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
-import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
@@ -108,11 +106,6 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
     BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
     else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
 }
-
-fun itemFromKey(key: String): ItemStack? = NamespacedKey.fromString(key)?.let(::itemFromKey)
-
-fun itemFromKey(key: NamespacedKey): ItemStack? =
-    PylonRegistry.ITEMS[key]?.itemStack ?: Registry.ITEM.get(key)?.createItemStack()
 
 fun wrapText(text: String, limit: Int): List<String> {
     val words = text.split(" ")
