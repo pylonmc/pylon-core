@@ -18,6 +18,7 @@ object ItemTagConfigAdapter : ConfigAdapter<Tag<ItemTypeWrapper>> {
         }
         val tagKey = NamespacedKey.fromString(string.drop(1)) ?: throw IllegalArgumentException("Invalid tag: $value")
         val tag = Bukkit.getTag("items", tagKey, Material::class.java)
+            ?: Bukkit.getTag("blocks", tagKey, Material::class.java)
         if (tag != null) {
             return tag.toItemTypeTag()
         }
