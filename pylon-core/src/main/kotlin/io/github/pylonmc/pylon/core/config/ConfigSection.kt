@@ -13,6 +13,8 @@ import kotlin.reflect.KProperty
 
 open class ConfigSection(val internalSection: ConfigurationSection) {
 
+    private val cache: MutableMap<String, Any?> = mutableMapOf()
+
     val keys: Set<String>
         get() = internalSection.getKeys(false)
 
@@ -25,18 +27,38 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun getSection(key: String): ConfigSection? {
+        val cached = cache[key]
+        if (cached != null) {
+            if (cached !is ConfigSection) {
+                error("$key is not a config section")
+            }
+            return cached
+        }
+
         val newConfig = internalSection.getConfigurationSection(key) ?: return null
-        return ConfigSection(newConfig)
+        val configSection = ConfigSection(newConfig)
+        cache[key] = configSection
+        return configSection
     }
 
     fun getSectionOrThrow(key: String): ConfigSection =
         getSection(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
 
     fun getFluid(key: String): PylonFluid? {
+        val cached = cache[key]
+        if (cached != null) {
+            if (cached !is PylonFluid) {
+                return null
+            }
+            return cached
+        }
+
         val name = get<String>(key) ?: return null
-        return PylonRegistry.FLUIDS[
+        val fluid = PylonRegistry.FLUIDS[
             NamespacedKey.fromString(name) ?: error("'$name' is not a namespaced key")
         ]
+        cache[key] = fluid
+        return fluid
     }
 
     fun getFluidOrThrow(key: String): PylonFluid {
@@ -47,8 +69,18 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun getMaterial(key: String): Material? {
+        val cached = cache[key]
+        if (cached != null) {
+            if (cached !is Material) {
+                return null
+            }
+            return cached
+        }
+
         val name = get<String>(key) ?: return null
-        return Material.getMaterial(name.uppercase())
+        val material = Material.getMaterial(name.uppercase())
+        cache[key] = material
+        return material
     }
 
     fun getMaterialOrThrow(key: String): Material {
@@ -64,7 +96,17 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
         ?: error("No such item $key")
 
     fun <T> get(key: String, type: Class<out T>): T? {
+        val cached = cache[key]
+        if (cached != null) {
+            if (!type.isInstance(cached)) {
+                return null
+            }
+            @Suppress("UNCHECKED_CAST")
+            return cached as T?
+        }
+
         val value = internalSection.get(key) ?: return null
+        cache[key] = value
         return type.cast(value)
     }
 
