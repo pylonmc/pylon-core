@@ -3,6 +3,13 @@ package io.github.pylonmc.pylon.core.util
 import java.util.Random
 import java.util.concurrent.ThreadLocalRandom
 
+/**
+ * A set containing elements with associated weights. You can retrieve either a specified subset
+ * or a single element randomly, with the probability of each element being chosen proportional to its weight.
+ *
+ * For example, if you have elements A, B, and C with weights 0.25, 0.25, and 0.5 respectively,
+ * element C will be chosen approximately 50% of the time, while A and B will each be chosen about 25% of the time.
+ */
 class WeightedSet<E> @JvmOverloads constructor(
     private val innerSet: MutableSet<Element<E>> = mutableSetOf()
 ) : AbstractMutableSet<WeightedSet.Element<E>>() {
@@ -18,6 +25,14 @@ class WeightedSet<E> @JvmOverloads constructor(
     val elements: Set<E>
         get() = innerSet.map { it.element }.toSet()
 
+    /**
+     * Returns a random subset of the specified size from the set, with selection probability based on weights.
+     * The subset will contain unique elements and always be of the requested size.
+     *
+     * @param size The number of unique elements to select.
+     * @param random An optional [Random] instance to use for selection. Defaults to [ThreadLocalRandom].
+     * @throws IllegalArgumentException if [size] is negative or exceeds the number of elements in the set.
+     */
     @JvmOverloads
     fun getRandomSubset(size: Int, random: Random = ThreadLocalRandom.current()): Set<E> {
         require(size >= 0) { "Size must be non-negative" }
@@ -49,6 +64,11 @@ class WeightedSet<E> @JvmOverloads constructor(
         return selected
     }
 
+    /**
+     * Returns a single random element from the set, with selection probability based on weights.
+     * @param random An optional [Random] instance to use for selection. Defaults to [ThreadLocalRandom].
+     * @throws IllegalArgumentException if the set is empty.
+     */
     @JvmOverloads
     fun getRandom(random: Random = ThreadLocalRandom.current()): E {
         require(this.isNotEmpty()) { "Set must not be empty" }
