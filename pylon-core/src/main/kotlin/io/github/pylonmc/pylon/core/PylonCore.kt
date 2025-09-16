@@ -119,14 +119,11 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         launch {
             delay(1.ticks)
-            postStartStuff()
+            loadRecipes()
         }
     }
 
-    /**
-     * Run after the server has fully started
-     */
-    private fun postStartStuff() {
+    private fun loadRecipes() {
         logger.info("Loading recipes...")
         for (type in PylonRegistry.RECIPE_TYPES) {
             if (type !is ConfigurableRecipeType) continue
