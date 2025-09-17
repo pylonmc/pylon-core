@@ -28,13 +28,18 @@ sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(key: String) :
     }
 
     @JvmSynthetic
-    internal fun addRecipeWithoutRegister(recipe: T) {
+    internal fun addNonPylonRecipe(recipe: T) {
         registeredRecipes[recipe.key] = recipe
+        nonPylonRecipes.add(recipe.key)
     }
 
     override fun removeRecipe(recipe: NamespacedKey) {
         super.removeRecipe(recipe)
         Bukkit.removeRecipe(recipe)
+    }
+
+    companion object {
+        internal val nonPylonRecipes: MutableSet<NamespacedKey> = mutableSetOf()
     }
 }
 

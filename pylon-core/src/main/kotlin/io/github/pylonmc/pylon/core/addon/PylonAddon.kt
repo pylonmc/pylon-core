@@ -91,6 +91,10 @@ interface PylonAddon : Keyed {
     fun mergeGlobalConfig(from: String, to: String): Config {
         require(from.endsWith(".yml")) { "Config file must be a YAML file" }
         require(to.endsWith(".yml")) { "Config file must be a YAML file" }
+        val cached = globalConfigCache[from to to]
+        if (cached != null) {
+            return cached
+        }
         val globalConfig = PylonCore.dataFolder.resolve(to)
         if (!globalConfig.exists()) {
             globalConfig.parentFile.mkdirs()
@@ -107,10 +111,13 @@ interface PylonAddon : Keyed {
             config.merge(ConfigSection(newConfig))
             config.save()
         }
+        globalConfigCache[from to to] = config
         return config
     }
 
     companion object : Listener {
+        private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
+
         @EventHandler
         private fun onPluginDisable(event: PluginDisableEvent) {
             val plugin = event.plugin

@@ -125,15 +125,13 @@ open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, 
             for (recipe in Bukkit.recipeIterator()) {
                 // @formatter:off
                 when (recipe) {
-                    is BlastingRecipe -> VANILLA_BLASTING.addRecipeWithoutRegister(BlastingRecipeWrapper(recipe))
-                    is CampfireRecipe -> VANILLA_CAMPFIRE.addRecipeWithoutRegister(CampfireRecipeWrapper(recipe))
-                    is FurnaceRecipe -> VANILLA_FURNACE.addRecipeWithoutRegister(FurnaceRecipeWrapper(recipe))
-                    is ShapedRecipe -> VANILLA_SHAPED.addRecipeWithoutRegister(ShapedRecipeWrapper(recipe))
-                    is ShapelessRecipe -> VANILLA_SHAPELESS.addRecipeWithoutRegister(ShapelessRecipeWrapper(recipe))
-                    is TransmuteRecipe -> VANILLA_TRANSMUTE.addRecipeWithoutRegister(TransmuteRecipeWrapper(recipe))
-                    is SmithingTransformRecipe -> VANILLA_SMITHING_TRANSFORM.addRecipeWithoutRegister(SmithingTransformRecipeWrapper(recipe))
-                    is SmithingTrimRecipe -> VANILLA_SMITHING_TRIM.addRecipeWithoutRegister(SmithingTrimRecipeWrapper(recipe))
-                    is SmokingRecipe -> VANILLA_SMOKING.addRecipeWithoutRegister(SmokingRecipeWrapper(recipe))
+                    is BlastingRecipe -> VANILLA_BLASTING.addNonPylonRecipe(BlastingRecipeWrapper(recipe))
+                    is CampfireRecipe -> VANILLA_CAMPFIRE.addNonPylonRecipe(CampfireRecipeWrapper(recipe))
+                    is FurnaceRecipe -> VANILLA_FURNACE.addNonPylonRecipe(FurnaceRecipeWrapper(recipe))
+                    is ShapedRecipe -> VANILLA_SHAPED.addNonPylonRecipe(ShapedRecipeWrapper(recipe))
+                    is ShapelessRecipe -> VANILLA_SHAPELESS.addNonPylonRecipe(ShapelessRecipeWrapper(recipe))
+                    is SmithingTrimRecipe -> VANILLA_SMITHING_TRIM.addNonPylonRecipe(SmithingRecipeWrapper(recipe))is SmithingTransformRecipe -> VANILLA_SMITHING_TRANSFORM.addNonPylonRecipe(SmithingRecipeWrapper(recipe))
+                    is SmokingRecipe -> VANILLA_SMOKING.addNonPylonRecipe(SmokingRecipeWrapper(recipe))
                 }
                 // @formatter:on
             }

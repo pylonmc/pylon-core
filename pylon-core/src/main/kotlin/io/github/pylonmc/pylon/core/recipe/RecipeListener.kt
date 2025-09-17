@@ -1,17 +1,24 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.base.VanillaCookingFuel
+import io.github.pylonmc.pylon.core.item.base.VanillaCookingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
+import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMineral
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
+import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
+import org.bukkit.Bukkit
 import org.bukkit.Keyed
+import org.bukkit.block.Furnace
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockCookEvent
+import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
 
@@ -25,8 +32,11 @@ internal object PylonRecipeListener : Listener {
         val inventory = e.inventory
 
         val hasPylonItems = inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }
-        val isNotPylonCraftingRecipe = RecipeType.vanillaCraftingRecipes().all {
-            it.key != recipe.key
+        val isNotPylonCraftingRecipe = recipe.key in VanillaRecipeType.nonPylonRecipes
+
+        // Prevent the erroneous crafting of vanilla items with Pylon ingredients
+        if (hasPylonItems && isNotPylonCraftingRecipe) {
+            inventory.result = null
         }
 
         // Prevent crafting of unresearched items
@@ -37,22 +47,39 @@ internal object PylonRecipeListener : Listener {
         if (anyViewerDoesNotHaveResearch) {
             inventory.result = null
         }
-
-        // Prevent the erroneous crafting of vanilla items with Pylon ingredients
-        if (hasPylonItems && isNotPylonCraftingRecipe) {
-            inventory.result = null
-        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onCook(e: BlockCookEvent) {
-        val input = e.source
-        if (PylonItem.fromStack(input) == null) return
+        if (PylonItem.fromStack(e.result) == null) return
 
         for (recipe in RecipeType.vanillaCookingRecipes()) {
-            if (recipe.recipe.inputChoice.test(input)) {
+            if (recipe.recipe.inputChoice.test(e.result)) {
                 e.result = recipe.recipe.result.clone()
                 return
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onFuelBurn(e: FurnaceBurnEvent) {
+        if (e.fuel.isPylonAndIsNot<VanillaCookingFuel>()) {
+            e.isCancelled = true
+            return
+        }
+
+        val furnace = (e.block.state as Furnace)
+        val input = furnace.inventory.smelting
+        if (input != null && input.isPylonAndIsNot<VanillaCookingItem>()) {
+            var isProcessingPylonRecipe = false
+            for (recipe in RecipeType.vanillaCookingRecipes()) {
+                if (recipe.key !in VanillaRecipeType.nonPylonRecipes && recipe.recipe.inputChoice.test(input)) {
+                    isProcessingPylonRecipe = true
+                    break
+                }
+            }
+            if (!isProcessingPylonRecipe) {
+                e.isCancelled = true
             }
         }
     }
@@ -63,23 +90,20 @@ internal object PylonRecipeListener : Listener {
         val recipe = inv.recipe
         if (recipe !is Keyed) return
 
+        // Prevent the erroneous smithing of vanilla items with Pylon ingredients
+        val hasPylonItem = inv.inputMineral.isPylonAndIsNot<VanillaSmithingMineral>()
+                || inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
+        if (hasPylonItem && recipe.key in VanillaRecipeType.nonPylonRecipes) {
+            e.result = null
+            return
+        }
+
         // Prevent crafting of unresearched items
         val pylonItemResult = PylonItem.fromStack(recipe.result)
         val anyViewerDoesNotHaveResearch = pylonItemResult != null && e.viewers.none {
             it is Player && it.canCraft(pylonItemResult, true)
         }
         if (anyViewerDoesNotHaveResearch) {
-            inv.result = null
-        }
-
-        // Prevent the erroneous smithing of vanilla items with Pylon ingredients
-        if (
-            RecipeType.VANILLA_SMITHING_TRANSFORM.all { it.key != recipe.key } &&
-            (
-                    inv.inputMineral.isPylonAndIsNot<VanillaSmithingMaterial>() ||
-                            inv.inputTemplate.isPylonAndIsNot<VanillaSmithingTemplate>()
-                    )
-        ) {
             inv.result = null
         }
     }

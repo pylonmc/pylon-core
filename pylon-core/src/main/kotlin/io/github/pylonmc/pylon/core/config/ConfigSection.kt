@@ -5,6 +5,8 @@ import org.bukkit.configuration.ConfigurationSection
 
 open class ConfigSection(val internalSection: ConfigurationSection) {
 
+    private val cache: MutableMap<String, Any?> = mutableMapOf()
+
     val keys: Set<String>
         get() = internalSection.getKeys(false)
 
@@ -17,8 +19,18 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun getSection(key: String): ConfigSection? {
+        val cached = cache[key]
+        if (cached != null) {
+            if (cached !is ConfigSection) {
+                error("$key is not a config section")
+            }
+            return cached
+        }
+
         val newConfig = internalSection.getConfigurationSection(key) ?: return null
-        return ConfigSection(newConfig)
+        val configSection = ConfigSection(newConfig)
+        cache[key] = configSection
+        return configSection
     }
 
     fun getSectionOrThrow(key: String): ConfigSection =
@@ -29,6 +41,7 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
      */
     fun <T> get(key: String, adapter: ConfigAdapter<T>): T? {
         val value = internalSection.get(key) ?: return null
+        // TODO cache
         return runCatching { adapter.convert(value) }.getOrNull()
     }
 
