@@ -110,7 +110,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         if (container == null) return GuiItems.background()
 
         return when (container) {
-            is Container.Item -> ItemButton.fromStack(container.item) { item: ItemStack, player: Player ->
+            is Container.Item -> ItemButton.from(container.item) { item: ItemStack, player: Player ->
                 ItemStackBuilder.of(item).name(
                     GlobalTranslator.render(Component.translatable(
                         "pylon.pyloncore.message.guide.ingredients-page.item",
@@ -120,7 +120,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
                 ).build()
             }
 
-            is Container.Fluid -> FluidButton(container.fluid.key, container.amountMillibuckets)
+            is Container.Fluid -> FluidButton(container.amountMillibuckets, container.fluid)
         }
     }
 

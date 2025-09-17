@@ -13,8 +13,8 @@ class AddonResearchesPage(val addon: PylonAddon) : SimpleDynamicGuidePage(
     pylonKey("researches_" + addon.key.key),
     addon.material,
     {
-        PylonRegistry.RESEARCHES.getKeys().filter {
-            it.namespace == addon.key.namespace && it !in PylonGuide.hiddenResearches
+        PylonRegistry.RESEARCHES.filter {
+            it.key.namespace == addon.key.namespace && it.key !in PylonGuide.hiddenResearches
         }.map {
             ResearchButton(it)
         }

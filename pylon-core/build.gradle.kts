@@ -27,8 +27,6 @@ dependencies {
 
     runtimeOnly(project(":nms"))
 
-    implementation("info.debatty:java-string-similarity:2.0.0")
-
     paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
@@ -39,6 +37,7 @@ dependencies {
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
     paperLibrary("xyz.xenondevs.invui:inventory-access-r24:1.46:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.46")
+    implementation("info.debatty:java-string-similarity:2.0.0")
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
@@ -63,7 +62,7 @@ kotlin {
     jvmToolchain(21)
     compilerOptions {
         javaParameters = true
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+        freeCompilerArgs = listOf("-Xjvm-default=all", "-Xwhen-guards")
     }
 }
 
@@ -105,6 +104,8 @@ tasks.shadowJar {
     mergeServiceFiles()
 
     exclude("kotlin/**")
+    exclude("org/intellij/lang/annotations/**")
+    exclude("org/jetbrains/annotations/**")
 
     archiveBaseName = "pylon-core"
     archiveClassifier = null

@@ -6,11 +6,9 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.getAddon
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -18,9 +16,7 @@ import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
 // TODO subcategory by addon
-open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
-
-    val research = PylonRegistry.RESEARCHES[key] ?: throw IllegalArgumentException("There is no item with key $key")
+open class ResearchButton(val research: Research) : AbstractItem() {
 
     override fun getItemProvider(player: Player): ItemProvider = try {
         val playerHasResearch = player.researches.contains(research)
@@ -68,7 +64,7 @@ open class ResearchButton(val key: NamespacedKey) : AbstractItem() {
             ))
         }
 
-        item.lore(getAddon(key).displayName)
+        item.lore(getAddon(research.key).displayName)
 
         item
     } catch (e: Exception) {

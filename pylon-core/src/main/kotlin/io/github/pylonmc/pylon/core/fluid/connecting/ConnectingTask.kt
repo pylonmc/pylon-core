@@ -58,7 +58,7 @@ class ConnectingTask(
         PylonCore,
         Runnable { tick(true) },
         0,
-        PylonConfig.PIPE_PLACEMENT_TASK_INTERVAL_TICKS
+        PylonConfig.pipePlacementTaskIntervalTicks
     )
 
     private fun tick(interpolate: Boolean) {
@@ -113,7 +113,7 @@ class ConnectingTask(
 
         if (isCardinalDirection(difference) && interpolate) {
             display.interpolationDelay = 0
-            display.interpolationDuration = PylonConfig.PIPE_PLACEMENT_TASK_INTERVAL_TICKS.toInt()
+            display.interpolationDuration = PylonConfig.pipePlacementTaskIntervalTicks.toInt()
         }
     }
 
@@ -133,7 +133,7 @@ class ConnectingTask(
         player.sendActionBar(Component.empty())
 
         val pipeDisplay = ConnectingService.connect(from, to, pipe)
-        return Result(pipeDisplay.getTo()!!, pipesUsed(from.position, to.position))
+        return Result(pipeDisplay.getTo(), pipesUsed(from.position, to.position))
     }
 
     fun pathIntersectsBlocks()
@@ -298,8 +298,8 @@ class ConnectingTask(
                 findClosestPointBetweenSkewLines(playerLookPosition, playerLookDirection, origin, Vector3f(axis))
             val lambda = Math.clamp(
                 solution.roundToLong(),
-                -PylonConfig.PIPE_PLACEMENT_MAX_DISTANCE,
-                PylonConfig.PIPE_PLACEMENT_MAX_DISTANCE
+                -PylonConfig.pipePlacementMaxDistance,
+                PylonConfig.pipePlacementMaxDistance
             )
             return Vector3f(axis).mul(lambda.toFloat())
         }

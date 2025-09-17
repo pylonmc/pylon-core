@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.papermc.paper.datacomponent.DataComponentType
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
 
 fun findPylonItemInInventory(inventory: Inventory, targetItem: PylonItem): Int? {
     for (i in 0..<inventory.size) {
@@ -54,18 +53,6 @@ fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
 inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
     val pylonItem = PylonItem.fromStack(this)
     return pylonItem != null && pylonItem !is T
-}
-
-/**
- * Returns a [RecipeChoice] for this [ItemStack]
- */
-@JvmName("recipeChoiceFromItem")
-fun ItemStack.asRecipeChoice(): RecipeChoice {
-    return if (PylonItem.isPylonItem(this)) {
-        RecipeChoice.ExactChoice(this)
-    } else {
-        RecipeChoice.MaterialChoice(this.type)
-    }
 }
 
 @JvmSynthetic

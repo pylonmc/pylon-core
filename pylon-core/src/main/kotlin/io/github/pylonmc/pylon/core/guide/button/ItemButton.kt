@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.guide.button
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
@@ -10,13 +12,13 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
+import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -25,20 +27,39 @@ import org.bukkit.inventory.RecipeChoice
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
-import xyz.xenondevs.invui.item.impl.AutoCycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
+import kotlin.time.Duration.Companion.seconds
 
-class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Player) -> ItemStack) : AbstractItem() {
-    constructor(stack: ItemStack) : this(stack, { stack: ItemStack, player: Player -> stack})
+class ItemButton @JvmOverloads constructor(
+    stacks: List<ItemStack>,
+    val preDisplayDecorator: (ItemStack, Player) -> ItemStack = { stack, _ -> stack }
+) : AbstractItem() {
+    constructor(vararg stacks: ItemStack) : this(stacks.toList())
+    constructor(stack: ItemStack, preDisplayDecorator: (ItemStack, Player) -> ItemStack) : this(listOf(stack), preDisplayDecorator)
 
-    constructor(key: NamespacedKey) : this(
-        PylonRegistry.ITEMS[key]?.itemStack ?: throw IllegalArgumentException("There is no item with key $key")
-    )
+    val stacks = stacks.shuffled()
+    private var index = 0
+    val currentStack: ItemStack
+        get() = this.stacks[index]
+
+    init {
+        require(stacks.isNotEmpty()) { "ItemButton must have at least one ItemStack" }
+        if (stacks.size > 1) {
+            PylonCore.launch {
+                while (true) {
+                    delay(1.seconds)
+                    index += 1
+                    index %= stacks.size
+                    notifyWindows()
+                }
+            }
+        }
+    }
 
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(player: Player): ItemProvider {
         try {
-            val displayStack = preDisplayDecorator.invoke(stack.clone(), player)
+            val displayStack = preDisplayDecorator.invoke(currentStack.clone(), player)
             val item = PylonItem.fromStack(displayStack)
             if (item == null) {
                 return ItemStackBuilder.of(displayStack)
@@ -82,14 +103,14 @@ class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Play
         try {
             when (clickType) {
                 ClickType.LEFT -> {
-                    val page = ItemRecipesPage(stack)
+                    val page = ItemRecipesPage(currentStack)
                     if (page.pages.isNotEmpty()) {
                         page.open(player)
                     }
                 }
 
                 ClickType.SHIFT_LEFT -> {
-                    val item = PylonItem.fromStack(stack)
+                    val item = PylonItem.fromStack(currentStack)
                     val research = item?.research
                     if (item != null && research != null) {
                         if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
@@ -102,14 +123,14 @@ class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Play
                 }
 
                 ClickType.RIGHT -> {
-                    val page = ItemUsagesPage(stack)
+                    val page = ItemUsagesPage(currentStack)
                     if (page.pages.isNotEmpty()) {
                         page.open(player)
                     }
                 }
 
                 ClickType.SHIFT_RIGHT -> {
-                    val item = PylonItem.fromStack(stack)
+                    val item = PylonItem.fromStack(currentStack)
                     if (item != null && item.research != null && !player.canUse(item)) {
                         ResearchItemsPage(item.research!!).open(player)
                     }
@@ -117,7 +138,7 @@ class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Play
 
                 ClickType.MIDDLE -> {
                     if (player.hasPermission("pylon.command.give")) {
-                        player.setItemOnCursor(stack)
+                        player.setItemOnCursor(currentStack)
                     }
                 }
 
@@ -132,7 +153,7 @@ class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Play
         const val CYCLE_INTERVAL = 10
 
         @JvmStatic
-        fun fromStack(stack: ItemStack?): Item {
+        fun from(stack: ItemStack?): Item {
             if (stack == null) {
                 return SimpleItem(ItemStack(Material.AIR))
             }
@@ -141,31 +162,27 @@ class ItemButton(val stack: ItemStack, val preDisplayDecorator: (ItemStack, Play
         }
 
         @JvmStatic
-        fun fromStack(stack: ItemStack?, preDisplayDecorator: (ItemStack, Player) -> ItemStack):  Item {
+        fun from(stack: ItemStack?, preDisplayDecorator: (ItemStack, Player) -> ItemStack):  Item {
             if (stack == null) {
                 return SimpleItem(ItemStack(Material.AIR))
             }
 
-            return ItemButton(stack, preDisplayDecorator)
+            return ItemButton(listOf(stack), preDisplayDecorator)
         }
 
         @JvmStatic
-        fun fromChoice(choice: RecipeChoice?): Item = when (choice) {
-            is RecipeChoice.MaterialChoice -> if (choice.choices.size == 1) {
-                fromStack(choice.itemStack)
-            } else {
-                AutoCycleItem(
-                    CYCLE_INTERVAL,
-                    *(choice.choices.map { ItemStackBuilder.of(it) }.toTypedArray())
-                )
+        fun from(input: RecipeInput.Item?): Item {
+            if (input == null) {
+                return SimpleItem(ItemStack(Material.AIR))
             }
 
-            is RecipeChoice.ExactChoice -> if (choice.choices.size == 1) {
-                fromStack(choice.itemStack)
-            } else {
-                AutoCycleItem(CYCLE_INTERVAL, *(choice.choices.map { ItemStackBuilder.of(it) }.toTypedArray()))
-            }
+            return ItemButton(*input.representativeItems.toTypedArray())
+        }
 
+        @JvmStatic
+        fun from(choice: RecipeChoice?): Item = when (choice) {
+            is RecipeChoice.MaterialChoice -> ItemButton(choice.choices.map(::ItemStack))
+            is RecipeChoice.ExactChoice -> ItemButton(choice.choices)
             else -> SimpleItem(ItemStackBuilder.of(Material.AIR))
         }
     }

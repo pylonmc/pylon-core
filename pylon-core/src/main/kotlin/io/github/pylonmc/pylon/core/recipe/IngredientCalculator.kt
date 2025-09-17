@@ -110,7 +110,12 @@ object IngredientCalculator {
         val scaleMultiplier = ceil(fluid.amountMillibuckets / targetFluid.amountMillibuckets)
 
         return IngredientCalculation(
-            inputs = Container.of(recipe.inputs.toMutableList()),
+            inputs = Container.of(recipe.inputs.mapTo(mutableListOf()) {
+                when (it) {
+                    is RecipeInput.Item -> FluidOrItem.Item(it.representativeItem)
+                    is RecipeInput.Fluid -> FluidOrItem.Fluid(it.fluids.first(), it.amountMillibuckets)
+                }
+            }),
             intermediates = Container.of(additionalIntermediates.toMutableList()),
             outputAmount = targetFluid.amountMillibuckets
         ).scaleBy(scaleMultiplier)
@@ -134,15 +139,15 @@ object IngredientCalculator {
         val recipeOutputAmount = getRecipeOutputAmount(recipe, pylonItem)
         baseResult.outputAmount = recipeOutputAmount
 
-        for (fluidOrItem in recipe.inputs) {
-            when (fluidOrItem) {
-                is FluidOrItem.Item -> {
-                    val subCalculation = calculateFinal(fluidOrItem.item, depth + 1)
+        for (input in recipe.inputs) {
+            when (input) {
+                is RecipeInput.Item -> {
+                    val subCalculation = calculateFinal(input.representativeItem, depth + 1)
                     baseResult.mergeSubCalculation(subCalculation)
                 }
 
-                is FluidOrItem.Fluid -> {
-                    val subCalculation = calculateFinal(fluidOrItem, depth + 1)
+                is RecipeInput.Fluid -> {
+                    val subCalculation = calculateFinal(FluidOrItem.Fluid(input.fluids.first(), input.amountMillibuckets), depth + 1)
                     baseResult.mergeSubCalculation(subCalculation)
                 }
             }
@@ -337,11 +342,11 @@ data class IngredientCalculation(
  * @author balugaq
  */
 internal class InternalRecipe(private val recipe: PylonRecipe) : PylonRecipe by recipe {
-    override val inputs: List<FluidOrItem>
+    override val inputs: List<RecipeInput>
         get() = recipe.inputs.map {
             when (it) {
-                is FluidOrItem.Fluid -> FluidOrItem.of(it.fluid, it.amountMillibuckets)
-                is FluidOrItem.Item -> FluidOrItem.of(it.item.clone())
+                is RecipeInput.Fluid -> RecipeInput.Fluid(it.fluids.toMutableSet(), it.amountMillibuckets)
+                is RecipeInput.Item -> RecipeInput.Item(it.items.toMutableSet(), it.amount)
             }
         }
 
