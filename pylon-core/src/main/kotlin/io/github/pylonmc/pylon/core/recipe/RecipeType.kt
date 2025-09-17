@@ -85,13 +85,13 @@ open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, 
         internal fun addVanillaRecipes() {
             for (recipe in Bukkit.recipeIterator()) {
                 when (recipe) {
-                    is BlastingRecipe -> VANILLA_BLASTING.addRecipeWithoutRegister(BlastingRecipeWrapper(recipe))
-                    is CampfireRecipe -> VANILLA_CAMPFIRE.addRecipeWithoutRegister(CampfireRecipeWrapper(recipe))
-                    is FurnaceRecipe -> VANILLA_FURNACE.addRecipeWithoutRegister(FurnaceRecipeWrapper(recipe))
-                    is ShapedRecipe -> VANILLA_SHAPED.addRecipeWithoutRegister(ShapedRecipeWrapper(recipe))
-                    is ShapelessRecipe -> VANILLA_SHAPELESS.addRecipeWithoutRegister(ShapelessRecipeWrapper(recipe))
-                    is SmithingRecipe -> VANILLA_SMITHING.addRecipeWithoutRegister(SmithingRecipeWrapper(recipe))
-                    is SmokingRecipe -> VANILLA_SMOKING.addRecipeWithoutRegister(SmokingRecipeWrapper(recipe))
+                    is BlastingRecipe -> VANILLA_BLASTING.addNonPylonRecipe(BlastingRecipeWrapper(recipe))
+                    is CampfireRecipe -> VANILLA_CAMPFIRE.addNonPylonRecipe(CampfireRecipeWrapper(recipe))
+                    is FurnaceRecipe -> VANILLA_FURNACE.addNonPylonRecipe(FurnaceRecipeWrapper(recipe))
+                    is ShapedRecipe -> VANILLA_SHAPED.addNonPylonRecipe(ShapedRecipeWrapper(recipe))
+                    is ShapelessRecipe -> VANILLA_SHAPELESS.addNonPylonRecipe(ShapelessRecipeWrapper(recipe))
+                    is SmithingRecipe -> VANILLA_SMITHING.addNonPylonRecipe(SmithingRecipeWrapper(recipe))
+                    is SmokingRecipe -> VANILLA_SMOKING.addNonPylonRecipe(SmokingRecipeWrapper(recipe))
                 }
             }
         }
