@@ -18,21 +18,21 @@ class SearchItemsAndFluidsPage : SearchPage(
     Material.OAK_SIGN
 ) {
 
-    fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.ITEMS.getKeys().filter {
-        !PylonGuide.hiddenItems.contains(it)
+    fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.ITEMS.filter {
+        it.key !in PylonGuide.hiddenItems
     }.map { item ->
         val name = GlobalTranslator.render(
-            Component.translatable("pylon.${item.namespace}.item.${item.key}.name"),
+            Component.translatable("pylon.${item.key.namespace}.item.${item.key.key}.name"),
             player.locale()
         )
-        ItemButton(item) to serializer.serialize(name).lowercase()
+        ItemButton(item.itemStack) to serializer.serialize(name).lowercase()
     }.toMutableList()
 
-    fun getFluidButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.FLUIDS.getKeys().filter {
-        !PylonGuide.hiddenFluids.contains(it)
+    fun getFluidButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.FLUIDS.filter {
+        it.key !in PylonGuide.hiddenFluids
     }.map { fluid ->
         val name = GlobalTranslator.render(
-            Component.translatable("pylon.${fluid.namespace}.fluid.${fluid.key}"),
+            Component.translatable("pylon.${fluid.key.namespace}.fluid.${fluid.key.key}"),
             player.locale()
         )
         FluidButton(fluid) to serializer.serialize(name).lowercase()

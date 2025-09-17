@@ -14,20 +14,23 @@ item:
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"
-    lore: ""
 
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Wax'd Weather'd Cutteth Copp'r Stairs of Unriddling"
     lore: "<insn>Strike with thy right hand</insn> yon block, and its Pylon lore shall be revealed"
 
-block:
-  phantom_block: "<red>Phantom Block (%block%)"
+  fluid_pipe_connector:
+    waila: "%pipe%"
+
+  fluid_pipe_marker:
+    waila: "%pipe%"
 
 fluid:
   temperature:
-    cold: "cold"
-    normal: "normal"
-    hot: "hot"
+    display-text: "<arrow> <attr>Temperature:</attr> %temperature%"
+    cold: "<#1cb3d8>cold"
+    normal: "<#c9d81c>normal"
+    hot: "<#d81c1c>hot"
 
 message:
   debug:
@@ -70,6 +73,9 @@ message:
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
         get: "<green>%player% has %points% research points"
+    exposerecipe:
+      not-configurable: "<red>This divine recipe may not be bent to thy whims"
+      warning: "<yellow>Hark! Shouldst thou lay bare the secrets of these recipes, their forms shall no longer mend themselves of their own accord. To undo this act, thou must destroy %file%"
 
 gui:
   scroll:

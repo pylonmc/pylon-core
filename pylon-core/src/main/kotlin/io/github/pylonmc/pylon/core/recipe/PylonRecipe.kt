@@ -11,19 +11,19 @@ interface PylonRecipe : Keyed {
     val isHidden: Boolean
         get() = false
 
-    val inputs: List<FluidOrItem>
+    val inputs: List<RecipeInput>
     val results: List<FluidOrItem>
 
     fun isInput(stack: ItemStack) = inputs.any {
         when (it) {
-            is FluidOrItem.Item -> it.item.isPylonSimilar(stack)
+            is RecipeInput.Item -> it.matches(stack)
             else -> false
         }
     }
 
     fun isInput(fluid: PylonFluid) = inputs.any {
         when (it) {
-            is FluidOrItem.Fluid -> it.fluid == fluid
+            is RecipeInput.Fluid -> fluid in it.fluids
             else -> false
         }
     }

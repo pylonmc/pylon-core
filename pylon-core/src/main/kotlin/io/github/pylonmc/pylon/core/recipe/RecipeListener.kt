@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCookingFuel
 import io.github.pylonmc.pylon.core.item.base.VanillaCookingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
+import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMineral
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft

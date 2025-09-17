@@ -23,13 +23,11 @@ import io.papermc.paper.math.Rotation
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
-import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
-import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.RoundingMode
 import org.joml.Vector3f
@@ -107,25 +105,6 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
     BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
     BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
     else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
-}
-
-fun itemFromName(name: String): ItemStack? {
-    if (name.contains(':')) {
-        val namespacedKey = NamespacedKey.fromString(name)
-        if (namespacedKey != null) {
-            val pylonItem = PylonRegistry.ITEMS[namespacedKey]
-            if (pylonItem != null) {
-                return pylonItem.itemStack
-            }
-        }
-    }
-
-    val material = Material.getMaterial(name.uppercase())
-    if (material != null) {
-        return ItemStack(material)
-    }
-
-    return null
 }
 
 fun wrapText(text: String, limit: Int): List<String> {
@@ -239,5 +218,5 @@ fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
 }
 
 fun isFakeEvent(event: Event): Boolean {
-    return event.javaClass.name.contains("Fake");
+    return event.javaClass.name.contains("Fake")
 }

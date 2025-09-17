@@ -44,6 +44,10 @@ object GuiItems {
             states.add(ItemStackBuilder.of(template.build().clone())
                 .set(DataComponentTypes.MAX_DAMAGE, timeTicks)
                 .set(DataComponentTypes.DAMAGE, i)
+                .set(
+                    DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay()
+                        .addHiddenComponents(DataComponentTypes.DAMAGE, DataComponentTypes.MAX_DAMAGE)
+                )
             )
             i++
         }
