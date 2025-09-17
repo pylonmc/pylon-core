@@ -249,8 +249,6 @@ internal object PylonItemListener : Listener {
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonItem)
             }
-        } else {
-            event.isCancelled = true
         }
     }
 
