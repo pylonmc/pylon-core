@@ -135,6 +135,7 @@ guide:
       error: "<red>Fluid item failed to load"
     item:
       not-researched: "<red><u>Not researched yet</u>"
+      not-researched-with-name: "<red><u>Not researched yet <gray>(%research_name%<gray>)"
       research-instructions: |-
         <arrow:#3a2939> <guideinsn>Shift left click</guideinsn> to research
         <arrow:#3a2939> <guideinsn>Shift right click</guideinsn> to see other research unlocks
