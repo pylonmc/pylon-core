@@ -35,6 +35,7 @@ class ItemButton @JvmOverloads constructor(
     val preDisplayDecorator: (ItemStack, Player) -> ItemStack = { stack, _ -> stack }
 ) : AbstractItem() {
     constructor(vararg stacks: ItemStack) : this(stacks.toList())
+    constructor(stack: ItemStack, preDisplayDecorator: (ItemStack, Player) -> ItemStack) : this(listOf(stack), preDisplayDecorator)
 
     val stacks = stacks.shuffled()
     private var index = 0
