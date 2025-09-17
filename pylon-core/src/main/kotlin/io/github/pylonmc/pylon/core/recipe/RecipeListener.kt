@@ -4,12 +4,13 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCookingFuel
 import io.github.pylonmc.pylon.core.item.base.VanillaCookingItem
 import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
-import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMaterial
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMineral
 import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
+import io.github.pylonmc.pylon.core.recipe.vanilla.CookingRecipeWrapper
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
+import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.block.Furnace
@@ -51,12 +52,14 @@ internal object PylonRecipeListener : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private fun onCook(e: BlockCookEvent) {
-        if (PylonItem.fromStack(e.result) == null) return
+        if (PylonItem.fromStack(e.source) == null) return
 
+        var pylonRecipe: CookingRecipeWrapper? = null
         for (recipe in RecipeType.vanillaCookingRecipes()) {
-            if (recipe.recipe.inputChoice.test(e.result)) {
+            if (recipe.key !in VanillaRecipeType.nonPylonRecipes && recipe.recipe.inputChoice.test(e.source)) {
                 e.result = recipe.recipe.result.clone()
-                return
+                pylonRecipe = recipe
+                break
             }
         }
     }
@@ -71,14 +74,16 @@ internal object PylonRecipeListener : Listener {
         val furnace = (e.block.state as Furnace)
         val input = furnace.inventory.smelting
         if (input != null && input.isPylonAndIsNot<VanillaCookingItem>()) {
-            var isProcessingPylonRecipe = false
+            var pylonRecipe: CookingRecipeWrapper? = null
             for (recipe in RecipeType.vanillaCookingRecipes()) {
                 if (recipe.key !in VanillaRecipeType.nonPylonRecipes && recipe.recipe.inputChoice.test(input)) {
-                    isProcessingPylonRecipe = true
+                    pylonRecipe = recipe
                     break
                 }
             }
-            if (!isProcessingPylonRecipe) {
+            val isFurnaceOutputValidToPutRecipeResultIn = pylonRecipe != null
+                    && (furnace.inventory.result == null || pylonRecipe.isOutput(furnace.inventory.result!!))
+            if (pylonRecipe == null || !isFurnaceOutputValidToPutRecipeResultIn) {
                 e.isCancelled = true
             }
         }
