@@ -126,7 +126,8 @@ guide:
       name: "%fluid% <gray>(%amount%<gray>)"
       error: "<red>Thy fluid item hath faileth to loadeth!!! Repent!!!"
     item:
-      not-researched: "<#ff0000>Not revealed yet"
+      not-researched: "<red><u>Not revealed yet"
+      not-researched-with-name: "<red><u>Not revealed yet <gray>(%research_name%<gray>)"
       research-instructions: |-
         <arrow> <guideinsn>Strike with thy left hand while crouching</guideinsn> to reveal
         <arrow> <guideinsn>Strike with thy right hand while crouching</guideinsn> to see other revelations
