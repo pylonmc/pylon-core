@@ -15,7 +15,6 @@ import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
@@ -76,10 +75,6 @@ internal object BlockListener : Listener {
                 return
             }
         }
-
-        val relative = event.blockPlaced.position - event.blockAgainst.position
-        val blockFace = BlockFace.entries.find { it.modX == relative.x && it.modY == relative.y && it.modZ == relative.z }
-            ?: BlockFace.SELF
 
         val pylonBlock = pylonItem.place(BlockCreateContext.PlayerPlace(player, item, event))
 
@@ -144,14 +139,14 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun disallowForming(event: BlockFormEvent) {
-        if (BlockStorage.isPylonBlock(event.block.position)) {
+        if (BlockStorage.isPylonBlock(event.block)) {
             event.isCancelled = true
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun disallowFromTo(event: BlockFromToEvent) {
-        if (BlockStorage.isPylonBlock(event.block.position)) {
+        if (BlockStorage.isPylonBlock(event.toBlock)) {
             event.isCancelled = true
         }
     }
@@ -159,7 +154,7 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun disallowMovementByPistons(event: BlockPistonExtendEvent) {
         for (block in event.blocks) {
-            if (BlockStorage.isPylonBlock(block.position)) {
+            if (BlockStorage.isPylonBlock(block)) {
                 event.isCancelled = true
                 return
             }
@@ -169,7 +164,7 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
         for (block in event.blocks) {
-            if (BlockStorage.isPylonBlock(block.position)) {
+            if (BlockStorage.isPylonBlock(block)) {
                 event.isCancelled = true
                 return
             }
