@@ -2,10 +2,13 @@ package io.github.pylonmc.pylon.core.config
 
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import org.bukkit.configuration.ConfigurationSection
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.util.WeakHashMap
 
 open class ConfigSection(val internalSection: ConfigurationSection) {
 
-    private val cache: MutableMap<String, Any?> = mutableMapOf()
+    private val cache: MutableMap<String, Any?> = WeakHashMap()
 
     val keys: Set<String>
         get() = internalSection.getKeys(false)
@@ -40,9 +43,7 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
      * Returns null either if the key does not exist or if the value cannot be converted to the desired type.
      */
     fun <T> get(key: String, adapter: ConfigAdapter<T>): T? {
-        val value = internalSection.get(key) ?: return null
-        // TODO cache
-        return runCatching { adapter.convert(value) }.getOrNull()
+        return runCatching { getOrThrow(key, adapter) }.getOrNull()
     }
 
     fun <T> get(key: String, adapter: ConfigAdapter<T>, defaultValue: T): T {
@@ -50,15 +51,27 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun <T> getOrThrow(key: String, adapter: ConfigAdapter<T>): T {
-        val value = internalSection.get(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
-        try {
-            return adapter.convert(value)
-        } catch (e: Exception) {
-            throw IllegalArgumentException(
-                "Failed to convert value '$value' to type ${adapter.type} for key '$key' in section '${internalSection.currentPath}'",
-                e
-            )
+        val value = cache.getOrPut(key) {
+            val value = internalSection.get(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
+            try {
+                adapter.convert(value)
+            } catch (e: Exception) {
+                throw IllegalArgumentException(
+                    "Failed to convert value '$value' to type ${adapter.type} for key '$key' in section '${internalSection.currentPath}'",
+                    e
+                )
+            }
         }
+
+        fun getClass(type: Type): Class<*> = when (type) {
+            is Class<*> -> type
+            is ParameterizedType -> getClass(type.rawType)
+            else -> throw IllegalArgumentException("Unsupported type: $type")
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        val clazz = getClass(adapter.type) as Class<T>
+        return clazz.cast(value)
     }
 
     fun <T> set(key: String, value: T) {

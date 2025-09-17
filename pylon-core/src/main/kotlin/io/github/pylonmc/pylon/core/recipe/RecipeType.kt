@@ -130,7 +130,9 @@ open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, 
                     is FurnaceRecipe -> VANILLA_FURNACE.addNonPylonRecipe(FurnaceRecipeWrapper(recipe))
                     is ShapedRecipe -> VANILLA_SHAPED.addNonPylonRecipe(ShapedRecipeWrapper(recipe))
                     is ShapelessRecipe -> VANILLA_SHAPELESS.addNonPylonRecipe(ShapelessRecipeWrapper(recipe))
-                    is SmithingTrimRecipe -> VANILLA_SMITHING_TRIM.addNonPylonRecipe(SmithingRecipeWrapper(recipe))is SmithingTransformRecipe -> VANILLA_SMITHING_TRANSFORM.addNonPylonRecipe(SmithingRecipeWrapper(recipe))
+                    is TransmuteRecipe -> VANILLA_TRANSMUTE.addNonPylonRecipe(TransmuteRecipeWrapper(recipe))
+                    is SmithingTrimRecipe -> VANILLA_SMITHING_TRIM.addNonPylonRecipe(SmithingTrimRecipeWrapper(recipe))
+                    is SmithingTransformRecipe -> VANILLA_SMITHING_TRANSFORM.addNonPylonRecipe(SmithingTransformRecipeWrapper(recipe))
                     is SmokingRecipe -> VANILLA_SMOKING.addNonPylonRecipe(SmokingRecipeWrapper(recipe))
                 }
                 // @formatter:on
