@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addRes
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
+import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
@@ -84,10 +85,17 @@ class ItemButton @JvmOverloads constructor(
             if (!player.canCraft(item)) {
                 builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
                     .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
-                    .lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
+
                 if (item.research != null) {
+                    builder.lore(Component.translatable(
+                            "pylon.pyloncore.guide.button.item.not-researched-with-name",
+                            PylonArgument.of("research_name", item.research!!.name)
+                    ))
                     addResearchCostLore(builder, player, item.research!!)
+                } else {
+                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
                 }
+
                 builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
             }
 

@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PlayerBreak
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidPointType
@@ -54,6 +55,14 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
             val uuid = fluidPointInteraction.connectedPipeDisplays.iterator().next()
             return EntityStorage.getAs<FluidPipeDisplay?>(uuid)!!.pipe
         }
+
+    override fun getItem(context: BlockItemContext): ItemStack? {
+        // Breaking is handled by other fluid pipe logic
+        if (context is BlockItemContext.PickBlock) {
+            return pipe.stack
+        }
+        return null
+    }
 
     companion object {
         val KEY = pylonKey("fluid_pipe_connector")

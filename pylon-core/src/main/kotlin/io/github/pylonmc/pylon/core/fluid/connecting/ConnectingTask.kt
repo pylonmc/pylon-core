@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipe
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipeConnector
+import io.github.pylonmc.pylon.core.content.fluid.FluidPipeDisplay
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipeMarker
 import io.github.pylonmc.pylon.core.content.fluid.FluidPointInteraction
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -196,6 +197,15 @@ class ConnectingTask(
             val clonedTo = to // kotlin complains if no clone
             return when (clonedTo) {
                 is ConnectingPointPipeMarker -> clonedTo.marker.getPipeDisplay()!!.pipe == pipe
+                is ConnectingPointInteraction -> {
+                    val connectedPipes = clonedTo.interaction.connectedPipeDisplays
+                    if (connectedPipes.isEmpty()) {
+                        return true // no pipes connected so any pipe type valid
+                    }
+                    // Slight hack - use an arbitrary connected pipe to find out the pipe type
+                    val arbitraryDisplay = clonedTo.interaction.connectedPipeDisplays.iterator().next()
+                    EntityStorage.getAs<FluidPipeDisplay>(arbitraryDisplay)!!.pipe == pipe
+                }
                 is ConnectingPointPipeConnector -> clonedTo.connector.pipe == pipe
                 else -> true
             }
