@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler

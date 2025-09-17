@@ -15,6 +15,7 @@ import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
+import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
@@ -56,6 +57,10 @@ internal object BlockListener : Listener {
         val item = event.itemInHand
         val player = event.player
 
+        if (!item.type.isBlock) {
+            return
+        }
+
         val pylonItem = PylonItem.fromStack(item) ?: return
         if (!event.player.canUse(pylonItem, true)) {
             event.isCancelled = true
@@ -67,7 +72,7 @@ internal object BlockListener : Listener {
             if (pylonItem.schema.pylonBlockKey == null
                 || BlockStorage.isPylonBlock(event.block)
             ) {
-                event.isCancelled = true;
+                event.isCancelled = true
                 return
             }
         }
