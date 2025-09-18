@@ -71,7 +71,11 @@ class Waila private constructor(private val player: Player, private val job: Job
             }
         } else {
             val blockReach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
-            val block = player.rayTraceBlocks(blockReach)?.hitBlock ?: return
+            val block = player.rayTraceBlocks(blockReach)?.hitBlock
+            if (block == null) {
+                off()
+                return
+            }
             val config = try {
                 overrides[block.position]?.invoke(player) ?: block.let(BlockStorage::get)?.getWaila(player)
             } catch (e: Exception) {
