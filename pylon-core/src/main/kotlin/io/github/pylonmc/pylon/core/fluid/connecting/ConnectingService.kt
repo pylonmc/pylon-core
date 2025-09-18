@@ -21,7 +21,8 @@ object ConnectingService : org.bukkit.event.Listener {
 
     fun startConnection(player: Player, startPoint: ConnectingPoint, pipe: FluidPipe) {
         check(!ConnectingService.connectionsInProgress.containsKey(player))
-        ConnectingService.connectionsInProgress.put(player, ConnectingTask(player, startPoint, pipe))
+        // Clone to prevent the PylonItem instance being shared between player's hotbar and the pipe itself
+        ConnectingService.connectionsInProgress.put(player, ConnectingTask(player, startPoint, FluidPipe(pipe.stack.clone())))
     }
 
     @JvmStatic
