@@ -132,7 +132,8 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: PlayerBucketFillEvent) {
-        val pylonItem = event.itemStack?.let { PylonItem.fromStack(it) }
+        val stack = event.player.inventory.getItem(event.hand)
+        val pylonItem = PylonItem.fromStack(stack)
         if (pylonItem != null && !event.player.canUse(pylonItem, true)) {
             event.isCancelled = true
             return
