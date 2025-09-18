@@ -62,8 +62,5 @@ internal fun RecipeChoice.asRecipeInput(): RecipeInput {
 
 @JvmSynthetic
 internal fun RecipeInput.Item.asRecipeChoice(): RecipeChoice {
-    if (items.all { it is ItemTypeWrapper.Vanilla }) {
-        return RecipeChoice.MaterialChoice(items.map { (it as ItemTypeWrapper.Vanilla).material })
-    }
     return RecipeChoice.ExactChoice(items.map { it.createItemStack().asQuantity(amount) })
 }
