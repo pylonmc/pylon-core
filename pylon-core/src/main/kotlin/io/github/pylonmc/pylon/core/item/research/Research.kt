@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.item.research
 
-import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
@@ -27,7 +26,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
-import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerJoinEvent
 
 /**
  * @property cost If null, the research cannot be unlocked using points
@@ -208,41 +207,20 @@ data class Research(
         }
 
         @EventHandler
-        private fun onInventoryClick(event: InventoryClickEvent) {
-            discoverRelevantRecipes(event.whoClicked as? Player ?: return)
-        }
-
-        @EventHandler
-        private fun onPickUpItem(event: EntityPickupItemEvent) {
-            discoverRelevantRecipes(event.entity as? Player ?: return)
-        }
-
-        // discover only the recipes that have no research whenever an ingredient is added to the inventory
-        private fun discoverRelevantRecipes(player: Player) {
+        private fun onJoin(e: PlayerJoinEvent) {
             if (!PylonConfig.researchesEnabled) return
-            val items = player.inventory.contents.clone().filterNotNull()
+            val player = e.player
 
-            PylonCore.launch(PylonCore.asyncDispatcher) {
-                for (item in items) {
-                    val research = PylonItem.fromStack(item)?.research
-                    if (research != null && !player.hasResearch(research)) {
-                        player.ejectUnknownItems()
-                        continue
-                    }
-                    for (recipeType in PylonRegistry.RECIPE_TYPES) {
-                        if (recipeType !is VanillaRecipeType<*>) continue
-                        for (recipe in recipeType) {
-                            if (recipe.key in VanillaRecipeType.nonPylonRecipes || !recipe.isInput(item)) continue
-                            val researches = recipe.results
-                                .filterIsInstance<FluidOrItem.Item>()
-                                .mapNotNull { PylonItem.fromStack(it.item)?.research }
-                            if (researches.isNotEmpty()) continue
-                            PylonCore.launch {
-                                if (!player.isOnline) return@launch
-                                player.discoverRecipe(recipe.key)
-                            }
-                        }
-                    }
+            // discover only the recipes that have no research whenever an ingredient is added to the inventory
+            for (recipeType in PylonRegistry.RECIPE_TYPES) {
+                if (recipeType !is VanillaRecipeType<*>) continue
+                for (recipe in recipeType) {
+                    if (recipe.key in VanillaRecipeType.nonPylonRecipes) continue
+                    val researches = recipe.results
+                        .filterIsInstance<FluidOrItem.Item>()
+                        .mapNotNull { PylonItem.fromStack(it.item)?.research }
+                    if (researches.isNotEmpty()) continue
+                    player.discoverRecipe(recipe.key)
                 }
             }
         }
