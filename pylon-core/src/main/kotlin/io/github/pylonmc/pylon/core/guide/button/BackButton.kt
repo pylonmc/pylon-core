@@ -19,7 +19,7 @@ open class BackButton(val player: Player) : AbstractItem() {
         val history = PylonGuide.history.getOrPut(player.uniqueId) { mutableListOf() }
 
         if (clickType.isShiftClick) {
-            if (!history.isEmpty()) history.removeLast()
+            history.clear()
             PylonGuide.rootPage.open(player);
         } else if (history.size >= 2) {
             history.removeLast() // remove the current page
