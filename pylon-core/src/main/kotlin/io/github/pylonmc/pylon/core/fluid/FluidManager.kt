@@ -290,6 +290,10 @@ object FluidManager {
                 val block = BlockStorage.getAs<PylonFluidBlock>(point.position)
                     ?: continue
                 for ((fluid, amount) in block.getSuppliedFluids(deltaSeconds)) {
+                    if (amount < 1.0e-6) {
+                        // prevent floating point issues supplying tiny amounts of liquid
+                        continue
+                    }
                     val pair = suppliedFluids.getOrPut(fluid) {
                         FluidSupplyInfo(0.0, IdentityHashMap())
                     }
