@@ -39,6 +39,7 @@ interface BlockCreateContext {
      * - Growing of Pylon Trees
      * - Evolution of Pylon Sponges
      */
+    @JvmRecord
     data class PluginGenerate(
         val plugin: Plugin,
         override val block: Block,
@@ -48,6 +49,7 @@ interface BlockCreateContext {
     /**
      * A context in which no other reason is specified
      */
+    @JvmRecord
     data class Default @JvmOverloads constructor(
         override val block: Block,
         override val shouldSetType: Boolean = true

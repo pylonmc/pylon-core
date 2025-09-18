@@ -78,6 +78,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
+    @JvmRecord
     data class VanillaMultiblockComponent(val materials: List<Material>) : MultiblockComponent {
 
         // Enforce at least 1
@@ -114,6 +115,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
+    @JvmRecord
     data class PylonMultiblockComponent(val key: NamespacedKey) : MultiblockComponent {
         override fun matches(block: Block): Boolean = BlockStorage.get(block)?.schema?.key == key
 

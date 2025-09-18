@@ -30,6 +30,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent
  * @property cost If null, the research cannot be unlocked using points
  * @property unlocks the keys of the items that are unlocked by this research
  */
+@JvmRecord
 data class Research(
     private val key: NamespacedKey,
     val material: Material,
