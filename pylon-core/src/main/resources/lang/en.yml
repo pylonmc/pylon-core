@@ -10,14 +10,14 @@ item:
   guide:
     name: "<white>Pylon Guide"
     lore: |-
-      <insn>Right click</insn> to open
+      <arrow> <insn>Right click</insn> to open
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"
 
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
-    lore: "<insn>Right click</insn> a block to view its Pylon block data"
+    lore: "<arrow> <insn>Right click</insn> a block to view its Pylon block data"
 
   fluid_pipe_connector:
     waila: "%pipe%"
