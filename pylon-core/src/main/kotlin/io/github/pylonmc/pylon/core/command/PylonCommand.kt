@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core.command
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.LongArgumentType
 import com.mojang.brigadier.context.CommandContext
@@ -22,6 +23,7 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
+import io.github.pylonmc.pylon.core.particles.ConfettiParticle.Factory.many
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -407,6 +409,24 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
     }
 }
 
+private val confetti = buildCommand("confetti") {
+    argument("amount", IntegerArgumentType.integer(1)) {
+        permission("pylon.command.confetti")
+        executes {
+            val sender = this.source.sender
+            val amount = IntegerArgumentType.getInteger(this, "amount")
+
+            if (sender !is Player) {
+                sender.sendRichMessage("<red>You must be a player to use this command")
+                return@executes
+            }
+
+            many(sender.location, amount).run()
+            return@executes
+        }
+    }
+}
+
 @JvmSynthetic
 internal val ROOT_COMMAND = buildCommand("pylon") {
     permission("pylon.command.guide")
@@ -423,6 +443,7 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
     then(gametest)
     then(research)
     then(exposeRecipeConfig)
+    then(confetti)
 }
 
 @JvmSynthetic
