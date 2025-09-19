@@ -39,6 +39,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
         })
 
         this.display.teleportDuration = TICK_AMOUNT.toInt()
+        this.display.interpolationDuration = TICK_AMOUNT.toInt()
 
         // Random initial velocity
         this.velocity = Vector(
