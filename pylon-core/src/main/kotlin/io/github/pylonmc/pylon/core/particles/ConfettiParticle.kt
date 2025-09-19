@@ -118,12 +118,12 @@ class ConfettiParticle private constructor(location: Location, material: Materia
         }
 
         @JvmStatic
-        fun many(loc: Location, materials: List<Material?>, amount: Int): Runnable {
+        fun many(loc: Location, materials: List<Material>, amount: Int): Runnable {
             val output: MutableList<Runnable> = ArrayList<Runnable>()
 
-            (0..<amount).forEach { _ ->
+            repeat(amount) { _ ->
                 val rnd: Int = RANDOM.nextInt(0, materials.size)
-                output.add(single(loc, materials[rnd]!!))
+                output.add(single(loc, materials[rnd]))
             }
 
             return Runnable { output.forEach(Runnable::run) }
