@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.core.particles
 import io.github.pylonmc.pylon.core.PylonCore
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.Tag
 import org.bukkit.entity.BlockDisplay
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Transformation
@@ -109,7 +108,9 @@ class ConfettiParticle private constructor(location: Location, material: Materia
      * Class with util methods that returns a runnable that once ran spawns all wanted particles
      */
     object Factory {
-        private val WOOLS: List<Material> = Tag.WOOL.values.toList()
+        private val WOOLS: List<Material> = Material.entries
+            .filter { mat: Material -> mat.name.endsWith("CONCRETE") && !mat.isLegacy }
+            .toList()
 
         @JvmStatic
         fun single(loc: Location, mat: Material): Runnable {
