@@ -15,7 +15,6 @@ import java.util.function.Consumer
 
 class ConfettiParticle private constructor(location: Location, material: Material) {
     private val display: BlockDisplay
-    private val maxAge: Int
     private var age = 0
 
     private val velocity: Vector
@@ -27,7 +26,6 @@ class ConfettiParticle private constructor(location: Location, material: Materia
 
     init {
         val world = location.getWorld()
-        this.maxAge = random.nextInt(300) + 400 // 400–700 ticks
 
         this.display = world.spawn<BlockDisplay>(location, BlockDisplay::class.java, Consumer { d: BlockDisplay ->
             d.block = material.createBlockData()
@@ -59,7 +57,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
     private fun startTickLoop() {
         object : BukkitRunnable() {
             override fun run() {
-                if (age++ > maxAge || display.isDead) {
+                if (age++ > MAX_AGE || display.isDead) {
                     display.remove()
                     cancel()
                     return
@@ -139,5 +137,6 @@ class ConfettiParticle private constructor(location: Location, material: Materia
         private val random = Random()
         private const val GRAVITY = -0.015
         private const val DRAG = 0.85
+        private const val MAX_AGE = 300
     }
 }
