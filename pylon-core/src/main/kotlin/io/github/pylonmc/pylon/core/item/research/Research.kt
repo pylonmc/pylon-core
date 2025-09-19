@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.item.research
 
+import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
@@ -9,6 +10,7 @@ import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
+import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -18,9 +20,11 @@ import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -51,7 +55,7 @@ data class Research(
     }
 
     @JvmOverloads
-    fun addTo(player: Player, sendMessage: Boolean = true) {
+    fun addTo(player: Player, visuals: Boolean = true) {
         if (this in player.researches) return
 
         player.researches += this
@@ -61,7 +65,24 @@ data class Research(
                 player.discoverRecipe(recipe.key)
             }
         }
-        if (sendMessage) {
+
+        if (visuals) {
+            val multiplier = ((cost?.toDouble() ?: 0.0) / 5.0)
+            val amount = (70.0 * multiplier).toInt()
+            ConfettiParticle.Factory.many(player.location, amount).run()
+
+            fun Sound.playSoundLater(d: Long, pitch: Float = 1f) {
+                Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
+                    player.playSound(player.location, this, 1.5f, pitch)
+                }, d)
+            }
+
+            repeat(2) {
+                Sound.ENTITY_FIREWORK_ROCKET_BLAST.playSoundLater(3L * it)
+                Sound.ENTITY_PLAYER_LEVELUP.playSoundLater(6L * it, 0.9f)
+                Sound.ENTITY_FIREWORK_ROCKET_LAUNCH.playSoundLater(9L * it)
+            }
+
             player.sendMessage(
                 Component.translatable(
                     "pylon.pyloncore.message.research.unlocked",
