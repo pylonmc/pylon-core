@@ -18,10 +18,10 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
+import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -59,11 +59,17 @@ private val give = buildCommand("give") {
             }
 
             permission("pylon.command.give")
-            executes { givePlayers(this, 1) }
+            executes {
+                PylonMetrics.onCommandRun("/py give")
+                givePlayers(this, 1)
+            }
 
             argument("amount", IntegerArgumentType.integer(1)) {
                 permission("pylon.command.give")
-                executes { givePlayers(this, IntegerArgumentType.getInteger(this, "amount")) }
+                executes {
+                    PylonMetrics.onCommandRun("/py give")
+                    givePlayers(this, IntegerArgumentType.getInteger(this, "amount"))
+                }
             }
         }
     }
@@ -72,6 +78,7 @@ private val give = buildCommand("give") {
 private val debug = buildCommand("debug") {
     permission("pylon.command.debug")
     executesWithPlayer { player ->
+        PylonMetrics.onCommandRun("/py debug")
         player.inventory.addItem(DebugWaxedWeatheredCutCopperStairs.STACK)
     }
 }
@@ -79,6 +86,7 @@ private val debug = buildCommand("debug") {
 private val key = buildCommand("key") {
     permission("pylon.command.key")
     executesWithPlayer { player ->
+        PylonMetrics.onCommandRun("/py key")
         val item = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
         if (item == null) {
             player.sendMessage(Component.translatable("pylon.pyloncore.message.command.key.no_item"))
@@ -93,6 +101,7 @@ private val setblock = buildCommand("setblock") {
         argument("block", RegistryCommandArgument(PylonRegistry.BLOCKS)) {
             permission("pylon.command.setblock")
             executesWithPlayer { player ->
+                PylonMetrics.onCommandRun("/py setblock")
                 val location = getArgument<PaperBlockPosition>("location")
                 val block = getArgument<PylonBlockSchema>("block")
                 BlockStorage.placeBlock(location.toLocation(player.world), block.key)
@@ -104,6 +113,7 @@ private val setblock = buildCommand("setblock") {
 private val waila = buildCommand("waila") {
     permission("pylon.command.waila")
     executesWithPlayer { player ->
+        PylonMetrics.onCommandRun("/py waila")
         player.wailaEnabled = !player.wailaEnabled
     }
 }
@@ -113,6 +123,7 @@ private val gametest = buildCommand("gametest") {
         argument("test", RegistryCommandArgument(PylonRegistry.GAMETESTS)) {
             permission("pylon.command.gametest")
             executesWithPlayer { player ->
+                PylonMetrics.onCommandRun("/py gametest")
                 val location = getArgument<PaperBlockPosition>("location")
                 val test = getArgument<GameTestConfig>("test")
                 PylonCore.launch {
@@ -159,6 +170,7 @@ private val researchAdd = buildCommand("add") {
         literal("*") {
             permission("pylon.command.research.modify")
             executes {
+                PylonMetrics.onCommandRun("/py research add")
                 addResearches(this, PylonRegistry.RESEARCHES.toList())
             }
         }
@@ -166,6 +178,7 @@ private val researchAdd = buildCommand("add") {
         argument("research", RegistryCommandArgument(PylonRegistry.RESEARCHES)) {
             permission("pylon.command.research.modify")
             executes {
+                PylonMetrics.onCommandRun("/py research add")
                 val res = getArgument<Research>("research")
                 addResearches(this, listOf(res))
             }
@@ -175,7 +188,7 @@ private val researchAdd = buildCommand("add") {
 
 private val researchList = buildCommand("list") {
     fun listResearches(sender: CommandSender, player: Player) {
-        val researches = player.researches
+        val researches = Research.getResearches(player)
         if (researches.isEmpty()) {
             sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.research.list.none"))
             return
@@ -192,12 +205,14 @@ private val researchList = buildCommand("list") {
 
     permission("pylon.command.research.list.self")
     executesWithPlayer { player ->
+        PylonMetrics.onCommandRun("/py research list")
         listResearches(player, player)
     }
 
     argument("player", ArgumentTypes.player()) {
         permission("pylon.command.research.list")
         executes { sender ->
+            PylonMetrics.onCommandRun("/py research list")
             val player = getArgument<Player>("player")
             listResearches(sender, player)
         }
@@ -208,6 +223,7 @@ private val researchDiscover = buildCommand("discover") {
     argument("research", RegistryCommandArgument(PylonRegistry.RESEARCHES)) {
         permission("pylon.command.research.discover")
         executesWithPlayer { player ->
+            PylonMetrics.onCommandRun("/py research discover")
             val res = getArgument<Research>("research")
             if (player.hasResearch(res)) {
                 player.sendMessage(
@@ -266,6 +282,7 @@ private val researchRemove = buildCommand("remove") {
         literal("*") {
             permission("pylon.command.research.modify")
             executes {
+                PylonMetrics.onCommandRun("/py research remove")
                 removeResearches(this, PylonRegistry.RESEARCHES.toList())
             }
         }
@@ -273,6 +290,7 @@ private val researchRemove = buildCommand("remove") {
         argument("research", RegistryCommandArgument(PylonRegistry.RESEARCHES)) {
             permission("pylon.command.research.modify")
             executes {
+                PylonMetrics.onCommandRun("/py research remove")
                 val res = getArgument<Research>("research")
                 removeResearches(this, listOf(res))
             }
@@ -285,6 +303,7 @@ private val researchPointsSet = buildCommand("set") {
         argument("points", LongArgumentType.longArg(0)) {
             permission("pylon.command.research.points.set")
             executes { sender ->
+                PylonMetrics.onCommandRun("/py research points set")
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
                     player.researchPoints = points
@@ -306,6 +325,7 @@ private val researchPointsAdd = buildCommand("add") {
         argument("points", LongArgumentType.longArg()) {
             permission("pylon.command.research.points.set")
             executes { sender ->
+                PylonMetrics.onCommandRun("/py research points add")
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
                     player.researchPoints += points
@@ -327,6 +347,7 @@ private val researchPointsSubtract = buildCommand("subtract") {
         argument("points", LongArgumentType.longArg()) {
             permission("pylon.command.research.points.set")
             executes { sender ->
+                PylonMetrics.onCommandRun("/py research points subtract")
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
                     player.researchPoints -= points
@@ -357,12 +378,14 @@ private val researchPointsGet = buildCommand("get") {
 
     permission("pylon.command.research.points.get.self")
     executesWithPlayer { player ->
+        PylonMetrics.onCommandRun("/py research points get")
         getPoints(player, player)
     }
 
     argument("player", ArgumentTypes.player()) {
         permission("pylon.command.research.points.get")
         executes { sender ->
+            PylonMetrics.onCommandRun("/py research points get")
             val player = getArgument<Player>("player")
             getPoints(sender, player)
         }
@@ -389,6 +412,7 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
         argument("recipe", RegistryCommandArgument(PylonRegistry.RECIPE_TYPES)) {
             permission("pylon.command.exposerecipeconfig")
             executes { sender ->
+                PylonMetrics.onCommandRun("/py exposerecipeconfig")
                 val addon = getArgument<PylonAddon>("addon")
                 val recipeType = getArgument<RecipeType<*>>("recipe")
                 if (recipeType !is ConfigurableRecipeType) {
@@ -411,6 +435,7 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
 internal val ROOT_COMMAND = buildCommand("pylon") {
     permission("pylon.command.guide")
     executesWithPlayer { player ->
+        PylonMetrics.onCommandRun("/py")
         PylonGuide.open(player)
     }
 

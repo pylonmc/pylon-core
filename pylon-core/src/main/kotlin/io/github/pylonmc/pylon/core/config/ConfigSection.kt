@@ -78,6 +78,9 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
         internalSection.set(key, value)
     }
 
+    fun createSection(key: String): ConfigSection
+        = ConfigSection(internalSection.createSection(key))
+
     fun merge(other: ConfigSection) {
         for (key in other.keys) {
             val otherSection = other.getSection(key)

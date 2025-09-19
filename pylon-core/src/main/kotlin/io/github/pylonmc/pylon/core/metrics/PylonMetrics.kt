@@ -1,14 +1,43 @@
 package io.github.pylonmc.pylon.core.metrics
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
+import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bstats.bukkit.Metrics
 import org.bstats.charts.AdvancedPie
+import org.bstats.charts.SimplePie
+import org.bukkit.Bukkit
 
-object PylonMetrics {
-    val metrics: Metrics = Metrics(PylonCore, 27322)
+internal object PylonMetrics {
+    const val SAVE_INTERVAl_TICKS = 20L
+
+    val metrics = Metrics(PylonCore, 27322)
+    val dataConfig = Config(PylonCore, "data/metrics.yml")
+    var commandsRun = mutableMapOf<String, Int>()
+
+    fun onCommandRun(name: String) {
+        commandsRun.put(name, commandsRun.getOrDefault(name, 0) + 1)
+    }
+
+    fun save() {
+        val dataSection = dataConfig.getSection("commandsRun") ?: dataConfig.createSection("commandsRun")
+        for ((command, runs) in commandsRun) {
+            dataSection.set(command, runs)
+        }
+        dataConfig.save()
+    }
 
     fun init() {
+        val dataSection = dataConfig.getSection("commandsRun")
+        if (dataSection != null) {
+            for (key in dataSection.keys) {
+                commandsRun.put(key, dataSection.getOrThrow(key, ConfigAdapter.INT))
+            }
+        }
+
         metrics.addCustomChart(AdvancedPie("addons") {
             val values = mutableMapOf<String, Int>()
             for (addon in PylonRegistry.ADDONS) {
@@ -21,6 +50,32 @@ object PylonMetrics {
             mutableMapOf<String, Int>(PylonRegistry.ADDONS.count().toString() to 1)
         })
 
+        metrics.addCustomChart(AdvancedPie("disabled_items") {
+            val values = mutableMapOf<String, Int>()
+            for (item in PylonConfig.disabledItems) {
+                values.put(item.toString(), 1)
+            }
+            values
+        })
 
+        metrics.addCustomChart(SimplePie("researches_enabled") {
+            if (PylonConfig.researchesEnabled) { "yes" } else { "no" }
+        })
+
+        metrics.addCustomChart(AdvancedPie("researches_unlocked") {
+            val researches = mutableMapOf<String, Int>()
+            for (player in Bukkit.getOfflinePlayers()) {
+                for (research in Research.getResearches(player)) {
+                    researches[research.key.toString()] = researches.getOrDefault(research.key.toString(), 0) + 1
+                }
+            }
+            researches
+        })
+
+        metrics.addCustomChart(AdvancedPie("commands_run") {
+            commandsRun
+        })
+
+        Bukkit.getScheduler().runTaskTimer(PylonCore, Runnable { save() }, 0L, SAVE_INTERVAl_TICKS)
     }
 }

@@ -22,6 +22,7 @@ import net.kyori.adventure.text.event.HoverEvent
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -55,9 +56,9 @@ data class Research(
 
     @JvmOverloads
     fun addTo(player: Player, sendMessage: Boolean = true) {
-        if (this in player.researches) return
+        if (this in getResearches(player)) return
 
-        player.researches += this
+        addResearch(player, this)
         for (recipe in RecipeType.vanillaCraftingRecipes()) {
             val pylonItem = PylonItem.fromStack(recipe.craftingRecipe.result) ?: continue
             if (pylonItem.key in unlocks) {
@@ -75,9 +76,9 @@ data class Research(
     }
 
     fun removeFrom(player: Player) {
-        if (this !in player.researches) return
+        if (this !in getResearches(player)) return
 
-        player.researches -= this
+        removeResearch(player, this)
         for (recipe in RecipeType.vanillaCraftingRecipes()) {
             val pylonItem = PylonItem.fromStack(recipe.craftingRecipe.result) ?: continue
             if (pylonItem.key in unlocks) {
@@ -87,7 +88,7 @@ data class Research(
     }
 
     fun isResearchedBy(player: Player): Boolean {
-        return this in player.researches
+        return this in getResearches(player)
     }
 
     override fun getKey() = key
@@ -106,9 +107,27 @@ data class Research(
         @set:JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
-        @get:JvmStatic
-        @set:JvmStatic
-        var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, mutableSetOf())
+        @JvmStatic
+        fun getResearches(player: OfflinePlayer): Set<Research> {
+            var researches = player.persistentDataContainer.get(researchesKey, researchesType)
+            if (researches == null && player is Player) {
+                setResearches(player, setOf())
+                return setOf()
+            }
+            return researches!!
+        }
+
+        @JvmStatic
+        fun setResearches(player: Player, researches: Set<Research>)
+            = player.persistentDataContainer.set(researchesKey, researchesType, researches)
+
+        @JvmStatic
+        fun addResearch(player: Player, research: Research)
+            = setResearches(player, getResearches(player) + research)
+
+        @JvmStatic
+        fun removeResearch(player: Player, research: Research)
+            = setResearches(player, getResearches(player) - research)
 
         @JvmStatic
         @JvmOverloads
@@ -167,11 +186,6 @@ data class Research(
             }
 
             return canCraft(item, sendMessage)
-        }
-
-        @JvmStatic
-        fun Player.clearResearches() {
-            this.researches = emptySet()
         }
 
         @EventHandler

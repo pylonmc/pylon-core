@@ -159,6 +159,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
+        PylonMetrics.save()
     }
 
     override val javaPlugin = this
