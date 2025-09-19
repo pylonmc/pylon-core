@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.util.position
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.util.Vector
 import org.joml.Vector3i
 import java.lang.ref.WeakReference
 
@@ -25,6 +26,8 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
         ((asLong shl 26) shr 38).toInt())
 
     constructor(location: Location) : this(location.world, location.blockX, location.blockY, location.blockZ)
+
+    constructor(world: World, position: Vector) : this(world, position.blockX, position.blockY, position.blockZ)
 
     constructor(block: Block) : this(block.world, block.x, block.y, block.z)
 

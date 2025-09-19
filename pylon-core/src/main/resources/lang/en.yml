@@ -151,6 +151,9 @@ guide:
       name: "<blue>↑ Inputs ↑"
       lore: |-
         <gold>↓ Main product ↓
+    toggle-block-textures:
+      name: "Toggle Custom Block Textures"
+      lore: "<arrow:#3a2939> If you have a resourcepack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 

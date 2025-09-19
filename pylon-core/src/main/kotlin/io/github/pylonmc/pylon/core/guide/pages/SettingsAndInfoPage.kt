@@ -2,7 +2,9 @@ package io.github.pylonmc.pylon.core.guide.pages
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
+import io.github.pylonmc.pylon.core.guide.button.CullingPresetButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
+import io.github.pylonmc.pylon.core.guide.button.ToggleBlockTexturesButton
 import io.github.pylonmc.pylon.core.guide.button.ToggleWailaButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
@@ -22,13 +24,15 @@ class SettingsAndInfoPage : SimpleStaticGuidePage(
             .setStructure(
                 "# b # # # # # s #",
                 "# # # # # # # # #",
-                "# w . . . . . . #",
+                "# w t c . . . . #",
                 "# # # # # # # # #",
             )
             .addIngredient('#', GuiItems.background())
             .addIngredient('b', BackButton(player))
             .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('w', ToggleWailaButton())
+            .addIngredient('t', ToggleBlockTexturesButton())
+            .addIngredient('c', CullingPresetButton())
 
         for (button in buttons) {
             gui.addContent(button)
