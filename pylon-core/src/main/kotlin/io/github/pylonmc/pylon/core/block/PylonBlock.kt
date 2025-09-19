@@ -1,5 +1,11 @@
 package io.github.pylonmc.pylon.core.block
 
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.protocol.entity.type.EntityType
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
+import com.github.retrooper.packetevents.protocol.world.Location
+import com.github.retrooper.packetevents.util.Vector3f
+import com.sun.tools.javac.code.TypeAnnotationPosition.field
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.register
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
@@ -19,8 +25,16 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import io.papermc.paper.datacomponent.item.CustomModelData
+import me.tofaa.entitylib.EntityLib
+import me.tofaa.entitylib.meta.EntityMeta
+import me.tofaa.entitylib.meta.display.ItemDisplayMeta
+import me.tofaa.entitylib.wrapper.WrapperEntity
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.UnsafeValues
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -47,6 +61,23 @@ open class PylonBlock protected constructor(val block: Block) {
     val key = schema.key
 
     val defaultTranslationKey = schema.defaultBlockTranslationKey
+
+    open var disableBlockTextureEntity = false;
+    var blockTextureEntity: WrapperEntity? = null
+        get() {
+            if (disableBlockTextureEntity || field != null) {
+                return field
+            }
+
+            field = WrapperEntity(EntityTypes.ITEM_DISPLAY)
+            setupBlockTexture(field!!)
+            return field
+        }
+    val blockTextureMeta: ItemDisplayMeta
+        get() {
+            val entity = blockTextureEntity!!
+            return entity.getEntityMeta(ItemDisplayMeta::class.java)
+        }
 
     /**
      * This constructor is called when a *new* block is created in the world
@@ -76,6 +107,21 @@ open class PylonBlock protected constructor(val block: Block) {
     protected open fun postLoad() {}
 
     /**
+     * Called when the block texture entity is created.
+     */
+    protected open fun setupBlockTexture(entity: WrapperEntity) {
+        val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
+        entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
+
+        val item = getItem(BlockItemContext.BlockTexture) ?: ItemStack(Material.BARRIER)
+        item.editMeta { meta -> meta.itemModel = NamespacedKey.minecraft("air") }
+        meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
+        meta.scale = Vector3f(1.0005f, 1.0005f, 1.0005f)
+        meta.width = 0f
+        meta.height = 0f
+    }
+
+    /**
      * This will only be called for the player if the player has WAILA enabled
      *
      * @return the WAILA configuration, or null if WAILA should not be shown for this block
@@ -102,6 +148,11 @@ open class PylonBlock protected constructor(val block: Block) {
             }
 
             is BlockItemContext.PickBlock -> defaultItem
+            is BlockItemContext.BlockTexture -> {
+                defaultItem?.clone()?.apply {
+                    itemMeta.persistentDataContainer.set(placedPylonBlock, PylonSerializers.BOOLEAN, true)
+                }
+            }
         }
     }
 
@@ -116,6 +167,7 @@ open class PylonBlock protected constructor(val block: Block) {
 
     companion object {
 
+        private val placedPylonBlock = pylonKey("placed_pylon_block")
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
 

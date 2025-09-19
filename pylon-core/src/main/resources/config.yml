@@ -46,3 +46,49 @@ metrics-save-interval-ticks: 6000
 # Be aware that disabling an item that's used as an ingredient for other items will mean that
 # those items can't be crafted.
 disabled-items: []
+
+# Should Pylon send item displays to the client for custom block textures?
+# If a player has no resource pack that adds textures installed, the entities will appear invisible.
+# Players can also disable this on a per-player basis, and can configure with culling preset they want.
+custom-block-textures:
+  enabled: true
+
+  # Custom Block Textures uses ray tracing to cull entities not visible to the player.
+  # There are 4 default presets to choose from, each with different client performance and visual quality tradeoffs.
+  # It is not recommended to change these settings (excluding default-preset) unless you know what you're doing
+  culling:
+    # Culling caches if a block is occluding the first time its checked, to avoid reading the world every time.
+    # When players break/place blocks, the cache will automatically update, but other changes to the world
+    # will not be respected until the cache is refreshed. This setting controls how often (in Minecraft ticks) the cache is refreshed.
+    occluding-snapshot-refresh-interval: 3600
+    # The proportion of the occluding snapshot cache to refresh every chunk-snapshot-refresh-interval
+    # By default, half of the cache is refreshed every interval, meaning the entire cache is refreshed every 2 intervals, or every 6 minutes
+    occluding-snapshot-refresh-share: 0.5
+
+    # players can choose a preset themselves, but this is the default one they will get if they haven't chosen one
+    default-preset: "medium"
+
+    presets:
+      # No culling, all entities are sent to the client, do NOT remove this preset
+      off:
+        id: "off"
+        material: "minecraft:gray_concrete"
+
+      # A balance between performance and visual quality
+      medium:
+        id: "medium"
+        # What material is shown in the guide for this preset
+        material: "minecraft:yellow_concrete"
+
+        # How often (in Minecraft ticks) to perform the ray tracing cull on hidden entities
+        hidden-interval: 1
+        # How often (in Minecraft ticks) to perform the ray tracing cull on visible entities
+        visible-interval: 20
+
+        # The radius around the player to always send entities for
+        always-show-radius: 16
+        # The radius around the player to check for entities to cull, anything outside this radius automatically hidden
+        cull-radius: 64
+
+        # The maximum number of occluding blocks between the players eye and an entity before it is culled
+        max-occluding-count: 3

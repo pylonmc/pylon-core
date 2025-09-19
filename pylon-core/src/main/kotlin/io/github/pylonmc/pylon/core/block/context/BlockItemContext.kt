@@ -18,4 +18,9 @@ sealed interface BlockItemContext {
      */
     @JvmRecord
     data class PickBlock(val player: Player) : BlockItemContext
+
+    /**
+     * The item is being requested for the creation of the block texture entity
+     */
+    object BlockTexture : BlockItemContext
 }
