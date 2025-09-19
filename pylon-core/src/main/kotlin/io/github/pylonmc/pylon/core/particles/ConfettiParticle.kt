@@ -12,6 +12,7 @@ import org.joml.Quaternionf
 import org.joml.Vector3f
 import java.util.*
 import java.util.function.Consumer
+import kotlin.math.pow
 
 class ConfettiParticle private constructor(location: Location, material: Material) {
     private val display: BlockDisplay
@@ -48,9 +49,9 @@ class ConfettiParticle private constructor(location: Location, material: Materia
 
         // Random angular velocity (degrees per tick)
         this.angularVelocity = Vector(
-            (RANDOM.nextDouble() - 0.5) * 7,
-            (RANDOM.nextDouble() - 0.5) * 7,
-            (RANDOM.nextDouble() - 0.5) * 7
+            (RANDOM.nextDouble() - 0.5) * 7 * TICK_AMOUNT,
+            (RANDOM.nextDouble() - 0.5) * 7 * TICK_AMOUNT,
+            (RANDOM.nextDouble() - 0.5) * 7 * TICK_AMOUNT
         )
 
         startTickLoop()
@@ -72,20 +73,20 @@ class ConfettiParticle private constructor(location: Location, material: Materia
                 }
 
                 // Apply pseudo-random drift
-                val driftX: Double = (RANDOM.nextDouble() - 0.5) * 0.03
-                val driftZ: Double = (RANDOM.nextDouble() - 0.5) * 0.03
+                val driftX: Double = (RANDOM.nextDouble() - 0.5) * 0.03 * TICK_AMOUNT
+                val driftZ: Double = (RANDOM.nextDouble() - 0.5) * 0.03 * TICK_AMOUNT
                 velocity.add(Vector(driftX, 0.0, driftZ))
 
-                velocity.setY(velocity.getY() + GRAVITY)
+                velocity.setY(velocity.getY() + GRAVITY * TICK_AMOUNT)
 
                 velocity.multiply(DRAG)
 
                 val loc = display.location.add(velocity)
                 display.teleport(loc)
 
-                rotationX += angularVelocity.getX()
-                rotationY += angularVelocity.getY()
-                rotationZ += angularVelocity.getZ()
+                rotationX += angularVelocity.getX() * TICK_AMOUNT
+                rotationY += angularVelocity.getY() * TICK_AMOUNT
+                rotationZ += angularVelocity.getZ() * TICK_AMOUNT
 
                 val leftRotation = Quaternionf().rotationXYZ(
                     Math.toRadians(rotationX).toFloat(),
