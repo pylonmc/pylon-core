@@ -39,6 +39,7 @@ sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(key: String) :
     }
 
     companion object {
+        @JvmSynthetic
         internal val nonPylonRecipes: MutableSet<NamespacedKey> = mutableSetOf()
     }
 }

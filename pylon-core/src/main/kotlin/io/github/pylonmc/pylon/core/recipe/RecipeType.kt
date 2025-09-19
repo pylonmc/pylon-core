@@ -6,6 +6,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Serves as a registry and container for recipes of a specific type.
@@ -15,7 +16,7 @@ import org.bukkit.inventory.*
  */
 open class RecipeType<T : PylonRecipe>(private val key: NamespacedKey) : Keyed, Iterable<T> {
 
-    protected open val registeredRecipes = mutableMapOf<NamespacedKey, T>()
+    protected open val registeredRecipes = ConcurrentHashMap<NamespacedKey, T>()
     val recipes: Collection<T>
         get() = registeredRecipes.values
 

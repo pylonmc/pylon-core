@@ -11,6 +11,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
+import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -25,6 +26,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
+import org.bukkit.event.player.PlayerJoinEvent
 
 /**
  * @property cost If null, the research cannot be unlocked using points
@@ -97,7 +99,8 @@ data class Research(
     companion object : Listener {
         private val researchesKey = pylonKey("researches")
         private val researchPointsKey = pylonKey("research_points")
-        private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
+        private val researchesType =
+            PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
         @get:JvmStatic
         @set:JvmStatic
@@ -106,14 +109,6 @@ data class Research(
         @get:JvmStatic
         @set:JvmStatic
         var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, mutableSetOf())
-
-        @get:JvmStatic
-        @get:JvmName("getResearchFor")
-        val PylonItem.research: Research?
-            /**
-             * Returns the research that unlocks this item, or null if no such research exists
-             */
-            get() = PylonRegistry.RESEARCHES.find { this.key in it.unlocks }
 
         @JvmStatic
         @JvmOverloads
@@ -153,8 +148,7 @@ data class Research(
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerPickUp")
-        fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean
-            = canCraft(item, sendMessage)
+        fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean = canCraft(item, sendMessage)
 
         @JvmStatic
         @JvmOverloads
@@ -199,16 +193,36 @@ data class Research(
 
             val canCraft = event.recipe.results.all {
                 when (it) {
-                    is FluidOrItem.Item ->  {
+                    is FluidOrItem.Item -> {
                         val item = PylonItem.fromStack(it.item)
                         item == null || event.player.canCraft(item, true)
                     }
+
                     else -> true
                 }
             }
 
             if (!canCraft) {
                 event.isCancelled = true
+            }
+        }
+
+        @EventHandler
+        private fun onJoin(e: PlayerJoinEvent) {
+            if (!PylonConfig.researchesEnabled) return
+            val player = e.player
+
+            // discover only the recipes that have no research whenever an ingredient is added to the inventory
+            for (recipeType in PylonRegistry.RECIPE_TYPES) {
+                if (recipeType !is VanillaRecipeType<*>) continue
+                for (recipe in recipeType) {
+                    if (recipe.key in VanillaRecipeType.nonPylonRecipes) continue
+                    val researches = recipe.results
+                        .filterIsInstance<FluidOrItem.Item>()
+                        .mapNotNull { PylonItem.fromStack(it.item)?.research }
+                    if (researches.isNotEmpty()) continue
+                    player.discoverRecipe(recipe.key)
+                }
             }
         }
     }

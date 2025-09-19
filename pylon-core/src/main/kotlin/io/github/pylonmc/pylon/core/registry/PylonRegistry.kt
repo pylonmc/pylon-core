@@ -6,11 +6,12 @@ import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
+import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Stream
 
 class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
-    private val values: MutableMap<NamespacedKey, T> = mutableMapOf()
+    private val values: MutableMap<NamespacedKey, T> = ConcurrentHashMap()
 
     fun register(vararg values: T) {
         for (value in values) {
