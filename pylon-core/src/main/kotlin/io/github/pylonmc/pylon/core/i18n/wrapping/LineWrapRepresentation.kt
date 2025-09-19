@@ -15,6 +15,7 @@ import kotlin.math.min
 // Please do not doubt past Seggan's wisdom. All code in here has been written to
 // perfection and should not be touched again. No, present Seggan does not understand
 // how it works either, only past Seggan does. Don't touch it I said.
+@JvmRecord
 data class LineWrapRepresentation(val lines: List<String>, val styles: Map<IntRange, Style>) {
 
     fun toComponentLines(): List<TextComponent> {

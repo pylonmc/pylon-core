@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component
 /**
  * The configuration for a WAILA bar, returned by a block or entity
  */
+@JvmRecord
 data class WailaConfig @JvmOverloads constructor(
     val text: Component,
     val color: BossBar.Color = BossBar.Color.WHITE,

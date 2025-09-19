@@ -10,10 +10,12 @@ sealed interface BlockItemContext {
     /**
      * The item is being requested because the block is being broken
      */
+    @JvmRecord
     data class Break(val context: BlockBreakContext) : BlockItemContext
 
     /**
      * The item is being requested because a player used the pick block button
      */
+    @JvmRecord
     data class PickBlock(val player: Player) : BlockItemContext
 }
