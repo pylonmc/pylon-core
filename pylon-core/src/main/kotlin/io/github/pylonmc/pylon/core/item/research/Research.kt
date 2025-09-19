@@ -66,15 +66,15 @@ data class Research(
             }
         }
 
-        if (visuals) {
+        if (effects) {
             val multiplier = ((cost?.toDouble() ?: 0.0) / 5.0)
             val amount = (70.0 * multiplier).toInt()
             ConfettiParticle.Factory.many(player.location, amount).run()
 
-            fun Sound.playSoundLater(d: Long, pitch: Float = 1f) {
+            fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {
                 Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
                     player.playSound(player.location, this, 1.5f, pitch)
-                }, d)
+                }, delay)
             }
 
             repeat(2) {
