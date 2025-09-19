@@ -38,6 +38,7 @@ dependencies {
     paperLibrary("xyz.xenondevs.invui:inventory-access-r24:1.46:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.46")
     implementation("info.debatty:java-string-similarity:2.0.0")
+    implementation("org.bstats:bstats-bukkit:2.2.1")
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")

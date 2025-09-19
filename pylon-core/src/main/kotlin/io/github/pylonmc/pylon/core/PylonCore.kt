@@ -31,6 +31,7 @@ import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
+import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -46,6 +47,8 @@ import java.util.Locale
 import kotlin.io.path.*
 
 object PylonCore : JavaPlugin(), PylonAddon {
+
+    val metrics: Metrics = Metrics(this, 27322)
 
     override fun onEnable() {
         InvUI.getInstance().setPlugin(this)
