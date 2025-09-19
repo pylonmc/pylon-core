@@ -6,7 +6,7 @@ enum class FluidPointType(val material: Material) {
     /**
      * Input to the attached machine
      */
-    INPUT(Material.GREEN_CONCRETE),
+    INPUT(Material.LIME_CONCRETE),
 
     /**
      * Output from the attached machine
