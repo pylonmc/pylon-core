@@ -113,25 +113,21 @@ class ConfettiParticle private constructor(location: Location, material: Materia
             .toList()
 
         @JvmStatic
-        fun single(loc: Location, mat: Material): Runnable {
+        @JvmOverloads
+        fun single(loc: Location, mat: Material = CONCRETES.random()): Runnable {
             return Runnable { ConfettiParticle(loc, mat) }
         }
 
         @JvmStatic
-        fun many(loc: Location, materials: List<Material>, amount: Int): Runnable {
+        @JvmOverloads
+        fun many(loc: Location, amount: Int, materials: Collection<Material> = CONCRETES): Runnable {
             val output: MutableList<Runnable> = ArrayList<Runnable>()
 
             repeat(amount) { _ ->
-                val rnd: Int = RANDOM.nextInt(0, materials.size)
-                output.add(single(loc, materials[rnd]))
+                output.add(single(loc, materials.random()))
             }
 
             return Runnable { output.forEach(Runnable::run) }
-        }
-
-        @JvmStatic
-        fun many(loc: Location, amount: Int): Runnable {
-            return many(loc, CONCRETES, amount)
         }
     }
 
