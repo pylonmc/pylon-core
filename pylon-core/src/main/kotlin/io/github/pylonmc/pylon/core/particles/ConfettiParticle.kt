@@ -41,16 +41,16 @@ class ConfettiParticle private constructor(location: Location, material: Materia
 
         // Random initial velocity
         this.velocity = Vector(
-            (random.nextDouble() - 0.5) * 0.2,
-            random.nextDouble() * 0.2,
-            (random.nextDouble() - 0.5) * 0.2
+            (RANDOM.nextDouble() - 0.5) * 0.2,
+            RANDOM.nextDouble() * 0.2,
+            (RANDOM.nextDouble() - 0.5) * 0.2
         ).normalize()
 
         // Random angular velocity (degrees per tick)
         this.angularVelocity = Vector(
-            (random.nextDouble() - 0.5) * 7,
-            (random.nextDouble() - 0.5) * 7,
-            (random.nextDouble() - 0.5) * 7
+            (RANDOM.nextDouble() - 0.5) * 7,
+            (RANDOM.nextDouble() - 0.5) * 7,
+            (RANDOM.nextDouble() - 0.5) * 7
         )
 
         startTickLoop()
@@ -72,8 +72,8 @@ class ConfettiParticle private constructor(location: Location, material: Materia
                 }
 
                 // Apply pseudo-random drift
-                val driftX: Double = (random.nextDouble() - 0.5) * 0.03
-                val driftZ: Double = (random.nextDouble() - 0.5) * 0.03
+                val driftX: Double = (RANDOM.nextDouble() - 0.5) * 0.03
+                val driftZ: Double = (RANDOM.nextDouble() - 0.5) * 0.03
                 velocity.add(Vector(driftX, 0.0, driftZ))
 
                 velocity.setY(velocity.getY() + GRAVITY)
@@ -108,7 +108,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
      * Class with util methods that returns a runnable that once ran spawns all wanted particles
      */
     object Factory {
-        private val WOOLS: List<Material> = Material.entries
+        private val CONCRETES: List<Material> = Material.entries
             .filter { mat: Material -> mat.name.endsWith("CONCRETE") && !mat.isLegacy }
             .toList()
 
@@ -122,7 +122,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
             val output: MutableList<Runnable> = ArrayList<Runnable>()
 
             (0..<amount).forEach { _ ->
-                val rnd: Int = random.nextInt(0, materials.size)
+                val rnd: Int = RANDOM.nextInt(0, materials.size)
                 output.add(single(loc, materials[rnd]!!))
             }
 
@@ -131,12 +131,12 @@ class ConfettiParticle private constructor(location: Location, material: Materia
 
         @JvmStatic
         fun many(loc: Location, amount: Int): Runnable {
-            return many(loc, WOOLS, amount)
+            return many(loc, CONCRETES, amount)
         }
     }
 
     companion object {
-        private val random = Random()
+        private val RANDOM = Random()
         private const val GRAVITY = -0.015
         private const val DRAG = 0.85
 
