@@ -112,10 +112,12 @@ class ConfettiParticle private constructor(location: Location, material: Materia
             .filter { mat: Material -> mat.name.endsWith("WOOL") && !mat.isLegacy }
             .toList()
 
+        @JvmStatic
         fun single(loc: Location, mat: Material): Runnable {
             return Runnable { ConfettiParticle(loc, mat) }
         }
 
+        @JvmStatic
         fun many(loc: Location, materials: List<Material?>, amount: Int): Runnable {
             val output: MutableList<Runnable> = ArrayList<Runnable>()
 
