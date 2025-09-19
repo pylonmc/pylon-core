@@ -37,6 +37,8 @@ class ConfettiParticle private constructor(location: Location, material: Materia
             )
         })
 
+        this.display.teleportDuration = TICK_AMOUNT.toInt()
+
         // Random initial velocity
         this.velocity = Vector(
             (random.nextDouble() - 0.5) * 0.2,
@@ -99,7 +101,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
                     Quaternionf()
                 )
             }
-        }.runTaskTimer(PylonCore, 1L, 1L) // every tick
+        }.runTaskTimer(PylonCore, 1L, TICK_AMOUNT)
     }
 
     /**
@@ -137,6 +139,8 @@ class ConfettiParticle private constructor(location: Location, material: Materia
         private val random = Random()
         private const val GRAVITY = -0.015
         private const val DRAG = 0.85
+
         private const val MAX_AGE = 300
+        private const val TICK_AMOUNT = 2L
     }
 }
