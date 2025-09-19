@@ -68,7 +68,7 @@ data class Research(
 
         if (effects) {
             val multiplier = ((cost?.toDouble() ?: 0.0) / 5.0)
-            val amount = (70.0 * multiplier).toInt()
+            val amount = (PylonConfig.confettiSpawned * multiplier).toInt()
             ConfettiParticle.Factory.many(player.location, amount).run()
 
             fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {

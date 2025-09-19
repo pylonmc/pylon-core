@@ -22,6 +22,8 @@ research:
   enabled: true
   # The interval (in Minecraft ticks) between when Pylon checks for unresearched items in inventories
   tick-interval: 20
+  # Base amount of confetti spawned on research unlock, increases the more research points are spent on it
+  confetti-base: 70.0
 
 pipe-placement:
   # The interval (in Minecraft ticks) between pipe placement task ticks

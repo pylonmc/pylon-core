@@ -32,6 +32,9 @@ object PylonConfig {
     val researchesEnabled = config.getOrThrow("research.enabled", ConfigAdapter.BOOLEAN)
 
     @JvmStatic
+    val confettiSpawned = config.get("research.confetti-base", ConfigAdapter.DOUBLE, 70.0)
+
+    @JvmStatic
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
     @JvmStatic
