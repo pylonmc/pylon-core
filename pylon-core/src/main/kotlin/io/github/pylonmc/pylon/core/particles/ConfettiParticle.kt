@@ -133,7 +133,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
 
     companion object {
         private val RANDOM = Random()
-        private const val GRAVITY = -0.015
+        private const val GRAVITY = -0.02
         private const val DRAG = 0.85
 
         private const val MAX_AGE = 300
