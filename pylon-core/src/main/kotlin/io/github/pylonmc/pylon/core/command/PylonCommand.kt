@@ -417,7 +417,7 @@ private val confetti = buildCommand("confetti") {
             val amount = IntegerArgumentType.getInteger(this, "amount")
 
             if (sender !is Player) {
-                sender.sendRichMessage("<red>You must be a player to use this command")
+                sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.error.must_be_player"))
                 return@executes
             }
 
