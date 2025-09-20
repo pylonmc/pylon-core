@@ -14,7 +14,6 @@ import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.withArguments
-import io.github.pylonmc.pylon.core.util.wrapText
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.key.Key
@@ -138,6 +137,29 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         private val languageRanges = WeakHashMap<Locale, List<Locale.LanguageRange>>()
 
         private val translators = mutableMapOf<NamespacedKey, PylonTranslator>()
+
+        @JvmStatic
+        fun wrapText(text: String, limit: Int): List<String> {
+            val words = text.split(" ")
+            val lines = mutableListOf<String>()
+            var currentLine = StringBuilder()
+
+            for (word in words) {
+                if (currentLine.length + word.length + 1 > limit) {
+                    currentLine.append(' ')
+                    lines.add(currentLine.toString())
+                    currentLine = StringBuilder()
+                }
+                if (currentLine.isNotEmpty()) {
+                    currentLine.append(" ")
+                }
+                currentLine.append(word)
+            }
+            if (currentLine.isNotEmpty()) {
+                lines.add(currentLine.toString())
+            }
+            return lines
+        }
 
         @get:JvmStatic
         @get:JvmName("getTranslatorForAddon")

@@ -17,7 +17,13 @@ import xyz.xenondevs.invui.item.impl.SimpleItem
 import xyz.xenondevs.invui.item.impl.controlitem.PageItem
 import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem
 
+/**
+ * A utility class containing items commonly used in GUIs.
+ */
 object GuiItems {
+    /**
+     * A gray glass pane with no name or lore.
+     */
     @JvmStatic
     fun background(): Item = SimpleItem(
         ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
@@ -25,6 +31,9 @@ object GuiItems {
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
 
+    /**
+     * A black glass pane with no name or lore.
+     */
     @JvmStatic
     fun backgroundBlack(): Item = SimpleItem(
         ItemStackBuilder.of(Material.BLACK_STAINED_GLASS_PANE)
@@ -33,8 +42,14 @@ object GuiItems {
     )
 
     /**
-     * Item that cycles through durability to represent processing time. Intended for use in
-     * recipe displays. For a proper progress bar item, see [ProgressItem]
+     * Item that automatically cycles through durability to represent processing time.
+     * Intended for use in recipe displays.
+     *
+     * For example, you could create a progressCyclingItem
+     * to represent a grindstone's grinding time in the guide. In this case, you might want to
+     * set [template] to the grindstone item, and [timeTicks] to the grinding time.
+     *
+     * For a more flexible progress bar item which does not automatically cycle, see [ProgressItem]
      */
     @JvmStatic
     fun progressCyclingItem(timeTicks: Int, template: ItemStackBuilder): Item {
@@ -54,21 +69,39 @@ object GuiItems {
         return AutoCycleItem(1, *(states.toTypedArray()))
     }
 
+    /**
+     * A button that scrolls one GUI row up. This should only be used in a [ScrollGui].
+     */
     @JvmStatic
     fun scrollUp(): Item = PylonScrollItem(-1, "up")
 
+    /**
+     * A button that scrolls one GUI row down. This should only be used in a [ScrollGui].
+     */
     @JvmStatic
     fun scrollDown(): Item = PylonScrollItem(1, "down")
 
+    /**
+     * A button that scrolls one GUI row left. This should only be used in a [ScrollGui].
+     */
     @JvmStatic
     fun scrollLeft(): Item = PylonScrollItem(-1, "left")
 
+    /**
+     * A button that scrolls one GUI row right. This should only be used in a [ScrollGui].
+     */
     @JvmStatic
     fun scrollRight(): Item = PylonScrollItem(1, "right")
 
+    /**
+     * A button that goes to the next page. This should only be used in a [PagedGui]
+     */
     @JvmStatic
     fun pageNext(): Item = PylonPageItem(true)
 
+    /**
+     * A button that goes to the previous page. This should only be used in a [PagedGui]
+     */
     @JvmStatic
     fun pagePrevious(): Item = PylonPageItem(false)
 }

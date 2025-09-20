@@ -6,6 +6,14 @@ import org.bukkit.block.Block
 import org.joml.Vector3i
 import java.lang.ref.WeakReference
 
+/**
+ * Represents the position of a block (x, y, z, and world).
+ *
+ * Why not just use [Block]? Because [Block] contains lots of extra information such
+ * as the type of the block, and so cannot practically be serialized. Holding
+ * references to blocks for extended periods may also prevent chunks from unloading,
+ * and increase memory usage.
+ */
 class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     private val worldRef: WeakReference<World> = WeakReference(world)
     val world: World?
@@ -14,15 +22,17 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     val chunk: ChunkPosition
         get() = ChunkPosition(world, x shr 4, z shr 4)
 
-    val asLong: Long
+    internal val asLong: Long
         get() = ((x and 0x3FFFFFF).toLong() shl 38)
             .or((z and 0x3FFFFFF).toLong() shl 12)
             .or((y and 0xFFF).toLong())
 
-    constructor(world: World, asLong: Long) : this(world,
+    internal constructor(world: World, asLong: Long) : this(
+        world,
         (asLong shr 38).toInt(),
         ((asLong shl 52) shr 52).toInt(),
-        ((asLong shl 26) shr 38).toInt())
+        ((asLong shl 26) shr 38).toInt()
+    )
 
     constructor(location: Location) : this(location.world, location.blockX, location.blockY, location.blockZ)
 

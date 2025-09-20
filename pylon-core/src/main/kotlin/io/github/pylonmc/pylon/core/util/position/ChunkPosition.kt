@@ -6,8 +6,17 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.lang.ref.WeakReference
 
+/**
+ * Represents the position of a chunk (x, z, and world).
+ *
+ * Why not just use [Chunk]? Because [Chunk] contains lots of extra information,
+ * and so cannot practically be serialized. Holding references to blocks for
+ * extended periods may also prevent chunks from unloading, and increase memory
+ * usage.
+ */
 class ChunkPosition(world: World?, val x: Int, val z: Int) {
     private val worldRef: WeakReference<World> = WeakReference(world)
+
     val world: World?
         get() = worldRef.get()
 
@@ -15,6 +24,9 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
 
     val chunk: Chunk?
+        /**
+         * WARNING: Getting the chunk will load the chunk if it is not already loaded.
+         */
         get() = world?.getChunkAt(x, z)
 
     /**

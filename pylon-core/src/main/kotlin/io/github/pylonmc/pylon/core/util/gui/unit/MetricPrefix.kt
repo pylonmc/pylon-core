@@ -3,6 +3,8 @@ package io.github.pylonmc.pylon.core.util.gui.unit
 import net.kyori.adventure.text.Component
 
 /**
+ * Represents a prefix that a unit could have (grams, kilograms, nanograms, etc).
+ *
  * Enum order is guaranteed to be the same as the SI unit prefixes, from largest to smallest.
  */
 enum class MetricPrefix(val scale: Int) {
@@ -35,25 +37,4 @@ enum class MetricPrefix(val scale: Int) {
 
     val fullName: Component = Component.translatable("pylon.pyloncore.unit.prefix.${name.lowercase()}.name")
     val abbreviation: Component = Component.translatable("pylon.pyloncore.unit.prefix.${name.lowercase()}.abbr")
-
-    /**
-     * A set of prefixes that are not commonly used for their respective SI units.
-     */
-    object Unused {
-
-        /**
-         * Prefixed not commonly used anywhere
-         */
-        @JvmField
-        val GENERAL = setOf(HECTO, DECA, DECI, CENTI)
-
-        @JvmField
-        val LENGTH = setOf(HECTO, DECA, DECI)
-
-        @JvmField
-        val MASS = setOf(HECTO, DECA, DECI, CENTI)
-
-        @JvmField
-        val VOLUME = setOf(HECTO, DECA, DECI, CENTI)
-    }
 }
