@@ -10,6 +10,7 @@ object CullingPresetConfigAdapter : ConfigAdapter<CullingPreset> {
     override fun convert(value: Any): CullingPreset {
         if (value is ConfigurationSection) {
             return CullingPreset(
+                index = value.getInt("index"),
                 id = value.getString("id") ?: throw IllegalArgumentException("CullingPreset is missing 'id'"),
                 material = ConfigAdapter.MATERIAL.convert(value.getString("material")
                     ?: throw IllegalArgumentException("CullingPreset is missing 'material'")),

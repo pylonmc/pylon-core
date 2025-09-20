@@ -116,7 +116,7 @@ open class PylonBlock protected constructor(val block: Block) {
         val item = getItem(BlockItemContext.BlockTexture) ?: ItemStack(Material.BARRIER)
         item.editMeta { meta -> meta.itemModel = NamespacedKey.minecraft("air") }
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
-        meta.scale = Vector3f(1.0005f, 1.0005f, 1.0005f)
+        meta.scale = Vector3f(1.00085f, 1.00085f, 1.00085f)
         meta.width = 0f
         meta.height = 0f
     }

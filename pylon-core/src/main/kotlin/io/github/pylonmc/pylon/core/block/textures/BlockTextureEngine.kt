@@ -33,6 +33,8 @@ import kotlin.collections.Map.Entry
 import kotlin.math.ceil
 
 object BlockTextureEngine : Listener {
+    const val DISABLED_PRESET = "disabled"
+
     private val presetKey = pylonKey("culling_preset")
 
     private val chunkData = mutableMapOf<ChunkPosition, ChunkData>()
@@ -74,7 +76,7 @@ object BlockTextureEngine : Listener {
     @set:JvmStatic
     var Player.cullingPreset: CullingPreset
         get() = PylonConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, PylonConfig.defaultCullingPreset.id)) {
-            PylonConfig.cullingPresets["off"]!!
+            PylonConfig.cullingPresets[DISABLED_PRESET]!!
         }
         set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
 
@@ -86,6 +88,11 @@ object BlockTextureEngine : Listener {
     fun remove(block: PylonBlock) {
         if (!PylonConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).remove(block)
+        block.blockTextureEntity?.let {
+            for (viewer in it.viewers.toSet()) {
+                it.removeViewer(viewer)
+            }
+        }
     }
 
     fun getOctree(world: World): Octree<PylonBlock> {
@@ -129,7 +136,7 @@ object BlockTextureEngine : Listener {
                 val eye = player.eyeLocation.toVector()
                 val preset = player.cullingPreset
                 val octree = getOctree(world)
-                if (preset.id == "off") {
+                if (preset.id == DISABLED_PRESET) {
                     val radius = player.sendViewDistance * 16 / 2.0
                     val query = octree.query(BoundingBox.of(eye, radius, radius, radius))
                     visible.toSet().subtract(query).forEach { it.blockTextureEntity?.removeViewer(uuid) }
@@ -160,7 +167,7 @@ object BlockTextureEngine : Listener {
                         entity.removeViewer(uuid)
                         visible.remove(block)
                     } else if ((seen && (tick % preset.visibleInterval) == 0) || (!seen && (tick % preset.hiddenInterval) == 0)) {
-                        // TODO: If necessary, have a 3d scan rather than a line
+                        // TODO: If necessary, have a 3d scan using bounding boxes rather than a line
                         var occluding = 0
                         val end = block.block.location.toCenterLocation().toVector()
                         val totalDistance = eye.distanceSquared(end)

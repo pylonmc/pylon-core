@@ -1,10 +1,13 @@
 package io.github.pylonmc.pylon.core.guide.button
 
 import io.github.pylonmc.pylon.core.block.textures.BlockTextureEngine.cullingPreset
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.ClickType
+import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
@@ -13,9 +16,9 @@ class CullingPresetButton : AbstractItem() {
         val preset = player.cullingPreset
         return ItemProvider {
             ItemStackBuilder.of(preset.material)
-                .name(Component.translatable("pylon.pyloncore.guide.button.culling-preset.name.${preset.id}"))
+                .name(Component.translatable("pylon.pyloncore.guide.button.culling-preset.${preset.id}.name"))
                 .lore(
-                    Component.translatable("pylon.pyloncore.guide.button.culling-preset.lore.${preset.id}")
+                    Component.translatable("pylon.pyloncore.guide.button.culling-preset.${preset.id}.lore")
                         .arguments(
                             PylonArgument.of("hiddenInterval", preset.hiddenInterval),
                             PylonArgument.of("visibleInterval", preset.visibleInterval),
@@ -28,7 +31,12 @@ class CullingPresetButton : AbstractItem() {
         }
     }
 
-    override fun handleClick(clickType: org.bukkit.event.inventory.ClickType, player: org.bukkit.entity.Player, event: org.bukkit.event.inventory.InventoryClickEvent) {
-        TODO("Not yet implemented")
+    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+        val presets = PylonConfig.cullingPresets.values.toMutableList()
+        presets.sortBy { it.index }
+        val currentIndex = presets.indexOfFirst { it.id == player.cullingPreset.id }
+        val nextIndex = (currentIndex + 1) % presets.size
+        player.cullingPreset = presets[nextIndex]
+        notifyWindows()
     }
 }
