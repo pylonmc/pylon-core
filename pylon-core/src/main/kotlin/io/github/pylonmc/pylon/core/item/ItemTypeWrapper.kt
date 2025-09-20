@@ -11,11 +11,13 @@ sealed interface ItemTypeWrapper : Keyed {
 
     fun createItemStack(): ItemStack
 
+    @JvmRecord
     data class Vanilla(val material: Material) : ItemTypeWrapper {
         override fun createItemStack() = ItemStack(material)
         override fun getKey() = material.key
     }
 
+    @JvmRecord
     data class Pylon(val item: PylonItemSchema) : ItemTypeWrapper {
         override fun createItemStack() = item.itemStack
         override fun getKey() = item.key

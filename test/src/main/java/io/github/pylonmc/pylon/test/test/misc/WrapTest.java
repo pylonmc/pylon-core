@@ -54,10 +54,10 @@ public class WrapTest extends AsyncTest {
     private Component wrap(Component component) {
         LineWrapRepresentation repr = LineWrapEncoder.encode(component);
         List<String> newLines = new ArrayList<>();
-        for (String line : repr.getLines()) {
+        for (String line : repr.lines()) {
             newLines.addAll(PylonUtils.wrapText(line, 8));
         }
-        List<TextComponent> lines = new LineWrapRepresentation(newLines, repr.getStyles()).toComponentLines();
+        List<TextComponent> lines = new LineWrapRepresentation(newLines, repr.styles()).toComponentLines();
         return Component.join(JoinConfiguration.newlines(), lines);
     }
 }

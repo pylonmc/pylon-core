@@ -31,6 +31,7 @@ sealed interface RecipeInput {
         operator fun contains(itemStack: ItemStack): Boolean = ItemTypeWrapper(itemStack) in items
     }
 
+    @JvmRecord
     data class Fluid(val fluids: MutableSet<PylonFluid>, val amountMillibuckets: Double) : RecipeInput {
         constructor(amountMillibuckets: Double, vararg fluids: PylonFluid) : this(fluids.toMutableSet(), amountMillibuckets)
         constructor(amountMillibuckets: Double, tag: Tag<PylonFluid>) : this(tag.values, amountMillibuckets)

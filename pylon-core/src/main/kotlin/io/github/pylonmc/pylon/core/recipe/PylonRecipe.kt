@@ -14,16 +14,16 @@ interface PylonRecipe : Keyed {
     val inputs: List<RecipeInput>
     val results: List<FluidOrItem>
 
-    fun isInput(stack: ItemStack) = inputs.any {
-        when (it) {
-            is RecipeInput.Item -> it.matches(stack)
+    fun isInput(stack: ItemStack) = inputs.any { input ->
+        when (input) {
+            is RecipeInput.Item -> stack in input
             else -> false
         }
     }
 
-    fun isInput(fluid: PylonFluid) = inputs.any {
-        when (it) {
-            is RecipeInput.Fluid -> fluid in it.fluids
+    fun isInput(fluid: PylonFluid) = inputs.any { input ->
+        when (input) {
+            is RecipeInput.Fluid -> fluid in input.fluids
             else -> false
         }
     }

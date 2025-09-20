@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.registry.RegistryHandler
 import io.github.pylonmc.pylon.core.util.findConstructorMatching
@@ -28,6 +29,8 @@ class PylonItemSchema @JvmOverloads internal constructor(
     val itemStack: ItemStack
         get() = template.clone()
 
+    val research: Research?
+        get() = PylonRegistry.RESEARCHES.find { key in it.unlocks }
     val researchBypassPermission = "pylon.item.${key.namespace}.${key.key}"
 
     @JvmSynthetic

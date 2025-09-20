@@ -50,5 +50,8 @@ object PylonConfig {
     val translationWrapLimit = config.getOrThrow("translation-wrap-limit", ConfigAdapter.INT)
 
     @JvmStatic
+    val metricsSaveIntervalTicks = config.getOrThrow("metrics-save-interval-ticks", ConfigAdapter.LONG)
+
+    @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
 }

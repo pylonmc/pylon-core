@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
 import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
+import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -23,17 +24,20 @@ import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.OfflinePlayer
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import kotlin.math.max
 
 /**
  * @property cost If null, the research cannot be unlocked using points
  * @property unlocks the keys of the items that are unlocked by this research
  */
+@JvmRecord
 data class Research(
     private val key: NamespacedKey,
     val material: Material,
@@ -56,9 +60,9 @@ data class Research(
 
     @JvmOverloads
     fun addTo(player: Player, sendMessage: Boolean = true, effects: Boolean = true) {
-        if (this in player.researches) return
+        if (this in getResearches(player)) return
 
-        player.researches += this
+        addResearch(player, this)
         for (recipe in RecipeType.vanillaCraftingRecipes()) {
             val pylonItem = PylonItem.fromStack(recipe.craftingRecipe.result) ?: continue
             if (pylonItem.key in unlocks) {
@@ -96,9 +100,9 @@ data class Research(
     }
 
     fun removeFrom(player: Player) {
-        if (this !in player.researches) return
+        if (this !in getResearches(player)) return
 
-        player.researches -= this
+        removeResearch(player, this)
         for (recipe in RecipeType.vanillaCraftingRecipes()) {
             val pylonItem = PylonItem.fromStack(recipe.craftingRecipe.result) ?: continue
             if (pylonItem.key in unlocks) {
@@ -108,7 +112,7 @@ data class Research(
     }
 
     fun isResearchedBy(player: Player): Boolean {
-        return this in player.researches
+        return this in getResearches(player)
     }
 
     override fun getKey() = key
@@ -120,23 +124,34 @@ data class Research(
     companion object : Listener {
         private val researchesKey = pylonKey("researches")
         private val researchPointsKey = pylonKey("research_points")
-        private val researchesType = PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
+        private val researchesType =
+            PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
         @get:JvmStatic
         @set:JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
-        @get:JvmStatic
-        @set:JvmStatic
-        var Player.researches: Set<Research> by persistentData(researchesKey, researchesType, mutableSetOf())
+        @JvmStatic
+        fun getResearches(player: OfflinePlayer): Set<Research> {
+            var researches = player.persistentDataContainer.get(researchesKey, researchesType)
+            if (researches == null && player is Player) {
+                setResearches(player, setOf())
+                return setOf()
+            }
+            return researches!!
+        }
 
-        @get:JvmStatic
-        @get:JvmName("getResearchFor")
-        val PylonItem.research: Research?
-            /**
-             * Returns the research that unlocks this item, or null if no such research exists
-             */
-            get() = PylonRegistry.RESEARCHES.find { this.key in it.unlocks }
+        @JvmStatic
+        fun setResearches(player: Player, researches: Set<Research>)
+            = player.persistentDataContainer.set(researchesKey, researchesType, researches)
+
+        @JvmStatic
+        fun addResearch(player: Player, research: Research)
+            = setResearches(player, getResearches(player) + research)
+
+        @JvmStatic
+        fun removeResearch(player: Player, research: Research)
+            = setResearches(player, getResearches(player) - research)
 
         @JvmStatic
         @JvmOverloads
@@ -176,8 +191,7 @@ data class Research(
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerPickUp")
-        fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean
-            = canCraft(item, sendMessage)
+        fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean = canCraft(item, sendMessage)
 
         @JvmStatic
         @JvmOverloads
@@ -196,11 +210,6 @@ data class Research(
             }
 
             return canCraft(item, sendMessage)
-        }
-
-        @JvmStatic
-        fun Player.clearResearches() {
-            this.researches = emptySet()
         }
 
         @EventHandler
@@ -222,16 +231,36 @@ data class Research(
 
             val canCraft = event.recipe.results.all {
                 when (it) {
-                    is FluidOrItem.Item ->  {
+                    is FluidOrItem.Item -> {
                         val item = PylonItem.fromStack(it.item)
                         item == null || event.player.canCraft(item, true)
                     }
+
                     else -> true
                 }
             }
 
             if (!canCraft) {
                 event.isCancelled = true
+            }
+        }
+
+        @EventHandler
+        private fun onJoin(e: PlayerJoinEvent) {
+            if (!PylonConfig.researchesEnabled) return
+            val player = e.player
+
+            // discover only the recipes that have no research whenever an ingredient is added to the inventory
+            for (recipeType in PylonRegistry.RECIPE_TYPES) {
+                if (recipeType !is VanillaRecipeType<*>) continue
+                for (recipe in recipeType) {
+                    if (recipe.key in VanillaRecipeType.nonPylonRecipes) continue
+                    val researches = recipe.results
+                        .filterIsInstance<FluidOrItem.Item>()
+                        .mapNotNull { PylonItem.fromStack(it.item)?.research }
+                    if (researches.isNotEmpty()) continue
+                    player.discoverRecipe(recipe.key)
+                }
             }
         }
     }

@@ -39,7 +39,13 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
                 .setUpperGui(upperGui)
                 .setLowerGui(lowerGui)
                 .setTitle(AdventureComponentWrapper(title))
-                .addRenameHandler { search -> lowerGui.setContent(getItems(player, search.lowercase())) }
+                .addRenameHandler { search ->
+                    try {
+                        lowerGui.setContent(getItems(player, search.lowercase()))
+                    } catch (t: Throwable) { // If uncaught, will crash the server
+                        t.printStackTrace()
+                    }
+                }
                 .open(player)
             PylonGuide.history.getOrPut(player.uniqueId) { mutableListOf() }.add(this)
         } catch (t: Throwable) {

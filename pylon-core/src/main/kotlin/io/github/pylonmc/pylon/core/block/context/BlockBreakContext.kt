@@ -40,6 +40,7 @@ interface BlockBreakContext {
     /**
      * The block is being broken by a player
      */
+    @JvmRecord
     data class PlayerBreak(val event: BlockBreakEvent) : BlockBreakContext {
         override val normallyDrops
             get() = event.player.gameMode != GameMode.CREATIVE
