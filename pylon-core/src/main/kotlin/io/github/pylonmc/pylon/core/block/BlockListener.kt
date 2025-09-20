@@ -130,6 +130,7 @@ internal object BlockListener : Listener {
     private fun blockRemove(event: BlockDestroyEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.Destroyed(event))
+            event.setWillDrop(false)
         }
     }
 
