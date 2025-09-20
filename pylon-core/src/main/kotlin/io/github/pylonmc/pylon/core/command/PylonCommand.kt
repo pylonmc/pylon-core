@@ -3,7 +3,6 @@
 package io.github.pylonmc.pylon.core.command
 
 import com.github.shynixn.mccoroutine.bukkit.launch
-import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.LongArgumentType
 import com.mojang.brigadier.context.CommandContext
@@ -421,7 +420,7 @@ private val confetti = buildCommand("confetti") {
                 return@executes
             }
 
-            ConfettiParticle.many(sender.location, amount).run()
+            ConfettiParticle.spawnMany(sender.location, amount).run()
             return@executes
         }
     }
