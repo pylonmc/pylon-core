@@ -70,12 +70,29 @@ custom-block-textures:
 
     presets:
       # No culling, all entities are sent to the client, do NOT remove this preset
-      off:
-        id: "off"
+      disabled:
+        index: 0
+        id: "disabled"
         material: "minecraft:gray_concrete"
+
+      low:
+        index: 1
+        id: "low"
+        material: "minecraft:green_concrete"
+
+        hidden-interval: 1
+        visible-interval: 10
+
+        always-show-radius: 48
+        cull-radius: 128
+
+        max-occluding-count: 5
 
       # A balance between performance and visual quality
       medium:
+        # Used to order the presets in the gui, lower -> higher
+        index: 2
+        # Should match the key used to identify this preset
         id: "medium"
         # What material is shown in the guide for this preset
         material: "minecraft:yellow_concrete"
@@ -92,3 +109,16 @@ custom-block-textures:
 
         # The maximum number of occluding blocks between the players eye and an entity before it is culled
         max-occluding-count: 3
+
+      high:
+        index: 3
+        id: "high"
+        material: "minecraft:red_concrete"
+
+        hidden-interval: 1
+        visible-interval: 40
+
+        always-show-radius: 8
+        cull-radius: 64
+
+        max-occluding-count: 2
