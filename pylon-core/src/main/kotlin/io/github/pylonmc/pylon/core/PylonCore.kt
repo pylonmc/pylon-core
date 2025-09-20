@@ -3,6 +3,7 @@
 package io.github.pylonmc.pylon.core
 
 import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
@@ -32,6 +33,7 @@ import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
+import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
@@ -66,6 +68,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val packetEvents = PacketEvents.getAPI()
         packetEvents.init()
 
+        packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
 
         val entityLibPlatform = SpigotEntityLibPlatform(this)
         entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type -> Bukkit.getUnsafe().nextEntityId() }
