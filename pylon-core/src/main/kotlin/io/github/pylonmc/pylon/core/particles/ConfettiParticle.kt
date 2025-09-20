@@ -116,6 +116,7 @@ class ConfettiParticle {
         private const val TICK_AMOUNT = 2L
 
 
+        @JvmField
         val CONCRETES: List<Material> = Material.entries
             .filter { mat: Material -> mat.name.endsWith("CONCRETE") && !mat.isLegacy }
             .toList()
