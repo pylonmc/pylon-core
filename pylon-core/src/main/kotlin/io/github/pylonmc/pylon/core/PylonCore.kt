@@ -32,7 +32,6 @@ import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
-import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -58,7 +57,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
         Bukkit.getPluginManager().registerEvents(PylonAddon, this)
 
-        PylonMetrics.init();
+        PylonMetrics // initialize metrics by referencing it
 
         // Anything that listens for addon registration must be above this line
         registerWithPylon()

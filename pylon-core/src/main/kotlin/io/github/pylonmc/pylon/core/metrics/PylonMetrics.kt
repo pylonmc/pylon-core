@@ -16,28 +16,18 @@ internal object PylonMetrics {
 
     val metrics = Metrics(PylonCore, 27322)
     val dataConfig = Config(PylonCore, "data/metrics.yml")
+
     var commandsRun = mutableMapOf<String, Int>()
-
-    fun onCommandRun(name: String) {
-        commandsRun.put(name, commandsRun.getOrDefault(name, 0) + 1)
-    }
-
-    fun save() {
-        val dataSection = dataConfig.getSection("commandsRun") ?: dataConfig.createSection("commandsRun")
-        for ((command, runs) in commandsRun) {
-            dataSection.set(command, runs)
-        }
-        dataConfig.save()
-    }
-
-    fun init() {
+    init {
         val dataSection = dataConfig.getSection("commandsRun")
         if (dataSection != null) {
             for (key in dataSection.keys) {
                 commandsRun.put(key, dataSection.getOrThrow(key, ConfigAdapter.INT))
             }
         }
+    }
 
+    init {
         metrics.addCustomChart(AdvancedPie("addons") {
             val values = mutableMapOf<String, Int>()
             for (addon in PylonRegistry.ADDONS) {
@@ -77,5 +67,17 @@ internal object PylonMetrics {
         })
 
         Bukkit.getScheduler().runTaskTimer(PylonCore, Runnable { save() }, 0L, SAVE_INTERVAl_TICKS)
+    }
+
+    fun save() {
+        val dataSection = dataConfig.getSection("commandsRun") ?: dataConfig.createSection("commandsRun")
+        for ((command, runs) in commandsRun) {
+            dataSection.set(command, runs)
+        }
+        dataConfig.save()
+    }
+
+    fun onCommandRun(name: String) {
+        commandsRun.put(name, commandsRun.getOrDefault(name, 0) + 1)
     }
 }
