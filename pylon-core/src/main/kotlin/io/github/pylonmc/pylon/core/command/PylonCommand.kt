@@ -142,10 +142,10 @@ private val gametest = buildCommand("gametest") {
 
 private val researchAdd = buildCommand("add") {
     argument("players", ArgumentTypes.players()) {
-        fun addResearches(context: CommandContext<CommandSourceStack>, researches: List<Research>) {
+        fun addResearches(context: CommandContext<CommandSourceStack>, researches: List<Research>, confetti: Boolean = true) {
             for (player in context.getArgument<List<Player>>("players")) {
                 for (res in researches) {
-                    player.addResearch(res, sendMessage = false)
+                    player.addResearch(res, false, confetti)
                     context.source.sender.sendMessage(
                         Component.translatable(
                             "pylon.pyloncore.message.command.research.added",
@@ -160,7 +160,8 @@ private val researchAdd = buildCommand("add") {
         literal("*") {
             permission("pylon.command.research.modify")
             executes {
-                addResearches(this, PylonRegistry.RESEARCHES.toList())
+                // no confetti for all research otherwise server go big boom
+                addResearches(this, PylonRegistry.RESEARCHES.toList(), false)
             }
         }
 

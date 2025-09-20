@@ -55,7 +55,7 @@ data class Research(
     }
 
     @JvmOverloads
-    fun addTo(player: Player, effects: Boolean = true) {
+    fun addTo(player: Player, sendMessage: Boolean = true, effects: Boolean = true) {
         if (this in player.researches) return
 
         player.researches += this
@@ -64,6 +64,15 @@ data class Research(
             if (pylonItem.key in unlocks) {
                 player.discoverRecipe(recipe.key)
             }
+        }
+
+        if (sendMessage) {
+            player.sendMessage(
+                Component.translatable(
+                    "pylon.pyloncore.message.research.unlocked",
+                    PylonArgument.of("research", name)
+                )
+            )
         }
 
         if (effects) {
@@ -83,13 +92,6 @@ data class Research(
                 Sound.ENTITY_PLAYER_LEVELUP.playSoundLater(6L * it, 0.9f)
                 Sound.ENTITY_FIREWORK_ROCKET_LAUNCH.playSoundLater(9L * it)
             }
-
-            player.sendMessage(
-                Component.translatable(
-                    "pylon.pyloncore.message.research.unlocked",
-                    PylonArgument.of("research", name)
-                )
-            )
         }
     }
 
@@ -248,8 +250,8 @@ private fun Player.ejectUnknownItems() {
 }
 
 @JvmSynthetic
-fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
-    research.addTo(this, sendMessage)
+fun Player.addResearch(research: Research, sendMessage: Boolean = false, confetti: Boolean = true) {
+    research.addTo(this, sendMessage, confetti)
 }
 
 @JvmSynthetic
