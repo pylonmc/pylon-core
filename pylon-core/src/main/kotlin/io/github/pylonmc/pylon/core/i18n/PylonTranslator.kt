@@ -138,6 +138,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
         private val translators = mutableMapOf<NamespacedKey, PylonTranslator>()
 
+        @JvmStatic
         fun wrapText(text: String, limit: Int): List<String> {
             val words = text.split(" ")
             val lines = mutableListOf<String>()
