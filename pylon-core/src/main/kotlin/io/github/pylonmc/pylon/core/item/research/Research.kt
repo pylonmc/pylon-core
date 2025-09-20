@@ -70,7 +70,7 @@ data class Research(
             val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
             val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
             val spawnedConfetti = max(amount, PylonConfig.researchMaxConfettiAmount)
-            ConfettiParticle.Factory.many(player.location, spawnedConfetti).run()
+            ConfettiParticle.many(player.location, spawnedConfetti).run()
 
             fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {
                 Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {

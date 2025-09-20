@@ -23,7 +23,7 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
-import io.github.pylonmc.pylon.core.particles.ConfettiParticle.Factory.many
+import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -421,7 +421,7 @@ private val confetti = buildCommand("confetti") {
                 return@executes
             }
 
-            many(sender.location, amount).run()
+            ConfettiParticle.many(sender.location, amount).run()
             return@executes
         }
     }

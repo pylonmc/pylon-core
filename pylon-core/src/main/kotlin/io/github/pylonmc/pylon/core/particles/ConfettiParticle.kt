@@ -12,7 +12,6 @@ import org.joml.Quaternionf
 import org.joml.Vector3f
 import java.util.*
 import java.util.function.Consumer
-import kotlin.math.pow
 
 class ConfettiParticle private constructor(location: Location, material: Material) {
     private val display: BlockDisplay
@@ -106,10 +105,15 @@ class ConfettiParticle private constructor(location: Location, material: Materia
         }.runTaskTimer(PylonCore, 1L, TICK_AMOUNT)
     }
 
-    /**
-     * Class with util methods that returns a runnable that once ran spawns all wanted particles
-     */
-    object Factory {
+    companion object {
+        private val RANDOM = Random()
+        private const val GRAVITY = -0.02
+        private const val DRAG = 0.85
+
+        private const val MAX_AGE = 300
+        private const val TICK_AMOUNT = 2L
+
+
         private val CONCRETES: List<Material> = Material.entries
             .filter { mat: Material -> mat.name.endsWith("CONCRETE") && !mat.isLegacy }
             .toList()
@@ -131,14 +135,5 @@ class ConfettiParticle private constructor(location: Location, material: Materia
 
             return Runnable { output.forEach(Runnable::run) }
         }
-    }
-
-    companion object {
-        private val RANDOM = Random()
-        private const val GRAVITY = -0.02
-        private const val DRAG = 0.85
-
-        private const val MAX_AGE = 300
-        private const val TICK_AMOUNT = 2L
     }
 }
