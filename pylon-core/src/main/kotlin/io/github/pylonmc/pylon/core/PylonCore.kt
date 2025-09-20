@@ -23,6 +23,7 @@ import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
+import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
@@ -47,6 +48,7 @@ import kotlin.io.path.*
 
 object PylonCore : JavaPlugin(), PylonAddon {
 
+
     override fun onEnable() {
         InvUI.getInstance().setPlugin(this)
 
@@ -54,6 +56,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
         Bukkit.getPluginManager().registerEvents(PylonAddon, this)
+
+        PylonMetrics // initialize metrics by referencing it
 
         // Anything that listens for addon registration must be above this line
         registerWithPylon()
@@ -154,6 +158,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
+        PylonMetrics.save()
     }
 
     override val javaPlugin = this
