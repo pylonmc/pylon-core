@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.command
 
+import com.destroystokyo.paper.profile.PlayerProfile
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.LongArgumentType
@@ -13,6 +14,7 @@ import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
+import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
@@ -26,16 +28,24 @@ import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.test.GameTestConfig
-import io.github.pylonmc.pylon.core.util.getArgument
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
+import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.RotationResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
+import io.papermc.paper.math.FinePosition
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
+import kotlin.reflect.typeOf
 import io.papermc.paper.math.BlockPosition as PaperBlockPosition
 
 private val guide = buildCommand("guide") {
@@ -428,4 +438,21 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
 @JvmSynthetic
 internal val ROOT_COMMAND_PY_ALIAS = buildCommand("py") {
     redirect(ROOT_COMMAND)
+}
+
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
+    return when (typeOf<T>()) {
+        typeOf<BlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
+        typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)
+        typeOf<Entity>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source).first()
+        typeOf<FinePosition>() -> getArgument(name, FinePositionResolver::class.java).resolve(source)
+        typeOf<List<PlayerProfile>>() -> getArgument(name, PlayerProfileListResolver::class.java).resolve(source)
+        typeOf<PlayerProfile>() -> getArgument(name, PlayerProfileListResolver::class.java).resolve(source).first()
+        typeOf<List<Player>>() -> getArgument(name, PlayerSelectorArgumentResolver::class.java).resolve(source)
+        typeOf<Player>() -> getArgument(name, PlayerSelectorArgumentResolver::class.java).resolve(source).first()
+        typeOf<Rotation>() -> getArgument(name, RotationResolver::class.java).resolve(source)
+        else -> getArgument(name, T::class.java)
+    } as T
 }
