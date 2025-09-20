@@ -32,6 +32,15 @@ object PylonConfig {
     val researchesEnabled = config.getOrThrow("research.enabled", ConfigAdapter.BOOLEAN)
 
     @JvmStatic
+    val researchBaseConfettiAmount = config.get("research.confetti.base-amount", ConfigAdapter.DOUBLE, 70.0)
+
+    @JvmStatic
+    val researchMultiplierConfettiAmount = config.get("research.confetti.multiplier", ConfigAdapter.DOUBLE, 0.2)
+
+    @JvmStatic
+    val researchMaxConfettiAmount = config.get("research.confetti.max-amount", ConfigAdapter.INT, 700)
+
+    @JvmStatic
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
     @JvmStatic
