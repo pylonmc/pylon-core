@@ -34,6 +34,9 @@ pipe-placement:
 # How many characters a line can be before it is split into a new line when translating
 translation-wrap-limit: 64
 
+# The interval (in Minecraft ticks) between metrics data being saved
+metrics-save-interval-ticks: 6000
+
 # Keys of the items you want to disable. You can get an item's key with /pylon key
 #
 # Disabling an item will remove it from the guide, stop players from being able to craft it,

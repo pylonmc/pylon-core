@@ -12,8 +12,6 @@ import org.bstats.charts.SimplePie
 import org.bukkit.Bukkit
 
 internal object PylonMetrics {
-    const val SAVE_INTERVAl_TICKS = 20L
-
     val metrics = Metrics(PylonCore, 27322)
     val dataConfig = Config(PylonCore, "data/metrics.yml")
 
@@ -66,7 +64,7 @@ internal object PylonMetrics {
             commandsRun
         })
 
-        Bukkit.getScheduler().runTaskTimer(PylonCore, Runnable { save() }, 0L, SAVE_INTERVAl_TICKS)
+        Bukkit.getScheduler().runTaskTimerAsynchronously(PylonCore, Runnable { save() }, 0L, PylonConfig.metricsSaveIntervalTicks)
     }
 
     fun save() {
