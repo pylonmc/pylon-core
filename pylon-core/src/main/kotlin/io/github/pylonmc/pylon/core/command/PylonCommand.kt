@@ -173,7 +173,7 @@ private val researchAdd = buildCommand("add") {
             executes {
                 // no confetti for all research otherwise server go big boom
                 PylonMetrics.onCommandRun("/py research add")
-                addResearches(this, PylonRegistry.RESEARCHES.toList())
+                addResearches(this, PylonRegistry.RESEARCHES.toList(), false)
             }
         }
 
