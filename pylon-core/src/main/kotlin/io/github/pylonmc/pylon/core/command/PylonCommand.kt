@@ -18,7 +18,6 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.researches
 import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
