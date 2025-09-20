@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.util
 
 import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * TODO: If ever needed, enforce thread-safety
@@ -11,7 +12,7 @@ open class Octree<N>(
     private val depth: Int,
     private val entryStrategy: (N) -> BoundingBox,
 ) {
-    private var entries: MutableList<N> = mutableListOf()
+    private var entries: MutableList<N> = CopyOnWriteArrayList()
     private var children: Array<Octree<N>>? = null
 
     open fun insert(entry: N) : Boolean {

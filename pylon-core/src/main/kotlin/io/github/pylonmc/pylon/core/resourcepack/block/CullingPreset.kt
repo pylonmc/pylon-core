@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.block.textures
+package io.github.pylonmc.pylon.core.resourcepack.block
 
 import org.bukkit.Material
 

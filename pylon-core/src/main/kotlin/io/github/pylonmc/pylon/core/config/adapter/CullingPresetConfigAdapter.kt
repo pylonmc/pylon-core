@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
-import io.github.pylonmc.pylon.core.block.textures.CullingPreset
+import io.github.pylonmc.pylon.core.resourcepack.block.CullingPreset
 import org.bukkit.configuration.ConfigurationSection
 import java.lang.reflect.Type
 

@@ -8,7 +8,7 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
-import io.github.pylonmc.pylon.core.block.textures.BlockTextureEngine
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
@@ -63,11 +63,14 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
     override fun onEnable() {
         InvUI.getInstance().setPlugin(this)
-        PacketEvents.getAPI().init()
+
+        val packetEvents = PacketEvents.getAPI()
+        packetEvents.init()
+
 
         val entityLibPlatform = SpigotEntityLibPlatform(this)
         entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type -> Bukkit.getUnsafe().nextEntityId() }
-        val entityLibSettings = APIConfig(PacketEvents.getAPI())
+        val entityLibSettings = APIConfig(packetEvents)
             .tickTickables()
             .trackPlatformEntities()
         EntityLib.init(entityLibPlatform, entityLibSettings)

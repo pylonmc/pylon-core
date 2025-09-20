@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.config
 
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.block.textures.CullingPreset
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 
 object PylonConfig {

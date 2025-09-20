@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.button
 
-import io.github.pylonmc.pylon.core.block.textures.BlockTextureEngine.customBlockTextures
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.customBlockTextures
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import net.kyori.adventure.text.Component
 import org.bukkit.Material

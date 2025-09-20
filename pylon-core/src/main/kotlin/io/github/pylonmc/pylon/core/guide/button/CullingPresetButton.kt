@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.button
 
-import io.github.pylonmc.pylon.core.block.textures.BlockTextureEngine.cullingPreset
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.cullingPreset
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
@@ -14,21 +14,18 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 class CullingPresetButton : AbstractItem() {
     override fun getItemProvider(player: Player): ItemProvider? {
         val preset = player.cullingPreset
-        return ItemProvider {
-            ItemStackBuilder.of(preset.material)
-                .name(Component.translatable("pylon.pyloncore.guide.button.culling-preset.${preset.id}.name"))
-                .lore(
-                    Component.translatable("pylon.pyloncore.guide.button.culling-preset.${preset.id}.lore")
-                        .arguments(
-                            PylonArgument.of("hiddenInterval", preset.hiddenInterval),
-                            PylonArgument.of("visibleInterval", preset.visibleInterval),
-                            PylonArgument.of("alwaysShowRadius", preset.alwaysShowRadius),
-                            PylonArgument.of("cullRadius", preset.cullRadius),
-                            PylonArgument.of("maxOccludingCount", preset.maxOccludingCount)
-                        )
-                )
-                .build()
-        }
+        return ItemStackBuilder.of(preset.material)
+            .name(Component.translatable("pylon.pyloncore.guide.button.culling-preset.${preset.id}.name"))
+            .lore(
+                Component.translatable("pylon.pyloncore.guide.button.culling-preset.${preset.id}.lore")
+                    .arguments(
+                        PylonArgument.of("hiddenInterval", preset.hiddenInterval),
+                        PylonArgument.of("visibleInterval", preset.visibleInterval),
+                        PylonArgument.of("alwaysShowRadius", preset.alwaysShowRadius),
+                        PylonArgument.of("cullRadius", preset.cullRadius),
+                        PylonArgument.of("maxOccludingCount", preset.maxOccludingCount)
+                    )
+            )
     }
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {

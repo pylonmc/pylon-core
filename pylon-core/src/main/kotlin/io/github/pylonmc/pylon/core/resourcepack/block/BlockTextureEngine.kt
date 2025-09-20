@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.block.textures
+package io.github.pylonmc.pylon.core.resourcepack.block
 
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
@@ -35,7 +35,8 @@ import kotlin.math.ceil
 object BlockTextureEngine : Listener {
     const val DISABLED_PRESET = "disabled"
 
-    private val presetKey = pylonKey("culling_preset")
+    val customBlockTexturesKey = pylonKey("custom_block_textures")
+    val presetKey = pylonKey("culling_preset")
 
     private val chunkData = mutableMapOf<ChunkPosition, ChunkData>()
 
@@ -69,14 +70,14 @@ object BlockTextureEngine : Listener {
     @get:JvmStatic
     @set:JvmStatic
     var Player.customBlockTextures: Boolean
-        get() = this.persistentDataContainer.getOrDefault(pylonKey("custom_block_textures"), PersistentDataType.BOOLEAN, true)
-        set(value) = this.persistentDataContainer.set(pylonKey("custom_block_textures"), PersistentDataType.BOOLEAN, value)
+        get() = this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true)
+        set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value)
 
     @get:JvmStatic
     @set:JvmStatic
     var Player.cullingPreset: CullingPreset
         get() = PylonConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, PylonConfig.defaultCullingPreset.id)) {
-            PylonConfig.cullingPresets[DISABLED_PRESET]!!
+            PylonConfig.defaultCullingPreset
         }
         set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
 
