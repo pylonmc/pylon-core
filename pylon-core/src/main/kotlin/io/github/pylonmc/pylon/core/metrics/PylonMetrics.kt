@@ -10,12 +10,13 @@ import org.bstats.bukkit.Metrics
 import org.bstats.charts.AdvancedPie
 import org.bstats.charts.SimplePie
 import org.bukkit.Bukkit
+import java.util.concurrent.ConcurrentHashMap
 
 internal object PylonMetrics {
     val metrics = Metrics(PylonCore, 27322)
     val dataConfig = Config(PylonCore, "data/metrics.yml")
 
-    var commandsRun = mutableMapOf<String, Int>()
+    var commandsRun = ConcurrentHashMap<String, Int>()
     init {
         val dataSection = dataConfig.getSection("commandsRun")
         if (dataSection != null) {
