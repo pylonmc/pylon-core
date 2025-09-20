@@ -13,7 +13,7 @@ import org.joml.Vector3f
 import java.util.*
 import java.util.function.Consumer
 
-class ConfettiParticle private constructor(location: Location, material: Material) {
+class ConfettiParticle {
     private val display: BlockDisplay
     private var age = 0
 
@@ -24,7 +24,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
     private var rotationY = 0.0
     private var rotationZ = 0.0
 
-    init {
+    constructor(location: Location, material: Material, velocity: Vector) {
         val world = location.getWorld()
 
         this.display = world.spawn<BlockDisplay>(location, BlockDisplay::class.java, Consumer { d: BlockDisplay ->
@@ -40,11 +40,7 @@ class ConfettiParticle private constructor(location: Location, material: Materia
         this.display.teleportDuration = TICK_AMOUNT.toInt()
 
         // Random initial velocity
-        this.velocity = Vector(
-            (RANDOM.nextDouble() - 0.5) * 0.2,
-            RANDOM.nextDouble() * 0.2,
-            (RANDOM.nextDouble() - 0.5) * 0.2
-        ).normalize()
+        this.velocity = velocity
 
         // Random angular velocity (degrees per tick)
         this.angularVelocity = Vector(
@@ -55,6 +51,12 @@ class ConfettiParticle private constructor(location: Location, material: Materia
 
         startTickLoop()
     }
+
+     constructor(location: Location, material: Material) : this(location, material, Vector(
+        (RANDOM.nextDouble() - 0.5) * 0.2,
+        RANDOM.nextDouble() * 0.2,
+        (RANDOM.nextDouble() - 0.5) * 0.2
+    ).normalize())
 
     private fun startTickLoop() {
         object : BukkitRunnable() {
