@@ -14,7 +14,7 @@ import java.util.EnumSet
  * Handles formatting of a specific unit. Call [format] to format a value using this unit.
  *
  * @param name The English name of the unit (for example 'kilograms')
- * @param singular A component representing the long singular form of this unit (kilogram, metr, litr, etc)
+ * @param singular A component representing the long singular form of this unit (kilogram, meter, liter, etc)
  * @param plural A component representing the long plural form of this unit (kilograms, meters, liters, etc)
  * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc)
  * @param defaultPrefix The prefix (kilo, nano, etc) used for this unit unless specified while formatting.
