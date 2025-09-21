@@ -37,8 +37,8 @@ dependencies {
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
     paperLibrary("xyz.xenondevs.invui:inventory-access-r24:1.46:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.46")
-    paperLibraryApi("com.github.Tofaa2.EntityLib:spigot:2.4.11")
-    paperLibraryApi("com.github.retrooper:packetevents-spigot:2.9.5")
+    implementation("com.github.Tofaa2.EntityLib:spigot:2.4.11")
+    implementation("com.github.retrooper:packetevents-spigot:2.9.5")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
 
@@ -109,6 +109,9 @@ tasks.shadowJar {
     exclude("kotlin/**")
     exclude("org/intellij/lang/annotations/**")
     exclude("org/jetbrains/annotations/**")
+
+    relocate("com.github.retrooper.packetevents", "io.github.pylonmc.pylon.core.packetevents")
+    relocate("me.tofaa.entitylib", "io.github.pylonmc.pylon.core.entitylib")
 
     archiveBaseName = "pylon-core"
     archiveClassifier = null
