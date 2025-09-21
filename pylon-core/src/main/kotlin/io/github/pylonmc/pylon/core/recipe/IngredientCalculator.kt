@@ -417,7 +417,7 @@ sealed class Container {
     }
 }
 
-fun findRecipeFor(item: PylonItem): PylonRecipe? {
+private fun findRecipeFor(item: PylonItem): PylonRecipe? {
     // 1. if there's a recipe with the same key as the item, use that
     PylonRegistry.RECIPE_TYPES
         .map { it.getRecipe(item.schema.key) }
@@ -446,7 +446,7 @@ fun findRecipeFor(item: PylonItem): PylonRecipe? {
     return null
 }
 
-fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
+private fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
     // 1. if there's a recipe with the same key as the item, use that
     PylonRegistry.RECIPE_TYPES
         .map { it.getRecipe(fluid.key) }

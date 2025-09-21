@@ -19,7 +19,7 @@ import java.util.EnumSet
  * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc)
  * @param defaultPrefix The prefix (kilo, nano, etc) used for this unit unless specified while formatting.
  * For example, if you create a 'grams' unit and specify 'kilo' as the default prefix, calling [format] with
- * 100 will return '0.1 kilograms'
+ * 100 will return '100 kilograms'
  * @param defaultStyle The style to apply to the unit (not the value)
  * @param usePrefixes Whether we should automatically calculate and apply a prefix (kilo, nano, etc)
  * to the output.
