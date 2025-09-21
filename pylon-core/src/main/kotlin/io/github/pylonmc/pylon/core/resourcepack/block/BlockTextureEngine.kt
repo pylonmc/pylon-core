@@ -1,5 +1,7 @@
 package io.github.pylonmc.pylon.core.resourcepack.block
 
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.LoadingCache
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
@@ -28,6 +30,7 @@ import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
+import java.time.Duration
 import java.util.UUID
 import kotlin.collections.Map.Entry
 import kotlin.math.ceil
@@ -57,8 +60,8 @@ object BlockTextureEngine : Listener {
 
                 val world = pos.world ?: continue
                 if (world.isChunkLoaded(pos.x, pos.z)) {
-                    for (position in data.occluding.keys.toSet()) {
-                        data.occluding[position] = position.block.blockData.isOccluding
+                    for (position in data.occluding.asMap().keys.toSet()) {
+                        data.occluding.put(position, position.block.blockData.isOccluding)
                     }
 
                     if (++refreshed >= toRefresh) break
@@ -143,8 +146,9 @@ object BlockTextureEngine : Listener {
                     visible.toSet().subtract(query).forEach { it.blockTextureEntity?.removeViewer(uuid) }
 
                     for (block in query) {
-                        if (!visible.contains(block)) {
-                            block.blockTextureEntity?.addViewer(uuid)
+                        val entity = block.blockTextureEntity ?: continue
+                        if (!entity.hasViewer(uuid)) {
+                            entity.addViewer(uuid)
                             visible.add(block)
                         }
                     }
@@ -156,8 +160,7 @@ object BlockTextureEngine : Listener {
                 visible.toSet().subtract(query).forEach { it.blockTextureEntity?.removeViewer(uuid) }
 
                 for (block in query) {
-                    val entity = block.blockTextureEntity
-                    if (entity == null) continue
+                    val entity = block.blockTextureEntity ?: continue
 
                     val seen = entity.hasViewer(uuid)
                     val distance = block.block.location.distanceSquared(player.location)
@@ -207,26 +210,23 @@ object BlockTextureEngine : Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onChunkLoad(event: ChunkLoadEvent) {
-        chunkData[ChunkPosition(event.chunk)] = ChunkData(
-            timestamp = System.currentTimeMillis(),
-            occluding = mutableMapOf()
-        )
+        chunkData[ChunkPosition(event.chunk)] = ChunkData(System.currentTimeMillis())
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private fun onBlockPlace(event: BlockPlaceEvent) {
-        chunkData[ChunkPosition(event.block)]?.occluding[BlockPosition(event.block)] = event.block.blockData.isOccluding
+        chunkData[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), event.block.blockData.isOccluding)
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private fun onBlockBreak(event: BlockBreakEvent) {
-        chunkData[ChunkPosition(event.block)]?.occluding[BlockPosition(event.block)] = false
+        chunkData[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), false)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onPylonBlockBreak(event: PylonBlockBreakEvent) {
         // TODO: Delete this when pylon no longer cancels BlockBreakEvents for PylonBlocks
-        chunkData[ChunkPosition(event.block)]?.occluding[BlockPosition(event.block)] = false
+        chunkData[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), false)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -241,12 +241,12 @@ object BlockTextureEngine : Listener {
 
     private data class ChunkData(
         val timestamp: Long,
-        val occluding: MutableMap<BlockPosition, Boolean>
+        val occluding: LoadingCache<BlockPosition, Boolean> = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(1))
+            .build { pos -> pos.block.blockData.isOccluding },
     ) {
         fun isOccluding(position: BlockPosition): Boolean {
-            return occluding.getOrPut(position) {
-                position.block.blockData.isOccluding
-            }
+            return occluding.get(position)
         }
     }
 
