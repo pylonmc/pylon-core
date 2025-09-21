@@ -25,7 +25,11 @@ class ChunkPosition(val worldId: UUID?, val x: Int, val z: Int) {
     val isLoaded: Boolean
         get() = world?.isChunkLoaded(x, z) == true
 
+    constructor(asLong: Long) : this(null, asLong)
+
     constructor(world: World?, asLong: Long) : this(world?.uid, (asLong shr 32).toInt(), asLong.toInt())
+
+    constructor(x: Int, z: Int) : this(null as UUID?, x, z)
 
     constructor(world: World?, x: Int, z: Int) : this(world?.uid, x, z)
 

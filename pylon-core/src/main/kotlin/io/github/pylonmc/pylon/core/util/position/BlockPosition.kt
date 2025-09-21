@@ -19,10 +19,14 @@ class BlockPosition(val worldId: UUID?, val x: Int, val y: Int, val z: Int) {
             .or((z and 0x3FFFFFF).toLong() shl 12)
             .or((y and 0xFFF).toLong())
 
+    constructor(asLong: Long) : this(null, asLong)
+
     constructor(world: World?, asLong: Long) : this(world?.uid,
         (asLong shr 38).toInt(),
         ((asLong shl 52) shr 52).toInt(),
         ((asLong shl 26) shr 38).toInt())
+
+    constructor(x: Int, y: Int, z: Int) : this(null as UUID?, x, y, z)
 
     constructor(world: World?, x: Int, y: Int, z: Int) : this(world?.uid, x, y, z)
 
