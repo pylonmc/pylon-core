@@ -12,10 +12,16 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
@@ -78,6 +84,24 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
 
         @JvmStatic
         val settingsAndInfoPage = SettingsAndInfoPage()
+
+        internal object FirstJoinGuide : Listener {
+            val waitingList = mutableSetOf<UUID>()
+
+            @EventHandler(priority = EventPriority.MONITOR)
+            fun preJoin(event: AsyncPlayerPreLoginEvent) {
+                if (event.loginResult == AsyncPlayerPreLoginEvent.Result.ALLOWED && !Bukkit.getOfflinePlayer(event.uniqueId).hasPlayedBefore()) {
+                    waitingList.add(event.uniqueId)
+                }
+            }
+
+            @EventHandler(priority = EventPriority.MONITOR)
+            fun join(event: PlayerJoinEvent) {
+                if (waitingList.remove(event.player.uniqueId)) {
+                    event.player.give(STACK.clone())
+                }
+            }
+        }
 
         @JvmStatic
         fun ingredientsPage(stack: ItemStack) = ItemIngredientsPage(stack)
