@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.CustomModelData
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
@@ -125,6 +126,7 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
         fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {
             return of(material)
                 .editPdc { pdc -> pdc.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
+                .set(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(key.toString()))
                 .defaultTranslatableName(key)
                 .defaultTranslatableLore(key)
         }
@@ -136,6 +138,15 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
         fun pylonItem(stack: ItemStack, key: NamespacedKey): ItemStackBuilder {
             return of(stack)
                 .editPdc { it.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
+                .let {
+                    val originalModelData = it.stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA)
+                    val modelData = CustomModelData.customModelData().addString(key.toString());
+                    if (originalModelData != null) {
+                        modelData.addStrings(originalModelData.strings()).addColors(originalModelData.colors())
+                            .addFloats(originalModelData.floats()).addFlags(originalModelData.flags())
+                    }
+                    it.set(DataComponentTypes.CUSTOM_MODEL_DATA, modelData)
+                }
                 .defaultTranslatableName(key)
                 .defaultTranslatableLore(key)
         }
