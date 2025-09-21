@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.test
+package io.github.pylonmc.pylon.core.gametest
 
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -11,7 +11,7 @@ import java.util.function.Consumer
 import kotlin.properties.Delegates
 
 /**
- * Represents the configuration for a game test. Prefer using the [Builder] to create instances of this class.
+ * Represents the configuration for a [GameTest]. Prefer using the [Builder] to create instances of this class.
  *
  * @see GameTest
  */
@@ -25,6 +25,9 @@ class GameTestConfig(
 ) : Keyed {
     override fun getKey(): NamespacedKey = key
 
+    /**
+     * Builds a [io.github.pylonmc.pylon.core.gametest.GameTestConfig].
+     */
     class Builder(val key: NamespacedKey) {
         private var size by Delegates.notNull<Int>()
         private var setUp: Consumer<GameTest> = Consumer {}

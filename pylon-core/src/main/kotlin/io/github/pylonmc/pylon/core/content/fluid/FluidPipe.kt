@@ -23,6 +23,14 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
+/**
+ * An item that represents a fluid pipe. All the logic regarding placing the pipe is handled automatically.
+ *
+ * Expects the pipe's config to contain a `material`, a `fluid-per-second`, and a `allowed-temperatures` value.
+ *
+ * You should generally not need to extend this class. Instead, simply register an item with class
+ * FluidPipe.class to create a new pipe type.
+ */
 open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityInteractor, PylonInteractor {
     val material = getSettings().getOrThrow("material", ConfigAdapter.MATERIAL)
     val fluidPerSecond = getSettings().getOrThrow("fluid-per-second", ConfigAdapter.DOUBLE)
@@ -41,6 +49,9 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
         )
     )
 
+    /**
+     * Returns whether the pipe is capable of moving the given fluid through it.
+     */
     open fun canPass(fluid: PylonFluid): Boolean {
         return fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedTemperatures
     }

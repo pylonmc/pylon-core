@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.content.guide
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
-import io.github.pylonmc.pylon.core.guide.pages.SettingsAndInfoPage
+import io.github.pylonmc.pylon.core.guide.pages.SettingsPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemIngredientsPage
@@ -19,6 +19,9 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
+/**
+ * The one and only Pylon guide.
+ */
 class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
 
     override fun onUsedToRightClick(event: PlayerInteractEvent) {
@@ -33,7 +36,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val KEY = pylonKey("guide")
 
         @JvmField
-        val STACK = ItemStackBuilder.Companion.pylonItem(Material.ENCHANTED_BOOK, KEY)
+        val STACK = ItemStackBuilder.pylonItem(Material.ENCHANTED_BOOK, KEY)
             .build()
 
         /**
@@ -77,7 +80,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val searchItemsAndFluidsPage = SearchItemsAndFluidsPage()
 
         @JvmStatic
-        val settingsAndInfoPage = SettingsAndInfoPage()
+        val settingsPageAndInfoPage = SettingsPage()
 
         @JvmStatic
         fun ingredientsPage(stack: ItemStack) = ItemIngredientsPage(stack)

@@ -13,6 +13,17 @@ import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataContainer
 
 
+/**
+ * Represents a Pylon entity in the world.
+ *
+ * All custom Pylon entities extend this class. Every instance of this class is wrapping a real entity
+ * in the world, and is stored in [EntityStorage]. All new block *types* must be registered using [register],
+ * and all new Pylon entities must be added to [EntityStorage] with [EntityStorage.add].
+ *
+ * You are responsible for creating your Pylon entities; there are no place constructors as with
+ * Pylon blocks. This is because it doesn't make sense for Pylon to manage spawning entities. However, your
+ * entity must still have a load constructor that takes a single parameter of type [E].
+ */
 abstract class PylonEntity<out E: Entity>(val entity: E) {
 
     val key = entity.persistentDataContainer.get(pylonEntityKeyKey, PylonSerializers.NAMESPACED_KEY)
@@ -23,18 +34,31 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
     constructor(key: NamespacedKey, entity: E): this(initialisePylonEntity<E>(key, entity))
 
     /**
-     * This will only be called for the player if the player has WAILA enabled
+     * WAILA is the text that shows up when looking at a block to tell you what the block is. It
+     * can also be used for entities.
      *
-     * @return the WAILA configuration, or null if WAILA should not be shown for this block
+     * This will only be called for the player if the player has WAILA enabled.
+     *
+     * @return the WAILA configuration, or null if WAILA should not be shown for this block.
      */
     open fun getWaila(player: Player): WailaConfig? = null
 
     /**
-     * Write all the state saved in the Pylon entity class to the entity's persistent data
-     * container.
+     * Called when the entity is saved.
+     *
+     * Put any logic to save the data in the entity here.
+     *
+     * *Do not assume that when this is called, the entity is being unloaded.* This
+     * may be called for other reasons, such as when a player right clicks with
+     * [io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs]
      */
     open fun write(pdc: PersistentDataContainer) {}
 
+    /**
+     * Returns settings associated with the block.
+     *
+     * Shorthand for `Settings.get(getKey())`
+     */
     fun getSettings(): Config
             = Settings.get(key)
 

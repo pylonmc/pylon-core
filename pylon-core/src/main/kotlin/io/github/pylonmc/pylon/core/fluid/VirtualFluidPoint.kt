@@ -11,7 +11,7 @@ import java.util.UUID
  * The VirtualFluidConnectionPoint class is stored in memory for every loaded point. VirtualFluidConnectionPoints
  * are persisted when unloaded, but do not store the segment UUID - this is decided at runtime.
  */
-data class VirtualFluidPoint(
+internal data class VirtualFluidPoint(
     val id: UUID,
     val position: BlockPosition,
     val type: FluidPointType,

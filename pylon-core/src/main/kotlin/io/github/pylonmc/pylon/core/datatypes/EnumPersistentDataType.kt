@@ -3,6 +3,9 @@ package io.github.pylonmc.pylon.core.datatypes
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType
 
+/**
+ * A [PersistentDataType] that can be used with any enum class (such as [org.bukkit.Material]).
+ */
 class EnumPersistentDataType<E : Enum<E>>(val enumClass: Class<E>) : PersistentDataType<String, E> {
 
     private val valueMap: Map<String, E> = enumClass.enumConstants.associateBy { it.name }

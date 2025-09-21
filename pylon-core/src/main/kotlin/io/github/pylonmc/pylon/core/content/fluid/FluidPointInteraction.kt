@@ -25,6 +25,11 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import java.util.UUID
 
+/**
+ * This spawns over [FluidPointDisplay]s and [FluidPipeConnector]s so that we can listen
+ * for right clicks on those displays. This is necessary because displays can't be right
+ * clicked.
+ */
 class FluidPointInteraction : PylonEntity<Interaction>, PylonDeathEntity, PylonUnloadEntity {
     val connectedPipeDisplays: MutableSet<UUID>
     val point: VirtualFluidPoint

@@ -4,8 +4,6 @@ import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import org.bukkit.inventory.ItemStack
 
 interface PylonBreakHandler {
-
     fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {}
-
     fun postBreak() {}
 }

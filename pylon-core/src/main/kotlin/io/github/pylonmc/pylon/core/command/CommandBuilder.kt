@@ -19,7 +19,7 @@ import org.bukkit.entity.Player
  *
  * Blame Kotlin for not allowing us to hide this class in any way from Java.
  */
-class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
+internal class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
 
     var requirement: CommandContext<CommandSourceStack>.(CommandSender) -> Boolean = { true }
 
@@ -88,7 +88,7 @@ class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
 }
 
 @JvmSynthetic
-inline fun buildCommand(name: String, block: CommandBuilder.() -> Unit): LiteralCommandNode<CommandSourceStack> {
+internal inline fun buildCommand(name: String, block: CommandBuilder.() -> Unit): LiteralCommandNode<CommandSourceStack> {
     val builder = CommandBuilder(Commands.literal(name))
     builder.block()
     return builder.build() as LiteralCommandNode<CommandSourceStack>

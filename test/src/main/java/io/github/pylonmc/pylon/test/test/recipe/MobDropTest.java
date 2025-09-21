@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.test.test.recipe;
 
 import io.github.pylonmc.pylon.core.mobdrop.SimpleMobDrop;
 import io.github.pylonmc.pylon.core.registry.PylonRegistry;
-import io.github.pylonmc.pylon.core.test.GameTestConfig;
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
 import io.github.pylonmc.pylon.test.item.Items;

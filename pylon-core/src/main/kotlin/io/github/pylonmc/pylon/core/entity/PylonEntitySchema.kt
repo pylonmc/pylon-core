@@ -5,7 +5,12 @@ import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import java.lang.invoke.MethodHandle
 
-
+/**
+ * Stores information about a Pylon entity type, including its key, vanilla entity class,
+ * and Pylion entity class.
+ *
+ * You should not need to use this if you are not working on Pylon core.
+ */
 class PylonEntitySchema(
     private val key: NamespacedKey,
     val entityClass: Class<*>,

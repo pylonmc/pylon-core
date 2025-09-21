@@ -2,6 +2,9 @@ package io.github.pylonmc.pylon.core.fluid
 
 import org.bukkit.Material
 
+/**
+ * The type of an in-world fluid point.
+ */
 enum class FluidPointType(val material: Material) {
     /**
      * Input to the attached machine

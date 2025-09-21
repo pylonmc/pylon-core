@@ -27,7 +27,8 @@ import io.github.pylonmc.pylon.core.item.research.removeResearch
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.test.GameTestConfig
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
@@ -411,7 +412,7 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
                         PylonArgument.of("file", "plugins/PylonCore/${recipeType.filePath}")
                     )
                 )
-                addon.mergeGlobalConfig(recipeType.filePath, recipeType.filePath)
+                mergeGlobalConfig(addon, recipeType.filePath, recipeType.filePath)
             }
         }
     }
@@ -442,7 +443,7 @@ internal val ROOT_COMMAND_PY_ALIAS = buildCommand("py") {
 
 @JvmSynthetic
 @Suppress("UnstableApiUsage")
-inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
+internal inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
     return when (typeOf<T>()) {
         typeOf<BlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
         typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)

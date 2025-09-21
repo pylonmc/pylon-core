@@ -14,7 +14,12 @@ import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.window.AnvilWindow
 
-abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStaticGuidePage(key, material) {
+/**
+ * A page that allows a collection of things (specified by [getItemNamePairs] to be searched.
+ *
+ * @param key A key that uniquely identifies
+ */
+abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStaticGuidePage(key, material) {
 
     abstract fun getItemNamePairs(player: Player, search: String): List<Pair<Item, String>>
 

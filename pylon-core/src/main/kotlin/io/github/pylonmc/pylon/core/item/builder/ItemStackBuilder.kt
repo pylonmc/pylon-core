@@ -20,6 +20,12 @@ import org.bukkit.persistence.PersistentDataContainer
 import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
 
+/**
+ * Helper class for creating an [ItemStack], including utilities for creating Pylon
+ * items specifically.
+ *
+ * Implements InvUI's [ItemProvider], so can be used instead of an [ItemStack] in GUIs.
+ */
 @Suppress("UnstableApiUsage")
 open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProvider {
 
@@ -69,6 +75,12 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
 
     fun name(name: String) = name(fromMiniMessage(name))
 
+    /**
+     * Sets the item's name to the default language file key (for example
+     * `pylon.pyloncore.item.my_dumb_item.name`), based on the item [key] given.
+     *
+     * Use [pylonItem] instead of this to create a stack for a [io.github.pylonmc.pylon.core.item.PylonItem].
+     */
     fun defaultTranslatableName(key: NamespacedKey) =
         name(Component.translatable(nameKey(key)))
 
@@ -83,11 +95,20 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
 
+    /**
+     * Sets the item's lore to the default language file key (for example
+     * `pylon.pyloncore.item.my_dumb_item.lore`), based on the item [key] given.
+     *
+     * Use [pylonItem] instead of this to create a stack for a [io.github.pylonmc.pylon.core.item.PylonItem].
+     */
     fun defaultTranslatableLore(key: NamespacedKey) =
         lore(Component.translatable(loreKey(key), ""))
 
     fun build(): ItemStack = stack.clone()
 
+    /**
+     * Ignore this method; InvUI item provider implementation.
+     */
     override fun get(lang: String?): ItemStack {
         val item = build()
         val split = lang?.split('_')?.toMutableList() ?: return item
@@ -101,12 +122,24 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
 
     companion object {
 
+        /**
+         * The default name language key for a Pylon item.
+         */
+        @JvmStatic
         fun nameKey(key: NamespacedKey)
                 = "pylon.${key.namespace}.item.${key.key}.name"
 
+        /**
+         * The default lore language key for a Pylon item.
+         */
+        @JvmStatic
         fun loreKey(key: NamespacedKey)
                 = "pylon.${key.namespace}.item.${key.key}.lore"
 
+        /**
+         * Creates a new ItemStackBuilder from [stack]. Any modifications made to the
+         * ItemStackBuilder will also be made to [stack].
+         */
         @JvmStatic
         fun of(stack: ItemStack): ItemStackBuilder {
             return ItemStackBuilder(stack)
@@ -118,8 +151,9 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
         }
 
         /**
-         * Returns an [ItemStackBuilder] with name and lore set to the default translation keys, and
-         * with the item's ID set to [key]
+         * Creates a new [ItemStack] for a [io.github.pylonmc.pylon.core.item.PylonItem] by setting
+         * the name and lore to the default translation keys, and setting the item's Pylon ID to the
+         * provided [key].
          */
         @JvmStatic
         fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {

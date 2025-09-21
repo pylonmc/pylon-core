@@ -15,7 +15,9 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
-// TODO subcategory by addon
+/**
+ * A button that shows a research.
+ */
 open class ResearchButton(val research: Research) : AbstractItem() {
 
     override fun getItemProvider(player: Player): ItemProvider = try {
@@ -98,7 +100,7 @@ open class ResearchButton(val research: Research) : AbstractItem() {
     companion object {
         const val MAX_UNLOCK_LIST_LINES = 10
 
-        fun addResearchCostLore(item: ItemStackBuilder, player: Player, research: Research) {
+        private fun addResearchCostLore(item: ItemStackBuilder, player: Player, research: Research) {
             if (research.cost == null) {
                 item.lore(Component.translatable("pylon.${research.key.namespace}.researches.${research.key.key}.unlock-instructions"))
             } else {

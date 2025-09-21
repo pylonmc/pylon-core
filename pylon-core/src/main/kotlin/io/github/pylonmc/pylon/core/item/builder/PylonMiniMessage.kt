@@ -22,13 +22,13 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
  * any Pylon translation keys.
  *
  * ### Custom Tags
- * - `<arrow>`|`<arrow:[color]>` - Inserts a right arrow (→) with the specified color (default: 0x666666)
- * - `<diamond>`|`<diamond:[color]>` - Inserts a diamond (◆) with the specified color (default: 0x666666)
- * - `<star>`|`<star:[color]>` - Inserts a star (★) with the specified color (default: [NamedTextColor.BLUE])
+ * - `<arrow>`|`<arrow:\[color\]>` - Inserts a right arrow (→) with the specified color (default: 0x666666)
+ * - `<diamond>`|`<diamond:\[color\]>` - Inserts a diamond (◆) with the specified color (default: 0x666666)
+ * - `<star>`|`<star:\[color\]>` - Inserts a star (★) with the specified color (default: [NamedTextColor.BLUE])
  * - `<instruction></instruction>`|`<insn></insn>` - Applies a yellow styling (0xf9d104), used for instructions
  * - `<guideinstruction></guideinstruction>`|`<guideinsn></guideinsn>` - Applies a purple styling (0xc907f4), used for guide instructions
  * - `<attribute></attribute>`|`<attr></attr>` - Applies a cyan styling (0xa9d9e8), used for attributes
- * - `<unit:[prefix]:[unit name]></unit>` - Formats a **constant** number as a unit, with an optional metric prefix
+ * - `<unit:\[prefix\]:[unit name]></unit>` - Formats a **constant** number as a unit, with an optional metric prefix
  * - `<nbsp></nbsp>` - Replaces spaces with non-breaking spaces ( ), useful for prevent line breaks in lore
  */
 val customMiniMessage = MiniMessage.builder()
