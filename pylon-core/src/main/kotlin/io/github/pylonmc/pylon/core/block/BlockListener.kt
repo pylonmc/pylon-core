@@ -92,12 +92,12 @@ internal object BlockListener : Listener {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
             event.isDropItems = false
+            event.expToDrop = 0
 
             val player = event.player
             val tool = player.inventory.itemInMainHand
 
             tool.damage(1, player)
-            event.isCancelled = true
         }
     }
 
@@ -105,7 +105,6 @@ internal object BlockListener : Listener {
     private fun blockBurn(event: BlockBurnEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
-            event.isCancelled = true
         }
     }
 
@@ -133,7 +132,6 @@ internal object BlockListener : Listener {
     private fun blockRemove(event: BlockFadeEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
-            event.isCancelled = true
         }
     }
 
