@@ -1,15 +1,15 @@
 package io.github.pylonmc.pylon.core.util.position
 
+import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
-import java.lang.ref.WeakReference
+import java.util.UUID
 
-class ChunkPosition(world: World?, val x: Int, val z: Int) {
-    private val worldRef: WeakReference<World> = WeakReference(world)
+class ChunkPosition(val worldId: UUID, val x: Int, val z: Int) {
     val world: World?
-        get() = worldRef.get()
+        get() = Bukkit.getWorld(worldId)
 
     val asLong: Long
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
@@ -25,11 +25,13 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
     val isLoaded: Boolean
         get() = world?.isChunkLoaded(x, z) == true
 
-    constructor(world: World, asLong: Long) : this(world, (asLong shr 32).toInt(), asLong.toInt())
+    constructor(world: World, asLong: Long) : this(world.uid, (asLong shr 32).toInt(), asLong.toInt())
 
-    constructor(chunk: Chunk) : this(chunk.world, chunk.x, chunk.z)
+    constructor(world: World, x: Int, z: Int) : this(world.uid, x, z)
 
-    constructor(location: Location) : this(location.world, location.blockX shr 4, location.blockZ shr 4)
+    constructor(chunk: Chunk) : this(chunk.world.uid, chunk.x, chunk.z)
+
+    constructor(location: Location) : this(location.world.uid, location.blockX shr 4, location.blockZ shr 4)
 
     constructor(block: Block) : this(block.location)
 
@@ -48,7 +50,7 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
 
     override fun equals(other: Any?): Boolean {
         return (other is ChunkPosition)
-                && other.world?.uid == world?.uid
+                && other.worldId == worldId
                 && other.x == x
                 && other.z == z
     }
