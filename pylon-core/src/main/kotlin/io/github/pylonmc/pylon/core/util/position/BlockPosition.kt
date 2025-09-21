@@ -22,7 +22,6 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     val chunk: ChunkPosition
         get() = ChunkPosition(world, x shr 4, z shr 4)
 
-	@JvmSynthetic
     internal val asLong: Long
         get() = ((x and 0x3FFFFFF).toLong() shl 38)
             .or((z and 0x3FFFFFF).toLong() shl 12)
