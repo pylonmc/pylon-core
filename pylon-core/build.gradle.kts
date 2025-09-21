@@ -112,11 +112,10 @@ tasks.shadowJar {
 
     relocate("com.github.retrooper.packetevents", "io.github.pylonmc.pylon.core.packetevents")
     relocate("me.tofaa.entitylib", "io.github.pylonmc.pylon.core.entitylib")
+    relocate("org.bstats", "io.github.pylonmc.pylon.core.bstats")
 
     archiveBaseName = "pylon-core"
     archiveClassifier = null
-
-    relocate("org.bstats", "io.github.pylonmc.pylon.core.bstats")
 }
 
 paper {
