@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.util
 
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 
 /**
@@ -34,3 +35,6 @@ val IMMEDIATE_FACES_WITH_DIAGONALS: Array<BlockFace> = arrayOf(
     BlockFace.SOUTH_WEST,
     BlockFace.EAST
 )
+
+val Block.replaceableOrAir: Boolean
+    get() = type.isAir || isReplaceable
