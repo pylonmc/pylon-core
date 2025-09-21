@@ -7,9 +7,9 @@ import org.bukkit.block.Block
 import org.joml.Vector3i
 import java.util.UUID
 
-class BlockPosition(val worldId: UUID, val x: Int, val y: Int, val z: Int) {
+class BlockPosition(val worldId: UUID?, val x: Int, val y: Int, val z: Int) {
     val world: World?
-        get() = Bukkit.getWorld(worldId)
+        get() = worldId?.let { Bukkit.getWorld(it) }
 
     val chunk: ChunkPosition
         get() = ChunkPosition(worldId, x shr 4, z shr 4)
@@ -19,14 +19,14 @@ class BlockPosition(val worldId: UUID, val x: Int, val y: Int, val z: Int) {
             .or((z and 0x3FFFFFF).toLong() shl 12)
             .or((y and 0xFFF).toLong())
 
-    constructor(world: World, asLong: Long) : this(world.uid,
+    constructor(world: World?, asLong: Long) : this(world?.uid,
         (asLong shr 38).toInt(),
         ((asLong shl 52) shr 52).toInt(),
         ((asLong shl 26) shr 38).toInt())
 
-    constructor(world: World, x: Int, y: Int, z: Int) : this(world.uid, x, y, z)
+    constructor(world: World?, x: Int, y: Int, z: Int) : this(world?.uid, x, y, z)
 
-    constructor(location: Location) : this(location.world.uid, location.blockX, location.blockY, location.blockZ)
+    constructor(location: Location) : this(location.world?.uid, location.blockX, location.blockY, location.blockZ)
 
     constructor(block: Block) : this(block.world.uid, block.x, block.y, block.z)
 

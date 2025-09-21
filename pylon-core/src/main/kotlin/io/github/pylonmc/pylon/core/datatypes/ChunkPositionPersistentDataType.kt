@@ -22,7 +22,7 @@ object ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContai
     ): ChunkPosition {
         val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
         val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
-        val worldId = primitive.get(worldKey, PylonSerializers.UUID)!!
+        val worldId = primitive.get(worldKey, PylonSerializers.UUID)
         return ChunkPosition(worldId, x, z)
     }
 
@@ -30,7 +30,7 @@ object ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContai
         val pdc = context.newPersistentDataContainer()
         pdc.set(xKey, PersistentDataType.INTEGER, complex.x)
         pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
-        pdc.set(worldKey, PylonSerializers.UUID, complex.worldId)
+        complex.worldId?.let { pdc.set(worldKey, PylonSerializers.UUID, it) }
         return pdc
     }
 }

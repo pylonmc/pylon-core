@@ -7,9 +7,9 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.util.UUID
 
-class ChunkPosition(val worldId: UUID, val x: Int, val z: Int) {
+class ChunkPosition(val worldId: UUID?, val x: Int, val z: Int) {
     val world: World?
-        get() = Bukkit.getWorld(worldId)
+        get() = worldId?.let { Bukkit.getWorld(it) }
 
     val asLong: Long
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
@@ -25,13 +25,13 @@ class ChunkPosition(val worldId: UUID, val x: Int, val z: Int) {
     val isLoaded: Boolean
         get() = world?.isChunkLoaded(x, z) == true
 
-    constructor(world: World, asLong: Long) : this(world.uid, (asLong shr 32).toInt(), asLong.toInt())
+    constructor(world: World?, asLong: Long) : this(world?.uid, (asLong shr 32).toInt(), asLong.toInt())
 
-    constructor(world: World, x: Int, z: Int) : this(world.uid, x, z)
+    constructor(world: World?, x: Int, z: Int) : this(world?.uid, x, z)
 
     constructor(chunk: Chunk) : this(chunk.world.uid, chunk.x, chunk.z)
 
-    constructor(location: Location) : this(location.world.uid, location.blockX shr 4, location.blockZ shr 4)
+    constructor(location: Location) : this(location.world?.uid, location.blockX shr 4, location.blockZ shr 4)
 
     constructor(block: Block) : this(block.location)
 

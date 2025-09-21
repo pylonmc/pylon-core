@@ -24,7 +24,7 @@ object BlockPositionPersistentDataType : PersistentDataType<PersistentDataContai
         val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
         val y = primitive.get(yKey, PersistentDataType.INTEGER)!!
         val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
-        val worldId = primitive.get(worldKey, PylonSerializers.UUID)!!
+        val worldId = primitive.get(worldKey, PylonSerializers.UUID)
         return BlockPosition(worldId, x, y, z)
     }
 
@@ -33,7 +33,7 @@ object BlockPositionPersistentDataType : PersistentDataType<PersistentDataContai
         pdc.set(xKey, PersistentDataType.INTEGER, complex.x)
         pdc.set(yKey, PersistentDataType.INTEGER, complex.y)
         pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
-        pdc.set(worldKey, PylonSerializers.UUID, complex.worldId)
+        complex.worldId?.let { pdc.set(worldKey, PylonSerializers.UUID, it) }
         return pdc
     }
 }
