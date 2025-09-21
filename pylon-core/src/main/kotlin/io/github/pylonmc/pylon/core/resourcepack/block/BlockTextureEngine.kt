@@ -81,12 +81,12 @@ object BlockTextureEngine : Listener {
         }
         set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
 
-    fun insert(block: PylonBlock) {
+    internal fun insert(block: PylonBlock) {
         if (!PylonConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).insert(block)
     }
 
-    fun remove(block: PylonBlock) {
+    internal fun remove(block: PylonBlock) {
         if (!PylonConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).remove(block)
         block.blockTextureEntity?.let {
@@ -96,7 +96,7 @@ object BlockTextureEngine : Listener {
         }
     }
 
-    fun getOctree(world: World): Octree<PylonBlock> {
+    internal fun getOctree(world: World): Octree<PylonBlock> {
         if (!PylonConfig.customBlockTexturesEnabled) return DummyOctree
 
         val border = world.worldBorder
@@ -239,7 +239,7 @@ object BlockTextureEngine : Listener {
         jobs.remove(event.player.uniqueId)?.cancel()
     }
 
-    data class ChunkData(
+    private data class ChunkData(
         val timestamp: Long,
         val occluding: MutableMap<BlockPosition, Boolean>
     ) {

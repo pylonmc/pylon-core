@@ -110,6 +110,7 @@ open class PylonBlock protected constructor(val block: Block) {
      * Called when the block texture entity is created.
      */
     protected open fun setupBlockTexture(entity: WrapperEntity) {
+        // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
         val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
         entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
 
