@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.content.guide
 
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
@@ -33,7 +34,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         }
     }
 
-    companion object {
+    companion object : Listener {
 
         @JvmField
         val KEY = pylonKey("guide")
@@ -85,21 +86,10 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         @JvmStatic
         val settingsAndInfoPage = SettingsAndInfoPage()
 
-        internal object FirstJoinGuide : Listener {
-            val waitingList = mutableSetOf<UUID>()
-
-            @EventHandler(priority = EventPriority.MONITOR)
-            fun preJoin(event: AsyncPlayerPreLoginEvent) {
-                if (event.loginResult == AsyncPlayerPreLoginEvent.Result.ALLOWED && !Bukkit.getOfflinePlayer(event.uniqueId).hasPlayedBefore()) {
-                    waitingList.add(event.uniqueId)
-                }
-            }
-
-            @EventHandler(priority = EventPriority.MONITOR)
-            fun join(event: PlayerJoinEvent) {
-                if (waitingList.remove(event.player.uniqueId)) {
-                    event.player.give(STACK.clone())
-                }
+        @EventHandler(priority = EventPriority.LOWEST)
+        fun join(event: PlayerJoinEvent) {
+            if (PylonConfig.firstJoinPylonGuide && !event.player.hasPlayedBefore()) {
+                event.player.give(STACK.clone())
             }
         }
 

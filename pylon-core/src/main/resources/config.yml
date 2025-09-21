@@ -1,3 +1,6 @@
+# Should players be given the pylon guide book when they first join?
+pylon-guide-on-first-join: false
+
 # The default interval (in Minecraft ticks) between each block tick
 # Most blocks have a custom tick interval which can be changed in their settings
 default-tick-interval: 20
