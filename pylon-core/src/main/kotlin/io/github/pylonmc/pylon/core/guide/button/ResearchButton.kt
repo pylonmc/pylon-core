@@ -100,7 +100,7 @@ open class ResearchButton(val research: Research) : AbstractItem() {
     companion object {
         const val MAX_UNLOCK_LIST_LINES = 10
 
-        private fun addResearchCostLore(item: ItemStackBuilder, player: Player, research: Research) {
+        internal fun addResearchCostLore(item: ItemStackBuilder, player: Player, research: Research) {
             if (research.cost == null) {
                 item.lore(Component.translatable("pylon.${research.key.namespace}.researches.${research.key.key}.unlock-instructions"))
             } else {
