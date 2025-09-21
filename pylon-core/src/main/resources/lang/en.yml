@@ -169,7 +169,7 @@ guide:
         lore: "<arrow:#3a2939> Aggressive culling always showing entities within %alwaysShowRadius% blocks and heavily culling entities within %cullRadius% blocks (only culling if there are %maxOccludingCount% occluding blocks between your eyes and the block)"
     toggle-armor-textures:
       name: "Toggle Custom Armor Textures"
-      lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon armor textures, enable this to use them, if you don't you can safely disable this"
+      lore: "<arrow:#3a2939> If you have a resource-pack that adds <bold>worn <gray>(not item) pylon armor textures, enable this to use them, otherwise leave it disabled"
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 
