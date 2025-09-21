@@ -87,7 +87,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val settingsAndInfoPage = SettingsAndInfoPage()
 
         @EventHandler(priority = EventPriority.LOWEST)
-        fun join(event: PlayerJoinEvent) {
+        private fun join(event: PlayerJoinEvent) {
             if (PylonConfig.firstJoinPylonGuide && !event.player.hasPlayedBefore()) {
                 event.player.give(STACK.clone())
             }
