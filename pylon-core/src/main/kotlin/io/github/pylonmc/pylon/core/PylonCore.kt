@@ -65,7 +65,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
-        Bukkit.getPluginManager().registerEvents(MobDropListener, this)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
