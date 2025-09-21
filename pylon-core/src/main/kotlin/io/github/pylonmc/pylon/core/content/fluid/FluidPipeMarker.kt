@@ -24,6 +24,8 @@ class FluidPipeMarker : PylonBlock, PylonBreakHandler {
     var from: UUID? = null
     var to: UUID? = null
 
+    override var disableBlockTextureEntity = true
+
     @Suppress("unused")
     constructor(block: Block, context: BlockCreateContext) : super(block)
 
