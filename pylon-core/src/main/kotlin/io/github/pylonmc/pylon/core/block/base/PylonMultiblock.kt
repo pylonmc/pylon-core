@@ -52,17 +52,11 @@ interface PylonMultiblock {
      * Called when the multiblock is formed (i.e., was not formed before, but now is).
      * This includes when the multiblock was previously formed, unloaded, and loaded again.
      */
-    @MustBeInvokedByOverriders
-    fun onMultiblockFormed() {
-
-    }
+    fun onMultiblockFormed() {}
 
     /**
      * Called when the multiblock is unformed (i.e., was formed before, but now is not).
      * This includes when a part of the multiblock is unloaded, and the multiblock becomes unformed because of it.
      */
-    @MustBeInvokedByOverriders
-    fun onMultiblockUnformed() {
-
-    }
+    fun onMultiblockUnformed() {}
 }
