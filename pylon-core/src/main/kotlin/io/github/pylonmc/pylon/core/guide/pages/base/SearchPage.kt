@@ -24,11 +24,13 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
                 "x x x x x x x x x",
                 "x x x x x x x x x",
                 "x x x x x x x x x",
-                "# # # # B # # # #"
+                "< # # # B # # # >"
             )
             .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('#', GuiItems.background())
-            .addIngredient('B', BackButton(player))
+            .addIngredient('B', BackButton())
+            .addIngredient('<', GuiItems.pagePrevious())
+            .addIngredient('>', GuiItems.pageNext())
             .build()
         val upperGui = Gui.empty(3, 1)
         upperGui.background = GuiItems.background().itemProvider
@@ -70,7 +72,6 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     }.map {
         it.first
     }
-    .take(27)
     .toList()
 
     companion object {

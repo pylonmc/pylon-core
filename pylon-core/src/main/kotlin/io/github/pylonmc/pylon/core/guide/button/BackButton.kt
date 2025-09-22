@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
-open class BackButton(val player: Player) : AbstractItem() {
+open class BackButton : AbstractItem() {
 
     override fun getItemProvider() = ItemStackBuilder.of(Material.ENCHANTED_BOOK)
         .name(Component.translatable("pylon.pyloncore.guide.button.back.name"))

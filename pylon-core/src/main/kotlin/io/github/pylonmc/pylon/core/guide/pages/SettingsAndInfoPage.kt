@@ -26,7 +26,7 @@ class SettingsAndInfoPage : SimpleStaticGuidePage(
                 "# # # # # # # # #",
             )
             .addIngredient('#', GuiItems.background())
-            .addIngredient('b', BackButton(player))
+            .addIngredient('b', BackButton())
             .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('w', ToggleWailaButton())
 
