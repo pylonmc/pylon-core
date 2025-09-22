@@ -5,7 +5,7 @@ import com.destroystokyo.paper.event.entity.WitchReadyPotionEvent
 import com.destroystokyo.paper.event.entity.WitchThrowPotionEvent
 
 interface PylonWitch {
-    fun onConsumePotion(event: WitchConsumePotionEvent){}
-    fun onReadyPotion(event: WitchReadyPotionEvent){}
-    fun onThrowPotion(event: WitchThrowPotionEvent){}
+    fun onConsumePotion(event: WitchConsumePotionEvent) {}
+    fun onReadyPotion(event: WitchReadyPotionEvent) {}
+    fun onThrowPotion(event: WitchThrowPotionEvent) {}
 }

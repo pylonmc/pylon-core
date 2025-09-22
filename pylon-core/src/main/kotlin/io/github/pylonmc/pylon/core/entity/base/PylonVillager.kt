@@ -5,7 +5,7 @@ import org.bukkit.event.entity.VillagerCareerChangeEvent
 import org.bukkit.event.entity.VillagerReplenishTradeEvent
 
 interface PylonVillager {
-    fun onAcquireTrade(event: VillagerAcquireTradeEvent){}
-    fun onCareerChange(event: VillagerCareerChangeEvent){}
-    fun onReplenishTrade(event: VillagerReplenishTradeEvent){}
+    fun onAcquireTrade(event: VillagerAcquireTradeEvent) {}
+    fun onCareerChange(event: VillagerCareerChangeEvent) {}
+    fun onReplenishTrade(event: VillagerReplenishTradeEvent) {}
 }

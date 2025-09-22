@@ -8,10 +8,10 @@ import org.bukkit.event.entity.EntityToggleGlideEvent
 import org.bukkit.event.entity.EntityToggleSwimEvent
 
 interface PylonMovingEntity {
-    fun onMove(event: EntityMoveEvent){}
-    fun onJump(event: EntityJumpEvent){}
-    fun onKnockback(event: EntityKnockbackEvent){}
-    fun onToggleSwim(event: EntityToggleSwimEvent){}
-    fun onToggleGlide(event: EntityToggleGlideEvent){}
-    fun onToggleSit(event: EntityToggleSitEvent){}
+    fun onMove(event: EntityMoveEvent) {}
+    fun onJump(event: EntityJumpEvent) {}
+    fun onKnockback(event: EntityKnockbackEvent) {}
+    fun onToggleSwim(event: EntityToggleSwimEvent) {}
+    fun onToggleGlide(event: EntityToggleGlideEvent) {}
+    fun onToggleSit(event: EntityToggleSitEvent) {}
 }

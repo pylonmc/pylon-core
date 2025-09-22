@@ -4,7 +4,7 @@ import org.bukkit.event.entity.ItemDespawnEvent
 import org.bukkit.event.entity.ItemMergeEvent
 
 interface PylonItemEntity {
-    fun onDespawn(event: ItemDespawnEvent){}
-    fun onMerge(event: ItemMergeEvent){}
+    fun onDespawn(event: ItemDespawnEvent) {}
+    fun onMerge(event: ItemMergeEvent) {}
 
 }

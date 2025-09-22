@@ -4,6 +4,6 @@ import org.bukkit.event.entity.EntityDismountEvent
 import org.bukkit.event.entity.EntityMountEvent
 
 interface PylonMountableEntity {
-    fun onMount(event: EntityMountEvent){}
-    fun onDismount(event: EntityDismountEvent){}
+    fun onMount(event: EntityMountEvent) {}
+    fun onDismount(event: EntityDismountEvent) {}
 }
