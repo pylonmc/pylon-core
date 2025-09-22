@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.fluid.connecting
 
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.vanilla
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipe
 import io.github.pylonmc.pylon.core.content.fluid.FluidPipeConnector
@@ -15,6 +16,7 @@ import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.isCardinalDirection
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
+import io.github.pylonmc.pylon.core.util.replaceableOrAir
 import io.github.pylonmc.pylon.core.util.vectorToBlockFace
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -137,8 +139,8 @@ class ConnectingTask(
     }
 
     fun pathIntersectsBlocks()
-        = to is ConnectingPointNewBlock && !to.position.block.type.isAir()
-            || blocksOnPath(from.position, to.position).any { !it.type.isAir() }
+        = to is ConnectingPointNewBlock && !to.position.block.let { it.vanilla && it.replaceableOrAir }
+            || blocksOnPath(from.position, to.position).any { !(it.vanilla && it.replaceableOrAir) }
 
     /**
      * Figures out where the target of the pipe is and adjusts the targetOffset and targetConnection
@@ -224,8 +226,8 @@ class ConnectingTask(
                     && !(fromInteraction != null && to.connectedInteractions.contains(fromInteraction.uuid))
 
             val startAndEndEmptyIfNewBlock
-                = !(clonedFrom is ConnectingPointNewBlock && !clonedFrom.position.block.type.isAir()
-                    || to is ConnectingPointNewBlock && !clonedTo.position.block.type.isAir())
+                = !(clonedFrom is ConnectingPointNewBlock && !clonedFrom.position.block.let { it.vanilla && it.replaceableOrAir }
+                    || to is ConnectingPointNewBlock && !clonedTo.position.block.let { it.vanilla && it.replaceableOrAir })
 
             val startAndEndNotSameIfNewBlock
                 = !(from is ConnectingPointNewBlock

@@ -13,6 +13,7 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
@@ -335,3 +336,6 @@ fun <T> persistentData(
     type: PersistentDataType<*, T & Any>,
     default: T
 ) = persistentData(key, type) { default }
+
+val Block.replaceableOrAir: Boolean
+    get() = type.isAir || isReplaceable
