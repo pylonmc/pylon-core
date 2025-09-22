@@ -96,11 +96,12 @@ class ConfettiParticle {
                 )
 
                 val t = display.transformation
+                display.interpolationDelay = 0
                 display.interpolationDuration = TICK_AMOUNT.toInt()
                 display.transformation = Transformation(
                     t.translation,
                     leftRotation,
-                    t.scale,
+                    if (age == MAX_AGE) Vector3f(0f) else t.scale,
                     Quaternionf()
                 )
             }
