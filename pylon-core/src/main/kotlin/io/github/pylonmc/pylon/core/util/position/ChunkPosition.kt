@@ -7,6 +7,14 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import java.util.UUID
 
+/**
+ * Represents the position of a chunk (x, z, and world).
+ *
+ * Why not just use [Chunk]? Because [Chunk] contains lots of extra information,
+ * and so cannot practically be serialized. Holding references to blocks for
+ * extended periods may also prevent chunks from unloading, and increase memory
+ * usage.
+ */
 class ChunkPosition(val worldId: UUID?, val x: Int, val z: Int) {
     val world: World?
         get() = worldId?.let { Bukkit.getWorld(it) }
@@ -15,6 +23,9 @@ class ChunkPosition(val worldId: UUID?, val x: Int, val z: Int) {
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
 
     val chunk: Chunk?
+        /**
+         * WARNING: Getting the chunk will load the chunk if it is not already loaded.
+         */
         get() = world?.getChunkAt(x, z)
 
     /**

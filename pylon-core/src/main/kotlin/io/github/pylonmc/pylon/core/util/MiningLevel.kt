@@ -3,6 +3,11 @@ package io.github.pylonmc.pylon.core.util
 import org.bukkit.Material
 import org.bukkit.Tag
 
+/**
+ * Represents the blocks that a tool made of some material is allowed to break.
+ *
+ * For example, at a mining level of iron you cannot break obsidian.
+ */
 enum class MiningLevel(val numericalLevel: Int, private val incorrectTag: Tag<Material>?) {
     ANY(0, null),
     WOOD(1, Tag.INCORRECT_FOR_WOODEN_TOOL),
@@ -15,6 +20,9 @@ enum class MiningLevel(val numericalLevel: Int, private val incorrectTag: Tag<Ma
     NETHERITE(4, Tag.INCORRECT_FOR_NETHERITE_TOOL),
     ;
 
+    /**
+     * @return Whether this mining level is capable of mining the given [material]
+     */
     fun canMine(material: Material): Boolean {
         return when {
             UNBREAKABLE.contains(material) -> false
@@ -23,6 +31,9 @@ enum class MiningLevel(val numericalLevel: Int, private val incorrectTag: Tag<Ma
         }
     }
 
+    /**
+     * @return Whether this mining level is at least the given [level]. For example, iron is at least any, wood, stone, gold, and iron.
+     */
     fun isAtLeast(level: MiningLevel): Boolean {
         return numericalLevel >= level.numericalLevel
     }

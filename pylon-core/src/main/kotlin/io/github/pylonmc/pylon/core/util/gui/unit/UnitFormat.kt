@@ -10,6 +10,20 @@ import java.math.RoundingMode
 import java.time.Duration
 import java.util.EnumSet
 
+/**
+ * Handles formatting of a specific unit. Call [format] to format a value using this unit.
+ *
+ * @param name The English name of the unit (for example 'kilograms')
+ * @param singular A component representing the long singular form of this unit (kilogram, meter, liter, etc)
+ * @param plural A component representing the long plural form of this unit (kilograms, meters, liters, etc)
+ * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc)
+ * @param defaultPrefix The prefix (kilo, nano, etc) used for this unit unless specified while formatting.
+ * For example, if you create a 'grams' unit and specify 'kilo' as the default prefix, calling [format] with
+ * 100 will return '100 kilograms'
+ * @param defaultStyle The style to apply to the unit (not the value)
+ * @param usePrefixes Whether we should automatically calculate and apply a prefix (kilo, nano, etc)
+ * to the output.
+ */
 class UnitFormat @JvmOverloads constructor(
     val name: String,
     val singular: Component,
@@ -55,6 +69,11 @@ class UnitFormat @JvmOverloads constructor(
         return format(BigDecimal.valueOf(value))
     }
 
+    /**
+     * Represents a value that has already been formatted.
+     *
+     * You can use this class to override how an already-formatted value is displayed.
+     */
     inner class Formatted internal constructor(private val value: BigDecimal) : ComponentLike {
         private var sigFigs = value.precision()
         private var decimalPlaces = value.scale()
@@ -64,17 +83,59 @@ class UnitFormat @JvmOverloads constructor(
         private var prefix: MetricPrefix? = defaultPrefix
         private val badPrefixes = EnumSet.noneOf(MetricPrefix::class.java)
 
+        /**
+         * Sets the number of significant figures. For example, if this is set to 3, then a value
+         * of 0.472894 will be shown as 0.472.
+         */
         fun significantFigures(sigFigs: Int) = apply { this.sigFigs = sigFigs }
+
+        /**
+         * Sets the number of decimal places. This overrides significant figures if both are set.
+         */
         fun decimalPlaces(decimalPlaces: Int) = apply { this.decimalPlaces = decimalPlaces }
+
+        /**
+         * Sets whether a value should always have decimal places. For example, if set to true, then
+         * the value 145 will be displayed as '145.0'
+         *
+         * This overrides decimal places if both are set.
+         */
         fun forceDecimalPlaces(force: Boolean) = apply { this.forceDecimalPlaces = force }
+
+        /**
+         * Sets whether the abbreviation should be used instead of the full name.
+         */
         fun abbreviate(abbreviate: Boolean) = apply { this.abbreviate = abbreviate }
+
+        /**
+         * Overrides the style of the unit.
+         */
         fun unitStyle(style: Style) = apply { this.unitStyle = style }
+
+        /**
+         * Overrides the default prefix (and adjusts the value shown accordingly).
+         */
         fun prefix(prefix: MetricPrefix) = apply { this.prefix = prefix }
+
+        /**
+         * Sets what prefixes should not be used.
+         */
         fun ignorePrefixes(prefixes: Collection<MetricPrefix>) = apply { badPrefixes.addAll(prefixes) }
+
+        /**
+         * Sets what prefixes should not be used.
+         */
         fun ignorePrefixes(vararg prefixes: MetricPrefix) = apply { badPrefixes.addAll(prefixes) }
 
+        /**
+         * Sets whether the prefix should be automatically selected instead of using the default
+         * prefix (if set).
+         */
         fun autoSelectPrefix() = apply { prefix = null }
 
+        /**
+         * Builds a component representing the value and unit.
+         */
         override fun asComponent(): Component {
             var usedValue = value.round(MathContext(sigFigs, RoundingMode.HALF_UP))
             usedValue = usedValue.setScale(decimalPlaces, RoundingMode.HALF_UP)
@@ -239,6 +300,9 @@ class UnitFormat @JvmOverloads constructor(
             abbreviate = true
         )
 
+        /**
+         * Helper function that automatically formats a duration into days:hours:minutes:seconds
+         */
         @JvmStatic
         fun formatDuration(duration: Duration): Component {
             var component = Component.text()

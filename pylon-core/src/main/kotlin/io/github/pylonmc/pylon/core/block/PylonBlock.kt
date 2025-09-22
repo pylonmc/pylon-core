@@ -119,6 +119,12 @@ open class PylonBlock protected constructor(val block: Block) {
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
 
+        val Block.pylonBlock : PylonBlock?
+            get() = BlockStorage.get(this)
+
+        val Block.vanilla : Boolean
+            get() = BlockStorage.get(this) == null
+
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
             val schema = PylonBlockSchema(key, material, blockClass)

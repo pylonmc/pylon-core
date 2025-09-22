@@ -7,6 +7,14 @@ import org.bukkit.block.Block
 import org.joml.Vector3i
 import java.util.UUID
 
+/**
+ * Represents the position of a block (x, y, z, and world).
+ *
+ * Why not just use [Block]? Because [Block] contains lots of extra information such
+ * as the type of the block, and so cannot practically be serialized. Holding
+ * references to blocks for extended periods may also prevent chunks from unloading,
+ * and increase memory usage.
+ */
 class BlockPosition(val worldId: UUID?, val x: Int, val y: Int, val z: Int) {
     val world: World?
         get() = worldId?.let { Bukkit.getWorld(it) }
@@ -14,17 +22,19 @@ class BlockPosition(val worldId: UUID?, val x: Int, val y: Int, val z: Int) {
     val chunk: ChunkPosition
         get() = ChunkPosition(worldId, x shr 4, z shr 4)
 
-    val asLong: Long
+    @get:JvmSynthetic
+    internal val asLong: Long
         get() = ((x and 0x3FFFFFF).toLong() shl 38)
             .or((z and 0x3FFFFFF).toLong() shl 12)
             .or((y and 0xFFF).toLong())
 
-    constructor(asLong: Long) : this(null, asLong)
+    internal constructor(asLong: Long) : this(null, asLong)
 
-    constructor(world: World?, asLong: Long) : this(world?.uid,
+    internal constructor(world: World?, asLong: Long) : this(world?.uid,
         (asLong shr 38).toInt(),
         ((asLong shl 52) shr 52).toInt(),
-        ((asLong shl 26) shr 38).toInt())
+        ((asLong shl 26) shr 38).toInt()
+    )
 
     constructor(x: Int, y: Int, z: Int) : this(null as UUID?, x, y, z)
 
