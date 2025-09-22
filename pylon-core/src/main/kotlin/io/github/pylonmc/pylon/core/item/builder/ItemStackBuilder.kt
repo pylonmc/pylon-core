@@ -139,6 +139,7 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
             return of(stack)
                 .editPdc { it.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .let {
+                    //  Adds the pylon item key as the FIRST string in custom model data, but preserve any pre-existing data
                     val originalModelData = it.stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA)
                     val modelData = CustomModelData.customModelData().addString(key.toString());
                     if (originalModelData != null) {
