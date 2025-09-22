@@ -18,7 +18,6 @@ import io.github.pylonmc.pylon.test.test.misc.GametestTest;
 import io.github.pylonmc.pylon.test.test.misc.WrapTest;
 import io.github.pylonmc.pylon.test.test.recipe.CraftingTest;
 import io.github.pylonmc.pylon.test.test.recipe.FurnaceTest;
-import io.github.pylonmc.pylon.test.test.recipe.MobDropTest;
 import io.github.pylonmc.pylon.test.test.serializer.*;
 import io.github.pylonmc.pylon.test.util.BedrockWorldGenerator;
 import io.github.pylonmc.pylon.test.util.TestUtil;
@@ -80,7 +79,6 @@ public class PylonTest extends JavaPlugin implements PylonAddon {
 
         tests.add(new CraftingTest());
         tests.add(new FurnaceTest());
-        tests.add(new MobDropTest());
 
         tests.add(new EntityStorageSimpleTest());
         tests.add(new EntityStorageUnregisteredEntityTest());

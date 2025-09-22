@@ -7,7 +7,6 @@ import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.research.Research
-import io.github.pylonmc.pylon.core.mobdrop.MobDrop
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.test.GameTestConfig
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -34,7 +33,6 @@ data class PylonRegistryKey<T>(val namespace: String, val path: String) {
         @JvmField val GAMETESTS = PylonRegistryKey<GameTestConfig>(pylonKey("gametests"))
         @JvmField val ADDONS = PylonRegistryKey<PylonAddon>(pylonKey("addons"))
         @JvmField val RECIPE_TYPES = PylonRegistryKey<RecipeType<*>>(pylonKey("recipe_types"))
-        @JvmField val MOB_DROPS = PylonRegistryKey<MobDrop>(pylonKey("mob_drops"))
         @JvmField val RESEARCHES = PylonRegistryKey<Research>(pylonKey("researches"))
         @JvmField val ITEM_TAGS = PylonRegistryKey<Tag<ItemTypeWrapper>>(pylonKey("tags"))
         // @formatter:on
