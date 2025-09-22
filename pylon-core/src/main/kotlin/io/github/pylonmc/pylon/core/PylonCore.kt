@@ -78,6 +78,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
         Bukkit.getPluginManager().registerEvents(ConnectingService, this)
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
+        Bukkit.getPluginManager().registerEvents(PylonGuide, this)
 
         Bukkit.getScheduler().runTaskTimer(
             this,

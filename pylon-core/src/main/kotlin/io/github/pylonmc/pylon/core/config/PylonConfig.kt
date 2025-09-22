@@ -8,6 +8,9 @@ object PylonConfig {
     private val config = Config(PylonCore, "config.yml")
 
     @JvmStatic
+    val pylonGuideOnFirstJoin = config.getOrThrow("pylon-guide-on-first-join", ConfigAdapter.BOOLEAN)
+
+    @JvmStatic
     val defaultTickInterval = config.getOrThrow("default-tick-interval", ConfigAdapter.INT)
 
     @JvmStatic
