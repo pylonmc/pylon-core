@@ -91,7 +91,7 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockBreakEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            if(BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event)) == null){
+            if (BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event)) == null) {
                 event.isCancelled = true
                 return
             }
@@ -108,7 +108,7 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockBurn(event: BlockBurnEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            if(BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event)) == null){
+            if (BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event)) == null) {
                 event.isCancelled = true
             }
         }
@@ -118,13 +118,13 @@ internal object BlockListener : Listener {
     // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
-        if(BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null){
+        if (BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
             event.isCancelled = true
             return
         }
         val it = event.blockList().iterator()
-        while(it.hasNext()){
-            if(BlockStorage.breakBlock(it.next(), BlockBreakContext.BlockExploded(event)) == null){
+        while (it.hasNext()) {
+            if (BlockStorage.breakBlock(it.next(), BlockBreakContext.BlockExploded(event)) == null) {
                 it.remove()
             }
         }
@@ -139,8 +139,8 @@ internal object BlockListener : Listener {
     private fun blockRemove(event: EntityExplodeEvent) {
         val context = BlockBreakContext.EntityExploded(event)
         val it = event.blockList().iterator()
-        while(it.hasNext()){
-            if(BlockStorage.breakBlock(it.next(), context) == null){
+        while (it.hasNext()) {
+            if (BlockStorage.breakBlock(it.next(), context) == null) {
                 it.remove()
             }
         }
@@ -149,7 +149,7 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockFadeEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            if(BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event)) == null){
+            if (BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event)) == null) {
                 event.isCancelled = true
             }
         }
