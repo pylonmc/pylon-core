@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
+import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
@@ -19,15 +20,18 @@ import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import kotlin.math.max
 
 /**
  * @property cost If null, the research cannot be unlocked using points
@@ -55,7 +59,7 @@ data class Research(
     }
 
     @JvmOverloads
-    fun addTo(player: Player, sendMessage: Boolean = true) {
+    fun addTo(player: Player, sendMessage: Boolean = true, effects: Boolean = true) {
         if (this in getResearches(player)) return
 
         addResearch(player, this)
@@ -65,6 +69,7 @@ data class Research(
                 player.discoverRecipe(recipe.key)
             }
         }
+
         if (sendMessage) {
             player.sendMessage(
                 Component.translatable(
@@ -72,6 +77,25 @@ data class Research(
                     PylonArgument.of("research", name)
                 )
             )
+        }
+
+        if (effects) {
+            val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
+            val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
+            val spawnedConfetti = max(amount, PylonConfig.researchMaxConfettiAmount)
+            ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
+
+            fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {
+                Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
+                    player.playSound(player.location, this, 1.5f, pitch)
+                }, delay)
+            }
+
+            repeat(2) {
+                Sound.ENTITY_FIREWORK_ROCKET_BLAST.playSoundLater(3L * it)
+                Sound.ENTITY_PLAYER_LEVELUP.playSoundLater(6L * it, 0.9f)
+                Sound.ENTITY_FIREWORK_ROCKET_LAUNCH.playSoundLater(9L * it)
+            }
         }
     }
 
@@ -255,8 +279,8 @@ private fun Player.ejectUnknownItems() {
 }
 
 @JvmSynthetic
-fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
-    research.addTo(this, sendMessage)
+fun Player.addResearch(research: Research, sendMessage: Boolean = false, confetti: Boolean = true) {
+    research.addTo(this, sendMessage, confetti)
 }
 
 @JvmSynthetic

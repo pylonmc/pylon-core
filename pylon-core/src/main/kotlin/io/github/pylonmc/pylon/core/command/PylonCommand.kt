@@ -24,6 +24,7 @@ import io.github.pylonmc.pylon.core.item.research.addResearch
 import io.github.pylonmc.pylon.core.item.research.hasResearch
 import io.github.pylonmc.pylon.core.item.research.removeResearch
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
+import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -162,10 +163,10 @@ private val gametest = buildCommand("gametest") {
 
 private val researchAdd = buildCommand("add") {
     argument("players", ArgumentTypes.players()) {
-        fun addResearches(context: CommandContext<CommandSourceStack>, researches: List<Research>) {
+        fun addResearches(context: CommandContext<CommandSourceStack>, researches: List<Research>, confetti: Boolean = true) {
             for (player in context.getArgument<List<Player>>("players")) {
                 for (res in researches) {
-                    player.addResearch(res, sendMessage = false)
+                    player.addResearch(res, false, confetti)
                     context.source.sender.sendMessage(
                         Component.translatable(
                             "pylon.pyloncore.message.command.research.added",
@@ -180,8 +181,9 @@ private val researchAdd = buildCommand("add") {
         literal("*") {
             permission("pylon.command.research.modify")
             executes {
+                // no confetti for all research otherwise server go big boom
                 PylonMetrics.onCommandRun("/py research add")
-                addResearches(this, PylonRegistry.RESEARCHES.toList())
+                addResearches(this, PylonRegistry.RESEARCHES.toList(), false)
             }
         }
 
@@ -441,6 +443,25 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
     }
 }
 
+private val confetti = buildCommand("confetti") {
+    argument("amount", IntegerArgumentType.integer(1)) {
+        permission("pylon.command.confetti")
+        executes {
+            PylonMetrics.onCommandRun("/py confetti")
+            val sender = this.source.sender
+            val amount = IntegerArgumentType.getInteger(this, "amount")
+
+            if (sender !is Player) {
+                sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.error.must_be_player"))
+                return@executes
+            }
+
+            ConfettiParticle.spawnMany(sender.location, amount).run()
+            return@executes
+        }
+    }
+}
+
 @JvmSynthetic
 internal val ROOT_COMMAND = buildCommand("pylon") {
     permission("pylon.command.guide")
@@ -458,6 +479,7 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
     then(gametest)
     then(research)
     then(exposeRecipeConfig)
+    then(confetti)
 }
 
 @JvmSynthetic
