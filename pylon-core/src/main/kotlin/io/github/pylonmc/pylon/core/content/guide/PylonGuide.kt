@@ -13,14 +13,12 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
@@ -86,9 +84,13 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         @JvmStatic
         val settingsAndInfoPage = SettingsAndInfoPage()
 
+        /**
+         * Lowest priority to avoid another plugin saving the players data or doing something
+         * to make the player considered as having played before, before we receive the event
+         */
         @EventHandler(priority = EventPriority.LOWEST)
         private fun join(event: PlayerJoinEvent) {
-            if (PylonConfig.firstJoinPylonGuide && !event.player.hasPlayedBefore()) {
+            if (PylonConfig.pylonGuideOnFirstJoin && !event.player.hasPlayedBefore()) {
                 event.player.give(STACK.clone())
             }
         }
