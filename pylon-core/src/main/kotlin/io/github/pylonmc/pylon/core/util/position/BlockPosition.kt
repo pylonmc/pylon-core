@@ -1,35 +1,51 @@
 package io.github.pylonmc.pylon.core.util.position
 
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.util.Vector
 import org.joml.Vector3i
-import java.lang.ref.WeakReference
+import java.util.UUID
 
-class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
-    private val worldRef: WeakReference<World> = WeakReference(world)
+/**
+ * Represents the position of a block (x, y, z, and world).
+ *
+ * Why not just use [Block]? Because [Block] contains lots of extra information such
+ * as the type of the block, and so cannot practically be serialized. Holding
+ * references to blocks for extended periods may also prevent chunks from unloading,
+ * and increase memory usage.
+ */
+class BlockPosition(val worldId: UUID?, val x: Int, val y: Int, val z: Int) {
     val world: World?
-        get() = worldRef.get()
+        get() = worldId?.let { Bukkit.getWorld(it) }
 
     val chunk: ChunkPosition
-        get() = ChunkPosition(world, x shr 4, z shr 4)
+        get() = ChunkPosition(worldId, x shr 4, z shr 4)
 
-    val asLong: Long
+    @get:JvmSynthetic
+    internal val asLong: Long
         get() = ((x and 0x3FFFFFF).toLong() shl 38)
             .or((z and 0x3FFFFFF).toLong() shl 12)
             .or((y and 0xFFF).toLong())
 
-    constructor(world: World, asLong: Long) : this(world,
+    internal constructor(asLong: Long) : this(null, asLong)
+
+    internal constructor(world: World?, asLong: Long) : this(world?.uid,
         (asLong shr 38).toInt(),
         ((asLong shl 52) shr 52).toInt(),
-        ((asLong shl 26) shr 38).toInt())
+        ((asLong shl 26) shr 38).toInt()
+    )
 
-    constructor(location: Location) : this(location.world, location.blockX, location.blockY, location.blockZ)
+    constructor(x: Int, y: Int, z: Int) : this(null as UUID?, x, y, z)
 
-    constructor(world: World, position: Vector) : this(world, position.blockX, position.blockY, position.blockZ)
+    constructor(world: World?, x: Int, y: Int, z: Int) : this(world?.uid, x, y, z)
 
-    constructor(block: Block) : this(block.world, block.x, block.y, block.z)
+    constructor(location: Location) : this(location.world?.uid, location.blockX, location.blockY, location.blockZ)
+
+    constructor(world: World?, position: Vector) : this(world?.uid, position.blockX, position.blockY, position.blockZ)
+
+    constructor(block: Block) : this(block.world.uid, block.x, block.y, block.z)
 
     override fun hashCode(): Int {
         val prime = 31
@@ -52,37 +68,37 @@ class BlockPosition(world: World?, val x: Int, val y: Int, val z: Int) {
     }
 
     fun addScalar(x: Int, y: Int, z: Int): BlockPosition {
-        return BlockPosition(world, this.x + x, this.y + y, this.z + z)
+        return BlockPosition(worldId, this.x + x, this.y + y, this.z + z)
     }
 
     fun withScalar(x: Int, y: Int, z: Int): BlockPosition {
-        return BlockPosition(world, x, y, z)
+        return BlockPosition(worldId, x, y, z)
     }
 
     operator fun plus(other: BlockPosition): BlockPosition {
-        check(world == other.world) { "Cannot add two BlockPositions in different worlds" }
-        return BlockPosition(world, x + other.x, y + other.y, z + other.z)
+        check(worldId == other.worldId) { "Cannot add two BlockPositions in different worlds" }
+        return BlockPosition(worldId, x + other.x, y + other.y, z + other.z)
     }
 
     operator fun plus(other: Vector3i): BlockPosition {
-        return BlockPosition(world, x + other.x, y + other.y, z + other.z)
+        return BlockPosition(worldId, x + other.x, y + other.y, z + other.z)
     }
 
     operator fun minus(other: BlockPosition): BlockPosition {
-        check(world == other.world) { "Cannot subtract two BlockPositions in different worlds" }
-        return BlockPosition(world, x - other.x, y - other.y, z - other.z)
+        check(worldId == other.worldId) { "Cannot subtract two BlockPositions in different worlds" }
+        return BlockPosition(worldId, x - other.x, y - other.y, z - other.z)
     }
 
     operator fun minus(other: Vector3i): BlockPosition {
-        return BlockPosition(world, x + other.x, y + other.y, z + other.z)
+        return BlockPosition(worldId, x + other.x, y + other.y, z + other.z)
     }
 
     operator fun times(value: Int): BlockPosition {
-        return BlockPosition(world, x * value, y * value, z * value)
+        return BlockPosition(worldId, x * value, y * value, z * value)
     }
 
     operator fun div(value: Int): BlockPosition {
-        return BlockPosition(world, x / value, y / value, z / value)
+        return BlockPosition(worldId, x / value, y / value, z / value)
     }
 
     val vector3i: Vector3i

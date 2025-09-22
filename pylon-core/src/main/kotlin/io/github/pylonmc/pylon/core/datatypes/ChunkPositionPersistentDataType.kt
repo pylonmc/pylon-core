@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes.world
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
@@ -21,17 +22,15 @@ object ChunkPositionPersistentDataType : PersistentDataType<PersistentDataContai
     ): ChunkPosition {
         val x = primitive.get(xKey, PersistentDataType.INTEGER)!!
         val z = primitive.get(zKey, PersistentDataType.INTEGER)!!
-        val world = primitive.get(worldKey, PylonSerializers.WORLD)
-        return ChunkPosition(world, x, z)
+        val worldId = primitive.get(worldKey, PylonSerializers.UUID)
+        return ChunkPosition(worldId, x, z)
     }
 
     override fun toPrimitive(complex: ChunkPosition, context: PersistentDataAdapterContext): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()
         pdc.set(xKey, PersistentDataType.INTEGER, complex.x)
         pdc.set(zKey, PersistentDataType.INTEGER, complex.z)
-        if (complex.world != null) {
-            pdc.set(worldKey, PylonSerializers.WORLD, complex.world!!)
-        }
+        complex.worldId?.let { pdc.set(worldKey, PylonSerializers.UUID, it) }
         return pdc
     }
 }

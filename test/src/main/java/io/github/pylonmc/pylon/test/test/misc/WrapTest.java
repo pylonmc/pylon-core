@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.test.test.misc;
 
+import io.github.pylonmc.pylon.core.i18n.PylonTranslator;
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder;
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapRepresentation;
-import io.github.pylonmc.pylon.core.util.PylonUtils;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -55,7 +55,7 @@ public class WrapTest extends AsyncTest {
         LineWrapRepresentation repr = LineWrapEncoder.encode(component);
         List<String> newLines = new ArrayList<>();
         for (String line : repr.lines()) {
-            newLines.addAll(PylonUtils.wrapText(line, 8));
+            newLines.addAll(PylonTranslator.wrapText(line, 8));
         }
         List<TextComponent> lines = new LineWrapRepresentation(newLines, repr.styles()).toComponentLines();
         return Component.join(JoinConfiguration.newlines(), lines);

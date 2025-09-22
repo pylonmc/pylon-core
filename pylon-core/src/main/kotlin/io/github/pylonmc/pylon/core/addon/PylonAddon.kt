@@ -129,7 +129,6 @@ interface PylonAddon : Keyed {
                 PylonRegistry.GAMETESTS.unregisterAllFromAddon(plugin)
                 PylonRegistry.ITEMS.unregisterAllFromAddon(plugin)
                 PylonRegistry.RECIPE_TYPES.unregisterAllFromAddon(plugin)
-                PylonRegistry.MOB_DROPS.unregisterAllFromAddon(plugin)
                 PylonRegistry.ADDONS.unregister(plugin)
             }
         }

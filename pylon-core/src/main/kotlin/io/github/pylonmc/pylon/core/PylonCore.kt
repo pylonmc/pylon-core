@@ -27,7 +27,6 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
-import io.github.pylonmc.pylon.core.mobdrop.MobDropListener
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
@@ -51,7 +50,7 @@ import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
-import java.util.Locale
+import java.util.*
 import kotlin.io.path.*
 
 object PylonCore : JavaPlugin(), PylonAddon {
@@ -88,7 +87,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
-        Bukkit.getPluginManager().registerEvents(MobDropListener, this)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
@@ -103,6 +101,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
         Bukkit.getPluginManager().registerEvents(ConnectingService, this)
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
+        Bukkit.getPluginManager().registerEvents(PylonGuide, this)
 
         if (PylonConfig.customBlockTexturesEnabled) {
             Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)

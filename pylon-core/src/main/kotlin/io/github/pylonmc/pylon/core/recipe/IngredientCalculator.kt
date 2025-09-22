@@ -5,7 +5,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateBase
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateFinal
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.checkRecursiveDepth
-import io.github.pylonmc.pylon.core.util.findRecipeFor
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import net.kyori.adventure.key.Key
 import org.bukkit.inventory.ItemStack
@@ -415,4 +415,62 @@ sealed class Container {
             return list.map { of(it) }.toMutableList()
         }
     }
+}
+
+private fun findRecipeFor(item: PylonItem): PylonRecipe? {
+    // 1. if there's a recipe with the same key as the item, use that
+    PylonRegistry.RECIPE_TYPES
+        .map { it.getRecipe(item.schema.key) }
+        .find { it != null }?.let { return it }
+
+    // 2. if there's a recipe which produces *only* that item, use that
+    // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
+    val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(item.stack) && recipe.results.size == 1 }
+        .sortedBy { it.key }
+        .toList()
+
+    if (singleOutputRecipes.isNotEmpty()) return singleOutputRecipes.first()
+
+    // 4. if there's a recipe which produces the item *alongside* other things, use that
+    // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
+    val multiOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(item.stack) }
+        .sortedBy { it.key }
+        .toList()
+
+    if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
+
+    return null
+}
+
+private fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
+    // 1. if there's a recipe with the same key as the item, use that
+    PylonRegistry.RECIPE_TYPES
+        .map { it.getRecipe(fluid.key) }
+        .find { it != null }?.let { return it }
+
+    // 2. if there's a recipe which produces *only* that item, use that
+    // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
+    val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size == 1 }
+        .sortedBy { it.key }
+        .toList()
+
+    if (singleOutputRecipes.isNotEmpty()) return singleOutputRecipes.first()
+
+    // 4. if there's a recipe which produces the item *alongside* other things, use that
+    // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
+    val multiOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
+        .flatMap { it.recipes }
+        .filter { recipe -> recipe.isOutput(fluid) }
+        .sortedWith { a: PylonRecipe, b: PylonRecipe -> a.key.compareTo(b.key) }
+        .toList()
+
+    if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
+
+    return null
 }

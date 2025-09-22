@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.content.guide
 
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
@@ -15,7 +16,11 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
@@ -28,7 +33,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         }
     }
 
-    companion object {
+    companion object : Listener {
 
         @JvmField
         val KEY = pylonKey("guide")
@@ -79,6 +84,17 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
 
         @JvmStatic
         val settingsAndInfoPage = SettingsAndInfoPage()
+
+        /**
+         * Lowest priority to avoid another plugin saving the players data or doing something
+         * to make the player considered as having played before, before we receive the event
+         */
+        @EventHandler(priority = EventPriority.LOWEST)
+        private fun join(event: PlayerJoinEvent) {
+            if (PylonConfig.pylonGuideOnFirstJoin && !event.player.hasPlayedBefore()) {
+                event.player.give(STACK.clone())
+            }
+        }
 
         @JvmStatic
         fun ingredientsPage(stack: ItemStack) = ItemIngredientsPage(stack)
