@@ -4,6 +4,7 @@ package io.github.pylonmc.pylon.core.command
 
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mojang.brigadier.arguments.DoubleArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.LongArgumentType
 import com.mojang.brigadier.context.CommandContext
@@ -447,19 +448,38 @@ private val confetti = buildCommand("confetti") {
     argument("amount", IntegerArgumentType.integer(1)) {
         permission("pylon.command.confetti")
         executes {
-            PylonMetrics.onCommandRun("/py confetti")
-            val sender = this.source.sender
-            val amount = IntegerArgumentType.getInteger(this, "amount")
-
-            if (sender !is Player) {
-                sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.error.must_be_player"))
-                return@executes
+            confetti(this, IntegerArgumentType.getInteger(this, "amount"))
+        }
+        argument("speed", DoubleArgumentType.doubleArg(0.0)) {
+            permission("pylon.command.confetti")
+            executes {
+                confetti(this, IntegerArgumentType.getInteger(this, "amount"), DoubleArgumentType.getDouble(this, "speed"))
             }
-
-            ConfettiParticle.spawnMany(sender.location, amount).run()
-            return@executes
+            argument("lifetime", IntegerArgumentType.integer(1)) {
+                permission("pylon.command.confetti")
+                executes {
+                    confetti(
+                        this,
+                        IntegerArgumentType.getInteger(this, "amount"),
+                        DoubleArgumentType.getDouble(this, "speed"),
+                        IntegerArgumentType.getInteger(this, "lifetime")
+                    )
+                }
+            }
         }
     }
+}
+
+private fun confetti(context: CommandContext<CommandSourceStack>, amount: Int, speed: Double = ConfettiParticle.DEFAULT_SPEED, lifetime: Int = ConfettiParticle.DEFAULT_LIFETIME) {
+    PylonMetrics.onCommandRun("/py confetti")
+    val sender = context.source.sender
+    if (sender !is Player) {
+        sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.error.must_be_player"))
+        return
+    }
+
+    ConfettiParticle.spawnMany(sender.location, amount, speed, lifetime).run()
+    return
 }
 
 @JvmSynthetic
