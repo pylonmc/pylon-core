@@ -13,6 +13,7 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
+import io.github.pylonmc.pylon.core.command.confetti
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
@@ -447,19 +448,22 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
 private val confetti = buildCommand("confetti") {
     argument("amount", IntegerArgumentType.integer(1)) {
         permission("pylon.command.confetti")
-        executes {
-            confetti(this, IntegerArgumentType.getInteger(this, "amount"))
+        executesWithPlayer { player ->
+            PylonMetrics.onCommandRun("/py confetti")
+            ConfettiParticle.spawnMany(player.location, IntegerArgumentType.getInteger(this, "amount")).run()
         }
         argument("speed", DoubleArgumentType.doubleArg(0.0)) {
             permission("pylon.command.confetti")
-            executes {
-                confetti(this, IntegerArgumentType.getInteger(this, "amount"), DoubleArgumentType.getDouble(this, "speed"))
+            executesWithPlayer { player ->
+                PylonMetrics.onCommandRun("/py confetti")
+                ConfettiParticle.spawnMany(player.location, IntegerArgumentType.getInteger(this, "amount"), DoubleArgumentType.getDouble(this, "speed"))
             }
             argument("lifetime", IntegerArgumentType.integer(1)) {
                 permission("pylon.command.confetti")
-                executes {
-                    confetti(
-                        this,
+                executesWithPlayer { player ->
+                    PylonMetrics.onCommandRun("/py confetti")
+                    ConfettiParticle.spawnMany(
+                        player.location,
                         IntegerArgumentType.getInteger(this, "amount"),
                         DoubleArgumentType.getDouble(this, "speed"),
                         IntegerArgumentType.getInteger(this, "lifetime")
@@ -468,18 +472,6 @@ private val confetti = buildCommand("confetti") {
             }
         }
     }
-}
-
-private fun confetti(context: CommandContext<CommandSourceStack>, amount: Int, speed: Double = ConfettiParticle.DEFAULT_SPEED, lifetime: Int = ConfettiParticle.DEFAULT_LIFETIME) {
-    PylonMetrics.onCommandRun("/py confetti")
-    val sender = context.source.sender
-    if (sender !is Player) {
-        sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.error.must_be_player"))
-        return
-    }
-
-    ConfettiParticle.spawnMany(sender.location, amount, speed, lifetime).run()
-    return
 }
 
 @JvmSynthetic

@@ -91,8 +91,8 @@ class ConfettiParticle {
                     block = currentBlock
 
                     // Apply pseudo-random drift
-                    val driftX: Double = (RANDOM.nextDouble() - 0.5) * 0.03 * TICK_AMOUNT
-                    val driftZ: Double = (RANDOM.nextDouble() - 0.5) * 0.03 * TICK_AMOUNT
+                    val driftX = (RANDOM.nextDouble() - 0.5) * 0.03 * TICK_AMOUNT
+                    val driftZ = (RANDOM.nextDouble() - 0.5) * 0.03 * TICK_AMOUNT
                     velocity.add(Vector(driftX, 0.0, driftZ))
 
                     velocity.setY(velocity.getY() + GRAVITY * TICK_AMOUNT)
@@ -134,6 +134,10 @@ class ConfettiParticle {
         private const val GRAVITY = -0.02
         private const val DRAG = 0.85
 
+        /**
+         * There are a few cases where particles would all immediately die when spawning
+         * this is to ensure they last at least 1 second.
+         */
         private const val IMMORTAL_AGE = 10
         private const val TICK_AMOUNT = 2L
 
