@@ -46,25 +46,31 @@ object BlockTextureEngine : Listener {
     private val octrees = mutableMapOf<UUID, Octree<PylonBlock>>()
     private val jobs = mutableMapOf<UUID, Job>()
 
-    internal object UpdateSnapshotTask : Runnable {
-        override fun run() {
-            val now = System.currentTimeMillis()
-            var refreshed = 0
-            var toRefresh = ceil(chunkData.size * PylonConfig.cullingSnapshotRefreshShare)
-            var entries = mutableListOf<Entry<ChunkPosition, ChunkData>>()
-            entries.addAll(chunkData.entries)
-            entries.sortBy { it.value.timestamp }
+    internal val updateSnapshotJob : Job by lazy {
+        PylonCore.launch {
+            while (true) {
+                delay(PylonConfig.cullingSnapshotRefreshInterval.ticks)
+                val now = System.currentTimeMillis()
+                var refreshed = 0
+                var toRefresh = ceil(chunkData.size * PylonConfig.cullingSnapshotRefreshShare)
+                var entries = mutableListOf<Entry<ChunkPosition, ChunkData>>()
+                entries.addAll(chunkData.entries)
+                entries.sortBy { it.value.timestamp }
 
-            for ((pos, data) in entries) {
-                if (now - data.timestamp <= PylonConfig.cullingSnapshotRefreshInterval) continue
+                for ((pos, data) in entries) {
+                    if (now - data.timestamp <= PylonConfig.cullingSnapshotRefreshInterval) continue
 
-                val world = pos.world ?: continue
-                if (world.isChunkLoaded(pos.x, pos.z)) {
-                    for (position in data.occluding.asMap().keys.toSet()) {
-                        data.occluding.put(position, position.block.blockData.isOccluding)
+                    val world = pos.world ?: continue
+                    if (world.isChunkLoaded(pos.x, pos.z)) {
+                        data.timestamp = now
+                        for (position in data.occluding.asMap().keys.toSet()) {
+                            data.occluding.put(position, position.block.blockData.isOccluding)
+                        }
+
+                        if (++refreshed >= toRefresh) break
+                    } else {
+                        chunkData.remove(pos)
                     }
-
-                    if (++refreshed >= toRefresh) break
                 }
             }
         }
@@ -240,7 +246,7 @@ object BlockTextureEngine : Listener {
     }
 
     private data class ChunkData(
-        val timestamp: Long,
+        var timestamp: Long,
         val occluding: LoadingCache<BlockPosition, Boolean> = Caffeine.newBuilder()
             .expireAfterAccess(Duration.ofMinutes(1))
             .build { pos -> pos.block.blockData.isOccluding },

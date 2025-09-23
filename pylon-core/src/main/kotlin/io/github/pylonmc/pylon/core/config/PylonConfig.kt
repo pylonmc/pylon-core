@@ -62,7 +62,7 @@ object PylonConfig {
     val customBlockTexturesEnabled = config.getOrThrow("custom-block-textures.enabled", ConfigAdapter.BOOLEAN)
 
     @JvmStatic
-    val cullingSnapshotRefreshInterval = config.getOrThrow("custom-block-textures.culling.occluding-snapshot-refresh-interval", ConfigAdapter.LONG)
+    val cullingSnapshotRefreshInterval = config.getOrThrow("custom-block-textures.culling.occluding-snapshot-refresh-interval", ConfigAdapter.INT)
 
     @JvmStatic
     val cullingSnapshotRefreshShare = config.getOrThrow("custom-block-textures.culling.occluding-snapshot-refresh-share", ConfigAdapter.DOUBLE)

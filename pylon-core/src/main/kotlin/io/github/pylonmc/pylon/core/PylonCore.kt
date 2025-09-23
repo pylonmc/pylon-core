@@ -105,12 +105,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         if (PylonConfig.customBlockTexturesEnabled) {
             Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
-            Bukkit.getScheduler().runTaskTimer(
-                this,
-                BlockTextureEngine.UpdateSnapshotTask,
-                PylonConfig.cullingSnapshotRefreshInterval,
-                PylonConfig.cullingSnapshotRefreshInterval
-            )
+            BlockTextureEngine.updateSnapshotJob
         }
 
         Bukkit.getScheduler().runTaskTimer(

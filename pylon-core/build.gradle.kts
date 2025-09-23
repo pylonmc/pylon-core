@@ -41,7 +41,7 @@ dependencies {
     implementation("com.github.retrooper:packetevents-spigot:2.9.5")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
+    paperLibrary("com.github.ben-manes.caffeine:caffeine:3.2.2")
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
