@@ -293,6 +293,27 @@ inline fun <T : Any> ItemStack.editData(
     return this
 }
 
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <T : Any> ItemStack.editDataOrDefault(
+    type: DataComponentType.Valued<T>,
+    block: (T) -> T
+): ItemStack {
+    val data = getData(type) ?: this.type.getDefaultData(type) ?: return this
+    setData(type, block(data))
+    return this
+}
+
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <T : Any> ItemStack.editDataOrSet(
+    type: DataComponentType.Valued<T>,
+    block: (T?) -> T
+): ItemStack {
+    setData(type, block(getData(type)))
+    return this
+}
+
 /**
  * Wrapper around [PersistentDataContainer.set] that allows nullable values to be passed
  *
