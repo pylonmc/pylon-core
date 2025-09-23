@@ -2,7 +2,6 @@
 
 package io.github.pylonmc.pylon.core.util.gui
 
-import io.github.pylonmc.pylon.core.PylonCore.material
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems.background
@@ -27,9 +26,10 @@ object GuiItems {
      * A gray glass pane with no name or lore.
      */
     @JvmStatic
-    fun background(): Item = SimpleItem(
+    @JvmOverloads
+    fun background(name: String = ""): Item = SimpleItem(
         ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
-            .name("")
+            .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
 
@@ -37,9 +37,10 @@ object GuiItems {
      * A black glass pane with no name or lore.
      */
     @JvmStatic
-    fun backgroundBlack(): Item = SimpleItem(
+    @JvmOverloads
+    fun backgroundBlack(name: String = ""): Item = SimpleItem(
         ItemStackBuilder.of(Material.BLACK_STAINED_GLASS_PANE)
-            .name("")
+            .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
 
