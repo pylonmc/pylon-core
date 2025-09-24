@@ -115,7 +115,7 @@ internal object BlockListener : Listener {
     private fun blockRemove(event: BlockExplodeEvent) {
         BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event))
         for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event))
+            BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event, block))
         }
     }
 
@@ -123,9 +123,8 @@ internal object BlockListener : Listener {
     // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
-        val context = BlockBreakContext.EntityExploded(event);
         for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, context)
+            BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(event, block))
         }
     }
 

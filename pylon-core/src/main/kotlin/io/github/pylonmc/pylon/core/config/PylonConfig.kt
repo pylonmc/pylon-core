@@ -56,5 +56,8 @@ object PylonConfig {
     val metricsSaveIntervalTicks = config.getOrThrow("metrics-save-interval-ticks", ConfigAdapter.LONG)
 
     @JvmStatic
+    val defaultExplosionDropChance = config.getOrThrow("default-explosion-drop-chance", ConfigAdapter.DOUBLE)
+
+    @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
 }

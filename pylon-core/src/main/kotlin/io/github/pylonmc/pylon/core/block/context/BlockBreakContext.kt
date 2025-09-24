@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block.context
 
 import org.bukkit.GameMode
+import org.bukkit.block.Block
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockBurnEvent
 import org.bukkit.event.block.BlockExplodeEvent
@@ -49,23 +50,17 @@ interface BlockBreakContext {
     /**
      * The block is being exploded by an entity (e.g. a creeper or TNT)
      */
-    data class EntityExploded(val event: EntityExplodeEvent) : BlockBreakContext {
-        override val normallyDrops = true
-    }
+    data class EntityExploded(val event: EntityExplodeEvent, val affectedBlock: Block) : BlockExplodeContext(affectedBlock)
 
     /**
      * The block is exploding (e.g. beds in the Nether/End, respawn anchors in the Overworld/End)
      */
-    data class BlockExplosionOrigin(val event: BlockExplodeEvent) : BlockBreakContext {
-        override val normallyDrops = false
-    }
+    data class BlockExplosionOrigin(val event: BlockExplodeEvent) : BlockExplodeContext(event.block)
 
     /**
      * The block is being exploded as a result of another block exploding
      */
-    data class BlockExploded(val event: BlockExplodeEvent) : BlockBreakContext {
-        override val normallyDrops = false
-    }
+    data class BlockExploded(val event: BlockExplodeEvent, val affectedBlock: Block) : BlockExplodeContext(affectedBlock)
 
     /**
      * The block has been burned away by fire
