@@ -8,12 +8,12 @@ plugins {
     idea
     `maven-publish`
     signing
-    id("org.jetbrains.dokka") version "2.0.0"
-    id("org.jetbrains.dokka-javadoc") version "2.0.0"
+    id("org.jetbrains.dokka")
+    id("org.jetbrains.dokka-javadoc")
 }
 
 repositories {
-    mavenCentral()
+    mavenLocal()
     maven("https://repo.xenondevs.xyz/releases") {
         name = "InvUI"
     }
@@ -45,7 +45,7 @@ dependencies {
     testImplementation("net.kyori:adventure-api:4.20.0")
     testImplementation("net.kyori:adventure-text-minimessage:4.20.0")
 
-    dokkaJavadocPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
+    dokkaJavadocPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:${rootProject.extra["dokkaVersion"]}")
 }
 
 idea {

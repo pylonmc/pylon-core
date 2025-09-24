@@ -1,7 +1,18 @@
 pluginManagement {
+    val useLocalDokka = extra.get("usePylonDokka").toString().toBoolean()
+    val dokkaVersion = if (useLocalDokka) "2.1.0-pylon-SNAPSHOT" else "2.0.0"
+    gradle.beforeProject {
+        extra["dokkaVersion"] = dokkaVersion
+    }
+
     repositories {
+        if (useLocalDokka) mavenLocal()
         gradlePluginPortal()
-        maven("https://repo.papermc.io/repository/maven-public/")
+    }
+
+    plugins {
+        id("org.jetbrains.dokka") version dokkaVersion
+        id("org.jetbrains.dokka-javadoc") version dokkaVersion
     }
 }
 
