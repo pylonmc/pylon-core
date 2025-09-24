@@ -39,7 +39,8 @@ interface ConfigAdapter<T> {
         @JvmField val MATERIAL = KEYED.fromRegistry(Registry.MATERIAL)
         @JvmField val ITEM_STACK = ItemStackConfigAdapter
         @JvmField val BLOCK_DATA = ConfigAdapter { Bukkit.createBlockData(STRING.convert(it)) }
-        @JvmField val SOUND = KEYED.fromRegistry(Registry.SOUNDS)
+        @JvmField val SOUND = SoundConfigAdapter
+        @JvmField val RANDOMIZED_SOUND = RandomizedSoundConfigAdapter
 
         @JvmField val PYLON_FLUID = KEYED.fromRegistry(PylonRegistry.FLUIDS)
         @JvmField val FLUID_TEMPERATURE = ENUM.from<FluidTemperature>()
