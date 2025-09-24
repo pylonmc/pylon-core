@@ -35,17 +35,8 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun getSection(key: String): ConfigSection? {
-        val cached = cache[key]
-        if (cached != null) {
-            if (cached !is ConfigSection) {
-                error("$key is not a config section")
-            }
-            return cached
-        }
-
         val newConfig = internalSection.getConfigurationSection(key) ?: return null
         val configSection = ConfigSection(newConfig)
-        cache[key] = configSection
         return configSection
     }
 
