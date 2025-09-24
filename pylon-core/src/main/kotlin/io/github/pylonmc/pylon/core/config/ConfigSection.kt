@@ -9,21 +9,31 @@ import java.util.WeakHashMap
 open class ConfigSection(val internalSection: ConfigurationSection) {
 
     private val cache: MutableMap<String, Any?> = WeakHashMap()
+    private val sectionCache: MutableMap<String, ConfigSection> = WeakHashMap()
 
     val keys: Set<String>
         get() = internalSection.getKeys(false)
 
+    /**
+     * @throws NullPointerException if any top level keys do not correspond to a section
+     */
     fun getSections(): Set<ConfigSection> {
         val configSections: MutableSet<ConfigSection> = mutableSetOf()
         for (key in internalSection.getKeys(false)) {
-            configSections.add(ConfigSection(internalSection.getConfigurationSection(key)!!))
+            configSections.add(getSection(key)!!)
         }
         return configSections
     }
 
     fun getSection(key: String): ConfigSection? {
+        val cached = sectionCache[key]
+        if (cached != null) {
+            return cached
+        }
+
         val newConfig = internalSection.getConfigurationSection(key) ?: return null
         val configSection = ConfigSection(newConfig)
+        sectionCache[key] = configSection
         return configSection
     }
 
@@ -70,7 +80,7 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun createSection(key: String): ConfigSection
-        = ConfigSection(internalSection.createSection(key))
+        = ConfigSection(internalSection.createSection(key)).also { sectionCache[key] = it }
 
     fun merge(other: ConfigSection) {
         for (key in other.keys) {
