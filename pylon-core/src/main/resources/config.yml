@@ -32,6 +32,24 @@ research:
     base-amount: 70.0
     multiplier: 0.2
     max-amount: 700 # must be an integer
+  # The sounds played when a player unlocks a research
+  # There must always be 3 sounds
+  sounds:
+    -
+      sound: minecraft:entity.player.levelup
+      source: player
+      volume: 1.5
+      pitch: 0.9
+    -
+      sound: minecraft:entity.firework_rocket.blast
+      source: player
+      volume: 1.5
+      pitch: 1
+    -
+      sound: minecraft:entity.firework_rocket.launch
+      source: player
+      volume: 1.5
+      pitch: 1
 
 pipe-placement:
   # The interval (in Minecraft ticks) between pipe placement task ticks

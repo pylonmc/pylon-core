@@ -47,6 +47,9 @@ object PylonConfig {
     val researchMaxConfettiAmount = config.get("research.confetti.max-amount", ConfigAdapter.INT, 700)
 
     @JvmStatic
+    val researchSounds = config.getOrThrow("research.sounds", ConfigAdapter.LIST.from(ConfigAdapter.RANDOMIZED_SOUND))
+
+    @JvmStatic
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
     @JvmStatic
