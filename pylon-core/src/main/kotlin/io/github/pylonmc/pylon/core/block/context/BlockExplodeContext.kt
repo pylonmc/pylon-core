@@ -13,7 +13,7 @@ abstract class BlockExplodeContext(val block: Block) : BlockBreakContext {
             val pylonBlock = block.pylonBlock!!
 
             // configurable by each pylon block
-            if (pylonBlock is CanExplodeBlock) return pylonBlock.willExplode()
+            if (pylonBlock is CanExplodeBlock) return pylonBlock.willExplode(this)
 
             // if not found, process a default
             return ThreadLocalRandom.current().nextDouble() < PylonConfig.defaultExplosionDropChance
