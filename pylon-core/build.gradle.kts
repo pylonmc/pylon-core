@@ -44,8 +44,6 @@ dependencies {
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
     testImplementation("net.kyori:adventure-api:4.20.0")
     testImplementation("net.kyori:adventure-text-minimessage:4.20.0")
-
-    dokkaJavadocPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:${rootProject.extra["dokkaVersion"]}")
 }
 
 idea {
