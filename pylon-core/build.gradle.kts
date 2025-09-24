@@ -77,6 +77,10 @@ dokka {
             url("https://jd.papermc.io/paper/1.21.8/")
             packageListUrl("https://jd.papermc.io/paper/1.21.8/element-list")
         }
+        externalDocumentationLinks.register("JOML") {
+            url("https://javadoc.io/doc/org.joml/joml/latest/")
+            packageListUrl("https://javadoc.io/doc/org.joml/joml/latest/element-list")
+        }
         externalDocumentationLinks.register("Adventure") {
             url("https://javadoc.io/doc/net.kyori/adventure-api/latest/")
             packageListUrl("https://javadoc.io/doc/net.kyori/adventure-api/latest/element-list")
@@ -90,6 +94,9 @@ dokka {
             remoteUrl("https://github.com/pylonmc/pylon-core")
             remoteLineSuffix.set("#L")
         }
+    }
+    dokkaPublications.configureEach {
+        suppressObviousFunctions = true
     }
 }
 
