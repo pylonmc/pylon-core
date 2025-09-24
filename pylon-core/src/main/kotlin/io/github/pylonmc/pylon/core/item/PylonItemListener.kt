@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDamageEvent
+import org.bukkit.event.block.BlockDispenseEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityShootBowEvent
@@ -127,6 +128,18 @@ internal object PylonItemListener : Listener {
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonItem)
             }
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: BlockDispenseEvent) {
+        val pylonItem = PylonItem.fromStack(event.item)
+        val dispensable = pylonItem as? PylonDispensable ?: return
+
+        try {
+            dispensable.onDispense(event)
+        } catch (e: Exception) {
+            logEventHandleErr(event, e, pylonItem)
         }
     }
 
