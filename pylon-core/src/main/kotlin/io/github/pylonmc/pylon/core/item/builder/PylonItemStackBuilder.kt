@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers
 import io.papermc.paper.datacomponent.item.Tool
+import io.papermc.paper.datacomponent.item.UseCooldown
 import io.papermc.paper.datacomponent.item.Weapon
 import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys
 import io.papermc.paper.registry.set.RegistryKeySet
@@ -100,6 +101,8 @@ class PylonItemStackBuilder : ItemStackBuilder {
             .addRule(Tool.rule(blocks, miningSpeed, TriState.TRUE)))
     }
 
+    fun noTool() = unset(DataComponentTypes.TOOL) as PylonItemStackBuilder
+
     @JvmOverloads
     fun weapon(
         disablesShield: Boolean = false,
@@ -108,29 +111,24 @@ class PylonItemStackBuilder : ItemStackBuilder {
         attackDurabilityDamage: Int = Settings.get(itemKey).getOrThrow("attack-durability-damage", ConfigAdapter.INT),
         disableShieldSeconds: Float? = null
     ) = apply {
-        editDataOrSet(DataComponentTypes.ATTRIBUTE_MODIFIERS) { modifiers ->
-            val copying = modifiers?.modifiers()?.filter { it.modifier().key != baseAttackDamage && it.modifier().key != baseAttackSpeed }
-            ItemAttributeModifiers.itemAttributes().copy(copying)
-                .addModifier(Attribute.ATTACK_DAMAGE, AttributeModifier(baseAttackDamage, -1.0 + attackDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
-                .addModifier(Attribute.ATTACK_SPEED, AttributeModifier(baseAttackSpeed, -4.0 + attackSpeed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
-                .build()
-        }
+        addAttributeModifier(Attribute.ATTACK_DAMAGE, AttributeModifier(baseAttackDamage, -1.0 + attackDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
+        addAttributeModifier(Attribute.ATTACK_SPEED, AttributeModifier(baseAttackSpeed, -4.0 + attackSpeed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
         set(DataComponentTypes.WEAPON, Weapon.weapon()
             .itemDamagePerAttack(attackDurabilityDamage)
             .disableBlockingForSeconds(if (disablesShield) disableShieldSeconds ?: Settings.get(itemKey).getOrThrow("disable-shield-seconds", ConfigAdapter.FLOAT) else 0f))
     }
 
     @JvmOverloads
+    fun attackKnockback(knockback: Double = Settings.get(itemKey).getOrThrow("attack-knockback", ConfigAdapter.DOUBLE)) =
+        addAttributeModifier(Attribute.ATTACK_KNOCKBACK, AttributeModifier(itemKey, knockback, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND)) as PylonItemStackBuilder
+
+    @JvmOverloads
     fun durability(
         durability: Int = Settings.get(itemKey).getOrThrow("durability", ConfigAdapter.INT)
-    ) = set(DataComponentTypes.MAX_DAMAGE, durability)
+    ) = set(DataComponentTypes.MAX_DAMAGE, durability) as PylonItemStackBuilder
 
-    companion object {
-        fun ItemAttributeModifiers.Builder.copy(modifiers: List<ItemAttributeModifiers.Entry>?) : ItemAttributeModifiers.Builder {
-            modifiers?.forEach { entry ->
-                this.addModifier(entry.attribute(), entry.modifier(), entry.group, entry.display())
-            }
-            return this
-        }
-    }
+    @JvmOverloads
+    fun useCooldown(
+        cooldownTicks: Int = Settings.get(itemKey).getOrThrow("cooldown-ticks", ConfigAdapter.INT)
+    ) = set(DataComponentTypes.USE_COOLDOWN, UseCooldown.useCooldown(cooldownTicks / 20.0f).cooldownGroup(itemKey)) as PylonItemStackBuilder
 }

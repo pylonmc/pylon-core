@@ -11,6 +11,7 @@ import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.CustomModelData
+import io.papermc.paper.datacomponent.item.ItemAttributeModifiers
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
@@ -18,11 +19,14 @@ import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.attribute.Attribute
+import org.bukkit.attribute.AttributeModifier
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
 import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
+import kotlin.collections.forEach
 
 /**
  * Helper class for creating an [ItemStack], including utilities for creating Pylon
@@ -157,6 +161,20 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     fun addCustomModelDataString(color: Color) =
         editCustomModelData { it.addColor(color) }
 
+    @JvmOverloads
+    fun addAttributeModifier(
+        attribute: Attribute,
+        modifier: AttributeModifier,
+        replaceExisting: Boolean = true
+    ) = apply {
+        editDataOrSet(DataComponentTypes.ATTRIBUTE_MODIFIERS) { modifiers ->
+            val copying = modifiers?.modifiers()?.filter { !replaceExisting || it.modifier().key != modifier.key }
+            ItemAttributeModifiers.itemAttributes().copy(copying)
+                .addModifier(attribute, modifier)
+                .build()
+        }
+    }
+
     fun build(): ItemStack = stack.clone()
 
     /**
@@ -239,6 +257,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
                 }
                 .defaultTranslatableName(key)
                 .defaultTranslatableLore(key) as PylonItemStackBuilder
+        }
+
+        fun ItemAttributeModifiers.Builder.copy(modifiers: List<ItemAttributeModifiers.Entry>?) : ItemAttributeModifiers.Builder {
+            modifiers?.forEach { entry ->
+                this.addModifier(entry.attribute(), entry.modifier(), entry.group, entry.display())
+            }
+            return this
         }
     }
 }
