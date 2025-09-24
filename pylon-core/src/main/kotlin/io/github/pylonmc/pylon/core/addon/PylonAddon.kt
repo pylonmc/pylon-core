@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -20,6 +21,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.annotations.ApiStatus
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import java.security.MessageDigest
 import java.util.Locale
 
 /**
@@ -68,6 +73,7 @@ interface PylonAddon : Keyed {
     @ApiStatus.NonExtendable
     fun registerWithPylon() {
         PylonRegistry.ADDONS.register(this)
+        InternalFileManager.processUpdate(javaPlugin)
         if (!suppressAddonNameWarning) {
             for (locale in languages) {
                 if (!translator.canTranslate("pylon.${key.namespace}.addon", locale)) {
@@ -95,11 +101,13 @@ interface PylonAddon : Keyed {
         if (cached != null) {
             return cached
         }
+
         val globalConfig = PylonCore.dataFolder.resolve(to)
         if (!globalConfig.exists()) {
             globalConfig.parentFile.mkdirs()
             globalConfig.createNewFile()
         }
+
         val config = Config(globalConfig)
         val resource = this.javaPlugin.getResource(from)
         if (resource == null) {
@@ -111,11 +119,85 @@ interface PylonAddon : Keyed {
             config.merge(ConfigSection(newConfig))
             config.save()
         }
+
         globalConfigCache[from to to] = config
+        InternalFileManager.calculateEntry(globalConfig, resource!!);
         return config
     }
 
     companion object : Listener {
+        object InternalFileManager {
+            private val internalFolder = PylonCore.dataFolder.resolve("internal")
+            private val modifyTrackerConfig : Config
+            private const val VERSION_KEY = "___core_version"
+
+            init {
+                if (!internalFolder.exists()) {
+                    internalFolder.parentFile.mkdirs()
+                    internalFolder.createNewFile()
+                }
+
+                val modifyTrackerFile = internalFolder.resolve("modifyTracker.yml")
+                if (!modifyTrackerFile.exists()) {
+                    modifyTrackerFile.createNewFile()
+                }
+
+                modifyTrackerConfig = Config(modifyTrackerFile)
+            }
+
+            fun processUpdate(javaPlugin: JavaPlugin) {
+                val currentVersion = javaPlugin.pluginMeta.version
+                val savedVersion = modifyTrackerConfig.get(VERSION_KEY, ConfigAdapter.STRING)
+                if (savedVersion != null) {
+                    javaPlugin.logger.fine("Updating unmodified configurations")
+                    if (savedVersion != currentVersion) {
+                        updateResources(javaPlugin)
+                    }
+                }
+
+                modifyTrackerConfig.set(VERSION_KEY, currentVersion)
+                save()
+            }
+
+            fun calculateEntry(targetFile: File, resourceFile: InputStream) {
+                val targetHash = getFileHash(targetFile.inputStream())
+                val resourceHash = getFileHash(resourceFile)
+                modifyTrackerConfig.set(targetFile.path, targetHash == resourceHash)
+            }
+
+            private fun updateResources(javaPlugin: JavaPlugin) {
+                val keys = modifyTrackerConfig.internalConfig.getKeys(false)
+                for (path in keys) {
+                    if (path == VERSION_KEY) continue
+
+                    val isOriginal = modifyTrackerConfig.get(path, ConfigAdapter.BOOLEAN)!!
+                    if (!isOriginal) {
+                        javaPlugin.logger.fine("Updating: $path")
+                        javaPlugin.saveResource(path, true)
+                    }
+                }
+            }
+
+            private fun getFileHash(stream: InputStream, algorithm: String = "SHA-512"): String {
+
+                val digest = MessageDigest.getInstance(algorithm)
+                val buffer = ByteArray(1024 * 4) // 4 KB buffer
+                stream.use { fis ->
+                    var bytesRead: Int
+                    while (fis.read(buffer).also { bytesRead = it } != -1) {
+                        digest.update(buffer, 0, bytesRead)
+                    }
+                }
+
+                return digest.digest().joinToString("") { "%02x".format(it) }
+            }
+
+            fun save() {
+                modifyTrackerConfig.save()
+            }
+        }
+
+
         private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
 
         @EventHandler
@@ -130,6 +212,7 @@ interface PylonAddon : Keyed {
                 PylonRegistry.ITEMS.unregisterAllFromAddon(plugin)
                 PylonRegistry.RECIPE_TYPES.unregisterAllFromAddon(plugin)
                 PylonRegistry.ADDONS.unregister(plugin)
+                InternalFileManager.save()
             }
         }
     }
