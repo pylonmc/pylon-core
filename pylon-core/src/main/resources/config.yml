@@ -84,12 +84,14 @@ custom-block-textures:
         index: 0
         id: "disabled"
         material: "minecraft:gray_concrete"
+        update-interval: 10
 
       low:
         index: 1
         id: "low"
         material: "minecraft:green_concrete"
 
+        update-interval: 1
         hidden-interval: 1
         visible-interval: 10
 
@@ -107,6 +109,8 @@ custom-block-textures:
         # What material is shown in the guide for this preset
         material: "minecraft:yellow_concrete"
 
+        # How often (in Minecraft ticks) to run the custom block texture logic & check for entities to show/hide
+        update-interval: 1
         # How often (in Minecraft ticks) to perform the ray tracing cull on hidden entities
         hidden-interval: 1
         # How often (in Minecraft ticks) to perform the ray tracing cull on visible entities
@@ -125,6 +129,7 @@ custom-block-textures:
         id: "high"
         material: "minecraft:red_concrete"
 
+        update-interval: 1
         hidden-interval: 1
         visible-interval: 40
 

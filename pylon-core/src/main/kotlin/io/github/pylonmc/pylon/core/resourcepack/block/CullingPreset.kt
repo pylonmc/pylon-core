@@ -8,6 +8,7 @@ data class CullingPreset(
     val id: String,
     val material: Material,
 
+    val updateInterval: Int,
     val hiddenInterval: Int,
     val visibleInterval: Int,
 

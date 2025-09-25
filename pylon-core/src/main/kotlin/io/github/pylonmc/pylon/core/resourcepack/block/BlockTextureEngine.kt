@@ -164,7 +164,7 @@ object BlockTextureEngine : Listener {
                             visible.add(block)
                         }
                     }
-                    delay(20.ticks)
+                    delay(preset.updateInterval.ticks)
                     continue
                 }
 
@@ -214,7 +214,7 @@ object BlockTextureEngine : Listener {
                     }
                 }
 
-                delay(1.ticks)
+                delay(preset.updateInterval.ticks)
                 tick++
             }
         }
