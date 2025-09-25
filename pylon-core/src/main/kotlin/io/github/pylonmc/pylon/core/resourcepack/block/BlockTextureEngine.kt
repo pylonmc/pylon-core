@@ -133,57 +133,68 @@ object BlockTextureEngine : Listener {
         jobs[uuid] = PylonCore.launch(PylonCore.asyncDispatcher) {
             val visible = mutableSetOf<PylonBlock>()
             var tick = 0
+
             while (true) {
                 val player = Bukkit.getPlayer(uuid)
                 if (player == null) {
                     visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
                     visible.clear()
                     break
-                }
-
-                if (!player.customBlockTextures) {
+                } else if (!player.customBlockTextures) {
                     visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
                     visible.clear()
                     delay(20.ticks)
                     continue
                 }
 
+                // When showing/hiding entities, we will always add/remove the viewer and add/remove the block from the visible set
+                // because in some edge cases, the visible set and the actual viewers can get out of sync
+
                 val world = player.world
                 val eye = player.eyeLocation.toVector()
                 val preset = player.cullingPreset
                 val octree = getOctree(world)
                 if (preset.id == DISABLED_PRESET) {
+                    // Send all block entities within view distance and hide all others
                     val radius = player.sendViewDistance * 16 / 2.0
                     val query = octree.query(BoundingBox.of(eye, radius, radius, radius))
                     visible.toSet().subtract(query).forEach { it.blockTextureEntity?.removeViewer(uuid) }
 
                     for (block in query) {
                         val entity = block.blockTextureEntity ?: continue
-                        if (!entity.hasViewer(uuid)) {
-                            entity.addViewer(uuid)
-                            visible.add(block)
-                        }
+                        entity.addViewer(uuid)
+                        visible.add(block)
                     }
                     delay(preset.updateInterval.ticks)
                     continue
                 }
 
+                // Query all possibly visible blocks within cull radius, and hide all others
                 val query = octree.query(BoundingBox.of(eye, preset.cullRadius.toDouble(), preset.cullRadius.toDouble(), preset.cullRadius.toDouble()))
                 visible.toSet().subtract(query).forEach { it.blockTextureEntity?.removeViewer(uuid) }
 
                 for (block in query) {
                     val entity = block.blockTextureEntity ?: continue
 
+                    // If we are within the always show radius, show, if we are outside cull radius, hide
+                    // (our query is a cube not a sphere, so blocks in the corners can still be outside the cull radius)
                     val seen = entity.hasViewer(uuid)
                     val distanceSquared = block.block.location.distanceSquared(player.location)
                     if (distanceSquared <= preset.alwaysShowRadius * preset.alwaysShowRadius) {
                         entity.addViewer(uuid)
                         visible.add(block)
+                        continue
                     } else if (distanceSquared > preset.cullRadius * preset.cullRadius) {
                         entity.removeViewer(uuid)
                         visible.remove(block)
-                    } else if ((seen && (tick % preset.visibleInterval) == 0) || (!seen && (tick % preset.hiddenInterval) == 0)) {
+                        continue
+                    }
+
+                    // If its visible & we are on a visibleInterval tick, or if its hidden & we are on a hiddenInterval tick, do a culling check
+                    if ((seen && (tick % preset.visibleInterval) == 0) || (!seen && (tick % preset.hiddenInterval) == 0)) {
                         // TODO: If necessary, have a 3d scan using bounding boxes rather than a line
+                        // Ray traces from the players eye to the center of the block, counting occluding blocks in between
+                        // if its greater than the maxOccludingCount, hide the entity, otherwise show it
                         var occluding = 0
                         val end = block.block.location.toCenterLocation().toVector()
                         val totalDistance = eye.distanceSquared(end)
@@ -204,10 +215,10 @@ object BlockTextureEngine : Listener {
                         }
 
                         val shouldSee = occluding <= preset.maxOccludingCount
-                        if (shouldSee && !seen) {
+                        if (shouldSee) {
                             entity.addViewer(uuid)
                             visible.add(block)
-                        } else if (!shouldSee && seen) {
+                        } else {
                             entity.removeViewer(uuid)
                             visible.remove(block)
                         }
