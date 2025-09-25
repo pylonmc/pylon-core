@@ -116,7 +116,7 @@ object ArmorTextureEngine : PacketListener {
         if (packet.itemStack == null) return
         val stack = SpigotConversionUtil.toBukkitItemStack(packet.itemStack)
         val item = PylonItem.fromStack(stack)
-        if (item != null && item is PylonArmor) {
+        if (item is PylonArmor) {
             val component = stack.getData(DataComponentTypes.EQUIPPABLE) ?: return
             if (component.assetId() == item.equipmentType) {
                 val template = item.schema.itemStack
