@@ -70,10 +70,10 @@ custom-block-textures:
     # Culling caches if a block is occluding the first time its checked, to avoid reading the world every time.
     # When players break/place blocks, the cache will automatically update, but other changes to the world
     # will not be respected until the cache is refreshed. This setting controls how often (in Minecraft ticks) the cache is refreshed.
-    occluding-snapshot-refresh-interval: 3600
-    # The proportion of the occluding snapshot cache to refresh every chunk-snapshot-refresh-interval
+    occluding-cache-refresh-interval: 3600
+    # The proportion of the occluding cache to refresh every occluding-cache-refresh-interval
     # By default, half of the cache is refreshed every interval, meaning the entire cache is refreshed every 2 intervals, or every 6 minutes
-    occluding-snapshot-refresh-share: 0.5
+    occluding-cache-refresh-share: 0.5
 
     # players can choose a preset themselves, but this is the default one they will get if they haven't chosen one
     default-preset: "medium"

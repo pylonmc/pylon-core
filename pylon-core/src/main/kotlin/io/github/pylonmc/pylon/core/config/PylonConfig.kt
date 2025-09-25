@@ -58,21 +58,4 @@ object PylonConfig {
     @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
 
-    @JvmStatic
-    val customBlockTexturesEnabled = config.getOrThrow("custom-block-textures.enabled", ConfigAdapter.BOOLEAN)
-
-    @JvmStatic
-    val cullingSnapshotRefreshInterval = config.getOrThrow("custom-block-textures.culling.occluding-snapshot-refresh-interval", ConfigAdapter.INT)
-
-    @JvmStatic
-    val cullingSnapshotRefreshShare = config.getOrThrow("custom-block-textures.culling.occluding-snapshot-refresh-share", ConfigAdapter.DOUBLE)
-
-    @JvmStatic
-    val cullingPresets = config.getOrThrow("custom-block-textures.culling.presets", ConfigAdapter.MAP.from(ConfigAdapter.STRING, ConfigAdapter.CULLING_PRESET))
-
-    @JvmStatic
-    val defaultCullingPreset = let {
-        val key = config.getOrThrow<String>("custom-block-textures.culling.default-preset", ConfigAdapter.STRING)
-        cullingPresets[key] ?: error("No culling preset with id '$key' found")
-    }
 }

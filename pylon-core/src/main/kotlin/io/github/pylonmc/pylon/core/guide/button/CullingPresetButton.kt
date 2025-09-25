@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.cullin
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
@@ -29,7 +30,7 @@ class CullingPresetButton : AbstractItem() {
     }
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
-        val presets = PylonConfig.cullingPresets.values.toMutableList()
+        val presets = BlockTextureConfig.cullingPresets.values.toMutableList()
         presets.sortBy { it.index }
         val currentIndex = presets.indexOfFirst { it.id == player.cullingPreset.id }
         val nextIndex = (currentIndex + 1) % presets.size

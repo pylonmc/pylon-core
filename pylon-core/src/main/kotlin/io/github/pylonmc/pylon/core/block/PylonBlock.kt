@@ -1,13 +1,9 @@
 package io.github.pylonmc.pylon.core.block
 
-import com.github.retrooper.packetevents.PacketEvents
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
-import com.sun.tools.javac.code.TypeAnnotationPosition.field
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.register
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
@@ -26,15 +22,10 @@ import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
-import io.papermc.paper.datacomponent.item.CustomModelData
-import me.tofaa.entitylib.EntityLib
-import me.tofaa.entitylib.meta.EntityMeta
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import me.tofaa.entitylib.wrapper.WrapperEntity
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.UnsafeValues
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -62,22 +53,33 @@ open class PylonBlock protected constructor(val block: Block) {
 
     val defaultTranslationKey = schema.defaultBlockTranslationKey
 
-    open var disableBlockTextureEntity = false;
-    var blockTextureEntity: WrapperEntity? = null
-        get() {
-            if (disableBlockTextureEntity || field != null) {
-                return field
-            }
+    /**
+     * Set this to true if your block should not have a block texture entity for custom models/textures.
+     *
+     * For example, if your block is comprised fully of display entities, then you may have no need for a block
+     * entity as you could already be supporting custom models/textures through those entities.
+     */
+    open var disableBlockTextureEntity = false
 
-            field = WrapperEntity(EntityTypes.ITEM_DISPLAY)
-            setupBlockTexture(field!!)
-            return field
-        }
-    val blockTextureMeta: ItemDisplayMeta
-        get() {
-            val entity = blockTextureEntity!!
-            return entity.getEntityMeta(ItemDisplayMeta::class.java)
-        }
+    /**
+     * A packet based item display entity sent to players with custom block textures enabled.
+     * You can modify the initial setup of the entity by overriding [setupBlockTexture].
+     *
+     * For example, say you have a block like pipes, that have different shapes based on its connections,
+     * you may want to add the shape of the pipe to the item display model data so that it can be reflected
+     * in the entity.
+     */
+    val blockTextureEntity: WrapperEntity? by lazy {
+        if (disableBlockTextureEntity) null else setupBlockTexture(WrapperEntity(EntityTypes.ITEM_DISPLAY))
+    }
+
+    /**
+     * The [ItemDisplayMeta] of the [blockTextureEntity], or null if the entity is null
+     * If you want to change any aspect of the ItemDisplay (transformation, itemstack, etc.)
+     * you do so by modifying this.
+     */
+    val blockTextureMeta: ItemDisplayMeta?
+        get() = blockTextureEntity?.getEntityMeta(ItemDisplayMeta::class.java)
 
     /**
      * This constructor is called when a *new* block is created in the world
@@ -107,9 +109,16 @@ open class PylonBlock protected constructor(val block: Block) {
     protected open fun postLoad() {}
 
     /**
-     * Called when the block texture entity is created.
+     * Used when initializing [blockTextureEntity], while in this method you **cannot** access
+     * [blockTextureMeta].
+     *
+     * By default, this method sets the item display to be at the center of the block, using the
+     * item returned by [getItem] with [BlockItemContext.BlockTexture] (or a barrier if none is
+     * provided), set's its item model to air, making it invisible for players without a resource
+     * pack, and scales it to 1.00085f in all directions to prevent z-fighting with the vanilla
+     * block model.
      */
-    protected open fun setupBlockTexture(entity: WrapperEntity) {
+    protected open fun setupBlockTexture(entity: WrapperEntity): WrapperEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
         val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
         entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
@@ -151,7 +160,7 @@ open class PylonBlock protected constructor(val block: Block) {
             is BlockItemContext.PickBlock -> defaultItem
             is BlockItemContext.BlockTexture -> {
                 defaultItem?.clone()?.apply {
-                    itemMeta.persistentDataContainer.set(placedPylonBlock, PylonSerializers.BOOLEAN, true)
+                    itemMeta.persistentDataContainer.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true)
                 }
             }
         }
@@ -168,7 +177,7 @@ open class PylonBlock protected constructor(val block: Block) {
 
     companion object {
 
-        private val placedPylonBlock = pylonKey("placed_pylon_block")
+        private val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
 

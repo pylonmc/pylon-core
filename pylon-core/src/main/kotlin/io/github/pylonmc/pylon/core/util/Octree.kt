@@ -4,16 +4,24 @@ import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 import java.util.concurrent.CopyOnWriteArrayList
 
-/**
- * TODO: If ever needed, enforce thread-safety
- */
 open class Octree<N>(
+    private val maxDepth: Int = DEFAULT_MAX_DEPTH,
+    private val maxEntries: Int = DEFAULT_MAX_ENTRIES,
+
     private val bounds: BoundingBox,
     private val depth: Int,
     private val entryStrategy: (N) -> BoundingBox,
 ) {
     private var entries: MutableList<N> = CopyOnWriteArrayList()
     private var children: Array<Octree<N>>? = null
+
+    constructor(bounds: BoundingBox, depth: Int, entryStrategy: (N) -> BoundingBox) : this(
+        DEFAULT_MAX_DEPTH,
+        DEFAULT_MAX_ENTRIES,
+        bounds,
+        depth,
+        entryStrategy
+    )
 
     open fun insert(entry: N) : Boolean {
         val entryBounds = entryStrategy(entry)
@@ -27,13 +35,13 @@ open class Octree<N>(
             }
         }
 
-        if (entries.size < MAX_ENTRIES || depth >= MAX_DEPTH) {
+        if (entries.size < DEFAULT_MAX_ENTRIES || depth >= DEFAULT_MAX_DEPTH) {
             entries.add(entry)
             return true
-        } else {
-            subdivide()
-            return insert(entry)
         }
+
+        subdivide()
+        return insert(entry)
     }
 
     open fun remove(entry: N): Boolean {
@@ -120,8 +128,8 @@ open class Octree<N>(
     }
 
     companion object {
-        // LISTEN IF THESE ARE INSANE FIX THEM, THIS ISN'T MY STRONG SUIT
-        private const val MAX_DEPTH = 2048
-        private const val MAX_ENTRIES = 128
+        // LISTEN IF THESE ARE INSANE FIX THEM, THIS ISN'T MY STRONG SUIT - JustAHuman
+        private const val DEFAULT_MAX_DEPTH = 2048
+        private const val DEFAULT_MAX_ENTRIES = 128
     }
 }

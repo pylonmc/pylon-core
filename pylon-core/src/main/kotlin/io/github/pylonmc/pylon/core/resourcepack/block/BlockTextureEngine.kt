@@ -7,12 +7,12 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.util.Octree
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.pylonKey
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
@@ -41,36 +41,42 @@ object BlockTextureEngine : Listener {
     val customBlockTexturesKey = pylonKey("custom_block_textures")
     val presetKey = pylonKey("culling_preset")
 
-    private val chunkData = mutableMapOf<ChunkPosition, ChunkData>()
+    private val occludingCache = mutableMapOf<ChunkPosition, ChunkData>()
 
     private val octrees = mutableMapOf<UUID, Octree<PylonBlock>>()
     private val jobs = mutableMapOf<UUID, Job>()
 
-    internal val updateSnapshotJob : Job by lazy {
-        PylonCore.launch {
-            while (true) {
-                delay(PylonConfig.cullingSnapshotRefreshInterval.ticks)
-                val now = System.currentTimeMillis()
-                var refreshed = 0
-                var toRefresh = ceil(chunkData.size * PylonConfig.cullingSnapshotRefreshShare)
-                var entries = mutableListOf<Entry<ChunkPosition, ChunkData>>()
-                entries.addAll(chunkData.entries)
-                entries.sortBy { it.value.timestamp }
+    /**
+     * Periodically updates a share of the occluding cache, to ensure it stays up to date with changes in the world.
+     * Every [BlockTextureConfig.occludingCacheRefreshInterval] ticks, it will refresh [BlockTextureConfig.occludingCacheRefreshShare]
+     * percent of the cache, starting with the oldest entries.
+     *
+     * Normally, blocks occluding state is cached the first time its requested, and is only updated when placed or broken.
+     * If a block changes its occluding state in any other way the cache will no longer be accurate. This job corrects that.
+     */
+    internal val updateOccludingCacheJob = PylonCore.launch(start = CoroutineStart.LAZY) {
+        while (true) {
+            delay(BlockTextureConfig.occludingCacheRefreshInterval.ticks)
+            val now = System.currentTimeMillis()
+            var refreshed = 0
+            var toRefresh = ceil(occludingCache.size * BlockTextureConfig.occludingCacheRefreshShare)
+            var entries = mutableListOf<Entry<ChunkPosition, ChunkData>>()
+            entries.addAll(occludingCache.entries)
+            entries.sortBy { it.value.timestamp }
 
-                for ((pos, data) in entries) {
-                    if (now - data.timestamp <= PylonConfig.cullingSnapshotRefreshInterval) continue
+            for ((pos, data) in entries) {
+                if (now - data.timestamp <= BlockTextureConfig.occludingCacheRefreshInterval) continue
 
-                    val world = pos.world ?: continue
-                    if (world.isChunkLoaded(pos.x, pos.z)) {
-                        data.timestamp = now
-                        for (position in data.occluding.asMap().keys.toSet()) {
-                            data.occluding.put(position, position.block.blockData.isOccluding)
-                        }
-
-                        if (++refreshed >= toRefresh) break
-                    } else {
-                        chunkData.remove(pos)
+                val world = pos.world ?: continue
+                if (world.isChunkLoaded(pos.x, pos.z)) {
+                    data.timestamp = now
+                    for (position in data.occluding.asMap().keys.toSet()) {
+                        data.occluding.put(position, position.block.blockData.isOccluding)
                     }
+
+                    if (++refreshed >= toRefresh) break
+                } else {
+                    occludingCache.remove(pos)
                 }
             }
         }
@@ -85,19 +91,19 @@ object BlockTextureEngine : Listener {
     @get:JvmStatic
     @set:JvmStatic
     var Player.cullingPreset: CullingPreset
-        get() = PylonConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, PylonConfig.defaultCullingPreset.id)) {
-            PylonConfig.defaultCullingPreset
+        get() = BlockTextureConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, BlockTextureConfig.defaultCullingPreset.id)) {
+            BlockTextureConfig.defaultCullingPreset
         }
         set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
 
     internal fun insert(block: PylonBlock) {
-        if (!PylonConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
-        getOctree(block.block.world).insert(block)
+        if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
+        getOctree(block.block.world)!!.insert(block)
     }
 
     internal fun remove(block: PylonBlock) {
-        if (!PylonConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
-        getOctree(block.block.world).remove(block)
+        if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
+        getOctree(block.block.world)!!.remove(block)
         block.blockTextureEntity?.let {
             for (viewer in it.viewers.toSet()) {
                 it.removeViewer(viewer)
@@ -105,8 +111,8 @@ object BlockTextureEngine : Listener {
         }
     }
 
-    internal fun getOctree(world: World): Octree<PylonBlock> {
-        if (!PylonConfig.customBlockTexturesEnabled) return DummyOctree
+    internal fun getOctree(world: World): Octree<PylonBlock>? {
+        if (!BlockTextureConfig.customBlockTexturesEnabled) return null
 
         val border = world.worldBorder
         return octrees.getOrPut(world.uid) {
@@ -145,7 +151,7 @@ object BlockTextureEngine : Listener {
                 val world = player.world
                 val eye = player.eyeLocation.toVector()
                 val preset = player.cullingPreset
-                val octree = getOctree(world)
+                val octree = getOctree(world)!!
                 if (preset.id == DISABLED_PRESET) {
                     val radius = player.sendViewDistance * 16 / 2.0
                     val query = octree.query(BoundingBox.of(eye, radius, radius, radius))
@@ -169,11 +175,11 @@ object BlockTextureEngine : Listener {
                     val entity = block.blockTextureEntity ?: continue
 
                     val seen = entity.hasViewer(uuid)
-                    val distance = block.block.location.distanceSquared(player.location)
-                    if (distance <= preset.alwaysShowRadius * preset.alwaysShowRadius) {
+                    val distanceSquared = block.block.location.distanceSquared(player.location)
+                    if (distanceSquared <= preset.alwaysShowRadius * preset.alwaysShowRadius) {
                         entity.addViewer(uuid)
                         visible.add(block)
-                    } else if (distance > preset.cullRadius * preset.cullRadius) {
+                    } else if (distanceSquared > preset.cullRadius * preset.cullRadius) {
                         entity.removeViewer(uuid)
                         visible.remove(block)
                     } else if ((seen && (tick % preset.visibleInterval) == 0) || (!seen && (tick % preset.hiddenInterval) == 0)) {
@@ -191,7 +197,7 @@ object BlockTextureEngine : Listener {
 
                             val position = BlockPosition(world, current)
                             val chunkPos = position.chunk
-                            val occludes = chunkData[chunkPos]?.isOccluding(position) ?: current.toLocation(world).block.blockData.isOccluding
+                            val occludes = occludingCache[chunkPos]?.isOccluding(position) ?: current.toLocation(world).block.blockData.isOccluding
                             if (occludes && ++occluding > preset.maxOccludingCount) {
                                 break
                             }
@@ -216,28 +222,28 @@ object BlockTextureEngine : Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onChunkLoad(event: ChunkLoadEvent) {
-        chunkData[ChunkPosition(event.chunk)] = ChunkData(System.currentTimeMillis())
+        occludingCache[ChunkPosition(event.chunk)] = ChunkData(System.currentTimeMillis())
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private fun onBlockPlace(event: BlockPlaceEvent) {
-        chunkData[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), event.block.blockData.isOccluding)
+        occludingCache[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), event.block.blockData.isOccluding)
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private fun onBlockBreak(event: BlockBreakEvent) {
-        chunkData[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), false)
+        occludingCache[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), false)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onPylonBlockBreak(event: PylonBlockBreakEvent) {
         // TODO: Delete this when pylon no longer cancels BlockBreakEvents for PylonBlocks
-        chunkData[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), false)
+        occludingCache[ChunkPosition(event.block)]?.occluding?.put(BlockPosition(event.block), false)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onChunkUnload(event: ChunkUnloadEvent) {
-        chunkData.remove(ChunkPosition(event.chunk))
+        occludingCache.remove(ChunkPosition(event.chunk))
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -254,14 +260,5 @@ object BlockTextureEngine : Listener {
         fun isOccluding(position: BlockPosition): Boolean {
             return occluding.get(position)
         }
-    }
-
-    private object DummyOctree : Octree<PylonBlock>(
-        bounds = BoundingBox(),
-        depth = 0,
-        entryStrategy = { BoundingBox.of(it.block) }
-    ) {
-        override fun insert(entry: PylonBlock): Boolean = false
-        override fun remove(entry: PylonBlock): Boolean = false
     }
 }

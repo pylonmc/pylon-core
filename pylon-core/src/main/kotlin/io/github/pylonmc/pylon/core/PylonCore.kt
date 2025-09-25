@@ -14,7 +14,6 @@ import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
-import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -32,6 +31,7 @@ import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
@@ -103,9 +103,9 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
 
-        if (PylonConfig.customBlockTexturesEnabled) {
+        if (BlockTextureConfig.customBlockTexturesEnabled) {
             Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
-            BlockTextureEngine.updateSnapshotJob
+            BlockTextureEngine.updateOccludingCacheJob.start()
         }
 
         Bukkit.getScheduler().runTaskTimer(
