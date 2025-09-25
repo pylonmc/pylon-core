@@ -96,7 +96,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PotionSplashEvent) {
+    private fun handle(event: PotionSplashEvent) {
         val pylonPotion = PylonItem.fromStack(event.potion.item)
         if (pylonPotion is PylonSplashPotion) {
             try {
@@ -108,7 +108,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: LingeringPotionSplashEvent) {
+    private fun handle(event: LingeringPotionSplashEvent) {
         val pylonPotion = PylonItem.fromStack(event.entity.item)
         if (pylonPotion is PylonLingeringPotion) {
             try {
@@ -120,7 +120,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: CreeperIgniteEvent) {
+    private fun handle(event: CreeperIgniteEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonCreeper) {
             try {
@@ -132,7 +132,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: CreeperPowerEvent) {
+    private fun handle(event: CreeperPowerEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonCreeper) {
             try {
@@ -144,7 +144,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EnderDragonChangePhaseEvent) {
+    private fun handle(event: EnderDragonChangePhaseEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonEnderDragon) {
             try {
@@ -156,7 +156,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EnderDragonFlameEvent) {
+    private fun handle(event: EnderDragonFlameEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonEnderDragon) {
             try {
@@ -168,7 +168,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EnderDragonFireballHitEvent) {
+    private fun handle(event: EnderDragonFireballHitEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonDragonFireball) {
             try {
@@ -180,7 +180,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EnderDragonShootFireballEvent) {
+    private fun handle(event: EnderDragonShootFireballEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonEnderDragon) {
             try {
@@ -192,7 +192,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: BatToggleSleepEvent) {
+    private fun handle(event: BatToggleSleepEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonBat) {
             try {
@@ -204,7 +204,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EndermanAttackPlayerEvent) {
+    private fun handle(event: EndermanAttackPlayerEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonEnderman) {
             try {
@@ -216,7 +216,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EndermanEscapeEvent) {
+    private fun handle(event: EndermanEscapeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonEnderman) {
             try {
@@ -228,7 +228,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityBreedEvent) {
+    private fun handle(event: EntityBreedEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonBreedable) {
             try {
@@ -240,7 +240,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityEnterLoveModeEvent) {
+    private fun handle(event: EntityEnterLoveModeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonBreedable) {
             try {
@@ -252,7 +252,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityBreakDoorEvent) {
+    private fun handle(event: EntityBreakDoorEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonCop) {
             try {
@@ -264,7 +264,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityCombustEvent) {
+    private fun handle(event: EntityCombustEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonCombustibleEntity) {
             try {
@@ -276,7 +276,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityDyeEvent) {
+    private fun handle(event: EntityDyeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonDyeable) {
             try {
@@ -288,7 +288,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityPathfindEvent) {
+    private fun handle(event: EntityPathfindEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonPathingEntity) {
             try {
@@ -300,7 +300,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityTargetEvent) {
+    private fun handle(event: EntityTargetEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonPathingEntity) {
             try {
@@ -312,7 +312,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityMoveEvent) {
+    private fun handle(event: EntityMoveEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonMovingEntity) {
             try {
@@ -324,7 +324,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityJumpEvent) {
+    private fun handle(event: EntityJumpEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonMovingEntity) {
             try {
@@ -336,7 +336,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityKnockbackEvent) {
+    private fun handle(event: EntityKnockbackEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonMovingEntity) {
             try {
@@ -348,7 +348,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityToggleSwimEvent) {
+    private fun handle(event: EntityToggleSwimEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonMovingEntity) {
             try {
@@ -360,7 +360,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityToggleGlideEvent) {
+    private fun handle(event: EntityToggleGlideEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonMovingEntity) {
             try {
@@ -372,7 +372,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityToggleSitEvent) {
+    private fun handle(event: EntityToggleSitEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonMovingEntity) {
             try {
@@ -384,7 +384,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityDamageEvent) {
+    private fun handle(event: EntityDamageEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonDamageableEntity) {
             try {
@@ -396,7 +396,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityRegainHealthEvent) {
+    private fun handle(event: EntityRegainHealthEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonDamageableEntity) {
             try {
@@ -408,7 +408,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityMountEvent) {
+    private fun handle(event: EntityMountEvent) {
         val mount = EntityStorage.get(event.mount)
         if (mount is PylonMountableEntity) {
             try {
@@ -428,7 +428,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityDismountEvent) {
+    private fun handle(event: EntityDismountEvent) {
         val mount = EntityStorage.get(event.dismounted)
         if (mount is PylonMountableEntity) {
             try {
@@ -448,7 +448,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntitySpellCastEvent) {
+    private fun handle(event: EntitySpellCastEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonSpellcaster) {
             try {
@@ -460,7 +460,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityResurrectEvent) {
+    private fun handle(event: EntityResurrectEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonResurrectable) {
             try {
@@ -472,7 +472,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityTameEvent) {
+    private fun handle(event: EntityTameEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonTameable) {
             try {
@@ -484,7 +484,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: TameableDeathMessageEvent) {
+    private fun handle(event: TameableDeathMessageEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonTameable) {
             try {
@@ -496,7 +496,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PlayerLeashEntityEvent) {
+    private fun handle(event: PlayerLeashEntityEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonLeashable) {
             try {
@@ -508,7 +508,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: EntityUnleashEvent) {
+    private fun handle(event: EntityUnleashEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonLeashable) {
             try {
@@ -520,7 +520,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: ItemDespawnEvent) {
+    private fun handle(event: ItemDespawnEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonItemEntity) {
             try {
@@ -532,7 +532,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: ItemMergeEvent) {
+    private fun handle(event: ItemMergeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonItemEntity) {
             try {
@@ -544,7 +544,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PiglinBarterEvent) {
+    private fun handle(event: PiglinBarterEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonPiglin) {
             try {
@@ -556,7 +556,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: PigZombieAngerEvent) {
+    private fun handle(event: PigZombieAngerEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonZombiePigman) {
             try {
@@ -568,7 +568,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: TurtleStartDiggingEvent) {
+    private fun handle(event: TurtleStartDiggingEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonTurtle) {
             try {
@@ -580,7 +580,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: TurtleGoHomeEvent) {
+    private fun handle(event: TurtleGoHomeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonTurtle) {
             try {
@@ -592,7 +592,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: TurtleLayEggEvent) {
+    private fun handle(event: TurtleLayEggEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonTurtle) {
             try {
@@ -604,7 +604,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: VillagerAcquireTradeEvent) {
+    private fun handle(event: VillagerAcquireTradeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonVillager) {
             try {
@@ -616,7 +616,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: VillagerCareerChangeEvent) {
+    private fun handle(event: VillagerCareerChangeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonVillager) {
             try {
@@ -628,7 +628,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: VillagerReplenishTradeEvent) {
+    private fun handle(event: VillagerReplenishTradeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonVillager) {
             try {
@@ -640,7 +640,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: WitchConsumePotionEvent) {
+    private fun handle(event: WitchConsumePotionEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonWitch) {
             try {
@@ -652,7 +652,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: WitchReadyPotionEvent) {
+    private fun handle(event: WitchReadyPotionEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonWitch) {
             try {
@@ -664,7 +664,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: WitchThrowPotionEvent) {
+    private fun handle(event: WitchThrowPotionEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonWitch) {
             try {
@@ -676,7 +676,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: SlimeSwimEvent) {
+    private fun handle(event: SlimeSwimEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonSlime) {
             try {
@@ -688,7 +688,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: SlimeSplitEvent) {
+    private fun handle(event: SlimeSplitEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonSlime) {
             try {
@@ -700,7 +700,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: SlimeWanderEvent) {
+    private fun handle(event: SlimeWanderEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonSlime) {
             try {
@@ -712,7 +712,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: SlimePathfindEvent) {
+    private fun handle(event: SlimePathfindEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonSlime) {
             try {
@@ -724,7 +724,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: SlimeChangeDirectionEvent) {
+    private fun handle(event: SlimeChangeDirectionEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonSlime) {
             try {
@@ -736,7 +736,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: SlimeTargetLivingEntityEvent) {
+    private fun handle(event: SlimeTargetLivingEntityEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonSlime) {
             try {
@@ -748,7 +748,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: FireworkExplodeEvent) {
+    private fun handle(event: FireworkExplodeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonFirework) {
             pylonEntity.onExplode(event)
@@ -756,7 +756,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: ExplosionPrimeEvent) {
+    private fun handle(event: ExplosionPrimeEvent) {
         val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity is PylonExplosiveEntity) {
             try {
@@ -768,7 +768,7 @@ internal object EntityListener : Listener {
     }
 
     @EventHandler
-    fun handle(event: ExperienceOrbMergeEvent) {
+    private fun handle(event: ExperienceOrbMergeEvent) {
         val source = EntityStorage.get(event.mergeSource)
         if (source is PylonExperienceOrb) {
             try {
