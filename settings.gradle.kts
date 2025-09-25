@@ -22,3 +22,4 @@ rootProject.name = "pylon-core-root"
 include("pylon-core")
 include("test")
 include("nms")
+include("dokka-plugin")

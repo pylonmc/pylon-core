@@ -40,6 +40,8 @@ dependencies {
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
 
+    dokkaPlugin(project(":dokka-plugin"))
+
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
     testImplementation("net.kyori:adventure-api:4.20.0")
