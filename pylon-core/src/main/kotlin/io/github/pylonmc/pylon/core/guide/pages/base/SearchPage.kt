@@ -1,16 +1,16 @@
 package io.github.pylonmc.pylon.core.guide.pages.base
 
 import info.debatty.java.stringsimilarity.JaroWinkler
-import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
-import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.plainText
+import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.util.render
+import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -42,11 +42,14 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
             .addIngredient('<', GuiItems.pagePrevious())
             .addIngredient('>', GuiItems.pageNext())
             .setContent(getItems(player, search))
+            .addPageChangeHandler { _, newPage -> searchPages[player.uniqueId] = newPage }
             .build()
         val upperGui = Gui.normal()
-            .setStructure("# # #")
+            .setStructure("# T #")
+            .addIngredient('T', searchTermsStack)
             .addIngredient('#', GuiItems.background(search))
             .build()
+        lowerGui.setPage(searchPages.getOrDefault(player.uniqueId, 0))
 
         try {
             AnvilWindow.split()
@@ -136,8 +139,13 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     }
 
     companion object {
+        private val searchTermsStack = ItemStackBuilder.of(Material.PAPER)
+            .name(Component.translatable("pylon.pyloncore.guide.button.search-terms.name"))
+            .lore(Component.translatable("pylon.pyloncore.guide.button.search-terms.lore"))
+
         private val searchAlgorithm = JaroWinkler()
         private val searches = mutableMapOf<UUID, String>()
+        private val searchPages = mutableMapOf<UUID, Int>()
 
         private fun weight(search: String, text: String): Double? {
             val distance = searchAlgorithm.distance(text, search)

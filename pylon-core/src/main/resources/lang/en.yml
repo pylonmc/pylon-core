@@ -103,21 +103,14 @@ guide:
     back:
       name: "<yellow>Back"
       lore: ""
-    fluids:
-      name: "<yellow>Fluids"
-      lore: ""
-    researches:
-      name: "<yellow>Researches"
-      lore: ""
-    settings-and-info:
-      name: "<yellow>Settings & info"
-      lore: ""
-    guides:
-      name: "<yellow>Guides"
-      lore: ""
-    search:
-      name: "<yellow>Search"
-      lore: ""
+    search-terms:
+      name: "Search Terms"
+      lore: |-
+        <arrow:#3a293> By default, searches item names
+        <arrow:#3a293> Prefix <light_purple>@</light_purple> to search by <light_purple>addon</light_purple>
+        <arrow:#3a293> Prefix <aqua>$ <gray>to search in <aqua>lore</aqua>
+        <arrow:#3a293> Separate terms with spaces
+        <arrow:#3a293> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature
     research:
       cost:
         not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
