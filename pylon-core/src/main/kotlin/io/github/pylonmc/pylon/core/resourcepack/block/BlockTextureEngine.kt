@@ -139,8 +139,10 @@ object BlockTextureEngine : Listener {
                 if (player == null) {
                     visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
                     visible.clear()
+                    jobs.remove(uuid)
                     break
                 } else if (!player.customBlockTextures) {
+                    // We don't cancel the job as the player might re-enable it later, just keep it idling
                     visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
                     visible.clear()
                     delay(20.ticks)
@@ -259,7 +261,11 @@ object BlockTextureEngine : Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onPlayerQuit(event: PlayerQuitEvent) {
-        jobs.remove(event.player.uniqueId)?.cancel()
+        jobs.remove(event.player.uniqueId)?.let {
+            if (it.isActive) {
+                it.cancel()
+            }
+        }
     }
 
     private data class ChunkData(
