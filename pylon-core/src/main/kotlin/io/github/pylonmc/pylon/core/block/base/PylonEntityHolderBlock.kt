@@ -18,7 +18,7 @@ import java.util.*
  * uses an item display to show the item would implement this to keep track of the
  * item display.
  *
- * Note that the Pylon entities may not be loaded when the block is loaded.
+ * Note that the Pylon entities may not be loaded at the same time that the block is loaded.
  */
 interface PylonEntityHolderBlock : PylonBreakHandler {
 

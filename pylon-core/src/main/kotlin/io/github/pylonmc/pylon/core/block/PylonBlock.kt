@@ -6,15 +6,12 @@ import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -29,6 +26,8 @@ import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 
 /**
+ * Represents a Pylon block in the world.
+ *
  * All custom Pylon blocks extend this class. Every instance of this class is wrapping a real block
  * in the world, and is stored in [BlockStorage]. All new block *types* must be registered using [register].
  *
@@ -37,81 +36,95 @@ import org.bukkit.persistence.PersistentDataContainer
  * constructor is known as the "create constructor", and is used when the block is created in the world.
  * The second constructor is known as the "load constructor", and is used to reconstruct the block when
  * the chunk containing the block is loaded.
+ *
+ * @see BlockStorage
  */
-open class PylonBlock protected constructor(val block: Block) {
+open class PylonBlock internal constructor(val block: Block) {
 
     /**
-     * The schema of a block is all the data needed to create or load the block.
+     * All the data needed to create or load the block.
      */
     val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
+
     val key = schema.key
 
-    val defaultTranslationKey = schema.defaultBlockTranslationKey
+    val defaultWailaTranslationKey = schema.defaultWailaTranslationKey
 
     /**
-     * This constructor is called when a *new* block is created in the world
-     * ex:
-     * - A player places a block
-     * - `BlockStorage.placeBlock` called
-     *
-     * @see PylonBlockSchema.create
-     * @see PylonBlockUnloadEvent
+     * This constructor is called when a *new* block is created in the world.
      */
     constructor(block: Block, context: BlockCreateContext) : this(block)
 
     /**
-     * This constructor is called while the chunk is being loaded
+     * This constructor is called when the block is loaded. For example, if the server
+     * restarts, we need to create a new PylonBlock instance, and we'll do it with this
+     * constructor.
      *
-     * @see PylonBlockSchema.load
-     * @see PylonBlockLoadEvent
-     * @see deserialize
+     * You should only load data in this block. If you need to do any extra logic on load
+     * for whatever reason, it's recommended to do it in [postLoad] to make sure all data
+     * associated with your block has been loaded.
      */
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
 
     /**
-     * Since "external" stuff like [PylonGuiBlock] and [PylonEntityHolderBlock] load their
-     * data *after* the load constructor is called, this method is necessary to manipulate
-     * the data loaded by those interfaces
+     * Called after the load constructor.
+     *
+     * This is necessary because "external" stuff like [PylonGuiBlock], [io.github.pylonmc.pylon.core.block.base.PylonFluidBufferBlock]
+     * and [PylonEntityHolderBlock] load their data *after* the load constructor is called.
+     * If you need to use data from these interfaces (such as the amount of fluid stored in
+     * a [io.github.pylonmc.pylon.core.block.base.PylonFluidBufferBlock], you must use this
+     * instead of using the data in the load constructor.
      */
     protected open fun postLoad() {}
 
     /**
-     * This will only be called for the player if the player has WAILA enabled
+     * WAILA is the text that shows up when looking at a block to tell you what the block is.
      *
-     * @return the WAILA configuration, or null if WAILA should not be shown for this block
+     * This will only be called for the player if the player has WAILA enabled.
+     *
+     * @return the WAILA configuration, or null if WAILA should not be shown for this block.
      */
     open fun getWaila(player: Player): WailaConfig? {
-        return WailaConfig(defaultTranslationKey)
+        return WailaConfig(defaultWailaTranslationKey)
     }
 
     /**
-     * Called when the corresponding item of the block is requested. By default,
-     * returns the item with the same key as the block. If the block is
-     * being broken, the item will only be returned if [BlockBreakContext.normallyDrops]
-     * is true, otherwise it will return null.
+     * Returns the item that the block should drop.
+     *
+     * By default returns the item with the same key as the block only if
+     * [BlockBreakContext.normallyDrops] is true, and null otherwise.
      *
      * @return the item, or null if none
      */
-    open fun getItem(context: BlockItemContext): ItemStack? {
-        val defaultItem = PylonRegistry.ITEMS[schema.key]?.itemStack
-        return when (context) {
-            is BlockItemContext.Break -> if (context.context.normallyDrops) {
-                defaultItem
-            } else {
-                null
-            }
-
-            is BlockItemContext.PickBlock -> defaultItem
+    open fun getDropItem(context: BlockBreakContext): ItemStack? {
+        return if (context.normallyDrops) {
+            PylonRegistry.ITEMS[schema.key]?.itemStack
+        } else {
+            null
         }
     }
 
     /**
-     * Called when the block is saved
+     * Returns the item that should be given when the block is middle clicked.
+     */
+    open fun getPickItem() = PylonRegistry.ITEMS[schema.key]?.itemStack
+
+    /**
+     * Called when the block is saved.
      *
-     * @see serialize
+     * Put any logic to save the data in the block here.
+     *
+     * *Do not assume that when this is called, the block is being unloaded.* This
+     * may be called for other reasons, such as when a player right clicks with
+     * [io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs]
      */
     open fun write(pdc: PersistentDataContainer) {}
 
+    /**
+     * Returns settings associated with the block.
+     *
+     * Shorthand for `Settings.get(getKey())`
+     */
     fun getSettings(): Config = Settings.get(key)
 
     companion object {
@@ -125,6 +138,15 @@ open class PylonBlock protected constructor(val block: Block) {
         val Block.vanilla : Boolean
             get() = BlockStorage.get(this) == null
 
+        /**
+         * Registers a new block type with Pylon.
+         *
+         * @param key A unique key that identifies this type of block
+         * @param material The material to use as the block. This must match the material
+         * of the item(s) that place the block.
+         * @param blockClass The class extending [PylonBlock] that represents a block
+         * of this type in the world.
+         */
         @JvmStatic
         fun register(key: NamespacedKey, material: Material, blockClass: Class<out PylonBlock>) {
             val schema = PylonBlockSchema(key, material, blockClass)

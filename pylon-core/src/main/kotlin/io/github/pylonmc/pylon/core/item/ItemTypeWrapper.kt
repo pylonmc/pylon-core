@@ -5,18 +5,24 @@ import org.bukkit.*
 import org.bukkit.inventory.ItemStack
 
 /**
- * Allows the representation of both vanilla and Pylon items in a unified way
+ * Allows the representation of both vanilla and Pylon items in a unified way.
  */
 sealed interface ItemTypeWrapper : Keyed {
 
     fun createItemStack(): ItemStack
 
+    /**
+     * The vanilla variant or [ItemTypeWrapper].
+     */
     @JvmRecord
     data class Vanilla(val material: Material) : ItemTypeWrapper {
         override fun createItemStack() = ItemStack(material)
         override fun getKey() = material.key
     }
 
+    /**
+     * The Pylon variant or [ItemTypeWrapper].
+     */
     @JvmRecord
     data class Pylon(val item: PylonItemSchema) : ItemTypeWrapper {
         override fun createItemStack() = item.itemStack

@@ -42,7 +42,7 @@ import kotlin.math.min
  *   first-serve but would also be much less intuitive so probably not a good idea.
  * - Currently not asynchronous, I think parts of this can definitely be made asynchronous
  */
-object FluidManager {
+internal object FluidManager {
 
     private class Segment(
         val points: MutableSet<VirtualFluidPoint> = mutableSetOf(),

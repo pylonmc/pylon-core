@@ -23,7 +23,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
 import java.util.UUID
 
-class Waila private constructor(private val player: Player, private val job: Job) {
+internal class Waila private constructor(private val player: Player, private val job: Job) {
 
     private val bossbar = BossBar.bossBar(
         Component.empty(),

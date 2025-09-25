@@ -7,16 +7,14 @@ import org.bukkit.event.entity.ProjectileHitEvent
 
 interface PylonArrow {
     /**
-     * Called when the arrow is shot from the bow of any entity
+     * Called when this arrow is selected for a player to fire from a bow.
      */
     fun onArrowReady(event: PlayerReadyArrowEvent) {}
 
     /**
-     * Called when the arrow is shot from the bow of any entity
+     * Called when the arrow is shot from the bow of any entity.
      */
     fun onArrowShotFromBow(event: EntityShootBowEvent) {}
-
     fun onArrowHit(event: ProjectileHitEvent) {}
-
     fun onArrowDamage(event: EntityDamageByEntityEvent) {}
 }

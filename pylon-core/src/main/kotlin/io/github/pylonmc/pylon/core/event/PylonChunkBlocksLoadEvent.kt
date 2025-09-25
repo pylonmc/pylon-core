@@ -5,6 +5,9 @@ import org.bukkit.Chunk
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
+/**
+ * Called after the blocks in a chunk (but not the chunk itself) have been loaded.
+ */
 class PylonChunkBlocksLoadEvent(
     val chunk: Chunk,
     val pylonBlocks: List<PylonBlock>

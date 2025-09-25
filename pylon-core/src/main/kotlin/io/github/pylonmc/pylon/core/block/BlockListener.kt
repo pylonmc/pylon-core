@@ -11,13 +11,11 @@ import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.block.BlockFace
 import org.bukkit.block.Container
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
@@ -123,9 +121,8 @@ internal object BlockListener : Listener {
     // TODO this will not respect pylon block break events being cancelled
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
-        val context = BlockBreakContext.EntityExploded(event);
         for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, context)
+            BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(block, event))
         }
     }
 
@@ -694,7 +691,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPlayerBlockInteract(event: PlayerInteractEvent) {
         val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
-        if (pylonBlock is PylonInteractableBlock) {
+        if (pylonBlock is PylonInteractBlock) {
             try {
                 pylonBlock.onInteract(event)
             } catch (e: Exception) {
@@ -715,13 +712,13 @@ internal object BlockListener : Listener {
             */
             if (!event.player.isSneaking) {
                 try {
-                    pylonBlock.onSneakStart(event)
+                    pylonBlock.onSneakedOn(event)
                 } catch (e: Exception) {
                     logEventHandleErr(event, e, pylonBlock)
                 }
             } else {
                 try {
-                    pylonBlock.onSneakEnd(event)
+                    pylonBlock.onUnsneakedOn(event)
                 } catch (e: Exception) {
                     logEventHandleErr(event, e, pylonBlock)
                 }
@@ -734,9 +731,9 @@ internal object BlockListener : Listener {
         val blockUnder = event.player.location.add(0.0, -1.0, 0.0).block
         val blockIn = event.player.location.add(0.0, 0.0, 0.0).block
         val pylonBlock = BlockStorage.get(blockUnder) ?: BlockStorage.get(blockIn)
-        if (pylonBlock is PylonJumpableBlock) {
+        if (pylonBlock is PylonJumpBlock) {
             try {
-                pylonBlock.onJump(event)
+                pylonBlock.onJumpedOn(event)
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonBlock)
             }

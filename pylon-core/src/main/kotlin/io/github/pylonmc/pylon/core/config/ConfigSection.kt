@@ -6,13 +6,26 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.util.WeakHashMap
 
+/**
+ * A wrapper around [ConfigurationSection] providing useful utilities for reading/writing.
+ *
+ * All get calls are cached, so performance is generally a non-issue here.
+ *
+ * @see ConfigurationSection
+ */
 open class ConfigSection(val internalSection: ConfigurationSection) {
 
     private val cache: MutableMap<String, Any?> = WeakHashMap()
 
+    /**
+     * Returns all the keys in the section.
+     */
     val keys: Set<String>
         get() = internalSection.getKeys(false)
 
+    /**
+     * Gets all the values in the section that are themselves sections.
+     */
     fun getSections(): Set<ConfigSection> {
         val configSections: MutableSet<ConfigSection> = mutableSetOf()
         for (key in internalSection.getKeys(false)) {
@@ -40,16 +53,22 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
         getSection(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
 
     /**
-     * Returns null either if the key does not exist or if the value cannot be converted to the desired type.
+     * Returns null if the key does not exist or if the value cannot be converted to the desired type.
      */
     fun <T> get(key: String, adapter: ConfigAdapter<T>): T? {
         return runCatching { getOrThrow(key, adapter) }.getOrNull()
     }
 
+    /**
+     * Returns [defaultValue] if the key does not exist or if the value cannot be converted to the desired type.
+     */
     fun <T> get(key: String, adapter: ConfigAdapter<T>, defaultValue: T): T {
         return get(key, adapter) ?: defaultValue
     }
 
+    /**
+     * Throws an error if the key does not exist or if the value cannot be converted to the desired type.
+     */
     fun <T> getOrThrow(key: String, adapter: ConfigAdapter<T>): T {
         val value = cache.getOrPut(key) {
             val value = internalSection.get(key) ?: throw KeyNotFoundException(internalSection.currentPath, key)
@@ -76,11 +95,16 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
 
     fun <T> set(key: String, value: T) {
         internalSection.set(key, value)
+        cache.remove(key)
     }
 
     fun createSection(key: String): ConfigSection
         = ConfigSection(internalSection.createSection(key))
 
+    /**
+     * 'Merges' [other] with this ConfigSection by copying all of its keys into this ConfigSection.
+     * If a key exists in both section, this ConfigSection's keys take priority.
+     */
     fun merge(other: ConfigSection) {
         for (key in other.keys) {
             val otherSection = other.getSection(key)
@@ -97,6 +121,9 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
         }
     }
 
+    /**
+     * Thrown when a key is not found.
+     */
     class KeyNotFoundException(path: String?, key: String) :
         Exception(if (!path.isNullOrEmpty()) "Config key not found: $path.$key" else "Config key not found: $key")
 }

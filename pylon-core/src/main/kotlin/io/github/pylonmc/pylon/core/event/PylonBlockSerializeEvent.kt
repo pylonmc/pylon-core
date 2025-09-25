@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList
 import org.bukkit.persistence.PersistentDataContainer
 
 /**
- * Called after serializing a block. **A block being serialized does not necessarily mean
+ * Called after a block is serialized. **A block being serialized does not necessarily mean
  * it is going to be unloaded.**
  */
 class PylonBlockSerializeEvent(
