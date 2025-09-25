@@ -98,12 +98,12 @@ object BlockTextureEngine : Listener {
 
     internal fun insert(block: PylonBlock) {
         if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
-        getOctree(block.block.world)!!.insert(block)
+        getOctree(block.block.world).insert(block)
     }
 
     internal fun remove(block: PylonBlock) {
         if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
-        getOctree(block.block.world)!!.remove(block)
+        getOctree(block.block.world).remove(block)
         block.blockTextureEntity?.let {
             for (viewer in it.viewers.toSet()) {
                 it.removeViewer(viewer)
@@ -111,8 +111,8 @@ object BlockTextureEngine : Listener {
         }
     }
 
-    internal fun getOctree(world: World): Octree<PylonBlock>? {
-        if (!BlockTextureConfig.customBlockTexturesEnabled) return null
+    internal fun getOctree(world: World): Octree<PylonBlock> {
+        check(BlockTextureConfig.customBlockTexturesEnabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
 
         val border = world.worldBorder
         return octrees.getOrPut(world.uid) {
@@ -151,7 +151,7 @@ object BlockTextureEngine : Listener {
                 val world = player.world
                 val eye = player.eyeLocation.toVector()
                 val preset = player.cullingPreset
-                val octree = getOctree(world)!!
+                val octree = getOctree(world)
                 if (preset.id == DISABLED_PRESET) {
                     val radius = player.sendViewDistance * 16 / 2.0
                     val query = octree.query(BoundingBox.of(eye, radius, radius, radius))
