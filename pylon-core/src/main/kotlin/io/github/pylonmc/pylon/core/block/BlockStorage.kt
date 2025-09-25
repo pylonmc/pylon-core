@@ -27,6 +27,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.ItemStack
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.random.Random
@@ -245,7 +246,7 @@ object BlockStorage : Listener {
     fun breakBlock(
         blockPosition: BlockPosition,
         context: BlockBreakContext = BlockBreakContext.PluginBreak()
-    ) : MutableList<ItemStack>? {
+    ) : List<ItemStack>? {
         require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
         val block = get(blockPosition) ?: return null
@@ -280,7 +281,8 @@ object BlockStorage : Listener {
         for (drop in drops) {
             block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
         }
-        return drops
+        // This is fully backed, just actually enforces the immutability of the drops list and prevents casting to MutableList
+        return Collections.unmodifiableList(drops)
     }
 
     /**
