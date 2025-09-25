@@ -12,6 +12,7 @@ object CullingPresetConfigAdapter : ConfigAdapter<CullingPreset> {
             index = ConfigAdapter.INT.convert(map["index"]!!),
             id = ConfigAdapter.STRING.convert(map["id"]!!),
             material = ConfigAdapter.MATERIAL.convert(map["material"]!!),
+            updateInterval = ConfigAdapter.INT.convert(map["update-interval"]!!),
             hiddenInterval = map["hidden-interval"]?.let { ConfigAdapter.INT.convert(it) } ?: 1,
             visibleInterval = map["visible-interval"]?.let { ConfigAdapter.INT.convert(it) } ?: 20,
             alwaysShowRadius = map["always-show-radius"]?.let { ConfigAdapter.INT.convert(it) } ?: 16,
