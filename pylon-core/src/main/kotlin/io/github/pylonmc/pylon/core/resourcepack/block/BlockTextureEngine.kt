@@ -194,7 +194,7 @@ object BlockTextureEngine : Listener {
 
                     // If its visible & we are on a visibleInterval tick, or if its hidden & we are on a hiddenInterval tick, do a culling check
                     if ((seen && (tick % preset.visibleInterval) == 0) || (!seen && (tick % preset.hiddenInterval) == 0)) {
-                        // TODO: If necessary, have a 3d scan using bounding boxes rather than a line
+                        // TODO: Later if necessary, have a 3d scan using bounding boxes rather than a line
                         // Ray traces from the players eye to the center of the block, counting occluding blocks in between
                         // if its greater than the maxOccludingCount, hide the entity, otherwise show it
                         var occluding = 0
