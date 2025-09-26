@@ -18,6 +18,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -28,6 +29,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
@@ -54,26 +56,32 @@ open class PylonBlock protected constructor(val block: Block) {
     val defaultTranslationKey = schema.defaultBlockTranslationKey
 
     /**
-     * Set this to true if your block should not have a block texture entity for custom models/textures.
+     * Set this to `true` if your block should not have a [blockTextureEntity] for custom models/textures.
      *
-     * For example, if your block is comprised fully of display entities, then you may have no need for a block
-     * entity as you could already be supporting custom models/textures through those entities.
+     * For example, if your block is comprised fully of [ItemDisplay]s, then you may have no need for a texture
+     * entity as your existing entities could already support custom models/textures.
      */
     open var disableBlockTextureEntity = false
 
     /**
-     * A packet based item display entity sent to players with custom block textures enabled.
-     * The entity is initialized by [setupBlockTexture] (which can be overridden), and any later
-     * modifications should use [updateBlockTexture].
+     * A packet based [ItemDisplay] sent to players with `customBlockTextures` enabled.
+     *
+     * Being lazily initialized, if you do not access the entity directly it will only be created
+     * when a player with `customBlockTextures` comes within range for the first time. This is to
+     * avoid unnecessary entity creation, memory usage, and entity update overhead when no players
+     * can actually see it.
+     *
+     * Upon initialization the entity is set up by [setupBlockTexture] (which can be overridden),
+     * and modifications afterward can be done using [updateBlockTexture].
      *
      * For example, if you have a block that faces different directions, you can override [setupBlockTexture]
      * and rotate the entity based on the block's facing direction.
      *
      * Or let's say you have a furnace block that changes texture based on whether it's lit or not,
-     * you can use [updateBlockTexture] to update the entity's item to reflect the lit/unlit state.
+     * you can use [updateBlockTexture] to change the entity's item to reflect the lit/unlit state.
      */
     val blockTextureEntity: WrapperEntity? by lazy {
-        if (disableBlockTextureEntity) {
+        if (!BlockTextureConfig.customBlockTexturesEnabled || disableBlockTextureEntity) {
             null
         } else {
             val entity = WrapperEntity(EntityTypes.ITEM_DISPLAY)
