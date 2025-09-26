@@ -31,7 +31,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import kotlin.math.max
+import kotlin.math.min
 
 /**
  * @property cost If null, the research cannot be unlocked using points
@@ -82,7 +82,7 @@ data class Research(
         if (effects) {
             val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
             val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
-            val spawnedConfetti = max(amount, PylonConfig.researchMaxConfettiAmount)
+            val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
             ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
 
             fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {
