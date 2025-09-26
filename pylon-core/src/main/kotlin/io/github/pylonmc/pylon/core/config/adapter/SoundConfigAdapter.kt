@@ -11,9 +11,9 @@ object SoundConfigAdapter : ConfigAdapter<Sound> {
         val map = MapConfigAdapter.STRING_TO_ANY.convert(value)
         Sound.sound(
             Key.key(map["name"] as String),
-            ConfigAdapter.ENUM.from(Sound.Source::class.java).convert(map["source"]!!),
-            (map["volume"] as Number).toFloat(),
-            (map["pitch"] as Number).toFloat()
+            ConfigAdapter.ENUM.from<Sound.Source>().convert(map["source"]!!),
+            ConfigAdapter.FLOAT.convert(map["volume"]!!),
+            ConfigAdapter.FLOAT.convert(map["pitch"]!!)
         )
         throw IllegalArgumentException("Cannot convert value to Sound: $value")
     }
