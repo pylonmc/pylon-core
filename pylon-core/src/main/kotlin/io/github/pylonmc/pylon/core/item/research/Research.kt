@@ -100,14 +100,10 @@ data class Research(
             val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
             ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
 
-            fun playSoundLater(sound: RandomizedSound, delay: Long) {
+            for ((delay, sound) in PylonConfig.researchSounds) {
                 Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
                     player.playSound(sound.create(), Sound.Emitter.self())
                 }, delay)
-            }
-
-            for ((delay, sound) in PylonConfig.researchSounds) {
-                playSoundLater(sound, delay)
             }
         }
     }

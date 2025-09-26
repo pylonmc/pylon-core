@@ -9,12 +9,11 @@ object SoundConfigAdapter : ConfigAdapter<Sound> {
 
     override fun convert(value: Any): Sound {
         val map = MapConfigAdapter.STRING_TO_ANY.convert(value)
-        Sound.sound(
+        return Sound.sound(
             Key.key(map["name"] as String),
             ConfigAdapter.ENUM.from<Sound.Source>().convert(map["source"]!!),
             ConfigAdapter.FLOAT.convert(map["volume"]!!),
             ConfigAdapter.FLOAT.convert(map["pitch"]!!)
         )
-        throw IllegalArgumentException("Cannot convert value to Sound: $value")
     }
 }
