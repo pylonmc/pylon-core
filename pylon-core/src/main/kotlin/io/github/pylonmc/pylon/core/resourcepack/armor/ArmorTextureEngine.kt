@@ -26,7 +26,7 @@ object ArmorTextureEngine : PacketListener {
     val armorSlots = setOf(5, 6, 7, 8)
 
     @JvmStatic
-    var Player.customArmorTextures: Boolean
+    var Player.hasCustomArmorTextures: Boolean
         get() = this.persistentDataContainer.getOrDefault(customArmorTexturesKey, PersistentDataType.BOOLEAN, false)
         set(value) = this.persistentDataContainer.set(customArmorTexturesKey, PersistentDataType.BOOLEAN, value)
 
@@ -34,7 +34,7 @@ object ArmorTextureEngine : PacketListener {
         if (event == null) return
 
         val player = event.getPlayer<Player>()
-        if (player == null || !player.customArmorTextures) return
+        if (player == null || !player.hasCustomArmorTextures) return
 
         when (event.packetType) {
             PacketType.Play.Server.SET_SLOT -> handleSetSlot(WrapperPlayServerSetSlot(event))
