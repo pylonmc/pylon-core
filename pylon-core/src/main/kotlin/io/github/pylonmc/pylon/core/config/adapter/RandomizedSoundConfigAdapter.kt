@@ -7,8 +7,7 @@ import org.bukkit.configuration.ConfigurationSection
 import java.lang.reflect.Type
 
 object RandomizedSoundConfigAdapter : ConfigAdapter<RandomizedSound> {
-    override val type: Type
-        get() = RandomizedSound::class.java
+    override val type: Type = RandomizedSound::class.java
 
     override fun convert(value: Any): RandomizedSound {
         val map = MapConfigAdapter.STRING_TO_ANY.convert(value)
