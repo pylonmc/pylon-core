@@ -25,8 +25,7 @@ object ArmorTextureEngine : PacketListener {
     val customArmorTexturesKey = pylonKey("custom_armor_textures")
     val armorSlots = setOf(5, 6, 7, 8)
 
-    @get:JvmStatic
-    @set:JvmStatic
+    @JvmStatic
     var Player.customArmorTextures: Boolean
         get() = this.persistentDataContainer.getOrDefault(customArmorTexturesKey, PersistentDataType.BOOLEAN, false)
         set(value) = this.persistentDataContainer.set(customArmorTexturesKey, PersistentDataType.BOOLEAN, value)
