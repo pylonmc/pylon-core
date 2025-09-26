@@ -24,7 +24,7 @@ object RandomizedSoundConfigAdapter : ConfigAdapter<RandomizedSound> {
 
         return RandomizedSound(
             keys,
-            ConfigAdapter.ENUM.from(Sound.Source::class.java).convert(map["source"]!!),
+            ConfigAdapter.ENUM.from<Sound.Source>().convert(map["source"]!!),
             getRange(map, "volume"),
             getRange(map, "pitch")
         )
@@ -34,13 +34,12 @@ object RandomizedSoundConfigAdapter : ConfigAdapter<RandomizedSound> {
         val range = section[key]!!
         if (range is ConfigurationSection || range is Map<*, *>) {
             val range = MapConfigAdapter.STRING_TO_ANY.convert(range)
-            return Pair((range["min"]!! as Number).toDouble(), (range["max"]!! as Number).toDouble())
+            return Pair(ConfigAdapter.DOUBLE.convert(range["min"]!!), ConfigAdapter.DOUBLE.convert(range["max"]!!))
         } else if (range is List<*>) {
-            return Pair((range[0] as Number).toDouble(), (range[1] as Number).toDouble())
-        } else if (range is Number) {
-            val value = range.toDouble()
+            return Pair(ConfigAdapter.DOUBLE.convert(range[0]!!), ConfigAdapter.DOUBLE.convert(range[1]!!))
+        } else {
+            val value = ConfigAdapter.DOUBLE.convert(range)
             return Pair(value, value)
         }
-        throw IllegalArgumentException("Cannot convert value to range: $range")
     }
 }
