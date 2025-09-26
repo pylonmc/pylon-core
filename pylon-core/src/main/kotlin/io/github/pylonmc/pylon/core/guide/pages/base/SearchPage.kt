@@ -77,6 +77,12 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     }
 
     open fun getItems(player: Player, search: String): List<Item> {
+        if (search.isBlank()) {
+            return getItemNamePairs(player, search)
+                .sortedBy { it.second }
+                .map { it.first }
+        }
+
         val specifiers = mutableListOf<SearchSpecifier>()
         val split = search.split(" ")
 
