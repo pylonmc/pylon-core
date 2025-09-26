@@ -6,6 +6,8 @@ import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent
+import io.github.pylonmc.pylon.core.event.PylonMultiblockFormEvent
+import io.github.pylonmc.pylon.core.event.PylonMultiblockUnformEvent
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -70,9 +72,15 @@ internal object MultiblockCache : Listener {
 
                 val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)
                 if (multiblock != null && multiblock.checkFormed()) {
-                    formedMultiblocks.add(multiblockPosition)
+                    if (formedMultiblocks.add(multiblockPosition)) {
+                        multiblock.onMultiblockFormed()
+                        PylonMultiblockFormEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
+                    }
                 } else {
-                    formedMultiblocks.remove(multiblockPosition)
+                    if (formedMultiblocks.remove(multiblockPosition) && multiblock != null) {
+                        multiblock.onMultiblockUnformed()
+                        PylonMultiblockUnformEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
+                    }
                 }
             }
             dirtyMultiblocks.clear()
