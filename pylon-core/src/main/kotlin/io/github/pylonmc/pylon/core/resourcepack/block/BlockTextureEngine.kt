@@ -83,7 +83,7 @@ object BlockTextureEngine : Listener {
     }
 
     @JvmStatic
-    var Player.customBlockTextures: Boolean
+    var Player.hasCustomBlockTextures: Boolean
         get() = this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true)
         set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value)
 
@@ -140,7 +140,7 @@ object BlockTextureEngine : Listener {
                     visible.clear()
                     jobs.remove(uuid)
                     break
-                } else if (!player.customBlockTextures) {
+                } else if (!player.hasCustomBlockTextures) {
                     // We don't cancel the job as the player might re-enable it later, just keep it idling
                     visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
                     visible.clear()
