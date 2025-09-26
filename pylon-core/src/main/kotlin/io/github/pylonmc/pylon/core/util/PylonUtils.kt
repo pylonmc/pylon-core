@@ -343,7 +343,10 @@ fun <T> persistentData(
 val Block.replaceableOrAir: Boolean
     get() = type.isAir || isReplaceable
 
-fun Component.render(locale: Locale = Locale.ROOT): Component
+/**
+ * Renders the component in the given locale using [GlobalTranslator]
+ */
+fun Component.globalRender(locale: Locale = Locale.ROOT): Component
         = GlobalTranslator.render(this, locale)
 
 val Component.plainText: String
