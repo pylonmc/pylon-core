@@ -102,6 +102,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock {
         return items
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
         private val inventoryKey = pylonKey("inventories")
         private val inventoryType =
