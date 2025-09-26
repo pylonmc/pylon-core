@@ -4,26 +4,31 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.util.editData
+import io.github.pylonmc.pylon.core.util.editDataOrDefault
+import io.github.pylonmc.pylon.core.util.editDataOrSet
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.CustomModelData
+import io.papermc.paper.datacomponent.item.ItemAttributeModifiers
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.attribute.Attribute
+import org.bukkit.attribute.AttributeModifier
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
 import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
+import kotlin.collections.forEach
 
 @Suppress("UnstableApiUsage")
-open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProvider {
-
+open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemProvider {
     fun amount(amount: Int) = apply {
         stack.amount = amount
     }
@@ -66,6 +71,14 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
         stack.editData(type, block)
     }
 
+    fun <T : Any> editDataOrDefault(type: DataComponentType.Valued<T>, block: (T) -> T) = apply {
+        stack.editDataOrDefault(type, block)
+    }
+
+    fun <T : Any> editDataOrSet(type: DataComponentType.Valued<T>, block: (T?) -> T) = apply {
+        stack.editDataOrSet(type, block)
+    }
+
     fun name(name: Component) = set(DataComponentTypes.ITEM_NAME, name)
 
     fun name(name: String) = name(fromMiniMessage(name))
@@ -87,6 +100,20 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
     fun defaultTranslatableLore(key: NamespacedKey) =
         lore(Component.translatable(loreKey(key), ""))
 
+    @JvmOverloads
+    fun addAttributeModifier(
+        attribute: Attribute,
+        modifier: AttributeModifier,
+        replaceExisting: Boolean = true
+    ) = apply {
+        editDataOrSet(DataComponentTypes.ATTRIBUTE_MODIFIERS) { modifiers ->
+            val copying = modifiers?.modifiers()?.filter { !replaceExisting || it.modifier().key != modifier.key }
+            ItemAttributeModifiers.itemAttributes().copy(copying)
+                .addModifier(attribute, modifier)
+                .build()
+        }
+    }
+
     fun build(): ItemStack = stack.clone()
 
     override fun get(lang: String?): ItemStack {
@@ -101,6 +128,9 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
     }
 
     companion object {
+
+        val baseAttackDamage = NamespacedKey.minecraft("base_attack_damage")
+        val baseAttackSpeed = NamespacedKey.minecraft("base_attack_speed")
 
         fun nameKey(key: NamespacedKey)
                 = "pylon.${key.namespace}.item.${key.key}.name"
@@ -123,20 +153,20 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
          * with the item's ID set to [key]
          */
         @JvmStatic
-        fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {
-            return of(material)
+        fun pylonItem(material: Material, key: NamespacedKey): PylonItemStackBuilder {
+            return PylonItemStackBuilder(ItemStack(material), key)
                 .editPdc { pdc -> pdc.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .set(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(key.toString()))
                 .defaultTranslatableName(key)
-                .defaultTranslatableLore(key)
+                .defaultTranslatableLore(key) as PylonItemStackBuilder
         }
 
         /**
          * Returns an [ItemStackBuilder] with name and lore set to the default translation keys, and with the item's ID set to [key]
          */
         @JvmStatic
-        fun pylonItem(stack: ItemStack, key: NamespacedKey): ItemStackBuilder {
-            return of(stack)
+        fun pylonItem(stack: ItemStack, key: NamespacedKey): PylonItemStackBuilder {
+            return PylonItemStackBuilder(stack, key)
                 .editPdc { it.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .let {
                     //  Adds the pylon item key as the FIRST string in custom model data, but preserve any pre-existing data
@@ -149,7 +179,14 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
                     it.set(DataComponentTypes.CUSTOM_MODEL_DATA, modelData)
                 }
                 .defaultTranslatableName(key)
-                .defaultTranslatableLore(key)
+                .defaultTranslatableLore(key) as PylonItemStackBuilder
+        }
+
+        fun ItemAttributeModifiers.Builder.copy(modifiers: List<ItemAttributeModifiers.Entry>?) : ItemAttributeModifiers.Builder {
+            modifiers?.forEach { entry ->
+                this.addModifier(entry.attribute(), entry.modifier(), entry.group, entry.display())
+            }
+            return this
         }
     }
 }
