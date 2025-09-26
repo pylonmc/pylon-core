@@ -87,8 +87,7 @@ object BlockTextureEngine : Listener {
         get() = this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true)
         set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value)
 
-    @get:JvmStatic
-    @set:JvmStatic
+    @JvmStatic
     var Player.cullingPreset: CullingPreset
         get() = BlockTextureConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, BlockTextureConfig.defaultCullingPreset.id)) {
             BlockTextureConfig.defaultCullingPreset
