@@ -9,10 +9,10 @@ object CullingPresetConfigAdapter : ConfigAdapter<CullingPreset> {
     override fun convert(value: Any): CullingPreset {
         val map = MapConfigAdapter.STRING_TO_ANY.convert(value)
         return CullingPreset(
-            index = ConfigAdapter.INT.convert(map["index"]!!),
-            id = ConfigAdapter.STRING.convert(map["id"]!!),
-            material = ConfigAdapter.MATERIAL.convert(map["material"]!!),
-            updateInterval = ConfigAdapter.INT.convert(map["update-interval"]!!),
+            index = ConfigAdapter.INT.convert(map["index"] ?: throw IllegalArgumentException("Culling preset is missing 'index' field")),
+            id = ConfigAdapter.STRING.convert(map["id"] ?: throw IllegalArgumentException("Culling preset is missing 'id' field")),
+            material = ConfigAdapter.MATERIAL.convert(map["material"] ?: throw IllegalArgumentException("Culling preset is missing 'material' field")),
+            updateInterval = ConfigAdapter.INT.convert(map["update-interval"] ?: throw IllegalArgumentException("Culling preset is missing 'update-interval' field")),
             hiddenInterval = map["hidden-interval"]?.let { ConfigAdapter.INT.convert(it) } ?: 1,
             visibleInterval = map["visible-interval"]?.let { ConfigAdapter.INT.convert(it) } ?: 20,
             alwaysShowRadius = map["always-show-radius"]?.let { ConfigAdapter.INT.convert(it) } ?: 16,

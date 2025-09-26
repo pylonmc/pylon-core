@@ -63,23 +63,24 @@ open class PylonBlock protected constructor(val block: Block) {
 
     /**
      * A packet based item display entity sent to players with custom block textures enabled.
-     * You can modify the initial setup of the entity by overriding [setupBlockTexture].
+     * The entity is initialized by [setupBlockTexture] (which can be overridden), and any later
+     * modifications should use [updateBlockTexture].
      *
-     * For example, say you have a block like pipes, that have different shapes based on its connections,
-     * you may want to add the shape of the pipe to the item display model data so that it can be reflected
-     * in the entity.
+     * For example, if you have a block that faces different directions, you can override [setupBlockTexture]
+     * and rotate the entity based on the block's facing direction.
+     *
+     * Or let's say you have a furnace block that changes texture based on whether it's lit or not,
+     * you can use [updateBlockTexture] to update the entity's item to reflect the lit/unlit state.
      */
     val blockTextureEntity: WrapperEntity? by lazy {
-        if (disableBlockTextureEntity) null else setupBlockTexture(WrapperEntity(EntityTypes.ITEM_DISPLAY))
+        if (disableBlockTextureEntity) {
+            null
+        } else {
+            val entity = WrapperEntity(EntityTypes.ITEM_DISPLAY)
+            val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
+            setupBlockTexture(entity, meta)
+        }
     }
-
-    /**
-     * The [ItemDisplayMeta] of the [blockTextureEntity], or null if the entity is null
-     * If you want to change any aspect of the ItemDisplay (transformation, itemstack, etc.)
-     * you do so by modifying this.
-     */
-    val blockTextureMeta: ItemDisplayMeta?
-        get() = blockTextureEntity?.getEntityMeta(ItemDisplayMeta::class.java)
 
     /**
      * This constructor is called when a *new* block is created in the world
@@ -109,8 +110,8 @@ open class PylonBlock protected constructor(val block: Block) {
     protected open fun postLoad() {}
 
     /**
-     * Used when initializing [blockTextureEntity], while in this method you **cannot** access
-     * [blockTextureMeta].
+     * Used to initialize [blockTextureEntity], if you need to modify the entity post-initialization,
+     * use [updateBlockTexture].
      *
      * By default, this method sets the item display to be at the center of the block, using the
      * item returned by [getItem] with [BlockItemContext.BlockTexture] (or a barrier if none is
@@ -118,17 +119,31 @@ open class PylonBlock protected constructor(val block: Block) {
      * pack, and scales it to 1.00085f in all directions to prevent z-fighting with the vanilla
      * block model.
      */
-    protected open fun setupBlockTexture(entity: WrapperEntity): WrapperEntity = entity.apply {
+    protected open fun setupBlockTexture(entity: WrapperEntity, meta: ItemDisplayMeta): WrapperEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
-        val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
         entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
 
         val item = getItem(BlockItemContext.BlockTexture) ?: ItemStack(Material.BARRIER)
-        item.editMeta { meta -> meta.itemModel = NamespacedKey.minecraft("air") }
+        item.editMeta { itemMeta -> itemMeta.itemModel = NamespacedKey.minecraft("air") }
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
         meta.scale = Vector3f(1.00085f, 1.00085f, 1.00085f)
         meta.width = 0f
         meta.height = 0f
+    }
+
+    /**
+     * Use this method to make any changes to the block texture entity, such as changing its item,
+     * transformation, etc, after initialization. (see [setupBlockTexture])
+     *
+     * If you want to make changes to the entity outside of this method, make sure to call
+     * [WrapperEntity.refresh] afterwards so that the changes are sent to the client.
+     */
+    protected fun updateBlockTexture(updater: (WrapperEntity, ItemDisplayMeta) -> Unit) {
+        blockTextureEntity?.let {
+            val meta = it.getEntityMeta(ItemDisplayMeta::class.java)
+            updater(it, meta)
+            it.refresh()
+        }
     }
 
     /**
