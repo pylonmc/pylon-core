@@ -106,10 +106,8 @@ data class Research(
                 }, delay)
             }
 
-            repeat(2) {
-                playSoundLater(PylonConfig.researchSounds[0], 3L * it)
-                playSoundLater(PylonConfig.researchSounds[1], 6L * it)
-                playSoundLater(PylonConfig.researchSounds[2], 9L * it)
+            for ((delay, sound) in PylonConfig.researchSounds) {
+                playSoundLater(sound, delay)
             }
         }
     }

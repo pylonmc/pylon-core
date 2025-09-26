@@ -18,12 +18,12 @@ interface ConfigAdapter<T> {
 
     companion object {
         // @formatter:off
-        @JvmField val BYTE = ConfigAdapter { (it as Number).toByte() }
-        @JvmField val SHORT = ConfigAdapter { (it as Number).toShort() }
-        @JvmField val INT = ConfigAdapter { (it as Number).toInt() }
-        @JvmField val LONG = ConfigAdapter { (it as Number).toLong() }
-        @JvmField val FLOAT = ConfigAdapter { (it as Number).toFloat() }
-        @JvmField val DOUBLE = ConfigAdapter { (it as Number).toDouble() }
+        @JvmField val BYTE = ConfigAdapter { if (it is String) it.toByte() else (it as Number).toByte() }
+        @JvmField val SHORT = ConfigAdapter { if (it is String) it.toShort() else (it as Number).toShort() }
+        @JvmField val INT = ConfigAdapter { if (it is String) it.toInt() else (it as Number).toInt() }
+        @JvmField val LONG = ConfigAdapter { if (it is String) it.toLong() else (it as Number).toLong() }
+        @JvmField val FLOAT = ConfigAdapter { if (it is String) it.toFloat() else (it as Number).toFloat() }
+        @JvmField val DOUBLE = ConfigAdapter { if (it is String) it.toDouble() else (it as Number).toDouble() }
         @JvmField val CHAR = ConfigAdapter { (it as String).single() }
         @JvmField val BOOLEAN = ConfigAdapter { it as Boolean }
         @JvmField val ANY = ConfigAdapter { it }
