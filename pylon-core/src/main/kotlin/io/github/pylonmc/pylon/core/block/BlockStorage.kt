@@ -485,10 +485,10 @@ object BlockStorage : Listener {
         }
     }
 
-    @JvmSynthetic
     /**
      * Turns the block into a [PhantomBlock] which represents a block which has failed for some reason
      */
+    @JvmSynthetic
     internal fun makePhantom(block: PylonBlock) = lockBlockWrite {
         PylonBlockSchema.schemaCache[block.block.position] = PhantomBlock.schema
         val phantomBlock = PhantomBlock(

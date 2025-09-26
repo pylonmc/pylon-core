@@ -56,11 +56,13 @@ class PylonBlockSchema(
         "Block '$key' ($blockClass) is missing a load constructor (${javaClass.simpleName}, Block, PersistentDataContainer)"
     )
 
+    @JvmSynthetic
     internal fun create(block: Block, context: BlockCreateContext): PylonBlock {
         schemaCache[block.position] = this
         return createConstructor.invoke(block, context) as PylonBlock
     }
 
+    @JvmSynthetic
     internal fun load(block: Block, pdc: PersistentDataContainer): PylonBlock {
         schemaCache[block.position] = this
         return loadConstructor.invoke(block, pdc) as PylonBlock
