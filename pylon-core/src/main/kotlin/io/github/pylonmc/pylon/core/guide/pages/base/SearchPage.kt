@@ -43,8 +43,8 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
             .addPageChangeHandler { _, newPage -> searchPages[player.uniqueId] = newPage }
             .build()
         val upperGui = Gui.normal()
-            .setStructure("# T #")
-            .addIngredient('T', searchTermsStack)
+            .setStructure("# S #")
+            .addIngredient('S', searchSpecifiersStack)
             .addIngredient('#', GuiItems.background(search))
             .build()
         lowerGui.setPage(searchPages.getOrDefault(player.uniqueId, 0))
@@ -80,7 +80,7 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
         val specifiers = mutableListOf<SearchSpecifier>()
         val split = search.split(" ")
 
-        // Because name searches can contain spaces, we need to accumulate them until we hit a different specifier
+        // Because name specifiers can contain spaces, we need to accumulate them until we hit a different specifier
         val nameSearch = StringBuilder()
         fun buildNameSearch() {
             if (!nameSearch.isEmpty()) {
@@ -112,7 +112,7 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
         for (specifier in specifiers) {
             // Map each entry to its weight for this specifier, excluding non-matching entries
             val weighted = entries.mapNotNull { entry ->
-                val weight = specifier.weight(entry) ?: return@mapNotNull null
+                val weight = specifier.weight(player, entry) ?: return@mapNotNull null
                 Pair(entry.first, weight)
             }
             // Remove entries that didn't match this specifier (are not in the weighted list)
@@ -128,9 +128,9 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     }
 
     companion object {
-        private val searchTermsStack = ItemStackBuilder.of(Material.PAPER)
-            .name(Component.translatable("pylon.pyloncore.guide.button.search-terms.name"))
-            .lore(Component.translatable("pylon.pyloncore.guide.button.search-terms.lore"))
+        private val searchSpecifiersStack = ItemStackBuilder.of(Material.PAPER)
+            .name(Component.translatable("pylon.pyloncore.guide.button.search-specifiers.name"))
+            .lore(Component.translatable("pylon.pyloncore.guide.button.search-specifiers.lore"))
 
         private val searchAlgorithm = JaroWinkler()
         private val searches = mutableMapOf<UUID, String>()
@@ -149,29 +149,29 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     }
 
     private fun interface SearchSpecifier {
-        fun weight(entry: Pair<Item, String>): Double?
+        fun weight(player: Player, entry: Pair<Item, String>): Double?
 
         data class ItemName(val filter: String) : SearchSpecifier {
-            override fun weight(entry: Pair<Item, String>): Double? {
+            override fun weight(player: Player, entry: Pair<Item, String>): Double? {
                 return weight(filter, entry.second)
             }
         }
 
         data class Namespace(val filter: String) : SearchSpecifier {
-            override fun weight(entry: Pair<Item, String>): Double? {
+            override fun weight(player: Player, entry: Pair<Item, String>): Double? {
                 val item = entry.first
                 var key: NamespacedKey = if (item is FluidButton) {
                     item.currentFluid.key
                 } else {
-                    PylonItem.fromStack(item.getItemProvider(null).get())?.key ?: return null
+                    PylonItem.fromStack(item.getItemProvider(player).get())?.key ?: return null
                 }
                 return if (key.namespace.startsWith(filter, true)) 0.0 else null
             }
         }
 
         data class Lore(val filter: String) : SearchSpecifier {
-            override fun weight(entry: Pair<Item, String>): Double? {
-                val stack = entry.first.getItemProvider(null).get()
+            override fun weight(player: Player, entry: Pair<Item, String>): Double? {
+                val stack = entry.first.getItemProvider(player).get()
                 return stack.lore()?.map {
                     weight(filter, it.plainText.lowercase())
                 }?.filterNotNull()?.minOrNull()
