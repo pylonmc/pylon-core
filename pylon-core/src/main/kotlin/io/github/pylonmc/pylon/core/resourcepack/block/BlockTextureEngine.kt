@@ -82,8 +82,7 @@ object BlockTextureEngine : Listener {
         }
     }
 
-    @get:JvmStatic
-    @set:JvmStatic
+    @JvmStatic
     var Player.customBlockTextures: Boolean
         get() = this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true)
         set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value)
