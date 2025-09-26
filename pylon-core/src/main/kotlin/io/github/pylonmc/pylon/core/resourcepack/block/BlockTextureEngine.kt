@@ -54,6 +54,7 @@ object BlockTextureEngine : Listener {
      * Normally, blocks occluding state is cached the first time its requested, and is only updated when placed or broken.
      * If a block changes its occluding state in any other way the cache will no longer be accurate. This job corrects that.
      */
+    @JvmSynthetic
     internal val updateOccludingCacheJob = PylonCore.launch(start = CoroutineStart.LAZY) {
         while (true) {
             delay(BlockTextureConfig.occludingCacheRefreshInterval.ticks)
@@ -87,19 +88,20 @@ object BlockTextureEngine : Listener {
         get() = this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true)
         set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value)
 
-    @get:JvmStatic
-    @set:JvmStatic
+    @JvmStatic
     var Player.cullingPreset: CullingPreset
         get() = BlockTextureConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, BlockTextureConfig.defaultCullingPreset.id)) {
             BlockTextureConfig.defaultCullingPreset
         }
         set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
 
+    @JvmSynthetic
     internal fun insert(block: PylonBlock) {
         if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).insert(block)
     }
 
+    @JvmSynthetic
     internal fun remove(block: PylonBlock) {
         if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).remove(block)
@@ -110,6 +112,7 @@ object BlockTextureEngine : Listener {
         }
     }
 
+    @JvmSynthetic
     internal fun getOctree(world: World): Octree<PylonBlock> {
         check(BlockTextureConfig.customBlockTexturesEnabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
 
