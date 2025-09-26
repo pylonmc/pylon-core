@@ -12,7 +12,7 @@ sealed interface ItemTypeWrapper : Keyed {
     fun createItemStack(): ItemStack
 
     /**
-     * The vanilla variant or [ItemTypeWrapper].
+     * The vanilla variant of [ItemTypeWrapper].
      */
     @JvmRecord
     data class Vanilla(val material: Material) : ItemTypeWrapper {
@@ -21,7 +21,7 @@ sealed interface ItemTypeWrapper : Keyed {
     }
 
     /**
-     * The Pylon variant or [ItemTypeWrapper].
+     * The Pylon variant of [ItemTypeWrapper].
      */
     @JvmRecord
     data class Pylon(val item: PylonItemSchema) : ItemTypeWrapper {

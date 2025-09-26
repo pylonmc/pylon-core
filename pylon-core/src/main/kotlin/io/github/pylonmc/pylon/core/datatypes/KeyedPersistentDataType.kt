@@ -6,7 +6,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType
 
 /**
- * A [PersistentDataType] that can be used with any class that implemented [Keyed].
+ * A [PersistentDataType] that can be used with any class that implements [Keyed].
  */
 abstract class KeyedPersistentDataType<T : Keyed>(val type: Class<T>) : PersistentDataType<String, T> {
 

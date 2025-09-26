@@ -18,7 +18,7 @@ import java.lang.invoke.MethodHandle
 /**
  * Stores information about a Pylon block type, including its key, material, and class.
  *
- * You should not need to use this if you are not working on Pylon core.
+ * You should not need to use this if you are not working on Pylon Core.
  */
 class PylonBlockSchema(
     private val key: NamespacedKey,

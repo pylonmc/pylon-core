@@ -17,7 +17,8 @@ import xyz.xenondevs.invui.window.AnvilWindow
 /**
  * A page that allows a collection of things (specified by [getItemNamePairs] to be searched.
  *
- * @param key A key that uniquely identifies
+ * @param key A key that uniquely identifies this page. Used to generate translation keys for
+ * this page
  */
 abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStaticGuidePage(key, material) {
 

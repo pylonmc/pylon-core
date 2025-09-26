@@ -23,7 +23,15 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
 import java.util.UUID
 
-internal class Waila private constructor(private val player: Player, private val job: Job) {
+/**
+ * Handles WAILAs (the text that displays a block's name when looking
+ * at the block).
+ *
+ * You should not need to use this if you just want to change the WAILA of
+ * a [io.github.pylonmc.pylon.core.block.PylonBlock]. For that, see
+ * [io.github.pylonmc.pylon.core.block.PylonBlock.getWaila]
+ */
+class Waila private constructor(private val player: Player, private val job: Job) {
 
     private val bossbar = BossBar.bossBar(
         Component.empty(),
@@ -100,7 +108,7 @@ internal class Waila private constructor(private val player: Player, private val
         private val overrides = mutableMapOf<BlockPosition, (Player) -> WailaConfig?>()
 
         /**
-         * Forcibly adds a WAILA display for the given player
+         * Forcibly adds a WAILA display for the given player.
          */
         @JvmStatic
         fun addPlayer(player: Player) {
@@ -115,7 +123,7 @@ internal class Waila private constructor(private val player: Player, private val
         }
 
         /**
-         * Forcibly removes a WAILA display for the given player
+         * Forcibly removes a WAILA display for the given player.
          */
         @JvmStatic
         fun removePlayer(player: Player) {
@@ -135,9 +143,10 @@ internal class Waila private constructor(private val player: Player, private val
             }
 
         /**
-         * Adds a WAILA override for the given position. This will always show the provided WAILA config when
-         * a WAILA-enabled player looks at the block at the given position, regardless of the block type or
-         * even if the block is not a Pylon block.
+         * Adds a WAILA override for the given position. This will always show the
+         * provided WAILA config when a WAILA-enabled player looks at the block at
+         * the given position, regardless of the block type or even if the block is
+         * not a Pylon block.
          */
         @JvmStatic
         fun addWailaOverride(position: BlockPosition, provider: (Player) -> WailaConfig?) {

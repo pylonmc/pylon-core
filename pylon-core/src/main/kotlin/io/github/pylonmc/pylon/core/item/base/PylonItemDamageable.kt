@@ -16,7 +16,7 @@ interface PylonItemDamageable {
     fun onItemBreaks(event: PlayerItemBreakEvent) {}
 
     /**
-     * Called when the item is mended.
+     * Called when the item is mended (gains durability).
      */
     fun onItemMended(event: PlayerItemMendEvent) {}
 }

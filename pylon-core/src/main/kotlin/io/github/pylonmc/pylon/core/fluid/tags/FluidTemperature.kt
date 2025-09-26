@@ -5,7 +5,7 @@ import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import net.kyori.adventure.text.Component
 
 /**
- * Fluids must have temperatures for pipes to be able to transfer them.
+ * Most pipes require fluids to have a temperature to be able to transfer fluids.
  */
 enum class FluidTemperature : PylonFluidTag {
     /**

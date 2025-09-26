@@ -14,7 +14,7 @@ import org.bukkit.NamespacedKey
 import java.util.concurrent.CompletableFuture
 
 @Suppress("UnstableApiUsage")
-internal class RegistryCommandArgument<T : Keyed>(private val registry: PylonRegistry<T>) :
+class RegistryCommandArgument<T : Keyed>(private val registry: PylonRegistry<T>) :
     CustomArgumentType.Converted<T, NamespacedKey> {
 
     @Suppress("PrivatePropertyName")
