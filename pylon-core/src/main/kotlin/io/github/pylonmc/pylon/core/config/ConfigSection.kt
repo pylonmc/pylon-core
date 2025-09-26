@@ -99,7 +99,7 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
     }
 
     fun createSection(key: String): ConfigSection
-        = ConfigSection(internalSection.createSection(key))
+            = ConfigSection(internalSection.createSection(key))
 
     /**
      * 'Merges' [other] with this ConfigSection by copying all of its keys into this ConfigSection.

@@ -13,8 +13,10 @@ import java.nio.file.Path
  *
  * @property internalConfig The [YamlConfiguration] that this object wraps.
  */
-class Config(val file: File, val internalConfig: YamlConfiguration = YamlConfiguration.loadConfiguration(file))
-    : ConfigSection(internalConfig) {
+class Config(
+    val file: File,
+    val internalConfig: YamlConfiguration = YamlConfiguration.loadConfiguration(file)
+) : ConfigSection(internalConfig) {
 
     constructor(path: Path) : this(path.toFile())
     constructor(plugin: Plugin, path: String) : this(File(plugin.dataFolder, path))

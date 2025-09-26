@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
+import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import com.destroystokyo.paper.event.player.PlayerJumpEvent
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.base.*
@@ -44,7 +45,6 @@ import java.util.*
  * It also handles components of multiblocks being placed, removed, or moved (this
  * includes vanilla blocks)
  */
-// TODO add ignoreCancelled = true, and priority monitory where relevant
 @Suppress("UnstableApiUsage")
 internal object BlockListener : Listener {
     private val blockErrMap: MutableMap<PylonBlock, Int> = WeakHashMap()
@@ -107,9 +107,7 @@ internal object BlockListener : Listener {
         }
     }
 
-    // TODO this might be dropping vanilla blocks in place of Pylon blocks
-    // TODO this will not respect pylon block break events being cancelled
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockRemove(event: BlockExplodeEvent) {
         BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event))
         for (block in event.blockList()) {
@@ -117,12 +115,21 @@ internal object BlockListener : Listener {
         }
     }
 
-    // TODO this might be dropping vanilla blocks in place of Pylon blocks
-    // TODO this will not respect pylon block break events being cancelled
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockRemove(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
             BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(block, event))
+        }
+    }
+
+    // Event added by paper, not really documented when it's called so two separate handlers might
+    // fire for some block breaks but this shouldn't be an issue
+    // Primarily added to handle sensitive blocks
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private fun blockRemove(event: BlockDestroyEvent) {
+        if (BlockStorage.isPylonBlock(event.block)) {
+            BlockStorage.breakBlock(event.block, BlockBreakContext.Destroyed(event))
+            event.setWillDrop(false)
         }
     }
 
