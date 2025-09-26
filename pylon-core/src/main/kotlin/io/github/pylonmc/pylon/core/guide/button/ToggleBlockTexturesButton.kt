@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.hasCustomBlockTextures
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -16,6 +17,9 @@ class ToggleBlockTexturesButton : AbstractItem() {
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
         player.hasCustomBlockTextures = !player.hasCustomBlockTextures
+        if (player.hasCustomBlockTextures) {
+            BlockTextureEngine.launchBlockTextureJob(player)
+        }
         notifyWindows()
     }
 }

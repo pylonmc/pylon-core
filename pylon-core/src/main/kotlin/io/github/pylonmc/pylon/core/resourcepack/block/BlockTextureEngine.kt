@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.util.Octree
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes.uuid
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -129,26 +130,22 @@ object BlockTextureEngine : Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    private fun onPlayerJoin(event: PlayerJoinEvent) {
-        val uuid = event.player.uniqueId
+    @JvmSynthetic
+    internal fun launchBlockTextureJob(player: Player) {
+        val uuid = player.uniqueId
+        if (!BlockTextureConfig.customBlockTexturesEnabled || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
+
         jobs[uuid] = PylonCore.launch(PylonCore.asyncDispatcher) {
             val visible = mutableSetOf<PylonBlock>()
             var tick = 0
 
             while (true) {
                 val player = Bukkit.getPlayer(uuid)
-                if (player == null) {
+                if (player == null || !player.hasCustomBlockTextures) {
                     visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
                     visible.clear()
                     jobs.remove(uuid)
                     break
-                } else if (!player.hasCustomBlockTextures) {
-                    // We don't cancel the job as the player might re-enable it later, just keep it idling
-                    visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
-                    visible.clear()
-                    delay(20.ticks)
-                    continue
                 }
 
                 // When showing/hiding entities, we will always add/remove the viewer and add/remove the block from the visible set
@@ -233,6 +230,11 @@ object BlockTextureEngine : Listener {
                 tick++
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    private fun onPlayerJoin(event: PlayerJoinEvent) {
+        launchBlockTextureJob(event.player)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
