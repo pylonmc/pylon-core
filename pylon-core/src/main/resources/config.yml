@@ -33,19 +33,34 @@ research:
     multiplier: 0.2
     max-amount: 700 # must be an integer
   # The sounds played when a player unlocks a research
-  # There must always be 3 sounds
+  # The keys are the tick at which the sound is played, relative to after when the research is unlocked
   sounds:
-    -
-      sound: minecraft:entity.player.levelup
-      source: player
-      volume: 1.5
-      pitch: 0.9
-    -
+    2:
       sound: minecraft:entity.firework_rocket.blast
       source: player
       volume: 1.5
       pitch: 1
-    -
+    4:
+      sound: minecraft:entity.firework_rocket.blast
+      source: player
+      volume: 1.5
+      pitch: 1
+    6:
+      sound: minecraft:entity.player.levelup
+      source: player
+      volume: 1.5
+      pitch: 0.9
+    9:
+      sound: minecraft:entity.firework_rocket.launch
+      source: player
+      volume: 1.5
+      pitch: 1
+    12:
+      sound: minecraft:entity.player.levelup
+      source: player
+      volume: 1.5
+      pitch: 0.9
+    18:
       sound: minecraft:entity.firework_rocket.launch
       source: player
       volume: 1.5
