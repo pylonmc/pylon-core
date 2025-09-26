@@ -8,8 +8,6 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.plainText
-import io.github.pylonmc.pylon.core.util.pylonKey
-import io.github.pylonmc.pylon.core.util.render
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -27,7 +25,7 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     abstract fun getItemNamePairs(player: Player, search: String): List<Pair<Item, String>>
 
     override fun open(player: Player) {
-        var dummyRename = true
+        var firstRename = true
         val search = searches.getOrDefault(player.uniqueId, "")
         val lowerGui = PagedGui.items()
             .setStructure(
@@ -58,8 +56,9 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
                 .setLowerGui(lowerGui)
                 .setTitle(AdventureComponentWrapper(title))
                 .addRenameHandler { search ->
-                    if (dummyRename) {
-                        dummyRename = false
+                    if (firstRename) {
+                        // The first rename happens immediately when the anvil is opened, we need to ignore it
+                        firstRename = false
                         return@addRenameHandler
                     }
 
@@ -78,13 +77,14 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
     }
 
     open fun getItems(player: Player, search: String): List<Item> {
-        val terms = mutableListOf<SearchTerm>()
+        val specifiers = mutableListOf<SearchSpecifier>()
         val split = search.split(" ")
-        val remainder = StringBuilder()
-        fun flushRemainder() {
-            if (remainder.isEmpty()) return
-            terms.add { entry ->
-                weight(remainder.toString(), entry.second)
+
+        // Because name searches can contain spaces, we need to accumulate them until we hit a different specifier
+        val nameSearch = StringBuilder()
+        fun buildNameSearch() {
+            if (!nameSearch.isEmpty()) {
+                specifiers.add(SearchSpecifier.ItemName(nameSearch.toString()))
             }
         }
 
@@ -93,44 +93,33 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
             val type = piece[0]
             when(type) {
                 '@' -> {
-                    flushRemainder()
-                    terms.add { entry ->
-                        val item = entry.first
-                        lateinit var key: NamespacedKey
-                        if (item is FluidButton) {
-                            key = item.currentFluid.key
-                        } else {
-                            key = PylonItem.fromStack(item.getItemProvider(player).get())?.key ?: return@add null
-                        }
-                        return@add if (key.namespace.startsWith(piece.substring(1), ignoreCase = true)) 0.0 else null
-                    }
+                    buildNameSearch()
+                    specifiers.add(SearchSpecifier.Namespace(piece.substring(1)))
                 }
                 '$' -> {
-                    flushRemainder()
-                    terms.add { entry ->
-                        val stack = entry.first.getItemProvider(player).get()
-                        stack.lore()?.map {
-                            weight(piece.substring(1), it.render(player.locale()).plainText.lowercase())
-                        }?.filterNotNull()?.minOrNull()
-                    }
+                    buildNameSearch()
+                    specifiers.add(SearchSpecifier.Lore(piece.substring(1)))
                 }
                 else -> {
-                    if (remainder.isNotEmpty()) remainder.append(" ")
-                    remainder.append(piece)
+                    if (nameSearch.isNotEmpty()) nameSearch.append(" ")
+                    nameSearch.append(piece)
                 }
             }
         }
-        flushRemainder()
+        buildNameSearch()
 
         val entries = getItemNamePairs(player, search).toMutableList()
-        for (term in terms) {
+        for (specifier in specifiers) {
+            // Map each entry to its weight for this specifier, excluding non-matching entries
             val weighted = entries.mapNotNull { entry ->
-                val weight = term.weight(entry) ?: return@mapNotNull null
+                val weight = specifier.weight(entry) ?: return@mapNotNull null
                 Pair(entry.first, weight)
             }
+            // Remove entries that didn't match this specifier (are not in the weighted list)
             entries.removeIf { entry ->
                 weighted.none { it.first == entry.first }
             }
+            // Sort remaining entries by their weight for this specifier
             entries.sortBy { entry ->
                 weighted.first { it.first == entry.first }.second
             }
@@ -159,7 +148,34 @@ abstract class SearchPage (key: NamespacedKey, material: Material) : SimpleStati
         }
     }
 
-    private fun interface SearchTerm {
+    private fun interface SearchSpecifier {
         fun weight(entry: Pair<Item, String>): Double?
+
+        data class ItemName(val filter: String) : SearchSpecifier {
+            override fun weight(entry: Pair<Item, String>): Double? {
+                return weight(filter, entry.second)
+            }
+        }
+
+        data class Namespace(val filter: String) : SearchSpecifier {
+            override fun weight(entry: Pair<Item, String>): Double? {
+                val item = entry.first
+                var key: NamespacedKey = if (item is FluidButton) {
+                    item.currentFluid.key
+                } else {
+                    PylonItem.fromStack(item.getItemProvider(null).get())?.key ?: return null
+                }
+                return if (key.namespace.startsWith(filter, true)) 0.0 else null
+            }
+        }
+
+        data class Lore(val filter: String) : SearchSpecifier {
+            override fun weight(entry: Pair<Item, String>): Double? {
+                val stack = entry.first.getItemProvider(null).get()
+                return stack.lore()?.map {
+                    weight(filter, it.plainText.lowercase())
+                }?.filterNotNull()?.minOrNull()
+            }
+        }
     }
 }
