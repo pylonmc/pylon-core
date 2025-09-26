@@ -382,6 +382,3 @@ internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Con
 }
 
 private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
-
-val Block.replaceableOrAir: Boolean
-    get() = type.isAir || isReplaceable
