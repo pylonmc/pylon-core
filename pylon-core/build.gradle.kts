@@ -94,28 +94,6 @@ dokka {
     }
 }
 
-// TODO Temporary solution
-tasks.register("dokkaJavadocWithVoid") {
-    group = "documentation"
-    description = "Generates Javadoc HTML from Kotlin, replacing Unit with void"
-
-    val outputDir = buildDir.resolve("dokka/docs/javadoc")
-    dependsOn("dokkaGeneratePublicationJavadoc")
-
-    doLast {
-        outputDir.walkTopDown().filter { it.isFile && it.extension == "html" }.forEach { file ->
-            var text = file.readText()
-
-            // Replace 'Unit' with 'void'
-            text = text.replace("<a href=https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html>Unit</a>", "void")
-
-            file.writeText(text)
-        }
-
-        println("Dokka Javadoc HTML generated in $outputDir with Unit → void replacement")
-    }
-}
-
 val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
     dependsOn(tasks.dokkaGeneratePublicationHtml)
     archiveClassifier.set("javadoc")

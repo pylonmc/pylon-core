@@ -26,7 +26,9 @@ import org.bukkit.inventory.ItemStack
 /**
  * An item that represents a fluid pipe. All the logic regarding placing the pipe is handled automatically.
  *
- * Expects the pipe's config to contain a `material`, a `fluid-per-second`, and a `allowed-temperatures` value.
+ * Expects the pipe's config to contain a `material`, a `fluid-per-second`, and optionally a
+ * `allowed-temperatures` value. If `allowed-temperatures` is not set, any fluid will be allowed through.
+ * To override this behaviour, override [canPass].
  *
  * You should generally not need to extend this class. Instead, simply register an item with class
  * FluidPipe.class to create a new pipe type.
@@ -34,7 +36,7 @@ import org.bukkit.inventory.ItemStack
 open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityInteractor, PylonInteractor {
     val material = getSettings().getOrThrow("material", ConfigAdapter.MATERIAL)
     val fluidPerSecond = getSettings().getOrThrow("fluid-per-second", ConfigAdapter.DOUBLE)
-    val allowedTemperatures = getSettings().getOrThrow(
+    val allowedTemperatures = getSettings().get(
         "allowed-temperatures",
         ConfigAdapter.LIST.from(ConfigAdapter.FLUID_TEMPERATURE)
     )
@@ -44,7 +46,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
         PylonArgument.of(
             "temperatures", Component.join(
                 JoinConfiguration.separator(Component.text(", ")),
-                allowedTemperatures.map(FluidTemperature::valueText)
+                allowedTemperatures?.map(FluidTemperature::valueText) ?: listOf()
             )
         )
     )
@@ -53,7 +55,8 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
      * Returns whether the pipe is capable of moving the given fluid through it.
      */
     open fun canPass(fluid: PylonFluid): Boolean {
-        return fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedTemperatures
+        return allowedTemperatures == null
+                || fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedTemperatures
     }
 
     override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {

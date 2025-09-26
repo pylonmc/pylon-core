@@ -6,7 +6,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Unloaded after the block (and it's chunk) have been unloaded.
+ * Unloaded after the [pylonBlock] and its chunk have been unloaded.
  */
 class PylonBlockUnloadEvent(
     val block: Block,

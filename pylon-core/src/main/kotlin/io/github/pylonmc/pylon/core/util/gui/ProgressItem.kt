@@ -66,7 +66,7 @@ abstract class ProgressItem @JvmOverloads constructor(
     }
 
     /**
-     * This can be used to modify the item being displayed.
+     * This is used to modify the item being displayed.
      *
      * @param builder The item builder representing the progress item
      */

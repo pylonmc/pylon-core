@@ -60,9 +60,12 @@ open class PylonBlock internal constructor(val block: Block) {
      * restarts, we need to create a new PylonBlock instance, and we'll do it with this
      * constructor.
      *
-     * You should only load data in this block. If you need to do any extra logic on load
-     * for whatever reason, it's recommended to do it in [postLoad] to make sure all data
-     * associated with your block has been loaded.
+     * You should only load data in this constructor. If you need to do any extra logic on
+     * load for whatever reason, it's recommended to do it in [postLoad] to make sure all
+     * data associated with your block that you don't directly control (such as inventories,
+     * associated entities, fluid tank data, etc) has been loaded.
+     *
+     * @see PersistentDataContainer
      */
     constructor(block: Block, pdc: PersistentDataContainer) : this(block)
 
@@ -91,10 +94,10 @@ open class PylonBlock internal constructor(val block: Block) {
     /**
      * Returns the item that the block should drop.
      *
-     * By default returns the item with the same key as the block only if
+     * By default, returns the item with the same key as the block only if
      * [BlockBreakContext.normallyDrops] is true, and null otherwise.
      *
-     * @return the item, or null if none
+     * @return the item the block should drop, or null if none
      */
     open fun getDropItem(context: BlockBreakContext): ItemStack? {
         return if (context.normallyDrops) {
@@ -106,6 +109,11 @@ open class PylonBlock internal constructor(val block: Block) {
 
     /**
      * Returns the item that should be given when the block is middle clicked.
+     *
+     * By default, returns the item with the same key as the block only if
+     * [BlockBreakContext.normallyDrops] is true, and null otherwise.
+     *
+     * @return the item the block should give when middle clicked, or null if none
      */
     open fun getPickItem() = PylonRegistry.ITEMS[schema.key]?.itemStack
 
@@ -116,7 +124,9 @@ open class PylonBlock internal constructor(val block: Block) {
      *
      * *Do not assume that when this is called, the block is being unloaded.* This
      * may be called for other reasons, such as when a player right clicks with
-     * [io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs]
+     * [io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs].
+     * Instead, implement [io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock] and
+     * use [io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock.onUnload].
      */
     open fun write(pdc: PersistentDataContainer) {}
 

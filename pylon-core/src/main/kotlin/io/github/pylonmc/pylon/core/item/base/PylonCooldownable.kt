@@ -3,8 +3,7 @@ package io.github.pylonmc.pylon.core.item.base
 import org.jetbrains.annotations.ApiStatus
 
 /**
- * Implemented by interfaces that may be affected by cooldowns. You should not
- * implement this interface on an item yourself.
+ * Implemented by other Pylon interfaces that may be affected by cooldowns.
  */
 @ApiStatus.Internal
 sealed interface PylonCooldownable {

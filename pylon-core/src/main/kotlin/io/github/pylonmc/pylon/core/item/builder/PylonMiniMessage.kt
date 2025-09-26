@@ -29,7 +29,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
  * - `<guideinstruction></guideinstruction>`|`<guideinsn></guideinsn>` - Applies a purple styling (0xc907f4), used for guide instructions
  * - `<attribute></attribute>`|`<attr></attr>` - Applies a cyan styling (0xa9d9e8), used for attributes
  * - `<unit:\[prefix\]:[unit name]></unit>` - Formats a **constant** number as a unit, with an optional metric prefix
- * - `<nbsp></nbsp>` - Replaces spaces with non-breaking spaces ( ), useful for prevent line breaks in lore
+ * - `<nbsp></nbsp>` - Replaces spaces with non-breaking spaces ( ), useful for preventing line breaks in lore
  */
 val customMiniMessage = MiniMessage.builder()
     .tags(TagResolver.standard())

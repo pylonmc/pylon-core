@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Loads Pylon Core - internal.
+ * Loads the necessary libraries for Pylon Core to run - internal.
  */
 @ApiStatus.Internal
 @SuppressWarnings({"UnstableApiUsage", "unused"})

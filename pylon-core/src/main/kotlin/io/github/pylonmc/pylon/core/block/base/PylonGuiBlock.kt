@@ -89,7 +89,8 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock {
     }
 
     /**
-     * Returns all the (non-null) items stored in this inventory.
+     * Returns all the (non-null) items stored across all inventories in the
+     * block's GUI.
      */
     fun getItems() : List<ItemStack> {
         val items = mutableListOf<ItemStack>()

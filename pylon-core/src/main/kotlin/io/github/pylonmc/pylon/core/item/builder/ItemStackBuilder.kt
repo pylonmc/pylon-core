@@ -25,6 +25,10 @@ import java.util.function.Consumer
  * items specifically.
  *
  * Implements InvUI's [ItemProvider], so can be used instead of an [ItemStack] in GUIs.
+ *
+ * You should use this when using anything to do with [Component.translatable] including
+ * [io.github.pylonmc.pylon.core.item.PylonItem]s in InvUI GUIs. Yes, this is confusing
+ * and annoying - it is unfortunately necessary to get around InvUI's translation system.
  */
 @Suppress("UnstableApiUsage")
 open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProvider {

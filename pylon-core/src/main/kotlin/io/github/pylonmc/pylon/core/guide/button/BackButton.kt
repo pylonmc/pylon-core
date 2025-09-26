@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
 /**
- * Represents the `back` button in the guide.
+ * Represents the back button in the guide.
  */
 open class BackButton(val player: Player) : AbstractItem() {
 

@@ -19,7 +19,7 @@ import java.lang.invoke.MethodHandle
  * Stores information about a Pylon item type, including its key, default [ItemStack], class, and
  * any associated blocks.
  *
- * You should not need to use this if you are not working on Pylon core.
+ * You should not need to use this if you are not working on Pylon Core.
  */
 class PylonItemSchema @JvmOverloads internal constructor(
     @JvmSynthetic internal val itemClass: Class<out PylonItem>,

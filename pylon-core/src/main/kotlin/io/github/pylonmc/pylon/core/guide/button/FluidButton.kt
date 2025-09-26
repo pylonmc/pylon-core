@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
  * Represents a fluid in the guide.
  *
  * @param fluids The list of fluids to display. If multiple fluids are supplied, the button automatically
- * cycles through all of them
+ * cycles through all of them. You must supply at least one fluid
  */
 open class FluidButton(
     fluids: List<PylonFluid>,
@@ -42,13 +42,13 @@ open class FluidButton(
 
     /**
      * @param fluids The list of fluids to display. If multiple fluids are supplied, the button
-     * cycles through them
+     * cycles through them. You must supply at least one fluid
      */
     constructor(amount: Double?, vararg fluids: PylonFluid) : this(fluids.toList(), amount, { it })
 
     /**
      * @param fluids The list of fluids to display. If multiple fluids are supplied, the button
-     * cycles through them
+     * cycles through them. You must supply at least one fluid
      */
     constructor(vararg fluids: PylonFluid) : this(null, *fluids)
 

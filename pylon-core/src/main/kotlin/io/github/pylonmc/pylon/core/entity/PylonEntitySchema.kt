@@ -9,7 +9,7 @@ import java.lang.invoke.MethodHandle
  * Stores information about a Pylon entity type, including its key, vanilla entity class,
  * and Pylion entity class.
  *
- * You should not need to use this if you are not working on Pylon core.
+ * You should not need to use this if you are not working on Pylon Core.
  */
 class PylonEntitySchema(
     private val key: NamespacedKey,

@@ -6,7 +6,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called when a [PylonBlock]'s load constructor is called.
+ * Called after the [pylonBlock]'s load constructor is called.
  */
 class PylonBlockLoadEvent(
     val block: Block,

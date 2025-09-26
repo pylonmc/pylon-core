@@ -15,11 +15,16 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 /**
- * Provides a Kotlin-style builder for Brigadier commands.
+ * If you are using Kotlin, you can use this class to create Brigadier commands
+ * Kotlin-style.
  *
- * Blame Kotlin for not allowing us to hide this class in any way from Java.
+ * You should probably implement your own command system if you are making your
+ * own addon, rather than using anything from Pylon Core. We recommend checking
+ * out Aikar's commands, as it makes adding commands very easy and simple.
+ *
+ * (Blame Kotlin for not allowing us to hide this class in any way from Java).
  */
-internal class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
+class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
 
     var requirement: CommandContext<CommandSourceStack>.(CommandSender) -> Boolean = { true }
 

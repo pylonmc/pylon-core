@@ -20,7 +20,8 @@ class ChunkPosition(world: World?, val x: Int, val z: Int) {
     val world: World?
         get() = worldRef.get()
 
-    val asLong: Long
+    internal val asLong: Long
+        @JvmSynthetic
         get() = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
 
     val chunk: Chunk?

@@ -35,7 +35,7 @@ interface GuidePage : Keyed {
      * Opens the GUI for a player.
      *
      * WARNING: The UI will break and let people take items out of it if an exception is thrown
-     * in this functrion, so make sure to wrap anything in here in try-catch.
+     * in this function, so make sure to wrap anything in here in try-catch.
      */
     fun open(player: Player) {
         try {
