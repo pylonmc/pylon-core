@@ -74,8 +74,10 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
 
         val itemToGive = pipe.stack.clone()
         itemToGive.amount = amount
-        if (player != null && player.gameMode != GameMode.CREATIVE) {
-            player.give(itemToGive)
+        if (player != null) {
+            if (player.gameMode != GameMode.CREATIVE) {
+                player.give(itemToGive)
+            }
         } else {
             val location = to.point.position.plus(from.point.position).location.multiply(0.5)
             location.getWorld().dropItemNaturally(location, itemToGive)
