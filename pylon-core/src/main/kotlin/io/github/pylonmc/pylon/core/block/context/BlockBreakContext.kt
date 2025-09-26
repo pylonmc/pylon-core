@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block.context
 
+import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import org.bukkit.GameMode
 import org.bukkit.block.Block
 import org.bukkit.event.block.BlockBreakEvent
@@ -92,5 +93,18 @@ interface BlockBreakContext {
     data class Faded(val event: BlockFadeEvent) : BlockBreakContext {
         override val block = event.block
         override val normallyDrops = false
+    }
+
+    /**
+     * The block has been destroyed for another reason, such as a lever dropping
+     * because the block it was attached to was broken. It is not really documented
+     * exactly when the event that this relies on is actually fired for some reason.
+     *
+     * Unfortunate quirk of Paper/Spigot/Bukkit/Mojang that this is needed.
+     *
+     * See [BlockDestroyEvent] for more details
+     */
+    data class Destroyed(val event: BlockDestroyEvent) : BlockBreakContext {
+        override val normallyDrops = true
     }
 }

@@ -98,6 +98,9 @@ open class ConfigSection(val internalSection: ConfigurationSection) {
         cache.remove(key)
     }
 
+    fun createSection(key: String): ConfigSection
+            = ConfigSection(internalSection.createSection(key))
+
     /**
      * 'Merges' [other] with this ConfigSection by copying all of its keys into this ConfigSection.
      * If a key exists in both section, this ConfigSection's keys take priority.

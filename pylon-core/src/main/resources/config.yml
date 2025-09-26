@@ -1,3 +1,6 @@
+# Should players be given the pylon guide book when they first join?
+pylon-guide-on-first-join: true
+
 # The default interval (in Minecraft ticks) between each block tick
 # Most blocks have a custom tick interval which can be changed in their settings
 default-tick-interval: 20
@@ -22,6 +25,13 @@ research:
   enabled: true
   # The interval (in Minecraft ticks) between when Pylon checks for unresearched items in inventories
   tick-interval: 20
+  # Formula
+  # calculated = base-amount * researchCost * multiplier
+  # spawnedConfetti = max(calculated, max-amount)
+  confetti:
+    base-amount: 70.0
+    multiplier: 0.2
+    max-amount: 700 # must be an integer
 
 pipe-placement:
   # The interval (in Minecraft ticks) between pipe placement task ticks
@@ -33,6 +43,9 @@ pipe-placement:
 
 # How many characters a line can be before it is split into a new line when translating
 translation-wrap-limit: 64
+
+# The interval (in Minecraft ticks) between metrics data being saved
+metrics-save-interval-ticks: 6000
 
 # Keys of the items you want to disable. You can get an item's key with /pylon key
 #

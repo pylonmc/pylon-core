@@ -11,6 +11,9 @@ object PylonConfig {
     private val config = Config(PylonCore, "config.yml")
 
     @JvmStatic
+    val pylonGuideOnFirstJoin = config.getOrThrow("pylon-guide-on-first-join", ConfigAdapter.BOOLEAN)
+
+    @JvmStatic
     val defaultTickInterval = config.getOrThrow("default-tick-interval", ConfigAdapter.INT)
 
     @JvmStatic
@@ -35,6 +38,15 @@ object PylonConfig {
     val researchesEnabled = config.getOrThrow("research.enabled", ConfigAdapter.BOOLEAN)
 
     @JvmStatic
+    val researchBaseConfettiAmount = config.get("research.confetti.base-amount", ConfigAdapter.DOUBLE, 70.0)
+
+    @JvmStatic
+    val researchMultiplierConfettiAmount = config.get("research.confetti.multiplier", ConfigAdapter.DOUBLE, 0.2)
+
+    @JvmStatic
+    val researchMaxConfettiAmount = config.get("research.confetti.max-amount", ConfigAdapter.INT, 700)
+
+    @JvmStatic
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
     @JvmStatic
@@ -42,6 +54,9 @@ object PylonConfig {
 
     @JvmStatic
     val translationWrapLimit = config.getOrThrow("translation-wrap-limit", ConfigAdapter.INT)
+
+    @JvmStatic
+    val metricsSaveIntervalTicks = config.getOrThrow("metrics-save-interval-ticks", ConfigAdapter.LONG)
 
     @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))

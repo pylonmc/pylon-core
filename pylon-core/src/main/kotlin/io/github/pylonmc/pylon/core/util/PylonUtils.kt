@@ -15,6 +15,7 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
@@ -379,3 +380,5 @@ internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Con
 
 private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
 
+val Block.replaceableOrAir: Boolean
+    get() = type.isAir || isReplaceable

@@ -1,10 +1,13 @@
 package io.github.pylonmc.pylon.core.block
 
+import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import io.github.pylonmc.pylon.core.block.base.PylonMultiblock
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent
+import io.github.pylonmc.pylon.core.event.PylonMultiblockFormEvent
+import io.github.pylonmc.pylon.core.event.PylonMultiblockUnformEvent
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -69,9 +72,15 @@ internal object MultiblockCache : Listener {
 
                 val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)
                 if (multiblock != null && multiblock.checkFormed()) {
-                    formedMultiblocks.add(multiblockPosition)
+                    if (formedMultiblocks.add(multiblockPosition)) {
+                        multiblock.onMultiblockFormed()
+                        PylonMultiblockFormEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
+                    }
                 } else {
-                    formedMultiblocks.remove(multiblockPosition)
+                    if (formedMultiblocks.remove(multiblockPosition) && multiblock != null) {
+                        multiblock.onMultiblockUnformed()
+                        PylonMultiblockUnformEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
+                    }
                 }
             }
             dirtyMultiblocks.clear()
@@ -197,6 +206,13 @@ internal object MultiblockCache : Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockBreak(event: BlockBurnEvent)
             = onBlockModified(event.block)
+
+    // Event added by paper, not really documented when it's called so two separate handlers might
+    // fire for some block breaks but this shouldn't be an issue
+    // Primarily added to handle sensitive blocks
+    @EventHandler
+    private fun blockRemove(event: BlockDestroyEvent)
+        = onBlockModified(event.block)
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockBreak(event: BlockExplodeEvent) {
