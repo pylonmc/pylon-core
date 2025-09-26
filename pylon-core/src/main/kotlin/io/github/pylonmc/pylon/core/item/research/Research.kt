@@ -20,12 +20,7 @@ import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import org.bukkit.Bukkit
-import org.bukkit.Keyed
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.OfflinePlayer
-import org.bukkit.Sound
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -147,13 +142,12 @@ data class Research(
         private val researchesType =
             PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
-        @get:JvmStatic
-        @set:JvmStatic
+        @JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
         fun getResearches(player: OfflinePlayer): Set<Research> {
-            var researches = player.persistentDataContainer.get(researchesKey, researchesType)
+            val researches = player.persistentDataContainer.get(researchesKey, researchesType)
             if (researches == null && player is Player) {
                 setResearches(player, setOf())
                 return setOf()

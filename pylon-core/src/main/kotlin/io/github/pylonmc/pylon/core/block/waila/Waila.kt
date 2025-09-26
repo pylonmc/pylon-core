@@ -122,8 +122,7 @@ internal class Waila private constructor(private val player: Player, private val
             wailas.remove(player.uniqueId)?.destroy()
         }
 
-        @get:JvmStatic
-        @set:JvmStatic
+        @JvmStatic
         var Player.wailaEnabled: Boolean
             get() = this.persistentDataContainer.getOrDefault(wailaKey, PersistentDataType.BOOLEAN, true)
             set(value) {

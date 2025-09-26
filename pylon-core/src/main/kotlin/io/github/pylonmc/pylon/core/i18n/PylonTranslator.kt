@@ -162,7 +162,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             return lines
         }
 
-        @get:JvmStatic
+        @JvmStatic
         @get:JvmName("getTranslatorForAddon")
         val PylonAddon.translator: PylonTranslator
             get() = translators[this.key]

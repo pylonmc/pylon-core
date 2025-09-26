@@ -102,25 +102,24 @@ dokka {
     }
 }
 
-// TODO Temporary solution
-tasks.register("dokkaJavadocWithVoid") {
-    group = "documentation"
-    description = "Generates Javadoc HTML from Kotlin, replacing Unit with void"
-
-    val outputDir = buildDir.resolve("dokka/docs/javadoc")
-    dependsOn("dokkaGeneratePublicationJavadoc")
-
+tasks.dokkaGeneratePublicationJavadoc {
+    // Fixes search lag by limiting the number of results shown
+    // See https://github.com/Kotlin/dokka/issues/4284
     doLast {
-        outputDir.walkTopDown().filter { it.isFile && it.extension == "html" }.forEach { file ->
-            var text = file.readText()
-
-            // Replace 'Unit' with 'void'
-            text = text.replace("<a href=https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html>Unit</a>", "void")
-
-            file.writeText(text)
+        val searchJs = layout.buildDirectory.file("dokka/docs/javadoc/search.js").get().asFile
+        val text = searchJs.readText()
+        val codeToFix = "const result = [...modules, ...packages, ...types, ...members, ...tags]"
+        if (codeToFix !in text) {
+            throw IllegalStateException("Seggan you buffoon, you updated dokka without checking to see if the search fix still works")
         }
-
-        println("Dokka Javadoc HTML generated in $outputDir with Unit → void replacement")
+        val fixed = "const result = [" +
+                "...modules.slice(0, 5), " +
+                "...packages.slice(0, 5), " +
+                "...types.slice(0, 40), " +
+                "...members.slice(0, 40), " +
+                "...tags.slice(0, 5)" +
+                "]"
+        searchJs.writeText(text.replace(codeToFix, fixed))
     }
 }
 
