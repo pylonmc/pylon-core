@@ -21,7 +21,7 @@ object BlockTextureConfig {
     val cullingPresets = config.getOrThrow("custom-block-textures.culling.presets", ConfigAdapter.MAP.from(ConfigAdapter.STRING, ConfigAdapter.CULLING_PRESET))
 
     @JvmStatic
-    val defaultCullingPreset = let {
+    val defaultCullingPreset = run {
         val key = config.getOrThrow<String>("custom-block-textures.culling.default-preset", ConfigAdapter.STRING)
         cullingPresets[key] ?: error("No culling preset with id '$key' found")
     }
