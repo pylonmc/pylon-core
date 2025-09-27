@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BeaconEffectEvent
+import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import com.destroystokyo.paper.event.player.PlayerJumpEvent
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.base.*
@@ -11,12 +12,12 @@ import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Container
 import org.bukkit.event.Event
@@ -46,7 +47,6 @@ import java.util.*
  * It also handles components of multiblocks being placed, removed, or moved (this
  * includes vanilla blocks)
  */
-// TODO add ignoreCancelled = true, and priority monitory where relevant
 @Suppress("UnstableApiUsage")
 internal object BlockListener : Listener {
     private val blockErrMap: MutableMap<PylonBlock, Int> = WeakHashMap()
@@ -90,50 +90,74 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockBreakEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event))
+            if (BlockStorage.breakBlock(event.block, BlockBreakContext.PlayerBreak(event)) == null) {
+                event.isCancelled = true
+                return
+            }
             event.isDropItems = false
+            event.expToDrop = 0
 
             val player = event.player
             val tool = player.inventory.itemInMainHand
 
             tool.damage(1, player)
-            event.isCancelled = true
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockBurn(event: BlockBurnEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event))
-            event.isCancelled = true
+            if (BlockStorage.breakBlock(event.block, BlockBreakContext.Burned(event)) == null) {
+                event.isCancelled = true
+            }
         }
     }
 
-    // TODO this might be dropping vanilla blocks in place of Pylon blocks
-    // TODO this will not respect pylon block break events being cancelled
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockRemove(event: BlockExplodeEvent) {
-        BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event))
+        if (BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
+            event.isCancelled = true
+            return
+        }
+        val it = event.blockList().iterator()
+        while (it.hasNext()) {
+            if (BlockStorage.breakBlock(it.next(), BlockBreakContext.BlockExploded(event)) == null) {
+                it.remove()
+            }
+        }
         for (block in event.blockList()) {
             BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event))
         }
     }
 
-    // TODO this might be dropping vanilla blocks in place of Pylon blocks
-    // TODO this will not respect pylon block break events being cancelled
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockRemove(event: EntityExplodeEvent) {
-        val context = BlockBreakContext.EntityExploded(event);
-        for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, context)
+        val context = BlockBreakContext.EntityExploded(event)
+        val it = event.blockList().iterator()
+        while (it.hasNext()) {
+            if (BlockStorage.breakBlock(it.next(), context) == null) {
+                it.remove()
+            }
+        }
+    }
+
+    // Event added by paper, not really documented when it's called so two separate handlers might
+    // fire for some block breaks but this shouldn't be an issue
+    // Primarily added to handle sensitive blocks
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private fun blockRemove(event: BlockDestroyEvent) {
+        if (BlockStorage.isPylonBlock(event.block)) {
+            BlockStorage.breakBlock(event.block, BlockBreakContext.Destroyed(event))
+            event.setWillDrop(false)
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockFadeEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event))
-            event.isCancelled = true
+            if (BlockStorage.breakBlock(event.block, BlockBreakContext.Faded(event)) == null) {
+                event.isCancelled = true
+            }
         }
     }
 
@@ -694,7 +718,7 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onPlayerBlockInteract(event: PlayerInteractEvent) {
         val pylonBlock = BlockStorage.get(event.clickedBlock ?: return)
-        if (pylonBlock is PylonInteractableBlock) {
+        if (pylonBlock is PylonInteractBlock) {
             try {
                 pylonBlock.onInteract(event)
             } catch (e: Exception) {
@@ -715,13 +739,13 @@ internal object BlockListener : Listener {
             */
             if (!event.player.isSneaking) {
                 try {
-                    pylonBlock.onSneakStart(event)
+                    pylonBlock.onSneakedOn(event)
                 } catch (e: Exception) {
                     logEventHandleErr(event, e, pylonBlock)
                 }
             } else {
                 try {
-                    pylonBlock.onSneakEnd(event)
+                    pylonBlock.onUnsneakedOn(event)
                 } catch (e: Exception) {
                     logEventHandleErr(event, e, pylonBlock)
                 }
@@ -734,9 +758,9 @@ internal object BlockListener : Listener {
         val blockUnder = event.player.location.add(0.0, -1.0, 0.0).block
         val blockIn = event.player.location.add(0.0, 0.0, 0.0).block
         val pylonBlock = BlockStorage.get(blockUnder) ?: BlockStorage.get(blockIn)
-        if (pylonBlock is PylonJumpableBlock) {
+        if (pylonBlock is PylonJumpBlock) {
             try {
-                pylonBlock.onJump(event)
+                pylonBlock.onJumpedOn(event)
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonBlock)
             }

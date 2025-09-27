@@ -15,6 +15,9 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.ItemProvider
 
+/**
+ * Displays all the recipes for the given [stack].
+ */
 open class ItemRecipesPage(val stack: ItemStack) : GuidePage {
 
     val pages: MutableList<Gui> = mutableListOf()

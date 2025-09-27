@@ -5,6 +5,9 @@ import org.bukkit.Chunk
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
+/**
+ * Called after the [pylonBlocks] in a chunk (and the chunk itself) have been unloaded.
+ */
 class PylonChunkBlocksUnloadEvent(
     val chunk: Chunk,
     val pylonBlocks: List<PylonBlock>,

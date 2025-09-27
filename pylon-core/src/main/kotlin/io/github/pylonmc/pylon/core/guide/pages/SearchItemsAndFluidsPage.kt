@@ -13,6 +13,9 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.item.Item
 
+/**
+ * Allows you to search all items and fluids by hijacking the anvil GUI.
+ */
 class SearchItemsAndFluidsPage : SearchPage(
     pylonKey("search"),
     Material.OAK_SIGN

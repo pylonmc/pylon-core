@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
@@ -17,7 +17,8 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 
 /**
- * Phantom blocks are used where a block failed to load.
+ * Phantom blocks are used where a block failed to load, or where a block errors and
+ * is unloaded.
  *
  * The intention behind phantom blocks is to make [BlockStorage] act consistently even
  * if the block is not loaded - i.e., if a block is broken, its block storage data should also be
@@ -51,14 +52,14 @@ class PhantomBlock(
 
     override fun getWaila(player: Player): WailaConfig? {
         return WailaConfig(
-            text = defaultTranslationKey.arguments(PylonArgument.of("block", erroredBlockKey.toString())),
+            text = defaultWailaTranslationKey.arguments(PylonArgument.of("block", erroredBlockKey.toString())),
             color = BossBar.Color.RED
         )
     }
 
-    override fun getItem(context: BlockItemContext): ItemStack {
-        return ErrorItem(erroredBlockKey).stack
-    }
+    override fun getDropItem(context: BlockBreakContext) = ErrorItem(erroredBlockKey).stack
+
+    override fun getPickItem() = ErrorItem(erroredBlockKey).stack
 
     companion object {
         @JvmSynthetic
@@ -69,10 +70,10 @@ class PhantomBlock(
         internal val schema = PylonBlockSchema(key, Material.BARRIER, PhantomBlock::class.java)
     }
 
-    class ErrorItem(stack: ItemStack) : PylonItem(stack) {
+    internal class ErrorItem(stack: ItemStack) : PylonItem(stack) {
 
         constructor(erroredBlock: NamespacedKey): this(STACK.clone()) {
-            stack.editPersistentDataContainer { pdc -> pdc.set(ErrorItem.BLOCK_KEY, PylonSerializers.NAMESPACED_KEY, erroredBlock) }
+            stack.editPersistentDataContainer { pdc -> pdc.set(BLOCK_KEY, PylonSerializers.NAMESPACED_KEY, erroredBlock) }
         }
 
         override fun getPlaceholders(): List<PylonArgument> {

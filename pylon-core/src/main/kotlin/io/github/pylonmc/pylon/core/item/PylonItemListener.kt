@@ -3,24 +3,25 @@ package io.github.pylonmc.pylon.core.item
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
-import org.bukkit.Bukkit
+import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDamageEvent
+import org.bukkit.event.block.BlockDispenseEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.player.*
+import kotlin.math.ceil
 
 @Suppress("UnstableApiUsage")
 internal object PylonItemListener : Listener {
@@ -127,6 +128,18 @@ internal object PylonItemListener : Listener {
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonItem)
             }
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: BlockDispenseEvent) {
+        val pylonItem = PylonItem.fromStack(event.item)
+        val dispensable = pylonItem as? PylonDispensable ?: return
+
+        try {
+            dispensable.onDispense(event)
+        } catch (e: Exception) {
+            logEventHandleErr(event, e, pylonItem)
         }
     }
 
@@ -367,9 +380,10 @@ internal object PylonItemListener : Listener {
 
     @EventHandler
     private fun handle(event: PlayerPickItemEvent) {
-        val block = event.player.getTargetBlockExact(4) ?: return
+        val reachDistance = event.player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
+        val block = event.player.getTargetBlockExact(ceil(reachDistance).toInt()) ?: return
         val pylonBlock = BlockStorage.get(block) ?: return
-        val blockItem = pylonBlock.getItem(BlockItemContext.PickBlock(event.player)) ?: return
+        val blockItem = pylonBlock.getPickItem() ?: return
         val blockPylonItem = PylonItem.fromStack(blockItem) ?: return
 
         val sourceSlot = event.sourceSlot

@@ -14,6 +14,9 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.ItemProvider
 
+/**
+ * Displays all the recipes for the given fluid.
+ */
 open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
 
     val fluid = PylonRegistry.FLUIDS[fluidKey]!!

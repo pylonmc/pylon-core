@@ -25,6 +25,8 @@ import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.math.max
 
 /**
+ * Displays a breakdown of the ingredients needed to craft an item.
+ *
  * Magic numbers:
  * 27 -> 27 "i" in sub-page, which means input items/fluid
  * 9  -> 9  "o" in sub-page, which means intermediates

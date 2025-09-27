@@ -13,6 +13,9 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.window.Window
 
+/**
+ * The first page that appears when you open the guide.
+ */
 class RootPage() : SimpleStaticGuidePage(
     pylonKey("root"),
     Material.ENCHANTED_BOOK,
@@ -35,7 +38,7 @@ class RootPage() : SimpleStaticGuidePage(
                 "x x x x x x x x x",
             )
             .addIngredient('#', GuiItems.background())
-            .addIngredient('e', PageButton(PylonGuide.settingsAndInfoPage))
+            .addIngredient('e', PageButton(PylonGuide.settingsPageAndInfoPage))
             .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 

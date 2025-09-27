@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.base;
 
-import io.github.pylonmc.pylon.core.test.GameTestConfig;
-import io.github.pylonmc.pylon.core.test.GameTestFailException;
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig;
+import io.github.pylonmc.pylon.core.gametest.GameTestFailException;
 import io.github.pylonmc.pylon.core.util.position.BlockPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.util.TestUtil;

@@ -12,7 +12,10 @@ import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 
-class SettingsAndInfoPage : SimpleStaticGuidePage(
+/**
+ * Contains buttons to change settings.
+ */
+class SettingsPage : SimpleStaticGuidePage(
     pylonKey("settings_and_info"),
     Material.COMPARATOR
 ) {

@@ -5,7 +5,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called after a Pylon entity has been loaded
+ * Called after a [PylonEntity] has been loaded.
  */
 class PylonEntityLoadEvent(val pylonEntity: PylonEntity<*>) : Event() {
 

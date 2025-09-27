@@ -11,7 +11,9 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 
 /**
- * Fluids aren't necessarily just liquids, they can also be gases or other substances that can flow
+ * Fluids aren't necessarily just liquids, they can also be gases or other substances that can flow.
+ *
+ * @see io.github.pylonmc.pylon.core.content.fluid.FluidPipe
  */
 open class PylonFluid(
     private val key: NamespacedKey,
