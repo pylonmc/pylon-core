@@ -5,6 +5,9 @@ import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.ApiStatus
 
+/**
+ * Internal, not for innocent eyes to see, move along now.
+ */
 @ApiStatus.Internal
 @ApiStatus.NonExtendable
 interface NmsAccessor {

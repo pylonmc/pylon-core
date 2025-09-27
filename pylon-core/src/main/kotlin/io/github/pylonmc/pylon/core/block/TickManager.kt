@@ -16,13 +16,20 @@ import kotlinx.coroutines.delay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.jetbrains.annotations.ApiStatus
 import java.util.concurrent.ConcurrentHashMap
 
+@ApiStatus.Internal
 object TickManager : Listener {
 
     private val tickingBlocks: MutableMap<PylonBlock, Job> = ConcurrentHashMap()
 
+    /**
+     * Returns true if the block is still ticking, or false if the block does
+     * not exist, is not a ticking block, or has errored and been unloaded.
+     */
     @JvmStatic
+    @ApiStatus.Internal
     fun isTicking(block: PylonBlock): Boolean {
         return tickingBlocks[block]?.isActive == true
     }

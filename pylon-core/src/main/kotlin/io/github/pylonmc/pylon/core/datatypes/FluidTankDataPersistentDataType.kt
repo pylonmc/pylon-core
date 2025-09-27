@@ -7,7 +7,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
-object FluidTankDataPersistentDataType : PersistentDataType<PersistentDataContainer, PylonFluidTank.FluidTankData> {
+internal object FluidTankDataPersistentDataType : PersistentDataType<PersistentDataContainer, PylonFluidTank.Companion.FluidTankData> {
     val fluidKey = pylonKey("fluid")
     val amountKey = pylonKey("amount")
     val capacityKey = pylonKey("capacity")
@@ -16,22 +16,22 @@ object FluidTankDataPersistentDataType : PersistentDataType<PersistentDataContai
 
     override fun getPrimitiveType(): Class<PersistentDataContainer> = PersistentDataContainer::class.java
 
-    override fun getComplexType(): Class<PylonFluidTank.FluidTankData> = PylonFluidTank.FluidTankData::class.java
+    override fun getComplexType(): Class<PylonFluidTank.Companion.FluidTankData> = PylonFluidTank.Companion.FluidTankData::class.java
 
     override fun fromPrimitive(
         primitive: PersistentDataContainer,
         context: PersistentDataAdapterContext
-    ): PylonFluidTank.FluidTankData {
+    ): PylonFluidTank.Companion.FluidTankData {
         val fluid = primitive.get(fluidKey, PylonSerializers.PYLON_FLUID)
         val amount = primitive.get(amountKey, PylonSerializers.DOUBLE)!!
         val capacity = primitive.get(capacityKey, PylonSerializers.DOUBLE)!!
         val input = primitive.get(inputKey, PylonSerializers.BOOLEAN)!!
         val output = primitive.get(outputKey, PylonSerializers.BOOLEAN)!!
-        return PylonFluidTank.FluidTankData(fluid, amount, capacity, input, output)
+        return PylonFluidTank.Companion.FluidTankData(fluid, amount, capacity, input, output)
     }
 
     override fun toPrimitive(
-        complex: PylonFluidTank.FluidTankData,
+        complex: PylonFluidTank.Companion.FluidTankData,
         context: PersistentDataAdapterContext
     ): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()

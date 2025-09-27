@@ -3,13 +3,23 @@ package io.github.pylonmc.pylon.core.block.base
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 
 /**
+ * A block that interacts with fluids in some way.
+ *
+ * This is a very flexible class which requires you to define exactly how fluid should
+ * be input and output. You are responsible for keeping track of any state, like how
+ * much fluid is stored.
+ *
+ * Most fluid blocks can use [PylonFluidBufferBlock] or [PylonFluidTank] instead.
+ *
  * PylonFluidBlock must be implemented by any block that has fluid inputs/outputs.
  * This interface allowed you to request fluids from input points, supply fluids to
  * output points, and specify how to add/remove fluids from your block.
  *
  * At this time, having multiple inputs/outputs is not supported.
+ *
+ * @see PylonFluidBufferBlock
+ * @see PylonFluidTank
  */
-// TODO 'Confused? [Here is an explanation on how this works.](link)'
 interface PylonFluidBlock {
 
     /**

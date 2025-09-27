@@ -4,7 +4,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 
 interface PylonInteractor : PylonCooldownable {
     /**
-     * Called when a player right clicks with the item in (both off and main) hand (in any context)
+     * Called when a player right clicks with the item in either main or off hand.
      */
     fun onUsedToRightClick(event: PlayerInteractEvent)
 }

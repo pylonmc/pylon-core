@@ -25,6 +25,8 @@ import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.math.max
 
 /**
+ * Displays a breakdown of the ingredients needed to craft an item.
+ *
  * Magic numbers:
  * 27 -> 27 "i" in sub-page, which means input items/fluid
  * 9  -> 9  "o" in sub-page, which means intermediates
@@ -79,9 +81,9 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             "x x x x x x x x x",
         )
         .addIngredient('#', GuiItems.background())
-        .addIngredient('<', if (pages.size > 1) GuiItems.pagePrevious() else GuiItems.background())
-        .addIngredient('b', BackButton(player))
-        .addIngredient('>', if (pages.size > 1) GuiItems.pageNext() else GuiItems.background())
+        .addIngredient('<', GuiItems.pagePrevious())
+        .addIngredient('b', BackButton())
+        .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 
     override fun getGui(player: Player): Gui {
