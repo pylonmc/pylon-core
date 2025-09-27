@@ -16,8 +16,16 @@ import xyz.xenondevs.invui.item.Item
  * on the page need to change at runtime.
  */
 open class SimpleStaticGuidePage @JvmOverloads constructor(
+    /**
+     * A key that uniquely identifies this page. Used to get the translation keys for this page.
+     */
     private val key: NamespacedKey,
+
     material: Material,
+
+    /**
+     * The list of buttons to be displayed on this page.
+     */
     val buttons: MutableList<Item> = mutableListOf()
 ) : SimpleDynamicGuidePage(key, material, { buttons }) {
 

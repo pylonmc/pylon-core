@@ -5,7 +5,6 @@ import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PlayerBreak
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidPointType
@@ -16,7 +15,13 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
+import org.jetbrains.annotations.ApiStatus
 
+/**
+ * A 'fluid pipe connector' is one of the small gray displays that appears
+ * on pipe corners/junctions.
+ */
+@ApiStatus.Internal
 class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
 
     @Suppress("unused")
@@ -47,7 +52,7 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
     }
 
     override fun getWaila(player: Player): WailaConfig?
-        = WailaConfig(defaultTranslationKey.arguments(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
+        = WailaConfig(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
 
     val pipe: PylonItem
         get() {
@@ -56,13 +61,9 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
             return EntityStorage.getAs<FluidPipeDisplay?>(uuid)!!.pipe
         }
 
-    override fun getItem(context: BlockItemContext): ItemStack? {
-        // Breaking is handled by other fluid pipe logic
-        if (context is BlockItemContext.PickBlock) {
-            return pipe.stack
-        }
-        return null
-    }
+    override fun getDropItem(context: BlockBreakContext) = null
+
+    override fun getPickItem() = pipe.stack
 
     companion object {
         val KEY = pylonKey("fluid_pipe_connector")

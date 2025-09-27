@@ -4,7 +4,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 
 interface PylonBlockInteractor : PylonCooldownable {
     /**
-     * Called when a player clicks a block while holding the item
+     * May be fired twice (once for each hand), and is fired for both left and right clicks.
      */
     fun onUsedToClickBlock(event: PlayerInteractEvent)
 }

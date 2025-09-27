@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.test
+package io.github.pylonmc.pylon.core.gametest
 
 import com.github.shynixn.mccoroutine.bukkit.scope
 import com.github.shynixn.mccoroutine.bukkit.ticks
@@ -14,11 +14,13 @@ import org.bukkit.util.BoundingBox
 import java.util.concurrent.CompletableFuture
 
 /**
- * Represents a running game test. A game test is a special blocked-off area in the world
- * that allows you to test blocks, items, entities, and other game mechanics in a controlled environment.
- * It contains a success condition that looks at the world and determines when the test has succeeded.
+ * A game test is a special blocked-off area in the world that allows you to test blocks, items,
+ * entities, and other game mechanics in a controlled environment. It contains a success condition
+ * that looks at the world and determines when the test has succeeded.
  *
- * Will succeed by default.
+ * This represents a running test in the world.
+ *
+ * Default behaviour is to simply succeed.
  *
  * @see GameTestConfig
  */
@@ -35,6 +37,9 @@ class GameTest(
         successCondition = { true }
     }
 
+    /**
+     * Set the condition under which the test will succeed. Will be checked periodically.
+     */
     fun succeedWhen(condition: () -> Boolean) {
         successCondition = condition
     }
@@ -44,14 +49,20 @@ class GameTest(
         throw GameTestFailException(this, message, cause)
     }
 
+    /**
+     * Checks whether any entity in the gametest matches [predicate]
+     */
     inline fun entityInBounds(predicate: (Entity) -> Boolean): Boolean {
         return world.getNearbyEntities(boundingBox).any(predicate)
     }
 
-    fun withDelay(ticks: Int, block: Runnable) {
+    /**
+     * Runs [runnable] on the main thread after waiting for the specified number of [ticks]
+     */
+    fun withDelay(ticks: Int, runnable: Runnable) {
         PylonCore.scope.launch {
             delay(ticks.ticks)
-            block.run()
+            runnable.run()
         }
     }
 

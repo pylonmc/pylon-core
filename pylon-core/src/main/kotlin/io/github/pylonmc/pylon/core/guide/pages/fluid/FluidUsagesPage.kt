@@ -14,6 +14,9 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.ItemProvider
 
+/**
+ * Displays all the recipes that use the given [fluid].
+ */
 open class FluidUsagesPage(val fluid: PylonFluid) : GuidePage {
 
     val pages: MutableList<Gui> = mutableListOf()
