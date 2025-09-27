@@ -13,6 +13,8 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.datacomponent.DataComponentTypes
+import net.kyori.adventure.key.Key
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -42,7 +44,9 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val KEY = pylonKey("guide")
 
         @JvmField
-        val STACK = ItemStackBuilder.pylonItem(Material.KNOWLEDGE_BOOK, KEY)
+        val STACK = ItemStackBuilder.pylonItem(Material.BOOK, KEY)
+            .set(DataComponentTypes.ITEM_MODEL, Key.key("knowledge_book"))
+            .set(DataComponentTypes.MAX_STACK_SIZE, 1)
             .build()
 
         /**

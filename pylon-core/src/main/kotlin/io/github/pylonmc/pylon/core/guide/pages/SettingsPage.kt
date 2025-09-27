@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.CullingPresetButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
+import io.github.pylonmc.pylon.core.guide.button.ToggleArmorTexturesButton
 import io.github.pylonmc.pylon.core.guide.button.ToggleBlockTexturesButton
 import io.github.pylonmc.pylon.core.guide.button.ToggleWailaButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
@@ -27,7 +28,7 @@ class SettingsPage : SimpleStaticGuidePage(
             .setStructure(
                 "# b # # # # # s #",
                 "# # # # # # # # #",
-                "# w t c . . . . #",
+                "# w t c a . . . #",
                 "# # # # # # # # #",
             )
             .addIngredient('#', GuiItems.background())
@@ -36,6 +37,7 @@ class SettingsPage : SimpleStaticGuidePage(
             .addIngredient('w', ToggleWailaButton())
             .addIngredient('t', ToggleBlockTexturesButton())
             .addIngredient('c', CullingPresetButton())
+            .addIngredient('a', ToggleArmorTexturesButton())
 
         for (button in buttons) {
             gui.addContent(button)
