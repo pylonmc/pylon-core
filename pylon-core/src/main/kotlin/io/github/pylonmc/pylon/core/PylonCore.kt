@@ -91,7 +91,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         addDefaultPermission("pylon.command.waila")
         addDefaultPermission("pylon.command.research.list.self")
         addDefaultPermission("pylon.command.research.discover")
-        addDefaultPermission("pylon.command.research.points.get.self")
+        addDefaultPermission("pylon.command.research.points.query.self")
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
             it.registrar().register(ROOT_COMMAND)
             it.registrar().register(ROOT_COMMAND_PY_ALIAS)

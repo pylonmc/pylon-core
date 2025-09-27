@@ -59,27 +59,35 @@ message:
       no_permission: "<red>You do not have permission to use this command"
       must_be_player: "<red>You must be a player to use this command"
     key:
+      hover: "Click to copy to clipboard"
       no_item: "<red>You are not holding a Pylon item"
+    waila:
+      enabled: "<green>WAILA enabled"
+      disabled: "<red>WAILA disabled"
     gametest:
+      started: "Starting game test %test% at %location%"
       failed: "<red>Game test %test% failed: %reason%"
       success: "<green>Game test %test% succeeded"
     research:
-      added: "<green>Added research %research% to player %player%"
-      removed: "<green>Removed research %research% from player %player%"
+      added: "Added research %research% to player %player%"
+      removed: "Removed research %research% from player %player%"
       list:
-        none: "You have no discovered researches"
-        discovered: "You have discovered %count% researches: %list%"
+        none_self: "<red>You have no discovered researches"
+        none_other: "<red>%player% has no discovered researches"
+        discovered_self: "You have discovered %count% researches: %list%"
+        discovered_other: "%player% has discovered %count% researches: %list%"
       already_discovered: "<red>You have already discovered %research%"
       cannot_unlock: "<red>You cannot unlock %research% using research points"
       not_enough_points: "<red>You do not yet know enough to discover %research% (%points%/%cost% points)"
       points:
-        set: "<green>Set %player%'s research points to %points%"
-        added: "<green>Added %points% research points to %player%"
-        removed: "<green>Removed %points% research points from %player%"
-        get: "<green>%player% has %points% research points"
+        set: "Set %player%'s research points to %points%"
+        added: "Added %points% research points to %player%"
+        removed: "Removed %points% research points from %player%"
+        query: "%player% has %points% research points"
     exposerecipe:
       not-configurable: "<red>This recipe type is not configurable"
       warning: "<yellow>Warning: exposing recipe configs will keep them from updating automatically. Delete %file% to revert"
+
   guide:
     ingredients-page:
       item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"

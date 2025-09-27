@@ -339,3 +339,12 @@ fun <T> persistentData(
 
 val Block.replaceableOrAir: Boolean
     get() = type.isAir || isReplaceable
+
+fun ItemStack.vanillaDisplayName(): Component
+    = effectiveName().let {
+        val wrapped = Component.translatable("chat.square_brackets", it)
+        if (!this.isEmpty) {
+            wrapped.hoverEvent(this.asHoverEvent())
+        }
+        return wrapped
+    }
