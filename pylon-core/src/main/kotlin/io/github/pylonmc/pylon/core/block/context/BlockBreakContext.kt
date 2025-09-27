@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block.context
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent
+import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import org.bukkit.GameMode
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockBurnEvent
@@ -29,6 +30,14 @@ interface BlockBreakContext {
     @get:JvmName("shouldSetToAir")
     val shouldSetToAir: Boolean
         get() = true
+
+    /**
+     * The block is being broken by [DebugWaxedWeatheredCutCopperStairs]
+     */
+    object DebugBreak : BlockBreakContext {
+        override val normallyDrops = false
+        override val shouldSetToAir = true
+    }
 
     /**
      * The block is being broken by a plugin

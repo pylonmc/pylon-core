@@ -17,7 +17,9 @@ item:
 
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
-    lore: "<arrow> <insn>Right click</insn> a block to view its Pylon block data"
+    lore: |-
+      <arrow> <insn>Right click</insn> a block/entity to view its Pylon data
+      <arrow> <insn>Shift right click</insn> a block/entity to remove it
 
   fluid_pipe_connector:
     waila: "%pipe%"
@@ -44,6 +46,7 @@ message:
       errored: "<gold>Ticking: <red>Ticker has errored"
       not_ticking: "<gold>Ticking: <red>No"
     data: "<gold>Data: <white>%data%"
+    deleted_data: "<red>Removed <white>%type% <gray>(%location%)"
 
   disabled:
     message: "<white>%item% <red>has been disabled"

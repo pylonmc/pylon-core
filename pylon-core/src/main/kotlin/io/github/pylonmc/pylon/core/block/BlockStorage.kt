@@ -318,6 +318,30 @@ object BlockStorage : Listener {
     fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
         breakBlock(BlockPosition(location), context)
 
+    /**
+     *
+     */
+    @JvmSynthetic
+    internal fun deleteBlockData(blockPosition: BlockPosition) {
+        require(blockPosition.chunk.isLoaded) { "You can only delete Pylon block data in loaded chunks" }
+
+        val block = get(blockPosition) ?: return
+
+        val event = PylonDeleteBlockDataEvent(blockPosition.block, block)
+        event.callEvent()
+
+        if (block is PylonBreakHandler) {
+            block.onBreak(mutableListOf(), BlockBreakContext.DebugBreak)
+        }
+        block.block.type = Material.AIR
+
+        lockBlockWrite {
+            blocks.remove(blockPosition)
+            blocksByKey[block.schema.key]?.remove(block)
+            blocksByChunk[blockPosition.chunk]?.remove(block)
+        }
+    }
+
     private fun load(world: World, chunk: Chunk): List<PylonBlock> {
         val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
         val chunkBlocks = chunk.persistentDataContainer.get(pylonBlocksKey, type)?.mapNotNull { element ->
