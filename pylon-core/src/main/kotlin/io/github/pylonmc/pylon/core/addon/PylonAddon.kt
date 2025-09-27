@@ -17,7 +17,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
+import java.util.Locale
 
 /**
  * Welcome to the place where it all begins: the Pylon addon!
@@ -74,6 +74,7 @@ interface PylonAddon : Keyed {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
         @EventHandler
         private fun onPluginDisable(event: PluginDisableEvent) {

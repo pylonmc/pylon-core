@@ -9,7 +9,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
+import java.util.IdentityHashMap
 
 /**
  * Represents a block that 'ticks' (does something at a fixed time interval).
@@ -60,6 +60,7 @@ interface PylonTickingBlock {
      */
     fun tick(deltaSeconds: Double)
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         internal data class TickingBlockData(

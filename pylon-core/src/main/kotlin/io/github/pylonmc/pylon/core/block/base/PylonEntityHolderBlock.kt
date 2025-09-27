@@ -11,7 +11,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.MustBeInvokedByOverriders
-import java.util.*
+import java.util.IdentityHashMap
+import java.util.UUID
 
 /**
  * A block that has one or more associated Pylon entities. For example, a pedestal that
@@ -78,6 +79,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
         private val entityKey = pylonKey("entity_holder_entity_uuids")
         private val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)

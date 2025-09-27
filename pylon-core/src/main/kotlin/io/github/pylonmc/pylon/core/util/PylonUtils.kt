@@ -340,6 +340,9 @@ fun <T> persistentData(
     default: T
 ) = persistentData(key, type) { default }
 
+val Block.replaceableOrAir: Boolean
+    get() = type.isAir || isReplaceable
+
 /**
  * Merges config from addons to the Pylon config directory.
  * Used for stuff like item settings and language files.
@@ -379,6 +382,3 @@ internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Con
 }
 
 private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
-
-val Block.replaceableOrAir: Boolean
-    get() = type.isAir || isReplaceable

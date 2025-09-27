@@ -19,8 +19,8 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
-import kotlinx.coroutines.delay
 import io.github.pylonmc.pylon.core.util.rotateVectorToFace
+import kotlinx.coroutines.delay
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -34,7 +34,8 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
 import org.joml.Vector3i
-import java.util.*
+import java.util.IdentityHashMap
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
@@ -315,6 +316,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         internal data class SimpleMultiblockData(var facing: BlockFace?)
