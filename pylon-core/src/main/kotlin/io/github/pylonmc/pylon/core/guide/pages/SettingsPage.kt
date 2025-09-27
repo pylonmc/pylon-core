@@ -14,7 +14,10 @@ import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 
-class SettingsAndInfoPage : SimpleStaticGuidePage(
+/**
+ * Contains buttons to change settings.
+ */
+class SettingsPage : SimpleStaticGuidePage(
     pylonKey("settings_and_info"),
     Material.COMPARATOR
 ) {
@@ -28,7 +31,7 @@ class SettingsAndInfoPage : SimpleStaticGuidePage(
                 "# # # # # # # # #",
             )
             .addIngredient('#', GuiItems.background())
-            .addIngredient('b', BackButton(player))
+            .addIngredient('b', BackButton())
             .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('w', ToggleWailaButton())
             .addIngredient('t', ToggleBlockTexturesButton())

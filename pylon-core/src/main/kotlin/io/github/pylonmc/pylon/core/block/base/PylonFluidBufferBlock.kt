@@ -13,11 +13,14 @@ import java.util.*
 import kotlin.math.max
 
 /**
- * Usually, fluid machines store fluids in internal fluids. For example,
- * the press has an internal buffer used to store plant oil, of size
- * 1000mB by default. This is a common enough thing that we created a new
- * interface to handle it: PylonFluidBufferBlock. This interface allows
- * your block to easily manage fluid buffers.
+ * Allows for creating 'fluid buffers' in a block, which have a capacity
+ * and can be filled and emptied by fluid connections.
+ *
+ * In more detail: Usually, fluid machines store fluids in internal 'buffers.'
+ * For example, the press has an internal buffer used to store plant oil, of
+ * size 1000mB by default. This is a common enough thing that we created a new
+ * interface to handle it: PylonFluidBufferBlock. This interface allows your
+ * block to easily manage fluid buffers.
  *
  * You will need to call `createFluidBuffer` when your block is placed
  * and specify the buffer's fluid type, capacity, whether it can take in
@@ -28,12 +31,10 @@ import kotlin.math.max
  * `PylonFluidBlock` methods for this; this is all done automatically.
  */
 interface PylonFluidBufferBlock : PylonFluidBlock {
-    @get:ApiStatus.NonExtendable
-    val fluidBuffers: MutableMap<PylonFluid, FluidBufferData>
+    private val fluidBuffers: MutableMap<PylonFluid, FluidBufferData>
         get() = bufferFluidBlocks.getOrPut(this, ::mutableMapOf)
 
-    @ApiStatus.NonExtendable
-    fun fluidData(fluid: PylonFluid)
+    private fun fluidData(fluid: PylonFluid)
             = fluidBuffers[fluid] ?: error("Block does not contain ${fluid.key}")
 
     /**
@@ -42,14 +43,16 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
      * @param input whether this buffer can be added to by fluid input points
      * @param output whether this buffer can be taken from by fluid output points
      */
-    fun createFluidBuffer(fluid: PylonFluid, capacity: Double, input: Boolean, output: Boolean)
-            = fluidBuffers.put(fluid, FluidBufferData(0.0, capacity, input, output))
+    fun createFluidBuffer(fluid: PylonFluid, capacity: Double, input: Boolean, output: Boolean) {
+        fluidBuffers.put(fluid, FluidBufferData(0.0, capacity, input, output))
+    }
 
     /**
      * Deletes a fluid buffer
      */
-    fun deleteFluidBuffer(fluid: PylonFluid)
-            = fluidBuffers.remove(fluid)
+    fun deleteFluidBuffer(fluid: PylonFluid) {
+        fluidBuffers.remove(fluid)
+    }
 
     /**
      * Returns whether a buffer exists for this fluid
@@ -140,15 +143,14 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
         removeFluid(fluid, amount)
     }
 
-    @ApiStatus.Internal
-    data class FluidBufferData(
-        var amount: Double,
-        var capacity: Double,
-        var input: Boolean,
-        var output: Boolean,
-    )
-
     companion object : Listener {
+
+        internal data class FluidBufferData(
+            var amount: Double,
+            var capacity: Double,
+            var input: Boolean,
+            var output: Boolean,
+        )
 
         private val fluidBuffersKey = pylonKey("buffer_fluid_block_fluid_buffers")
         private val fluidBuffersType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.PYLON_FLUID, PylonSerializers.FLUID_BUFFER_DATA)

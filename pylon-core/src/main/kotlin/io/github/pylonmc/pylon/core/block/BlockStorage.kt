@@ -8,7 +8,6 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -28,6 +27,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.ItemStack
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.random.Random
@@ -56,6 +56,8 @@ import kotlin.random.Random
  * for loaded blocks. If access is not synchronized, situations may occur where these fields are
  * briefly out of sync. For example, if we unload a chunk, there will be a short delay between
  * deleting the chunk from `blocksByChunk`, and deleting all of its blocks from `blocks`.
+ *
+ * @see PylonBlock
  */
 object BlockStorage : Listener {
 
@@ -75,7 +77,7 @@ object BlockStorage : Listener {
     private val chunkAutosaveTasks: MutableMap<ChunkPosition, Job> = ConcurrentHashMap()
 
     @JvmStatic
-    val loadedBlocks: Set<BlockPosition>
+    val loadedBlockPositions: Set<BlockPosition>
         get() = lockBlockRead { blocks.keys }
 
     @JvmStatic
@@ -86,20 +88,38 @@ object BlockStorage : Listener {
     val loadedPylonBlocks: Collection<PylonBlock>
         get() = lockBlockRead { blocks.values }
 
+    /**
+     * Returns the Pylon block at the given [blockPosition], or null if the block does not exist
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
+     */
     @JvmStatic
     fun get(blockPosition: BlockPosition): PylonBlock? {
         require(blockPosition.chunk.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocks[blockPosition] }
     }
 
+    /**
+     * Returns the Pylon block at the given [block], or null if the block does not exist.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
+     */
     @JvmStatic
     fun get(block: Block): PylonBlock? = get(block.position)
 
+    /**
+     * Returns the Pylon block at the given [location], or null if the block does not exist.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
+     */
     @JvmStatic
     fun get(location: Location): PylonBlock? = get(location.block)
 
     /**
-     * Returns null if the block is not of the expected class
+     * Returns the Pylon block (of type [T]) at the given [blockPosition], or null if the block
+     * does not exist or is not of the expected class.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, blockPosition: BlockPosition): T? {
@@ -111,40 +131,66 @@ object BlockStorage : Listener {
     }
 
     /**
-     * Returns null if the block is not of the expected class
+     * Returns the Pylon block (of type [T]) at the given [block], or null if the block
+     * does not exist or is not of the expected class.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, block: Block): T? = getAs(clazz, block.position)
 
     /**
-     * Returns null if the block is not of the expected class
+     * Returns the Pylon block (of type [T]) at the given [location], or null if the block
+     * does not exist or is not of the expected class.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, location: Location): T? =
         getAs(clazz, BlockPosition(location))
 
     /**
-     * Returns null if the block is not of the expected class
+     * Gets the Pylon block (of type [T]) at the given [blockPosition].
+     *
+     * Returns null if the block does not exist or is not of the expected class.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     inline fun <reified T> getAs(blockPosition: BlockPosition): T? =
         getAs(T::class.java, blockPosition)
 
     /**
-     * Returns null if the block is not of the expected class
+     * Returns the Pylon block (of type [T]) at the given [block].
+     *
+     * Returns null if the block does not exist or is not of the expected class.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     inline fun <reified T> getAs(block: Block): T? = getAs(T::class.java, block)
 
     /**
-     * Returns null if the block is not of the expected class
+     * Returns the Pylon block (of type [T]) at the given [location].
+     *
+     * Returns null if the block does not exist or is not of the expected class.
+     *
+     * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     inline fun <reified T> getAs(location: Location): T? = getAs(T::class.java, location)
 
+    /**
+     * Returns all the Plyon blocks in the chunk at [chunkPosition].
+     *
+     * @throws IllegalArgumentException if the chunk is not loaded
+     */
     @JvmStatic
     fun getByChunk(chunkPosition: ChunkPosition): Collection<PylonBlock> {
         require(chunkPosition.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocksByChunk[chunkPosition].orEmpty() }
     }
 
+    /**
+     * Returns all the Plyon blocks with type [key].
+     */
     @JvmStatic
     fun getByKey(key: NamespacedKey): Collection<PylonBlock> =
         if (PylonRegistry.BLOCKS.contains(key)) {
@@ -155,20 +201,30 @@ object BlockStorage : Listener {
             emptySet()
         }
 
+    /**
+     * Returns whether the block at [blockPosition] is a Pylon block, or null if the
+     * chunk at [blockPosition] is not loaded
+     */
     @JvmStatic
     fun isPylonBlock(blockPosition: BlockPosition): Boolean =
         (blockPosition.chunk.isLoaded) && get(blockPosition) != null
 
+    /**
+     * Returns whether the block at [block] is a Pylon block, or null if the
+     * chunk at [block] is not loaded
+     */
     @JvmStatic
     fun isPylonBlock(block: Block): Boolean =
         (block.position.chunk.isLoaded) && get(block) != null
 
     /**
-     * Sets a new Pylon block's data in the storage and sets the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
+     * Creates a new Pylon block. Only call on the main thread.
      *
      * @return The block that was placed, or null if the block placement was cancelled
+     *
+     * @throws IllegalArgumentException if the chunk of the given [blockPosition] is not
+     * loaded, the block already contains a Pylon block, or the block type given by
+     * [key] does not exist.
      */
     @JvmStatic
     @JvmOverloads
@@ -206,11 +262,13 @@ object BlockStorage : Listener {
     }
 
     /**
-     * Sets a new Pylon block's data in the storage and sets the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
+     * Creates a new Pylon block. Only call on the main thread.
      *
      * @return The block that was placed, or null if the block placement was cancelled
+     *
+     * @throws IllegalArgumentException if the chunk of the given [block] is not
+     * loaded, the block already contains a Pylon block, or the block type given by
+     * [key] does not exist.
      */
     @JvmStatic
     @JvmOverloads
@@ -221,11 +279,13 @@ object BlockStorage : Listener {
     ) = placeBlock(block.position, key, context)
 
     /**
-     * Sets a new Pylon block's data in the storage and sets the block in the world.
-     * The block's chunk must be loaded.
-     * Only call on the main thread.
+     * Creates a new Pylon block. Only call on the main thread.
      *
      * @return The block that was placed, or null if the block placement was cancelled
+     *
+     * @throws IllegalArgumentException if the chunk of the given [location] is not
+     * loaded, the block already contains a Pylon block, or the block type given by
+     * [key] does not exist.
      */
     @JvmStatic
     @JvmOverloads
@@ -236,29 +296,30 @@ object BlockStorage : Listener {
     ) = placeBlock(BlockPosition(location), key, context)
 
     /**
-     * Removes a block from the world and the storage.
+     * Removes a Pylon block and breaks the physical block in the world.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
-     * @return The list of drops, or null if the block is not a Pylon block or the block break was cancelled
+     * @throws IllegalArgumentException if the chunk of the given [blockPosition] is not
+     * loaded.
      */
     @JvmStatic
     @JvmOverloads
     fun breakBlock(
         blockPosition: BlockPosition,
-        context: BlockBreakContext = BlockBreakContext.PluginBreak()
-    ) {
+        context: BlockBreakContext = BlockBreakContext.PluginBreak(blockPosition.block)
+    ): List<ItemStack>? {
         require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
-        val block = get(blockPosition) ?: return
+        val block = get(blockPosition) ?: return null
 
         val event = PrePylonBlockBreakEvent(blockPosition.block, block, context)
         event.callEvent()
-        if (event.isCancelled) return
+        if (event.isCancelled) return null
 
         val drops = mutableListOf<ItemStack>()
         if (context.normallyDrops) {
-            block.getItem(BlockItemContext.Break(context))?.let { drops.add(it.clone()) }
+            block.getDropItem(context)?.let { drops.add(it.clone()) }
         }
         if (block is PylonBreakHandler) {
             block.onBreak(drops, context)
@@ -283,42 +344,47 @@ object BlockStorage : Listener {
         for (drop in drops) {
             block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
         }
+        // This is fully backed, just actually enforces the immutability of the drops list and prevents casting to MutableList
+        return Collections.unmodifiableList(drops)
     }
 
     /**
-     * Removes a block from the world and the storage.
+     * Removes a Pylon block and breaks the physical block in the world.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
-     * @return The list of drops, or null if the block is not a Pylon block
+     * @throws IllegalArgumentException if the chunk of the given [block] is not
+     * loaded.
      */
     @JvmStatic
     @JvmOverloads
-    fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
+    fun breakBlock(block: Block, context: BlockBreakContext = BlockBreakContext.PluginBreak(block)) =
         breakBlock(block.position, context)
 
     /**
-     * Removes a block from the world and the storage.
-     * Does nothing if the block is not a Pylon block.
-     * Only call on the main thread
-     *
-     * @return The list of drops, or null if the block is not a Pylon block
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun breakBlock(block: PylonBlock, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
-        breakBlock(block.block, context)
-
-    /**
-     * Removes a block from the world and the storage.
+     * Removes a Pylon block and breaks the physical block in the world.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
-     * @return The list of drops, or null if the block is not a Pylon block
+     * @throws IllegalArgumentException if the chunk of the given [block] is not
+     * loaded.
      */
     @JvmStatic
     @JvmOverloads
-    fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak()) =
+    fun breakBlock(block: PylonBlock, context: BlockBreakContext = BlockBreakContext.PluginBreak(block.block)) =
+        breakBlock(block.block, context)
+
+    /**
+     * Removes a Pylon block and breaks the physical block in the world.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread.
+     *
+     * @throws IllegalArgumentException if the chunk of the given [location] is not
+     * loaded.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak(location.block)) =
         breakBlock(BlockPosition(location), context)
 
     private fun load(world: World, chunk: Chunk): List<PylonBlock> {

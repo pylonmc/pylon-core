@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList
 import org.bukkit.persistence.PersistentDataContainer
 
 /**
- * Called after deserializing a block
+ * Called after the [pylonBlock] has been deserialized.
  */
 class PylonBlockDeserializeEvent(
     val block: Block,

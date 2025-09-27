@@ -10,6 +10,9 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.item.Item
 
+/**
+ * Shows the items that a research unlocks.
+ */
 class ResearchItemsPage(research: Research) : SimpleStaticGuidePage(
     KEY,
     research.material,

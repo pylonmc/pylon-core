@@ -53,6 +53,9 @@ import xyz.xenondevs.invui.InvUI
 import java.util.*
 import kotlin.io.path.*
 
+/**
+ * The one and only Pylon Core plugin!
+ */
 object PylonCore : JavaPlugin(), PylonAddon {
 
     override fun onLoad() {
@@ -61,6 +64,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
     }
 
     override fun onEnable() {
+        val start = System.currentTimeMillis()
+
         InvUI.getInstance().setPlugin(this)
 
         val packetEvents = PacketEvents.getAPI()
@@ -152,9 +157,14 @@ object PylonCore : JavaPlugin(), PylonAddon {
             delay(1.ticks)
             loadRecipes()
         }
+
+        val end = System.currentTimeMillis()
+        logger.info("Loaded in ${(end - start) / 1000.0}s")
     }
 
     private fun loadRecipes() {
+        val start = System.currentTimeMillis()
+
         logger.info("Loading recipes...")
         for (type in PylonRegistry.RECIPE_TYPES) {
             if (type !is ConfigurableRecipeType) continue
@@ -178,7 +188,9 @@ object PylonCore : JavaPlugin(), PylonAddon {
                 }
             }
         }
-        logger.info("Finished loading recipes")
+
+        val end = System.currentTimeMillis()
+        logger.info("Loaded recipes in ${(end - start) / 1000.0}s")
     }
 
     override fun onDisable() {

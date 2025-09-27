@@ -15,6 +15,11 @@ import org.bukkit.block.Block
 import org.bukkit.persistence.PersistentDataContainer
 import java.lang.invoke.MethodHandle
 
+/**
+ * Stores information about a Pylon block type, including its key, material, and class.
+ *
+ * You should not need to use this if you are not working on Pylon Core.
+ */
 class PylonBlockSchema(
     private val key: NamespacedKey,
     val material: Material,
@@ -27,12 +32,12 @@ class PylonBlockSchema(
 
     val addon = getAddon(key)
 
-    val defaultBlockTranslationKey: TranslatableComponent
+    val defaultWailaTranslationKey: TranslatableComponent
 
     init {
         val prefix = "pylon.${key.namespace}.item.${key.key}"
         val default = "$prefix.waila"
-        defaultBlockTranslationKey = Component.translatable(
+        defaultWailaTranslationKey = Component.translatable(
             if (addon.translator.languages.any { addon.translator.canTranslate(default, it) }) default else "$prefix.name"
         )
     }
@@ -51,12 +56,14 @@ class PylonBlockSchema(
         "Block '$key' ($blockClass) is missing a load constructor (${javaClass.simpleName}, Block, PersistentDataContainer)"
     )
 
-    fun create(block: Block, context: BlockCreateContext): PylonBlock {
+    @JvmSynthetic
+    internal fun create(block: Block, context: BlockCreateContext): PylonBlock {
         schemaCache[block.position] = this
         return createConstructor.invoke(block, context) as PylonBlock
     }
 
-    fun load(block: Block, pdc: PersistentDataContainer): PylonBlock {
+    @JvmSynthetic
+    internal fun load(block: Block, pdc: PersistentDataContainer): PylonBlock {
         schemaCache[block.position] = this
         return loadConstructor.invoke(block, pdc) as PylonBlock
     }
@@ -70,6 +77,6 @@ class PylonBlockSchema(
     companion object {
 
         // This exists to avoid having to pass a key to the PylonBlock constructor
-        val schemaCache: MutableMap<BlockPosition, PylonBlockSchema> = mutableMapOf()
+        internal val schemaCache: MutableMap<BlockPosition, PylonBlockSchema> = mutableMapOf()
     }
 }

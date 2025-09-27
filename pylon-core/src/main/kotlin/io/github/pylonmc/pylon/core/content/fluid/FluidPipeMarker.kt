@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PlayerBreak
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PluginBreak
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.context.BlockItemContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -16,8 +15,14 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
+import org.jetbrains.annotations.ApiStatus
 import java.util.UUID
 
+/**
+ * An invisible block (structure block) that exists purely to represent a pipe and prevent
+ * blocks from being placed on top of them.
+ */
+@ApiStatus.Internal
 class FluidPipeMarker : PylonBlock, PylonBreakHandler {
     // Should always be set immediately after the marker has been placed
     var pipeDisplay: UUID? = null
@@ -65,15 +70,11 @@ class FluidPipeMarker : PylonBlock, PylonBreakHandler {
     }
 
     override fun getWaila(player: Player): WailaConfig?
-        = WailaConfig(defaultTranslationKey.arguments(PylonArgument.of("pipe", getPipeDisplay()!!.pipe.stack.effectiveName())))
+        = WailaConfig(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", getPipeDisplay()!!.pipe.stack.effectiveName())))
 
-    override fun getItem(context: BlockItemContext): ItemStack? {
-        // Breaking is handled by other fluid pipe logic
-        if (context is BlockItemContext.PickBlock) {
-            return getPipeDisplay()?.pipe?.stack
-        }
-        return null
-    }
+    override fun getDropItem(context: BlockBreakContext) = null
+
+    override fun getPickItem() = null
 
     companion object {
         val KEY = pylonKey("fluid_pipe_marker")

@@ -85,7 +85,7 @@ class UnitFormat @JvmOverloads constructor(
 
         /**
          * Sets the number of significant figures. For example, if this is set to 3, then a value
-         * of 0.472894 will be shown as 0.472.
+         * of 0.472894 will be shown as 0.473.
          */
         fun significantFigures(sigFigs: Int) = apply { this.sigFigs = sigFigs }
 

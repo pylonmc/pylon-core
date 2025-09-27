@@ -7,6 +7,9 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Material
 
+/**
+ * Shows buttons to view each addon's researches.
+ */
 class ResearchesPage : SimpleDynamicGuidePage(
     pylonKey("researches"),
     Material.BREWING_STAND,

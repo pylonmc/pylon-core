@@ -14,6 +14,9 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.ItemProvider
 
+/**
+ * Displays all the recipes that use the given [fluid].
+ */
 open class FluidUsagesPage(val fluid: PylonFluid) : GuidePage {
 
     val pages: MutableList<Gui> = mutableListOf()
@@ -43,10 +46,10 @@ open class FluidUsagesPage(val fluid: PylonFluid) : GuidePage {
             "x x x x x x x x x",
         )
         .addIngredient('#', GuiItems.background())
-        .addIngredient('<', if (pages.size > 1) GuiItems.pagePrevious() else GuiItems.background())
-        .addIngredient('b', BackButton(player))
+        .addIngredient('<', GuiItems.pagePrevious())
+        .addIngredient('b', BackButton())
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
-        .addIngredient('>', if (pages.size > 1) GuiItems.pageNext() else GuiItems.background())
+        .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 
     override fun getGui(player: Player): Gui {
