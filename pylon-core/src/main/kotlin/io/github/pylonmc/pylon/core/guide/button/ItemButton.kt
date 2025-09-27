@@ -126,9 +126,7 @@ class ItemButton @JvmOverloads constructor(
                         }
                         research.addTo(player, false)
                         player.researchPoints -= research.cost
-
-                        val history = PylonGuide.history.getOrPut(player.uniqueId) { mutableListOf() }
-                        history.removeLast().open(player) // refresh the current page
+                        notifyWindows()
                     }
                 }
 
