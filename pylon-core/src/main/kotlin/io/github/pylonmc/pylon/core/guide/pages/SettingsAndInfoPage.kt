@@ -29,11 +29,12 @@ class SettingsAndInfoPage : SimpleStaticGuidePage(
             .addIngredient('b', BackButton())
             .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('w', ToggleWailaButton())
+            .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
         for (button in buttons) {
             gui.addContent(button)
         }
 
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 }
