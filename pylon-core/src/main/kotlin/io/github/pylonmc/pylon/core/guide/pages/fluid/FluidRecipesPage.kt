@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
+import io.github.pylonmc.pylon.core.guide.pages.base.PagedGuidePage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -14,7 +15,7 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.ItemProvider
 
-open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
+open class FluidRecipesPage(fluidKey: NamespacedKey) : PagedGuidePage {
 
     val fluid = PylonRegistry.FLUIDS[fluidKey]!!
     val pages: MutableList<Gui> = mutableListOf()
@@ -50,13 +51,14 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+        .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
     override fun getGui(player: Player): Gui {
         val gui = getHeader(player, pages)
         for (page in pages) {
             gui.addContent(page)
         }
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 
     companion object {
