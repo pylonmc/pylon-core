@@ -239,11 +239,11 @@ object BlockStorage : Listener {
         val schema = PylonRegistry.BLOCKS[key]
         require(schema != null) { "Block $key does not exist" }
 
+        if (!PrePylonBlockPlaceEvent(blockPosition.block, schema, context).callEvent()) return null
+
         if (context.shouldSetType) {
             blockPosition.block.type = schema.material
         }
-
-        if (!PrePylonBlockPlaceEvent(blockPosition.block, schema, context).callEvent()) return null
 
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.create(blockPosition.block, context)
