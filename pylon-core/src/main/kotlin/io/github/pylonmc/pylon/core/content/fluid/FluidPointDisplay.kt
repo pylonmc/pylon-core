@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.util.Vector
@@ -26,6 +27,10 @@ class FluidPointDisplay(entity: ItemDisplay) : PylonEntity<ItemDisplay>(KEY, ent
                 .transformation(TransformBuilder()
                     .translate(translation.toVector3d())
                     .scale(FluidPointInteraction.POINT_SIZE)
+                )
+
+                .itemStack(ItemStackBuilder.of(point.type.material)
+                    .addCustomModelDataString("fluid_point_display:${point.type.name.lowercase()}")
                 )
                 .build(point.position.location.toCenterLocation())
             val entity = FluidPointDisplay(display)

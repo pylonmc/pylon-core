@@ -75,13 +75,13 @@ open class FluidButton(
 
     override fun getItemProvider() = try {
         if (amount == null) {
-            preDisplayDecorator.invoke(currentFluid.getItem())
+            preDisplayDecorator.invoke(ItemStackBuilder.of(currentFluid.item))
         } else {
-            preDisplayDecorator.invoke(currentFluid.getItem())
+            preDisplayDecorator.invoke(ItemStackBuilder.of(currentFluid.item))
                 .name(
                     Component.translatable(
                         "pylon.pyloncore.guide.button.fluid.name",
-                        PylonArgument.of("fluid", currentFluid.getItem().stack.getData(DataComponentTypes.ITEM_NAME)!!),
+                        PylonArgument.of("fluid", currentFluid.item.getData(DataComponentTypes.ITEM_NAME)!!),
                         PylonArgument.of("amount", UnitFormat.MILLIBUCKETS.format(amount).decimalPlaces(2))
                     )
                 )

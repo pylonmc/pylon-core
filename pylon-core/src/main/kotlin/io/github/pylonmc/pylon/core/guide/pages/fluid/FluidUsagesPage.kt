@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -32,7 +33,7 @@ open class FluidUsagesPage(val fluid: PylonFluid) : GuidePage {
     }
 
     override val item: ItemProvider
-        get() = fluid.getItem()
+        get() = ItemStackBuilder.of(fluid.item)
 
     override fun getKey() = KEY
 

@@ -33,7 +33,7 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
     constructor(block: Block, pdc: PersistentDataContainer) : super(block)
 
     val fluidPointInteraction
-        get() = getHeldEntityOrThrow(FluidPointInteraction::class.java, "connector")
+        get() = getHeldPylonEntityOrThrow(FluidPointInteraction::class.java, "connector")
 
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
         var player: Player? = null
