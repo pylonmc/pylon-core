@@ -15,6 +15,12 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import java.lang.invoke.MethodHandle
 
+/**
+ * Stores information about a Pylon item type, including its key, default [ItemStack], class, and
+ * any associated blocks.
+ *
+ * You should not need to use this if you are not working on Pylon Core.
+ */
 class PylonItemSchema @JvmOverloads internal constructor(
     @JvmSynthetic internal val itemClass: Class<out PylonItem>,
     private val template: ItemStack,
@@ -31,12 +37,18 @@ class PylonItemSchema @JvmOverloads internal constructor(
 
     val research: Research?
         get() = PylonRegistry.RESEARCHES.find { key in it.unlocks }
+
     val researchBypassPermission = "pylon.item.${key.namespace}.${key.key}"
 
     @JvmSynthetic
     internal val loadConstructor: MethodHandle = itemClass.findConstructorMatching(ItemStack::class.java)
         ?: throw NoSuchMethodException("Item '$key' (${itemClass.simpleName}) is missing a load constructor (ItemStack)")
 
+    /**
+     * Attempts to place the block associated with this item.
+     *
+     * Does nothing if no block is associated with this item.
+     */
     fun place(context: BlockCreateContext): PylonBlock? {
         if (pylonBlockKey == null) {
             return null

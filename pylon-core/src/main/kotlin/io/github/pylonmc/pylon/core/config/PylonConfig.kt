@@ -3,9 +3,15 @@ package io.github.pylonmc.pylon.core.config
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 
+/**
+ * The config options for Pylon Core.
+ */
 object PylonConfig {
 
     private val config = Config(PylonCore, "config.yml")
+
+    @JvmStatic
+    val pylonGuideOnFirstJoin = config.getOrThrow("pylon-guide-on-first-join", ConfigAdapter.BOOLEAN)
 
     @JvmStatic
     val defaultTickInterval = config.getOrThrow("default-tick-interval", ConfigAdapter.INT)
@@ -30,6 +36,15 @@ object PylonConfig {
 
     @JvmStatic
     val researchesEnabled = config.getOrThrow("research.enabled", ConfigAdapter.BOOLEAN)
+
+    @JvmStatic
+    val researchBaseConfettiAmount = config.get("research.confetti.base-amount", ConfigAdapter.DOUBLE, 70.0)
+
+    @JvmStatic
+    val researchMultiplierConfettiAmount = config.get("research.confetti.multiplier", ConfigAdapter.DOUBLE, 0.2)
+
+    @JvmStatic
+    val researchMaxConfettiAmount = config.get("research.confetti.max-amount", ConfigAdapter.INT, 700)
 
     @JvmStatic
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)

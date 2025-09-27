@@ -5,8 +5,9 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called after two fluid points have been disconnected
+ * Called after two [VirtualFluidPoint]s have been disconnected.
  */
+@Suppress("unused")
 class PylonFluidPointDisconnectEvent(
     val point1: VirtualFluidPoint,
     val point2: VirtualFluidPoint,

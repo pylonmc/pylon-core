@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
+import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
@@ -19,19 +20,27 @@ import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import kotlin.math.min
 
 /**
+ * A Pylon research as seem in the 'researches' guide section.
+ *
+ * Researches typically have a research point [cost] specified. However, this
+ * is optional, and you can implement your own methods to unlock a research.
+ *
  * @property cost If null, the research cannot be unlocked using points
- * @property unlocks the keys of the items that are unlocked by this research
+ * @property unlocks The keys of the items that are unlocked by this research
  */
 @JvmRecord
 data class Research(
@@ -42,6 +51,9 @@ data class Research(
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
+    /**
+     * A constructor that sets the name to a default language file key.
+     */
     constructor(key: NamespacedKey, material: Material, cost: Long?, vararg unlocks: NamespacedKey) : this(
         key,
         material,
@@ -54,8 +66,14 @@ data class Research(
         PylonRegistry.RESEARCHES.register(this)
     }
 
+    /**
+     * Adds the research to a player.
+     *
+     * @param sendMessage If set, sends a message to notify the player that they
+     * have unlocked the research
+     */
     @JvmOverloads
-    fun addTo(player: Player, sendMessage: Boolean = true) {
+    fun addTo(player: Player, sendMessage: Boolean = true, effects: Boolean = true) {
         if (this in getResearches(player)) return
 
         addResearch(player, this)
@@ -65,6 +83,7 @@ data class Research(
                 player.discoverRecipe(recipe.key)
             }
         }
+
         if (sendMessage) {
             player.sendMessage(
                 Component.translatable(
@@ -73,8 +92,30 @@ data class Research(
                 )
             )
         }
+
+        if (effects) {
+            val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
+            val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
+            val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
+            ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
+
+            fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {
+                Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
+                    player.playSound(player.location, this, 1.5f, pitch)
+                }, delay)
+            }
+
+            repeat(2) {
+                Sound.ENTITY_FIREWORK_ROCKET_BLAST.playSoundLater(3L * it)
+                Sound.ENTITY_PLAYER_LEVELUP.playSoundLater(6L * it, 0.9f)
+                Sound.ENTITY_FIREWORK_ROCKET_LAUNCH.playSoundLater(9L * it)
+            }
+        }
     }
 
+    /**
+     * Removes a research from a player.
+     */
     fun removeFrom(player: Player) {
         if (this !in getResearches(player)) return
 
@@ -87,6 +128,9 @@ data class Research(
         }
     }
 
+    /**
+     * Returns whether a research has been researched by the given player.
+     */
     fun isResearchedBy(player: Player): Boolean {
         return this in getResearches(player)
     }
@@ -129,6 +173,13 @@ data class Research(
         fun removeResearch(player: Player, research: Research)
             = setResearches(player, getResearches(player) - research)
 
+        /**
+         * Checks whether a player can craft an item (ie has the associated research, or
+         * has permission to bypass research.
+         *
+         * @param sendMessage Whether, if the player cannot craft the item, a message should be sent to them
+         * to notify them of this fact
+         */
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerCraft")
@@ -164,11 +215,25 @@ data class Research(
             return canUse
         }
 
+        /**
+         * Checks whether a player can pick up an item (ie has the associated research, or
+         * has permission to bypass research.
+         *
+         * @param sendMessage Whether, if the player cannot pick up the item, a message should be sent to them
+         * to notify them of this fact
+         */
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerPickUp")
         fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean = canCraft(item, sendMessage)
 
+        /**
+         * Checks whether a player can use an item (ie has the associated research, or
+         * has permission to bypass research.
+         *
+         * @param sendMessage Whether, if the player cannot use the item, a message should be sent to them
+         * to notify them of this fact
+         */
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerUse")
@@ -255,8 +320,8 @@ private fun Player.ejectUnknownItems() {
 }
 
 @JvmSynthetic
-fun Player.addResearch(research: Research, sendMessage: Boolean = false) {
-    research.addTo(this, sendMessage)
+fun Player.addResearch(research: Research, sendMessage: Boolean = false, confetti: Boolean = true) {
+    research.addTo(this, sendMessage, confetti)
 }
 
 @JvmSynthetic

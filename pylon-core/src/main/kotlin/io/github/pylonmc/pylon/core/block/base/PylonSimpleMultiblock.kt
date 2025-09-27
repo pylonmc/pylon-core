@@ -8,7 +8,7 @@ import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.entity.base.PylonInteractableEntity
+import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
@@ -40,12 +40,26 @@ import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * A multiblock that is made of a static defined set of components
+ * A multiblock that is made of a predefined set of components.
+ *
+ * Automatically creates ghost blocks to show how to build your multiblock.
+ *
+ * Automatically handles different possible rotations of your multiblock.
+ *
+ * If you need something more flexible (eg: a fluid tank that can have up to 10
+ * fluid casings added to increase the capacity), see [PylonMultiblock].
  */
 interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
+    /**
+     * Represents a single block of a multiblock.
+     */
     interface MultiblockComponent {
         fun matches(block: Block): Boolean
+
+        /**
+         * Creates a 'ghost block' entity that represents this block.
+         */
         fun spawnGhostBlock(block: Block): UUID
 
         companion object {
@@ -58,8 +72,12 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
+    /**
+     * A block display that represents this block, showing the player what block
+     * needs to be placed in a specific location.
+     */
     class MultiblockGhostBlock(entity: BlockDisplay, val name: String) :
-        PylonEntity<BlockDisplay>(KEY, entity), PylonInteractableEntity {
+        PylonEntity<BlockDisplay>(KEY, entity), PylonInteractEntity {
 
         constructor(entity: BlockDisplay)
                 : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
@@ -78,10 +96,15 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
+    /**
+     * Represents a vanilla component of a multiblock, which can have one or more materials.
+     *
+     * If multiple materials are specified, the ghost block will automatically cycle through all
+     * the given materials in order.
+     */
     @JvmRecord
     data class VanillaMultiblockComponent(val materials: List<Material>) : MultiblockComponent {
 
-        // Enforce at least 1
         constructor(first: Material, vararg materials: Material) : this(listOf(first) + materials)
 
         init {
@@ -115,6 +138,9 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
+    /**
+     * Represents a Pylon block component of a multiblock.
+     */
     @JvmRecord
     data class PylonMultiblockComponent(val key: NamespacedKey) : MultiblockComponent {
         override fun matches(block: Block): Boolean = BlockStorage.get(block)?.schema?.key == key
@@ -133,10 +159,12 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
     }
 
     @get:ApiStatus.NonExtendable
-    val simpleMultiblockData: SimpleMultiblockData
+    private val simpleMultiblockData: SimpleMultiblockData
         get() = simpleMultiblocks.getOrPut(this) { SimpleMultiblockData(null) }
 
     /**
+     * The positions and corresponding components of the multiblock.
+     *
      * Any rotation of these components will be considered valid, unless setFacing has been called, in which case
      * only a multiblock constructed facing in the specified direction will be considered valid.
      */
@@ -144,7 +172,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     /**
      * Sets the 'direction' we expect the multiblock to be built in. North is considered the default facing direction -
-     * ie setFacing(BlockFace.NORTH) will preserve the original multiblock structure without rotatnig it.
+     * ie setFacing(BlockFace.NORTH) will preserve the original multiblock structure without rotating it.
      *
      * Leave this unset to accept any direction.
      */
@@ -152,9 +180,17 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         simpleMultiblockData.facing = facing
     }
 
+    /**
+     * The 'direction' we expect the multiblock to be built in. This is not the *actual* direction that
+     * the multiblock has been built in.
+     */
     fun getFacing(): BlockFace?
             = simpleMultiblockData.facing
 
+    /**
+     * Returns all the valid configurations of the multiblock. If any of these is satisfied, the multiblock
+     * will be considered complete.
+     */
     fun validStructures(): List<Map<Vector3i, MultiblockComponent>> {
         val facing = simpleMultiblockData.facing
         return if (facing == null) {
@@ -169,6 +205,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
+    /**
+     * Spawns a ghost block for every component of the multiblock.
+     */
+    @ApiStatus.Internal
     fun spawnGhostBlocks() {
         val block = (this as PylonBlock).block
         val facing = simpleMultiblockData.facing
@@ -182,7 +222,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
     }
 
     // Just assumes any rotation of the multiblock is valid, probably not worth the extra logic to account for
-    // different facing directions
+    // different facing directions.
+    /**
+     * Imagine the smallest square containing the multiblock; this is the radius of that square.
+     */
     val horizontalRadius
         get() = maxOf(
             abs(components.keys.minOf { it.x }),
@@ -191,9 +234,17 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
             abs(components.keys.maxOf { it.z })
         )
 
+    /**
+     * Imagine the smallest cuboid (with equal width and length) containing the multiblock; this is the
+     * corner with the lowest X, Y, and Z coordinates.
+     */
     val minCorner: Vector3i
         get() = Vector3i(-horizontalRadius, components.keys.minOf { it.y }, -horizontalRadius)
 
+    /**
+     * Imagine the smallest cuboid (with equal width and length) containing the multiblock; this is the
+     * corner with the highest X, Y, and Z coordinates.
+     */
     val maxCorner: Vector3i
         get() = Vector3i(horizontalRadius, components.keys.maxOf { it.y }, horizontalRadius)
 
@@ -237,6 +288,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         it.contains((otherBlock.position - block.position).vector3i)
     }
 
+    /**
+     * Updates the color of all ghost blocks to indicate whether the block is correctly placed.
+     */
+    @ApiStatus.Internal
     fun updateGhostBlockColors() {
         if (MultiblockCache.isFormed(this)) {
             return // ghosts should have been deleted
@@ -260,9 +315,9 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         }
     }
 
-    data class SimpleMultiblockData(var facing: BlockFace?)
-
     companion object : Listener {
+
+        internal data class SimpleMultiblockData(var facing: BlockFace?)
 
         private val simpleMultiblockKey = pylonKey("simple_multiblock_data")
 

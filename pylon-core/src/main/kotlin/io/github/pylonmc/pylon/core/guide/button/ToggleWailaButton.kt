@@ -9,6 +9,9 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
+/**
+ * A settings button for toggling the WAILA overlay.
+ */
 class ToggleWailaButton : AbstractItem() {
 
     override fun getItemProvider(player: Player) = ItemStackBuilder.of(if (player.wailaEnabled) Material.LIME_CONCRETE else Material.RED_CONCRETE)

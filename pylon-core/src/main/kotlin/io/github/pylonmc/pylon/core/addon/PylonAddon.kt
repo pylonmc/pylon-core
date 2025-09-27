@@ -2,8 +2,6 @@ package io.github.pylonmc.pylon.core.addon
 
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.config.Config
-import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -14,13 +12,12 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.annotations.ApiStatus
-import java.util.Locale
+import java.util.*
 
 /**
  * Welcome to the place where it all begins: the Pylon addon!
@@ -33,18 +30,18 @@ interface PylonAddon : Keyed {
     val javaPlugin: JavaPlugin
 
     /**
-     * The set of [Locale]s this addon has translations for
+     * The set of [Locale]s this addon has translations for.
      */
     val languages: Set<Locale>
 
     /**
-     * The material to represent this addon in menus
+     * The material to represent this addon in menus.
      */
     val material: Material
 
     /**
      * The name used to represent this addon in the item tooltips.
-     * By default, a blue italic `pylon.[addon].addon` translation key.
+     * By default, a blue italic `pylon.<your-addon-key>.addon` translation key.
      */
     val displayName: TranslatableComponent
         get() = Component.translatable("pylon.${key.namespace}.addon")
@@ -52,8 +49,8 @@ interface PylonAddon : Keyed {
             .color(NamedTextColor.BLUE)
 
     /**
-     * If you use something besides the default `pylon.[addon].addon` translation key for the addon name,
-     * set this to true to suppress warnings about the "missing" key
+     * If you use something besides the default `pylon.<your-addon-key>.addon` translation key for the addon name,
+     * set this to true to suppress warnings about the "missing" key.
      */
     @Suppress("INAPPLICABLE_JVM_NAME")
     @get:JvmName("suppressAddonNameWarning")
@@ -77,47 +74,7 @@ interface PylonAddon : Keyed {
         }
     }
 
-    /**
-     * Merges config from addons to the Pylon config directory.
-     * Used for stuff like item settings and language files.
-     *
-     * Returns the configuration read and merged from the resource.
-     * If the file does not exist in the resource but already exists
-     * at the [to] path, reads and returns the file at the [to] path.
-     *
-     * @param from The path to the config file. Must be a YAML file.
-     * @return The merged config
-     */
-    fun mergeGlobalConfig(from: String, to: String): Config {
-        require(from.endsWith(".yml")) { "Config file must be a YAML file" }
-        require(to.endsWith(".yml")) { "Config file must be a YAML file" }
-        val cached = globalConfigCache[from to to]
-        if (cached != null) {
-            return cached
-        }
-        val globalConfig = PylonCore.dataFolder.resolve(to)
-        if (!globalConfig.exists()) {
-            globalConfig.parentFile.mkdirs()
-            globalConfig.createNewFile()
-        }
-        val config = Config(globalConfig)
-        val resource = this.javaPlugin.getResource(from)
-        if (resource == null) {
-            PylonCore.logger.warning("Resource not found: $from")
-        } else {
-            val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
-            config.internalConfig.setDefaults(newConfig)
-            config.internalConfig.options().copyDefaults(true)
-            config.merge(ConfigSection(newConfig))
-            config.save()
-        }
-        globalConfigCache[from to to] = config
-        return config
-    }
-
     companion object : Listener {
-        private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
-
         @EventHandler
         private fun onPluginDisable(event: PluginDisableEvent) {
             val plugin = event.plugin
@@ -129,7 +86,6 @@ interface PylonAddon : Keyed {
                 PylonRegistry.GAMETESTS.unregisterAllFromAddon(plugin)
                 PylonRegistry.ITEMS.unregisterAllFromAddon(plugin)
                 PylonRegistry.RECIPE_TYPES.unregisterAllFromAddon(plugin)
-                PylonRegistry.MOB_DROPS.unregisterAllFromAddon(plugin)
                 PylonRegistry.ADDONS.unregister(plugin)
             }
         }

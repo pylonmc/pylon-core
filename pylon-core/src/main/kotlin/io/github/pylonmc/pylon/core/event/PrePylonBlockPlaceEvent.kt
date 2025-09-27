@@ -8,9 +8,9 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called after the material of the block is set,
- * but before the PylonBlock's constructor is called
- * @see BlockCreateContext.shouldSetType
+ * Called after the material of the block is set, but before the PylonBlock's constructor is called.
+ *
+ * @see BlockCreateContext
  */
 class PrePylonBlockPlaceEvent(
     val block: Block,

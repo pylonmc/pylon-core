@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.test.test.block;
 import io.github.pylonmc.pylon.core.block.BlockStorage;
 import io.github.pylonmc.pylon.core.block.PhantomBlock;
 import io.github.pylonmc.pylon.core.config.PylonConfig;
-import io.github.pylonmc.pylon.core.test.GameTestConfig;
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
 import io.github.pylonmc.pylon.test.block.BlockEventError;

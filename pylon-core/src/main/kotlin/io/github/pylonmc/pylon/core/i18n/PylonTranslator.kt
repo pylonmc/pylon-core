@@ -13,8 +13,8 @@ import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.editData
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.withArguments
-import io.github.pylonmc.pylon.core.util.wrapText
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.key.Key
@@ -64,7 +64,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
     init {
         for (lang in addon.languages) {
-            addon.mergeGlobalConfig("lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
+            mergeGlobalConfig(addon, "lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
         }
         val langsDir = PylonCore.dataPath.resolve("lang").resolve(addonNamespace)
         translations = if (!langsDir.exists()) {
@@ -138,6 +138,29 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         private val languageRanges = WeakHashMap<Locale, List<Locale.LanguageRange>>()
 
         private val translators = mutableMapOf<NamespacedKey, PylonTranslator>()
+
+        @JvmStatic
+        fun wrapText(text: String, limit: Int): List<String> {
+            val words = text.split(" ")
+            val lines = mutableListOf<String>()
+            var currentLine = StringBuilder()
+
+            for (word in words) {
+                if (currentLine.length + word.length + 1 > limit) {
+                    currentLine.append(' ')
+                    lines.add(currentLine.toString())
+                    currentLine = StringBuilder()
+                }
+                if (currentLine.isNotEmpty()) {
+                    currentLine.append(" ")
+                }
+                currentLine.append(word)
+            }
+            if (currentLine.isNotEmpty()) {
+                lines.add(currentLine.toString())
+            }
+            return lines
+        }
 
         @get:JvmStatic
         @get:JvmName("getTranslatorForAddon")

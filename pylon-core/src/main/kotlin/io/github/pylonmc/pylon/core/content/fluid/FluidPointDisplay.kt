@@ -9,6 +9,9 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.util.Vector
 
+/**
+ * A 'fluid point' is one of the red/green displays that indicates a block's fluid input/output.
+ */
 class FluidPointDisplay(entity: ItemDisplay) : PylonEntity<ItemDisplay>(KEY, entity) {
 
     companion object {
