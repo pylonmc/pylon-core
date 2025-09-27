@@ -12,7 +12,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 /**
  * Represents the back button in the guide.
  */
-open class BackButton(val player: Player) : AbstractItem() {
+open class BackButton() : AbstractItem() {
 
     override fun getItemProvider() = ItemStackBuilder.of(Material.ENCHANTED_BOOK)
         .name(Component.translatable("pylon.pyloncore.guide.button.back.name"))

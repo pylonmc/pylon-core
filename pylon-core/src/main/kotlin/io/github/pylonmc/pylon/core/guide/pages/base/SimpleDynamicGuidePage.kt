@@ -58,10 +58,10 @@ open class SimpleDynamicGuidePage(
             "x x x x x x x x x",
         )
         .addIngredient('#', GuiItems.background())
-        .addIngredient('<', if (buttons.size >= 46) GuiItems.pagePrevious() else GuiItems.background())
-        .addIngredient('b', BackButton(player))
+        .addIngredient('<', GuiItems.pagePrevious())
+        .addIngredient('b', BackButton())
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
-        .addIngredient('>', if (buttons.size >= 46) GuiItems.pageNext() else GuiItems.background())
+        .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
 
     override fun getGui(player: Player): Gui {
