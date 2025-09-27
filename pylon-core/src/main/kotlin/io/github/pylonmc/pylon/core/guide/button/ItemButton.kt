@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
@@ -145,7 +146,7 @@ class ItemButton @JvmOverloads constructor(
                         }
                         research.addTo(player, false)
                         player.researchPoints -= research.cost
-                        windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
+                        notifyWindows()
                     }
                 }
 
