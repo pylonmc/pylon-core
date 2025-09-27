@@ -50,7 +50,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : GuidePage {
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', GuiItems.pagePrevious())
         .addIngredient('b', BackButton())
-        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(fluid.getItem().build())))
+        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(fluid.item)))
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
