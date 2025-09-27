@@ -115,7 +115,7 @@ private val setblock = buildCommand("setblock") {
             permission("pylon.command.setblock")
             executesWithPlayer { player ->
                 PylonMetrics.onCommandRun("/py setblock")
-                val location = getArgument<PaperBlockPosition>("location")
+                val location = getArgument<BlockPositionResolver>("location").resolve(source)
                 val block = getArgument<PylonBlockSchema>("block")
                 BlockStorage.placeBlock(location.toLocation(player.world), block.key)
             }
