@@ -17,8 +17,6 @@ import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 import org.bukkit.block.Container
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
@@ -132,10 +130,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private fun blockRemove(event: EntityExplodeEvent) {
-        val context = BlockBreakContext.EntityExploded(event)
         val it = event.blockList().iterator()
         while (it.hasNext()) {
-            if (BlockStorage.breakBlock(it.next(), context) == null) {
+            val block = it.next()
+            if (BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(block, event)) == null) {
                 it.remove()
             }
         }
