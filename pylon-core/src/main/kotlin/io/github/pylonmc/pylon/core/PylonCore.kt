@@ -42,6 +42,8 @@ import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
+import java.io.File
+import java.net.JarURLConnection
 import java.util.*
 import kotlin.io.path.*
 
@@ -123,6 +125,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         launch {
             delay(1.ticks)
             loadRecipes()
+            loadResearches()
         }
     }
 
@@ -153,6 +156,49 @@ object PylonCore : JavaPlugin(), PylonAddon {
         logger.info("Finished loading recipes")
     }
 
+    private fun loadResearches() {
+        logger.info("Loading researches...")
+        for (addon in PylonRegistry.ADDONS) {
+            val addonPlugin = addon.javaPlugin
+            val researchFiles = listResourcesRecursively(addonPlugin::class.java.classLoader, "researches")
+
+            for (path in researchFiles) {
+                val configStream = addonPlugin.getResource(path) ?: continue
+                val yamlConfig = configStream.reader().use { YamlConfiguration.loadConfiguration(it) }
+
+                val file = File(path)
+                val parent = file.parentFile
+                val fileName = file.name
+
+                val ourPath = this.javaPlugin.dataFolder
+                    .resolve(parent)
+                    .resolve(addon.key.namespace)
+                    .resolve(fileName)
+
+                if (!ourPath.exists()) {
+                    ourPath.parentFile.mkdirs()
+                    yamlConfig.save(ourPath)
+                }
+            }
+        }
+
+        val researchDir = dataPath.resolve("researches")
+        if (researchDir.exists()) {
+            for (namespaceDir in researchDir.listDirectoryEntries()) {
+                if (!namespaceDir.isDirectory()) continue
+                val namespace = namespaceDir.nameWithoutExtension
+                for (research in namespaceDir.listDirectoryEntries()) {
+                    if (!research.isRegularFile() || research.extension != "yml") continue
+                    val key = NamespacedKey(namespace, research.nameWithoutExtension)
+
+                    Research.loadFromConfig(Config(research), key).register()
+                }
+            }
+        }
+
+        logger.info("Finished loading researches")
+    }
+
     override fun onDisable() {
         ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
@@ -172,4 +218,28 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
 private fun addDefaultPermission(permission: String) {
     Bukkit.getPluginManager().addPermission(Permission(permission, PermissionDefault.TRUE))
+}
+
+fun listResourcesRecursively(classLoader : ClassLoader, folder: String): List<String> {
+    val resourceUrls = classLoader.getResources(folder)
+    val result = mutableListOf<String>()
+
+    while (resourceUrls.hasMoreElements()) {
+        val url = resourceUrls.nextElement()
+
+        if (url.protocol != "jar") continue
+
+        val jarConnection = url.openConnection() as JarURLConnection
+        val jarFile = jarConnection.jarFile
+
+        val basePath = folder.removeSuffix("/") + "/"
+
+        for (entry in jarFile.entries()) {
+            if (entry.name.startsWith(basePath) && !entry.isDirectory) {
+                result.add(entry.name)
+            }
+        }
+    }
+
+    return result
 }

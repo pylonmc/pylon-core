@@ -3,7 +3,9 @@ package io.github.pylonmc.pylon.core.item.research
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
@@ -261,6 +263,24 @@ data class Research(
                     if (researches.isNotEmpty()) continue
                     player.discoverRecipe(recipe.key)
                 }
+            }
+        }
+
+
+        fun loadFromConfig(section: ConfigSection, key : NamespacedKey) : Research {
+
+            try {
+                val material = section.get("material", ConfigAdapter.MATERIAL) ?: throw IllegalArgumentException("Invalid entry 'material' for research keyed $key")
+                val name = section.get("name", ConfigAdapter.STRING) ?: "pylon.${key.namespace}.research.${key.key}"
+                val cost = section.get("cost", ConfigAdapter.LONG)
+                val unlocked = section.get("unlocked", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY)) ?: emptySet()
+
+                return Research(key, material, Component.translatable(name), cost, unlocked)
+            } catch (e: Exception) {
+                throw IllegalArgumentException(
+                    "Failed to load research with key '$key' from config",
+                    e
+                )
             }
         }
     }
