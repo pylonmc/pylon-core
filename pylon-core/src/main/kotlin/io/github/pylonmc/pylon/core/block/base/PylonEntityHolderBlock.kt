@@ -25,7 +25,7 @@ import java.util.*
  *
  * Note that the Pylon entities may not be loaded at the same time that the block is loaded.
  */
-interface PylonEntityHolderBlock : PylonBreakHandler, Keyed {
+interface PylonEntityHolderBlock : PylonBreakHandler {
 
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>

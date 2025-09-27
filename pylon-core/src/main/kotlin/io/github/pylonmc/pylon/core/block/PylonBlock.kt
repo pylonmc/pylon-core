@@ -22,7 +22,6 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import me.tofaa.entitylib.wrapper.WrapperEntity
-import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
@@ -47,15 +46,14 @@ import org.bukkit.persistence.PersistentDataContainer
  *
  * @see BlockStorage
  */
-open class PylonBlock internal constructor(val block: Block) : Keyed {
+open class PylonBlock internal constructor(val block: Block) {
 
     /**
      * All the data needed to create or load the block.
      */
     val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
 
-    // Private so it doesn't conflict with getKey from Keyed
-    private val key = schema.key
+    val key = schema.key
 
     val defaultWailaTranslationKey = schema.defaultWailaTranslationKey
 
@@ -230,8 +228,6 @@ open class PylonBlock internal constructor(val block: Block) : Keyed {
      * Shorthand for `Settings.get(getKey())`
      */
     fun getSettings(): Config = Settings.get(key)
-
-    override fun getKey() = key
 
     companion object {
 

@@ -20,11 +20,10 @@ class ItemDisplayBuilder() {
     var transformation: Matrix4f? = null
     var brightness: Brightness? = null
     var glowColor: Color? = null
-    var billboard: Display.Billboard? = null
+    var billboard: Billboard? = null
     var viewRange: Float? = null
     var interpolationDelay: Int? = null
     var interpolationDuration: Int? = null
-    var resourcePackItemName: String? = null
 
     constructor(other: ItemDisplayBuilder): this() {
         this.itemStack = other.itemStack
@@ -57,7 +56,6 @@ class ItemDisplayBuilder() {
         return finalLocation.getWorld().spawn(finalLocation, ItemDisplay::class.java, this::update)
     }
 
-    @Suppress("UnstableApiUsage")
     fun update(display: Display) {
         if (display !is ItemDisplay) {
             throw IllegalArgumentException("Must provide an ItemDisplay")
