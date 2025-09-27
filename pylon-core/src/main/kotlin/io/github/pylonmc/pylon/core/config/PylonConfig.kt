@@ -60,4 +60,5 @@ object PylonConfig {
 
     @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
+
 }

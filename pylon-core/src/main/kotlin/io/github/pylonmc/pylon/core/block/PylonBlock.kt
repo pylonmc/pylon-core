@@ -1,7 +1,9 @@
 package io.github.pylonmc.pylon.core.block
 
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
+import com.github.retrooper.packetevents.protocol.world.Location
+import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.register
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
@@ -13,13 +15,18 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import me.tofaa.entitylib.meta.display.ItemDisplayMeta
+import me.tofaa.entitylib.wrapper.WrapperEntity
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
@@ -49,6 +56,43 @@ open class PylonBlock internal constructor(val block: Block) {
     val key = schema.key
 
     val defaultWailaTranslationKey = schema.defaultWailaTranslationKey
+
+    /**
+     * Set this to `true` if your block should not have a [blockTextureEntity] for custom models/textures.
+     *
+     * For example, if your block is comprised fully of [ItemDisplay]s, then you may have no need for a texture
+     * entity as your existing entities could already support custom models/textures.
+     */
+    open var disableBlockTextureEntity = false
+
+    /**
+     * A packet based [ItemDisplay] sent to players with `customBlockTextures` enabled.
+     *
+     * Being lazily initialized, if you do not access the entity directly it will only be created
+     * when a player with `customBlockTextures` comes within range for the first time. This is to
+     * avoid unnecessary entity creation, memory usage, and entity update overhead when no players
+     * can actually see it.
+     *
+     * Upon initialization the entity is set up by [setupBlockTexture] (which can be overridden),
+     * and modifications afterward can be done using [updateBlockTexture].
+     *
+     * For example, if you have a block that faces different directions, you can override [setupBlockTexture]
+     * and rotate the entity based on the block's facing direction.
+     *
+     * Or let's say you have a furnace block that changes texture based on whether it's lit or not,
+     * you can use [updateBlockTexture] to change the entity's item to reflect the lit/unlit state.
+     */
+    val blockTextureEntity: WrapperEntity? by lazy {
+        if (!BlockTextureConfig.customBlockTexturesEnabled || disableBlockTextureEntity) {
+            null
+        } else {
+            val entity = WrapperEntity(EntityTypes.ITEM_DISPLAY)
+            val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
+            setupBlockTexture(entity, meta)
+        }
+    }
+
+    val defaultItem = PylonRegistry.ITEMS[schema.key]
 
     /**
      * This constructor is called when a *new* block is created in the world.
@@ -81,6 +125,43 @@ open class PylonBlock internal constructor(val block: Block) {
     protected open fun postLoad() {}
 
     /**
+     * Used to initialize [blockTextureEntity], if you need to modify the entity post-initialization,
+     * use [updateBlockTexture].
+     *
+     * By default, this method sets the item display to be at the center of the block, using the
+     * item returned by [getItem] with [BlockItemContext.BlockTexture] (or a barrier if none is
+     * provided), set's its item model to air, making it invisible for players without a resource
+     * pack, and scales it to 1.00085f in all directions to prevent z-fighting with the vanilla
+     * block model.
+     */
+    protected open fun setupBlockTexture(entity: WrapperEntity, meta: ItemDisplayMeta): WrapperEntity = entity.apply {
+        // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
+        entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
+
+        val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
+        item.editMeta { itemMeta -> itemMeta.itemModel = NamespacedKey.minecraft("air") }
+        meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
+        meta.scale = Vector3f(1.00085f, 1.00085f, 1.00085f)
+        meta.width = 0f
+        meta.height = 0f
+    }
+
+    /**
+     * Use this method to make any changes to the block texture entity, such as changing its item,
+     * transformation, etc, after initialization. (see [setupBlockTexture])
+     *
+     * If you want to make changes to the entity outside of this method, make sure to call
+     * [WrapperEntity.refresh] afterwards so that the changes are sent to the client.
+     */
+    protected fun updateBlockTexture(updater: (WrapperEntity, ItemDisplayMeta) -> Unit) {
+        blockTextureEntity?.let {
+            val meta = it.getEntityMeta(ItemDisplayMeta::class.java)
+            updater(it, meta)
+            it.refresh()
+        }
+    }
+
+    /**
      * WAILA is the text that shows up when looking at a block to tell you what the block is.
      *
      * This will only be called for the player if the player has WAILA enabled.
@@ -101,7 +182,7 @@ open class PylonBlock internal constructor(val block: Block) {
      */
     open fun getDropItem(context: BlockBreakContext): ItemStack? {
         return if (context.normallyDrops) {
-            PylonRegistry.ITEMS[schema.key]?.itemStack
+            defaultItem?.itemStack
         } else {
             null
         }
@@ -115,7 +196,18 @@ open class PylonBlock internal constructor(val block: Block) {
      *
      * @return the item the block should give when middle clicked, or null if none
      */
-    open fun getPickItem() = PylonRegistry.ITEMS[schema.key]?.itemStack
+    open fun getPickItem() = defaultItem?.itemStack
+
+    /**
+     * Returns the item that should be used to display the block's texture.
+     *
+     * By default, returns the item with the same key as the block.
+     *
+     * @return the item that should be used to display the block's texture
+     */
+    open fun getBlockTextureItem() = defaultItem?.itemStack?.apply {
+        itemMeta.persistentDataContainer.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true)
+    }
 
     /**
      * Called when the block is saved.
@@ -139,6 +231,7 @@ open class PylonBlock internal constructor(val block: Block) {
 
     companion object {
 
+        private val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
 

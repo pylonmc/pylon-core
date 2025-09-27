@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.*
@@ -254,6 +255,7 @@ object BlockStorage : Listener {
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
 
+        BlockTextureEngine.insert(block)
         PylonBlockPlaceEvent(blockPosition.block, block, context).callEvent()
 
         return block
@@ -336,6 +338,7 @@ object BlockStorage : Listener {
             block.postBreak()
         }
 
+        BlockTextureEngine.remove(block)
         PylonBlockBreakEvent(blockPosition.block, block, context, drops).callEvent()
 
         for (drop in drops) {
@@ -432,6 +435,7 @@ object BlockStorage : Listener {
 
         for (block in chunkBlocks) {
             PylonBlockLoadEvent(block.block, block).callEvent()
+            BlockTextureEngine.insert(block)
         }
 
         PylonChunkBlocksLoadEvent(event.chunk, chunkBlocks.toList()).callEvent()
@@ -454,6 +458,7 @@ object BlockStorage : Listener {
 
         for (block in chunkBlocks) {
             PylonBlockUnloadEvent(block.block, block).callEvent()
+            BlockTextureEngine.remove(block)
         }
 
         PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
