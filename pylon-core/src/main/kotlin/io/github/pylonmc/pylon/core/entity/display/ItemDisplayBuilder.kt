@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.entity.display
 
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -23,6 +24,7 @@ class ItemDisplayBuilder() {
     var viewRange: Float? = null
     var interpolationDelay: Int? = null
     var interpolationDuration: Int? = null
+    var resourcePackItemName: String? = null
 
     constructor(other: ItemDisplayBuilder): this() {
         this.itemStack = other.itemStack
@@ -37,6 +39,7 @@ class ItemDisplayBuilder() {
 
     fun material(material: Material): ItemDisplayBuilder = apply { this.itemStack = ItemStack(material) }
     fun itemStack(itemStack: ItemStack?): ItemDisplayBuilder = apply { this.itemStack = itemStack }
+    fun itemStack(builder: ItemStackBuilder): ItemDisplayBuilder = apply { this.itemStack = builder.build() }
     fun transformation(transformation: Matrix4f?): ItemDisplayBuilder = apply { this.transformation = transformation }
     fun transformation(builder: TransformBuilder): ItemDisplayBuilder = apply { this.transformation = builder.buildForItemDisplay() }
     fun brightness(brightness: Brightness): ItemDisplayBuilder = apply { this.brightness = brightness }
@@ -54,6 +57,7 @@ class ItemDisplayBuilder() {
         return finalLocation.getWorld().spawn(finalLocation, ItemDisplay::class.java, this::update)
     }
 
+    @Suppress("UnstableApiUsage")
     fun update(display: Display) {
         if (display !is ItemDisplay) {
             throw IllegalArgumentException("Must provide an ItemDisplay")

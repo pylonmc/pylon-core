@@ -7,6 +7,11 @@ import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
+import org.bukkit.Bukkit
+import org.bukkit.Keyed
+import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.Entity
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
@@ -20,18 +25,18 @@ import java.util.*
  *
  * Note that the Pylon entities may not be loaded at the same time that the block is loaded.
  */
-interface PylonEntityHolderBlock : PylonBreakHandler {
+interface PylonEntityHolderBlock : PylonBreakHandler, Keyed {
 
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
         get() = holders.getOrPut(this) { mutableMapOf() }
 
-    fun addEntity(name: String, entity: PylonEntity<*>) {
-        if (!EntityStorage.isPylonEntity(entity.uuid)) {
-            EntityStorage.add(entity)
-        }
-        heldEntities[name] = entity.uuid
+    fun addEntity(name: String, entity: Entity) {
+        heldEntities[name] = entity.uniqueId
     }
+
+    fun addEntity(name: String, entity: PylonEntity<*>)
+        = addEntity(name, entity.entity)
 
     @ApiStatus.NonExtendable
     fun getHeldEntityUuid(name: String) = heldEntities[name]
@@ -41,28 +46,44 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         ?: throw IllegalArgumentException("Entity $name not found")
 
     @ApiStatus.NonExtendable
-    fun getHeldEntity(name: String): PylonEntity<*>?
-            = getHeldEntityUuid(name)?.let { EntityStorage.get(it) }
+    fun getHeldEntity(name: String): Entity?
+            = getHeldEntityUuid(name)?.let { Bukkit.getEntity(it) }
 
     @ApiStatus.NonExtendable
-    fun getHeldEntityOrThrow(name: String): PylonEntity<*>
+    fun getHeldEntityOrThrow(name: String): Entity
             = getHeldEntity(name)
         ?: throw IllegalArgumentException("Entity $name does not exist")
 
     @ApiStatus.NonExtendable
-    fun <T: PylonEntity<*>> getHeldEntity(clazz: Class<T>, name: String): T?
-            = getHeldEntityUuid(name)?.let { EntityStorage.getAs(clazz, it) }
+    fun <T: Entity> getHeldEntity(clazz: Class<T>, name: String): T? {
+        val entity = getHeldEntity(name)
+        if (!clazz.isInstance(entity)) {
+            return null
+        }
+        return clazz.cast(entity)
+    }
 
     @ApiStatus.NonExtendable
-    fun <T: PylonEntity<*>> getHeldEntityOrThrow(clazz: Class<T>, name: String): T
+    fun <T: Entity> getHeldEntityOrThrow(clazz: Class<T>, name: String): T
             = getHeldEntity(clazz, name)
         ?: throw IllegalArgumentException("Entity $name does not exist or is not of type ${clazz.simpleName}")
 
+    @ApiStatus.NonExtendable
+    fun <T: PylonEntity<*>> getHeldPylonEntity(clazz: Class<T>, name: String): T?
+            = getHeldEntityUuid(name)?.let { EntityStorage.getAs(clazz, it) }
+
+    @ApiStatus.NonExtendable
+    fun <T: PylonEntity<*>> getHeldPylonEntityOrThrow(clazz: Class<T>, name: String): T
+            = EntityStorage.getAs(clazz, getHeldEntityUuidOrThrow(name))
+        ?: throw IllegalArgumentException("Entity $name is not of type ${clazz.simpleName}")
+
+
     /**
-     * Returns false if the block holds no entity with the provided name, the entity is unloaded or does not physically exist.
+     * Returns false if the block holds no entity with the provided name, the entity is unloaded or does not
+     * physically exist.
      */
     @ApiStatus.NonExtendable
-    fun isHeldEntityPresent(name: String) = getHeldEntityUuid(name)?.let { EntityStorage.isPylonEntity(it) } == true
+    fun isHeldEntityPresent(name: String) = getHeldEntityUuid(name) != null
 
     /**
      * Returns false if any entity is unloaded or does not exist.
@@ -74,7 +95,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
     override fun postBreak() {
         // Best-effort removal; unlikely to cause issues
         for (name in heldEntities.keys) {
-            getHeldEntity(name)?.entity?.remove()
+            getHeldEntity(name)?.remove()
         }
     }
 
@@ -88,7 +109,8 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
             if (block !is PylonEntityHolderBlock) return
-            holders[block] = event.pdc.get(entityKey, entityType)?.toMutableMap() ?: error("Held entities not found for ${block.key}")
+            holders[block] = event.pdc.get(entityKey, entityType)?.toMutableMap()
+                ?: error("Held entities not found for ${block.key}")
         }
 
         @EventHandler

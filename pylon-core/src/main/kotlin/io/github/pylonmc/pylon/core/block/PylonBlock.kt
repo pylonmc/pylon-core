@@ -16,6 +16,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
@@ -39,14 +40,15 @@ import org.bukkit.persistence.PersistentDataContainer
  *
  * @see BlockStorage
  */
-open class PylonBlock internal constructor(val block: Block) {
+open class PylonBlock internal constructor(val block: Block) : Keyed {
 
     /**
      * All the data needed to create or load the block.
      */
     val schema = PylonBlockSchema.schemaCache.remove(block.position)!!
 
-    val key = schema.key
+    // Private so it doesn't conflict with getKey from Keyed
+    private val key = schema.key
 
     val defaultWailaTranslationKey = schema.defaultWailaTranslationKey
 
@@ -136,6 +138,8 @@ open class PylonBlock internal constructor(val block: Block) {
      * Shorthand for `Settings.get(getKey())`
      */
     fun getSettings(): Config = Settings.get(key)
+
+    override fun getKey() = key
 
     companion object {
 

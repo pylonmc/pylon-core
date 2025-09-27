@@ -301,7 +301,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         val facing = simpleMultiblockData.facing
         val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
         for ((offset, component) in rotatedComponents) {
-            val entity = getHeldEntity(
+            val entity = getHeldPylonEntity(
                 MultiblockGhostBlock::class.java,
                 "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
             )
