@@ -12,7 +12,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 
 class ToggleArmorTexturesButton : AbstractItem() {
     override fun getItemProvider(player: Player)
-        = ItemStackBuilder.gui(if (player.hasCustomArmorTextures) Material.LIME_CONCRETE else Material.RED_CONCRETE, pylonKey("toggle_armor_textures:${player.hasCustomArmorTextures}"))
+        = ItemStackBuilder.gui(if (player.hasCustomArmorTextures) Material.LIME_CONCRETE else Material.RED_CONCRETE, pylonKey("toggle_armor_textures"))
             .name(Component.translatable("pylon.pyloncore.guide.button.toggle-armor-textures.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.toggle-armor-textures.lore"))
 

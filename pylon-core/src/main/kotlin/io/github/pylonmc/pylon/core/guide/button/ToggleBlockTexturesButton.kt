@@ -13,7 +13,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 
 class ToggleBlockTexturesButton : AbstractItem() {
     override fun getItemProvider(player: Player)
-        = ItemStackBuilder.gui(if (player.hasCustomBlockTextures) Material.LIME_CONCRETE else Material.RED_CONCRETE, pylonKey("toggle_block_textures:${player.hasCustomBlockTextures}"))
+        = ItemStackBuilder.gui(if (player.hasCustomBlockTextures) Material.LIME_CONCRETE else Material.RED_CONCRETE, pylonKey("toggle_block_textures"))
             .name(Component.translatable("pylon.pyloncore.guide.button.toggle-block-textures.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.toggle-block-textures.lore"))
 

@@ -16,7 +16,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 class ToggleWailaButton : AbstractItem() {
 
     override fun getItemProvider(player: Player)
-        = ItemStackBuilder.gui(if (player.wailaEnabled) Material.LIME_CONCRETE else Material.RED_CONCRETE, pylonKey("toggle_waila:${player.wailaEnabled}"))
+        = ItemStackBuilder.gui(if (player.wailaEnabled) Material.LIME_CONCRETE else Material.RED_CONCRETE, pylonKey("toggle_waila"))
             .name(Component.translatable("pylon.pyloncore.guide.button.toggle-waila.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.toggle-waila.lore"))
 
