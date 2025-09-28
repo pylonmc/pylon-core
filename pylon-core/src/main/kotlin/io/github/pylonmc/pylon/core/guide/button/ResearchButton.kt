@@ -23,8 +23,7 @@ open class ResearchButton(val research: Research) : AbstractItem() {
 
     override fun getItemProvider(player: Player): ItemProvider = try {
         val playerHasResearch = Research.getResearches(player).contains(research)
-        val item = ItemStackBuilder.of(if (playerHasResearch) Material.LIME_STAINED_GLASS_PANE else research.material)
-            .addCustomModelDataString("${GuiItems.pylonGuiItemKeyKey}:${pylonKey("research")}:${research.key}:$playerHasResearch")
+        val item = ItemStackBuilder.gui(if (playerHasResearch) Material.LIME_STAINED_GLASS_PANE else research.material, "${pylonKey("research")}:${research.key}:$playerHasResearch")
             .name(research.name)
 
         if (playerHasResearch) {

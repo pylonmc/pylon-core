@@ -42,7 +42,7 @@ open class SimpleDynamicGuidePage(
 
     override fun getKey() = key
 
-    override val item = ItemStackBuilder.gui(material, pylonKey("guide_page:$key"))
+    override val item = ItemStackBuilder.gui(material, "${pylonKey("guide_page")}:$key")
         .name(Component.translatable("pylon.${key.namespace}.guide.page.${key.key}"))
 
     /**

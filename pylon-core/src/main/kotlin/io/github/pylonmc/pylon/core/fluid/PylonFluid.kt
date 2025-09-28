@@ -33,7 +33,7 @@ open class PylonFluid(
     val item by lazy {
         val builder = ItemStackBuilder.of(material)
             .editPdc { it.set(pylonFluidKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
-            .addCustomModelDataString("$pylonFluidKeyKey:$key")
+            .addCustomModelDataString(key.toString())
             .name(name)
 
         for (tag in tags) {

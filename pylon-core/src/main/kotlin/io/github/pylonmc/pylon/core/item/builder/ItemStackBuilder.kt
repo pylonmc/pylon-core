@@ -346,9 +346,20 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         }
 
         @JvmStatic
-        fun gui(stack: ItemStack, key: NamespacedKey): ItemStackBuilder {
+        fun gui(stack: ItemStack, key: String): ItemStackBuilder {
             return ItemStackBuilder(stack)
-                .addCustomModelDataString("${GuiItems.pylonGuiItemKeyKey}:$key")
+                .editPdc { it.set(GuiItems.pylonGuiItemKeyKey, PylonSerializers.STRING, key) }
+                .addCustomModelDataString(key.toString())
+        }
+
+        @JvmStatic
+        fun gui(material: Material, key: String): ItemStackBuilder {
+            return gui(ItemStack(material), key)
+        }
+
+        @JvmStatic
+        fun gui(stack: ItemStack, key: NamespacedKey): ItemStackBuilder {
+            return gui(stack, key.toString())
         }
 
         @JvmStatic
@@ -365,7 +376,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         fun pylonItem(stack: ItemStack, key: NamespacedKey): ItemStackBuilder {
             return ItemStackBuilder(stack)
                 .editPdc { it.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
-                .addCustomModelDataString("${PylonItemSchema.pylonItemKeyKey}:$key")
+                .addCustomModelDataString(key.toString())
                 .defaultTranslatableName(key)
                 .defaultTranslatableLore(key)
         }
