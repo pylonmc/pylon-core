@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.base.PylonDirectionalBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
@@ -22,10 +23,15 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import me.tofaa.entitylib.wrapper.WrapperEntity
+import org.bukkit.Axis
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
+import org.bukkit.block.data.Directional
+import org.bukkit.block.data.Orientable
+import org.bukkit.block.data.Rotatable
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -144,6 +150,29 @@ open class PylonBlock internal constructor(val block: Block) {
         meta.scale = Vector3f(1.00085f, 1.00085f, 1.00085f)
         meta.width = 0f
         meta.height = 0f
+
+        val blockData = block.blockData
+        var facing: BlockFace? = null
+        if (this@PylonBlock is PylonDirectionalBlock) {
+            facing = this@PylonBlock.getFacing()
+        } else if (blockData is Orientable) {
+            facing = when(blockData.axis) {
+                Axis.X -> BlockFace.EAST
+                Axis.Y -> BlockFace.UP
+                Axis.Z -> BlockFace.SOUTH
+            }
+        } else if (blockData is Directional) {
+            facing = blockData.facing
+        } else if (blockData is Rotatable) {
+            facing = blockData.rotation
+        }
+
+        if (facing != null) {
+            val direction = facing.direction
+            entity.teleport(entity.location.apply {
+                this.direction = Vector3f(direction.x.toFloat(), direction.y.toFloat(), direction.z.toFloat())
+            })
+        }
     }
 
     /**
