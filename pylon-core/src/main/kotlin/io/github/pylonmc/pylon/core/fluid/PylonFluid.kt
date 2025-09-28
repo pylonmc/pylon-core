@@ -1,14 +1,17 @@
 package io.github.pylonmc.pylon.core.fluid
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.getAddon
+import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.inventory.ItemStack
 
 /**
  * Fluids aren't necessarily just liquids, they can also be gases or other substances that can flow.
@@ -29,8 +32,9 @@ open class PylonFluid(
 
     val item by lazy {
         val builder = ItemStackBuilder.of(material)
-            .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}"))
-            .addCustomModelDataString(key.toString())
+            .editPdc { it.set(pylonFluidKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
+            .addCustomModelDataString("$pylonFluidKeyKey:$key")
+            .name(name)
 
         for (tag in tags) {
             builder.lore(tag.displayText)
@@ -91,4 +95,14 @@ open class PylonFluid(
     override fun equals(other: Any?): Boolean = other is PylonFluid && key == other.key
     override fun hashCode(): Int = key.hashCode()
     override fun toString(): String = key.toString()
+
+    companion object {
+        val pylonFluidKeyKey = pylonKey("pylon_fluid_key")
+
+        fun fromStack(stack: ItemStack?): PylonFluid? {
+            if (stack == null || stack.isEmpty) return null
+            val id = stack.persistentDataContainer.get(pylonFluidKeyKey, PylonSerializers.NAMESPACED_KEY) ?: return null
+            return PylonRegistry.FLUIDS[id]
+        }
+    }
 }
