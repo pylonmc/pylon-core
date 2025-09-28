@@ -138,7 +138,9 @@ open class PylonBlock internal constructor(val block: Block) {
      * item returned by [getItem] with [BlockItemContext.BlockTexture] (or a barrier if none is
      * provided), set's its item model to air, making it invisible for players without a resource
      * pack, and scales it to 1.00085f in all directions to prevent z-fighting with the vanilla
-     * block model.
+     * block model. If the block is directional (either by implementing [PylonDirectionalBlock],
+     * or by having block data that is [Orientable], [Directional], or [Rotatable]), the entity
+     * is rotated to face the same direction as the block.
      */
     protected open fun setupBlockTexture(entity: WrapperEntity, meta: ItemDisplayMeta): WrapperEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
