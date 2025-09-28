@@ -11,9 +11,9 @@ object SoundConfigAdapter : ConfigAdapter<Sound> {
         val map = MapConfigAdapter.STRING_TO_ANY.convert(value)
         return Sound.sound(
             Key.key(map["name"] as String),
-            ConfigAdapter.ENUM.from<Sound.Source>().convert(map["source"]!!),
-            ConfigAdapter.FLOAT.convert(map["volume"]!!),
-            ConfigAdapter.FLOAT.convert(map["pitch"]!!)
+            ConfigAdapter.ENUM.from<Sound.Source>().convert(map["source"] ?: throw IllegalArgumentException("Sound is missing 'source' field")),
+            ConfigAdapter.FLOAT.convert(map["volume"] ?: throw IllegalArgumentException("Sound is missing 'volume' field")),
+            ConfigAdapter.FLOAT.convert(map["pitch"] ?: throw IllegalArgumentException("Sound is missing 'pitch' field"))
         )
     }
 }
