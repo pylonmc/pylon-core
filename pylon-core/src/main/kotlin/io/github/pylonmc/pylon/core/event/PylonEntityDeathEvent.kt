@@ -6,7 +6,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called when a Pylon entity is killed
+ * Called when a [PylonEntity] is removed for any reason.
  */
 class PylonEntityDeathEvent(val pylonEntity: PylonEntity<*>, val event: EntityRemoveFromWorldEvent) : Event() {
 

@@ -3,6 +3,9 @@ package io.github.pylonmc.pylon.core.config
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 
+/**
+ * The config options for Pylon Core.
+ */
 object PylonConfig {
 
     private val config = Config(PylonCore, "config.yml")
@@ -57,4 +60,5 @@ object PylonConfig {
 
     @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
+
 }

@@ -3,6 +3,9 @@ package io.github.pylonmc.pylon.core.entity
 import com.destroystokyo.paper.event.entity.*
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.entity.base.PylonDeathEntity
+import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
+import io.github.pylonmc.pylon.core.entity.base.PylonUnloadEntity
 import io.github.pylonmc.pylon.core.entity.base.*
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
@@ -28,7 +31,7 @@ internal object EntityListener : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     private fun handle(event: PlayerInteractEntityEvent) {
         val pylonEntity = EntityStorage.get(event.rightClicked)
-        if (pylonEntity is PylonInteractableEntity) {
+        if (pylonEntity is PylonInteractEntity) {
             try {
                 pylonEntity.onInteract(event)
             } catch (e: Exception) {

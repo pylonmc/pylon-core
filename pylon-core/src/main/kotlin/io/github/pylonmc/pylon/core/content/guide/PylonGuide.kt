@@ -4,7 +4,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
-import io.github.pylonmc.pylon.core.guide.pages.SettingsAndInfoPage
+import io.github.pylonmc.pylon.core.guide.pages.SettingsPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemIngredientsPage
@@ -13,6 +13,8 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.datacomponent.DataComponentTypes
+import net.kyori.adventure.key.Key
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -24,11 +26,15 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
+/**
+ * The one and only Pylon guide.
+ */
 class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
 
     override fun onUsedToRightClick(event: PlayerInteractEvent) {
         if (event.action.isRightClick) {
             open(event.player)
+            event.isCancelled = true
         }
     }
 
@@ -38,7 +44,9 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val KEY = pylonKey("guide")
 
         @JvmField
-        val STACK = ItemStackBuilder.Companion.pylonItem(Material.ENCHANTED_BOOK, KEY)
+        val STACK = ItemStackBuilder.pylonItem(Material.BOOK, KEY)
+            .set(DataComponentTypes.ITEM_MODEL, Key.key("knowledge_book"))
+            .set(DataComponentTypes.MAX_STACK_SIZE, 1)
             .build()
 
         /**
@@ -82,7 +90,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val searchItemsAndFluidsPage = SearchItemsAndFluidsPage()
 
         @JvmStatic
-        val settingsAndInfoPage = SettingsAndInfoPage()
+        val settingsPageAndInfoPage = SettingsPage()
 
         /**
          * Lowest priority to avoid another plugin saving the players data or doing something

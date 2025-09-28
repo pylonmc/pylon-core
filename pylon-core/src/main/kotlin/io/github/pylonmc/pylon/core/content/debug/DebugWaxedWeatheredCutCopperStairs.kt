@@ -27,7 +27,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
-class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
+internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
     : PylonItem(stack), PylonBlockInteractor, PylonItemEntityInteractor {
 
     override fun onUsedToClickBlock(event: PlayerInteractEvent) {

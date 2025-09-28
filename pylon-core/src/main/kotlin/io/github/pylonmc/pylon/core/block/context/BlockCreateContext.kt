@@ -6,10 +6,13 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
+/**
+ * Information surrounding a block place event.
+ */
 interface BlockCreateContext {
 
     /**
-     * The block at the position where the context is created
+     * The old block where the new block is about to be created.
      */
     val block: Block
 

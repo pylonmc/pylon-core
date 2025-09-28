@@ -49,6 +49,7 @@ interface ConfigAdapter<T> {
         @JvmField val RECIPE_INPUT_FLUID = RecipeInputFluidAdapter
         @JvmField val ITEM_TAG = ItemTagConfigAdapter
         @JvmField val WEIGHTED_SET = WeightedSetConfigAdapter
+        @JvmField val CULLING_PRESET = CullingPresetConfigAdapter
         // @formatter:on
     }
 }

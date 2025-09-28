@@ -13,8 +13,13 @@ import org.bukkit.GameMode
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataContainer
+import org.jetbrains.annotations.ApiStatus
 import java.util.UUID
 
+/**
+ * A display that visually represents a pipe.
+ */
+@ApiStatus.Internal
 class FluidPipeDisplay : PylonEntity<ItemDisplay> {
     val pipe: FluidPipe
     val amount: Int

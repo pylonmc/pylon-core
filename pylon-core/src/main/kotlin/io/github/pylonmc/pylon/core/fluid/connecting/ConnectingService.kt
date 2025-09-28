@@ -20,43 +20,43 @@ object ConnectingService : org.bukkit.event.Listener {
     private val connectionsInProgress = mutableMapOf<Player, ConnectingTask>()
 
     fun startConnection(player: Player, startPoint: ConnectingPoint, pipe: FluidPipe) {
-        check(!ConnectingService.connectionsInProgress.containsKey(player))
+        check(!connectionsInProgress.containsKey(player))
         // Clone to prevent the PylonItem instance being shared between player's hotbar and the pipe itself
-        ConnectingService.connectionsInProgress.put(player, ConnectingTask(player, startPoint, FluidPipe(pipe.stack.clone())))
+        connectionsInProgress.put(player, ConnectingTask(player, startPoint, FluidPipe(pipe.stack.clone())))
     }
 
     @JvmStatic
     fun cancelConnection(player: Player) {
-        ConnectingService.connectionsInProgress.remove(player)!!.cancel()
+        connectionsInProgress.remove(player)!!.cancel()
     }
 
     fun placeConnection(player: Player): java.util.UUID? {
-        val connectingTask = ConnectingService.connectionsInProgress[player]!!
+        val connectingTask = connectionsInProgress[player]!!
         val result = connectingTask.finish() ?: return null
 
         if (player.gameMode != GameMode.CREATIVE) {
             player.inventory.getItem(EquipmentSlot.HAND).subtract(result.pipesUsed)
         }
 
-        ConnectingService.connectionsInProgress.remove(player)
+        connectionsInProgress.remove(player)
 
         val pylonItem = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
         if (result.to.face == null && pylonItem is FluidPipe) {
             // start new connection from the point we just placed if it didn't have a face
             // if it does have a face, we can't go any further so don't bother starting a new connection
             val connectingPoint = ConnectingPointInteraction(result.to)
-            ConnectingService.connectionsInProgress.put(player, ConnectingTask(player, connectingPoint, connectingTask.pipe))
+            connectionsInProgress.put(player, ConnectingTask(player, connectingPoint, connectingTask.pipe))
         }
 
         return result.to.point.segment
     }
 
     fun isConnecting(player: Player): Boolean
-        = ConnectingService.connectionsInProgress.containsKey(player)
+        = connectionsInProgress.containsKey(player)
 
     fun cleanup() {
-        for (player in ConnectingService.connectionsInProgress.keys) {
-            ConnectingService.cancelConnection(player)
+        for (player in connectionsInProgress.keys) {
+            cancelConnection(player)
         }
     }
 
@@ -95,7 +95,7 @@ object ConnectingService : org.bukkit.event.Listener {
     fun disconnect(
         from: FluidPointInteraction,
         to: FluidPointInteraction,
-        removeEmptyConnectors: kotlin.Boolean
+        removeEmptyConnectors: Boolean
     ) {
         // the pipe display will be the only common display between the two points
         val pipeDisplaySet = from.connectedPipeDisplays.toMutableSet()
@@ -131,16 +131,16 @@ object ConnectingService : org.bukkit.event.Listener {
 
     @EventHandler
     private fun onPlayerQuit(event: PlayerQuitEvent) {
-        if (ConnectingService.connectionsInProgress.containsKey(event.getPlayer())) {
-            ConnectingService.cancelConnection(event.getPlayer())
+        if (connectionsInProgress.containsKey(event.getPlayer())) {
+            cancelConnection(event.getPlayer())
         }
     }
 
     @EventHandler
     private fun onPlayerScroll(event: PlayerItemHeldEvent) {
         val heldItem = event.getPlayer().inventory.getItem(event.previousSlot)
-        if (PylonItem.fromStack(heldItem) is FluidPipe && ConnectingService.connectionsInProgress.containsKey(event.getPlayer())) {
-            ConnectingService.cancelConnection(event.getPlayer())
+        if (PylonItem.fromStack(heldItem) is FluidPipe && connectionsInProgress.containsKey(event.getPlayer())) {
+            cancelConnection(event.getPlayer())
         }
     }
 
@@ -149,12 +149,12 @@ object ConnectingService : org.bukkit.event.Listener {
      */
     @EventHandler
     private fun onChunkUnload(event: ChunkUnloadEvent) {
-        val toRemove = ConnectingService.connectionsInProgress.values.filter { task: ConnectingTask ->
-            ConnectingService.taskContainsBlocksInChunk(task, ChunkPosition(event.getChunk()))
+        val toRemove = connectionsInProgress.values.filter { task: ConnectingTask ->
+            taskContainsBlocksInChunk(task, ChunkPosition(event.getChunk()))
         }
         for (task in toRemove) {
             task.cancel()
         }
-        ConnectingService.connectionsInProgress.values.removeAll(toRemove)
+        connectionsInProgress.values.removeAll(toRemove)
     }
 }

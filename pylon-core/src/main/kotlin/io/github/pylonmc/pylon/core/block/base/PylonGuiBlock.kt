@@ -37,11 +37,20 @@ import java.util.IdentityHashMap
  */
 interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock, PylonNoVanillaContainerBlock {
 
+    /**
+     * Returns the block's GUI. Called when a block is created.
+     */
     fun createGui(): Gui
 
+    /**
+     * The title of the GUI
+     */
     val guiTitle: Component
-        get() = (this as PylonBlock).defaultTranslationKey
+        get() = (this as PylonBlock).defaultWailaTranslationKey
 
+    /**
+     * The GUI associated with this block.
+     */
     @get:ApiStatus.NonExtendable
     val gui: AbstractGui
         get() = guiBlocks.getOrPut(this) { createGui() as AbstractGui }
@@ -77,9 +86,13 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock, PylonNoVani
         }
     }
 
+    /**
+     * Returns all the (non-null) items stored across all inventories in the
+     * block's GUI.
+     */
     fun getItems() : List<ItemStack> {
         val items = mutableListOf<ItemStack>()
-        val invs = inventories.get(this) ?: return listOf()
+        val invs = inventories[this] ?: return listOf()
         for (inv in invs) {
             for (item in inv.items) {
                 item?.let(items::add)

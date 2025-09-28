@@ -3,6 +3,7 @@ package io.github.pylonmc.pylon.core.block.context
 import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import org.bukkit.GameMode
+import org.bukkit.block.Block
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockBurnEvent
 import org.bukkit.event.block.BlockExplodeEvent
@@ -15,6 +16,11 @@ import org.bukkit.event.entity.EntityExplodeEvent
  * having to be dealt with individually.
  */
 interface BlockBreakContext {
+
+    /**
+     * The block that is about to be broken.
+     */
+    val block: Block
 
     /**
      * Determines the default drop behavior of the context
@@ -43,8 +49,9 @@ interface BlockBreakContext {
      * The block is being broken by a plugin
      */
     class PluginBreak @JvmOverloads constructor(
+        override val block: Block,
         override val normallyDrops: Boolean = true,
-        override val shouldSetToAir: Boolean = true
+        override val shouldSetToAir: Boolean = true,
     ) : BlockBreakContext
 
     /**
@@ -52,6 +59,8 @@ interface BlockBreakContext {
      */
     @JvmRecord
     data class PlayerBreak(val event: BlockBreakEvent) : BlockBreakContext {
+        override val block
+            get() = event.block
         override val normallyDrops
             get() = event.player.gameMode != GameMode.CREATIVE
     }
@@ -59,7 +68,7 @@ interface BlockBreakContext {
     /**
      * The block is being exploded by an entity (e.g. a creeper or TNT)
      */
-    data class EntityExploded(val event: EntityExplodeEvent) : BlockBreakContext {
+    data class EntityExploded(override val block: Block, val event: EntityExplodeEvent) : BlockBreakContext {
         override val normallyDrops = true
     }
 
@@ -67,6 +76,7 @@ interface BlockBreakContext {
      * The block is exploding (e.g. beds in the Nether/End, respawn anchors in the Overworld/End)
      */
     data class BlockExplosionOrigin(val event: BlockExplodeEvent) : BlockBreakContext {
+        override val block = event.block
         override val normallyDrops = false
     }
 
@@ -74,6 +84,7 @@ interface BlockBreakContext {
      * The block is being exploded as a result of another block exploding
      */
     data class BlockExploded(val event: BlockExplodeEvent) : BlockBreakContext {
+        override val block = event.block
         override val normallyDrops = false
     }
 
@@ -81,6 +92,7 @@ interface BlockBreakContext {
      * The block has been burned away by fire
      */
     data class Burned(val event: BlockBurnEvent) : BlockBreakContext {
+        override val block = event.block
         override val normallyDrops = false
     }
 
@@ -88,6 +100,7 @@ interface BlockBreakContext {
      * The block has faded away (see [BlockFadeEvent] for more details)
      */
     data class Faded(val event: BlockFadeEvent) : BlockBreakContext {
+        override val block = event.block
         override val normallyDrops = false
     }
 
@@ -101,6 +114,7 @@ interface BlockBreakContext {
      * See [BlockDestroyEvent] for more details
      */
     data class Destroyed(val event: BlockDestroyEvent) : BlockBreakContext {
+        override val block = event.block
         override val normallyDrops = true
     }
 }

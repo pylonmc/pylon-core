@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
@@ -30,11 +31,31 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Represents an item in the guide.
+ *
+ * @param stacks The items to display. If multiple are provided, the button will automatically
+ * cycle through all of them. You must supply at least one item
+ */
 class ItemButton @JvmOverloads constructor(
     stacks: List<ItemStack>,
+
+    /**
+     * A function to apply to the button item after creating it.
+     */
     val preDisplayDecorator: (ItemStack, Player) -> ItemStack = { stack, _ -> stack }
 ) : AbstractItem() {
+
+    /**
+     * @param stacks The items to display. If multiple are provided, the button will automatically
+     * cycle through all of them. You must supply at least one item
+     */
     constructor(vararg stacks: ItemStack) : this(stacks.toList())
+
+    /**
+     * @param stacks The items to display. If multiple are provided, the button will automatically
+     * cycle through all of them. You must supply at least one item
+     */
     constructor(stack: ItemStack, preDisplayDecorator: (ItemStack, Player) -> ItemStack) : this(listOf(stack), preDisplayDecorator)
 
     val stacks = stacks.shuffled()
@@ -125,7 +146,7 @@ class ItemButton @JvmOverloads constructor(
                         }
                         research.addTo(player, false)
                         player.researchPoints -= research.cost
-                        windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
+                        notifyWindows()
                     }
                 }
 

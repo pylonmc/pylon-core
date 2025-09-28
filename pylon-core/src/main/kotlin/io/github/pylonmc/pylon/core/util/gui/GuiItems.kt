@@ -4,6 +4,7 @@ package io.github.pylonmc.pylon.core.util.gui
 
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.util.gui.GuiItems.background
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.TooltipDisplay
 import net.kyori.adventure.text.Component
@@ -25,9 +26,10 @@ object GuiItems {
      * A gray glass pane with no name or lore.
      */
     @JvmStatic
-    fun background(): Item = SimpleItem(
+    @JvmOverloads
+    fun background(name: String = ""): Item = SimpleItem(
         ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
-            .name("")
+            .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
 
@@ -35,9 +37,10 @@ object GuiItems {
      * A black glass pane with no name or lore.
      */
     @JvmStatic
-    fun backgroundBlack(): Item = SimpleItem(
+    @JvmOverloads
+    fun backgroundBlack(name: String = ""): Item = SimpleItem(
         ItemStackBuilder.of(Material.BLACK_STAINED_GLASS_PANE)
-            .name("")
+            .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
 
@@ -117,9 +120,12 @@ private class PylonScrollItem(private val direction: Int, key: String?) : Scroll
 }
 
 private class PylonPageItem(private val forward: Boolean) : PageItem(forward) {
+    private val background = background().itemProvider
     private val name = Component.translatable("pylon.pyloncore.gui.page.${if (forward) "next" else "previous"}")
 
     override fun getItemProvider(gui: PagedGui<*>): ItemProvider {
+        if (gui.pageAmount < 2) return background
+
         val material = if (gui.canPage) Material.GREEN_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE
         return ItemStackBuilder.of(material)
             .name(

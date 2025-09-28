@@ -5,12 +5,12 @@ import org.bukkit.event.entity.EntityShootBowEvent
 
 interface PylonBow {
     /**
-     * Called when the arrow is shot from the bow of any entity
+     * Called when an arrow is being selected to fire from this bow.
      */
     fun onBowReady(event: PlayerReadyArrowEvent) {}
 
     /**
-     * Called when the arrow is shot from the bow of any entity
+     * Called when an arrow is shot from this bow.
      */
     fun onBowFired(event: EntityShootBowEvent) {}
 }
