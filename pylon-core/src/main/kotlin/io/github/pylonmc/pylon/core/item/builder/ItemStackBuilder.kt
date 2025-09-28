@@ -13,14 +13,24 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.CustomModelData
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers
 import io.papermc.paper.datacomponent.item.ItemLore
+import io.papermc.paper.datacomponent.item.Tool
+import io.papermc.paper.datacomponent.item.UseCooldown
+import io.papermc.paper.datacomponent.item.Weapon
+import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys
+import io.papermc.paper.registry.set.RegistryKeySet
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
+import net.kyori.adventure.util.TriState
 import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.Registry
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
+import org.bukkit.block.BlockType
+import org.bukkit.inventory.EquipmentSlotGroup
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
@@ -175,6 +185,112 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         }
     }
 
+    fun removeAttributeModifier(
+        attribute: Attribute,
+        modifierKey: NamespacedKey
+    ) = removeAttributeModifiers(attribute) { it.key == modifierKey }
+
+    fun removeAttributeModifiers(
+        attribute: Attribute
+    ) = removeAttributeModifiers(attribute) { true }
+
+    fun removeAttributeModifiers(
+        attribute: Attribute,
+        predicate: (AttributeModifier) -> Boolean
+    ) = apply {
+        editDataOrSet(DataComponentTypes.ATTRIBUTE_MODIFIERS) { modifiers ->
+            val copying = modifiers?.modifiers()?.filter { it.attribute() != attribute || !predicate(it.modifier()) }
+            ItemAttributeModifiers.itemAttributes().copy(copying).build()
+        }
+    }
+
+    fun helmet(
+        armor: Double,
+        armorToughness: Double
+    ) = armor(EquipmentSlotGroup.HEAD, armor, armorToughness)
+
+    fun chestPlate(
+        armor: Double,
+        armorToughness: Double
+    ) = armor(EquipmentSlotGroup.CHEST, armor, armorToughness)
+
+    fun leggings(
+        armor: Double,
+        armorToughness: Double
+    ) = armor(EquipmentSlotGroup.LEGS, armor, armorToughness)
+
+    fun boots(
+        armor: Double,
+        armorToughness: Double
+    ) = armor(EquipmentSlotGroup.FEET, armor, armorToughness)
+
+    fun armor(
+        slot: EquipmentSlotGroup,
+        armor: Double,
+        armorToughness: Double
+    ) = apply {
+        removeAttributeModifiers(Attribute.ARMOR)
+        removeAttributeModifiers(Attribute.ARMOR_TOUGHNESS)
+        addAttributeModifier(Attribute.ARMOR, AttributeModifier(baseArmor, armor, AttributeModifier.Operation.ADD_NUMBER, slot))
+        addAttributeModifier(Attribute.ARMOR_TOUGHNESS, AttributeModifier(baseArmorToughness, armorToughness, AttributeModifier.Operation.ADD_NUMBER, slot))
+    }
+
+    fun axe(
+        miningSpeed: Float,
+        miningDurabilityDamage: Int
+    ) = tool(Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_AXE), miningSpeed, miningDurabilityDamage)
+
+    fun pickaxe(
+        miningSpeed: Float,
+        miningDurabilityDamage: Int
+    ) = tool(Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_PICKAXE), miningSpeed, miningDurabilityDamage)
+
+    fun shovel(
+        miningSpeed: Float,
+        miningDurabilityDamage: Int
+    ) = tool(Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_SHOVEL), miningSpeed, miningDurabilityDamage)
+
+    fun hoe(
+        miningSpeed: Float,
+        miningDurabilityDamage: Int
+    ) = tool(Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_HOE), miningSpeed, miningDurabilityDamage)
+
+    fun tool(
+        blocks: RegistryKeySet<BlockType>,
+        miningSpeed: Float,
+        miningDurabilityDamage: Int
+    ) = apply {
+        set(DataComponentTypes.TOOL, Tool.tool()
+            .defaultMiningSpeed(miningSpeed)
+            .damagePerBlock(miningDurabilityDamage)
+            .addRule(Tool.rule(blocks, miningSpeed, TriState.TRUE)))
+    }
+
+    fun noTool() = unset(DataComponentTypes.TOOL)
+
+    fun weapon(
+        attackDamage: Double,
+        attackSpeed: Double,
+        attackDurabilityDamage: Int,
+        disableShieldSeconds: Float
+    ) = apply {
+        addAttributeModifier(Attribute.ATTACK_DAMAGE, AttributeModifier(baseAttackDamage, -1.0 + attackDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
+        addAttributeModifier(Attribute.ATTACK_SPEED, AttributeModifier(baseAttackSpeed, -4.0 + attackSpeed, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
+        set(DataComponentTypes.WEAPON, Weapon.weapon()
+            .itemDamagePerAttack(attackDurabilityDamage)
+            .disableBlockingForSeconds(disableShieldSeconds))
+    }
+
+    fun attackKnockback(knockback: Double) = apply {
+        removeAttributeModifiers(Attribute.ATTACK_KNOCKBACK)
+        addAttributeModifier(Attribute.ATTACK_KNOCKBACK, AttributeModifier(baseAttackKnockback, knockback, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
+    }
+
+    fun durability(durability: Int) = set(DataComponentTypes.MAX_DAMAGE, durability)
+
+    fun useCooldown(cooldownTicks: Int, cooldownGroup: Key?)
+            = set(DataComponentTypes.USE_COOLDOWN, UseCooldown.useCooldown(cooldownTicks / 20.0f).cooldownGroup(cooldownGroup))
+
     fun build(): ItemStack = stack.clone()
 
     /**
@@ -193,8 +309,12 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
 
     companion object {
 
+        val baseArmor = NamespacedKey.minecraft("base_armor")
+        val baseArmorToughness = NamespacedKey.minecraft("base_armor_toughness")
+
         val baseAttackDamage = NamespacedKey.minecraft("base_attack_damage")
         val baseAttackSpeed = NamespacedKey.minecraft("base_attack_speed")
+        val baseAttackKnockback = NamespacedKey.minecraft("base_attack_knockback")
 
         /**
          * The default name language key for a Pylon item.
@@ -230,20 +350,20 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * provided [key].
          */
         @JvmStatic
-        fun pylonItem(material: Material, key: NamespacedKey): PylonItemStackBuilder {
-            return PylonItemStackBuilder(ItemStack(material), key)
+        fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {
+            return ItemStackBuilder(ItemStack(material))
                 .editPdc { pdc -> pdc.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .set(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(key.toString()))
                 .defaultTranslatableName(key)
-                .defaultTranslatableLore(key) as PylonItemStackBuilder
+                .defaultTranslatableLore(key)
         }
 
         /**
          * Returns an [ItemStackBuilder] with name and lore set to the default translation keys, and with the item's ID set to [key]
          */
         @JvmStatic
-        fun pylonItem(stack: ItemStack, key: NamespacedKey): PylonItemStackBuilder {
-            return PylonItemStackBuilder(stack, key)
+        fun pylonItem(stack: ItemStack, key: NamespacedKey): ItemStackBuilder {
+            return ItemStackBuilder(stack)
                 .editPdc { it.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
                 .let {
                     //  Adds the pylon item key as the FIRST string in custom model data, but preserve any pre-existing data
@@ -256,7 +376,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
                     it.set(DataComponentTypes.CUSTOM_MODEL_DATA, modelData)
                 }
                 .defaultTranslatableName(key)
-                .defaultTranslatableLore(key) as PylonItemStackBuilder
+                .defaultTranslatableLore(key)
         }
 
         fun ItemAttributeModifiers.Builder.copy(modifiers: List<ItemAttributeModifiers.Entry>?) : ItemAttributeModifiers.Builder {
