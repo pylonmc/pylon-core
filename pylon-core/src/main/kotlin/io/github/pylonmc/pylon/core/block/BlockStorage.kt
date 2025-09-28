@@ -400,7 +400,7 @@ object BlockStorage : Listener {
         event.callEvent()
 
         if (block is PylonBreakHandler) {
-            block.onBreak(mutableListOf(), BlockBreakContext.DebugBreak)
+            block.onBreak(mutableListOf(), BlockBreakContext.DebugBreak(block.block))
         }
         block.block.type = Material.AIR
 

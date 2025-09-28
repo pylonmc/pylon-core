@@ -35,7 +35,7 @@ import java.util.IdentityHashMap
  * @see Gui
  * @see VirtualInventory
  */
-interface PylonGuiBlock : PylonBreakHandler, PylonInteractableBlock, PylonNoVanillaContainerBlock {
+interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaContainerBlock {
 
     /**
      * Returns the block's GUI. Called when a block is created.

@@ -40,7 +40,7 @@ interface BlockBreakContext {
     /**
      * The block is being broken by [DebugWaxedWeatheredCutCopperStairs]
      */
-    object DebugBreak : BlockBreakContext {
+    class DebugBreak(override val block: Block) : BlockBreakContext {
         override val normallyDrops = false
         override val shouldSetToAir = true
     }
