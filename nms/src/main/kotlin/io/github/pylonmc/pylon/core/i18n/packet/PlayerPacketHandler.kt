@@ -37,14 +37,6 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    fun resendInventory() {
-        val inventory = player.containerMenu
-        for (slot in 0..45) {
-            val item = inventory.getSlot(slot).item
-            player.containerSynchronizer.sendSlotChange(inventory, slot, item)
-        }
-    }
-
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
             var packet = packet
