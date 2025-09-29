@@ -28,6 +28,7 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.net.JarURLConnection
 import kotlin.math.absoluteValue
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -339,3 +340,28 @@ fun <T> persistentData(
 
 val Block.replaceableOrAir: Boolean
     get() = type.isAir || isReplaceable
+
+
+fun listResourcesRecursively(classLoader : ClassLoader, folder: String): List<String> {
+    val resourceUrls = classLoader.getResources(folder)
+    val result = mutableListOf<String>()
+
+    while (resourceUrls.hasMoreElements()) {
+        val url = resourceUrls.nextElement()
+
+        if (url.protocol != "jar") continue
+
+        val jarConnection = url.openConnection() as JarURLConnection
+        val jarFile = jarConnection.jarFile
+
+        val basePath = folder.removeSuffix("/") + "/"
+
+        for (entry in jarFile.entries()) {
+            if (entry.name.startsWith(basePath) && !entry.isDirectory) {
+                result.add(entry.name)
+            }
+        }
+    }
+
+    return result
+}

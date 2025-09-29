@@ -29,6 +29,7 @@ import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.listResourcesRecursively
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
@@ -218,28 +219,4 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
 private fun addDefaultPermission(permission: String) {
     Bukkit.getPluginManager().addPermission(Permission(permission, PermissionDefault.TRUE))
-}
-
-fun listResourcesRecursively(classLoader : ClassLoader, folder: String): List<String> {
-    val resourceUrls = classLoader.getResources(folder)
-    val result = mutableListOf<String>()
-
-    while (resourceUrls.hasMoreElements()) {
-        val url = resourceUrls.nextElement()
-
-        if (url.protocol != "jar") continue
-
-        val jarConnection = url.openConnection() as JarURLConnection
-        val jarFile = jarConnection.jarFile
-
-        val basePath = folder.removeSuffix("/") + "/"
-
-        for (entry in jarFile.entries()) {
-            if (entry.name.startsWith(basePath) && !entry.isDirectory) {
-                result.add(entry.name)
-            }
-        }
-    }
-
-    return result
 }
