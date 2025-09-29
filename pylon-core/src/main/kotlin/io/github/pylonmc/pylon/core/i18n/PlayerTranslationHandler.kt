@@ -17,7 +17,6 @@ import org.jetbrains.annotations.ApiStatus
 class PlayerTranslationHandler internal constructor(private val player: Player) {
 
     fun handleItem(stack: ItemStack) {
-        player.itemOnCursor
         val pylonItem = PylonItem.fromStack(stack)
         val placeholders = pylonItem?.getPlaceholders().orEmpty()
 
