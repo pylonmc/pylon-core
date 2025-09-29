@@ -270,7 +270,7 @@ data class Research(
         fun loadFromConfig(section: ConfigSection, key : NamespacedKey) : Research {
 
             try {
-                val material = section.get("material", ConfigAdapter.MATERIAL) ?: throw IllegalArgumentException("Invalid entry 'material' for research keyed $key")
+                val material = section.getOrThrow("material", ConfigAdapter.MATERIAL)
                 val name = section.get("name", ConfigAdapter.STRING) ?: "pylon.${key.namespace}.research.${key.key}"
                 val cost = section.get("cost", ConfigAdapter.LONG)
                 val unlocked = section.get("unlocked", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY)) ?: emptySet()
