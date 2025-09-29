@@ -273,9 +273,9 @@ data class Research(
                 val material = section.getOrThrow("material", ConfigAdapter.MATERIAL)
                 val name = section.get("name", ConfigAdapter.STRING) ?: "pylon.${key.namespace}.research.${key.key}"
                 val cost = section.get("cost", ConfigAdapter.LONG)
-                val unlocked = section.get("unlocked", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY)) ?: emptySet()
+                val unlocks = section.get("unlocks", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY)) ?: emptySet()
 
-                return Research(key, material, Component.translatable(name), cost, unlocked)
+                return Research(key, material, Component.translatable(name), cost, unlocks)
             } catch (e: Exception) {
                 throw IllegalArgumentException(
                     "Failed to load research with key '$key' from config",
