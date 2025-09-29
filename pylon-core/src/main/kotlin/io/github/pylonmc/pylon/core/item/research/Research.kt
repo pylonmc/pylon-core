@@ -267,6 +267,7 @@ data class Research(
         }
 
 
+        @JvmStatic
         fun loadFromConfig(section: ConfigSection, key : NamespacedKey) : Research {
 
             try {
