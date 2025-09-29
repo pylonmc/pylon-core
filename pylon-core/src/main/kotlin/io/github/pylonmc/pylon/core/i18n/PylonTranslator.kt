@@ -176,8 +176,15 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         @JvmName("translateItem")
         @Suppress("UnstableApiUsage")
         fun ItemStack.translate(locale: Locale, arguments: List<PylonArgument> = emptyList()) {
+            fun isPylon(component: Component): Boolean {
+                if (component is TranslatableComponent) {
+                    return component.key().startsWith("pylon.")
+                }
+                return component.children().any(::isPylon)
+            }
 
             editData(DataComponentTypes.ITEM_NAME) {
+                if (!isPylon(it)) return@editData it
                 val translated = GlobalTranslator.render(it.withArguments(arguments), locale)
                 if (translated is TranslatableComponent && translated.fallback() != null) {
                     Component.text(translated.fallback()!!)
@@ -187,6 +194,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             }
             editData(DataComponentTypes.LORE) { lore ->
                 val newLore = lore.lines().flatMap { line ->
+                    if (!isPylon(line)) return@flatMap listOf(line)
                     val translated = GlobalTranslator.render(line.withArguments(arguments), locale)
                     val encoded = LineWrapEncoder.encode(translated)
                     val wrapped = encoded.copy(

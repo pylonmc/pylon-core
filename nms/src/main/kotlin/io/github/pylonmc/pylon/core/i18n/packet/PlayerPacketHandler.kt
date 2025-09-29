@@ -19,6 +19,7 @@ import net.minecraft.world.item.crafting.display.*
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import java.util.WeakHashMap
 import java.util.logging.Level
+import org.bukkit.inventory.ItemStack as BukkitItemStack
 
 // Much inspiration has been taken from https://github.com/GuizhanCraft/SlimefunTranslation
 // with permission from the author
@@ -163,10 +164,10 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    private inline fun handleItem(item: ItemStack, handler: (PylonItem) -> Unit) {
+    private inline fun handleItem(item: ItemStack, handler: (BukkitItemStack) -> Unit) {
         if (item.isEmpty) return
         try {
-            handler(PylonItem.fromStack(CraftItemStack.asCraftMirror(item)) ?: return)
+            handler(CraftItemStack.asCraftMirror(item))
         } catch (e: Throwable) {
             // Log the error nicely instead of kicking the player off
             // and causing two days of headache. True story.
@@ -189,7 +190,8 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 private val names = WeakHashMap<PylonItemSchema, Component>()
 private val lores = WeakHashMap<PylonItemSchema, ItemLore>()
 
-private fun reset(item: PylonItem) {
+private fun reset(stack: BukkitItemStack) {
+    val item = PylonItem.fromStack(stack) ?: return
     val name = names.getOrPut(item.schema) {
         item.schema.itemStack.getData(DataComponentTypes.ITEM_NAME)!!
     }

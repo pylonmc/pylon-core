@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.item.builder
 
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder.Companion.pylonItem
 import io.github.pylonmc.pylon.core.util.editData
@@ -13,7 +12,6 @@ import io.papermc.paper.datacomponent.item.CustomModelData
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -21,7 +19,6 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.ApiStatus
 import xyz.xenondevs.invui.item.ItemProvider
-import java.util.Locale
 import java.util.function.Consumer
 
 /**
@@ -118,21 +115,7 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
      * Ignore this method; InvUI item provider implementation.
      */
     @ApiStatus.Internal
-    override fun get(lang: String?): ItemStack {
-        val item = build()
-        val split = lang?.split('_')?.toMutableList() ?: return item
-        if (split.size > 1) {
-            split[1] = split[1].uppercase()
-        }
-        val joined = split.joinToString("_")
-        val locale = try {
-            LocaleUtils.toLocale(joined)
-        } catch (_: IllegalArgumentException) {
-            Locale.of(joined) // Handle the special Minecraft locales such as 'enws' that are not ISO compliant
-        }
-        item.translate(locale)
-        return item
-    }
+    override fun get(lang: String?) = build()
 
     companion object {
 
