@@ -14,6 +14,8 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
@@ -31,6 +33,7 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.util.Locale
 import kotlin.math.absoluteValue
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -340,9 +343,6 @@ fun <T> persistentData(
     default: T
 ) = persistentData(key, type) { default }
 
-val Block.replaceableOrAir: Boolean
-    get() = type.isAir || isReplaceable
-
 /**
  * Merges config from addons to the Pylon config directory.
  * Used for stuff like item settings and language files.
@@ -382,3 +382,9 @@ internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Con
 }
 
 private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
+
+val Block.replaceableOrAir: Boolean
+    get() = type.isAir || isReplaceable
+
+val Component.plainText: String
+    get() = PlainTextComponentSerializer.plainText().serialize(this)

@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.*
@@ -26,6 +27,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.ItemStack
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.random.Random
@@ -237,11 +239,11 @@ object BlockStorage : Listener {
         val schema = PylonRegistry.BLOCKS[key]
         require(schema != null) { "Block $key does not exist" }
 
+        if (!PrePylonBlockPlaceEvent(blockPosition.block, schema, context).callEvent()) return null
+
         if (context.shouldSetType) {
             blockPosition.block.type = schema.material
         }
-
-        if (!PrePylonBlockPlaceEvent(blockPosition.block, schema, context).callEvent()) return null
 
         @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
         val block = schema.create(blockPosition.block, context)
@@ -253,6 +255,7 @@ object BlockStorage : Listener {
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
 
+        BlockTextureEngine.insert(block)
         PylonBlockPlaceEvent(blockPosition.block, block, context).callEvent()
 
         return block
@@ -305,14 +308,14 @@ object BlockStorage : Listener {
     fun breakBlock(
         blockPosition: BlockPosition,
         context: BlockBreakContext = BlockBreakContext.PluginBreak(blockPosition.block)
-    ) {
+    ): List<ItemStack>? {
         require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
-        val block = get(blockPosition) ?: return
+        val block = get(blockPosition) ?: return null
 
         val event = PrePylonBlockBreakEvent(blockPosition.block, block, context)
         event.callEvent()
-        if (event.isCancelled) return
+        if (event.isCancelled) return null
 
         val drops = mutableListOf<ItemStack>()
         if (context.normallyDrops) {
@@ -335,11 +338,14 @@ object BlockStorage : Listener {
             block.postBreak()
         }
 
+        BlockTextureEngine.remove(block)
         PylonBlockBreakEvent(blockPosition.block, block, context, drops).callEvent()
 
         for (drop in drops) {
             block.block.world.dropItemNaturally(block.block.location.add(0.5, 0.1, 0.5), drop)
         }
+        // This is fully backed, just actually enforces the immutability of the drops list and prevents casting to MutableList
+        return Collections.unmodifiableList(drops)
     }
 
     /**
@@ -429,6 +435,7 @@ object BlockStorage : Listener {
 
         for (block in chunkBlocks) {
             PylonBlockLoadEvent(block.block, block).callEvent()
+            BlockTextureEngine.insert(block)
         }
 
         PylonChunkBlocksLoadEvent(event.chunk, chunkBlocks.toList()).callEvent()
@@ -451,6 +458,7 @@ object BlockStorage : Listener {
 
         for (block in chunkBlocks) {
             PylonBlockUnloadEvent(block.block, block).callEvent()
+            BlockTextureEngine.remove(block)
         }
 
         PylonChunkBlocksUnloadEvent(event.chunk, chunkBlocks.toList()).callEvent()
