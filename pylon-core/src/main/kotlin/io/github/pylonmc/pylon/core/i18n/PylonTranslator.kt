@@ -223,7 +223,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerJoin(event: PlayerJoinEvent) {
             val player = event.player
-            // NmsAccessor.instance.registerTranslationHandler(player, PlayerTranslationHandler(player))
+            NmsAccessor.instance.registerTranslationHandler(player, PlayerTranslationHandler(player))
             // Since the recipe book is initially sent before the event, and therefore before
             // we can register the translation handler, we need to resend it here so that it
             // gets translated properly.
@@ -232,7 +232,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerQuit(event: PlayerQuitEvent) {
-            // NmsAccessor.instance.unregisterTranslationHandler(event.player)
+            NmsAccessor.instance.unregisterTranslationHandler(event.player)
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
