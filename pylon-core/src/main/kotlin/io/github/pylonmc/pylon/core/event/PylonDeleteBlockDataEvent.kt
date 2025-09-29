@@ -8,7 +8,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called when a [PylonBlock] has it's data deleted using [DebugWaxedWeatheredCutCopperStairs].
+ * Called when a [PylonBlock] has its data deleted using [DebugWaxedWeatheredCutCopperStairs].
  * This event is called directly before any [PylonBreakHandler] is called, and before deleting the data.
  */
 internal class PylonDeleteBlockDataEvent(
