@@ -105,7 +105,11 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                         packet.buttonNum,
                         packet.clickType,
                         packet.changedSlots,
-                        HashedStack.create(player.containerMenu.carried, hashGenerator)
+                        if (packet.changedSlots.size == 1) {
+                            HashedStack.create(player.containerMenu.getSlot(packet.changedSlots.keys.single()).item, hashGenerator)
+                        } else {
+                            HashedStack.create(player.containerMenu.carried, hashGenerator)
+                        }
                     )
                 }
 
