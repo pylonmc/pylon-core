@@ -199,6 +199,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                         editData(DataComponentTypes.PROFILE) { profile ->
                             // Need to remove the name from the profile because it overrides item name
                             ResolvableProfile.resolvableProfile()
+                                .uuid(profile.uuid())
                                 .addProperties(profile.properties())
                                 .build()
                         }
@@ -206,8 +207,8 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                         // Potions are wacky wrt names, so we lie to the client about the type and set the model data
                         val oldStack = clone()
                         @Suppress("DEPRECATION")
-                        type = Material.BREWER_POTTERY_SHERD
-                        check(type == Material.BREWER_POTTERY_SHERD) { "ItemStack.setType no longer works" }
+                        type = Material.GLASS_BOTTLE
+                        check(type == Material.GLASS_BOTTLE) { "ItemStack.setType no longer works" }
                         copyDataFrom(oldStack) { true }
                         editData(DataComponentTypes.ITEM_MODEL) { oldStack.type.key }
                     }
