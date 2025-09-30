@@ -8,7 +8,9 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called before a pylon block has been broken.
+ * Called before a [PylonBlock] has been broken.
+ *
+ * @see BlockBreakContext
  */
 class PrePylonBlockBreakEvent(
     val block: Block,

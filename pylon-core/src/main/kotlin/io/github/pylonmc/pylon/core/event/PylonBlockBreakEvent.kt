@@ -8,7 +8,9 @@ import org.bukkit.event.HandlerList
 import org.bukkit.inventory.ItemStack
 
 /**
- * Called after a pylon block has been broken.
+ * Called after a [PylonBlock] has been broken.
+ *
+ * @see BlockBreakContext
  */
 class PylonBlockBreakEvent(
     val block: Block,

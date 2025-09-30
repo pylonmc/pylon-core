@@ -3,6 +3,13 @@ package io.github.pylonmc.pylon.core.datatypes
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType
 
+/**
+ * A [PersistentDataType] that can be used with any enum class (such as [org.bukkit.Material]).
+ *
+ * Assumes that the enum names do not change between serialization and deserialization. (For
+ * example, if you serialize `Sound.EPIC_SOUND` and later rename it to `Sound.GREAT_SOUND`, this
+ * will obviously fail to deserialize as `Sound.EPIC_SOUND` no longer exists).
+ */
 class EnumPersistentDataType<E : Enum<E>>(val enumClass: Class<E>) : PersistentDataType<String, E> {
 
     private val valueMap: Map<String, E> = enumClass.enumConstants.associateBy { it.name }
