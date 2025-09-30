@@ -14,6 +14,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.CustomModelData
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers
 import io.papermc.paper.datacomponent.item.ItemLore
+import io.papermc.paper.datacomponent.item.TooltipDisplay
 import io.papermc.paper.datacomponent.item.Tool
 import io.papermc.paper.datacomponent.item.UseCooldown
 import io.papermc.paper.datacomponent.item.Weapon
@@ -124,6 +125,15 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     fun lore(vararg loreToAdd: ComponentLike) = lore(loreToAdd.toList())
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
+
+    fun hideFromTooltip(componentType: DataComponentType) = apply {
+        val tooltipDisplay = stack.getData(DataComponentTypes.TOOLTIP_DISPLAY)
+        val hidden = tooltipDisplay?.hiddenComponents()?.toMutableSet() ?: mutableSetOf()
+        hidden.add(componentType)
+        stack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay()
+            .hideTooltip(tooltipDisplay?.hideTooltip() == true)
+            .hiddenComponents(hidden))
+    }
 
     /**
      * Sets the item's lore to the default language file key (for example
