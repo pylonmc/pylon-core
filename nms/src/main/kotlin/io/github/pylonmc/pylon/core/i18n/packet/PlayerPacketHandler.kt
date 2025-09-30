@@ -34,7 +34,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     private val hashGenerator: HashedPatchMap.HashGenerator
 
     init {
-        // https://discord.com/channels/289587909051416579/555462289851940864/1371651093972385823
+        // (PaperMC server) https://discord.com/channels/289587909051416579/555462289851940864/1371651093972385823
         val registryOps = player.registryAccess().createSerializationContext(HashOps.CRC32C_INSTANCE)
         hashGenerator = HashedPatchMap.HashGenerator { component ->
             component.encodeValue(registryOps)

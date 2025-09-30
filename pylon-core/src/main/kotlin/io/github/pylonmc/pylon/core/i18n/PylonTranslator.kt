@@ -5,10 +5,12 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -17,6 +19,7 @@ import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
+import io.papermc.paper.datacomponent.item.ResolvableProfile
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextReplacementConfig
@@ -28,6 +31,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.translation.GlobalTranslator
 import net.kyori.adventure.translation.Translator
 import org.apache.commons.lang3.LocaleUtils
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -184,6 +188,31 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
             editData(DataComponentTypes.ITEM_NAME) {
                 if (!isPylon(it)) return@editData it
+
+                if (!persistentDataContainer.getOrDefault(
+                        ItemStackBuilder.disableNameHacksKey,
+                        PylonSerializers.BOOLEAN,
+                        false
+                    )
+                ) {
+                    if (type == Material.PLAYER_HEAD) {
+                        editData(DataComponentTypes.PROFILE) { profile ->
+                            // Need to remove the name from the profile because it overrides item name
+                            ResolvableProfile.resolvableProfile()
+                                .addProperties(profile.properties())
+                                .build()
+                        }
+                    } else if (type.isPotion) {
+                        // Potions are wacky wrt names, so we lie to the client about the type and set the model data
+                        val oldStack = clone()
+                        @Suppress("DEPRECATION")
+                        type = Material.BREWER_POTTERY_SHERD
+                        check(type == Material.BREWER_POTTERY_SHERD) { "ItemStack.setType no longer works" }
+                        copyDataFrom(oldStack) { true }
+                        editData(DataComponentTypes.ITEM_MODEL) { oldStack.type.key }
+                    }
+                }
+
                 val translated = GlobalTranslator.render(it.withArguments(arguments), locale)
                 if (translated is TranslatableComponent && translated.fallback() != null) {
                     Component.text(translated.fallback()!!)
@@ -250,3 +279,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         }
     }
 }
+
+private val Material.isPotion: Boolean
+    get() = this == Material.POTION || this == Material.SPLASH_POTION ||
+            this == Material.LINGERING_POTION || this == Material.TIPPED_ARROW
