@@ -153,7 +153,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             var currentLine = StringBuilder()
 
             for (word in words) {
-                if (currentLine.length + word.length + 1 > limit) {
+                if (currentLine.length + word.length > limit) {
                     lines.add(currentLine.toString())
                     currentLine = StringBuilder()
                 }
