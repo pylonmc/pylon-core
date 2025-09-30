@@ -99,6 +99,10 @@ open class PylonFluid(
     companion object {
         val pylonFluidKeyKey = pylonKey("pylon_fluid_key")
 
+        /**
+         * Get the fluid represented by the given item stack, or null if the stack is null, empty or does not represent a fluid.
+         * See [item] for how to get an item stack that represents this fluid.
+         */
         fun fromStack(stack: ItemStack?): PylonFluid? {
             if (stack == null || stack.isEmpty) return null
             val id = stack.persistentDataContainer.get(pylonFluidKeyKey, PylonSerializers.NAMESPACED_KEY) ?: return null
