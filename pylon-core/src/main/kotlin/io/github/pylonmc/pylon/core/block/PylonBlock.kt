@@ -158,7 +158,7 @@ open class PylonBlock internal constructor(val block: Block) {
         if (this@PylonBlock is PylonDirectionalBlock) {
             facing = this@PylonBlock.getFacing()
         } else if (blockData is Orientable) {
-            facing = when(blockData.axis) {
+            facing = when (blockData.axis) {
                 Axis.X -> BlockFace.EAST
                 Axis.Y -> BlockFace.UP
                 Axis.Z -> BlockFace.SOUTH
