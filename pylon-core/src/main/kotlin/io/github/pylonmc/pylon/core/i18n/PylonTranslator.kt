@@ -139,20 +139,19 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
         private val translators = mutableMapOf<NamespacedKey, PylonTranslator>()
 
+        private val wordStartRegex = Regex("""(?<=\s)""")
+
         @JvmStatic
         fun wrapText(text: String, limit: Int): List<String> {
-            val words = text.split(" ")
+            if (text.length <= limit) return listOf(text)
+            val words = text.split(wordStartRegex)
             val lines = mutableListOf<String>()
             var currentLine = StringBuilder()
 
             for (word in words) {
                 if (currentLine.length + word.length + 1 > limit) {
-                    currentLine.append(' ')
                     lines.add(currentLine.toString())
                     currentLine = StringBuilder()
-                }
-                if (currentLine.isNotEmpty()) {
-                    currentLine.append(" ")
                 }
                 currentLine.append(word)
             }
