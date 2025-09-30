@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.test.item;
 
 import io.github.pylonmc.pylon.core.item.PylonItem;
 import io.github.pylonmc.pylon.core.item.base.PylonBrewingStandFuel;
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder;
+import io.github.pylonmc.pylon.core.item.builder.PylonItemStackBuilder;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
