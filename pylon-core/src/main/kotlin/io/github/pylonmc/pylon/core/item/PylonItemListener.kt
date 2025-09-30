@@ -6,9 +6,12 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
+import io.papermc.paper.event.block.BlockPreDispenseEvent
 import io.papermc.paper.event.player.PlayerPickItemEvent
 import org.bukkit.attribute.Attribute
+import org.bukkit.entity.AbstractArrow
 import org.bukkit.entity.Player
+import org.bukkit.entity.ThrowableProjectile
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,6 +21,8 @@ import org.bukkit.event.block.BlockDispenseEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityShootBowEvent
+import org.bukkit.event.entity.ProjectileHitEvent
+import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.player.*
@@ -128,6 +133,68 @@ internal object PylonItemListener : Listener {
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonItem)
             }
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: ProjectileLaunchEvent) {
+        val entity = event.entity
+        val itemStack = when (entity) {
+            is ThrowableProjectile -> entity.item
+            is AbstractArrow -> entity.pickItemStack
+            else -> return
+        }
+
+        val pylonItem = PylonItem.fromStack(itemStack)
+        val projectile = pylonItem as? PylonProjectile ?: return
+
+        try {
+            projectile.onLaunch(event)
+        } catch (e: Exception) {
+            logEventHandleErr(event, e, pylonItem)
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: ProjectileHitEvent) {
+        val entity = event.entity
+        val itemStack = when (entity) {
+            is ThrowableProjectile -> entity.item
+            is AbstractArrow -> entity.pickItemStack
+            else -> return
+        }
+
+        val pylonItem = PylonItem.fromStack(itemStack)
+        val projectile = pylonItem as? PylonProjectile ?: return
+
+        try {
+            projectile.onHit(event)
+        } catch (e: Exception) {
+            logEventHandleErr(event, e, pylonItem)
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: PlayerPickupArrowEvent) {
+        val pylonItem = PylonItem.fromStack(event.arrow.itemStack)
+        val projectile = pylonItem as? PylonProjectile ?: return
+
+        try {
+            projectile.onPickup(event)
+        } catch (e: Exception) {
+            logEventHandleErr(event, e, pylonItem)
+        }
+    }
+
+    @EventHandler
+    private fun handle(event: BlockPreDispenseEvent) {
+        val pylonItem = PylonItem.fromStack(event.itemStack)
+        val dispensable = pylonItem as? PylonDispensable ?: return
+
+        try {
+            dispensable.onPreDispense(event)
+        } catch (e: Exception) {
+            logEventHandleErr(event, e, pylonItem)
         }
     }
 
