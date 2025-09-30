@@ -5,16 +5,17 @@ import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.entity.EntityStorage
-import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonBlockInteractor
 import io.github.pylonmc.pylon.core.item.base.PylonItemEntityInteractor
+import io.github.pylonmc.pylon.core.item.base.PylonWeapon
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
@@ -22,13 +23,14 @@ import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
+import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
 internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
-    : PylonItem(stack), PylonBlockInteractor, PylonItemEntityInteractor {
+    : PylonItem(stack), PylonBlockInteractor, PylonItemEntityInteractor, PylonWeapon {
 
     override fun onUsedToClickBlock(event: PlayerInteractEvent) {
         event.isCancelled = true
@@ -38,7 +40,7 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         val pylonBlock = BlockStorage.get(block)
         val player = event.player
         if (pylonBlock == null) {
-            player.sendDebug("not_a_block")
+            player.sendDebugActionBar("not_a_block")
             return
         }
 
@@ -50,20 +52,18 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
     }
 
     fun onUsedToLeftClickBlock(player: Player, block: Block, pylonBlock: PylonBlock) {
-
-    }
-
-    fun onUsedToRightClickBlock(player: Player, block: Block, pylonBlock: PylonBlock) {
         if (player.currentInput.isSneak) {
-            BlockStorage.deleteBlockData(block.position)
-            player.sendDebug(
+            BlockStorage.deleteBlock(block.position)
+            player.sendDebugActionBar(
                 "deleted_data",
                 PylonArgument.of("type", pylonBlock.schema.key.toString()),
                 PylonArgument.of("location", block.position.toString())
             )
             return
         }
+    }
 
+    fun onUsedToRightClickBlock(player: Player, block: Block, pylonBlock: PylonBlock) {
         player.sendDebug(
             "key.block",
             PylonArgument.of("key", pylonBlock.schema.key.toString())
@@ -91,11 +91,12 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         )
     }
 
-    override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
-        val pylonEntity = EntityStorage.get(event.rightClicked)
-        val player = event.player
+    override fun onUsedToDamageEntity(event: EntityDamageByEntityEvent) {
+        event.isCancelled = true
+        val player = event.damager as? Player ?: return
+        val pylonEntity = EntityStorage.get(event.entity)
         if (pylonEntity == null) {
-            player.sendDebug("not_an_entity")
+            player.sendDebugActionBar("not_an_entity")
             return
         }
 
@@ -106,6 +107,16 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
                 PylonArgument.of("type", pylonEntity.schema.key.toString()),
                 PylonArgument.of("location", pylonEntity.entity.uniqueId.toString())
             )
+            return
+        }
+    }
+
+    override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
+        event.isCancelled = true
+        val pylonEntity = EntityStorage.get(event.rightClicked)
+        val player = event.player
+        if (pylonEntity == null) {
+            player.sendDebugActionBar("not_an_entity")
             return
         }
 
@@ -147,4 +158,8 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
 
 private fun Audience.sendDebug(subkey: String, vararg args: PylonArgument) {
     return sendMessage(Component.translatable("pylon.pyloncore.message.debug.$subkey", *args))
+}
+
+private fun Audience.sendDebugActionBar(subkey: String, vararg args: PylonArgument) {
+    return sendActionBar(Component.translatable("pylon.pyloncore.message.debug.$subkey", *args))
 }

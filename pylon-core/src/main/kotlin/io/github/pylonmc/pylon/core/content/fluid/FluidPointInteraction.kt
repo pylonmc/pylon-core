@@ -76,7 +76,7 @@ class FluidPointInteraction : PylonEntity<Interaction>, PylonDeathEntity, PylonU
 
     override fun onDeath(event: PylonEntityDeathEvent) {
         for (uuid in connectedPipeDisplays) {
-            EntityStorage.getAs<FluidPipeDisplay>(uuid)?.delete(true, null)
+            EntityStorage.getAs<FluidPipeDisplay>(uuid)?.delete(true, null, null)
         }
         EntityStorage.getAs<FluidPointDisplay>(display)?.entity?.remove()
         FluidManager.remove(point)

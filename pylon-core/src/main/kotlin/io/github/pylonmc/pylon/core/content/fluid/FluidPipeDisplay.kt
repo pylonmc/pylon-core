@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.GameMode
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.ApiStatus
 import java.util.UUID
@@ -73,7 +74,7 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
     fun getTo(): FluidPointInteraction
         = EntityStorage.getAs<FluidPointInteraction>(to)!!
 
-    fun delete(removeMarkersIfEmpty: Boolean, player: Player?) {
+    fun delete(removeMarkersIfEmpty: Boolean, player: Player?, drops: MutableList<ItemStack>?) {
         val from = getFrom()
         val to = getTo()
 
@@ -83,6 +84,8 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
             if (player.gameMode != GameMode.CREATIVE) {
                 player.give(itemToGive)
             }
+        } else if (drops != null) {
+            drops.add(itemToGive)
         } else {
             val location = to.point.position.plus(from.point.position).location.multiply(0.5)
             location.getWorld().dropItemNaturally(location, itemToGive)

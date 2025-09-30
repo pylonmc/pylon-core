@@ -388,27 +388,36 @@ object BlockStorage : Listener {
         breakBlock(BlockPosition(location), context)
 
     /**
+     * Deletes the Pylon block and removes the physical block in the world.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread.
      *
+     * This differs from [breakBlock] in that it cannot be cancelled and does not drop any items.
      */
     @JvmSynthetic
-    internal fun deleteBlockData(blockPosition: BlockPosition) {
+    internal fun deleteBlock(blockPosition: BlockPosition) {
         require(blockPosition.chunk.isLoaded) { "You can only delete Pylon block data in loaded chunks" }
 
         val block = get(blockPosition) ?: return
 
-        val event = PylonDeleteBlockDataEvent(blockPosition.block, block)
-        event.callEvent()
-
+        val context = BlockBreakContext.Delete(block.block)
         if (block is PylonBreakHandler) {
-            block.onBreak(mutableListOf(), BlockBreakContext.DebugBreak(block.block))
+            block.onBreak(mutableListOf(), context)
         }
-        block.block.type = Material.AIR
 
         lockBlockWrite {
             blocks.remove(blockPosition)
             blocksByKey[block.schema.key]?.remove(block)
             blocksByChunk[blockPosition.chunk]?.remove(block)
         }
+
+        block.block.type = Material.AIR
+        if (block is PylonBreakHandler) {
+            block.postBreak()
+        }
+
+        BlockTextureEngine.remove(block)
+        PylonBlockBreakEvent(blockPosition.block, block, context, mutableListOf()).callEvent()
     }
 
     private fun load(world: World, chunk: Chunk): List<PylonBlock> {

@@ -18,8 +18,8 @@ item:
   debug_waxed_weathered_cut_copper_stairs:
     name: "<red>Debug Waxed Weathered Cut Copper Stairs"
     lore: |-
+      <arrow> <insn>Shift left click</insn> a block/entity to remove it
       <arrow> <insn>Right click</insn> a block/entity to view its Pylon data
-      <arrow> <insn>Shift right click</insn> a block/entity to remove it
 
   fluid_pipe_connector:
     waila: "%pipe%"
