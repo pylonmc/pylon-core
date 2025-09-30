@@ -27,7 +27,8 @@ public class WrapTest extends AsyncTest {
                 <green>Lorem\s
                 <green>ipsum\s
                 <green>dolor\s
-                <green>sit amet
+                <green>sit\s
+                <green>amet
                 """
         );
         checkWrap(
@@ -36,7 +37,8 @@ public class WrapTest extends AsyncTest {
                 <yellow>Lorem\s
                 <red>ipsum\s
                 <red>dolor\s
-                <red>sit amet
+                <red>sit\s
+                <red>amet
                 """
         );
     }
