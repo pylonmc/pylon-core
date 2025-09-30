@@ -44,7 +44,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val KEY = pylonKey("guide")
 
         @JvmField
-        val STACK = ItemStackBuilder.pylonItem(Material.BOOK, KEY)
+        val STACK = PylonItemStackBuilder.of(Material.BOOK, KEY)
             .set(DataComponentTypes.ITEM_MODEL, Key.key("knowledge_book"))
             .set(DataComponentTypes.MAX_STACK_SIZE, 1)
             .build()

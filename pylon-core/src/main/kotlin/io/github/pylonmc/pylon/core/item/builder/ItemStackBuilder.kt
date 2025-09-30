@@ -2,7 +2,7 @@ package io.github.pylonmc.pylon.core.item.builder
 
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
+import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.editDataOrDefault
 import io.github.pylonmc.pylon.core.util.editDataOrSet
@@ -40,13 +40,13 @@ import java.util.function.Consumer
 import kotlin.collections.forEach
 
 /**
- * Helper class for creating an [ItemStack], including utilities for creating Pylon
- * items specifically.
+ * Helper class for creating an [ItemStack] with various properties. Refer to
+ * [PylonItemStackBuilder] for utilities specifically for creating [PylonItem]s.
  *
  * Implements InvUI's [ItemProvider], so can be used instead of an [ItemStack] in GUIs.
  *
  * You should use this when using anything to do with [Component.translatable] including
- * [io.github.pylonmc.pylon.core.item.PylonItem]s in InvUI GUIs. Yes, this is confusing
+ * [PylonItem]s in InvUI GUIs. Yes, this is confusing
  * and annoying - it is unfortunately necessary to get around InvUI's translation system.
  */
 @Suppress("UnstableApiUsage")
@@ -109,7 +109,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
      * Sets the item's name to the default language file key (for example
      * `pylon.pyloncore.item.my_dumb_item.name`), based on the item [key] given.
      *
-     * Use [pylonItem] instead of this to create a stack for a [io.github.pylonmc.pylon.core.item.PylonItem].
+     * Use [PylonItemStackBuilder.of] instead of this to create a stack for a [PylonItem].
      */
     fun defaultTranslatableName(key: NamespacedKey) =
         name(Component.translatable(nameKey(key)))
@@ -129,7 +129,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
      * Sets the item's lore to the default language file key (for example
      * `pylon.pyloncore.item.my_dumb_item.lore`), based on the item [key] given.
      *
-     * Use [pylonItem] instead of this to create a stack for a [io.github.pylonmc.pylon.core.item.PylonItem].
+     * Use [PylonItemStackBuilder.of] instead of this to create a stack for a [PylonItem].
      */
     fun defaultTranslatableLore(key: NamespacedKey) =
         lore(Component.translatable(loreKey(key), ""))
@@ -365,30 +365,6 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         @JvmStatic
         fun gui(material: Material, key: NamespacedKey): ItemStackBuilder {
             return gui(ItemStack(material), key)
-        }
-
-        /**
-         * Creates a new [ItemStack] for a [io.github.pylonmc.pylon.core.item.PylonItem] by setting
-         * the name and lore to the default translation keys, and setting the item's Pylon ID to the
-         * provided [key].
-         */
-        @JvmStatic
-        fun pylonItem(stack: ItemStack, key: NamespacedKey): ItemStackBuilder {
-            return ItemStackBuilder(stack)
-                .editPdc { it.set(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
-                .addCustomModelDataString(key.toString())
-                .defaultTranslatableName(key)
-                .defaultTranslatableLore(key)
-        }
-
-        /**
-         * Creates a new [ItemStack] for a [io.github.pylonmc.pylon.core.item.PylonItem] by setting
-         * the name and lore to the default translation keys, and setting the item's Pylon ID to the
-         * provided [key].
-         */
-        @JvmStatic
-        fun pylonItem(material: Material, key: NamespacedKey): ItemStackBuilder {
-            return pylonItem(ItemStack(material), key)
         }
 
         fun ItemAttributeModifiers.Builder.copy(modifiers: List<ItemAttributeModifiers.Entry>?) : ItemAttributeModifiers.Builder {

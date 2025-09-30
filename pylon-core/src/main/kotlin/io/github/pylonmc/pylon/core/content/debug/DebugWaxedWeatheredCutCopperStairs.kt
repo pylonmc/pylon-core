@@ -10,6 +10,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonBlockInteractor
 import io.github.pylonmc.pylon.core.item.base.PylonItemEntityInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.item.builder.PylonItemStackBuilder
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -99,7 +100,7 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
 
     companion object {
         val KEY = pylonKey("debug_waxed_weathered_cut_copper_stairs")
-        val STACK = ItemStackBuilder.pylonItem(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
+        val STACK = PylonItemStackBuilder.of(Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, KEY)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()
     }

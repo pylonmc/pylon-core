@@ -85,7 +85,7 @@ class PhantomBlock(
         companion object {
             val KEY = pylonKey("error_item")
             val BLOCK_KEY = pylonKey("block")
-            val STACK = ItemStackBuilder.pylonItem(Material.BARRIER, KEY)
+            val STACK = PylonItemStackBuilder.of(Material.BARRIER, KEY)
                 .build()
         }
     }
