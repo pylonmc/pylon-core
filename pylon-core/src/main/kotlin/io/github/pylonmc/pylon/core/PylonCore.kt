@@ -29,7 +29,6 @@ import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.listResourcesRecursively
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
 import org.bukkit.Bukkit
@@ -161,25 +160,18 @@ object PylonCore : JavaPlugin(), PylonAddon {
         logger.info("Loading researches...")
         for (addon in PylonRegistry.ADDONS) {
             val addonPlugin = addon.javaPlugin
-            val researchFiles = listResourcesRecursively(addonPlugin::class.java.classLoader, "researches")
 
-            for (path in researchFiles) {
-                val configStream = addonPlugin.getResource(path) ?: continue
-                val yamlConfig = configStream.reader().use { YamlConfiguration.loadConfiguration(it) }
+            val researchFile = addonPlugin.getResource("researches.yml") ?: continue
+            val yamlConfig = researchFile.reader().use { YamlConfiguration.loadConfiguration(it) }
 
-                val file = File(path)
-                val parent = file.parentFile
-                val fileName = file.name
+            val ourPath = this.javaPlugin.dataFolder
+                .resolve("researches")
+                .resolve(addon.key.namespace)
+                .resolve("researches.yml")
 
-                val ourPath = this.javaPlugin.dataFolder
-                    .resolve(parent)
-                    .resolve(addon.key.namespace)
-                    .resolve(fileName)
-
-                if (!ourPath.exists()) {
-                    ourPath.parentFile.mkdirs()
-                    yamlConfig.save(ourPath)
-                }
+            if (!ourPath.exists()) {
+                ourPath.parentFile.mkdirs()
+                yamlConfig.save(ourPath)
             }
         }
 
@@ -188,12 +180,18 @@ object PylonCore : JavaPlugin(), PylonAddon {
             for (namespaceDir in researchDir.listDirectoryEntries()) {
                 if (!namespaceDir.isDirectory()) continue
                 val namespace = namespaceDir.nameWithoutExtension
-                for (research in namespaceDir.listDirectoryEntries()) {
-                    if (!research.isRegularFile() || research.extension != "yml") continue
-                    val key = NamespacedKey(namespace, research.nameWithoutExtension)
+                val pluginResearch = namespaceDir.resolve("researches.yml")
 
-                    Research.loadFromConfig(Config(research), key).register()
+                if (!pluginResearch.isRegularFile() || pluginResearch.extension != "yml") continue
+
+                val mainResearchConfig = Config(pluginResearch)
+                for (key in mainResearchConfig.keys) {
+                    val nsKey = NamespacedKey(namespace, key)
+                    val section = mainResearchConfig.getSection(key) ?: continue
+
+                    Research.loadFromConfig(section, nsKey).register()
                 }
+
             }
         }
 

@@ -340,28 +340,3 @@ fun <T> persistentData(
 
 val Block.replaceableOrAir: Boolean
     get() = type.isAir || isReplaceable
-
-
-fun listResourcesRecursively(classLoader : ClassLoader, folder: String): List<String> {
-    val resourceUrls = classLoader.getResources(folder)
-    val result = mutableListOf<String>()
-
-    while (resourceUrls.hasMoreElements()) {
-        val url = resourceUrls.nextElement()
-
-        if (url.protocol != "jar") continue
-
-        val jarConnection = url.openConnection() as JarURLConnection
-        val jarFile = jarConnection.jarFile
-
-        val basePath = folder.removeSuffix("/") + "/"
-
-        for (entry in jarFile.entries()) {
-            if (entry.name.startsWith(basePath) && !entry.isDirectory) {
-                result.add(entry.name)
-            }
-        }
-    }
-
-    return result
-}
