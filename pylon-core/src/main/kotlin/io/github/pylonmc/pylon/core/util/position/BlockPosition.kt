@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.util.Vector
 import org.joml.Vector3i
 import java.util.UUID
 
@@ -41,6 +42,8 @@ class BlockPosition(val worldId: UUID?, val x: Int, val y: Int, val z: Int) {
     constructor(world: World?, x: Int, y: Int, z: Int) : this(world?.uid, x, y, z)
 
     constructor(location: Location) : this(location.world?.uid, location.blockX, location.blockY, location.blockZ)
+
+    constructor(world: World?, position: Vector) : this(world?.uid, position.blockX, position.blockY, position.blockZ)
 
     constructor(block: Block) : this(block.world.uid, block.x, block.y, block.z)
 

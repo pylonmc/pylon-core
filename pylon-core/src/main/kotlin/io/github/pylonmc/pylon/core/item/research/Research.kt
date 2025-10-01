@@ -36,8 +36,13 @@ import org.bukkit.event.player.PlayerJoinEvent
 import kotlin.math.min
 
 /**
+ * A Pylon research as seem in the 'researches' guide section.
+ *
+ * Researches typically have a research point [cost] specified. However, this
+ * is optional, and you can implement your own methods to unlock a research.
+ *
  * @property cost If null, the research cannot be unlocked using points
- * @property unlocks the keys of the items that are unlocked by this research
+ * @property unlocks The keys of the items that are unlocked by this research
  */
 @JvmRecord
 data class Research(
@@ -48,6 +53,9 @@ data class Research(
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
+    /**
+     * A constructor that sets the name to a default language file key.
+     */
     constructor(key: NamespacedKey, material: Material, cost: Long?, vararg unlocks: NamespacedKey) : this(
         key,
         material,
@@ -60,6 +68,12 @@ data class Research(
         PylonRegistry.RESEARCHES.register(this)
     }
 
+    /**
+     * Adds the research to a player.
+     *
+     * @param sendMessage If set, sends a message to notify the player that they
+     * have unlocked the research
+     */
     @JvmOverloads
     fun addTo(player: Player, sendMessage: Boolean = true, effects: Boolean = true) {
         if (this in getResearches(player)) return
@@ -101,6 +115,9 @@ data class Research(
         }
     }
 
+    /**
+     * Removes a research from a player.
+     */
     fun removeFrom(player: Player) {
         if (this !in getResearches(player)) return
 
@@ -113,6 +130,9 @@ data class Research(
         }
     }
 
+    /**
+     * Returns whether a research has been researched by the given player.
+     */
     fun isResearchedBy(player: Player): Boolean {
         return this in getResearches(player)
     }
@@ -155,6 +175,13 @@ data class Research(
         fun removeResearch(player: Player, research: Research)
             = setResearches(player, getResearches(player) - research)
 
+        /**
+         * Checks whether a player can craft an item (ie has the associated research, or
+         * has permission to bypass research.
+         *
+         * @param sendMessage Whether, if the player cannot craft the item, a message should be sent to them
+         * to notify them of this fact
+         */
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerCraft")
@@ -190,11 +217,25 @@ data class Research(
             return canUse
         }
 
+        /**
+         * Checks whether a player can pick up an item (ie has the associated research, or
+         * has permission to bypass research.
+         *
+         * @param sendMessage Whether, if the player cannot pick up the item, a message should be sent to them
+         * to notify them of this fact
+         */
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerPickUp")
         fun Player.canPickUp(item: PylonItem, sendMessage: Boolean = false): Boolean = canCraft(item, sendMessage)
 
+        /**
+         * Checks whether a player can use an item (ie has the associated research, or
+         * has permission to bypass research.
+         *
+         * @param sendMessage Whether, if the player cannot use the item, a message should be sent to them
+         * to notify them of this fact
+         */
         @JvmStatic
         @JvmOverloads
         @JvmName("canPlayerUse")

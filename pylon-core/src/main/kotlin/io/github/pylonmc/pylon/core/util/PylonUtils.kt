@@ -4,6 +4,8 @@ package io.github.pylonmc.pylon.core.util
 
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -12,9 +14,12 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.inventory.Inventory
@@ -28,6 +33,7 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.util.Locale
 import java.net.JarURLConnection
 import kotlin.math.absoluteValue
 import kotlin.properties.ReadWriteProperty
@@ -338,5 +344,48 @@ fun <T> persistentData(
     default: T
 ) = persistentData(key, type) { default }
 
+/**
+ * Merges config from addons to the Pylon config directory.
+ * Used for stuff like item settings and language files.
+ *
+ * Returns the configuration read and merged from the resource.
+ * If the file does not exist in the resource but already exists
+ * at the [to] path, reads and returns the file at the [to] path.
+ *
+ * @param from The path to the config file. Must be a YAML file.
+ * @return The merged config
+ */
+internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Config {
+    require(from.endsWith(".yml")) { "Config file must be a YAML file" }
+    require(to.endsWith(".yml")) { "Config file must be a YAML file" }
+    val cached = globalConfigCache[from to to]
+    if (cached != null) {
+        return cached
+    }
+    val globalConfig = PylonCore.dataFolder.resolve(to)
+    if (!globalConfig.exists()) {
+        globalConfig.parentFile.mkdirs()
+        globalConfig.createNewFile()
+    }
+    val config = Config(globalConfig)
+    val resource = addon.javaPlugin.getResource(from)
+    if (resource == null) {
+        PylonCore.logger.warning("Resource not found: $from")
+    } else {
+        val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
+        config.internalConfig.setDefaults(newConfig)
+        config.internalConfig.options().copyDefaults(true)
+        config.merge(ConfigSection(newConfig))
+        config.save()
+    }
+    globalConfigCache[from to to] = config
+    return config
+}
+
+private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutableMapOf()
+
 val Block.replaceableOrAir: Boolean
     get() = type.isAir || isReplaceable
+
+val Component.plainText: String
+    get() = PlainTextComponentSerializer.plainText().serialize(this)

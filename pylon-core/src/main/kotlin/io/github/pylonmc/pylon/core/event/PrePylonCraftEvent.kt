@@ -9,7 +9,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called when a crafting recipe is started
+ * Called when a crafting recipe is started.
  */
 class PrePylonCraftEvent<T: PylonRecipe> @JvmOverloads constructor(
     val type: RecipeType<T>,

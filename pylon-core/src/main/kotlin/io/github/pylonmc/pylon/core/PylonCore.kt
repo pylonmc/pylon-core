@@ -2,11 +2,14 @@
 
 package io.github.pylonmc.pylon.core
 
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
@@ -29,8 +32,15 @@ import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
+import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
+import me.tofaa.entitylib.APIConfig
+import me.tofaa.entitylib.EntityIdProvider
+import me.tofaa.entitylib.EntityLib
+import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -47,11 +57,32 @@ import java.net.JarURLConnection
 import java.util.*
 import kotlin.io.path.*
 
+/**
+ * The one and only Pylon Core plugin!
+ */
 object PylonCore : JavaPlugin(), PylonAddon {
 
+    override fun onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this))
+        PacketEvents.getAPI().load()
+    }
 
     override fun onEnable() {
+        val start = System.currentTimeMillis()
+
         InvUI.getInstance().setPlugin(this)
+
+        val packetEvents = PacketEvents.getAPI()
+        packetEvents.init()
+
+        packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
+
+        val entityLibPlatform = SpigotEntityLibPlatform(this)
+        entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type -> Bukkit.getUnsafe().nextEntityId() }
+        val entityLibSettings = APIConfig(packetEvents)
+            .tickTickables()
+            .trackPlatformEntities()
+        EntityLib.init(entityLibPlatform, entityLibSettings)
 
         saveDefaultConfig()
 
@@ -81,6 +112,11 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(ConnectingService, this)
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
+
+        if (BlockTextureConfig.customBlockTexturesEnabled) {
+            Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
+            BlockTextureEngine.updateOccludingCacheJob.start()
+        }
 
         Bukkit.getScheduler().runTaskTimer(
             this,
@@ -127,9 +163,14 @@ object PylonCore : JavaPlugin(), PylonAddon {
             loadRecipes()
             loadResearches()
         }
+
+        val end = System.currentTimeMillis()
+        logger.info("Loaded in ${(end - start) / 1000.0}s")
     }
 
     private fun loadRecipes() {
+        val start = System.currentTimeMillis()
+
         logger.info("Loading recipes...")
         for (type in PylonRegistry.RECIPE_TYPES) {
             if (type !is ConfigurableRecipeType) continue
@@ -153,7 +194,9 @@ object PylonCore : JavaPlugin(), PylonAddon {
                 }
             }
         }
-        logger.info("Finished loading recipes")
+
+        val end = System.currentTimeMillis()
+        logger.info("Loaded recipes in ${(end - start) / 1000.0}s")
     }
 
     private fun loadResearches() {
@@ -199,6 +242,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
     }
 
     override fun onDisable() {
+        PacketEvents.getAPI().terminate()
         ConnectingService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()

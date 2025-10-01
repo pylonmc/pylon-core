@@ -13,6 +13,7 @@ import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.editData
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
@@ -63,7 +64,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
 
     init {
         for (lang in addon.languages) {
-            addon.mergeGlobalConfig("lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
+            mergeGlobalConfig(addon, "lang/$lang.yml", "lang/$addonNamespace/$lang.yml")
         }
         val langsDir = PylonCore.dataPath.resolve("lang").resolve(addonNamespace)
         translations = if (!langsDir.exists()) {

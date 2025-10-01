@@ -8,7 +8,6 @@ import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.jetbrains.annotations.ApiStatus
 import java.util.*
 import kotlin.math.max
 
@@ -27,8 +26,7 @@ import kotlin.math.max
  */
 interface PylonFluidTank : PylonFluidBlock {
 
-    @get:ApiStatus.NonExtendable
-    val fluidData: FluidTankData
+    private val fluidData: FluidTankData
         get() = fluidTankBlocks.getOrPut(this) { FluidTankData(
             null,
             0.0,
@@ -157,16 +155,15 @@ interface PylonFluidTank : PylonFluidBlock {
         }
     }
 
-    @ApiStatus.Internal
-    data class FluidTankData(
-        var fluid: PylonFluid?,
-        var amount: Double,
-        var capacity: Double,
-        var input: Boolean,
-        var output: Boolean,
-    )
-
     companion object : Listener {
+
+        internal data class FluidTankData(
+            var fluid: PylonFluid?,
+            var amount: Double,
+            var capacity: Double,
+            var input: Boolean,
+            var output: Boolean,
+        )
 
         private val fluidTankKey = pylonKey("fluid_tank_data")
 

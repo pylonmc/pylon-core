@@ -26,7 +26,10 @@ import java.util.function.Consumer
 import kotlin.random.Random
 
 /**
- * Basically [BlockStorage], but for entities
+ * Basically [BlockStorage], but for entities. Works on all the same principles.
+ *
+ * @see BlockStorage
+ * @see PylonEntity
  */
 object EntityStorage : Listener {
 
@@ -35,6 +38,9 @@ object EntityStorage : Listener {
     private val entityAutosaveTasks: MutableMap<UUID, Job> = ConcurrentHashMap()
     private val whenEntityLoadsTasks: MutableMap<UUID, MutableSet<Consumer<PylonEntity<*>>>> = ConcurrentHashMap()
 
+    /**
+     * All the loaded [PylonEntity]s
+     */
     val loadedEntities: Collection<PylonEntity<*>>
         get() = entities.values
 
@@ -42,16 +48,25 @@ object EntityStorage : Listener {
     // briefly going out of sync
     private val entityLock = ReentrantReadWriteLock()
 
+    /**
+     * Returns the [PylonEntity] with this [uuid], or null if the entity does not exist or is not
+     * a Pylon entity.
+     */
     @JvmStatic
     fun get(uuid: UUID): PylonEntity<*>?
         = lockEntityRead { entities[uuid] }
 
+    /**
+     * Returns the [PylonEntity] corresponding to this [entity], or null if this entity is not
+     * a Pylon entity.
+     */
     @JvmStatic
     fun get(entity: Entity): PylonEntity<*>?
         = get(entity.uniqueId)
 
     /**
-     * Returns null if the entity is not of the expected class
+     * Returns the [PylonEntity] with this [uuid], or null if the entity does not exist, is not
+     * a Pylon entity, or is not of type [T].
      */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, uuid: UUID): T? {
@@ -63,24 +78,30 @@ object EntityStorage : Listener {
     }
 
     /**
-     * Returns null if the entity is not of the expected class
+     * Returns the [PylonEntity] corresponding to this [entity], or if this entity is not
+     * a Pylon entity, or is not of type [T].
      */
     @JvmStatic
     fun <T> getAs(clazz: Class<T>, entity: Entity): T?
         = getAs(clazz, entity.uniqueId)
 
     /**
-     * Returns null if the entity is not of the expected class
+     * Returns the [PylonEntity] with this [uuid], or null if the entity does not exist, is not
+     * a Pylon entity, or is not of type [T].
      */
     inline fun <reified T> getAs(uuid: UUID): T?
         = getAs(T::class.java, uuid)
 
     /**
-     * Returns null if the entity is not of the expected class
+     * Returns the [PylonEntity] corresponding to this [entity], or if this entity is not
+     * a Pylon entity, or is not of type [T].
      */
     inline fun <reified T> getAs(entity: Entity): T?
         = getAs(T::class.java, entity)
 
+    /**
+     * Returns all the Pylon entities associated with this [key].
+     */
     @JvmStatic
     fun getByKey(key: NamespacedKey): Collection<PylonEntity<*>> =
         if (key in PylonRegistry.ENTITIES) {
@@ -93,7 +114,9 @@ object EntityStorage : Listener {
 
     /**
      * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
-     * if the entity is already loaded
+     * if the entity is already loaded.
+     *
+     * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
      */
     @JvmStatic
     fun whenEntityLoads(uuid: UUID, consumer: Consumer<PylonEntity<*>>) {
@@ -110,7 +133,9 @@ object EntityStorage : Listener {
 
     /**
      * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
-     * if the entity is already loaded
+     * if the entity is already loaded.
+     *
+     * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
      */
     @JvmStatic
     fun <T: PylonEntity<*>> whenEntityLoads(uuid: UUID, clazz: Class<T>, consumer: Consumer<T>) {
@@ -127,19 +152,30 @@ object EntityStorage : Listener {
     /**
      * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
      * if the entity is already loaded
+     *
+     * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
      */
     @JvmStatic
     inline fun <reified T: PylonEntity<*>> whenEntityLoads(uuid: UUID, crossinline consumer: (T) -> Unit)
             = whenEntityLoads(uuid, T::class.java) { t -> consumer(t) }
 
+    /**
+     * Returns false if the entity is not a [PylonEntity] or does not exist.
+     */
     @JvmStatic
     fun isPylonEntity(uuid: UUID): Boolean
         = get(uuid) != null
 
+    /**
+     * Returns false if the entity is not a [PylonEntity] or does not exist.
+     */
     @JvmStatic
     fun isPylonEntity(entity: Entity): Boolean
         = get(entity) != null
 
+    /**
+     * Adds an entity to the storage. *This must be called for all newly spawned Pylon entities*.
+     */
     @JvmStatic
     fun <E : Entity> add(entity: PylonEntity<E>): PylonEntity<E> = lockEntityWrite {
         entities[entity.uuid] = entity

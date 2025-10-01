@@ -1,8 +1,12 @@
 package io.github.pylonmc.pylon.core.config
 
 import io.github.pylonmc.pylon.core.util.getAddon
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import org.bukkit.NamespacedKey
 
+/**
+ * Utility class.
+ */
 object Settings {
 
     /**
@@ -10,5 +14,5 @@ object Settings {
      */
     @JvmStatic
     fun get(key: NamespacedKey): Config =
-        getAddon(key).mergeGlobalConfig("settings/${key.key}.yml", "settings/${key.namespace}/${key.key}.yml")
+        mergeGlobalConfig(getAddon(key), "settings/${key.key}.yml", "settings/${key.namespace}/${key.key}.yml")
 }

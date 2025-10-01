@@ -7,7 +7,9 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called after a pylon block has been placed.
+ * Called after a [PylonBlock] has been placed.
+ *
+ * @see BlockCreateContext
  */
 class PylonBlockPlaceEvent(
     val block: Block,

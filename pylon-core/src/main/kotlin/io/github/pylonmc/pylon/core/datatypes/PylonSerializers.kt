@@ -10,6 +10,7 @@ import org.bukkit.persistence.PersistentDataType
 /**
  * A collection of various [PersistentDataType]s for use by Pylon and Pylon addons
  */
+@Suppress("unused")
 object PylonSerializers {
     @JvmField
     val BYTE = PersistentDataType.BYTE!!

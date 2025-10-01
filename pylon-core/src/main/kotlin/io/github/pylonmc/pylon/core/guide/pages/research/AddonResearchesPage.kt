@@ -9,6 +9,9 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 
+/**
+ * Shows all the researches for the given [addon].
+ */
 class AddonResearchesPage(val addon: PylonAddon) : SimpleDynamicGuidePage(
     pylonKey("researches_" + addon.key.key),
     addon.material,
