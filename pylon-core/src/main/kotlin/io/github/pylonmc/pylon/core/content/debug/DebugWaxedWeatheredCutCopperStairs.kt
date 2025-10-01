@@ -15,7 +15,6 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
@@ -54,7 +53,7 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
     fun onUsedToLeftClickBlock(player: Player, block: Block, pylonBlock: PylonBlock) {
         if (player.currentInput.isSneak) {
             BlockStorage.deleteBlock(block.position)
-            player.sendDebugActionBar(
+            player.sendDebug(
                 "deleted_data",
                 PylonArgument.of("type", pylonBlock.schema.key.toString()),
                 PylonArgument.of("location", block.position.toString())
@@ -82,7 +81,7 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         // Create a new PDC - doesn't matter what type because we won't be saving it, so we just use the block's
         // chunk to get a PDC context
         val pdc = block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer()
-        pylonBlock.write(pdc)
+        pylonBlock.writeDebugInfo(pdc)
         PylonBlockSerializeEvent(block, pylonBlock, pdc).callEvent()
         val serialized = NmsAccessor.instance.serializePdc(pdc)
         player.sendDebug(
@@ -139,7 +138,7 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
 //                    }
 //                )
 //            )
-        pylonEntity.write(pylonEntity.entity.persistentDataContainer)
+        pylonEntity.writeDebugInfo(pylonEntity.entity.persistentDataContainer)
         val serialized = NmsAccessor.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
         player.sendDebug(
             "data",
