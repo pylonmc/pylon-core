@@ -75,14 +75,12 @@ object PylonCore : JavaPlugin(), PylonAddon {
         packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
 
         val entityLibPlatform = SpigotEntityLibPlatform(this)
+        val entityLibSettings = APIConfig(packetEvents).tickTickables()
+        EntityLib.init(entityLibPlatform, entityLibSettings)
         entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type ->
             @Suppress("DEPRECATION")
             Bukkit.getUnsafe().nextEntityId()
         }
-        val entityLibSettings = APIConfig(packetEvents)
-            .tickTickables()
-            .trackPlatformEntities()
-        EntityLib.init(entityLibPlatform, entityLibSettings)
 
         saveDefaultConfig()
 

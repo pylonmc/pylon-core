@@ -62,6 +62,13 @@ interface PylonMultiblock {
     fun onMultiblockFormed() {}
 
     /**
+     * Called when the multiblock is refreshed (i.e., was formed before, and still is).
+     * This happens when something causes the Multiblock to re-check if it is formed,
+     * and it still is.
+     */
+    fun onMultiblockRefreshed() {}
+
+    /**
      * Called when the multiblock is unformed (i.e., was formed before, but now is not).
      * This includes when a part of the multiblock is unloaded, and the multiblock becomes unformed because of it.
      */
