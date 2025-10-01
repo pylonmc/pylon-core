@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.i18n.packet.PlayerPacketHandler
 import io.papermc.paper.adventure.PaperAdventure
 import net.kyori.adventure.text.Component
-import net.minecraft.nbt.NbtUtils
 import net.minecraft.nbt.TextComponentTagVisitor
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer
