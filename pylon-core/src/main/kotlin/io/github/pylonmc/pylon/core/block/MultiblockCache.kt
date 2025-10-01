@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent
 import io.github.pylonmc.pylon.core.event.PylonMultiblockFormEvent
+import io.github.pylonmc.pylon.core.event.PylonMultiblockRefreshEvent
 import io.github.pylonmc.pylon.core.event.PylonMultiblockUnformEvent
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
@@ -75,6 +76,9 @@ internal object MultiblockCache : Listener {
                     if (formedMultiblocks.add(multiblockPosition)) {
                         multiblock.onMultiblockFormed()
                         PylonMultiblockFormEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
+                    } else {
+                        multiblock.onMultiblockRefreshed()
+                        PylonMultiblockRefreshEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
                     }
                 } else {
                     if (formedMultiblocks.remove(multiblockPosition) && multiblock != null) {
