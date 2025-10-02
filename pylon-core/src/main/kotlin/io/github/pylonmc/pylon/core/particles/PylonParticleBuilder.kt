@@ -42,7 +42,7 @@ sealed class PylonParticleBuilder<S : PylonParticleBuilder<S>>(val innerBuilder:
         return this
     }
 
-    class Multiple<S : Multiple<S>>(particle: Single<*>) : PylonParticleBuilder<S>(particle.innerBuilder.clone()) {
+    class Multiple(particle: Single<*>) : PylonParticleBuilder<Multiple>(particle.innerBuilder.clone()) {
         fun count(count: Int) = applySelf { innerBuilder.count(count) }
     }
 
@@ -114,7 +114,9 @@ sealed class PylonParticleBuilder<S : PylonParticleBuilder<S>>(val innerBuilder:
         class CurrentDown : Single<CurrentDown>(Particle.CURRENT_DOWN), Offsettable<CurrentDown>
         class DamageIndicator : Single<DamageIndicator>(Particle.DAMAGE_INDICATOR), Directional<DamageIndicator>
         class Dolphin : Single<Dolphin>(Particle.DOLPHIN), Offsettable<Dolphin>
-        class DragonBreath : Single<DragonBreath>(Particle.DRAGON_BREATH), Directional<DragonBreath>
+        class DragonBreath : Single<DragonBreath>(Particle.DRAGON_BREATH), Directional<DragonBreath> {
+            fun power(power: Float) = apply { innerBuilder.data(power) }
+        }
         class DrippingDripstoneLava : Single<DrippingDripstoneLava>(Particle.DRIPPING_DRIPSTONE_LAVA), Offsettable<DrippingDripstoneLava>
         class DrippingDripstoneWater : Single<DrippingDripstoneWater>(Particle.DRIPPING_DRIPSTONE_WATER), Offsettable<DrippingDripstoneWater>
         class DrippingHoney : Single<DrippingHoney>(Particle.DRIPPING_HONEY), Offsettable<DrippingHoney>
@@ -156,7 +158,7 @@ sealed class PylonParticleBuilder<S : PylonParticleBuilder<S>>(val innerBuilder:
         class Firework : Single<Firework>(Particle.FIREWORK), Directional<Firework>
         class Fishing : Single<Fishing>(Particle.FISHING), Directional<Fishing>
         class Flame : Single<Flame>(Particle.FLAME), Directional<Flame>
-        class Flash : Single<Flash>(Particle.FLASH), Directional<Flash>
+        class Flash : Single<Flash>(Particle.FLASH), Directional<Flash>, Colored<Flash>
         class Glow : Single<Glow>(Particle.GLOW), Offsettable<Glow>, Rising<Glow>
         class GlowSquidInk : Single<GlowSquidInk>(Particle.GLOW_SQUID_INK), Directional<GlowSquidInk>
         class Gust : Single<Gust>(Particle.GUST), Offsettable<Gust>
