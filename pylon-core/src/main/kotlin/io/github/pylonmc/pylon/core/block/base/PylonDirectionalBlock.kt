@@ -9,5 +9,5 @@ import org.bukkit.block.BlockFace
  * Internally only used for rotating [PylonBlock.blockTextureEntity]s.
  */
 interface PylonDirectionalBlock {
-    fun getFacing(): BlockFace
+    fun getFacing(): BlockFace?
 }

@@ -135,10 +135,10 @@ open class PylonBlock internal constructor(val block: Block) {
      * use [updateBlockTexture].
      *
      * By default, this method sets the item display to be at the center of the block, using the
-     * item returned by [getItem] with [BlockItemContext.BlockTexture] (or a barrier if none is
-     * provided), set's its item model to air, making it invisible for players without a resource
-     * pack, and scales it to 1.00085f in all directions to prevent z-fighting with the vanilla
-     * block model. If the block is directional (either by implementing [PylonDirectionalBlock],
+     * item returned by [getBlockTextureItem] (or a barrier if none is provided), set's its item
+     * model to air, making it invisible for players without a resource pack, scales it to
+     * 1.00085f in all directions to prevent z-fighting with the vanilla block model, and maxes its
+     * brightness. If the block is directional (either by implementing [PylonDirectionalBlock],
      * or by having block data that is [Orientable], [Directional], or [Rotatable]), the entity
      * is rotated to face the same direction as the block.
      */
@@ -149,24 +149,25 @@ open class PylonBlock internal constructor(val block: Block) {
         val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
         item.editMeta { itemMeta -> itemMeta.itemModel = NamespacedKey.minecraft("air") }
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
-        meta.scale = Vector3f(1.00085f, 1.00085f, 1.00085f)
+        meta.brightnessOverride = 15 shl 4 or 15 shl 20;
+        meta.scale = Vector3f(1.0009f, 1.0009f, 1.0009f)
         meta.width = 0f
         meta.height = 0f
 
         val blockData = block.blockData
-        var facing: BlockFace? = null
-        if (this@PylonBlock is PylonDirectionalBlock) {
-            facing = this@PylonBlock.getFacing()
-        } else if (blockData is Orientable) {
-            facing = when (blockData.axis) {
-                Axis.X -> BlockFace.EAST
-                Axis.Y -> BlockFace.UP
-                Axis.Z -> BlockFace.SOUTH
+        var facing = (this@PylonBlock as? PylonDirectionalBlock)?.getFacing()
+        if (facing == null) {
+            if (blockData is Orientable) {
+                facing = when (blockData.axis) {
+                    Axis.X -> BlockFace.EAST
+                    Axis.Y -> BlockFace.UP
+                    Axis.Z -> BlockFace.SOUTH
+                }
+            } else if (blockData is Directional) {
+                facing = blockData.facing
+            } else if (blockData is Rotatable) {
+                facing = blockData.rotation
             }
-        } else if (blockData is Directional) {
-            facing = blockData.facing
-        } else if (blockData is Rotatable) {
-            facing = blockData.rotation
         }
 
         if (facing != null) {
