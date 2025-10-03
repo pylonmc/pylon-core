@@ -10,11 +10,13 @@ import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
 import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
+import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -27,9 +29,11 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
@@ -76,10 +80,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
      * A block display that represents this block, showing the player what block
      * needs to be placed in a specific location.
      */
-    class MultiblockGhostBlock(entity: BlockDisplay, val name: String) :
-        PylonEntity<BlockDisplay>(KEY, entity), PylonInteractEntity {
+    class MultiblockGhostBlock(entity: ItemDisplay, val name: String) :
+        PylonEntity<ItemDisplay>(KEY, entity), PylonInteractEntity {
 
-        constructor(entity: BlockDisplay)
+        constructor(entity: ItemDisplay)
                 : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
 
         override fun onInteract(event: PlayerInteractEntityEvent) {
@@ -114,7 +118,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         override fun matches(block: Block): Boolean = !BlockStorage.isPylonBlock(block) && block.type in materials
 
         override fun spawnGhostBlock(block: Block): UUID {
-            val display = BlockDisplayBuilder()
+            val display = ItemDisplayBuilder()
                 .material(materials.first())
                 .glow(Color.WHITE)
                 .transformation(TransformBuilder().scale(0.5))
@@ -123,12 +127,11 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
             if (materials.size > 1) {
                 PylonCore.launch {
-                    val datas = materials.map(Material::createBlockData)
                     var i = 0
                     while (display.isValid) {
-                        display.block = datas[i]
+                        display.setItemStack(ItemStack(materials[i]))
                         i++
-                        i %= datas.size
+                        i %= materials.size
                         delay(1.seconds)
                     }
                 }
@@ -148,8 +151,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
         override fun spawnGhostBlock(block: Block): UUID {
             val schema = PylonRegistry.BLOCKS[key]
                 ?: throw IllegalArgumentException("Block schema $key does not exist")
-            val display = BlockDisplayBuilder()
-                .material(schema.material)
+            val display = ItemDisplayBuilder()
+                .itemStack(ItemStackBuilder.of(schema.material).addCustomModelDataString(key.toString()))
                 .glow(Color.WHITE)
                 .transformation(TransformBuilder().scale(0.5))
                 .build(block.location.toCenterLocation())

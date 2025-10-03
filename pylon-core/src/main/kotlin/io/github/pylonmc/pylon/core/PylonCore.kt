@@ -142,7 +142,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonItem.register<PylonGuide>(PylonGuide.STACK)
         PylonGuide.hideItem(PylonGuide.KEY)
 
-        PylonEntity.register<BlockDisplay, PylonSimpleMultiblock.MultiblockGhostBlock>(
+        PylonEntity.register<ItemDisplay, PylonSimpleMultiblock.MultiblockGhostBlock>(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
         )
 
