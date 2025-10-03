@@ -2,24 +2,27 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.content.guide.PylonGuide
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.recipe.RecipeInput
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
+import org.bukkit.Registry
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -166,7 +169,27 @@ class ItemButton @JvmOverloads constructor(
 
                 ClickType.MIDDLE -> {
                     if (player.hasPermission("pylon.command.give")) {
-                        player.setItemOnCursor(currentStack)
+                        val clonedUnkown = currentStack.clone()
+                        val pylonItem = PylonItem.fromStack(clonedUnkown)
+
+                        if (pylonItem == null) {
+                            if (clonedUnkown.persistentDataContainer.isEmpty) {
+                                // item is vanilla
+                                val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
+                                val clonedVanilla = ItemStack(type, clonedUnkown.amount)
+                                player.setItemOnCursor(clonedVanilla)
+                            } else {
+                                // item might be special, keep it as is
+                                player.setItemOnCursor(clonedUnkown)
+                            }
+                        } else {
+                            // pylon item handling
+                            // maybe make getting key public?
+                            val key = pylonItem.stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
+                            val clonedPylon = PylonRegistry.ITEMS[key]!!.itemStack.clone()
+                            clonedPylon.amount = clonedUnkown.amount
+                            player.setItemOnCursor(clonedPylon)
+                        }
                     }
                 }
 
