@@ -27,7 +27,7 @@ open class PylonFluid(
     private val tags: MutableList<PylonFluidTag>,
 ) : Keyed {
 
-    val item by lazy {
+    private val internalItem by lazy {
         val builder = ItemStackBuilder.of(material)
             .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}"))
             .addCustomModelDataString(key.toString())
@@ -40,6 +40,9 @@ open class PylonFluid(
 
         builder.build()
     }
+
+    val item
+        get() = internalItem.clone()
 
     constructor(key: NamespacedKey, material: Material, vararg tags: PylonFluidTag) : this(
         key,
