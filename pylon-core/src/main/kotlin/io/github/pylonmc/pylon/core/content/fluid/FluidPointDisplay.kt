@@ -22,7 +22,6 @@ class FluidPointDisplay(entity: ItemDisplay) : PylonEntity<ItemDisplay>(KEY, ent
         @JvmStatic
         fun make(point: VirtualFluidPoint, translation: Vector): FluidPointDisplay {
             val display = ItemDisplayBuilder()
-                .material(point.type.material)
                 .brightness(7)
                 .transformation(TransformBuilder()
                     .translate(translation.toVector3d())
