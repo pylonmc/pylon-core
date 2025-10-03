@@ -184,9 +184,7 @@ class ItemButton @JvmOverloads constructor(
                             }
                         } else {
                             // pylon item handling
-                            // maybe make getting key public?
-                            val key = pylonItem.stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
-                            val clonedPylon = PylonRegistry.ITEMS[key]!!.itemStack.clone()
+                            val clonedPylon = pylonItem.schema.itemStack
                             clonedPylon.amount = clonedUnkown.amount
                             player.setItemOnCursor(clonedPylon)
                         }
