@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translator
 import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder
+import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.customMiniMessage
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -176,9 +177,11 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
         @JvmName("translateItem")
         @Suppress("UnstableApiUsage")
         fun ItemStack.translate(locale: Locale, arguments: List<PylonArgument> = emptyList()) {
+            val item = PylonItem.fromStack(this)
+            val usedArguments = item?.getPlaceholders() ?: arguments
 
             editData(DataComponentTypes.ITEM_NAME) {
-                val translated = GlobalTranslator.render(it.withArguments(arguments), locale)
+                val translated = GlobalTranslator.render(it.withArguments(usedArguments), locale)
                 if (translated is TranslatableComponent && translated.fallback() != null) {
                     Component.text(translated.fallback()!!)
                 } else {
@@ -187,7 +190,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             }
             editData(DataComponentTypes.LORE) { lore ->
                 val newLore = lore.lines().flatMap { line ->
-                    val translated = GlobalTranslator.render(line.withArguments(arguments), locale)
+                    val translated = GlobalTranslator.render(line.withArguments(usedArguments), locale)
                     val encoded = LineWrapEncoder.encode(translated)
                     val wrapped = encoded.copy(
                         lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
