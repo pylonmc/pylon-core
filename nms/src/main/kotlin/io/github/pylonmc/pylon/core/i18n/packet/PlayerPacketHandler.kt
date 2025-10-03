@@ -12,20 +12,36 @@ import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
+import net.minecraft.network.HashedPatchMap
+import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.util.HashOps
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.display.*
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import java.util.WeakHashMap
 import java.util.logging.Level
+import org.bukkit.inventory.ItemStack as BukkitItemStack
+
 
 // Much inspiration has been taken from https://github.com/GuizhanCraft/SlimefunTranslation
 // with permission from the author
 class PlayerPacketHandler(private val player: ServerPlayer, private val handler: PlayerTranslationHandler) {
 
-    private val connection = player.connection
-    private val channel = connection.connection.channel
+    private val channel = player.connection.connection.channel
+
+    private val hashGenerator: HashedPatchMap.HashGenerator
+
+    init {
+        // (PaperMC server) https://discord.com/channels/289587909051416579/555462289851940864/1371651093972385823
+        val registryOps = player.registryAccess().createSerializationContext(HashOps.CRC32C_INSTANCE)
+        hashGenerator = HashedPatchMap.HashGenerator { component ->
+            component.encodeValue(registryOps)
+                .getOrThrow { IllegalArgumentException("Failed to hash $component: $it") }
+                .asInt()
+        }
+    }
 
     fun register() {
         channel.pipeline().addBefore("packet_handler", HANDLER_NAME, PacketHandler())
@@ -34,14 +50,6 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     fun unregister() {
         channel.eventLoop().submit {
             channel.pipeline().remove(HANDLER_NAME)
-        }
-    }
-
-    fun resendInventory() {
-        val inventory = player.containerMenu
-        for (slot in 0..45) {
-            val item = inventory.getSlot(slot).item
-            player.containerSynchronizer.sendSlotChange(inventory, slot, item)
         }
     }
 
@@ -55,6 +63,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                 }
 
                 is ClientboundContainerSetSlotPacket -> translateItem(packet.item)
+                is ClientboundSetCursorItemPacket -> translateItem(packet.contents)
                 is ClientboundRecipeBookAddPacket -> {
                     // This requires a full copy for some reason
                     packet = ClientboundRecipeBookAddPacket(
@@ -91,12 +100,16 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                     // force server to resend the item
                     packet = ServerboundContainerClickPacket(
                         packet.containerId,
-                        -1,
+                        packet.stateId,
                         packet.slotNum,
                         packet.buttonNum,
                         packet.clickType,
                         packet.changedSlots,
-                        packet.carriedItem,
+                        if (packet.changedSlots.size == 1) {
+                            HashedStack.create(player.containerMenu.getSlot(packet.changedSlots.keys.single()).item, hashGenerator)
+                        } else {
+                            HashedStack.create(player.containerMenu.carried, hashGenerator)
+                        }
                     )
                 }
 
@@ -171,10 +184,10 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    private inline fun handleItem(item: ItemStack, handler: (PylonItem) -> Unit) {
+    private inline fun handleItem(item: ItemStack, handler: (BukkitItemStack) -> Unit) {
         if (item.isEmpty) return
         try {
-            handler(PylonItem.fromStack(CraftItemStack.asCraftMirror(item)) ?: return)
+            handler(CraftItemStack.asCraftMirror(item))
         } catch (e: Throwable) {
             // Log the error nicely instead of kicking the player off
             // and causing two days of headache. True story.
@@ -197,7 +210,8 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 private val names = WeakHashMap<PylonItemSchema, Component>()
 private val lores = WeakHashMap<PylonItemSchema, ItemLore>()
 
-private fun reset(item: PylonItem) {
+private fun reset(stack: BukkitItemStack) {
+    val item = PylonItem.fromStack(stack) ?: return
     val name = names.getOrPut(item.schema) {
         item.schema.itemStack.getData(DataComponentTypes.ITEM_NAME)!!
     }

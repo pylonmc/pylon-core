@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
@@ -14,9 +13,7 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.recipe.RecipeInput
-import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.datacomponent.item.ItemLore
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
@@ -86,18 +83,7 @@ class ItemButton @JvmOverloads constructor(
                 return ItemStackBuilder.of(displayStack)
             }
 
-            val placeholders = item.getPlaceholders()
             val builder = ItemStackBuilder.of(displayStack.clone())
-                .editData(DataComponentTypes.LORE) { lore ->
-                    ItemLore.lore(lore.lines().map { it.withArguments(placeholders) })
-                }
-
-            // buffoonery to bypass InvUI's translation mess
-            // Search message 'any idea why items displayed in InvUI are not having placeholders' on Pylon's Discord for more info
-            builder.editData(DataComponentTypes.ITEM_NAME) {
-                it.withArguments(placeholders)
-            }
-
             if (item.isDisabled) {
                 builder.set(DataComponentTypes.ITEM_MODEL, Material.STRUCTURE_VOID.key)
             }
@@ -178,8 +164,6 @@ class ItemButton @JvmOverloads constructor(
     }
 
     companion object {
-        const val CYCLE_INTERVAL = 10
-
         @JvmStatic
         fun from(stack: ItemStack?): Item {
             if (stack == null) {
