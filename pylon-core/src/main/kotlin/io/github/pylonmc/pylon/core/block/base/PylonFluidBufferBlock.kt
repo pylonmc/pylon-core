@@ -130,7 +130,7 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
     }
 
     override fun fluidAmountRequested(fluid: PylonFluid, deltaSeconds: Double): Double
-            = if (hasFluid(fluid)) fluidSpaceRemaining(fluid) else 0.0
+            = if (hasFluid(fluid) && fluidData(fluid).input) fluidSpaceRemaining(fluid) else 0.0
 
     override fun getSuppliedFluids(deltaSeconds: Double): Map<PylonFluid, Double>
             = fluidBuffers.filter { it.value.output }.mapValues { it.value.amount }
