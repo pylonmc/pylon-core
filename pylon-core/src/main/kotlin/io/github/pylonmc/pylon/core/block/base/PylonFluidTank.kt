@@ -90,7 +90,13 @@ interface PylonFluidTank : PylonFluidBlock {
      */
     fun setFluid(amount: Double): Boolean {
         if (canSetFluid(amount)) {
+            val original = fluidData.amount
             fluidData.amount = max(0.0, amount)
+
+            if (original > amount && amount < 1.0e-6) {
+                setFluidType(null)
+                setFluid(0.0)
+            }
             return true
         }
         return false
@@ -150,10 +156,6 @@ interface PylonFluidTank : PylonFluidBlock {
     override fun onFluidRemoved(fluid: PylonFluid, amount: Double) {
         check(fluid == fluidType)
         removeFluid(amount)
-        if (fluidData.amount < 1.0e-6) {
-            setFluidType(null)
-            setFluid(0.0)
-        }
     }
 
     @ApiStatus.Internal
