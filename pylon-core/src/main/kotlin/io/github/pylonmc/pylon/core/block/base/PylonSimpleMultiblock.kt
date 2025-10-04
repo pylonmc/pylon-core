@@ -54,7 +54,7 @@ import kotlin.time.Duration.Companion.seconds
  * If you need something more flexible (eg: a fluid tank that can have up to 10
  * fluid casings added to increase the capacity), see [PylonMultiblock].
  */
-interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
+interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, PylonDirectionalBlock {
 
     /**
      * Represents a single block of a multiblock.
@@ -188,7 +188,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
      * The 'direction' we expect the multiblock to be built in. This is not the *actual* direction that
      * the multiblock has been built in.
      */
-    fun getFacing(): BlockFace?
+    override fun getFacing(): BlockFace?
             = simpleMultiblockData.facing
 
     /**
