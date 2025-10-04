@@ -8,9 +8,9 @@ interface PylonFluidPointDirectional : PylonDirectionalBlock {
 
     override fun getFacing(): BlockFace? {
         if (this is PylonEntityHolderBlock) {
-            return getDirectionalPoint()?.let { getHeldEntity(FluidPointInteraction::class.java, it)?.face }
-                ?: getHeldEntity(FluidPointInteraction::class.java, "input")?.face
-                ?: getHeldEntity(FluidPointInteraction::class.java, "output")?.face
+            return getDirectionalPoint()?.let { getHeldPylonEntity(FluidPointInteraction::class.java, it)?.face }
+                ?: getHeldPylonEntity(FluidPointInteraction::class.java, "input")?.face
+                ?: getHeldPylonEntity(FluidPointInteraction::class.java, "output")?.face
         }
         return null
     }
