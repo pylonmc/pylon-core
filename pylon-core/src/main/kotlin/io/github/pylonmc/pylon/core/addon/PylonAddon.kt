@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -64,6 +65,10 @@ interface PylonAddon : Keyed {
      */
     @ApiStatus.NonExtendable
     fun registerWithPylon() {
+        if (!Bukkit.getPluginManager().isPluginEnabled("PylonCore")) {
+            throw IllegalStateException("PylonCore is not installed or not enabled")
+        }
+
         PylonRegistry.ADDONS.register(this)
         if (!suppressAddonNameWarning) {
             for (locale in languages) {

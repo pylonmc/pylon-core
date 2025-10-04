@@ -107,6 +107,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
                 checkName(schema)
             }
             PylonRegistry.ITEMS.register(schema)
+
+            // pre-merge configs and check for constructor errors
+            fromStack(schema.itemStack)
         }
 
         @JvmStatic
@@ -142,11 +145,11 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         /**
-         * Suppresses warnings about missing/incorrect translation keys for item names and lores
+         * Suppresses warnings about missing/incorrect translation keys for the item name and lore
          * for the given item key
          */
         @JvmStatic
-        fun supressNameWarnings(key: NamespacedKey) {
+        fun suppressNameWarnings(key: NamespacedKey) {
             nameWarningsSuppressed.add(key)
         }
 
