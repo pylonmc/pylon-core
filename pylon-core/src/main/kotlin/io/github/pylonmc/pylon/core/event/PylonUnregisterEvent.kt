@@ -5,6 +5,9 @@ import org.bukkit.Keyed
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
+/**
+ * Called when something is unregistered from a registry.
+ */
 class PylonUnregisterEvent(
     val registry: PylonRegistry<*>,
     val value: Keyed,

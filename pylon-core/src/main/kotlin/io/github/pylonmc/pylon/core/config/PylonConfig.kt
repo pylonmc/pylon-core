@@ -3,6 +3,9 @@ package io.github.pylonmc.pylon.core.config
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 
+/**
+ * The config options for Pylon Core.
+ */
 object PylonConfig {
 
     private val config = Config(PylonCore, "config.yml")
@@ -44,6 +47,9 @@ object PylonConfig {
     val researchMaxConfettiAmount = config.get("research.confetti.max-amount", ConfigAdapter.INT, 700)
 
     @JvmStatic
+    val researchSounds = config.getOrThrow("research.sounds", ConfigAdapter.MAP.from(ConfigAdapter.LONG, ConfigAdapter.RANDOMIZED_SOUND))
+
+    @JvmStatic
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
     @JvmStatic
@@ -57,4 +63,5 @@ object PylonConfig {
 
     @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
+
 }

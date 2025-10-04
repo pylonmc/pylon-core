@@ -10,7 +10,7 @@ class PylonMultiblockUnformEvent(
     val pylonBlock: PylonBlock,
 ) : Event() {
     override fun getHandlers(): HandlerList
-        = handlerList
+            = handlerList
 
     companion object {
         @JvmStatic

@@ -5,6 +5,9 @@ import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType
 
+/**
+ * A [PersistentDataType] that can be used with any class that implements [Keyed].
+ */
 abstract class KeyedPersistentDataType<T : Keyed>(val type: Class<T>) : PersistentDataType<String, T> {
 
     override fun getPrimitiveType(): Class<String> = String::class.java
@@ -23,6 +26,12 @@ abstract class KeyedPersistentDataType<T : Keyed>(val type: Class<T>) : Persiste
         return retrieve(key)
     }
 
+    /**
+     * Gets the value of the keyed type corresponding to [T].
+     *
+     * For example, if you are using this for [io.github.pylonmc.pylon.core.item.research.Research]es,
+     * you would want to do `PylonRegistry.RESEARCHES.getOrThrow(key)`.
+     */
     abstract fun retrieve(key: NamespacedKey): T
 
     companion object {

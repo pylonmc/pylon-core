@@ -3,6 +3,11 @@ package io.github.pylonmc.pylon.core.entity.display.transform
 import org.joml.Vector3d
 import org.joml.Vector3f
 
+/**
+ * Creates a transformation that represents a line between two points.
+ *
+ * You must specify [from], [to], and [thickness]; other fields are optional.
+ */
 class LineBuilder {
 
     var translation: Vector3f = Vector3f()

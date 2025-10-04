@@ -4,7 +4,8 @@ import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 
 /**
- * The configuration for a WAILA bar, returned by a block or entity
+ * The configuration for a WAILA bossbar (the bar shown at the top of your
+ * screen when looking at a block).
  */
 @JvmRecord
 data class WailaConfig @JvmOverloads constructor(

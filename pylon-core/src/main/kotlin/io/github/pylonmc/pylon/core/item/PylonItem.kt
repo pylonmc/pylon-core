@@ -34,13 +34,23 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     private val key =
         stack.persistentDataContainer.get(PylonItemSchema.pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)!!
+
+    /**
+     * Additional data about the item's type.
+     */
     val schema = PylonRegistry.ITEMS.getOrThrow(key)
+
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
     val isDisabled = key in PylonConfig.disabledItems
     val research get() = schema.research
 
+    /**
+     * Returns settings associated with the item.
+     *
+     * Shorthand for `Settings.get(getKey())`
+     */
     fun getSettings() = Settings.get(key)
 
     override fun equals(other: Any?): Boolean = key == (other as? PylonItem)?.key
@@ -49,8 +59,16 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
     override fun getKey(): NamespacedKey = key
 
+    /**
+     * Returns the list of placeholders to be substituted into the item's lore.
+     *
+     * Each placeholder is written as `%placeholder_name%` in the lore.
+     */
     open fun getPlaceholders(): List<PylonArgument> = emptyList()
 
+    /**
+     * Places the block associated with this item, if it exists.
+     */
     open fun place(context: BlockCreateContext): PylonBlock? = schema.place(context)
 
     companion object {
@@ -114,6 +132,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
         }
 
+        /**
+         * Checks if [stack] is a Pylon item.
+         */
         @JvmStatic
         @Contract("null -> false")
         fun isPylonItem(stack: ItemStack?): Boolean {

@@ -31,11 +31,31 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Represents an item in the guide.
+ *
+ * @param stacks The items to display. If multiple are provided, the button will automatically
+ * cycle through all of them. You must supply at least one item
+ */
 class ItemButton @JvmOverloads constructor(
     stacks: List<ItemStack>,
+
+    /**
+     * A function to apply to the button item after creating it.
+     */
     val preDisplayDecorator: (ItemStack, Player) -> ItemStack = { stack, _ -> stack }
 ) : AbstractItem() {
+
+    /**
+     * @param stacks The items to display. If multiple are provided, the button will automatically
+     * cycle through all of them. You must supply at least one item
+     */
     constructor(vararg stacks: ItemStack) : this(stacks.toList())
+
+    /**
+     * @param stacks The items to display. If multiple are provided, the button will automatically
+     * cycle through all of them. You must supply at least one item
+     */
     constructor(stack: ItemStack, preDisplayDecorator: (ItemStack, Player) -> ItemStack) : this(listOf(stack), preDisplayDecorator)
 
     val stacks = stacks.shuffled()
