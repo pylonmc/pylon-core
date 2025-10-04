@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.guide.pages.fluid
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
-import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.guide.pages.base.PagedGuidePage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
@@ -34,7 +34,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : PagedGuidePage {
     }
 
     override val item: ItemProvider
-        get() = fluid.getItem()
+        get() = ItemStackBuilder.of(fluid.item)
 
     override fun getKey() = KEY
 
@@ -50,7 +50,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : PagedGuidePage {
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', GuiItems.pagePrevious())
         .addIngredient('b', BackButton())
-        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(fluid.getItem().build())))
+        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(fluid.item)))
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)

@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.fluid.FluidManager
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.GameMode
 import org.bukkit.entity.ItemDisplay
@@ -121,7 +122,9 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
                     .build()
                     .buildForItemDisplay()
                 )
-                .material(pipe.material)
+                .itemStack(ItemStackBuilder.of(pipe.material)
+                    .addCustomModelDataString("fluid_pipe_display:${pipe.key.key}")
+                )
                 .build(centerLocation)
         }
 
