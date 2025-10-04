@@ -14,9 +14,11 @@ import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.RandomizedSound
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.delay
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
@@ -25,7 +27,6 @@ import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
-import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -99,16 +100,10 @@ data class Research(
             val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
             ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
 
-            fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {
+            for ((delay, sound) in PylonConfig.researchSounds) {
                 Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
-                    player.playSound(player.location, this, 1.5f, pitch)
+                    player.playSound(sound.create(), Sound.Emitter.self())
                 }, delay)
-            }
-
-            repeat(2) {
-                Sound.ENTITY_FIREWORK_ROCKET_BLAST.playSoundLater(3L * it)
-                Sound.ENTITY_PLAYER_LEVELUP.playSoundLater(6L * it, 0.9f)
-                Sound.ENTITY_FIREWORK_ROCKET_LAUNCH.playSoundLater(9L * it)
             }
         }
     }
