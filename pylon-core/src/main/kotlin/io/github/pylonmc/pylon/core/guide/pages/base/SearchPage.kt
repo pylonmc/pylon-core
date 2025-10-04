@@ -46,14 +46,14 @@ abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStatic
             .addIngredient('<', GuiItems.pagePrevious())
             .addIngredient('>', GuiItems.pageNext())
             .setContent(getItems(player, search))
-            .addPageChangeHandler { _, newPage -> searchPages[player.uniqueId] = newPage }
+            .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
             .build()
         val upperGui = Gui.normal()
             .setStructure("# S #")
             .addIngredient('S', searchSpecifiersStack)
             .addIngredient('#', GuiItems.background(search))
             .build()
-        lowerGui.setPage(searchPages.getOrDefault(player.uniqueId, 0))
+        loadCurrentPage(player, lowerGui)
 
         try {
             AnvilWindow.split()
@@ -146,7 +146,6 @@ abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStatic
 
         private val searchAlgorithm = JaroWinkler()
         private val searches = mutableMapOf<UUID, String>()
-        private val searchPages = mutableMapOf<UUID, Int>()
 
         private fun weight(search: String, text: String): Double? {
             val distance = searchAlgorithm.distance(text, search)
