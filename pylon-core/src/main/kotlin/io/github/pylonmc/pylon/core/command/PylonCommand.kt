@@ -13,7 +13,6 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
-import io.github.pylonmc.pylon.core.command.confetti
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
@@ -33,6 +32,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.gametest.GameTestConfig
 import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
+import io.github.pylonmc.pylon.core.util.vanillaDisplayName
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
@@ -44,7 +44,10 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import io.papermc.paper.math.FinePosition
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.JoinConfiguration
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -55,7 +58,25 @@ import io.papermc.paper.math.BlockPosition as PaperBlockPosition
 private val guide = buildCommand("guide") {
     permission("pylon.command.guide")
     executesWithPlayer { player ->
+        PylonMetrics.onCommandRun("/py guide")
         player.inventory.addItem(PylonGuide.STACK)
+    }
+    argument("players", ArgumentTypes.players()) {
+        permission("pylon.command.guide.others")
+        executes {
+            PylonMetrics.onCommandRun("/py guide")
+            val players = getArgument<List<Player>>("players")
+            for (player in players) {
+                player.inventory.addItem(PylonGuide.STACK)
+            }
+            val singular = players.size == 1
+            source.sender.sendVanillaFeedback(
+                "give.success." + if (singular) "single" else "multiple",
+                Component.text(1),
+                PylonGuide.STACK.vanillaDisplayName(),
+                if (singular) players[0].name() else Component.text(players.size)
+            )
+        }
     }
 }
 
@@ -67,9 +88,17 @@ private val give = buildCommand("give") {
 
             fun givePlayers(context: CommandContext<CommandSourceStack>, amount: Int) {
                 val item = context.getArgument<PylonItemSchema>("item")
-                for (player in context.getArgument<List<Player>>("players")) {
+                val players = context.getArgument<List<Player>>("players")
+                val singular = players.size == 1
+                for (player in players) {
                     player.inventory.addItem(item.itemStack.asQuantity(amount))
                 }
+                context.source.sender.sendVanillaFeedback(
+                    "give.success." + if (singular) "single" else "multiple",
+                    Component.text(amount),
+                    item.itemStack.vanillaDisplayName(),
+                    if (singular) players[0].name() else Component.text(players.size)
+                )
             }
 
             permission("pylon.command.give")
@@ -94,6 +123,7 @@ private val debug = buildCommand("debug") {
     executesWithPlayer { player ->
         PylonMetrics.onCommandRun("/py debug")
         player.inventory.addItem(DebugWaxedWeatheredCutCopperStairs.STACK)
+        player.sendVanillaFeedback("give.success.single", Component.text(1), DebugWaxedWeatheredCutCopperStairs.STACK.vanillaDisplayName(), player.name())
     }
 }
 
@@ -103,22 +133,36 @@ private val key = buildCommand("key") {
         PylonMetrics.onCommandRun("/py key")
         val item = PylonItem.fromStack(player.inventory.getItem(EquipmentSlot.HAND))
         if (item == null) {
-            player.sendMessage(Component.translatable("pylon.pyloncore.message.command.key.no_item"))
+            player.sendFeedback("key.no_item")
             return@executesWithPlayer
         }
-        player.sendMessage(item.key.toString())
+        player.sendMessage(Component.text(item.key.toString())
+            .hoverEvent(HoverEvent.showText(Component.translatable("pylon.pyloncore.message.command.key.hover")))
+            .clickEvent(ClickEvent.copyToClipboard(item.key.toString())))
     }
 }
 
 private val setblock = buildCommand("setblock") {
-    argument("location", ArgumentTypes.blockPosition()) {
+    argument("pos", ArgumentTypes.blockPosition()) {
         argument("block", RegistryCommandArgument(PylonRegistry.BLOCKS)) {
             permission("pylon.command.setblock")
-            executesWithPlayer { player ->
+            executes {
                 PylonMetrics.onCommandRun("/py setblock")
-                val location = getArgument<PaperBlockPosition>("location")
+                val location = getArgument<PaperBlockPosition>("pos").toLocation(source.location.world)
+                if (!location.world.isPositionLoaded(location)) {
+                    source.sender.sendMessage(Component.translatable("argument.pos.unloaded"))
+                    return@executes
+                } else if (location.blockX !in -30000000..30000000 || location.blockZ !in -30000000..30000000 || location.blockY !in location.world.minHeight..location.world.maxHeight) {
+                    source.sender.sendMessage(Component.translatable("argument.pos.outofworld"))
+                    return@executes
+                }
+
                 val block = getArgument<PylonBlockSchema>("block")
-                BlockStorage.placeBlock(location.toLocation(player.world), block.key)
+                val failed = BlockStorage.placeBlock(location, block.key) == null
+                source.sender.sendVanillaFeedback(
+                    if (failed) "setblock.failed" else "setblock.success",
+                    Component.text(location.blockX), Component.text(location.blockY), Component.text(location.blockZ)
+                )
             }
         }
     }
@@ -129,33 +173,35 @@ private val waila = buildCommand("waila") {
     executesWithPlayer { player ->
         PylonMetrics.onCommandRun("/py waila")
         player.wailaEnabled = !player.wailaEnabled
+        player.sendFeedback(if (player.wailaEnabled) "waila.enabled" else "waila.disabled")
     }
 }
 
 private val gametest = buildCommand("gametest") {
-    argument("location", ArgumentTypes.blockPosition()) {
+    argument("pos", ArgumentTypes.blockPosition()) {
         argument("test", RegistryCommandArgument(PylonRegistry.GAMETESTS)) {
             permission("pylon.command.gametest")
             executesWithPlayer { player ->
                 PylonMetrics.onCommandRun("/py gametest")
-                val location = getArgument<PaperBlockPosition>("location")
+                val position = BlockPosition(getArgument<PaperBlockPosition>("pos").toLocation(player.world))
                 val test = getArgument<GameTestConfig>("test")
+                player.sendFeedback(
+                    "gametest.started",
+                    PylonArgument.of("test", test.key.toString()),
+                    PylonArgument.of("location", position.toString())
+                )
                 PylonCore.launch {
-                    val result = test.launch(BlockPosition(location.toLocation(player.world))).await()
+                    val result = test.launch(position).await()
                     if (result != null) {
-                        player.sendMessage(
-                            Component.translatable(
-                                "pylon.pyloncore.message.command.gametest.failed",
-                                PylonArgument.of("test", test.key.toString()),
-                                PylonArgument.of("reason", result.message ?: "Unknown error")
-                            )
+                        player.sendFeedback(
+                            "gametest.failed",
+                            PylonArgument.of("test", test.key.toString()),
+                            PylonArgument.of("reason", result.message ?: "Unknown error")
                         )
                     } else {
-                        player.sendMessage(
-                            Component.translatable(
-                                "pylon.pyloncore.message.command.gametest.success",
-                                PylonArgument.of("test", test.key.toString())
-                            )
+                        player.sendFeedback(
+                            "gametest.success",
+                            PylonArgument.of("test", test.key.toString())
                         )
                     }
                 }
@@ -170,12 +216,10 @@ private val researchAdd = buildCommand("add") {
             for (player in context.getArgument<List<Player>>("players")) {
                 for (res in researches) {
                     player.addResearch(res, false, confetti)
-                    context.source.sender.sendMessage(
-                        Component.translatable(
-                            "pylon.pyloncore.message.command.research.added",
-                            PylonArgument.of("research", res.name),
-                            PylonArgument.of("player", player.name)
-                        )
+                    context.source.sender.sendFeedback(
+                        "research.added",
+                        PylonArgument.of("research", res.name),
+                        PylonArgument.of("player", player.name)
                     )
                 }
             }
@@ -202,26 +246,25 @@ private val researchAdd = buildCommand("add") {
 }
 
 private val researchList = buildCommand("list") {
-    fun listResearches(sender: CommandSender, player: Player) {
+    fun listResearches(sender: CommandSender, player: Player, type: String) {
         val researches = Research.getResearches(player)
         if (researches.isEmpty()) {
-            sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.research.list.none"))
+            sender.sendFeedback("research.list.none$type", PylonArgument.of("player", player.name))
             return
         }
         val names = Component.join(JoinConfiguration.commas(true), researches.map(Research::name))
-        sender.sendMessage(
-            Component.translatable(
-                "pylon.pyloncore.message.command.research.list.discovered",
-                PylonArgument.of("count", researches.size),
-                PylonArgument.of("list", names)
-            )
+        sender.sendFeedback(
+            "research.list.discovered$type",
+            PylonArgument.of("player", player.name),
+            PylonArgument.of("count", researches.size),
+            PylonArgument.of("list", names)
         )
     }
 
     permission("pylon.command.research.list.self")
     executesWithPlayer { player ->
         PylonMetrics.onCommandRun("/py research list")
-        listResearches(player, player)
+        listResearches(player, player, "_self")
     }
 
     argument("player", ArgumentTypes.player()) {
@@ -229,7 +272,7 @@ private val researchList = buildCommand("list") {
         executes { sender ->
             PylonMetrics.onCommandRun("/py research list")
             val player = getArgument<Player>("player")
-            listResearches(sender, player)
+            listResearches(sender, player, "_other")
         }
     }
 }
@@ -241,31 +284,25 @@ private val researchDiscover = buildCommand("discover") {
             PylonMetrics.onCommandRun("/py research discover")
             val res = getArgument<Research>("research")
             if (player.hasResearch(res)) {
-                player.sendMessage(
-                    Component.translatable(
-                        "pylon.pyloncore.message.command.research.already_discovered",
-                        PylonArgument.of("research", res.name)
-                    )
+                player.sendFeedback(
+                    "research.already_discovered",
+                    PylonArgument.of("research", res.name)
                 )
                 return@executesWithPlayer
             }
             if (res.cost == null) {
-                player.sendMessage(
-                    Component.translatable(
-                        "pylon.pyloncore.message.command.research.cannot_unlock",
-                        PylonArgument.of("research", res.name)
-                    )
+                player.sendFeedback(
+                    "research.cannot_unlock",
+                    PylonArgument.of("research", res.name)
                 )
                 return@executesWithPlayer
             }
             if (player.researchPoints < res.cost) {
-                player.sendMessage(
-                    Component.translatable(
-                        "pylon.pyloncore.message.command.research.not_enough_points",
-                        PylonArgument.of("research", res.name),
-                        PylonArgument.of("points", player.researchPoints),
-                        PylonArgument.of("cost", res.cost)
-                    )
+                player.sendFeedback(
+                    "research.not_enough_points",
+                    PylonArgument.of("research", res.name),
+                    PylonArgument.of("points", player.researchPoints),
+                    PylonArgument.of("cost", res.cost)
                 )
                 return@executesWithPlayer
             }
@@ -282,12 +319,10 @@ private val researchRemove = buildCommand("remove") {
                 for (res in researches) {
                     if (player.hasResearch(res)) {
                         player.removeResearch(res)
-                        context.source.sender.sendMessage(
-                            Component.translatable(
-                                "pylon.pyloncore.message.command.research.removed",
-                                PylonArgument.of("research", res.name),
-                                PylonArgument.of("player", player.name)
-                            )
+                        context.source.sender.sendFeedback(
+                            "research.removed",
+                            PylonArgument.of("research", res.name),
+                            PylonArgument.of("player", player.name)
                         )
                     }
                 }
@@ -322,12 +357,10 @@ private val researchPointsSet = buildCommand("set") {
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
                     player.researchPoints = points
-                    sender.sendMessage(
-                        Component.translatable(
-                            "pylon.pyloncore.message.command.research.points.set",
-                            PylonArgument.of("player", player.name),
-                            PylonArgument.of("points", points)
-                        )
+                    sender.sendFeedback(
+                        "research.points.set",
+                        PylonArgument.of("player", player.name),
+                        PylonArgument.of("points", points)
                     )
                 }
             }
@@ -344,12 +377,10 @@ private val researchPointsAdd = buildCommand("add") {
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
                     player.researchPoints += points
-                    sender.sendMessage(
-                        Component.translatable(
-                            "pylon.pyloncore.message.command.research.points.added",
-                            PylonArgument.of("player", player.name),
-                            PylonArgument.of("points", points)
-                        )
+                    sender.sendFeedback(
+                        "research.points.added",
+                        PylonArgument.of("player", player.name),
+                        PylonArgument.of("points", points)
                     )
                 }
             }
@@ -366,12 +397,10 @@ private val researchPointsSubtract = buildCommand("subtract") {
                 val points = getArgument<Long>("points")
                 for (player in getArgument<List<Player>>("players")) {
                     player.researchPoints -= points
-                    sender.sendMessage(
-                        Component.translatable(
-                            "pylon.pyloncore.message.command.research.points.removed",
-                            PylonArgument.of("player", player.name),
-                            PylonArgument.of("points", points)
-                        )
+                    sender.sendFeedback(
+                        "research.points.removed",
+                        PylonArgument.of("player", player.name),
+                        PylonArgument.of("points", points)
                     )
                 }
             }
@@ -379,28 +408,26 @@ private val researchPointsSubtract = buildCommand("subtract") {
     }
 }
 
-private val researchPointsGet = buildCommand("get") {
+private val researchPointQuery = buildCommand("query") {
     fun getPoints(sender: CommandSender, player: Player) {
         val points = player.researchPoints
-        sender.sendMessage(
-            Component.translatable(
-                "pylon.pyloncore.message.command.research.points.get",
-                PylonArgument.of("player", player.name),
-                PylonArgument.of("points", points)
-            )
+        sender.sendFeedback(
+            "research.points.query",
+            PylonArgument.of("player", player.name),
+            PylonArgument.of("points", points)
         )
     }
 
-    permission("pylon.command.research.points.get.self")
+    permission("pylon.command.research.points.query.self")
     executesWithPlayer { player ->
-        PylonMetrics.onCommandRun("/py research points get")
+        PylonMetrics.onCommandRun("/py research points query")
         getPoints(player, player)
     }
 
     argument("player", ArgumentTypes.player()) {
-        permission("pylon.command.research.points.get")
+        permission("pylon.command.research.points.query")
         executes { sender ->
-            PylonMetrics.onCommandRun("/py research points get")
+            PylonMetrics.onCommandRun("/py research points query")
             val player = getArgument<Player>("player")
             getPoints(sender, player)
         }
@@ -411,7 +438,7 @@ private val researchPoints = buildCommand("points") {
     then(researchPointsSet)
     then(researchPointsAdd)
     then(researchPointsSubtract)
-    then(researchPointsGet)
+    then(researchPointQuery)
 }
 
 private val research = buildCommand("research") {
@@ -431,14 +458,12 @@ private val exposeRecipeConfig = buildCommand("exposerecipeconfig") {
                 val addon = getArgument<PylonAddon>("addon")
                 val recipeType = getArgument<RecipeType<*>>("recipe")
                 if (recipeType !is ConfigurableRecipeType) {
-                    sender.sendMessage(Component.translatable("pylon.pyloncore.message.command.exposerecipe.not-configurable"))
+                    sender.sendFeedback("exposerecipe.not-configurable")
                     return@executes
                 }
-                sender.sendMessage(
-                    Component.translatable(
-                        "pylon.pyloncore.message.command.exposerecipe.warning",
-                        PylonArgument.of("file", "plugins/PylonCore/${recipeType.filePath}")
-                    )
+                sender.sendFeedback(
+                    "exposerecipe.warning",
+                    PylonArgument.of("file", "plugins/PylonCore/${recipeType.filePath}")
                 )
                 mergeGlobalConfig(addon, recipeType.filePath, recipeType.filePath)
             }
@@ -452,12 +477,14 @@ private val confetti = buildCommand("confetti") {
         executesWithPlayer { player ->
             PylonMetrics.onCommandRun("/py confetti")
             ConfettiParticle.spawnMany(player.location, IntegerArgumentType.getInteger(this, "amount")).run()
+            player.sendVanillaFeedback("commands.particle.success", Component.text("pyloncore:confetti"))
         }
         argument("speed", DoubleArgumentType.doubleArg(0.0)) {
             permission("pylon.command.confetti")
             executesWithPlayer { player ->
                 PylonMetrics.onCommandRun("/py confetti")
                 ConfettiParticle.spawnMany(player.location, IntegerArgumentType.getInteger(this, "amount"), DoubleArgumentType.getDouble(this, "speed"))
+                player.sendVanillaFeedback("commands.particle.success", Component.text("pyloncore:confetti"))
             }
             argument("lifetime", IntegerArgumentType.integer(1)) {
                 permission("pylon.command.confetti")
@@ -469,6 +496,7 @@ private val confetti = buildCommand("confetti") {
                         DoubleArgumentType.getDouble(this, "speed"),
                         IntegerArgumentType.getInteger(this, "lifetime")
                     )
+                    player.sendVanillaFeedback("commands.particle.success", Component.text("pyloncore:confetti"))
                 }
             }
         }
@@ -504,7 +532,7 @@ internal val ROOT_COMMAND_PY_ALIAS = buildCommand("py") {
 @Suppress("UnstableApiUsage")
 internal inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
     return when (typeOf<T>()) {
-        typeOf<BlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
+        typeOf<PaperBlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
         typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)
         typeOf<Entity>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source).first()
         typeOf<FinePosition>() -> getArgument(name, FinePositionResolver::class.java).resolve(source)
@@ -515,4 +543,12 @@ internal inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(n
         typeOf<Rotation>() -> getArgument(name, RotationResolver::class.java).resolve(source)
         else -> getArgument(name, T::class.java)
     } as T
+}
+
+private fun CommandSender.sendFeedback(key: String, vararg args: ComponentLike) {
+    sendMessage(Component.translatable("pylon.pyloncore.message.command.$key").arguments(*args))
+}
+
+private fun CommandSender.sendVanillaFeedback(key: String, vararg args: ComponentLike) {
+    sendMessage(Component.translatable("commands.$key", *args))
 }
