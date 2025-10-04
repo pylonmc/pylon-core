@@ -5,6 +5,7 @@ package io.github.pylonmc.pylon.core.util.gui
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems.background
+import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.TooltipDisplay
 import net.kyori.adventure.text.Component
@@ -22,13 +23,15 @@ import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem
  * A utility class containing items commonly used in GUIs.
  */
 object GuiItems {
+    val pylonGuiItemKeyKey = pylonKey("gui_item_key")
+
     /**
      * A gray glass pane with no name or lore.
      */
     @JvmStatic
     @JvmOverloads
     fun background(name: String = ""): Item = SimpleItem(
-        ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
+        ItemStackBuilder.gui(Material.GRAY_STAINED_GLASS_PANE, pylonKey("background"))
             .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
@@ -39,7 +42,7 @@ object GuiItems {
     @JvmStatic
     @JvmOverloads
     fun backgroundBlack(name: String = ""): Item = SimpleItem(
-        ItemStackBuilder.of(Material.BLACK_STAINED_GLASS_PANE)
+        ItemStackBuilder.gui(Material.BLACK_STAINED_GLASS_PANE, pylonKey("background_black"))
             .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
     )
@@ -109,13 +112,13 @@ object GuiItems {
     fun pagePrevious(): Item = PylonPageItem(false)
 }
 
-private class PylonScrollItem(private val direction: Int, key: String?) : ScrollItem(direction) {
+private class PylonScrollItem(private val direction: Int, private val key: String?) : ScrollItem(direction) {
     private val name = Component.translatable("pylon.pyloncore.gui.scroll.$key")
 
     override fun getItemProvider(gui: ScrollGui<*>): ItemProvider {
         val material =
             if (gui.canScroll(direction)) Material.GREEN_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE
-        return ItemStackBuilder.of(material).name(name)
+        return ItemStackBuilder.gui(material, pylonKey("scroll_$key")).name(name)
     }
 }
 
@@ -127,7 +130,7 @@ private class PylonPageItem(private val forward: Boolean) : PageItem(forward) {
         if (gui.pageAmount < 2) return background
 
         val material = if (gui.canPage) Material.GREEN_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE
-        return ItemStackBuilder.of(material)
+        return ItemStackBuilder.gui(material, pylonKey("page_${if (forward) "next" else "previous"}"))
             .name(
                 name.arguments(
                     PylonArgument.of("current", gui.currentPage + 1),

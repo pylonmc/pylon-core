@@ -148,7 +148,7 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
 
     companion object {
         val KEY = pylonKey("debug_waxed_weathered_cut_copper_stairs")
-        val STACK = ItemStackBuilder.pylonItem(Material.BRICK, KEY)
+        val STACK = ItemStackBuilder.pylon(Material.BRICK, KEY)
             .set(DataComponentTypes.ITEM_MODEL, Material.WAXED_WEATHERED_CUT_COPPER_STAIRS.key)
             .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
             .build()

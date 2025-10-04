@@ -82,7 +82,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
 
             var isNameValid = true
             if (name == null || name.key() != ItemStackBuilder.nameKey(schema.key)) {
-                PylonCore.logger.warning("Item ${schema.key}'s name is not a translation key; check your item uses ItemStackBuilder.pylonItem(...)")
+                PylonCore.logger.warning("Item ${schema.key}'s name is not a translation key; check your item uses PylonItemStackBuilder.of(...)")
                 isNameValid = false
             }
 

@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
+import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -41,7 +42,7 @@ open class SimpleDynamicGuidePage(
 
     override fun getKey() = key
 
-    override val item = ItemStackBuilder.of(material)
+    override val item = ItemStackBuilder.gui(material, "${pylonKey("guide_page")}:$key")
         .name(Component.translatable("pylon.${key.namespace}.guide.page.${key.key}"))
 
     /**

@@ -6,6 +6,8 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.util.getAddon
+import io.github.pylonmc.pylon.core.util.gui.GuiItems
+import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -21,7 +23,7 @@ open class ResearchButton(val research: Research) : AbstractItem() {
 
     override fun getItemProvider(player: Player): ItemProvider = try {
         val playerHasResearch = Research.getResearches(player).contains(research)
-        val item = ItemStackBuilder.of(if (playerHasResearch) Material.LIME_STAINED_GLASS_PANE else research.material)
+        val item = ItemStackBuilder.gui(if (playerHasResearch) Material.LIME_STAINED_GLASS_PANE else research.material, "${pylonKey("research")}:${research.key}:$playerHasResearch")
             .name(research.name)
 
         if (playerHasResearch) {
