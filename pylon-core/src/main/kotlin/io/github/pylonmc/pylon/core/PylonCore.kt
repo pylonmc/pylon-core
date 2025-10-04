@@ -201,6 +201,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
     private fun loadResearches() {
         logger.info("Loading researches...")
+        val start = System.currentTimeMillis()
+
         for (addon in PylonRegistry.ADDONS) {
             val addonPlugin = addon.javaPlugin
 
@@ -238,7 +240,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
             }
         }
 
-        logger.info("Finished loading researches")
+        val end = System.currentTimeMillis()
+        logger.info("Loaded researches in ${(end - start) / 1000.0}s")
     }
 
     override fun onDisable() {
