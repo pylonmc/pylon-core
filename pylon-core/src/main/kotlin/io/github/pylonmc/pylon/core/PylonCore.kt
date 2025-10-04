@@ -34,6 +34,7 @@ import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
@@ -202,18 +203,12 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val start = System.currentTimeMillis()
 
         for (addon in PylonRegistry.ADDONS) {
-            val researchFile = addon.javaPlugin.getResource("researches.yml") ?: continue
-            val yamlConfig = researchFile.reader().use { YamlConfiguration.loadConfiguration(it) }
-
             val corePath = this.javaPlugin.dataFolder
                 .resolve("researches")
                 .resolve(addon.key.namespace)
                 .resolve("researches.yml")
 
-            if (!corePath.exists()) {
-                corePath.parentFile.mkdirs()
-                yamlConfig.save(corePath)
-            }
+            mergeGlobalConfig(addon, "researches.yml", corePath.toString())
         }
 
         val researchDir = dataPath.resolve("researches")
