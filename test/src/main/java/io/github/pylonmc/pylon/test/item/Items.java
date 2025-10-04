@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.item;
 
 import io.github.pylonmc.pylon.core.item.PylonItem;
-import io.github.pylonmc.pylon.core.item.builder.PylonItemStackBuilder;
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
@@ -14,7 +14,7 @@ public final class Items {
     private Items() {}
 
     public static final NamespacedKey STICKY_STICK_KEY = PylonTest.key("sticky_stick");
-    public static final ItemStack STICKY_STICK_STACK = PylonItemStackBuilder.of(Material.STICK, STICKY_STICK_KEY)
+    public static final ItemStack STICKY_STICK_STACK = ItemStackBuilder.pylon(Material.STICK, STICKY_STICK_KEY)
             .set(DataComponentTypes.ITEM_NAME, Component.text("Sticky Stick"))
             .build();
 

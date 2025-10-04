@@ -11,7 +11,7 @@ import io.github.pylonmc.pylon.core.guide.pages.item.ItemIngredientsPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchesPage
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
-import io.github.pylonmc.pylon.core.item.builder.PylonItemStackBuilder
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.key.Key
@@ -44,7 +44,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val KEY = pylonKey("guide")
 
         @JvmField
-        val STACK = PylonItemStackBuilder.of(Material.BOOK, KEY)
+        val STACK = ItemStackBuilder.pylon(Material.BOOK, KEY)
             .set(DataComponentTypes.ITEM_MODEL, Key.key("knowledge_book"))
             .set(DataComponentTypes.MAX_STACK_SIZE, 1)
             .build()
