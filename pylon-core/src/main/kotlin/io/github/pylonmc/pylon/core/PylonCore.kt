@@ -52,8 +52,6 @@ import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
-import java.io.File
-import java.net.JarURLConnection
 import java.util.*
 import kotlin.io.path.*
 
@@ -207,14 +205,14 @@ object PylonCore : JavaPlugin(), PylonAddon {
             val researchFile = addon.javaPlugin.getResource("researches.yml") ?: continue
             val yamlConfig = researchFile.reader().use { YamlConfiguration.loadConfiguration(it) }
 
-            val ourPath = this.javaPlugin.dataFolder
+            val corePath = this.javaPlugin.dataFolder
                 .resolve("researches")
                 .resolve(addon.key.namespace)
                 .resolve("researches.yml")
 
-            if (!ourPath.exists()) {
-                ourPath.parentFile.mkdirs()
-                yamlConfig.save(ourPath)
+            if (!corePath.exists()) {
+                corePath.parentFile.mkdirs()
+                yamlConfig.save(corePath)
             }
         }
 
