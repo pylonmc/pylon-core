@@ -88,7 +88,8 @@ interface BlockBreakContext {
      */
     data class BlockExploded(val event: BlockExplodeEvent) : BlockBreakContext {
         override val block = event.block
-        override val normallyDrops = false
+        override val normallyDrops
+            get() = Math.random() <= event.yield
     }
 
     /**
