@@ -173,15 +173,10 @@ class ItemButton @JvmOverloads constructor(
                         val pylonItem = PylonItem.fromStack(clonedUnkown)
 
                         if (pylonItem == null) {
-                            if (clonedUnkown.persistentDataContainer.isEmpty) {
-                                // item is vanilla
-                                val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
-                                val clonedVanilla = ItemStack(type, clonedUnkown.amount)
-                                player.setItemOnCursor(clonedVanilla)
-                            } else {
-                                // item might be special, keep it as is
-                                player.setItemOnCursor(clonedUnkown)
-                            }
+                            // item is vanilla
+                            val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
+                            val clonedVanilla = ItemStack(type, clonedUnkown.amount)
+                            player.setItemOnCursor(clonedVanilla)
                         } else {
                             // pylon item handling
                             val clonedPylon = pylonItem.schema.itemStack
