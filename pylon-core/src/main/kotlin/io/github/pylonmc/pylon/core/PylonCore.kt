@@ -28,7 +28,6 @@ import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
-import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -153,7 +152,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonBlock.register<FluidPipeMarker>(FluidPipeMarker.KEY, Material.STRUCTURE_VOID)
         PylonBlock.register<FluidPipeConnector>(FluidPipeConnector.KEY, Material.STRUCTURE_VOID)
 
-        DisplayRecipeType.register()
         RecipeType.addVanillaRecipes()
 
         launch {
