@@ -24,6 +24,9 @@ sealed class VanillaRecipeType<T : VanillaRecipeWrapper>(key: String) :
 
     override fun addRecipe(recipe: T) {
         super.addRecipe(recipe)
+        if (Bukkit.getRecipe(recipe.key) != null) {
+            Bukkit.removeRecipe(recipe.key)
+        }
         Bukkit.addRecipe(recipe.recipe)
     }
 

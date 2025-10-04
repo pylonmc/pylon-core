@@ -72,6 +72,7 @@ object BlockTextureEngine : Listener {
                 val world = pos.world ?: continue
                 if (world.isChunkLoaded(pos.x, pos.z)) {
                     data.timestamp = now
+                    data.occluding.cleanUp()
                     for (position in data.occluding.asMap().keys.toSet()) {
                         data.occluding.put(position, position.block.blockData.isOccluding)
                     }

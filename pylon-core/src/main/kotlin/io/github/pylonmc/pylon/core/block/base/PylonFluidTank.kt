@@ -8,7 +8,8 @@ import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import java.util.*
+import org.jetbrains.annotations.ApiStatus
+import java.util.IdentityHashMap
 import kotlin.math.max
 
 /**
@@ -155,6 +156,7 @@ interface PylonFluidTank : PylonFluidBlock {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         internal data class FluidTankData(

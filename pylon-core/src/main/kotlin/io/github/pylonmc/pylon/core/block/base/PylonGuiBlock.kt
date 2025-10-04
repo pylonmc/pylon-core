@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -34,7 +35,7 @@ import java.util.IdentityHashMap
  * @see Gui
  * @see VirtualInventory
  */
-interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock {
+interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaContainerBlock {
 
     /**
      * Returns the block's GUI. Called when a block is created.
@@ -57,6 +58,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock {
     @MustBeInvokedByOverriders
     override fun onInteract(event: PlayerInteractEvent) {
         if (!event.action.isRightClick
+            || event.player.isSneaking
             || event.hand != EquipmentSlot.HAND
             || event.useInteractedBlock() == Event.Result.DENY) {
             return
@@ -64,10 +66,6 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock {
 
         event.setUseInteractedBlock(Event.Result.DENY)
         event.setUseItemInHand(Event.Result.DENY)
-
-        if (event.player.isSneaking) {
-            return
-        }
 
         Window.single()
             .setGui(gui)
@@ -103,6 +101,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock {
         return items
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
         private val inventoryKey = pylonKey("inventories")
         private val inventoryType =
