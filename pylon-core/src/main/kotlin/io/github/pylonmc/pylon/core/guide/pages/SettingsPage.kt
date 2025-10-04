@@ -38,11 +38,12 @@ class SettingsPage : SimpleStaticGuidePage(
             .addIngredient('t', ToggleBlockTexturesButton())
             .addIngredient('c', CullingPresetButton())
             .addIngredient('a', ToggleArmorTexturesButton())
+            .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
         for (button in buttons) {
             gui.addContent(button)
         }
 
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 }

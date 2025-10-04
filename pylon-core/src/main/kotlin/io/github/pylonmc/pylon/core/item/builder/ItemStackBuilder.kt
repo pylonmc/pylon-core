@@ -153,10 +153,12 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         val customModelData = stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA)
         val newCustomModelData = CustomModelData.customModelData()
 
-        customModelData?.flags()?.let { newCustomModelData.addFlags(it) }
-        customModelData?.strings()?.let { newCustomModelData.addStrings(it) }
-        customModelData?.floats()?.let { newCustomModelData.addFloats(it) }
-        customModelData?.colors()?.let { newCustomModelData.addColors(it) }
+        if (customModelData != null) {
+            newCustomModelData.addFlags(customModelData.flags())
+            newCustomModelData.addStrings(customModelData.strings())
+            newCustomModelData.addFloats(customModelData.floats())
+            newCustomModelData.addColors(customModelData.colors())
+        }
 
         editFunction.accept(newCustomModelData)
 
@@ -172,19 +174,19 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     /**
      * Adds a float to the item's custom model data, used in resource packs.
      */
-    fun addCustomModelDataString(float: Float) =
+    fun addCustomModelDataFloat(float: Float) =
         editCustomModelData { it.addFloat(float) }
 
     /**
      * Adds a boolean to the item's custom model data, used in resource packs.
      */
-    fun addCustomModelDataString(boolean: Boolean) =
+    fun addCustomModelDataFlag(boolean: Boolean) =
         editCustomModelData { it.addFlag(boolean) }
 
     /**
      * Adds a color to the item's custom model data, used in resource packs.
      */
-    fun addCustomModelDataString(color: Color) =
+    fun addCustomModelDataColor(color: Color) =
         editCustomModelData { it.addColor(color) }
 
     @JvmOverloads

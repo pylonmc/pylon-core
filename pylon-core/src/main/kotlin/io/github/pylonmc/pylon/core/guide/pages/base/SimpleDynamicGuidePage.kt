@@ -38,7 +38,7 @@ open class SimpleDynamicGuidePage(
      * Supplies the buttons to be displayed on this page.
      */
     val buttonSupplier: Supplier<List<Item>>,
-) : GuidePage {
+) : PagedGuidePage {
 
     override fun getKey() = key
 
@@ -64,6 +64,7 @@ open class SimpleDynamicGuidePage(
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+        .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
     override fun getGui(player: Player): Gui {
         val buttons = buttonSupplier.get()
@@ -73,6 +74,6 @@ open class SimpleDynamicGuidePage(
             gui.addContent(button)
         }
 
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 }

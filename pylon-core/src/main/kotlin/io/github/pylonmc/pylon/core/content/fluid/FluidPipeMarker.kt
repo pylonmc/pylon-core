@@ -65,7 +65,7 @@ class FluidPipeMarker : PylonBlock, PylonBreakHandler {
         // if this is triggered by a fluid connector being broken, the pipe display will already have been deleted
         // not the ideal solution, but can't think of anything better
         if (context !is PluginBreak) {
-            getPipeDisplay()?.delete(true, player)
+            getPipeDisplay()?.delete(true, player, drops)
         }
     }
 

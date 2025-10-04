@@ -8,12 +8,12 @@ plugins {
     idea
     `maven-publish`
     signing
-    id("org.jetbrains.dokka") version "2.0.0"
-    id("org.jetbrains.dokka-javadoc") version "2.0.0"
+    id("org.jetbrains.dokka")
+    id("org.jetbrains.dokka-javadoc")
 }
 
 repositories {
-    mavenCentral()
+    mavenLocal()
     maven("https://repo.xenondevs.xyz/releases") {
         name = "InvUI"
     }
@@ -43,12 +43,12 @@ dependencies {
     implementation("org.bstats:bstats-bukkit:2.2.1")
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.2.2")
 
+    dokkaPlugin(project(":dokka-plugin"))
+
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
     testImplementation("net.kyori:adventure-api:4.20.0")
     testImplementation("net.kyori:adventure-text-minimessage:4.20.0")
-
-    dokkaJavadocPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
 }
 
 idea {
@@ -82,6 +82,10 @@ dokka {
             url("https://jd.papermc.io/paper/1.21.8/")
             packageListUrl("https://jd.papermc.io/paper/1.21.8/element-list")
         }
+        externalDocumentationLinks.register("JOML") {
+            url("https://javadoc.io/doc/org.joml/joml/latest/")
+            packageListUrl("https://javadoc.io/doc/org.joml/joml/latest/element-list")
+        }
         externalDocumentationLinks.register("Adventure") {
             url("https://javadoc.io/doc/net.kyori/adventure-api/latest/")
             packageListUrl("https://javadoc.io/doc/net.kyori/adventure-api/latest/element-list")
@@ -95,6 +99,30 @@ dokka {
             remoteUrl("https://github.com/pylonmc/pylon-core")
             remoteLineSuffix.set("#L")
         }
+    }
+    dokkaPublications.configureEach {
+        suppressObviousFunctions = true
+    }
+}
+
+tasks.dokkaGeneratePublicationJavadoc {
+    // Fixes search lag by limiting the number of results shown
+    // See https://github.com/Kotlin/dokka/issues/4284
+    doLast {
+        val searchJs = layout.buildDirectory.file("dokka/docs/javadoc/search.js").get().asFile
+        val text = searchJs.readText()
+        val codeToFix = "const result = [...modules, ...packages, ...types, ...members, ...tags]"
+        if (codeToFix !in text) {
+            throw IllegalStateException("Seggan you buffoon, you updated dokka without checking to see if the search fix still works")
+        }
+        val fixed = "const result = [" +
+                "...modules.slice(0, 5), " +
+                "...packages.slice(0, 5), " +
+                "...types.slice(0, 40), " +
+                "...members.slice(0, 40), " +
+                "...tags.slice(0, 5)" +
+                "]"
+        searchJs.writeText(text.replace(codeToFix, fixed))
     }
 }
 

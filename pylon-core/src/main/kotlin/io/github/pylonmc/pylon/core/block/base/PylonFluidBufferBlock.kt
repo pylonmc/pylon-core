@@ -9,7 +9,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
+import java.util.IdentityHashMap
 import kotlin.math.max
 
 /**
@@ -130,7 +130,7 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
     }
 
     override fun fluidAmountRequested(fluid: PylonFluid, deltaSeconds: Double): Double
-            = if (hasFluid(fluid)) fluidSpaceRemaining(fluid) else 0.0
+            = if (hasFluid(fluid) && fluidData(fluid).input) fluidSpaceRemaining(fluid) else 0.0
 
     override fun getSuppliedFluids(deltaSeconds: Double): Map<PylonFluid, Double>
             = fluidBuffers.filter { it.value.output }.mapValues { it.value.amount }
@@ -143,6 +143,7 @@ interface PylonFluidBufferBlock : PylonFluidBlock {
         removeFluid(fluid, amount)
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         internal data class FluidBufferData(

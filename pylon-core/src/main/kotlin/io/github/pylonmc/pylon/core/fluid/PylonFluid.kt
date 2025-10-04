@@ -30,7 +30,7 @@ open class PylonFluid(
     private val tags: MutableList<PylonFluidTag>,
 ) : Keyed {
 
-    val item by lazy {
+    private val internalItem by lazy {
         val builder = ItemStackBuilder.of(material)
             .editPdc { it.set(pylonFluidKeyKey, PylonSerializers.NAMESPACED_KEY, key) }
             .addCustomModelDataString(key.toString())
@@ -44,6 +44,9 @@ open class PylonFluid(
 
         builder.build()
     }
+
+    val item
+        get() = internalItem.clone()
 
     constructor(key: NamespacedKey, material: Material, vararg tags: PylonFluidTag) : this(
         key,
