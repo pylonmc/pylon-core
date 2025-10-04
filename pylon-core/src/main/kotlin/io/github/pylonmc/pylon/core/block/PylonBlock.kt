@@ -236,13 +236,11 @@ open class PylonBlock internal constructor(val block: Block) {
         private val pylonBlockPositionKey = pylonKey("position")
 
         @get:JvmStatic
-        @get:JvmName("getPylonBlock")
-        val Block.pylonBlock : PylonBlock?
+        val Block.pylonBlock: PylonBlock?
             get() = BlockStorage.get(this)
 
         @get:JvmStatic
-        @get:JvmName("isVanillaBlock")
-        val Block.vanilla : Boolean
+        val Block.isVanillaBlock: Boolean
             get() = BlockStorage.get(this) == null
 
         /**

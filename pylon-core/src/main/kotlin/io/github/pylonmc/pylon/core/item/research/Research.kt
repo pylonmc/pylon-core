@@ -14,7 +14,6 @@ import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.RandomizedSound
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.delay
@@ -142,13 +141,12 @@ data class Research(
         private val researchesType =
             PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
-        @get:JvmStatic
-        @set:JvmStatic
+        @JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
         fun getResearches(player: OfflinePlayer): Set<Research> {
-            var researches = player.persistentDataContainer.get(researchesKey, researchesType)
+            val researches = player.persistentDataContainer.get(researchesKey, researchesType)
             if (researches == null && player is Player) {
                 setResearches(player, setOf())
                 return setOf()
