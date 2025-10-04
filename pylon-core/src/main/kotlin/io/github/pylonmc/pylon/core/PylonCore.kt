@@ -34,6 +34,7 @@ import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
@@ -159,6 +160,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         launch {
             delay(1.ticks)
             loadRecipes()
+            loadResearches()
         }
 
         val end = System.currentTimeMillis()
@@ -194,6 +196,43 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         val end = System.currentTimeMillis()
         logger.info("Loaded recipes in ${(end - start) / 1000.0}s")
+    }
+
+    private fun loadResearches() {
+        logger.info("Loading researches...")
+        val start = System.currentTimeMillis()
+
+        for (addon in PylonRegistry.ADDONS) {
+            val corePath = this.javaPlugin.dataFolder
+                .resolve("researches")
+                .resolve(addon.key.namespace)
+                .resolve("researches.yml")
+
+            mergeGlobalConfig(addon, "researches.yml", corePath.toString())
+        }
+
+        val researchDir = dataPath.resolve("researches")
+        if (researchDir.exists()) {
+            for (namespaceDir in researchDir.listDirectoryEntries()) {
+                if (!namespaceDir.isDirectory()) continue
+                val namespace = namespaceDir.nameWithoutExtension
+                val pluginResearch = namespaceDir.resolve("researches.yml")
+
+                if (!pluginResearch.isRegularFile() || pluginResearch.extension != "yml") continue
+
+                val mainResearchConfig = Config(pluginResearch)
+                for (key in mainResearchConfig.keys) {
+                    val nsKey = NamespacedKey(namespace, key)
+                    val section = mainResearchConfig.getSection(key) ?: continue
+
+                    Research.loadFromConfig(section, nsKey).register()
+                }
+
+            }
+        }
+
+        val end = System.currentTimeMillis()
+        logger.info("Loaded researches in ${(end - start) / 1000.0}s")
     }
 
     override fun onDisable() {
