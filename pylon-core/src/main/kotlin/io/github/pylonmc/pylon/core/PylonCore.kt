@@ -204,9 +204,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val start = System.currentTimeMillis()
 
         for (addon in PylonRegistry.ADDONS) {
-            val addonPlugin = addon.javaPlugin
-
-            val researchFile = addonPlugin.getResource("researches.yml") ?: continue
+            val researchFile = addon.javaPlugin.getResource("researches.yml") ?: continue
             val yamlConfig = researchFile.reader().use { YamlConfiguration.loadConfiguration(it) }
 
             val ourPath = this.javaPlugin.dataFolder
