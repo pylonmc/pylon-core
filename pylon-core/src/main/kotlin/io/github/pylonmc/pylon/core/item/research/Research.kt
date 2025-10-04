@@ -320,7 +320,7 @@ data class Research(
                 return Research(key, material, Component.translatable(name), cost, unlocks)
             } catch (e: Exception) {
                 throw IllegalArgumentException(
-                    "Failed to load research with key '$key' from config",
+                    "Failed to load research '$key' from config",
                     e
                 )
             }
