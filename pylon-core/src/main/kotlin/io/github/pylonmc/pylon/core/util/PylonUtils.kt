@@ -169,6 +169,17 @@ fun isFakeEvent(event: Event): Boolean {
 }
 
 /**
+ * [BlockFace.NORTH], [BlockFace.EAST], [BlockFace.SOUTH], [BlockFace.WEST]
+ */
+@JvmField
+val CARDINAL_FACES: Array<BlockFace> = arrayOf(
+    BlockFace.NORTH,
+    BlockFace.EAST,
+    BlockFace.SOUTH,
+    BlockFace.WEST
+)
+
+/**
  * [BlockFace.UP], [BlockFace.DOWN], [BlockFace.EAST], [BlockFace.WEST], [BlockFace.SOUTH], [BlockFace.NORTH]
  */
 @JvmField

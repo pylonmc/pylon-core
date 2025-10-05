@@ -17,6 +17,7 @@ import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperSt
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -33,9 +34,19 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.data.AnaloguePowerable
+import org.bukkit.block.data.Bisected
 import org.bukkit.block.data.Directional
+import org.bukkit.block.data.FaceAttachable
+import org.bukkit.block.data.Hangable
+import org.bukkit.block.data.MultipleFacing
+import org.bukkit.block.data.Openable
 import org.bukkit.block.data.Orientable
+import org.bukkit.block.data.Powerable
 import org.bukkit.block.data.Rotatable
+import org.bukkit.block.data.type.Slab
+import org.bukkit.block.data.type.Stairs
+import org.bukkit.block.data.type.Wall
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -142,9 +153,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * item returned by [getBlockTextureItem] (or a barrier if none is provided), set's its item
      * model to air, making it invisible for players without a resource pack, scales it to
      * 1.00085f in all directions to prevent z-fighting with the vanilla block model, and maxes its
-     * brightness. If the block is directional (either by implementing [PylonDirectionalBlock],
-     * or by having block data that is [Orientable], [Directional], or [Rotatable]), the entity
-     * is rotated to face the same direction as the block.
+     * brightness. It sets the display type to be "fixed".
      */
     protected open fun setupBlockTexture(entity: WrapperEntity, meta: ItemDisplayMeta): WrapperEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
@@ -153,33 +162,11 @@ open class PylonBlock internal constructor(val block: Block) {
         val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
         item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
+        meta.displayType = ItemDisplayMeta.DisplayType.FIXED
         meta.brightnessOverride = 15 shl 4 or 15 shl 20;
         meta.scale = Vector3f(1.0009f, 1.0009f, 1.0009f)
         meta.width = 0f
         meta.height = 0f
-
-        val blockData = block.blockData
-        var facing = (this@PylonBlock as? PylonDirectionalBlock)?.getFacing()
-        if (facing == null) {
-            if (blockData is Orientable) {
-                facing = when (blockData.axis) {
-                    Axis.X -> BlockFace.EAST
-                    Axis.Y -> BlockFace.UP
-                    Axis.Z -> BlockFace.SOUTH
-                }
-            } else if (blockData is Directional) {
-                facing = blockData.facing
-            } else if (blockData is Rotatable) {
-                facing = blockData.rotation
-            }
-        }
-
-        if (facing != null) {
-            val direction = facing.direction
-            entity.teleport(entity.location.apply {
-                this.direction = Vector3f(direction.x.toFloat(), direction.y.toFloat(), direction.z.toFloat())
-            })
-        }
     }
 
     /**
@@ -245,13 +232,69 @@ open class PylonBlock internal constructor(val block: Block) {
     /**
      * Returns the item that should be used to display the block's texture.
      *
-     * By default, returns the item with the same key as the block.
+     * By default, returns the item with the same key as the block. As well
+     * as adding the value of a few common block data types (like [Powerable],
+     * [Bisected], etc) to the item's custom model data. If the block is a
+     * [Directional] (or similar) block, or implements [PylonDirectionalBlock], the facing
+     * will be added as well.
+     *
+     * If you override this method, it is recommended to apply your changes to the result of
+     * this super method, so that the order of common block data types is consistent across
+     * all blocks. (If you don't it may be harder for resource packs to support your block.)
      *
      * @return the item that should be used to display the block's texture
      */
-    open fun getBlockTextureItem() = defaultItem?.getItemStack()?.apply {
-        itemMeta.persistentDataContainer.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true)
-    }
+    open fun getBlockTextureItem() = defaultItem?.getItemStack()?.let { ItemStackBuilder(it) }?.apply {
+        editPdc { it.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true) }
+
+        val blockData = block.blockData
+        if (blockData is Powerable) {
+            addCustomModelDataString("powered=${blockData.isPowered}")
+        } else if (blockData is AnaloguePowerable) {
+            addCustomModelDataString("power=${blockData.power}")
+        }
+
+        if (blockData is Openable) {
+            addCustomModelDataString("open=${blockData.isOpen}")
+        }
+        if (blockData is Bisected) {
+            addCustomModelDataString("half=${blockData.half.name.lowercase()}")
+        }
+        if (blockData is Hangable) {
+            addCustomModelDataString("hanging=${blockData.isHanging}")
+        }
+
+        if (blockData is FaceAttachable) {
+            addCustomModelDataString("face=${blockData.attachedFace.name.lowercase()}")
+        }
+
+        var facing = (this@PylonBlock as? PylonDirectionalBlock)?.getFacing()
+        if (facing != null) {
+            addCustomModelDataString("facing=${facing.name.lowercase()}")
+        } else if (blockData is Directional) {
+            addCustomModelDataString("facing=${blockData.facing.name.lowercase()}")
+        }
+        if (blockData is Orientable) {
+            addCustomModelDataString("axis=${blockData.axis.name.lowercase()}")
+        }
+        if (blockData is Rotatable) {
+            addCustomModelDataString("rotation=${blockData.rotation.name.lowercase()}")
+        }
+
+        if (blockData is Slab) {
+            addCustomModelDataString("type=${blockData.type.name.lowercase()}")
+        }
+        if (blockData is Stairs) {
+            addCustomModelDataString("shape=${blockData.shape.name.lowercase()}")
+        }
+
+        if (blockData is Wall) {
+            // todo
+        }
+        if (blockData is MultipleFacing) {
+            // todo
+        }
+    }?.build()
 
     /**
      * Called when debug info is requested for the block by someone
