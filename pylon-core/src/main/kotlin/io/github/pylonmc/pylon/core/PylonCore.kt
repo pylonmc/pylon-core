@@ -218,7 +218,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
                 val namespace = namespaceDir.nameWithoutExtension
                 val pluginResearch = namespaceDir.resolve("researches.yml")
 
-                if (!pluginResearch.isRegularFile() || pluginResearch.extension != "yml") continue
+                if (!pluginResearch.isRegularFile()) continue
 
                 val mainResearchConfig = Config(pluginResearch)
                 for (key in mainResearchConfig.keys) {
