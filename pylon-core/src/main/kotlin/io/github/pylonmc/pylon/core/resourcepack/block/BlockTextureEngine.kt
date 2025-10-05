@@ -143,8 +143,7 @@ object BlockTextureEngine : Listener {
             while (true) {
                 val player = Bukkit.getPlayer(uuid)
                 if (player == null || !player.hasCustomBlockTextures) {
-                    visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
-                    visible.clear()
+                    octrees.values.forEach { it.forEach { b -> b.blockTextureEntity?.removeViewer(uuid) } }
                     jobs.remove(uuid)
                     break
                 }
@@ -262,15 +261,6 @@ object BlockTextureEngine : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onChunkUnload(event: ChunkUnloadEvent) {
         occludingCache.remove(ChunkPosition(event.chunk))
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    private fun onPlayerQuit(event: PlayerQuitEvent) {
-        jobs.remove(event.player.uniqueId)?.let {
-            if (it.isActive) {
-                it.cancel()
-            }
-        }
     }
 
     private data class ChunkData(

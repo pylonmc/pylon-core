@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.content.fluid
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PlayerBreak
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.ApiStatus
  * on pipe corners/junctions.
  */
 @ApiStatus.Internal
-class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
+class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock, PylonBreakHandler {
 
     @Suppress("unused")
     constructor(block: Block, context: BlockCreateContext) : super(block) {
@@ -47,8 +48,6 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
             // can be null if called from two different location (eg two different connection points removing the display)
             pipeDisplay?.delete(true, player, drops)
         }
-
-        super<PylonEntityHolderBlock>.onBreak(drops, context)
     }
 
     override fun getWaila(player: Player): WailaConfig?

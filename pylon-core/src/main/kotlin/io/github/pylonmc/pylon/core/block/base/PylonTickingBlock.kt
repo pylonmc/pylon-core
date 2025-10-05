@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
@@ -91,6 +92,14 @@ interface PylonTickingBlock {
 
         @EventHandler
         private fun onUnload(event: PylonBlockUnloadEvent) {
+            val block = event.pylonBlock
+            if (block is PylonTickingBlock) {
+                tickingBlocks.remove(block)
+            }
+        }
+
+        @EventHandler
+        private fun onBreak(event: PylonBlockBreakEvent) {
             val block = event.pylonBlock
             if (block is PylonTickingBlock) {
                 tickingBlocks.remove(block)
