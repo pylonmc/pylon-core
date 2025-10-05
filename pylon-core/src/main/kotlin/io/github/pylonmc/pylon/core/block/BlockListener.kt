@@ -17,7 +17,6 @@ import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.block.Container
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -35,6 +34,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.inventory.BlockInventoryHolder
 import java.util.*
 
 
@@ -791,14 +791,14 @@ internal object BlockListener : Listener {
     @EventHandler
     private fun onItemMove(event: InventoryMoveItemEvent) {
         val sourceHolder = event.source.holder
-        if (sourceHolder is Container) {
+        if (sourceHolder is BlockInventoryHolder) {
             val sourceBlock = BlockStorage.get(sourceHolder.block)
             if (sourceBlock is PylonVanillaContainerBlock) {
                 sourceBlock.onItemMoveFrom(event)
             }
         }
         val destHolder = event.destination.holder
-        if (destHolder is Container) {
+        if (destHolder is BlockInventoryHolder) {
             val destBlock = BlockStorage.get(destHolder.block)
             if (destBlock is PylonVanillaContainerBlock) {
                 destBlock.onItemMoveTo(event)
