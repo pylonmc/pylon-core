@@ -66,12 +66,15 @@ internal object MultiblockCache : Listener {
         override fun run() {
             for (multiblockPosition in dirtyMultiblocks) {
                 // For a multiblock to be formed, it must be fully loaded
+                val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)
                 if (multiblockPosition !in fullyLoadedMultiblocks) {
-                    formedMultiblocks.remove(multiblockPosition)
+                    if (formedMultiblocks.remove(multiblockPosition) && multiblock != null) {
+                        multiblock.onMultiblockUnformed(true)
+                        PylonMultiblockUnformEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
+                    }
                     continue
                 }
 
-                val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)
                 if (multiblock != null && multiblock.checkFormed()) {
                     if (formedMultiblocks.add(multiblockPosition)) {
                         multiblock.onMultiblockFormed()
@@ -82,7 +85,7 @@ internal object MultiblockCache : Listener {
                     }
                 } else {
                     if (formedMultiblocks.remove(multiblockPosition) && multiblock != null) {
-                        multiblock.onMultiblockUnformed()
+                        multiblock.onMultiblockUnformed(false)
                         PylonMultiblockUnformEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
                     }
                 }
@@ -99,13 +102,17 @@ internal object MultiblockCache : Listener {
         = dirtyMultiblocks.add(multiblock.block.position)
 
     private fun refreshFullyLoaded(multiblock: PylonMultiblock) {
+        val multiblockPosition = multiblock.block.position
         if (multiblock.chunksOccupied.all { it.isLoaded }) {
-            fullyLoadedMultiblocks.add(multiblock.block.position)
+            fullyLoadedMultiblocks.add(multiblockPosition)
             markDirty(multiblock)
         } else {
-            formedMultiblocks.remove(multiblock.block.position)
-            fullyLoadedMultiblocks.remove(multiblock.block.position)
-            dirtyMultiblocks.remove(multiblock.block.position)
+            if (formedMultiblocks.remove(multiblockPosition)) {
+                multiblock.onMultiblockUnformed(true)
+                PylonMultiblockUnformEvent(multiblock.block, multiblock as PylonBlock).callEvent()
+            }
+            fullyLoadedMultiblocks.remove(multiblockPosition)
+            dirtyMultiblocks.remove(multiblockPosition)
         }
     }
 
@@ -127,8 +134,8 @@ internal object MultiblockCache : Listener {
             }
         }
 
-        fullyLoadedMultiblocks.remove(multiblockPosition)
         formedMultiblocks.remove(multiblockPosition)
+        fullyLoadedMultiblocks.remove(multiblockPosition)
         dirtyMultiblocks.remove(multiblockPosition)
     }
 
@@ -162,18 +169,22 @@ internal object MultiblockCache : Listener {
 
     @EventHandler
     private fun handle(event: PylonChunkBlocksUnloadEvent) {
-        // Mark existing multiblocks with components as not formed and not fully loaded
-        for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
-            formedMultiblocks.remove(multiblockPosition)
-            fullyLoadedMultiblocks.remove(multiblockPosition)
-            dirtyMultiblocks.remove(multiblockPosition)
-        }
-
         // Remove multiblocks that were just unloaded
         for (pylonBlock in event.pylonBlocks) {
             if (pylonBlock is PylonMultiblock) {
                 onMultiblockRemoved(pylonBlock)
             }
+        }
+
+        // Mark existing multiblocks with components as not formed and not fully loaded
+        for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
+            val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)
+            if (formedMultiblocks.remove(multiblockPosition) && multiblock != null) {
+                multiblock.onMultiblockUnformed(true)
+                PylonMultiblockUnformEvent(multiblockPosition.block, multiblock as PylonBlock).callEvent()
+            }
+            fullyLoadedMultiblocks.remove(multiblockPosition)
+            dirtyMultiblocks.remove(multiblockPosition)
         }
     }
 

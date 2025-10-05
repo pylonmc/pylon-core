@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import org.bukkit.block.Block
 import org.jetbrains.annotations.ApiStatus
-import org.jetbrains.annotations.MustBeInvokedByOverriders
 
 
 /**
@@ -70,7 +69,12 @@ interface PylonMultiblock {
 
     /**
      * Called when the multiblock is unformed (i.e., was formed before, but now is not).
-     * This includes when a part of the multiblock is unloaded, and the multiblock becomes unformed because of it.
+     * This includes when a part of the multiblock is unloaded and the multiblock becomes unformed because of it,
+     * or when part of the multiblock is broken/changed, and it becomes unformed because of it.
+     *
+     * This is **not** called when the multiblock itself is unloaded, use [PylonUnloadBlock] for that.
+     *
+     * [partUnloaded] is true if the multiblock became unformed because part of it was unloaded, false otherwise.
      */
-    fun onMultiblockUnformed() {}
+    fun onMultiblockUnformed(partUnloaded: Boolean) {}
 }
