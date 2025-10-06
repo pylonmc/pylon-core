@@ -87,6 +87,7 @@ internal object MultiblockCache : Listener {
         }
     }
 
+    @JvmSynthetic
     internal fun isFormed(multiblock: PylonMultiblock): Boolean
         = multiblock.block.position in formedMultiblocks
 

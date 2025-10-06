@@ -85,6 +85,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         .addIngredient('b', BackButton())
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+        .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
     override fun getGui(player: Player): Gui {
         val pages = mutableListOf<Gui>()
@@ -98,7 +99,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         for (page in pages) {
             gui.addContent(page)
         }
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 
     companion object {

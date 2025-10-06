@@ -41,12 +41,13 @@ class RootPage() : SimpleStaticGuidePage(
             .addIngredient('e', PageButton(PylonGuide.settingsPageAndInfoPage))
             .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+            .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
         for (button in buttons) {
             gui.addContent(button)
         }
 
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 
     override fun open(player: Player) {

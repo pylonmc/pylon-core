@@ -8,7 +8,8 @@ import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import java.util.*
+import org.jetbrains.annotations.ApiStatus
+import java.util.IdentityHashMap
 import kotlin.math.max
 
 /**
@@ -89,7 +90,13 @@ interface PylonFluidTank : PylonFluidBlock {
      */
     fun setFluid(amount: Double): Boolean {
         if (canSetFluid(amount)) {
+            val original = fluidData.amount
             fluidData.amount = max(0.0, amount)
+
+            if (original > amount && amount < 1.0e-6) {
+                setFluidType(null)
+                setFluid(0.0)
+            }
             return true
         }
         return false
@@ -149,12 +156,9 @@ interface PylonFluidTank : PylonFluidBlock {
     override fun onFluidRemoved(fluid: PylonFluid, amount: Double) {
         check(fluid == fluidType)
         removeFluid(amount)
-        if (fluidData.amount < 1.0e-6) {
-            setFluidType(null)
-            setFluid(0.0)
-        }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         internal data class FluidTankData(

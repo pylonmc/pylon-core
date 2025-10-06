@@ -13,6 +13,7 @@ import io.papermc.paper.datacomponent.item.CustomModelData
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
+import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -113,6 +114,46 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
     fun defaultTranslatableLore(key: NamespacedKey) =
         lore(Component.translatable(loreKey(key), ""))
 
+    fun editCustomModelData(editFunction: Consumer<CustomModelData.Builder>) = apply {
+        val customModelData = stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA)
+        val newCustomModelData = CustomModelData.customModelData()
+
+        if (customModelData != null) {
+            newCustomModelData.addFlags(customModelData.flags())
+            newCustomModelData.addStrings(customModelData.strings())
+            newCustomModelData.addFloats(customModelData.floats())
+            newCustomModelData.addColors(customModelData.colors())
+        }
+
+        editFunction.accept(newCustomModelData)
+
+        stack.setData(DataComponentTypes.CUSTOM_MODEL_DATA, newCustomModelData)
+    }
+
+    /**
+     * Adds a string to the item's custom model data, used in resource packs.
+     */
+    fun addCustomModelDataString(string: String) =
+        editCustomModelData { it.addString(string) }
+
+    /**
+     * Adds a float to the item's custom model data, used in resource packs.
+     */
+    fun addCustomModelDataFloat(float: Float) =
+        editCustomModelData { it.addFloat(float) }
+
+    /**
+     * Adds a boolean to the item's custom model data, used in resource packs.
+     */
+    fun addCustomModelDataFlag(boolean: Boolean) =
+        editCustomModelData { it.addFlag(boolean) }
+
+    /**
+     * Adds a color to the item's custom model data, used in resource packs.
+     */
+    fun addCustomModelDataColor(color: Color) =
+        editCustomModelData { it.addColor(color) }
+
     fun build(): ItemStack = stack.clone()
 
     /**
@@ -177,7 +218,7 @@ open class ItemStackBuilder private constructor(val stack: ItemStack) : ItemProv
                 .let {
                     //  Adds the pylon item key as the FIRST string in custom model data, but preserve any pre-existing data
                     val originalModelData = it.stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA)
-                    val modelData = CustomModelData.customModelData().addString(key.toString());
+                    val modelData = CustomModelData.customModelData().addString(key.toString())
                     if (originalModelData != null) {
                         modelData.addStrings(originalModelData.strings()).addColors(originalModelData.colors())
                             .addFloats(originalModelData.floats()).addFlags(originalModelData.flags())

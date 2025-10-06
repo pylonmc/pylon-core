@@ -386,5 +386,14 @@ private val globalConfigCache: MutableMap<Pair<String, String>, Config> = mutabl
 val Block.replaceableOrAir: Boolean
     get() = type.isAir || isReplaceable
 
+fun ItemStack.vanillaDisplayName(): Component
+    = effectiveName().let {
+        val wrapped = Component.translatable("chat.square_brackets", it)
+        if (!this.isEmpty) {
+            wrapped.hoverEvent(this.asHoverEvent())
+        }
+        return wrapped
+    }
+
 val Component.plainText: String
     get() = PlainTextComponentSerializer.plainText().serialize(this)

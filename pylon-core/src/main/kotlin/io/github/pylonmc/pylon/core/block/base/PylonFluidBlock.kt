@@ -20,7 +20,7 @@ import io.github.pylonmc.pylon.core.fluid.PylonFluid
  * @see PylonFluidBufferBlock
  * @see PylonFluidTank
  */
-interface PylonFluidBlock {
+interface PylonFluidBlock : PylonFluidPointDirectional {
 
     /**
      * Returns a map of fluid types - and their corresponding amounts - that can be supplied by

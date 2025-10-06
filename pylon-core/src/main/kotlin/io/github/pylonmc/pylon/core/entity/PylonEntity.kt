@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
+import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -44,13 +45,23 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
     open fun getWaila(player: Player): WailaConfig? = null
 
     /**
+     * Called when debug info is requested for the entity by someone
+     * using the [DebugWaxedWeatheredCutCopperStairs]. If there is
+     * any transient data that can be useful for debugging, you're
+     * encouraged to save it here.
+     *
+     * Defaults to a normal [write] call.
+     */
+    open fun writeDebugInfo(pdc: PersistentDataContainer) = write(pdc)
+
+    /**
      * Called when the entity is saved.
      *
      * Put any logic to save the data in the entity here.
      *
      * *Do not assume that when this is called, the entity is being unloaded.* This
      * may be called for other reasons, such as when a player right clicks with
-     * [io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs]
+     * [DebugWaxedWeatheredCutCopperStairs]
      */
     open fun write(pdc: PersistentDataContainer) {}
 

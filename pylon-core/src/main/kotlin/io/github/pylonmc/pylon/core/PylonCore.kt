@@ -28,7 +28,6 @@ import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
-import io.github.pylonmc.pylon.core.recipe.DisplayRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -127,7 +126,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         addDefaultPermission("pylon.command.waila")
         addDefaultPermission("pylon.command.research.list.self")
         addDefaultPermission("pylon.command.research.discover")
-        addDefaultPermission("pylon.command.research.points.get.self")
+        addDefaultPermission("pylon.command.research.points.query.self")
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) {
             it.registrar().register(ROOT_COMMAND)
             it.registrar().register(ROOT_COMMAND_PY_ALIAS)
@@ -142,7 +141,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonItem.register<PylonGuide>(PylonGuide.STACK)
         PylonGuide.hideItem(PylonGuide.KEY)
 
-        PylonEntity.register<BlockDisplay, PylonSimpleMultiblock.MultiblockGhostBlock>(
+        PylonEntity.register<ItemDisplay, PylonSimpleMultiblock.MultiblockGhostBlock>(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
         )
 
@@ -153,7 +152,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonBlock.register<FluidPipeMarker>(FluidPipeMarker.KEY, Material.STRUCTURE_VOID)
         PylonBlock.register<FluidPipeConnector>(FluidPipeConnector.KEY, Material.STRUCTURE_VOID)
 
-        DisplayRecipeType.register()
         RecipeType.addVanillaRecipes()
 
         launch {

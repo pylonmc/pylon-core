@@ -33,7 +33,7 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
     constructor(block: Block, pdc: PersistentDataContainer) : super(block)
 
     val fluidPointInteraction
-        get() = getHeldEntityOrThrow(FluidPointInteraction::class.java, "connector")
+        get() = getHeldPylonEntityOrThrow(FluidPointInteraction::class.java, "connector")
 
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
         var player: Player? = null
@@ -45,7 +45,7 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
         for (pipeDisplayId in fluidPointInteraction.connectedPipeDisplays.toSet()) {
             val pipeDisplay = EntityStorage.getAs<FluidPipeDisplay>(pipeDisplayId)
             // can be null if called from two different location (eg two different connection points removing the display)
-            pipeDisplay?.delete(true, player)
+            pipeDisplay?.delete(true, player, drops)
         }
 
         super<PylonEntityHolderBlock>.onBreak(drops, context)

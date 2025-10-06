@@ -13,20 +13,36 @@ import org.bukkit.NamespacedKey
 /**
  * Fluids aren't necessarily just liquids, they can also be gases or other substances that can flow.
  *
+ * @param material Used to display the fluid in tanks
+ *
  * @see io.github.pylonmc.pylon.core.content.fluid.FluidPipe
  */
 open class PylonFluid(
     private val key: NamespacedKey,
     val name: Component,
-    /**
-     * Used to display the fluid in fluid tanks
-     */
-    val material: Material,
+    material: Material,
     /**
      * @see PylonFluidTag
      */
     private val tags: MutableList<PylonFluidTag>,
 ) : Keyed {
+
+    private val internalItem by lazy {
+        val builder = ItemStackBuilder.of(material)
+            .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}"))
+            .addCustomModelDataString(key.toString())
+
+        for (tag in tags) {
+            builder.lore(tag.displayText)
+        }
+
+        builder.lore(getAddon(key).displayName)
+
+        builder.build()
+    }
+
+    val item
+        get() = internalItem.clone()
 
     constructor(key: NamespacedKey, material: Material, vararg tags: PylonFluidTag) : this(
         key,
@@ -71,19 +87,6 @@ open class PylonFluid(
 
     fun register() {
         PylonRegistry.FLUIDS.register(this)
-    }
-
-    fun getItem(): ItemStackBuilder {
-        val item = ItemStackBuilder.of(material)
-            .name(Component.translatable("pylon.${key.namespace}.fluid.${key.key}"))
-
-        for (tag in tags) {
-            item.lore(tag.displayText)
-        }
-
-        item.lore(getAddon(key).displayName)
-
-        return item
     }
 
     override fun getKey(): NamespacedKey = key

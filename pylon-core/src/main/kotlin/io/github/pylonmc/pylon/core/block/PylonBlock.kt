@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.base.PylonDirectionalBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
@@ -11,6 +12,7 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
+import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
@@ -22,10 +24,15 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import me.tofaa.entitylib.wrapper.WrapperEntity
+import org.bukkit.Axis
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
+import org.bukkit.block.data.Directional
+import org.bukkit.block.data.Orientable
+import org.bukkit.block.data.Rotatable
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -129,10 +136,12 @@ open class PylonBlock internal constructor(val block: Block) {
      * use [updateBlockTexture].
      *
      * By default, this method sets the item display to be at the center of the block, using the
-     * item returned by [getItem] with [BlockItemContext.BlockTexture] (or a barrier if none is
-     * provided), set's its item model to air, making it invisible for players without a resource
-     * pack, and scales it to 1.00085f in all directions to prevent z-fighting with the vanilla
-     * block model.
+     * item returned by [getBlockTextureItem] (or a barrier if none is provided), set's its item
+     * model to air, making it invisible for players without a resource pack, scales it to
+     * 1.00085f in all directions to prevent z-fighting with the vanilla block model, and maxes its
+     * brightness. If the block is directional (either by implementing [PylonDirectionalBlock],
+     * or by having block data that is [Orientable], [Directional], or [Rotatable]), the entity
+     * is rotated to face the same direction as the block.
      */
     protected open fun setupBlockTexture(entity: WrapperEntity, meta: ItemDisplayMeta): WrapperEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
@@ -141,9 +150,33 @@ open class PylonBlock internal constructor(val block: Block) {
         val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
         item.editMeta { itemMeta -> itemMeta.itemModel = NamespacedKey.minecraft("air") }
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
-        meta.scale = Vector3f(1.00085f, 1.00085f, 1.00085f)
+        meta.brightnessOverride = 15 shl 4 or 15 shl 20;
+        meta.scale = Vector3f(1.0009f, 1.0009f, 1.0009f)
         meta.width = 0f
         meta.height = 0f
+
+        val blockData = block.blockData
+        var facing = (this@PylonBlock as? PylonDirectionalBlock)?.getFacing()
+        if (facing == null) {
+            if (blockData is Orientable) {
+                facing = when (blockData.axis) {
+                    Axis.X -> BlockFace.EAST
+                    Axis.Y -> BlockFace.UP
+                    Axis.Z -> BlockFace.SOUTH
+                }
+            } else if (blockData is Directional) {
+                facing = blockData.facing
+            } else if (blockData is Rotatable) {
+                facing = blockData.rotation
+            }
+        }
+
+        if (facing != null) {
+            val direction = facing.direction
+            entity.teleport(entity.location.apply {
+                this.direction = Vector3f(direction.x.toFloat(), direction.y.toFloat(), direction.z.toFloat())
+            })
+        }
     }
 
     /**
@@ -210,13 +243,23 @@ open class PylonBlock internal constructor(val block: Block) {
     }
 
     /**
+     * Called when debug info is requested for the block by someone
+     * using the [DebugWaxedWeatheredCutCopperStairs]. If there is
+     * any transient data that can be useful for debugging, you're
+     * encouraged to serialize it here.
+     *
+     * Defaults to a normal [write] call.
+     */
+    open fun writeDebugInfo(pdc: PersistentDataContainer) = write(pdc)
+
+    /**
      * Called when the block is saved.
      *
      * Put any logic to save the data in the block here.
      *
      * *Do not assume that when this is called, the block is being unloaded.* This
      * may be called for other reasons, such as when a player right clicks with
-     * [io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs].
+     * [DebugWaxedWeatheredCutCopperStairs].
      * Instead, implement [io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock] and
      * use [io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock.onUnload].
      */
@@ -236,13 +279,11 @@ open class PylonBlock internal constructor(val block: Block) {
         private val pylonBlockPositionKey = pylonKey("position")
 
         @get:JvmStatic
-        @get:JvmName("getPylonBlock")
-        val Block.pylonBlock : PylonBlock?
+        val Block.pylonBlock: PylonBlock?
             get() = BlockStorage.get(this)
 
         @get:JvmStatic
-        @get:JvmName("isVanillaBlock")
-        val Block.vanilla : Boolean
+        val Block.isVanillaBlock: Boolean
             get() = BlockStorage.get(this) == null
 
         /**

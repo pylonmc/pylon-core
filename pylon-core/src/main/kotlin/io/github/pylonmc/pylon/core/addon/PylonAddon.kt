@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -17,7 +18,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
+import java.util.Locale
 
 /**
  * Welcome to the place where it all begins: the Pylon addon!
@@ -64,6 +65,10 @@ interface PylonAddon : Keyed {
      */
     @ApiStatus.NonExtendable
     fun registerWithPylon() {
+        if (!Bukkit.getPluginManager().isPluginEnabled("PylonCore")) {
+            throw IllegalStateException("PylonCore is not installed or not enabled")
+        }
+
         PylonRegistry.ADDONS.register(this)
         if (!suppressAddonNameWarning) {
             for (locale in languages) {
@@ -74,6 +79,7 @@ interface PylonAddon : Keyed {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
         @EventHandler
         private fun onPluginDisable(event: PluginDisableEvent) {
