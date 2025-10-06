@@ -6,12 +6,12 @@ import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PlayerBreak
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidPointType
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -50,8 +50,8 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock, PylonBreakHandler
         }
     }
 
-    override fun getWaila(player: Player): WailaConfig?
-        = WailaConfig(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
+    override fun getWaila(player: Player): WailaDisplay?
+        = WailaDisplay(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
 
     val pipe: PylonItem
         get() {

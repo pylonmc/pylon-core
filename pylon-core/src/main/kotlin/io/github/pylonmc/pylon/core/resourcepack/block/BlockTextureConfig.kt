@@ -9,7 +9,10 @@ object BlockTextureConfig {
     private val config = Config(PylonCore, "config.yml")
 
     @JvmStatic
-    val customBlockTexturesEnabled = config.getOrThrow("custom-block-textures.enabled", ConfigAdapter.BOOLEAN)
+    val blockTexturesEnabled = config.getOrThrow("custom-block-textures.enabled", ConfigAdapter.BOOLEAN)
+
+    @JvmStatic
+    val blockTexturesForced = config.getOrThrow("custom-block-textures.force", ConfigAdapter.BOOLEAN)
 
     @JvmStatic
     val occludingCacheRefreshInterval = config.getOrThrow("custom-block-textures.culling.occluding-cache-refresh-interval", ConfigAdapter.INT)

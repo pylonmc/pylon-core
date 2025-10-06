@@ -20,9 +20,6 @@ object PylonConfig {
     val allowedBlockErrors = config.getOrThrow("allowed-block-errors", ConfigAdapter.INT)
 
     @JvmStatic
-    val wailaTickInterval = config.getOrThrow("waila-tick-interval", ConfigAdapter.INT)
-
-    @JvmStatic
     val allowedEntityErrors = config.getOrThrow("allowed-entity-errors", ConfigAdapter.INT)
 
     @JvmStatic

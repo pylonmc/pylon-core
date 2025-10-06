@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.waila.Waila
 import org.bukkit.Material
 import org.bukkit.Registry
 import org.bukkit.block.BlockFace
@@ -116,4 +117,10 @@ object PylonSerializers {
 
     @JvmField
     val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
+
+    @JvmSynthetic
+    internal val WAILA_TYPE = EnumPersistentDataType(Waila.Type::class.java)
+
+    @JvmSynthetic
+    internal val PLAYER_WAILA_CONFIG = PlayerWailaConfigPersistentDataType
 }

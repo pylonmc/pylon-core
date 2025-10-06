@@ -12,7 +12,6 @@ import io.github.pylonmc.pylon.core.util.Octree
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.uuid
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -87,8 +86,8 @@ object BlockTextureEngine : Listener {
 
     @JvmStatic
     var Player.hasCustomBlockTextures: Boolean
-        get() = this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true)
-        set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value)
+        get() = (this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true) || BlockTextureConfig.blockTexturesForced)
+        set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value || BlockTextureConfig.blockTexturesForced)
 
     @JvmStatic
     var Player.cullingPreset: CullingPreset
@@ -99,13 +98,13 @@ object BlockTextureEngine : Listener {
 
     @JvmSynthetic
     internal fun insert(block: PylonBlock) {
-        if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
+        if (!BlockTextureConfig.blockTexturesEnabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).insert(block)
     }
 
     @JvmSynthetic
     internal fun remove(block: PylonBlock) {
-        if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
+        if (!BlockTextureConfig.blockTexturesEnabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).remove(block)
         block.blockTextureEntity?.let {
             for (viewer in it.viewers.toSet()) {
@@ -116,7 +115,7 @@ object BlockTextureEngine : Listener {
 
     @JvmSynthetic
     internal fun getOctree(world: World): Octree<PylonBlock> {
-        check(BlockTextureConfig.customBlockTexturesEnabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
+        check(BlockTextureConfig.blockTexturesEnabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
 
         val border = world.worldBorder
         return octrees.getOrPut(world.uid) {
@@ -134,7 +133,7 @@ object BlockTextureEngine : Listener {
     @JvmSynthetic
     internal fun launchBlockTextureJob(player: Player) {
         val uuid = player.uniqueId
-        if (!BlockTextureConfig.customBlockTexturesEnabled || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
+        if (!BlockTextureConfig.blockTexturesEnabled || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
 
         jobs[uuid] = PylonCore.launch(PylonCore.asyncDispatcher) {
             val visible = mutableSetOf<PylonBlock>()

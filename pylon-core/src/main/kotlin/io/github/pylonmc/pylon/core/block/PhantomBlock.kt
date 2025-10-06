@@ -2,12 +2,12 @@ package io.github.pylonmc.pylon.core.block
 
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import net.kyori.adventure.bossbar.BossBar
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -50,8 +50,8 @@ class PhantomBlock(
         throw UnsupportedOperationException("Phantom block cannot be loaded")
     }
 
-    override fun getWaila(player: Player): WailaConfig? {
-        return WailaConfig(
+    override fun getWaila(player: Player): WailaDisplay? {
+        return WailaDisplay(
             text = defaultWailaTranslationKey.arguments(PylonArgument.of("block", erroredBlockKey.toString())),
             color = BossBar.Color.RED
         )
