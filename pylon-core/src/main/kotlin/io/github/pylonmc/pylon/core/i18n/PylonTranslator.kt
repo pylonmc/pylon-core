@@ -16,6 +16,7 @@ import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
+import io.github.pylonmc.pylon.core.util.plainText
 import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
@@ -225,6 +226,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                 val newLore = lore.lines().flatMap { line ->
                     if (!isPylon(line)) return@flatMap listOf(line)
                     val translated = GlobalTranslator.render(line.withArguments(arguments), locale)
+                    if (translated.plainText.isBlank()) return@flatMap emptyList()
                     val encoded = LineWrapEncoder.encode(translated)
                     val wrapped = encoded.copy(
                         lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
