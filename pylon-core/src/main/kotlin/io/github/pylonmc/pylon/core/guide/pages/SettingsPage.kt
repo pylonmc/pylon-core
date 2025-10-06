@@ -97,13 +97,6 @@ class SettingsPage(
         )
 
         @JvmStatic
-        val armorTextureSetting = ToggleSettingButton(
-            pylonKey("toggle-armor-textures"),
-            toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
-            isToggled = { player -> player.hasCustomArmorTextures },
-        )
-
-        @JvmStatic
         val blockTextureSettings = SettingsPage(
             pylonKey("block_texture_settings"),
             Material.BOOKSHELF
@@ -134,6 +127,13 @@ class SettingsPage(
                 )}
             ))
         }
+
+        @JvmStatic
+        val armorTextureSetting = ToggleSettingButton(
+            pylonKey("toggle-armor-textures"),
+            toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
+            isToggled = { player -> player.hasCustomArmorTextures },
+        )
 
         @JvmStatic
         val researchEffects = ToggleSettingButton(
