@@ -23,7 +23,7 @@ waila:
   # Set to 0 to disable WAILA globally
   tick-interval: 1
 
-  # THe WAILA display types players can choose between
+  # The WAILA display types players can choose between
   enabled-types:
     - actionbar
     - bossbar
