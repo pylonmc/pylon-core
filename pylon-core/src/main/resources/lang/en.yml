@@ -119,7 +119,7 @@ guide:
       lore: |-
         <arrow:#3a293> By default, searches through item names greedily ("iron ingot" searches for exactly "iron ingot" not "iron" and "ingot")
         <arrow:#3a293> Prefix <light_purple>@</light_purple> to search by <light_purple>addon</light_purple>
-        <arrow:#3a293> Prefix <aqua>$ <gray>to search in <aqua>lore</aqua>
+        <arrow:#3a293> Prefix <aqua>$</aqua> to search in <aqua>lore</aqua>
         <arrow:#3a293> Prefixed searches only apply to the word directly after the prefix
         <arrow:#3a293> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature <white>slurry
     research:
