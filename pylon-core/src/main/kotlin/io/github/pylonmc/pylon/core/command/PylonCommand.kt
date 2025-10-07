@@ -16,6 +16,7 @@ import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
@@ -29,7 +30,6 @@ import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.gametest.GameTestConfig
 import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vanillaDisplayName
@@ -91,12 +91,12 @@ private val give = buildCommand("give") {
                 val players = context.getArgument<List<Player>>("players")
                 val singular = players.size == 1
                 for (player in players) {
-                    player.inventory.addItem(item.itemStack.asQuantity(amount))
+                    player.inventory.addItem(item.getItemStack().asQuantity(amount))
                 }
                 context.source.sender.sendVanillaFeedback(
                     "give.success." + if (singular) "single" else "multiple",
                     Component.text(amount),
-                    item.itemStack.vanillaDisplayName(),
+                    item.getItemStack().vanillaDisplayName(),
                     if (singular) players[0].name() else Component.text(players.size)
                 )
             }

@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.register
 import io.github.pylonmc.pylon.core.block.base.PylonDirectionalBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
@@ -215,7 +216,7 @@ open class PylonBlock internal constructor(val block: Block) {
      */
     open fun getDropItem(context: BlockBreakContext): ItemStack? {
         return if (context.normallyDrops) {
-            defaultItem?.itemStack
+            defaultItem?.getItemStack()
         } else {
             null
         }
@@ -229,7 +230,7 @@ open class PylonBlock internal constructor(val block: Block) {
      *
      * @return the item the block should give when middle clicked, or null if none
      */
-    open fun getPickItem() = defaultItem?.itemStack
+    open fun getPickItem() = defaultItem?.getItemStack()
 
     /**
      * Returns the item that should be used to display the block's texture.
@@ -238,7 +239,7 @@ open class PylonBlock internal constructor(val block: Block) {
      *
      * @return the item that should be used to display the block's texture
      */
-    open fun getBlockTextureItem() = defaultItem?.itemStack?.apply {
+    open fun getBlockTextureItem() = defaultItem?.getItemStack()?.apply {
         itemMeta.persistentDataContainer.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true)
     }
 

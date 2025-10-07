@@ -25,7 +25,7 @@ sealed interface ItemTypeWrapper : Keyed {
      */
     @JvmRecord
     data class Pylon(val item: PylonItemSchema) : ItemTypeWrapper {
-        override fun createItemStack() = item.itemStack
+        override fun createItemStack() = item.getItemStack()
         override fun getKey() = item.key
     }
 

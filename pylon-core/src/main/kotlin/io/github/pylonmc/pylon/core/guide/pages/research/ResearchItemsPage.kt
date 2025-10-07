@@ -16,7 +16,7 @@ class ResearchItemsPage(research: Research) : SimpleStaticGuidePage(
     KEY,
     research.material,
     research.unlocks.map {
-        ItemButton(PylonRegistry.ITEMS[it]!!.itemStack)
+        ItemButton(PylonRegistry.ITEMS[it]!!.getItemStack())
     }.toMutableList()
 ) {
 

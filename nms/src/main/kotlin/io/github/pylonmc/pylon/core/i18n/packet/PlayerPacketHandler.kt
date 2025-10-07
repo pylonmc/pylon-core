@@ -213,10 +213,10 @@ private val lores = WeakHashMap<PylonItemSchema, ItemLore>()
 private fun reset(stack: BukkitItemStack) {
     val item = PylonItem.fromStack(stack) ?: return
     val name = names.getOrPut(item.schema) {
-        item.schema.itemStack.getData(DataComponentTypes.ITEM_NAME)!!
+        item.schema.getItemStack().getData(DataComponentTypes.ITEM_NAME)!!
     }
     val lore = lores.getOrPut(item.schema) {
-        item.schema.itemStack.getData(DataComponentTypes.LORE)!!
+        item.schema.getItemStack().getData(DataComponentTypes.LORE)!!
     }
     item.stack.setData(DataComponentTypes.ITEM_NAME, name)
     item.stack.setData(DataComponentTypes.LORE, lore)
