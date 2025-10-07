@@ -52,8 +52,8 @@ message:
 
   research:
     unknown: "<red>Thou knowest not how to use %item%. Prithee, ponder upon %research%"
-    unlocked: "Thou hast discovered %research%"
-    click_to_research: "<green>Click to research (%points% points)"
+    unlocked: "Thou hast had %research% revealed to you"
+    click_to_research: "<green>Strike to ponder (%points% points)"
 
   command:
     error:
@@ -70,21 +70,21 @@ message:
       enabled: "<green>WAILA enabled"
       disabled: "<red>WAILA disabled"
     research:
-      added: "<green>Added research %research% to player %player%"
-      removed: "<green>Removed research %research% from player %player%"
+      added: "<green>Revealed %research% to player %player%"
+      removed: "<green>Mystified %player%'s memory of %research%"
       list:
-        none_self: "Thou dost not knoweth anything" # TODO make all instance of "research" to "revelation"
+        none_self: "Thou dost not knoweth anything"
         none_other: "<red>%player% doth not know anything"
-        discovered_self: "Thou hast discovered %count% researches: %list%"
-        discovered_other: "%player% hath discovered %count% researches: %list%"
-      already_discovered: "<red>Thou hast already discovered %research%"
-      cannot_unlock: "<red>Thou cannot unlock %research% using research points"
-      not_enough_points: "<red>Thou hast not yet gathered sufficient knowledge to discover %research% (%points%/%cost% points)"
+        discovered_self: "Thou hast had %count% revelations: %list%"
+        discovered_other: "%player% hast had %count% revelations: %list%"
+      already_discovered: "<red>Thou hast already had %research% revealed to thee"
+      cannot_unlock: "<red>Thou canst not know %research% using marks of revelation"
+      not_enough_points: "<red>Thou hast not yet gathered sufficient knowledge to have %research% revealed to thee (%points%/%cost% points)"
       points:
-        set: "<green>Set %player%'s research points to %points%"
-        added: "<green>Added %points% research points to %player%"
-        removed: "<green>Removed %points% research points from %player%"
-        query: "<green>%player% hath %points% research points" # TODO make "research points" to "marks of revelation"
+        set: "<green>Set %player%'s marks of revelation to %points%"
+        added: "<green>Added %points% marks of revelation to %player%"
+        removed: "<green>Removed %points% marks of revelation from %player%"
+        query: "<green>%player% hath %points% marks of revelation"
     exposerecipe:
       not-configurable: "<red>This divine recipe may not be bent to thy whims"
       warning: "<yellow>Hark! Shouldst thou lay bare the secrets of these recipes, their forms shall no longer mend themselves of their own accord. To undo this act, thou must destroy %file%"
@@ -118,7 +118,7 @@ guide:
       unlocks-title: "<u>Revelations</u>"
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>additional revelations - <guideinsn>right click</guideinsn> <gray>to see all"
-      error: "<red>Thy research hath failed to load!!! Repent!!!"
+      error: "<red>Thy revelation hath failed to load!!! Repent!!!"
     fluid:
       name: "%fluid% <gray>(%amount%<gray>)"
       error: "<red>Thy fluid item hath failed to load!!! Repent!!!"
@@ -282,8 +282,8 @@ unit:
     plural: "percent"
     abbr: "%"
   research_points:
-    singular: "research point"
-    plural: "research points"
+    singular: "mark of revelation"
+    plural: "marks of revelation"
   celsius:
     singular: "degree Celsius"
     plural: "degrees Celsius"
