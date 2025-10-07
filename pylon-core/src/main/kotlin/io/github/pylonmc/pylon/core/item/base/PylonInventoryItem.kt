@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack
 
 interface PylonInventoryItem {
     fun onTick(player: Player, stack: ItemStack)
-    fun getTickSpeed(): InventoryTickSpeed
+    val tickSpeed: InventoryTickSpeed
 }
 
 enum class InventoryTickSpeed(val tickRate: Long) {
