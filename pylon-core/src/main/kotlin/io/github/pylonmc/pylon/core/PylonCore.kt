@@ -9,7 +9,6 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
@@ -23,16 +22,19 @@ import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
+import io.github.pylonmc.pylon.core.item.PylonInventoryTicker
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
+import io.github.pylonmc.pylon.core.item.base.InventoryTickSpeed
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
@@ -44,7 +46,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
@@ -94,6 +95,9 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
+        for (speed in InventoryTickSpeed.entries) {
+            Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(speed), 0, speed.tickRate)
+        }
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
