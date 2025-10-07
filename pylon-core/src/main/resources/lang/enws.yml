@@ -43,7 +43,12 @@ message:
       ticking: "<gold>Ticking: <green>Yea"
       errored: "<gold>Ticking: <red>Ticker hath errored"
       not_ticking: "<gold>Ticking: <red>Nay"
-    pdc: "%key%: %value%"
+    data: "<gold>Data: <white>%data%"
+    deleted_data: "<red>Destroyed <white>%type% <gray>(%location%)"
+
+  disabled:
+    message: "<white>%item% <red>hath been disabled"
+    lore: "<arrow> <#ff0000>Disabled - thou still canst craft this item but thou canst not use it"
 
   research:
     unknown: "<red>Thou knowest not how to use %item%. Prithee, ponder upon %research%"
@@ -53,18 +58,25 @@ message:
   command:
     error:
       no_permission: "<red>Thou art not permitted to execute this command"
-      not_a_player: "<red>Thou art not a player"
+      must_be_player: "<red>Thou must be a player to execute this command"
     key:
+      hover: "Strike to copy to thy clip-scroll"
       no_item: "<red>Thou art not holding a Pylon item"
     gametest:
+      started: "Starting game test %test% at %location%"
       failed: "<red>Game test %test% failed: %reason%"
       success: "<green>Game test %test% succeeded"
+    waila:
+      enabled: "<green>WAILA enabled"
+      disabled: "<red>WAILA disabled"
     research:
       added: "<green>Added research %research% to player %player%"
       removed: "<green>Removed research %research% from player %player%"
       list:
-        none: "Thou dost not knoweth anything"
-        discovered: "Thou hast discovered %count% researches: %list%"
+        none_self: "Thou dost not knoweth anything" # TODO make all instance of "research" to "revelation"
+        none_other: "<red>%player% doth not know anything"
+        discovered_self: "Thou hast discovered %count% researches: %list%"
+        discovered_other: "%player% hath discovered %count% researches: %list%"
       already_discovered: "<red>Thou hast already discovered %research%"
       cannot_unlock: "<red>Thou cannot unlock %research% using research points"
       not_enough_points: "<red>Thou hast not yet gathered sufficient knowledge to discover %research% (%points%/%cost% points)"
@@ -72,7 +84,7 @@ message:
         set: "<green>Set %player%'s research points to %points%"
         added: "<green>Added %points% research points to %player%"
         removed: "<green>Removed %points% research points from %player%"
-        get: "<green>%player% has %points% research points"
+        query: "<green>%player% hath %points% research points" # TODO make "research points" to "marks of revelation"
     exposerecipe:
       not-configurable: "<red>This divine recipe may not be bent to thy whims"
       warning: "<yellow>Hark! Shouldst thou lay bare the secrets of these recipes, their forms shall no longer mend themselves of their own accord. To undo this act, thou must destroy %file%"
@@ -133,6 +145,7 @@ guide:
       name: "<blue>↑ Ingredients ↑"
       lore: |-
         <gold>↓ Results ↓
+    ingredient: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
     culling-preset:
       disabled:
         name: "<gray>Concealment Scheme: No Concealment <dark_gray>(Click to cycle)"

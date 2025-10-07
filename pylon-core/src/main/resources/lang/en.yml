@@ -91,10 +91,6 @@ message:
       not-configurable: "<red>This recipe type is not configurable"
       warning: "<yellow>Warning: exposing recipe configs will keep them from updating automatically. Delete %file% to revert"
 
-  guide:
-    ingredients-page:
-      item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
-
 gui:
   scroll:
     up: "Scroll up"
@@ -155,6 +151,7 @@ guide:
       name: "<blue>↑ Inputs ↑"
       lore: |-
         <gold>↓ Main product ↓
+    ingredient: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
     toggle-block-textures:
       name: "Toggle Custom Block Textures"
       lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
