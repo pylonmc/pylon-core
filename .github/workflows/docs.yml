@@ -1,4 +1,4 @@
-name: docs.yml
+name: Deploy Kdocs/Javadocs
 on:
   push:
     branches: [ "master" ]
