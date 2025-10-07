@@ -266,6 +266,10 @@ unit:
   blocks:
     singular: "block"
     plural: "blocks"
+  blocks_per_second:
+    singular: "block per second"
+    plural: "blocks per second"
+    abbr: "b/s"
   chunks:
     singular: "chunk"
     plural: "chunks"
@@ -316,3 +320,11 @@ unit:
     singular: "watt"
     plural: "watts"
     abbr: "W"
+  experience:
+    singular: "experience point"
+    plural: "experience points"
+    abbr: "XP"
+  experience_per_second:
+    singular: "experience point per second"
+    plural: "experience points per second"
+    abbr: "XP/s"
