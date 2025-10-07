@@ -3,7 +3,7 @@ package io.github.pylonmc.pylon.core.item.base
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-internal interface PylonInventoryItem {
+interface PylonInventoryItem {
     fun onTick(player: Player, stack: ItemStack)
     fun getTickSpeed(): InventoryTickSpeed
 }
