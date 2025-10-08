@@ -9,7 +9,7 @@ class PylonInventoryTicker(val tickSpeed: InventoryTickSpeed) : Runnable {
         for (player in Bukkit.getOnlinePlayers()) {
             for (item in player.inventory) {
                 val pylonItem = PylonItem.fromStack(item)
-                if (pylonItem is PylonInventoryItem && pylonItem.getTickSpeed() == tickSpeed) {
+                if (pylonItem is PylonInventoryItem && pylonItem.tickSpeed == tickSpeed) {
                     pylonItem.onTick(player, item)
                 }
             }
