@@ -13,7 +13,7 @@ interface PylonInventoryItem {
     * @param stack The item itself
     */
     fun onTick(player: Player, stack: ItemStack)
-    /* Speed at which onTick is called */
+    /** Speed at which onTick is called */
     val tickSpeed: InventoryTickSpeed
 }
 
