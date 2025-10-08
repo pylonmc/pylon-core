@@ -205,8 +205,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         for (addon in PylonRegistry.ADDONS) {
             val corePath = this.javaPlugin.dataFolder
                 .resolve("researches")
-                .resolve(addon.key.namespace)
-                .resolve("researches.yml")
+                .resolve(addon.key.namespace + ".yml")
 
             mergeGlobalConfig(addon, "researches.yml", corePath.toString())
         }
@@ -214,9 +213,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val researchDir = dataPath.resolve("researches")
         if (researchDir.exists()) {
             for (namespaceDir in researchDir.listDirectoryEntries()) {
-                if (!namespaceDir.isDirectory()) continue
                 val namespace = namespaceDir.nameWithoutExtension
-                val pluginResearch = namespaceDir.resolve("researches.yml")
+                val pluginResearch = namespaceDir.resolve("$namespace.yml")
 
                 if (!pluginResearch.isRegularFile()) continue
 
@@ -227,7 +225,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
                     Research.loadFromConfig(section, nsKey).register()
                 }
-
             }
         }
 
