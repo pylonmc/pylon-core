@@ -31,6 +31,7 @@ import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -111,29 +112,28 @@ internal object BlockListener : Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
-        if (BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
+        if (BlockStorage.isPylonBlock(event.block) && BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
             event.isCancelled = true
             return
         }
+
         val it = event.blockList().iterator()
         while (it.hasNext()) {
-            if (BlockStorage.breakBlock(it.next(), BlockBreakContext.BlockExploded(event)) == null) {
+            val block = it.next()
+            if (BlockStorage.isPylonBlock(block) && BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event)) == null) {
                 it.remove()
             }
         }
-        for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event))
-        }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         val it = event.blockList().iterator()
         while (it.hasNext()) {
             val block = it.next()
-            if (BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(block, event)) == null) {
+            if (BlockStorage.isPylonBlock(block) && BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(block, event)) == null) {
                 it.remove()
             }
         }
@@ -142,7 +142,7 @@ internal object BlockListener : Listener {
     // Event added by paper, not really documented when it's called so two separate handlers might
     // fire for some block breaks but this shouldn't be an issue
     // Primarily added to handle sensitive blocks
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockDestroyEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.Destroyed(event))
@@ -784,6 +784,17 @@ internal object BlockListener : Listener {
                 block.onFlowerPotManipulated(event)
             } catch (e: Exception) {
                 logEventHandleErr(event, e, block)
+            }
+        }
+    }
+
+    @EventHandler
+    private fun onInventoryOpen(event: InventoryOpenEvent) {
+        val holder = event.inventory.holder
+        if (holder is Container) {
+            val block = BlockStorage.get(holder.block)
+            if (block is PylonVanillaContainerBlock) {
+                block.onInventoryOpen(event)
             }
         }
     }

@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.block.context
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent
+import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import org.bukkit.GameMode
 import org.bukkit.block.Block
 import org.bukkit.event.block.BlockBreakEvent
@@ -35,6 +37,16 @@ interface BlockBreakContext {
     @get:JvmName("shouldSetToAir")
     val shouldSetToAir: Boolean
         get() = true
+
+    /**
+     * The block is being forcefully broken by [BlockStorage.deleteBlock]
+     *
+     * See [DebugWaxedWeatheredCutCopperStairs] for example
+     */
+    class Delete(override val block: Block) : BlockBreakContext {
+        override val normallyDrops = false
+        override val shouldSetToAir = true
+    }
 
     /**
      * The block is being broken by a plugin
@@ -76,7 +88,8 @@ interface BlockBreakContext {
      */
     data class BlockExploded(val event: BlockExplodeEvent) : BlockBreakContext {
         override val block = event.block
-        override val normallyDrops = false
+        override val normallyDrops
+            get() = Math.random() <= event.yield
     }
 
     /**
