@@ -16,6 +16,7 @@ import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
@@ -29,7 +30,6 @@ import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.gametest.GameTestConfig
 import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vanillaDisplayName
@@ -530,7 +530,7 @@ internal val ROOT_COMMAND_PY_ALIAS = buildCommand("py") {
 
 @JvmSynthetic
 @Suppress("UnstableApiUsage")
-internal inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
+inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
     return when (typeOf<T>()) {
         typeOf<PaperBlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
         typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)
