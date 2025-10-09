@@ -214,11 +214,10 @@ object PylonCore : JavaPlugin(), PylonAddon {
         if (researchDir.exists()) {
             for (namespaceDir in researchDir.listDirectoryEntries()) {
                 val namespace = namespaceDir.nameWithoutExtension
-                val pluginResearch = namespaceDir.resolve("$namespace.yml")
 
-                if (!pluginResearch.isRegularFile()) continue
+                if (!namespaceDir.isRegularFile()) continue
 
-                val mainResearchConfig = Config(pluginResearch)
+                val mainResearchConfig = Config(namespaceDir)
                 for (key in mainResearchConfig.keys) {
                     val nsKey = NamespacedKey(namespace, key)
                     val section = mainResearchConfig.getSection(key) ?: continue
