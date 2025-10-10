@@ -4,7 +4,8 @@ plugins {
     kotlin("jvm")
     `java-library`
     id("com.gradleup.shadow") version "9.0.0"
-    id("de.eldoria.plugin-yml.paper") version "0.7.1"
+    id("de.eldoria.plugin-yml.paper") version "0.8.0"
+    id("xyz.jpenilla.gremlin-gradle") version "0.0.9"
     idea
     `maven-publish`
     signing
@@ -19,29 +20,35 @@ repositories {
     }
 }
 
-dependencies {
-    fun paperLibraryApi(dependency: Any) {
-        paperLibrary(dependency)
-        compileOnlyApi(dependency)
-    }
+fun DependencyHandlerScope.downloadedAtRuntime(dependency: String, configure: Action<ExternalModuleDependency> = Action {}) {
+    compileOnly(dependency, configure)
+    runtimeDownload(dependency, configure)
+}
 
+fun DependencyHandlerScope.apiDownloadedAtRuntime(dependency: String, configure: Action<ExternalModuleDependency> = Action {}) {
+    compileOnlyApi(dependency, configure)
+    runtimeDownload(dependency, configure)
+}
+
+dependencies {
     runtimeOnly(project(":nms"))
 
-    paperLibrary("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    apiDownloadedAtRuntime("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
+    apiDownloadedAtRuntime("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
-    paperLibrary("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
-    paperLibrary("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
-    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.46")
+    downloadedAtRuntime("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
+    downloadedAtRuntime("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
+    apiDownloadedAtRuntime("xyz.xenondevs.invui:invui-core:1.46")
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
-    paperLibrary("xyz.xenondevs.invui:inventory-access-r24:1.46:remapped-mojang")
-    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.46")
+    downloadedAtRuntime("xyz.xenondevs.invui:inventory-access-r24:1.46:remapped-mojang")
+    apiDownloadedAtRuntime("xyz.xenondevs.invui:invui-kotlin:1.46")
     api("com.github.Tofaa2.EntityLib:spigot:2.4.11")
     implementation("com.github.retrooper:packetevents-spigot:2.9.5")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
-    paperLibrary("com.github.ben-manes.caffeine:caffeine:3.2.2")
+    downloadedAtRuntime("com.github.ben-manes.caffeine:caffeine:3.2.2")
 
     dokkaPlugin(project(":dokka-plugin"))
 
@@ -141,6 +148,7 @@ tasks.shadowJar {
 
     relocate("com.github.retrooper.packetevents", "io.github.pylonmc.pylon.core.packetevents")
     relocate("me.tofaa.entitylib", "io.github.pylonmc.pylon.core.entitylib")
+    relocate("xyz.jpenilla.gremlin", "io.github.pylonmc.pylon.core.gremlin")
     relocate("org.bstats", "io.github.pylonmc.pylon.core.bstats")
 
     archiveBaseName = "pylon-core"
@@ -148,10 +156,8 @@ tasks.shadowJar {
 }
 
 paper {
-    generateLibrariesJson = true
-
     name = "PylonCore"
-    loader = "io.github.pylonmc.pylon.core.PylonLoader"
+    loader = "io.github.pylonmc.pylon.core.gremlin.runtime.platformsupport.DefaultsPaperPluginLoader"
     bootstrapper = "io.github.pylonmc.pylon.core.PylonBootstrapper"
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
@@ -217,4 +223,10 @@ signing {
     useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
 
     sign(publishing.publications["maven"])
+}
+
+tasks.withType(Sign::class) {
+    onlyIf {
+        System.getenv("SIGNING_KEY") != null && System.getenv("SIGNING_PASSWORD") != null
+    }
 }
