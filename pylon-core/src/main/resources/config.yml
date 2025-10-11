@@ -72,7 +72,11 @@ pipe-placement:
 
   # Recommended to keep this low to make pipe placement easier
   # Might break pipe placement if set very high due to chunkloading mechanics
-  max-distance: 5
+  max-length: 5
+
+  # If the player goes beyond this distance from the pipe placement's origin, the pipe
+  # placement will be cancelled
+  cancel-distance: 32
 
 # How many characters a line can be before it is split into a new line when translating
 translation-wrap-limit: 64

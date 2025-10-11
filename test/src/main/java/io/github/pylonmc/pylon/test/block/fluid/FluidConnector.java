@@ -27,7 +27,7 @@ public class FluidConnector extends PylonBlock implements PylonUnloadBlock {
     @SuppressWarnings("unused")
     public FluidConnector(Block block, BlockCreateContext context) {
         super(block);
-        point = new VirtualFluidPoint(block, FluidPointType.CONNECTOR);
+        point = new VirtualFluidPoint(block, FluidPointType.INTERSECTION);
         FluidManager.add(point);
     }
 

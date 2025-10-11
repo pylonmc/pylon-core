@@ -6,9 +6,10 @@ import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.fluid.FluidManager
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
+import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.GameMode
 import org.bukkit.entity.ItemDisplay
@@ -23,64 +24,73 @@ import java.util.UUID
  */
 @ApiStatus.Internal
 class FluidPipeDisplay : PylonEntity<ItemDisplay> {
+    val fromDisplay: UUID
+    val toDisplay: UUID
     val pipe: FluidPipe
-    val amount: Int
-    val from: UUID
-    val to: UUID
+    val pipeAmount: Int
+
+    constructor(
+        pipe: FluidPipe, pipeAmount: Int, from: FluidPointDisplay, to: FluidPointDisplay
+    ) : super(KEY, makeDisplay(pipe, from, to)) {
+        this.pipe = pipe
+        this.pipeAmount = pipeAmount
+        this.fromDisplay = from.uuid
+        this.toDisplay = to.uuid
+        EntityStorage.add(this)
+    }
 
     @Suppress("unused")
     constructor(entity: ItemDisplay) : super(entity) {
         val pdc = entity.persistentDataContainer
 
+        this.fromDisplay = pdc.get(FROM_DISPLAY_KEY, PylonSerializers.UUID)!!
+        this.toDisplay = pdc.get(TO_DISPLAY_KEY, PylonSerializers.UUID)!!
+
         // will fail to load if schema not found; no way around this
-        pipe = PylonItem.fromStack(pdc.get(PIPE_KEY, PylonSerializers.ITEM_STACK)) as FluidPipe
-        this.amount = pdc.get(AMOUNT_KEY, PylonSerializers.INTEGER)!!
-        from = pdc.get(FROM_KEY, PylonSerializers.UUID)!!
-        to = pdc.get(TO_KEY, PylonSerializers.UUID)!!
+        val pipeSchema = pdc.get(PIPE_KEY, PIPE_TYPE)!!
+        pipe = PylonItem.fromStack(pipeSchema.itemStack) as FluidPipe
+
+        this.pipeAmount = pdc.get(PIPE_AMOUNT_KEY, PylonSerializers.INTEGER)!!
 
         // When fluid points are loaded back, their segment's fluid per second and predicate won't be preserved, so
         // we wait for them to load and then set their segments' fluid per second and predicate
-        EntityStorage.whenEntityLoads(from, FluidPointInteraction::class.java) { interaction ->
-            FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe::canPass)
+        EntityStorage.whenEntityLoads<FluidPointDisplay>(fromDisplay) { display ->
+            FluidManager.setFluidPerSecond(display.point.segment, pipe.fluidPerSecond)
+            FluidManager.setFluidPredicate(display.point.segment, pipe::canPass)
         }
 
         // Technically only need to do this for one of the end points since they're part of the same segment, but
         // we do it twice just to be safe
-        EntityStorage.whenEntityLoads(to, FluidPointInteraction::class.java) { interaction ->
-            FluidManager.setFluidPerSecond(interaction.point.segment, pipe.fluidPerSecond)
-            FluidManager.setFluidPredicate(interaction.point.segment, pipe::canPass)
+        EntityStorage.whenEntityLoads<FluidPointDisplay>(toDisplay) { display ->
+            FluidManager.setFluidPerSecond(display.point.segment, pipe.fluidPerSecond)
+            FluidManager.setFluidPredicate(display.point.segment, pipe::canPass)
         }
     }
 
-    constructor(
-        pipe: FluidPipe, amount: Int, from: FluidPointInteraction, to: FluidPointInteraction
-    ) : super(KEY, makeDisplay(pipe, from, to)) {
-        this.pipe = pipe
-        this.amount = amount
-        this.from = from.uuid
-        this.to = to.uuid
-    }
-
     override fun write(pdc: PersistentDataContainer) {
-        pdc.set(PIPE_KEY, PylonSerializers.ITEM_STACK, pipe.stack)
-        pdc.set(AMOUNT_KEY, PylonSerializers.INTEGER, amount)
-        pdc.set(FROM_KEY, PylonSerializers.UUID, from)
-        pdc.set(TO_KEY, PylonSerializers.UUID, to)
+        pdc.set(FROM_DISPLAY_KEY, PylonSerializers.UUID, fromDisplay)
+        pdc.set(TO_DISPLAY_KEY, PylonSerializers.UUID, toDisplay)
+        pdc.set(PIPE_KEY, PIPE_TYPE, pipe.schema)
+        pdc.set(PIPE_AMOUNT_KEY, PylonSerializers.INTEGER, pipeAmount)
     }
 
-    fun getFrom(): FluidPointInteraction
-        = EntityStorage.getAs<FluidPointInteraction>(from)!!
+    fun getFrom(): FluidPointDisplay
+        = EntityStorage.getAs<FluidPointDisplay>(fromDisplay)!!
 
-    fun getTo(): FluidPointInteraction
-        = EntityStorage.getAs<FluidPointInteraction>(to)!!
+    fun getTo(): FluidPointDisplay
+        = EntityStorage.getAs<FluidPointDisplay>(toDisplay)!!
 
-    fun delete(removeMarkersIfEmpty: Boolean, player: Player?, drops: MutableList<ItemStack>?) {
+    fun delete(player: Player?, drops: MutableList<ItemStack>?) {
+        if (!entity.isValid) {
+            // already deleted
+            return
+        }
+
         val from = getFrom()
         val to = getTo()
 
         val itemToGive = pipe.stack.clone()
-        itemToGive.amount = amount
+        itemToGive.amount = pipeAmount
         if (player != null) {
             if (player.gameMode != GameMode.CREATIVE) {
                 player.give(itemToGive)
@@ -92,20 +102,22 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
             location.getWorld().dropItemNaturally(location, itemToGive)
         }
 
-        ConnectingService.disconnect(from, to, removeMarkersIfEmpty)
+        FluidPipePlacementService.disconnect(from, to, true)
     }
 
     companion object {
 
         val KEY = pylonKey("fluid_pipe_display")
+        const val SIZE = 0.1
 
-        private val AMOUNT_KEY = pylonKey("amount")
+        private val PIPE_AMOUNT_KEY = pylonKey("pipe_amount")
         private val PIPE_KEY = pylonKey("pipe")
-        private val FROM_KEY = pylonKey("from")
-        private val TO_KEY = pylonKey("to")
+        private val PIPE_TYPE = PylonSerializers.KEYED.keyedTypeFrom { PylonRegistry.ITEMS.getOrThrow(it) }
+        private val FROM_DISPLAY_KEY = pylonKey("from_display")
+        private val TO_DISPLAY_KEY = pylonKey("to_display")
 
-        private fun makeDisplay(pipe: FluidPipe, from: FluidPointInteraction, to: FluidPointInteraction): ItemDisplay {
-            val height = from.entity.interactionHeight
+        private fun makeDisplay(pipe: FluidPipe, from: FluidPointDisplay, to: FluidPointDisplay): ItemDisplay {
+            val height = from.entity.height
             val fromLocation = from.entity.location.add(0.0, height / 2.0, 0.0)
             val toLocation = to.entity.location.add(0.0, height / 2.0, 0.0)
             // We use a center location rather than just spawning at fromLocation or toLocation to prevent the entity
@@ -118,7 +130,7 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
                 .transformation(LineBuilder()
                     .from(fromOffset)
                     .to(toOffset)
-                    .thickness(0.1)
+                    .thickness(SIZE)
                     .build()
                     .buildForItemDisplay()
                 )
@@ -126,16 +138,6 @@ class FluidPipeDisplay : PylonEntity<ItemDisplay> {
                     .addCustomModelDataString("fluid_pipe_display:${pipe.key.key}")
                 )
                 .build(centerLocation)
-        }
-
-        /**
-         * Convenience function that constructs the display, but then also adds it to EntityStorage
-         */
-        @JvmStatic
-        fun make(pipe: FluidPipe, amount: Int, from: FluidPointInteraction, to: FluidPointInteraction): FluidPipeDisplay {
-            val display = FluidPipeDisplay(pipe, amount, from, to)
-            EntityStorage.add(display)
-            return display
         }
     }
 }

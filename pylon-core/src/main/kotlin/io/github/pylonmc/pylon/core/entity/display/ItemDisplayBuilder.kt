@@ -24,6 +24,8 @@ class ItemDisplayBuilder() {
     var viewRange: Float? = null
     var interpolationDelay: Int? = null
     var interpolationDuration: Int? = null
+    var width: Float? = null
+    var height: Float? = null
 
     constructor(other: ItemDisplayBuilder): this() {
         this.itemStack = other.itemStack
@@ -34,6 +36,8 @@ class ItemDisplayBuilder() {
         this.viewRange = other.viewRange
         this.interpolationDelay = other.interpolationDelay
         this.interpolationDuration = other.interpolationDuration
+        this.width = other.width
+        this.height = other.height
     }
 
     fun material(material: Material): ItemDisplayBuilder = apply { this.itemStack = ItemStack(material) }
@@ -48,6 +52,8 @@ class ItemDisplayBuilder() {
     fun viewRange(viewRange: Float): ItemDisplayBuilder = apply { this.viewRange = viewRange }
     fun interpolationDelay(interpolationDelay: Int): ItemDisplayBuilder = apply { this.interpolationDelay = interpolationDelay }
     fun interpolationDuration(interpolationDuration: Int): ItemDisplayBuilder = apply { this.interpolationDuration = interpolationDuration }
+    fun width(width: Float): ItemDisplayBuilder = apply { this.width = width }
+    fun height(height: Float): ItemDisplayBuilder = apply { this.height = height }
 
     fun build(location: Location): ItemDisplay {
         val finalLocation = location.clone()
@@ -84,6 +90,12 @@ class ItemDisplayBuilder() {
         }
         if (interpolationDuration != null) {
             display.interpolationDuration = interpolationDuration!!
+        }
+        if (width != null) {
+            display.displayWidth = width!!
+        }
+        if (height != null) {
+            display.displayWidth = height!!
         }
     }
 }
