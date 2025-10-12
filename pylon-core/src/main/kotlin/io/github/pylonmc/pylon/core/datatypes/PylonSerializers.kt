@@ -92,6 +92,9 @@ object PylonSerializers {
     val ITEM_STACK = ItemStackPersistentDataType
 
     @JvmField
+    val ITEM_STACK_READABLE = ReadableItemStackPersistentDataType
+
+    @JvmField
     val INVENTORY = InventoryPersistentDataType
 
     @JvmField

@@ -5,6 +5,9 @@ import io.github.pylonmc.pylon.core.i18n.packet.PlayerPacketHandler
 import io.papermc.paper.adventure.PaperAdventure
 import net.kyori.adventure.text.Component
 import net.minecraft.nbt.TextComponentTagVisitor
+import net.minecraft.world.level.block.state.properties.Property
+import org.bukkit.block.Block
+import org.bukkit.craftbukkit.block.CraftBlock
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer
 import org.bukkit.entity.Player
@@ -45,4 +48,22 @@ object NmsAccessorImpl : NmsAccessor {
 
     override fun serializePdc(pdc: PersistentDataContainer): Component
         = PaperAdventure.asAdventure(TextComponentTagVisitor("  ").visit((pdc as CraftPersistentDataContainer).toTagCompound()))
+
+    override fun getStateProperties(block: Block, custom: Map<String, Pair<String, Int>>): Map<String, String> {
+        val state = (block as CraftBlock).nms
+        val properties = state.properties ?: emptyList()
+        val map = mutableMapOf<String, String>()
+        val possibleValues = mutableMapOf<String, Int>()
+        for (property in properties) {
+            @Suppress("UNCHECKED_CAST")
+            property as Property<Comparable<Any>>
+            map[property.name] = state.getOptionalValue(property).map(property::getName).orElse("none")
+            possibleValues[property.name] = property.possibleValues.size
+        }
+        for ((name, pair) in custom) {
+            map[name] = pair.first
+            possibleValues[name] = pair.second
+        }
+        return map.toSortedMap().toSortedMap(compareBy<String> { possibleValues[it] ?: 0 }.reversed())
+    }
 }

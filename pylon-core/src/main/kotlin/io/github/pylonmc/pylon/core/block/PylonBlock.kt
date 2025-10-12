@@ -4,7 +4,6 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.register
 import io.github.pylonmc.pylon.core.block.base.PylonDirectionalBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
@@ -18,7 +17,9 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -27,26 +28,11 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.datacomponent.DataComponentTypes
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import me.tofaa.entitylib.wrapper.WrapperEntity
-import org.bukkit.Axis
 import net.kyori.adventure.key.Key
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
-import org.bukkit.block.data.AnaloguePowerable
-import org.bukkit.block.data.Bisected
-import org.bukkit.block.data.Directional
-import org.bukkit.block.data.FaceAttachable
-import org.bukkit.block.data.Hangable
-import org.bukkit.block.data.MultipleFacing
-import org.bukkit.block.data.Openable
-import org.bukkit.block.data.Orientable
-import org.bukkit.block.data.Powerable
-import org.bukkit.block.data.Rotatable
-import org.bukkit.block.data.type.Slab
-import org.bukkit.block.data.type.Stairs
-import org.bukkit.block.data.type.Wall
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -193,6 +179,52 @@ open class PylonBlock internal constructor(val block: Block) {
     }
 
     /**
+     * Returns a map of custom block state properties to be used for the block texture item.
+     * These properties will be merged with the vanilla block state properties of the block.
+     *
+     * Your map should be in the form of `propertyName -> (propertyValue, numberOfPossibleValues)`.
+     * For example, if you have a property called "facing" that can be "up", "down", "north", "south", "east", or "west",
+     * you may return `mapOf("facing" to ("north", 6))`.
+     *
+     * When overriding this method you most likely want to work off the result of `super.getBlockTextureProperties()`
+     * instead of returning a new map entirely, to ensure that any properties provided by superclasses
+     * are preserved. (e.g. [PylonDirectionalBlock])
+     */
+    open fun getBlockTextureProperties(): Map<String, Pair<String, Int>> {
+        val properties = mutableMapOf<String, Pair<String, Int>>()
+        if (this is PylonDirectionalBlock) {
+            val facing = getFacing()
+            if (facing != null) {
+                properties["facing"] = facing.name.lowercase() to IMMEDIATE_FACES.size
+            }
+        }
+        return properties
+    }
+
+    /**
+     * Returns the item that should be used to display the block's texture.
+     *
+     * By default, returns the item with the same key as the block, marked with the
+     * [pylonBlockTextureEntityKey]. The item will also have custom model data with
+     * the vanilla block state properties of the block, merged with any custom
+     * properties provided by the block. (see [getBlockTextureProperties])
+     * This allows resource packs to provide different models/textures for different
+     * block states.
+     *
+     * It is recommended to only override this method if you definitely need to, for
+     * most use cases you should only ever need to override [getBlockTextureProperties].
+     *
+     * @return the item that should be used to display the block's texture
+     */
+    open fun getBlockTextureItem() = defaultItem?.getItemStack()?.let { ItemStackBuilder(it) }?.apply {
+        editPdc { it.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true) }
+        val properties = NmsAccessor.instance.getStateProperties(block, getBlockTextureProperties())
+        for ((property, value) in properties) {
+            addCustomModelDataString("$property=$value")
+        }
+    }?.build()
+
+    /**
      * WAILA is the text that shows up when looking at a block to tell you what the block is.
      *
      * This will only be called for the player if the player has WAILA enabled.
@@ -230,73 +262,6 @@ open class PylonBlock internal constructor(val block: Block) {
     open fun getPickItem() = defaultItem?.getItemStack()
 
     /**
-     * Returns the item that should be used to display the block's texture.
-     *
-     * By default, returns the item with the same key as the block. As well
-     * as adding the value of a few common block data types (like [Powerable],
-     * [Bisected], etc) to the item's custom model data. If the block is a
-     * [Directional] (or similar) block, or implements [PylonDirectionalBlock], the facing
-     * will be added as well.
-     *
-     * If you override this method, it is recommended to apply your changes to the result of
-     * this super method, so that the order of common block data types is consistent across
-     * all blocks. (If you don't it may be harder for resource packs to support your block.)
-     *
-     * @return the item that should be used to display the block's texture
-     */
-    open fun getBlockTextureItem() = defaultItem?.getItemStack()?.let { ItemStackBuilder(it) }?.apply {
-        editPdc { it.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true) }
-
-        val blockData = block.blockData
-        if (blockData is Powerable) {
-            addCustomModelDataString("powered=${blockData.isPowered}")
-        } else if (blockData is AnaloguePowerable) {
-            addCustomModelDataString("power=${blockData.power}")
-        }
-
-        if (blockData is Openable) {
-            addCustomModelDataString("open=${blockData.isOpen}")
-        }
-        if (blockData is Bisected) {
-            addCustomModelDataString("half=${blockData.half.name.lowercase()}")
-        }
-        if (blockData is Hangable) {
-            addCustomModelDataString("hanging=${blockData.isHanging}")
-        }
-
-        if (blockData is FaceAttachable) {
-            addCustomModelDataString("face=${blockData.attachedFace.name.lowercase()}")
-        }
-
-        var facing = (this@PylonBlock as? PylonDirectionalBlock)?.getFacing()
-        if (facing != null) {
-            addCustomModelDataString("facing=${facing.name.lowercase()}")
-        } else if (blockData is Directional) {
-            addCustomModelDataString("facing=${blockData.facing.name.lowercase()}")
-        }
-        if (blockData is Orientable) {
-            addCustomModelDataString("axis=${blockData.axis.name.lowercase()}")
-        }
-        if (blockData is Rotatable) {
-            addCustomModelDataString("rotation=${blockData.rotation.name.lowercase()}")
-        }
-
-        if (blockData is Slab) {
-            addCustomModelDataString("type=${blockData.type.name.lowercase()}")
-        }
-        if (blockData is Stairs) {
-            addCustomModelDataString("shape=${blockData.shape.name.lowercase()}")
-        }
-
-        if (blockData is Wall) {
-            // todo
-        }
-        if (blockData is MultipleFacing) {
-            // todo
-        }
-    }?.build()
-
-    /**
      * Called when debug info is requested for the block by someone
      * using the [DebugWaxedWeatheredCutCopperStairs]. If there is
      * any transient data that can be useful for debugging, you're
@@ -328,7 +293,7 @@ open class PylonBlock internal constructor(val block: Block) {
 
     companion object {
 
-        private val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
+        val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
 
