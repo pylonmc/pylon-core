@@ -91,10 +91,6 @@ message:
       not-configurable: "<red>This recipe type is not configurable"
       warning: "<yellow>Warning: exposing recipe configs will keep them from updating automatically. Delete %file% to revert"
 
-  guide:
-    ingredients-page:
-      item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
-
 gui:
   scroll:
     up: "Scroll up"
@@ -119,7 +115,7 @@ guide:
       lore: |-
         <arrow:#3a293> By default, searches through item names greedily ("iron ingot" searches for exactly "iron ingot" not "iron" and "ingot")
         <arrow:#3a293> Prefix <light_purple>@</light_purple> to search by <light_purple>addon</light_purple>
-        <arrow:#3a293> Prefix <aqua>$ <gray>to search in <aqua>lore</aqua>
+        <arrow:#3a293> Prefix <aqua>$</aqua> to search in <aqua>lore</aqua>
         <arrow:#3a293> Prefixed searches only apply to the word directly after the prefix
         <arrow:#3a293> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature <white>slurry
     research:
@@ -155,6 +151,7 @@ guide:
       name: "<blue>↑ Inputs ↑"
       lore: |-
         <gold>↓ Main product ↓
+    ingredient: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
     toggle-block-textures:
       name: "Toggle Custom Block Textures"
       lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"

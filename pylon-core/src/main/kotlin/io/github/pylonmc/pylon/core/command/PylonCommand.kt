@@ -91,12 +91,12 @@ private val give = buildCommand("give") {
                 val players = context.getArgument<List<Player>>("players")
                 val singular = players.size == 1
                 for (player in players) {
-                    player.inventory.addItem(item.itemStack.asQuantity(amount))
+                    player.inventory.addItem(item.getItemStack().asQuantity(amount))
                 }
                 context.source.sender.sendVanillaFeedback(
                     "give.success." + if (singular) "single" else "multiple",
                     Component.text(amount),
-                    item.itemStack.vanillaDisplayName(),
+                    item.getItemStack().vanillaDisplayName(),
                     if (singular) players[0].name() else Component.text(players.size)
                 )
             }
