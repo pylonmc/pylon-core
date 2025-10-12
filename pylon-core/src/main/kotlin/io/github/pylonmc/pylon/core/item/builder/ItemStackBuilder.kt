@@ -7,12 +7,12 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
-import io.github.pylonmc.pylon.core.util.ToolType
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.editDataOrDefault
 import io.github.pylonmc.pylon.core.util.editDataOrSet
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
+import io.github.pylonmc.pylon.core.util.pickaxeMineable
 import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -304,7 +304,12 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         addAttributeModifier(Attribute.ATTACK_KNOCKBACK, AttributeModifier(baseAttackKnockback, knockback, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND))
     }
 
-    fun durability(durability: Int) = set(DataComponentTypes.MAX_DAMAGE, durability)
+    fun durability(durability: Int) = durability(durability, 0)
+
+    fun durability(durability: Int, damage: Int) = apply {
+        set(DataComponentTypes.MAX_DAMAGE, durability)
+        set(DataComponentTypes.DAMAGE, damage)
+    }
 
     fun useCooldown(cooldownTicks: Int, cooldownGroup: Key?)
             = set(DataComponentTypes.USE_COOLDOWN, UseCooldown.useCooldown(cooldownTicks / 20.0f).cooldownGroup(cooldownGroup))
@@ -459,7 +464,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [helmet][EquipmentSlotGroup.HEAD] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-helmet.yml`
@@ -470,13 +475,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonHelmet(stack: ItemStack, key: NamespacedKey, durability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.HEAD, durability)
+        fun pylonHelmet(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.HEAD, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [helmet][EquipmentSlotGroup.HEAD] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-helmet.yml`
@@ -487,13 +492,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonHelmet(material: Material, key: NamespacedKey, durability: Boolean) = pylonHelmet(ItemStack(material), key, durability)
+        fun pylonHelmet(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonHelmet(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [chestplate][EquipmentSlotGroup.CHEST] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-chestplate.yml`
@@ -504,13 +509,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonChestplate(stack: ItemStack, key: NamespacedKey, durability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.CHEST, durability)
+        fun pylonChestplate(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.CHEST, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [chestplate][EquipmentSlotGroup.CHEST] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-chestplate.yml`
@@ -521,13 +526,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonChestplate(material: Material, key: NamespacedKey, durability: Boolean) = pylonChestplate(ItemStack(material), key, durability)
+        fun pylonChestplate(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonChestplate(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [leggings][EquipmentSlotGroup.LEGS] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-leggings.yml`
@@ -538,13 +543,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonLeggings(stack: ItemStack, key: NamespacedKey, durability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.LEGS, durability)
+        fun pylonLeggings(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.LEGS, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [leggings][EquipmentSlotGroup.LEGS] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-leggings.yml`
@@ -555,13 +560,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonLeggings(material: Material, key: NamespacedKey, durability: Boolean) = pylonLeggings(ItemStack(material), key, durability)
+        fun pylonLeggings(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonLeggings(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [boots][EquipmentSlotGroup.FEET] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-boots.yml`
@@ -572,13 +577,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonBoots(stack: ItemStack, key: NamespacedKey, durability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.FEET, durability)
+        fun pylonBoots(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.FEET, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the [boots][EquipmentSlotGroup.FEET] slot.
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-boots.yml`
@@ -589,13 +594,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonBoots(material: Material, key: NamespacedKey, durability: Boolean) = pylonBoots(ItemStack(material), key, durability)
+        fun pylonBoots(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonBoots(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the specified [slot].
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-armor.yml`
@@ -606,14 +611,14 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonArmor(stack: ItemStack, key: NamespacedKey, slot: EquipmentSlotGroup, durability: Boolean) = create(stack, key) { builder, settings ->
+        fun pylonArmor(stack: ItemStack, key: NamespacedKey, slot: EquipmentSlotGroup, hasDurability: Boolean) = pylon(stack, key) { builder, settings ->
             builder.armor(
                 slot,
                 settings.getOrThrow("armor", ConfigAdapter.DOUBLE),
                 settings.getOrThrow("armor-toughness", ConfigAdapter.DOUBLE)
             )
 
-            if (durability) {
+            if (hasDurability) {
                 builder.durability(settings.getOrThrow("durability", ConfigAdapter.INT))
             } else {
                 builder.unset(DataComponentTypes.DAMAGE).unset(DataComponentTypes.MAX_DAMAGE)
@@ -624,7 +629,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * Creates a new [ItemStack] for a [PylonItem] that can be worn in the specified [slot].
          * You must provide a value for `armor` and `armor-toughness` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-armor.yml`
@@ -635,14 +640,14 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonArmor(material: Material, key: NamespacedKey, slot: EquipmentSlotGroup, durability: Boolean)
-                = pylonArmor(ItemStack(material), key, slot, durability)
+        fun pylonArmor(material: Material, key: NamespacedKey, slot: EquipmentSlotGroup, hasDurability: Boolean)
+                = pylonArmor(ItemStack(material), key, slot, hasDurability)
 
         /**
-         * Creates a new [ItemStack] for a [PylonItem] that can be used as a tool of the specified [toolType].
-         * You must provide a value for `mining-speed` and `mining-durability-damage` in the [Settings][Settings.get] for the item.
+         * Creates a new [ItemStack] for a [PylonItem] that can be used as a tool for the [mineable] blocks. (See [pickaxeMineable]
+         * and related for basic tools) You must provide a value for `mining-speed` and `mining-durability-damage` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-tool.yml`
@@ -653,14 +658,14 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonTool(stack: ItemStack, key: NamespacedKey, toolType: ToolType, durability: Boolean) = create(stack, key) { builder, settings ->
+        fun pylonTool(stack: ItemStack, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean) = pylon(stack, key) { builder, settings ->
             builder.tool(
-                toolType.getTag(),
+                mineable,
                 settings.getOrThrow("mining-speed", ConfigAdapter.FLOAT),
                 settings.getOrThrow("mining-durability-damage", ConfigAdapter.INT)
             )
 
-            if (durability) {
+            if (hasDurability) {
                 builder.durability(settings.getOrThrow("durability", ConfigAdapter.INT))
             } else {
                 builder.unset(DataComponentTypes.DAMAGE).unset(DataComponentTypes.MAX_DAMAGE)
@@ -668,10 +673,10 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         }
 
         /**
-         * Creates a new [ItemStack] for a [PylonItem] that can be used as a tool of the specified [toolType].
-         * You must provide a value for `mining-speed` and `mining-durability-damage` in the [Settings][Settings.get] for the item.
+         * Creates a new [ItemStack] for a [PylonItem] that can be used as a tool for the [mineable] blocks. (See [pickaxeMineable]
+         * and related for basic tools) You must provide a value for `mining-speed` and `mining-durability-damage` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
          * `settings/example-tool.yml`
@@ -682,17 +687,17 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonTool(material: Material, key: NamespacedKey, toolType: ToolType, durability: Boolean)
-                = pylonTool(ItemStack(material), key, toolType, durability)
+        fun pylonTool(material: Material, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean)
+                = pylonTool(ItemStack(material), key, mineable, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [PylonItem] that can be used as a weapon.
          * You must provide a value for `attack-damage`, `attack-speed` and `attack-durability-damage` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
-         * If `knockback` is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
+         * If [hasKnockback] is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
          * Otherwise, removes any existing attack knockback.
          *
          * If `disablesShield` is true, gives the item a shield disable time defined by `disable-shield-seconds` in the [Settings][Settings.get].
@@ -709,7 +714,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonWeapon(stack: ItemStack, key: NamespacedKey, durability: Boolean, knockback: Boolean, disablesShield: Boolean) = create(stack, key) { builder, settings ->
+        fun pylonWeapon(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean) = pylon(stack, key) { builder, settings ->
             builder.weapon(
                 settings.getOrThrow("attack-damage", ConfigAdapter.DOUBLE),
                 settings.getOrThrow("attack-speed", ConfigAdapter.DOUBLE),
@@ -717,13 +722,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
                 if (disablesShield) settings.getOrThrow("disable-shield-seconds", ConfigAdapter.FLOAT) else 0f
             )
 
-            if (knockback) {
+            if (hasKnockback) {
                 builder.attackKnockback(settings.getOrThrow("attack-knockback", ConfigAdapter.DOUBLE))
             } else {
                 builder.removeAttributeModifiers(Attribute.ATTACK_KNOCKBACK)
             }
 
-            if (durability) {
+            if (hasDurability) {
                 builder.durability(settings.getOrThrow("durability", ConfigAdapter.INT))
             } else {
                 builder.unset(DataComponentTypes.DAMAGE).unset(DataComponentTypes.MAX_DAMAGE)
@@ -734,10 +739,10 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * Creates a new [ItemStack] for a [PylonItem] that can be used as a weapon.
          * You must provide a value for `attack-damage`, `attack-speed` and `attack-durability-damage` in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
-         * If `knockback` is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
+         * If [hasKnockback] is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
          * Otherwise, removes any existing attack knockback.
          *
          * If `disablesShield` is true, gives the item a shield disable time defined by `disable-shield-seconds` in the [Settings][Settings.get].
@@ -754,21 +759,21 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonWeapon(material: Material, key: NamespacedKey, durability: Boolean, knockback: Boolean, disablesShield: Boolean)
-                = pylonWeapon(ItemStack(material), key, durability, knockback, disablesShield)
+        fun pylonWeapon(material: Material, key: NamespacedKey, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean)
+                = pylonWeapon(ItemStack(material), key, hasDurability, hasKnockback, disablesShield)
 
         /**
-         * Creates a new [ItemStack] for a [PylonItem] that can be used as a weapon and tool of the specified [toolType].
+         * Creates a new [ItemStack] for a [PylonItem] that can be used as a weapon and tool for the [mineable] blocks. (See [pickaxeMineable] and related for basic tools)
          * You must provide a value for `attack-damage`, `attack-speed`, `attack-durability-damage`, `mining-speed` and `mining-durability-damage`
          * in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
-         * If `knockback` is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
          * Otherwise, removes any existing attack knockback.
          *
-         * If `disablesShield` is true, gives the item a shield disable time defined by `disable-shield-seconds` in the [Settings][Settings.get].
+         * If [hasKnockback] is true, gives the item a shield disable time defined by `disable-shield-seconds` in the [Settings][Settings.get].
          * If false, the item will not disable shields when used in attacking.
          *
          * `settings/example-tool-weapon.yml`
@@ -786,24 +791,24 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonToolWeapon(stack: ItemStack, key: NamespacedKey, toolType: ToolType, durability: Boolean, knockback: Boolean, disablesShield: Boolean): ItemStackBuilder {
+        fun pylonToolWeapon(stack: ItemStack, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean): ItemStackBuilder {
             val settings = Settings.get(key)
-            return pylonWeapon(stack, key, durability, knockback, disablesShield).tool(
-                toolType.getTag(),
+            return pylonWeapon(stack, key, hasDurability, hasKnockback, disablesShield).tool(
+                mineable,
                 settings.getOrThrow("mining-speed", ConfigAdapter.FLOAT),
                 settings.getOrThrow("mining-durability-damage", ConfigAdapter.INT)
             )
         }
 
         /**
-         * Creates a new [ItemStack] for a [PylonItem] that can be used as a weapon and tool of the specified [toolType].
+         * Creates a new [ItemStack] for a [PylonItem] that can be used as a weapon and tool for the [mineable] blocks. (See [pickaxeMineable] and related for basic tools)
          * You must provide a value for `attack-damage`, `attack-speed`, `attack-durability-damage`, `mining-speed` and `mining-durability-damage`
          * in the [Settings][Settings.get] for the item.
          *
-         * If `durability` is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
+         * If [hasDurability] is true, gives the item a max durability defined by `durability` in the [Settings][Settings.get].
          * Otherwise, removes any existing durability.
          *
-         * If `knockback` is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
+         * If [hasKnockback] is true, gives the item knockback defined by `attack-knockback` in the [Settings][Settings.get].
          * Otherwise, removes any existing attack knockback.
          *
          * If `disablesShield` is true, gives the item a shield disable time defined by `disable-shield-seconds` in the [Settings][Settings.get].
@@ -824,21 +829,14 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonToolWeapon(material: Material, key: NamespacedKey, toolType: ToolType, durability: Boolean, knockback: Boolean, disablesShield: Boolean)
-                = pylonToolWeapon(ItemStack(material), key, toolType, durability, knockback, disablesShield)
+        fun pylonToolWeapon(material: Material, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean)
+                = pylonToolWeapon(ItemStack(material), key, mineable, hasDurability, hasKnockback, disablesShield)
 
         fun ItemAttributeModifiers.Builder.copy(modifiers: List<ItemAttributeModifiers.Entry>?) : ItemAttributeModifiers.Builder {
             modifiers?.forEach { entry ->
                 this.addModifier(entry.attribute(), entry.modifier(), entry.group, entry.display())
             }
             return this
-        }
-
-        private fun create(stack: ItemStack, key: NamespacedKey, consumer: (ItemStackBuilder, Config) -> Unit): ItemStackBuilder {
-            val builder = pylon(stack, key)
-            val settings = Settings.get(key)
-            consumer(builder, settings)
-            return builder
         }
     }
 }
