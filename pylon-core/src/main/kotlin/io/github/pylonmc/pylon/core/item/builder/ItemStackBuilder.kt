@@ -4,10 +4,8 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder.Companion.pylonItem
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.editDataOrDefault
 import io.github.pylonmc.pylon.core.util.editDataOrSet
@@ -31,7 +29,6 @@ import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.util.TriState
-import org.apache.commons.lang3.LocaleUtils
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
