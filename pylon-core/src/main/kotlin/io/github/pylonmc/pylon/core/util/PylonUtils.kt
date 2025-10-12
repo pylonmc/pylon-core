@@ -16,7 +16,6 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.NamespacedKey
 import org.bukkit.Registry
 import org.bukkit.block.Block
@@ -35,7 +34,6 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
-import java.util.Locale
 import kotlin.math.absoluteValue
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty

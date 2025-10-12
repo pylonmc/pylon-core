@@ -9,7 +9,6 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
@@ -31,8 +30,10 @@ import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
@@ -44,14 +45,13 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
-import java.util.*
+import java.util.Locale
 import kotlin.io.path.*
 
 /**
@@ -75,7 +75,10 @@ object PylonCore : JavaPlugin(), PylonAddon {
         packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
 
         val entityLibPlatform = SpigotEntityLibPlatform(this)
-        entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type -> Bukkit.getUnsafe().nextEntityId() }
+        entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type ->
+            @Suppress("DEPRECATION")
+            Bukkit.getUnsafe().nextEntityId()
+        }
         val entityLibSettings = APIConfig(packetEvents)
             .tickTickables()
             .trackPlatformEntities()
@@ -157,6 +160,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         launch {
             delay(1.ticks)
             loadRecipes()
+            loadResearches()
         }
 
         val end = System.currentTimeMillis()
@@ -192,6 +196,35 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         val end = System.currentTimeMillis()
         logger.info("Loaded recipes in ${(end - start) / 1000.0}s")
+    }
+
+    private fun loadResearches() {
+        logger.info("Loading researches...")
+        val start = System.currentTimeMillis()
+
+        for (addon in PylonRegistry.ADDONS) {
+            mergeGlobalConfig(addon, "researches.yml", "researches/${addon.key.namespace}.yml")
+        }
+
+        val researchDir = dataPath.resolve("researches")
+        if (researchDir.exists()) {
+            for (namespaceDir in researchDir.listDirectoryEntries()) {
+                val namespace = namespaceDir.nameWithoutExtension
+
+                if (!namespaceDir.isRegularFile()) continue
+
+                val mainResearchConfig = Config(namespaceDir)
+                for (key in mainResearchConfig.keys) {
+                    val nsKey = NamespacedKey(namespace, key)
+                    val section = mainResearchConfig.getSection(key) ?: continue
+
+                    Research.loadFromConfig(section, nsKey).register()
+                }
+            }
+        }
+
+        val end = System.currentTimeMillis()
+        logger.info("Loaded researches in ${(end - start) / 1000.0}s")
     }
 
     override fun onDisable() {

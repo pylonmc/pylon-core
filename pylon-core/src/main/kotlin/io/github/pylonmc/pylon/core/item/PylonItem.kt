@@ -78,7 +78,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         @Suppress("UnstableApiUsage")
         private fun checkName(schema: PylonItemSchema) {
             // Adventure is a perfect API with absolutely no problems whatsoever.
-            val name = schema.itemStack.getData(DataComponentTypes.ITEM_NAME) as? TranslatableComponent
+            val name = schema.getItemStack().getData(DataComponentTypes.ITEM_NAME) as? TranslatableComponent
 
             var isNameValid = true
             if (name == null || name.key() != ItemStackBuilder.nameKey(schema.key)) {
@@ -109,7 +109,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             PylonRegistry.ITEMS.register(schema)
 
             // pre-merge configs and check for constructor errors
-            fromStack(schema.itemStack)
+            fromStack(schema.getItemStack())
         }
 
         @JvmStatic

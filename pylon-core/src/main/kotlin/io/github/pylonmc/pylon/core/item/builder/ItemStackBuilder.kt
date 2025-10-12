@@ -7,12 +7,14 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator.Companion.translate
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder.Companion.pylonItem
 import io.github.pylonmc.pylon.core.util.editData
 import io.github.pylonmc.pylon.core.util.editDataOrDefault
 import io.github.pylonmc.pylon.core.util.editDataOrSet
 import io.github.pylonmc.pylon.core.util.fromMiniMessage
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pickaxeMineable
+import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -41,6 +43,7 @@ import org.bukkit.inventory.EquipmentSlotGroup
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
+import org.jetbrains.annotations.ApiStatus
 import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
 import kotlin.collections.forEach
@@ -50,10 +53,6 @@ import kotlin.collections.forEach
  * methods for creating [PylonItem] stacks, and gui items.
  *
  * Implements InvUI's [ItemProvider], so can be used instead of an [ItemStack] in GUIs.
- *
- * You should use this when using anything to do with [Component.translatable] including
- * [PylonItem]s in InvUI GUIs. Yes, this is confusing
- * and annoying - it is unfortunately necessary to get around InvUI's translation system.
  */
 @Suppress("UnstableApiUsage")
 open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemProvider {
@@ -119,6 +118,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
      */
     fun defaultTranslatableName(key: NamespacedKey) =
         name(Component.translatable(nameKey(key)))
+
+    /**
+     * In order to get around potions and player heads overriding `item_name`, Pylon by default
+     * does unspeakable things to the item to get it to work. This method disables those
+     * hacks, which may have unintended side effects.
+     */
+    fun disableNameHacks() = editPdc { pdc -> pdc.set(disableNameHacksKey, PylonSerializers.BOOLEAN, true) }
 
     fun lore(loreToAdd: List<ComponentLike>) = apply {
         val lore = ItemLore.lore()
@@ -319,16 +325,8 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     /**
      * Ignore this method; InvUI item provider implementation.
      */
-    override fun get(lang: String?): ItemStack {
-        val item = build()
-        val split = lang?.split('_')?.toMutableList() ?: return item
-        if (split.size > 1) {
-            split[1] = split[1].uppercase()
-        }
-        val locale = LocaleUtils.toLocale(split.joinToString("_"))
-        item.translate(locale)
-        return item
-    }
+    @ApiStatus.Internal
+    override fun get(lang: String?) = build()
 
     companion object {
 
@@ -338,6 +336,8 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         val baseAttackDamage = NamespacedKey.minecraft("base_attack_damage")
         val baseAttackSpeed = NamespacedKey.minecraft("base_attack_speed")
         val baseAttackKnockback = NamespacedKey.minecraft("base_attack_knockback")
+
+        val disableNameHacksKey = pylonKey("disable_name_hacks")
 
         /**
          * The default name language key for a Pylon item.

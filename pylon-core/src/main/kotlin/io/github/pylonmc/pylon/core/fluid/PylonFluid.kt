@@ -59,7 +59,7 @@ open class PylonFluid(
         val addon = PylonRegistry.ADDONS[NamespacedKey(key.namespace, key.namespace)]!!
         for (locale in addon.languages) {
             val translationKey = "pylon.${key.namespace}.fluid.${key.key}"
-            check(addon.translator.canTranslate(translationKey, locale)) {
+            if (!addon.translator.canTranslate(translationKey, locale)) {
                 PylonCore.logger.warning("${key.namespace} is missing a translation key for fluid ${key.key} (locale: ${locale.displayName} | expected translation key: $translationKey")
             }
         }
