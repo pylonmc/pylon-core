@@ -203,11 +203,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val start = System.currentTimeMillis()
 
         for (addon in PylonRegistry.ADDONS) {
-            val corePath = this.javaPlugin.dataFolder
-                .resolve("researches")
-                .resolve(addon.key.namespace + ".yml")
-
-            mergeGlobalConfig(addon, "researches.yml", corePath.toString())
+            mergeGlobalConfig(addon, "researches.yml", "researches/${addon.key.namespace}.yml")
         }
 
         val researchDir = dataPath.resolve("researches")
