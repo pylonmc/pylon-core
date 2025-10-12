@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.waila
 
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.waila.Waila.Companion.wailaConfig
 import org.bukkit.entity.Player
 
@@ -18,7 +19,7 @@ class PlayerWailaConfig {
             player?.wailaConfig = this
         }
 
-    var type: Waila.Type = WailaConfig.defaultType
+    var type: Waila.Type = PylonConfig.WailaConfig.defaultType
         set(value) {
             field = value
             player?.wailaConfig = this

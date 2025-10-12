@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
@@ -33,7 +34,6 @@ import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vanillaDisplayName
 import io.github.pylonmc.pylon.core.waila.Waila.Companion.wailaConfig
-import io.github.pylonmc.pylon.core.waila.WailaConfig
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
@@ -518,7 +518,7 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
     then(debug)
     then(key)
     then(setblock)
-    if (WailaConfig.wailaEnabled) {
+    if (PylonConfig.WailaConfig.enabled) {
         then(waila)
     }
     then(gametest)

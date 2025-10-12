@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.pages
 
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
@@ -9,14 +10,11 @@ import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchEffects
-import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine.hasCustomArmorTextures
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.cullingPreset
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.hasCustomBlockTextures
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.Waila.Companion.wailaConfig
-import io.github.pylonmc.pylon.core.waila.WailaConfig
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -72,10 +70,10 @@ class SettingsPage(
                 toggle = { player -> player.wailaConfig.vanillaWailaEnabled = !player.wailaConfig.vanillaWailaEnabled },
                 isEnabled = { player -> player.wailaConfig.vanillaWailaEnabled }
             ))
-            if (WailaConfig.enabledTypes.size > 1) {
+            if (PylonConfig.WailaConfig.enabledTypes.size > 1) {
                 addSetting(CycleSettingButton(
                     pylonKey("cycle-waila-type"),
-                    WailaConfig.enabledTypes,
+                    PylonConfig.WailaConfig.enabledTypes,
                     identifier = { type -> type.name.lowercase() },
                     getter = { player -> player.wailaConfig.type },
                     setter = { player, type -> player.wailaConfig.type = type },
@@ -98,7 +96,7 @@ class SettingsPage(
             pylonKey("block_texture_settings"),
             Material.BOOKSHELF
         ).apply {
-            if (!BlockTextureConfig.blockTexturesForced) {
+            if (!PylonConfig.BlockTextureConfig.forced) {
                 addSetting(ToggleSettingButton(
                     pylonKey("toggle-block-textures"),
                     toggle = { player -> player.hasCustomBlockTextures = !player.hasCustomBlockTextures },
@@ -107,7 +105,7 @@ class SettingsPage(
             }
             addSetting(CycleSettingButton(
                 pylonKey("cycle-culling-preset"),
-                BlockTextureConfig.cullingPresets.values.sortedBy { it.index },
+                PylonConfig.BlockTextureConfig.cullingPresets.values.sortedBy { it.index },
                 identifier = { preset -> preset.id },
                 getter = { player -> player.cullingPreset },
                 setter = { player, preset -> player.cullingPreset = preset },
@@ -124,13 +122,6 @@ class SettingsPage(
                 )}
             ))
         }
-
-        @JvmStatic
-        val armorTextureSetting = ToggleSettingButton(
-            pylonKey("toggle-armor-textures"),
-            toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
-            isEnabled = { player -> player.hasCustomArmorTextures },
-        )
 
         @JvmStatic
         val researchEffects = ToggleSettingButton(

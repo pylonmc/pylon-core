@@ -148,11 +148,19 @@ guide:
         <arrow:#3a2939> <guideinsn>Shift right click</guideinsn> to see other research unlocks
       error: "<red>Item failed to load"
     toggle-waila:
-      name: "Toggle WAILA"
-      lore: "<arrow:#3a2939> WAILA is a display that shows information about the pylon block/entity you're looking at"
+      enabled:
+        name: "<gray>WAILA: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> WAILA is a display that shows information about the pylon block/entity you're looking at"
+      disabled:
+        name: "<gray>WAILA: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> WAILA is a display that shows information about the pylon block/entity you're looking at"
     toggle-vanilla-waila:
-      name: "Toggle Vanilla WAILA"
-      lore: "<arrow:#3a2939> Should the WAILA display vanilla block/entity information as well?"
+      enabled:
+        name: "<gray>Vanilla WAILA: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should the WAILA display vanilla block/entity information as well?"
+      disabled:
+        name: "<gray>Vanilla WAILA: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should the WAILA display vanilla block/entity information as well?"
     cycle-waila-type:
       bossbar:
         name: "<gray>WAILA Display Type: <green>Bossbar <dark_gray>(Click to cycle)"
@@ -170,8 +178,12 @@ guide:
         <gold>↓ Main product ↓
     ingredient: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
     toggle-block-textures:
-      name: "Toggle Custom Block Textures"
-      lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
+      enabled:
+        name: "<gray>Custom Block Textures: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
+      disabled:
+        name: "<gray>Custom Block Textures: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
     cycle-culling-preset:
       disabled:
         name: "<gray>Culling Preset: No Culling <dark_gray>(Click to cycle)"
@@ -186,11 +198,19 @@ guide:
         name: "<gray>Culling Preset: <red>High <dark_gray>(Click to cycle)"
         lore: "<arrow:#3a2939> Aggressive culling always showing entities within %alwaysShowRadius% blocks and heavily culling entities within %cullRadius% blocks (only culling if there are %maxOccludingCount% occluding blocks between your eyes and the block)"
     toggle-armor-textures:
-      name: "Toggle Custom Armor Textures"
-      lore: "<arrow:#3a2939> If you have a resource pack that adds <bold>worn</bold> (not item) Pylon armor textures, enable this to use them, otherwise leave it disabled"
+      enabled:
+        name: "<gray>Custom Armor Textures: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource pack that adds <bold>worn</bold> (not item) Pylon armor textures, enable this to use them, otherwise leave it disabled"
+      disabled:
+        name: "<gray>Custom Armor Textures: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource pack that adds <bold>worn</bold> (not item) Pylon armor textures, enable this to use them, otherwise leave it disabled"
     toggle-research-effects:
-      name: "Toggle Research Effects"
-      lore: "<arrow:#3a2939> Should sounds play and confetti appear when you research something new?"
+      enabled:
+        name: "<gray>Research Effects: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should sounds play and confetti appear when you research something new?"
+      disabled:
+        name: "<gray>Research Effects: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should sounds play and confetti appear when you research something new?"
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 

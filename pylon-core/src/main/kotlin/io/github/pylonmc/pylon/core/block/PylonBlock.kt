@@ -11,13 +11,13 @@ import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -93,7 +93,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * you can use [updateBlockTexture] to change the entity's item to reflect the lit/unlit state.
      */
     val blockTextureEntity: WrapperEntity? by lazy {
-        if (!BlockTextureConfig.blockTexturesEnabled || disableBlockTextureEntity) {
+        if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
             null
         } else {
             val entity = WrapperEntity(EntityTypes.ITEM_DISPLAY)

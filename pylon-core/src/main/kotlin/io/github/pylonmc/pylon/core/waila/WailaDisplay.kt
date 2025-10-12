@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.waila
 
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 
@@ -10,7 +11,7 @@ import net.kyori.adventure.text.Component
 @JvmRecord
 data class WailaDisplay @JvmOverloads constructor(
     val text: Component,
-    val color: BossBar.Color = WailaConfig.defaultDisplay.color,
-    val overlay: BossBar.Overlay = WailaConfig.defaultDisplay.overlay,
-    val progress: Float = WailaConfig.defaultDisplay.progress
+    val color: BossBar.Color = PylonConfig.WailaConfig.defaultDisplay.color,
+    val overlay: BossBar.Overlay = PylonConfig.WailaConfig.defaultDisplay.overlay,
+    val progress: Float = PylonConfig.WailaConfig.defaultDisplay.progress
 )

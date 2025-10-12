@@ -137,6 +137,11 @@ custom-block-textures:
   # If true, players will not be able to disable custom block textures themselves
   force: false
 
+  # If not forced, should custom block textures be enabled by default for players?
+  # Remember that if a player has no resource pack that adds textures installed, even with this enabled
+  # the entities will appear invisible (no visual change).
+  default: true
+
   # Custom Block Textures uses ray tracing to cull entities not visible to the player.
   # There are 4 default presets to choose from, each with different client performance and visual quality tradeoffs.
   # It is not recommended to change these settings (excluding default-preset) unless you know what you're doing
