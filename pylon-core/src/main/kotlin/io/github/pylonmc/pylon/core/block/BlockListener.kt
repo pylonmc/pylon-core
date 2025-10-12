@@ -17,6 +17,7 @@ import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.block.Container
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
