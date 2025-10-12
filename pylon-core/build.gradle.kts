@@ -27,11 +27,11 @@ dependencies {
 
     runtimeOnly(project(":nms"))
 
-    paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    paperLibrary("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
-    paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
+    paperLibrary("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
     paperLibrary("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
     paperLibraryApi("xyz.xenondevs.invui:invui-core:1.46")
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java

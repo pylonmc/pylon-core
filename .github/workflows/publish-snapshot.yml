@@ -3,6 +3,8 @@ name: Publish to Maven Central Snapshots
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "**/src/**"
 
 env:
   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}

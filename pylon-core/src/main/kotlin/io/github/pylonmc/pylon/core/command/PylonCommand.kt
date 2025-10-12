@@ -530,7 +530,7 @@ internal val ROOT_COMMAND_PY_ALIAS = buildCommand("py") {
 
 @JvmSynthetic
 @Suppress("UnstableApiUsage")
-internal inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
+inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
     return when (typeOf<T>()) {
         typeOf<PaperBlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
         typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)
