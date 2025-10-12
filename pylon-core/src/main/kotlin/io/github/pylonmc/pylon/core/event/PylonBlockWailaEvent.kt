@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.event
 
+import io.github.pylonmc.pylon.core.waila.Waila
 import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -7,6 +8,12 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 import org.bukkit.event.player.PlayerEvent
 
+/**
+ * Called when the players [WAILA display][WailaDisplay] is being generated for a targeted [Block].
+ * This is called if and only if the player has WAILA enabled and the block already has a generated display.
+ *
+ * @see Waila
+ */
 class PylonBlockWailaEvent(
     player: Player,
     val block: Block,

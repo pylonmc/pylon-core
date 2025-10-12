@@ -9,7 +9,6 @@ import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchEffects
-import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureConfig
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine.hasCustomArmorTextures
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.cullingPreset
@@ -18,8 +17,6 @@ import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.Waila.Companion.wailaConfig
 import io.github.pylonmc.pylon.core.waila.WailaConfig
-import io.papermc.paper.datacomponent.item.ItemLore.lore
-import jdk.internal.misc.PreviewFeatures.isEnabled
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -68,12 +65,12 @@ class SettingsPage(
             addSetting(ToggleSettingButton(
                 pylonKey("toggle-waila"),
                 toggle = { player -> player.wailaConfig.enabled = !player.wailaConfig.enabled },
-                isToggled = { player -> player.wailaConfig.enabled }
+                isEnabled = { player -> player.wailaConfig.enabled }
             ))
             addSetting(ToggleSettingButton(
                 pylonKey("toggle-vanilla-waila"),
                 toggle = { player -> player.wailaConfig.vanillaWailaEnabled = !player.wailaConfig.vanillaWailaEnabled },
-                isToggled = { player -> player.wailaConfig.vanillaWailaEnabled }
+                isEnabled = { player -> player.wailaConfig.vanillaWailaEnabled }
             ))
             if (WailaConfig.enabledTypes.size > 1) {
                 addSetting(CycleSettingButton(
@@ -105,7 +102,7 @@ class SettingsPage(
                 addSetting(ToggleSettingButton(
                     pylonKey("toggle-block-textures"),
                     toggle = { player -> player.hasCustomBlockTextures = !player.hasCustomBlockTextures },
-                    isToggled = { player -> player.hasCustomBlockTextures }
+                    isEnabled = { player -> player.hasCustomBlockTextures }
                 ))
             }
             addSetting(CycleSettingButton(
@@ -118,7 +115,7 @@ class SettingsPage(
                     .addCustomModelDataString("culling_preset=${preset.id}")
                     .build()
                 },
-                argumentProvider = { player, preset -> mutableListOf(
+                placeholderProvider = { player, preset -> mutableListOf(
                     PylonArgument.of("hiddenInterval", preset.hiddenInterval),
                     PylonArgument.of("visibleInterval", preset.visibleInterval),
                     PylonArgument.of("alwaysShowRadius", preset.alwaysShowRadius),
@@ -132,14 +129,14 @@ class SettingsPage(
         val armorTextureSetting = ToggleSettingButton(
             pylonKey("toggle-armor-textures"),
             toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
-            isToggled = { player -> player.hasCustomArmorTextures },
+            isEnabled = { player -> player.hasCustomArmorTextures },
         )
 
         @JvmStatic
         val researchEffects = ToggleSettingButton(
             pylonKey("toggle-research-effects"),
             toggle = { player -> player.researchEffects = !player.researchEffects },
-            isToggled = { player -> player.researchEffects }
+            isEnabled = { player -> player.researchEffects }
         )
     }
 }

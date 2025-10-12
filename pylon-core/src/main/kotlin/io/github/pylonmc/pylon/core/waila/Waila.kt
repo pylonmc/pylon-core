@@ -236,22 +236,39 @@ class Waila private constructor(private val player: Player, playerConfig: Player
          * provided WAILA config when a WAILA-enabled player looks at the block at
          * the given position, regardless of the block type or even if the block is
          * not a Pylon block.
+         *
+         * If an override is added for a position that already has an override, the
+         * old override will be replaced.
          */
         @JvmStatic
         fun addWailaOverride(position: BlockPosition, provider: (Player) -> WailaDisplay?) {
             blockOverrides[position] = provider
         }
 
+        /**
+         * Adds a WAILA override for the given entity. This will always show the
+         * provided WAILA config when a WAILA-enabled player looks at the entity
+         * regardless of any other factors.
+         *
+         * If an override is added for an entity that already has an override, the
+         * old override will be replaced.
+         */
         @JvmStatic
         fun addWailaOverride(entity: Entity, provider: (Player) -> WailaDisplay?) {
             entityOverrides[entity.uniqueId] = provider
         }
 
+        /**
+         * Removes any existing WAILA override for the given position.
+         */
         @JvmStatic
         fun removeWailaOverride(position: BlockPosition) {
             blockOverrides.remove(position)
         }
 
+        /**
+         * Removes any existing WAILA override for the given entity.
+         */
         @JvmStatic
         fun removeWailaOverride(entity: Entity) {
             entityOverrides.remove(entity.uniqueId)
