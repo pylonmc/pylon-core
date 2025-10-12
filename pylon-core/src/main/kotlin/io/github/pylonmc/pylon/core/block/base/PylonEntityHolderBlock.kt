@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
@@ -93,7 +94,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
     fun areAllHeldEntitiesLoaded() = heldEntities.keys.all { isHeldEntityPresent(it) }
 
     @MustBeInvokedByOverriders
-    override fun postBreak() {
+    override fun postBreak(context: BlockBreakContext) {
         // Best-effort removal; unlikely to cause issues
         for (name in heldEntities.keys) {
             getHeldEntity(name)?.remove()

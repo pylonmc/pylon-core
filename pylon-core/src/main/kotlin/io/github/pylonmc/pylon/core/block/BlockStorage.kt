@@ -312,6 +312,9 @@ object BlockStorage : Listener {
         require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
         val block = get(blockPosition) ?: return null
+        if (block is PylonBreakHandler && !block.preBreak(context)) {
+            return null
+        }
 
         val event = PrePylonBlockBreakEvent(blockPosition.block, block, context)
         event.callEvent()
@@ -335,7 +338,7 @@ object BlockStorage : Listener {
             blockPosition.block.type = Material.AIR
         }
         if (block is PylonBreakHandler) {
-            block.postBreak()
+            block.postBreak(context)
         }
 
         BlockTextureEngine.remove(block)
@@ -413,7 +416,7 @@ object BlockStorage : Listener {
 
         block.block.type = Material.AIR
         if (block is PylonBreakHandler) {
-            block.postBreak()
+            block.postBreak(context)
         }
 
         BlockTextureEngine.remove(block)
