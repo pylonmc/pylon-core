@@ -22,8 +22,8 @@ import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
 import io.github.pylonmc.pylon.core.guide.button.PageButton
-import io.github.pylonmc.pylon.core.guide.button.setting.ToggleSettingButton
-import io.github.pylonmc.pylon.core.guide.pages.SettingsPage
+import io.github.pylonmc.pylon.core.guide.button.setting.TogglePlayerSettingButton
+import io.github.pylonmc.pylon.core.guide.pages.PlayerSettingsPage
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -114,15 +114,15 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
 
         if (PylonConfig.WailaConfig.enabled) {
-            PylonGuide.settingsPage.addSetting(PageButton(SettingsPage.wailaSettings))
+            PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.wailaSettings))
             Bukkit.getPluginManager().registerEvents(Waila, this)
         }
 
-        PylonGuide.settingsPage.addSetting(PageButton(SettingsPage.resourcePackSettings))
+        PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.resourcePackSettings))
 
         if (PylonConfig.ArmorTextureConfig.enabled) {
             if (!PylonConfig.ArmorTextureConfig.forced) {
-                SettingsPage.resourcePackSettings.addSetting(ToggleSettingButton(
+                PlayerSettingsPage.resourcePackSettings.addSetting(TogglePlayerSettingButton(
                     pylonKey("toggle-armor-textures"),
                     toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
                     isEnabled = { player -> player.hasCustomArmorTextures },
@@ -132,13 +132,13 @@ object PylonCore : JavaPlugin(), PylonAddon {
         }
 
         if (PylonConfig.BlockTextureConfig.enabled) {
-            SettingsPage.resourcePackSettings.addSetting(PageButton(SettingsPage.blockTextureSettings))
+            PlayerSettingsPage.resourcePackSettings.addSetting(PageButton(PlayerSettingsPage.blockTextureSettings))
             Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
             BlockTextureEngine.updateOccludingCacheJob.start()
         }
 
         if (PylonConfig.researchesEnabled) {
-            PylonGuide.settingsPage.addSetting(SettingsPage.researchEffects)
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchEffects)
         }
 
         Bukkit.getScheduler().runTaskTimer(

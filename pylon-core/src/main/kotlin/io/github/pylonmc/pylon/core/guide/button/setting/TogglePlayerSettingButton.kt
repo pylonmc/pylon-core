@@ -4,7 +4,6 @@ import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -30,7 +29,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
  *
  * [placeholderProvider] Provides additional placeholders for the translation. (See [TranslatableComponent.arguments] and [PylonArgument])
  */
-data class ToggleSettingButton(
+data class TogglePlayerSettingButton(
     val key: NamespacedKey,
 
     val isEnabled: (Player) -> Boolean,

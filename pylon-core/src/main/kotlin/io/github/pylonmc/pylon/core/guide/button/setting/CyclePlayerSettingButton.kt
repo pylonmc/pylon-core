@@ -36,7 +36,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
  *
  * [placeholderProvider] Provides additional placeholders for the translation. (See [TranslatableComponent.arguments] and [PylonArgument])
  */
-data class CycleSettingButton<S> (
+data class CyclePlayerSettingButton<S> (
     val key: NamespacedKey,
     val sortedValues: List<S>,
     val identifier: (S) -> String,
