@@ -7,12 +7,12 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.util.Octree
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.pylonKey
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.uuid
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,7 +49,7 @@ object BlockTextureEngine : Listener {
 
     /**
      * Periodically updates a share of the occluding cache, to ensure it stays up to date with changes in the world.
-     * Every [BlockTextureConfig.occludingCacheRefreshInterval] ticks, it will refresh [BlockTextureConfig.occludingCacheRefreshShare]
+     * Every [PylonConfig.BlockTextureConfig.occludingCacheRefreshInterval] ticks, it will refresh [PylonConfig.BlockTextureConfig.occludingCacheRefreshShare]
      * percent of the cache, starting with the oldest entries.
      *
      * Normally, blocks occluding state is cached the first time its requested, and is only updated when placed or broken.
@@ -58,16 +58,16 @@ object BlockTextureEngine : Listener {
     @JvmSynthetic
     internal val updateOccludingCacheJob = PylonCore.launch(start = CoroutineStart.LAZY) {
         while (true) {
-            delay(BlockTextureConfig.occludingCacheRefreshInterval.ticks)
+            delay(PylonConfig.BlockTextureConfig.occludingCacheRefreshInterval.ticks)
             val now = System.currentTimeMillis()
             var refreshed = 0
-            var toRefresh = ceil(occludingCache.size * BlockTextureConfig.occludingCacheRefreshShare)
+            var toRefresh = ceil(occludingCache.size * PylonConfig.BlockTextureConfig.occludingCacheRefreshShare)
             var entries = mutableListOf<Entry<ChunkPosition, ChunkData>>()
             entries.addAll(occludingCache.entries)
             entries.sortBy { it.value.timestamp }
 
             for ((pos, data) in entries) {
-                if (now - data.timestamp <= BlockTextureConfig.occludingCacheRefreshInterval) continue
+                if (now - data.timestamp <= PylonConfig.BlockTextureConfig.occludingCacheRefreshInterval) continue
 
                 val world = pos.world ?: continue
                 if (world.isChunkLoaded(pos.x, pos.z)) {
@@ -87,25 +87,25 @@ object BlockTextureEngine : Listener {
 
     @JvmStatic
     var Player.hasCustomBlockTextures: Boolean
-        get() = this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, true)
-        set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value)
+        get() = (this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, PylonConfig.BlockTextureConfig.default) || PylonConfig.BlockTextureConfig.forced)
+        set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value || PylonConfig.BlockTextureConfig.forced)
 
     @JvmStatic
     var Player.cullingPreset: CullingPreset
-        get() = BlockTextureConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, BlockTextureConfig.defaultCullingPreset.id)) {
-            BlockTextureConfig.defaultCullingPreset
+        get() = PylonConfig.BlockTextureConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, PylonConfig.BlockTextureConfig.defaultCullingPreset.id)) {
+            PylonConfig.BlockTextureConfig.defaultCullingPreset
         }
         set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
 
     @JvmSynthetic
     internal fun insert(block: PylonBlock) {
-        if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
+        if (!PylonConfig.BlockTextureConfig.enabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).insert(block)
     }
 
     @JvmSynthetic
     internal fun remove(block: PylonBlock) {
-        if (!BlockTextureConfig.customBlockTexturesEnabled || block.disableBlockTextureEntity) return
+        if (!PylonConfig.BlockTextureConfig.enabled || block.disableBlockTextureEntity) return
         getOctree(block.block.world).remove(block)
         block.blockTextureEntity?.let {
             for (viewer in it.viewers.toSet()) {
@@ -116,7 +116,7 @@ object BlockTextureEngine : Listener {
 
     @JvmSynthetic
     internal fun getOctree(world: World): Octree<PylonBlock> {
-        check(BlockTextureConfig.customBlockTexturesEnabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
+        check(PylonConfig.BlockTextureConfig.enabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
 
         val border = world.worldBorder
         return octrees.getOrPut(world.uid) {
@@ -134,7 +134,7 @@ object BlockTextureEngine : Listener {
     @JvmSynthetic
     internal fun launchBlockTextureJob(player: Player) {
         val uuid = player.uniqueId
-        if (!BlockTextureConfig.customBlockTexturesEnabled || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
+        if (!PylonConfig.BlockTextureConfig.enabled || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
 
         jobs[uuid] = PylonCore.launch(PylonCore.asyncDispatcher) {
             val visible = mutableSetOf<PylonBlock>()
@@ -143,8 +143,7 @@ object BlockTextureEngine : Listener {
             while (true) {
                 val player = Bukkit.getPlayer(uuid)
                 if (player == null || !player.hasCustomBlockTextures) {
-                    visible.forEach { it.blockTextureEntity?.removeViewer(uuid) }
-                    visible.clear()
+                    octrees.values.forEach { it.forEach { b -> b.blockTextureEntity?.removeViewer(uuid) } }
                     jobs.remove(uuid)
                     break
                 }
@@ -262,15 +261,6 @@ object BlockTextureEngine : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onChunkUnload(event: ChunkUnloadEvent) {
         occludingCache.remove(ChunkPosition(event.chunk))
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    private fun onPlayerQuit(event: PlayerQuitEvent) {
-        jobs.remove(event.player.uniqueId)?.let {
-            if (it.isActive) {
-                it.cancel()
-            }
-        }
     }
 
     private data class ChunkData(

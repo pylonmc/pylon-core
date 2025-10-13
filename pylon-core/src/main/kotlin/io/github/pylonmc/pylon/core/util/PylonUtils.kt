@@ -10,13 +10,14 @@ import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawTo
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.papermc.paper.datacomponent.DataComponentType
+import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.NamespacedKey
+import org.bukkit.Registry
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.file.YamlConfiguration
@@ -33,7 +34,6 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
-import java.util.Locale
 import kotlin.math.absoluteValue
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -293,6 +293,27 @@ inline fun <T : Any> ItemStack.editData(
     return this
 }
 
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <T : Any> ItemStack.editDataOrDefault(
+    type: DataComponentType.Valued<T>,
+    block: (T) -> T
+): ItemStack {
+    val data = getData(type) ?: this.type.getDefaultData(type) ?: return this
+    setData(type, block(data))
+    return this
+}
+
+@JvmSynthetic
+@Suppress("UnstableApiUsage")
+inline fun <T : Any> ItemStack.editDataOrSet(
+    type: DataComponentType.Valued<T>,
+    block: (T?) -> T
+): ItemStack {
+    setData(type, block(getData(type)))
+    return this
+}
+
 /**
  * Wrapper around [PersistentDataContainer.set] that allows nullable values to be passed
  *
@@ -397,3 +418,8 @@ fun ItemStack.vanillaDisplayName(): Component
 
 val Component.plainText: String
     get() = PlainTextComponentSerializer.plainText().serialize(this)
+
+fun pickaxeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_PICKAXE)
+fun axeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_AXE)
+fun shovelMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_SHOVEL)
+fun hoeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_HOE)

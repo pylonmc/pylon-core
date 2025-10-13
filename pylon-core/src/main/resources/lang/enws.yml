@@ -43,36 +43,48 @@ message:
       ticking: "<gold>Ticking: <green>Yea"
       errored: "<gold>Ticking: <red>Ticker hath errored"
       not_ticking: "<gold>Ticking: <red>Nay"
-    pdc: "%key%: %value%"
+    data: "<gold>Data: <white>%data%"
+    deleted_data: "<red>Destroyed <white>%type% <gray>(%location%)"
+
+  disabled:
+    message: "<white>%item% <red>hath been disabled"
+    lore: "<arrow> <#ff0000>Disabled - thou still canst craft this item but thou canst not use it"
 
   research:
     unknown: "<red>Thou knowest not how to use %item%. Prithee, ponder upon %research%"
-    unlocked: "Thou hast discovered %research%"
-    click_to_research: "<green>Click to research (%points% points)"
+    unlocked: "Thou hast had %research% revealed to you"
+    click_to_research: "<green>Strike to ponder (%points% points)"
 
   command:
     error:
       no_permission: "<red>Thou art not permitted to execute this command"
-      not_a_player: "<red>Thou art not a player"
+      must_be_player: "<red>Thou must be a player to execute this command"
     key:
+      hover: "Strike to copy to thy clip-scroll"
       no_item: "<red>Thou art not holding a Pylon item"
     gametest:
+      started: "Starting game test %test% at %location%"
       failed: "<red>Game test %test% failed: %reason%"
       success: "<green>Game test %test% succeeded"
+    waila:
+      enabled: "<green>WAILA enabled"
+      disabled: "<red>WAILA disabled"
     research:
-      added: "<green>Added research %research% to player %player%"
-      removed: "<green>Removed research %research% from player %player%"
+      added: "<green>Revealed %research% to player %player%"
+      removed: "<green>Mystified %player%'s memory of %research%"
       list:
-        none: "Thou dost not knoweth anything"
-        discovered: "Thou hast discovered %count% researches: %list%"
-      already_discovered: "<red>Thou hast already discovered %research%"
-      cannot_unlock: "<red>Thou cannot unlock %research% using research points"
-      not_enough_points: "<red>Thou hast not yet gathered sufficient knowledge to discover %research% (%points%/%cost% points)"
+        none_self: "Thou dost not knoweth anything"
+        none_other: "<red>%player% doth not know anything"
+        discovered_self: "Thou hast had %count% revelations: %list%"
+        discovered_other: "%player% hast had %count% revelations: %list%"
+      already_discovered: "<red>Thou hast already had %research% revealed to thee"
+      cannot_unlock: "<red>Thou canst not know %research% using marks of revelation"
+      not_enough_points: "<red>Thou hast not yet gathered sufficient knowledge to have %research% revealed to thee (%points%/%cost% points)"
       points:
-        set: "<green>Set %player%'s research points to %points%"
-        added: "<green>Added %points% research points to %player%"
-        removed: "<green>Removed %points% research points from %player%"
-        get: "<green>%player% has %points% research points"
+        set: "<green>Set %player%'s marks of revelation to %points%"
+        added: "<green>Added %points% marks of revelation to %player%"
+        removed: "<green>Removed %points% marks of revelation from %player%"
+        query: "<green>%player% hath %points% marks of revelation"
     exposerecipe:
       not-configurable: "<red>This divine recipe may not be bent to thy whims"
       warning: "<yellow>Hark! Shouldst thou lay bare the secrets of these recipes, their forms shall no longer mend themselves of their own accord. To undo this act, thou must destroy %file%"
@@ -97,21 +109,6 @@ guide:
     back:
       name: "<yellow>Back"
       lore: ""
-    fluids:
-      name: "<yellow>Fluids"
-      lore: ""
-    researches:
-      name: "<yellow>Inquisitions"
-      lore: ""
-    settings-and-info:
-      name: "<yellow>Settings & informations"
-      lore: ""
-    guides:
-      name: "<yellow>Instructions"
-      lore: ""
-    search:
-      name: "<yellow>Seeketh"
-      lore: ""
     research:
       cost:
         not-enough: "<arrow> <attr>Reveal cost:</attr> <#e23b28>%points%/%cost%"
@@ -121,20 +118,56 @@ guide:
       unlocks-title: "<u>Revelations</u>"
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>additional revelations - <guideinsn>right click</guideinsn> <gray>to see all"
-      error: "<red>Thy research hath faileth to loadeth!!! Repent!!!"
+      error: "<red>Thy revelation hath failed to load!!! Repent!!!"
     fluid:
       name: "%fluid% <gray>(%amount%<gray>)"
-      error: "<red>Thy fluid item hath faileth to loadeth!!! Repent!!!"
+      error: "<red>Thy fluid item hath failed to load!!! Repent!!!"
     item:
       not-researched: "<red><u>Not revealed yet"
       not-researched-with-name: "<red><u>Not revealed yet <gray>(%research_name%<gray>)"
       research-instructions: |-
         <arrow> <guideinsn>Strike with thy left hand while crouching</guideinsn> to reveal
         <arrow> <guideinsn>Strike with thy right hand while crouching</guideinsn> to see other revelations
-      error: "<red>Thy item hath faileth to loadeth!!! Repent!!!"
+      error: "<red>Thy item hath failed to load!!! Repent!!!"
+    search-specifiers:
+      name: "Tokens for Seeking"
+      lore: |-
+        <arrow:#3a293> By default, the quest seeketh the name whole, even "iron ingot", and not each word alone, neither "iron" nor "ingot" apart
+        <arrow:#3a293> Place afore <light_purple>@</light_purple> to seek by <light_purple>addon</light_purple>
+        <arrow:#3a293> Place afore <aqua>$</aqua> to seek in <aqua>lore</aqua>
+        <arrow:#3a293> Searches thus prefixed do apply only to the word that followeth straight after the mark
+        <arrow:#3a293> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature <white>slurry
+    intermediates:
+      name: "<blue>↑ Ingredients ↑"
+      lore: |-
+        <yellow>↓ Midway Works ↓
+    main_product:
+      name: "<blue>↑ Ingredients ↑"
+      lore: |-
+        <gold>↓ Results ↓
+    ingredient: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
+    culling-preset:
+      disabled:
+        name: "<gray>Concealment Scheme: No Concealment <dark_gray>(Click to cycle)"
+        lore: "<arrow:#3a2939> All Pylon Block entities within view distance will be sent to the client, this can have a <red>large negative effect <gray>on fps depending on how many there are, and how good your device is"
+      low:
+        name: "<gray>Concealment Scheme: <green>Low <dark_gray>(Click to cycle)"
+        lore: "<arrow:#3a2939> With gentle concealment, ever reveal the beings within %alwaysShowRadius% plots, and softly cast aside those within %cullRadius% plots; yet cast them away only if %maxOccludingCount% blocks lie betwixt thine eyes and the plot"
+      medium:
+        name: "<gray>Concealment Scheme: <yellow>Medium <dark_gray>(Click to cycle)"
+        lore: "<arrow:#3a2939> A just measure ’twixt swiftness of craft and beauty to thine eye: ever reveal the beings within %alwaysShowRadius% blocks, and temperately hide those that dwell within %cullRadius% blocks; yet hide them only if %maxOccludingCount% blocks interpose betwixt thine eyes and the plot"
+      high:
+        name: "<gray>Concealment Scheme: <red>High <dark_gray>(Click to cycle)"
+        lore: "<arrow:#3a2939> By ruthless concealment: ever reveal the beings within %alwaysShowRadius% blocks, and rigorously hide those that dwell within %cullRadius% blocks; yet hide them only if %maxOccludingCount% blocks interpose betwixt thine eyes and the plot"
     toggle-waila:
       name: "Toggle WAILA"
-      lore: "<arrow> WAILA is thy bossbar at the top of your computational device's screen that reveals itself when thy camera is pointed at a Pylon block"
+      lore: "<arrow> WAILA is the bossbar at the top of thy scrying device that reveals itself when thy camera is pointed at a Pylon block"
+    toggle-armor-textures:
+      name: "Toggle Custom Armor Guises"
+      lore: "<arrow:#3a2939> If thou possessest a resource pack that adds <bold>worn</bold> Pylon armor textures (and not the items themselves), enable this to employ them; else leave it disabled"
+    toggle-block-textures:
+      name: "Toggle Custom Block Guises"
+      lore: "<arrow:#3a2939> If thou possessest a resource pack that addeth Pylon block guises, enable this to employ them; if not, thou mayst safely leave it disabled. <red>Yet beware</red>, for with many Pylon blocks this may bear ill effect upon thy frame-rate"
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 
@@ -144,12 +177,13 @@ guide:
     researches: "Inquisitions"
     research-items: "Revelations"
     root: "Pylon Bible"
-    search: "Seeketh"
+    search: "Seek"
     settings_and_info: "Settings & informations"
     item_recipes: "Item recipes"
     fluid_recipes: "Fluid recipes"
     item_usages: "Item usages"
     fluid_usages: "Fluid usages"
+    item_ingredients: "Ingredients"
 
 unit:
   prefix:
@@ -232,6 +266,10 @@ unit:
   blocks:
     singular: "block"
     plural: "blocks"
+  blocks_per_second:
+    singular: "block per second"
+    plural: "blocks per second"
+    abbr: "b/s"
   chunks:
     singular: "chunk"
     plural: "chunks"
@@ -244,8 +282,8 @@ unit:
     plural: "percent"
     abbr: "%"
   research_points:
-    singular: "research point"
-    plural: "research points"
+    singular: "mark of revelation"
+    plural: "marks of revelation"
   celsius:
     singular: "degree Celsius"
     plural: "degrees Celsius"
@@ -282,3 +320,11 @@ unit:
     singular: "watt"
     plural: "watts"
     abbr: "W"
+  experience:
+    singular: "experience point"
+    plural: "experience points"
+    abbr: "XP"
+  experience_per_second:
+    singular: "experience point per second"
+    plural: "experience points per second"
+    abbr: "XP/s"

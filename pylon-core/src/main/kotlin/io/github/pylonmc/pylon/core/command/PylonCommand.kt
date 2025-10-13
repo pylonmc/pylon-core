@@ -12,10 +12,11 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
-import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
@@ -29,10 +30,10 @@ import io.github.pylonmc.pylon.core.particles.ConfettiParticle
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.gametest.GameTestConfig
 import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vanillaDisplayName
+import io.github.pylonmc.pylon.core.waila.Waila.Companion.wailaConfig
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
@@ -91,12 +92,12 @@ private val give = buildCommand("give") {
                 val players = context.getArgument<List<Player>>("players")
                 val singular = players.size == 1
                 for (player in players) {
-                    player.inventory.addItem(item.itemStack.asQuantity(amount))
+                    player.inventory.addItem(item.getItemStack().asQuantity(amount))
                 }
                 context.source.sender.sendVanillaFeedback(
                     "give.success." + if (singular) "single" else "multiple",
                     Component.text(amount),
-                    item.itemStack.vanillaDisplayName(),
+                    item.getItemStack().vanillaDisplayName(),
                     if (singular) players[0].name() else Component.text(players.size)
                 )
             }
@@ -172,8 +173,9 @@ private val waila = buildCommand("waila") {
     permission("pylon.command.waila")
     executesWithPlayer { player ->
         PylonMetrics.onCommandRun("/py waila")
-        player.wailaEnabled = !player.wailaEnabled
-        player.sendFeedback(if (player.wailaEnabled) "waila.enabled" else "waila.disabled")
+        val config = player.wailaConfig
+        config.enabled = !config.enabled
+        player.sendFeedback(if (config.enabled) "waila.enabled" else "waila.disabled")
     }
 }
 
@@ -503,6 +505,32 @@ private val confetti = buildCommand("confetti") {
     }
 }
 
+private val setphantom = buildCommand("setphantom") {
+    argument("pos", ArgumentTypes.blockPosition()) {
+        permission("pylon.command.setphantom")
+        executes { sender ->
+            PylonMetrics.onCommandRun("/py setphantom")
+            val position = getArgument<PaperBlockPosition>("pos").toLocation(source.location.world)
+            if (!position.world.isPositionLoaded(position)) {
+                source.sender.sendMessage(Component.translatable("argument.pos.unloaded"))
+                return@executes
+            } else if (position.blockX !in -30000000..30000000 || position.blockZ !in -30000000..30000000 || position.blockY !in position.world.minHeight..position.world.maxHeight) {
+                source.sender.sendMessage(Component.translatable("argument.pos.outofworld"))
+                return@executes
+            }
+
+            val block = BlockStorage.get(position)
+            if (block == null) {
+                source.sender.sendVanillaFeedback("setblock.failed", Component.text(position.blockX), Component.text(position.blockY), Component.text(position.blockZ))
+                return@executes
+            }
+
+            BlockStorage.makePhantom(block)
+            source.sender.sendVanillaFeedback("setblock.success", Component.text(position.blockX), Component.text(position.blockY), Component.text(position.blockZ))
+        }
+    }
+}
+
 @JvmSynthetic
 internal val ROOT_COMMAND = buildCommand("pylon") {
     permission("pylon.command.guide")
@@ -516,7 +544,10 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
     then(debug)
     then(key)
     then(setblock)
-    then(waila)
+    then(setphantom)
+    if (PylonConfig.WailaConfig.enabled) {
+        then(waila)
+    }
     then(gametest)
     then(research)
     then(exposeRecipeConfig)
@@ -530,7 +561,7 @@ internal val ROOT_COMMAND_PY_ALIAS = buildCommand("py") {
 
 @JvmSynthetic
 @Suppress("UnstableApiUsage")
-internal inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
+inline fun <reified T> CommandContext<CommandSourceStack>.getArgument(name: String): T {
     return when (typeOf<T>()) {
         typeOf<PaperBlockPosition>() -> getArgument(name, BlockPositionResolver::class.java).resolve(source)
         typeOf<List<Entity>>() -> getArgument(name, EntitySelectorArgumentResolver::class.java).resolve(source)

@@ -93,7 +93,7 @@ class CommandBuilder(val command: ArgumentBuilder<CommandSourceStack, *>) {
 }
 
 @JvmSynthetic
-internal inline fun buildCommand(name: String, block: CommandBuilder.() -> Unit): LiteralCommandNode<CommandSourceStack> {
+inline fun buildCommand(name: String, block: CommandBuilder.() -> Unit): LiteralCommandNode<CommandSourceStack> {
     val builder = CommandBuilder(Commands.literal(name))
     builder.block()
     return builder.build() as LiteralCommandNode<CommandSourceStack>
