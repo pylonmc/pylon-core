@@ -10,9 +10,8 @@ interface PylonInventoryItem {
     /**
     * Called once for every player where the item is in their inventory every [tickSpeed]
     * @param player The player whose inventory the item was in
-    * @param stack The item itself
     */
-    fun onTick(player: Player, stack: ItemStack)
+    fun onTick(player: Player)
     /* Speed at which onTick is called */
     val tickSpeed: InventoryTickSpeed
 }
