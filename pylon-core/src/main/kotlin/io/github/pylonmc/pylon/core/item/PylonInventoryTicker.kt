@@ -10,7 +10,7 @@ internal class PylonInventoryTicker(private val tickSpeed: InventoryTickSpeed) :
             for (item in player.inventory) {
                 val pylonItem = PylonItem.fromStack(item)
                 if (pylonItem is PylonInventoryItem && pylonItem.tickSpeed == tickSpeed) {
-                    pylonItem.onTick(player, item)
+                    pylonItem.onTick(player)
                 }
             }
         }

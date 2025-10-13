@@ -12,7 +12,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders
 import java.util.*
 
 interface InventoryEffectItem : PylonInventoryItem {
-    override fun onTick(player: Player, stack: ItemStack) {
+    override fun onTick(player: Player) {
         tasks.putIfAbsent(itemKey, HashMap())
         tasks[itemKey]!![player.uniqueId]?.cancel()
         if (!player.persistentDataContainer.has(itemKey)) {
