@@ -11,15 +11,44 @@ allowed-block-errors: 5
 # The number of errors a entity can throw before it is disabled
 allowed-entity-errors: 5
 
-# The interval (in Minecraft ticks), between WAILA checks
-waila-tick-interval: 1
-
 # The interval (in Minecraft ticks) between fluid network ticks
 fluid-tick-interval: 5
 
 block-data-autosave-interval-seconds: 60
 
 entity-data-autosave-interval-seconds: 60
+
+waila:
+  # The interval (in Minecraft ticks), between WAILA checks
+  # Set to 0 to disable WAILA globally
+  tick-interval: 1
+
+  # The WAILA display types players can choose between
+  enabled-types:
+    - actionbar
+    - bossbar
+
+  # The default display type for players, if you allow multiple types, they can change between them in the guide settings
+  # Note: If you default to actionbar, or enforce it, and have a long tick-interval, the WAILA may not be visible all the time
+  # as actionbar messages fade after a few seconds
+  default-type: bossbar
+
+  # The default bossbar display options if the block doesn't specify one
+  # There are no defaults for actionbar, as it has no options
+  default-display:
+    bossbar:
+      text: ""
+      color: white
+      overlay: progress
+      progress: 1.0
+
+  # Here you can control what bossbar colors & overlays can be used within the WAILA
+  # Some servers modify the textures for both in resource packs, so they may want to
+  # prevent them being used by the WAILA.
+  # If any colors/overlays not in these lists are used, they will default to the values in default-display
+  bossbar:
+    allowed-colors: [ pink, blue, red, green, yellow, purple, white ]
+    allowed-overlays: [ progress, notched_6, notched_10, notched_12, notched_20 ]
 
 research:
   enabled: true
@@ -90,11 +119,28 @@ metrics-save-interval-ticks: 6000
 # those items can't be crafted.
 disabled-items: []
 
-# Should Pylon send item displays to the client for custom block textures?
-# If a player has no resource pack that adds textures installed, the entities will appear invisible.
-# Players can also disable this on a per-player basis, and can configure with culling preset they want.
-custom-block-textures:
+custom-armor-textures:
+  # Should Pylon support modifying the equipment component of armor items to use custom armor textures?
+  # If a player has no resource pack that adds textures installed, and has armor textures enabled the armor will appear invisible.
+  # By default, armor textures are disabled for players, but they can enable it themselves in the guide settings.
   enabled: true
+
+  # If true, players will not be able to disable custom armor textures and it will default to enabled
+  force: false
+
+custom-block-textures:
+  # Should Pylon send item displays to the client for custom block textures?
+  # If a player has no resource pack that adds textures installed, the entities will appear invisible.
+  # Players can also disable this on a per-player basis, and can configure with culling preset they want.
+  enabled: true
+
+  # If true, players will not be able to disable custom block textures themselves
+  force: false
+
+  # If not forced, should custom block textures be enabled by default for players?
+  # Remember that if a player has no resource pack that adds textures installed, even with this enabled
+  # the entities will appear invisible (no visual change).
+  default: true
 
   # Custom Block Textures uses ray tracing to cull entities not visible to the player.
   # There are 4 default presets to choose from, each with different client performance and visual quality tradeoffs.

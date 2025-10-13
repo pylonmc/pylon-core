@@ -2,9 +2,9 @@ package io.github.pylonmc.pylon.core.content.guide
 
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.guide.pages.InfoPage
+import io.github.pylonmc.pylon.core.guide.pages.PlayerSettingsPage
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
-import io.github.pylonmc.pylon.core.guide.pages.SettingsPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
 import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemIngredientsPage
@@ -90,7 +90,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val searchItemsAndFluidsPage = SearchItemsAndFluidsPage()
 
         @JvmStatic
-        val settingsPageAndInfoPage = SettingsPage()
+        val settingsPage = PlayerSettingsPage()
 
         /**
          * Lowest priority to avoid another plugin saving the players data or doing something

@@ -10,18 +10,18 @@ import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.config.Config
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.datacomponent.DataComponentTypes
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
@@ -93,7 +93,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * you can use [updateBlockTexture] to change the entity's item to reflect the lit/unlit state.
      */
     val blockTextureEntity: WrapperEntity? by lazy {
-        if (!BlockTextureConfig.customBlockTexturesEnabled || disableBlockTextureEntity) {
+        if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
             null
         } else {
             val entity = WrapperEntity(EntityTypes.ITEM_DISPLAY)
@@ -212,8 +212,8 @@ open class PylonBlock internal constructor(val block: Block) {
      *
      * @return the WAILA configuration, or null if WAILA should not be shown for this block.
      */
-    open fun getWaila(player: Player): WailaConfig? {
-        return WailaConfig(defaultWailaTranslationKey)
+    open fun getWaila(player: Player): WailaDisplay? {
+        return WailaDisplay(defaultWailaTranslationKey)
     }
 
     /**

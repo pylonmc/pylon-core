@@ -12,6 +12,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPlayerInventory
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowItems
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonArmor
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -27,8 +28,8 @@ object ArmorTextureEngine : PacketListener {
 
     @JvmStatic
     var Player.hasCustomArmorTextures: Boolean
-        get() = this.persistentDataContainer.getOrDefault(customArmorTexturesKey, PersistentDataType.BOOLEAN, false)
-        set(value) = this.persistentDataContainer.set(customArmorTexturesKey, PersistentDataType.BOOLEAN, value)
+        get() = PylonConfig.ArmorTextureConfig.forced || this.persistentDataContainer.getOrDefault(customArmorTexturesKey, PersistentDataType.BOOLEAN, false)
+        set(value) = this.persistentDataContainer.set(customArmorTexturesKey, PersistentDataType.BOOLEAN, PylonConfig.ArmorTextureConfig.forced || value)
 
     override fun onPacketSend(event: PacketSendEvent?) {
         if (event == null) return
