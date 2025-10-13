@@ -1,17 +1,17 @@
 package io.github.pylonmc.pylon.core.item.base
 
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.item.PylonItem
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scheduler.BukkitTask
 import org.jetbrains.annotations.MustBeInvokedByOverriders
 import java.util.*
 
-interface InventoryEffectItem : PylonInventoryItem {
+interface PylonInventoryEffectItem : PylonInventoryTicker {
     override fun onTick(player: Player) {
         tasks.putIfAbsent(itemKey, HashMap())
         tasks[itemKey]!![player.uniqueId]?.cancel()
@@ -20,7 +20,7 @@ interface InventoryEffectItem : PylonInventoryItem {
         }
         tasks[itemKey]!![player.uniqueId] = Bukkit.getScheduler().runTaskLater(PylonCore.javaPlugin, Runnable {
             onRemovedFromInventory(player)
-        }, tickSpeed.tickRate)
+        }, tickInterval * PylonConfig.inventoryTickerBaseRate + 1)
     }
 
     /**
