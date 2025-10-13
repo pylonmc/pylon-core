@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.block
 
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.pylon.core.PylonCore
@@ -14,6 +13,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.entity.packet.BlockTextureEntity
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
@@ -27,7 +27,6 @@ import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.datacomponent.DataComponentTypes
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
-import me.tofaa.entitylib.wrapper.WrapperEntity
 import net.kyori.adventure.key.Key
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -89,11 +88,11 @@ open class PylonBlock internal constructor(val block: Block) {
      * Or let's say you have a furnace block that changes texture based on whether it's lit or not,
      * you can use [updateBlockTexture] to change the entity's item to reflect the lit/unlit state.
      */
-    val blockTextureEntity: WrapperEntity? by lazy {
+    val blockTextureEntity: BlockTextureEntity? by lazy {
         if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
             null
         } else {
-            val entity = WrapperEntity(EntityTypes.ITEM_DISPLAY)
+            val entity = BlockTextureEntity()
             val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
             setupBlockTexture(entity, meta)
         }
@@ -141,7 +140,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * 1.00085f in all directions to prevent z-fighting with the vanilla block model, and maxes its
      * brightness. It sets the display type to be "fixed".
      */
-    protected open fun setupBlockTexture(entity: WrapperEntity, meta: ItemDisplayMeta): WrapperEntity = entity.apply {
+    protected open fun setupBlockTexture(entity: BlockTextureEntity, meta: ItemDisplayMeta): BlockTextureEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
         entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
 
@@ -150,7 +149,7 @@ open class PylonBlock internal constructor(val block: Block) {
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
         meta.displayType = ItemDisplayMeta.DisplayType.FIXED
         meta.brightnessOverride = 15 shl 4 or 15 shl 20;
-        meta.scale = Vector3f(1.0009f, 1.0009f, 1.0009f)
+        meta.scale = Vector3f(1.0000175f, 1.0000175f, 1.0000175f)
         meta.width = 0f
         meta.height = 0f
     }
@@ -159,7 +158,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * Use this method to make any changes to the block texture entity, such as changing its item,
      * transformation, etc, after initialization. (see [setupBlockTexture])
      */
-    protected fun updateBlockTexture(updater: (WrapperEntity, ItemDisplayMeta) -> Unit) {
+    protected fun updateBlockTexture(updater: (BlockTextureEntity, ItemDisplayMeta) -> Unit) {
         blockTextureEntity?.let {
             val meta = it.getEntityMeta(ItemDisplayMeta::class.java)
             updater(it, meta)

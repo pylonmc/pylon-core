@@ -25,7 +25,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.persistence.PersistentDataType
@@ -182,7 +181,7 @@ object BlockTextureEngine : Listener {
                     val seen = entity.hasViewer(uuid)
                     val distanceSquared = block.block.location.distanceSquared(player.location)
                     if (distanceSquared <= preset.alwaysShowRadius * preset.alwaysShowRadius) {
-                        entity.addViewer(uuid)
+                        entity.addOrRefreshViewer(uuid, distanceSquared)
                         visible.add(block)
                         continue
                     } else if (distanceSquared > preset.cullRadius * preset.cullRadius) {
@@ -217,7 +216,7 @@ object BlockTextureEngine : Listener {
 
                         val shouldSee = occluding <= preset.maxOccludingCount
                         if (shouldSee) {
-                            entity.addViewer(uuid)
+                            entity.addOrRefreshViewer(uuid, distanceSquared)
                             visible.add(block)
                         } else {
                             entity.removeViewer(uuid)
