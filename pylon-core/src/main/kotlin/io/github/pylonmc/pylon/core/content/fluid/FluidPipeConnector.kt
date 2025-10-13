@@ -1,16 +1,17 @@
 package io.github.pylonmc.pylon.core.content.fluid
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PlayerBreak
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidPointType
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.ApiStatus
  * on pipe corners/junctions.
  */
 @ApiStatus.Internal
-class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
+class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock, PylonBreakHandler {
 
     @Suppress("unused")
     constructor(block: Block, context: BlockCreateContext) : super(block) {
@@ -47,12 +48,10 @@ class FluidPipeConnector : PylonBlock, PylonEntityHolderBlock {
             // can be null if called from two different location (eg two different connection points removing the display)
             pipeDisplay?.delete(true, player, drops)
         }
-
-        super<PylonEntityHolderBlock>.onBreak(drops, context)
     }
 
-    override fun getWaila(player: Player): WailaConfig?
-        = WailaConfig(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
+    override fun getWaila(player: Player): WailaDisplay?
+        = WailaDisplay(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", this.pipe.stack.effectiveName())))
 
     val pipe: PylonItem
         get() {

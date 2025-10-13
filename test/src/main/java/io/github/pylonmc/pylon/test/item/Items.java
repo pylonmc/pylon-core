@@ -9,13 +9,12 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
-
 public final class Items {
 
     private Items() {}
 
     public static final NamespacedKey STICKY_STICK_KEY = PylonTest.key("sticky_stick");
-    public static final ItemStack STICKY_STICK_STACK = ItemStackBuilder.pylonItem(Material.STICK, STICKY_STICK_KEY)
+    public static final ItemStack STICKY_STICK_STACK = ItemStackBuilder.pylon(Material.STICK, STICKY_STICK_KEY)
             .set(DataComponentTypes.ITEM_NAME, Component.text("Sticky Stick"))
             .build();
 

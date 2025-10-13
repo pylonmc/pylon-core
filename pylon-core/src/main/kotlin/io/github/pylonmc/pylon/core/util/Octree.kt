@@ -11,7 +11,7 @@ open class Octree<N>(
     private val bounds: BoundingBox,
     private val depth: Int,
     private val entryStrategy: (N) -> BoundingBox,
-) {
+) : Iterable<N> {
     private var entries: MutableList<N> = CopyOnWriteArrayList()
     private var children: Array<Octree<N>>? = null
 
@@ -35,7 +35,7 @@ open class Octree<N>(
             }
         }
 
-        if (entries.size < DEFAULT_MAX_ENTRIES || depth >= DEFAULT_MAX_DEPTH) {
+        if (entries.size < maxEntries || depth >= maxDepth) {
             entries.add(entry)
             return true
         }
@@ -127,9 +127,39 @@ open class Octree<N>(
         return children?.maxOfOrNull { it.maxDepth() } ?: depth
     }
 
+    override fun iterator(): Iterator<N> = OctreeIterator(this)
+
     companion object {
         // LISTEN IF THESE ARE INSANE FIX THEM, THIS ISN'T MY STRONG SUIT - JustAHuman
         private const val DEFAULT_MAX_DEPTH = 2048
         private const val DEFAULT_MAX_ENTRIES = 128
+    }
+
+    private class OctreeIterator<N>(root: Octree<N>) : Iterator<N> {
+        private val stack = ArrayDeque<Octree<N>>()
+        private var currentEntries: Iterator<N>? = null
+
+        init {
+            stack.add(root)
+        }
+
+        override fun hasNext(): Boolean {
+            while (true) {
+                if (currentEntries?.hasNext() == true) {
+                    return true
+                }
+                if (stack.isEmpty()) {
+                    return false
+                }
+                val node = stack.removeLast()
+                currentEntries = node.entries.iterator()
+                node.children?.let { stack.addAll(it) }
+            }
+        }
+
+        override fun next(): N {
+            if (!hasNext()) throw NoSuchElementException()
+            return currentEntries!!.next()
+        }
     }
 }

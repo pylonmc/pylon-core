@@ -38,7 +38,7 @@ class RootPage() : SimpleStaticGuidePage(
                 "x x x x x x x x x",
             )
             .addIngredient('#', GuiItems.background())
-            .addIngredient('e', PageButton(PylonGuide.settingsPageAndInfoPage))
+            .addIngredient('e', PageButton(PylonGuide.settingsPage))
             .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
             .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }

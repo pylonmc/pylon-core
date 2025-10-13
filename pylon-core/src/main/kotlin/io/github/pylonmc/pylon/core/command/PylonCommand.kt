@@ -12,7 +12,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
-import io.github.pylonmc.pylon.core.block.waila.Waila.Companion.wailaEnabled
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.display.transform.Rotation
@@ -33,6 +33,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.vanillaDisplayName
+import io.github.pylonmc.pylon.core.waila.Waila.Companion.wailaConfig
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver
@@ -172,8 +173,9 @@ private val waila = buildCommand("waila") {
     permission("pylon.command.waila")
     executesWithPlayer { player ->
         PylonMetrics.onCommandRun("/py waila")
-        player.wailaEnabled = !player.wailaEnabled
-        player.sendFeedback(if (player.wailaEnabled) "waila.enabled" else "waila.disabled")
+        val config = player.wailaConfig
+        config.enabled = !config.enabled
+        player.sendFeedback(if (config.enabled) "waila.enabled" else "waila.disabled")
     }
 }
 
@@ -543,7 +545,9 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
     then(key)
     then(setblock)
     then(setphantom)
-    then(waila)
+    if (PylonConfig.WailaConfig.enabled) {
+        then(waila)
+    }
     then(gametest)
     then(research)
     then(exposeRecipeConfig)

@@ -91,6 +91,13 @@ message:
       not-configurable: "<red>This recipe type is not configurable"
       warning: "<yellow>Warning: exposing recipe configs will keep them from updating automatically. Delete %file% to revert"
 
+  guide:
+    ingredients-page:
+      item: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
+
+  waila:
+    type-disabled: "<red>This server no longer permits the your previously set %type% WAILA display type, it has been reset to default"
+
 gui:
   scroll:
     up: "Scroll up"
@@ -141,8 +148,26 @@ guide:
         <arrow:#3a2939> <guideinsn>Shift right click</guideinsn> to see other research unlocks
       error: "<red>Item failed to load"
     toggle-waila:
-      name: "Toggle WAILA"
-      lore: "<arrow:#3a2939> WAILA is the bossbar at the top of your screen that shows when you look at a Pylon block"
+      enabled:
+        name: "<gray>WAILA: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> WAILA is a display that shows information about the pylon block/entity you're looking at"
+      disabled:
+        name: "<gray>WAILA: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> WAILA is a display that shows information about the pylon block/entity you're looking at"
+    toggle-vanilla-waila:
+      enabled:
+        name: "<gray>Vanilla WAILA: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should the WAILA display vanilla block/entity information as well?"
+      disabled:
+        name: "<gray>Vanilla WAILA: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should the WAILA display vanilla block/entity information as well?"
+    cycle-waila-type:
+      bossbar:
+        name: "<gray>WAILA Display Type: <green>Bossbar <dark_gray>(Click to cycle)"
+        lore: "<arrow:#3a2939> The WAILA is displayed as a bossbar at the top of your screen"
+      actionbar:
+        name: "<gray>WAILA Display Type: <aqua>Actionbar <dark_gray>(Click to cycle)"
+        lore: "<arrow:#3a2939> The WAILA is displayed on the actionbar above your hotbar"
     intermediates:
       name: "<blue>↑ Inputs ↑"
       lore: |-
@@ -153,9 +178,13 @@ guide:
         <gold>↓ Main product ↓
     ingredient: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
     toggle-block-textures:
-      name: "Toggle Custom Block Textures"
-      lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
-    culling-preset:
+      enabled:
+        name: "<gray>Custom Block Textures: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
+      disabled:
+        name: "<gray>Custom Block Textures: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource-pack that adds Pylon block textures, enable this to use them, if you don't you can safely disable this, <red>however <gray>be aware that this can have negative effects on your fps with large numbers of Pylon blocks"
+    cycle-culling-preset:
       disabled:
         name: "<gray>Culling Preset: No Culling <dark_gray>(Click to cycle)"
         lore: "<arrow:#3a2939> All Pylon Block entities within view distance will be sent to the client, this can have a <red>large negative effect <gray>on fps depending on how many there are, and how good your device is"
@@ -169,8 +198,19 @@ guide:
         name: "<gray>Culling Preset: <red>High <dark_gray>(Click to cycle)"
         lore: "<arrow:#3a2939> Aggressive culling always showing entities within %alwaysShowRadius% blocks and heavily culling entities within %cullRadius% blocks (only culling if there are %maxOccludingCount% occluding blocks between your eyes and the block)"
     toggle-armor-textures:
-      name: "Toggle Custom Armor Textures"
-      lore: "<arrow:#3a2939> If you have a resource pack that adds <bold>worn</bold> (not item) Pylon armor textures, enable this to use them, otherwise leave it disabled"
+      enabled:
+        name: "<gray>Custom Armor Textures: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource pack that adds <bold>worn</bold> (not item) Pylon armor textures, enable this to use them, otherwise leave it disabled"
+      disabled:
+        name: "<gray>Custom Armor Textures: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> If you have a resource pack that adds <bold>worn</bold> (not item) Pylon armor textures, enable this to use them, otherwise leave it disabled"
+    toggle-research-effects:
+      enabled:
+        name: "<gray>Research Effects: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should sounds play and confetti appear when you research something new?"
+      disabled:
+        name: "<gray>Research Effects: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<arrow:#3a2939> Should sounds play and confetti appear when you research something new?"
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 
@@ -181,7 +221,10 @@ guide:
     research-items: "Research items"
     root: "Pylon guide"
     search: "Search"
-    settings_and_info: "Settings & info"
+    settings: "Settings"
+    waila_settings: "WAILA settings"
+    resource_pack_settings: "Resource pack settings"
+    block_texture_settings: "Block texture settings"
     item_recipes: "Item recipes"
     fluid_recipes: "Fluid recipes"
     item_usages: "Item usages"

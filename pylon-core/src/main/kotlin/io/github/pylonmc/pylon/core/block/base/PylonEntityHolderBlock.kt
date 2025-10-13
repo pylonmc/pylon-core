@@ -1,22 +1,24 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
+import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.block.PhantomBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
+import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
+import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Bukkit
-import org.bukkit.Keyed
-import org.bukkit.entity.BlockDisplay
+import org.bukkit.block.Block
 import org.bukkit.entity.Entity
-import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityRemoveEvent
 import org.jetbrains.annotations.ApiStatus
-import org.jetbrains.annotations.MustBeInvokedByOverriders
 import java.util.IdentityHashMap
 import java.util.UUID
 
@@ -27,7 +29,8 @@ import java.util.UUID
  *
  * Note that the Pylon entities may not be loaded at the same time that the block is loaded.
  */
-interface PylonEntityHolderBlock : PylonBreakHandler {
+interface PylonEntityHolderBlock {
+    val block: Block
 
     @get:ApiStatus.NonExtendable
     val heldEntities: MutableMap<String, UUID>
@@ -35,6 +38,7 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
 
     fun addEntity(name: String, entity: Entity) {
         heldEntities[name] = entity.uniqueId
+        entity.persistentDataContainer.set(blockKey, PylonSerializers.BLOCK_POSITION, block.position)
     }
 
     fun addEntity(name: String, entity: PylonEntity<*>)
@@ -93,17 +97,10 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
     @ApiStatus.NonExtendable
     fun areAllHeldEntitiesLoaded() = heldEntities.keys.all { isHeldEntityPresent(it) }
 
-    @MustBeInvokedByOverriders
-    override fun postBreak(context: BlockBreakContext) {
-        // Best-effort removal; unlikely to cause issues
-        for (name in heldEntities.keys) {
-            getHeldEntity(name)?.remove()
-        }
-    }
-
     @ApiStatus.Internal
     companion object : Listener {
         private val entityKey = pylonKey("entity_holder_entity_uuids")
+        private val blockKey = pylonKey("entity_holder_block")
         private val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
 
         private val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
@@ -128,6 +125,30 @@ interface PylonEntityHolderBlock : PylonBreakHandler {
             val block = event.pylonBlock
             if (block !is PylonEntityHolderBlock) return
             holders.remove(block)
+        }
+
+        @EventHandler
+        private fun onBreak(event: PylonBlockBreakEvent) {
+            val block = event.pylonBlock
+            if (block is PylonEntityHolderBlock) {
+                // Best-effort removal; unlikely to cause issues
+                block.heldEntities.values.forEach {
+                    Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
+                }
+                holders.remove(block)
+            } else if (block is PhantomBlock) {
+                block.pdc.get(entityKey, entityType)?.values?.forEach {
+                    Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
+                }
+            }
+        }
+
+        @EventHandler
+        private fun onEntityRemove(event: EntityRemoveEvent) {
+            if (event.cause == EntityRemoveEvent.Cause.UNLOAD || event.cause == EntityRemoveEvent.Cause.PLAYER_QUIT) return
+            val blockPos = event.entity.persistentDataContainer.get(blockKey, PylonSerializers.BLOCK_POSITION) ?: return
+            val block = BlockStorage.get(blockPos) as? PylonEntityHolderBlock ?: return
+            holders[block]?.entries?.removeIf { it.value == event.entity.uniqueId }
         }
     }
 }
