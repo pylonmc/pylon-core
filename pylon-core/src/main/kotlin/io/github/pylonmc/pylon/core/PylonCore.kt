@@ -14,6 +14,7 @@ import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -25,7 +26,6 @@ import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonInventoryTicker
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
-import io.github.pylonmc.pylon.core.item.base.InventoryTickSpeed
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
@@ -95,9 +95,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
-        for (speed in InventoryTickSpeed.entries) {
-            Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(speed), 0, speed.tickRate)
-        }
+        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.inventoryTickerBaseRate)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
