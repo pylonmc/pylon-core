@@ -543,6 +543,7 @@ object BlockStorage : Listener {
         blocksByKey[block.key]!!.add(phantomBlock)
         blocksByChunk[block.block.chunk.position]!!.remove(block)
         blocksByChunk[block.block.chunk.position]!!.add(phantomBlock)
+        BlockTextureEngine.remove(block)
     }
 
     @JvmSynthetic

@@ -23,9 +23,11 @@ import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import io.papermc.paper.datacomponent.DataComponentTypes
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import me.tofaa.entitylib.wrapper.WrapperEntity
 import org.bukkit.Axis
+import net.kyori.adventure.key.Key
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
@@ -149,7 +151,7 @@ open class PylonBlock internal constructor(val block: Block) {
         entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
 
         val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
-        item.editMeta { itemMeta -> itemMeta.itemModel = NamespacedKey.minecraft("air") }
+        item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
         meta.brightnessOverride = 15 shl 4 or 15 shl 20;
         meta.scale = Vector3f(1.0009f, 1.0009f, 1.0009f)
@@ -183,15 +185,23 @@ open class PylonBlock internal constructor(val block: Block) {
     /**
      * Use this method to make any changes to the block texture entity, such as changing its item,
      * transformation, etc, after initialization. (see [setupBlockTexture])
-     *
-     * If you want to make changes to the entity outside of this method, make sure to call
-     * [WrapperEntity.refresh] afterwards so that the changes are sent to the client.
      */
     protected fun updateBlockTexture(updater: (WrapperEntity, ItemDisplayMeta) -> Unit) {
         blockTextureEntity?.let {
             val meta = it.getEntityMeta(ItemDisplayMeta::class.java)
             updater(it, meta)
-            it.refresh()
+        }
+    }
+
+    /**
+     * Call this method to refresh the block texture entity's item to be the result of
+     * [getBlockTextureItem], or a barrier if that returns null.
+     */
+    protected fun refreshBlockTextureItem() {
+        updateBlockTexture { _, meta ->
+            val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
+            item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
+            meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
         }
     }
 
