@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PhantomBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers

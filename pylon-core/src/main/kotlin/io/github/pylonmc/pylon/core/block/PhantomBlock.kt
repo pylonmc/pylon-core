@@ -1,20 +1,28 @@
 package io.github.pylonmc.pylon.core.block
 
+import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
+import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.datacomponent.DataComponentTypes
 import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import net.kyori.adventure.bossbar.BossBar
+import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.entity.Display
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
+import java.util.UUID
 
 /**
  * Phantom blocks are used where a block failed to load, or where a block errors and
@@ -34,7 +42,10 @@ class PhantomBlock(
     val pdc: PersistentDataContainer,
     val erroredBlockKey: NamespacedKey,
     block: Block
-) : PylonBlock(block) {
+) : PylonBlock(block), PylonBreakHandler {
+
+    override var disableBlockTextureEntity: Boolean = true
+    private var errorOutlineEntityId : UUID? = null
 
     // Hacky placeholder
     @Suppress("unused")
@@ -48,6 +59,23 @@ class PhantomBlock(
     internal constructor(block: Block, pdc: PersistentDataContainer)
             : this(block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer(), pylonKey("bruh"), block) {
         throw UnsupportedOperationException("Phantom block cannot be loaded")
+    }
+
+    init {
+        errorOutlineEntityId = block.world.spawn(block.location.toCenterLocation(), ItemDisplay::class.java) { display ->
+            display.setItemStack(ItemStackBuilder.of(Material.BARRIER).set(DataComponentTypes.ITEM_MODEL, PhantomBlock.key).build())
+            display.glowColorOverride = Color.RED
+            display.isGlowing = true
+            display.isPersistent = false
+            display.brightness = Display.Brightness(15, 15)
+            display.setTransformationMatrix(TransformBuilder().scale(1.001f).buildForItemDisplay())
+        }.uniqueId
+    }
+
+    override fun postBreak(context: BlockBreakContext) {
+        errorOutlineEntityId?.let { uuid ->
+            block.world.getEntity(uuid)?.remove()
+        }
     }
 
     override fun getWaila(player: Player): WailaDisplay? {
@@ -85,7 +113,8 @@ class PhantomBlock(
         companion object {
             val KEY = pylonKey("error_item")
             val BLOCK_KEY = pylonKey("block")
-            val STACK = ItemStackBuilder.pylon(Material.BARRIER, KEY)
+            val STACK = ItemStackBuilder.pylon(Material.CLAY_BALL, KEY)
+                .set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
                 .build()
         }
     }
