@@ -12,7 +12,7 @@ interface PylonInventoryItem {
     * @param player The player whose inventory the item was in
     */
     fun onTick(player: Player)
-    /* Speed at which onTick is called */
+    /** Speed at which onTick is called */
     val tickSpeed: InventoryTickSpeed
 }
 
