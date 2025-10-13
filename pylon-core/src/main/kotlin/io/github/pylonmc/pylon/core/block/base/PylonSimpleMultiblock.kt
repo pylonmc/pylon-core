@@ -9,7 +9,6 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
-import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
@@ -28,7 +27,6 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -37,6 +35,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
+import org.jetbrains.annotations.MustBeInvokedByOverriders
 import org.joml.Vector3i
 import java.util.IdentityHashMap
 import java.util.UUID
@@ -219,8 +218,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
         for ((offset, component) in rotatedComponents) {
             val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
-            val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
-            heldEntities[key] = ghostBlock
+            if (!isHeldEntityPresent(key)) {
+                val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
+                heldEntities[key] = ghostBlock
+            }
         }
         updateGhostBlockColors()
     }
@@ -274,18 +275,25 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
             }
         }
 
-        // Remove ghosts if fully formed
-        if (formed) {
-            val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
-            for (key in toRemove) {
-                EntityStorage.get(heldEntities[key]!!)!!.entity.remove()
-                heldEntities.remove(key)
-            }
-        }
-
         updateGhostBlockColors()
 
         return formed
+    }
+
+    @MustBeInvokedByOverriders
+    override fun onMultiblockFormed() {
+        val toRemove = heldEntities.keys.filter { it.startsWith("multiblock_ghost_block_") }
+        for (key in toRemove) {
+            EntityStorage.get(heldEntities[key]!!)!!.entity.remove()
+            heldEntities.remove(key)
+        }
+    }
+
+    @MustBeInvokedByOverriders
+    override fun onMultiblockUnformed(partUnloaded: Boolean) {
+        if (!partUnloaded) {
+            spawnGhostBlocks()
+        }
     }
 
     override fun isPartOfMultiblock(otherBlock: Block): Boolean = validStructures().any {

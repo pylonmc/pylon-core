@@ -17,6 +17,11 @@ interface BlockCreateContext {
     val block: Block
 
     /**
+     * The item used to create the block, if applicable.
+     */
+    val item: ItemStack?
+
+    /**
      * If true, the type of the block will be set to the type of the Pylon block
      */
     @Suppress("INAPPLICABLE_JVM_NAME")
@@ -29,7 +34,7 @@ interface BlockCreateContext {
      */
     data class PlayerPlace(
         val player: Player,
-        val item: ItemStack,
+        override val item: ItemStack,
         val event: BlockPlaceEvent
     ) : BlockCreateContext {
         override val block = event.blockPlaced
@@ -46,7 +51,7 @@ interface BlockCreateContext {
     data class PluginGenerate(
         val plugin: Plugin,
         override val block: Block,
-        val item: ItemStack
+        override val item: ItemStack
     ) : BlockCreateContext
 
     /**
@@ -55,6 +60,7 @@ interface BlockCreateContext {
     @JvmRecord
     data class Default @JvmOverloads constructor(
         override val block: Block,
+        override val item: ItemStack? = null,
         override val shouldSetType: Boolean = true
     ) : BlockCreateContext
 }

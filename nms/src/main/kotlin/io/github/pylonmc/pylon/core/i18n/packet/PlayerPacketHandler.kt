@@ -5,27 +5,39 @@ package io.github.pylonmc.pylon.core.i18n.packet
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
+import io.github.pylonmc.pylon.core.util.editData
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.datacomponent.item.ItemLore
-import net.kyori.adventure.text.Component
+import net.minecraft.network.HashedPatchMap
+import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.util.HashOps
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.display.*
 import org.bukkit.craftbukkit.inventory.CraftItemStack
-import java.util.WeakHashMap
 import java.util.logging.Level
+
 
 // Much inspiration has been taken from https://github.com/GuizhanCraft/SlimefunTranslation
 // with permission from the author
 class PlayerPacketHandler(private val player: ServerPlayer, private val handler: PlayerTranslationHandler) {
 
-    private val connection = player.connection
-    private val channel = connection.connection.channel
+    private val channel = player.connection.connection.channel
+
+    private val hashGenerator: HashedPatchMap.HashGenerator
+
+    init {
+        // (PaperMC server) https://discord.com/channels/289587909051416579/555462289851940864/1371651093972385823
+        val registryOps = player.registryAccess().createSerializationContext(HashOps.CRC32C_INSTANCE)
+        hashGenerator = HashedPatchMap.HashGenerator { component ->
+            component.encodeValue(registryOps)
+                .getOrThrow { IllegalArgumentException("Failed to hash $component: $it") }
+                .asInt()
+        }
+    }
 
     fun register() {
         channel.pipeline().addBefore("packet_handler", HANDLER_NAME, PacketHandler())
@@ -37,24 +49,17 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    fun resendInventory() {
-        val inventory = player.containerMenu
-        for (slot in 0..45) {
-            val item = inventory.getSlot(slot).item
-            player.containerSynchronizer.sendSlotChange(inventory, slot, item)
-        }
-    }
-
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
             var packet = packet
             when (packet) {
                 is ClientboundContainerSetContentPacket -> {
-                    packet.items.forEach(::translateItem)
-                    translateItem(packet.carriedItem)
+                    packet.items.forEach(::translate)
+                    translate(packet.carriedItem)
                 }
 
-                is ClientboundContainerSetSlotPacket -> translateItem(packet.item)
+                is ClientboundContainerSetSlotPacket -> translate(packet.item)
+                is ClientboundSetCursorItemPacket -> translate(packet.contents)
                 is ClientboundRecipeBookAddPacket -> {
                     // This requires a full copy for some reason
                     packet = ClientboundRecipeBookAddPacket(
@@ -86,21 +91,30 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 
         override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
             var packet = packet
-            when (packet) {
-                is ServerboundContainerClickPacket -> {
-                    // force server to resend the item
-                    packet = ServerboundContainerClickPacket(
-                        packet.containerId,
-                        -1,
-                        packet.slotNum,
-                        packet.buttonNum,
-                        packet.clickType,
-                        packet.changedSlots,
-                        packet.carriedItem,
-                    )
-                }
+            packet = when (packet) {
+                is ServerboundContainerClickPacket -> ServerboundContainerClickPacket(
+                    packet.containerId,
+                    packet.stateId,
+                    packet.slotNum,
+                    packet.buttonNum,
+                    packet.clickType,
+                    packet.changedSlots,
+                    if (packet.changedSlots.size == 1) {
+                        HashedStack.create(
+                            player.containerMenu.getSlot(packet.changedSlots.keys.single()).item,
+                            hashGenerator
+                        )
+                    } else {
+                        HashedStack.create(player.containerMenu.carried, hashGenerator)
+                    }
+                )
 
-                is ServerboundSetCreativeModeSlotPacket -> resetItem(packet.itemStack)
+                is ServerboundSetCreativeModeSlotPacket -> ServerboundSetCreativeModeSlotPacket(
+                    packet.slotNum,
+                    reset(packet.itemStack)
+                )
+
+                else -> packet
             }
             super.channelRead(ctx, packet)
         }
@@ -153,7 +167,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 
             is SlotDisplay.Composite -> SlotDisplay.Composite(display.contents.map(::handleSlotDisplay))
             is SlotDisplay.ItemStackSlotDisplay -> SlotDisplay.ItemStackSlotDisplay(
-                display.stack.copy().apply(::translateItem)
+                display.stack.copy().apply(::translate)
             )
 
             is SlotDisplay.SmithingTrimDemoSlotDisplay -> SlotDisplay.SmithingTrimDemoSlotDisplay(
@@ -171,10 +185,10 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    private inline fun handleItem(item: ItemStack, handler: (PylonItem) -> Unit) {
+    private fun translate(item: ItemStack) {
         if (item.isEmpty) return
         try {
-            handler(PylonItem.fromStack(CraftItemStack.asCraftMirror(item)) ?: return)
+            handler.handleItem(CraftItemStack.asCraftMirror(item))
         } catch (e: Throwable) {
             // Log the error nicely instead of kicking the player off
             // and causing two days of headache. True story.
@@ -186,24 +200,38 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         }
     }
 
-    private fun translateItem(item: ItemStack) = handleItem(item, handler::handleItem)
-    private fun resetItem(item: ItemStack) = handleItem(item, ::reset)
+    // no, I have no idea what this does either
+    private fun reset(stack: ItemStack): ItemStack {
+        if (stack.isEmpty) return stack
+        val bukkitStack = CraftItemStack.asCraftMirror(stack)
+        val item = PylonItem.fromStack(bukkitStack) ?: return stack
+        val prototype = item.schema.getItemStack()
+        prototype.copyDataFrom(bukkitStack) { it != DataComponentTypes.ITEM_NAME && it != DataComponentTypes.LORE }
+        val translatedPrototype = prototype.clone()
+        try {
+            handler.handleItem(translatedPrototype)
+        } catch (e: Throwable) {
+            PylonCore.logger.log(
+                Level.SEVERE,
+                "An error occurred while handling item translations",
+                e
+            )
+            return stack
+        }
+        prototype.editData(DataComponentTypes.ITEM_NAME) {
+            val protoName = translatedPrototype.getData(DataComponentTypes.ITEM_NAME)!!
+            val newName = bukkitStack.getData(DataComponentTypes.ITEM_NAME)!!
+            if (protoName != newName) newName else it
+        }
+        prototype.editData(DataComponentTypes.LORE) {
+            val protoLore = translatedPrototype.getData(DataComponentTypes.LORE)!!
+            val newLore = bukkitStack.getData(DataComponentTypes.LORE)!!
+            if (protoLore != newLore) newLore else it
+        }
+        return CraftItemStack.unwrap(prototype)
+    }
 
     companion object {
         private const val HANDLER_NAME = "pylon_packet_handler"
     }
-}
-
-private val names = WeakHashMap<PylonItemSchema, Component>()
-private val lores = WeakHashMap<PylonItemSchema, ItemLore>()
-
-private fun reset(item: PylonItem) {
-    val name = names.getOrPut(item.schema) {
-        item.schema.itemStack.getData(DataComponentTypes.ITEM_NAME)!!
-    }
-    val lore = lores.getOrPut(item.schema) {
-        item.schema.itemStack.getData(DataComponentTypes.LORE)!!
-    }
-    item.stack.setData(DataComponentTypes.ITEM_NAME, name)
-    item.stack.setData(DataComponentTypes.LORE, lore)
 }

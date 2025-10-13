@@ -25,14 +25,14 @@ class SearchItemsAndFluidsPage : SearchPage(
         it.key !in PylonGuide.hiddenItems
     }.map { item ->
         val name = GlobalTranslator.render(Component.translatable("pylon.${item.key.namespace}.item.${item.key.key}.name"), player.locale())
-        ItemButton(item.itemStack) to name.plainText.lowercase()
+        ItemButton(item.getItemStack()) to name.plainText.lowercase(player.locale())
     }.toMutableList()
 
     fun getFluidButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.FLUIDS.filter {
         it.key !in PylonGuide.hiddenFluids
     }.map { fluid ->
         val name = GlobalTranslator.render(Component.translatable("pylon.${fluid.key.namespace}.fluid.${fluid.key.key}"), player.locale())
-        FluidButton(fluid) to name.plainText.lowercase()
+        FluidButton(fluid) to name.plainText.lowercase(player.locale())
     }.toMutableList()
 
     override fun getItemNamePairs(player: Player, search: String): List<Pair<Item, String>> {

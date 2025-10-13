@@ -32,8 +32,7 @@ class PylonItemSchema @JvmOverloads internal constructor(
 
     val addon = getAddon(key)
 
-    val itemStack: ItemStack
-        get() = template.clone()
+    fun getItemStack(): ItemStack = template.clone()
 
     val research: Research?
         get() = PylonRegistry.RESEARCHES.find { key in it.unlocks }
