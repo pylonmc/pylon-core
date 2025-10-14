@@ -218,3 +218,9 @@ signing {
 
     sign(publishing.publications["maven"])
 }
+
+tasks.withType(Sign::class) {
+    onlyIf {
+        System.getenv("SIGNING_KEY") != null && System.getenv("SIGNING_PASSWORD") != null
+    }
+}
