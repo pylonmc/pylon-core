@@ -9,12 +9,11 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
-import io.github.pylonmc.pylon.core.block.waila.Waila
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -22,6 +21,9 @@ import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
+import io.github.pylonmc.pylon.core.guide.button.PageButton
+import io.github.pylonmc.pylon.core.guide.button.setting.TogglePlayerSettingButton
+import io.github.pylonmc.pylon.core.guide.pages.PlayerSettingsPage
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
@@ -31,8 +33,12 @@ import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureConfig
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
+import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine.hasCustomArmorTextures
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
+import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.waila.Waila
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
@@ -44,13 +50,12 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
-import java.util.*
+import java.util.Locale
 import kotlin.io.path.*
 
 /**
@@ -71,14 +76,13 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val packetEvents = PacketEvents.getAPI()
         packetEvents.init()
 
-        packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
-
         val entityLibPlatform = SpigotEntityLibPlatform(this)
-        entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type -> Bukkit.getUnsafe().nextEntityId() }
-        val entityLibSettings = APIConfig(packetEvents)
-            .tickTickables()
-            .trackPlatformEntities()
+        val entityLibSettings = APIConfig(packetEvents).tickTickables()
         EntityLib.init(entityLibPlatform, entityLibSettings)
+        entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type ->
+            @Suppress("DEPRECATION")
+            Bukkit.getUnsafe().nextEntityId()
+        }
 
         saveDefaultConfig()
 
@@ -97,7 +101,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
         Bukkit.getPluginManager().registerEvents(EntityListener, this)
-        Bukkit.getPluginManager().registerEvents(Waila, this)
         Bukkit.getPluginManager().registerEvents(Research, this)
         Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
@@ -109,9 +112,32 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
 
-        if (BlockTextureConfig.customBlockTexturesEnabled) {
+        if (PylonConfig.WailaConfig.enabled) {
+            PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.wailaSettings))
+            Bukkit.getPluginManager().registerEvents(Waila, this)
+        }
+
+        PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.resourcePackSettings))
+
+        if (PylonConfig.ArmorTextureConfig.enabled) {
+            if (!PylonConfig.ArmorTextureConfig.forced) {
+                PlayerSettingsPage.resourcePackSettings.addSetting(TogglePlayerSettingButton(
+                    pylonKey("toggle-armor-textures"),
+                    toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
+                    isEnabled = { player -> player.hasCustomArmorTextures },
+                ))
+            }
+            packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
+        }
+
+        if (PylonConfig.BlockTextureConfig.enabled) {
+            PlayerSettingsPage.resourcePackSettings.addSetting(PageButton(PlayerSettingsPage.blockTextureSettings))
             Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
             BlockTextureEngine.updateOccludingCacheJob.start()
+        }
+
+        if (PylonConfig.researchesEnabled) {
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchEffects)
         }
 
         Bukkit.getScheduler().runTaskTimer(
@@ -156,6 +182,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         launch {
             delay(1.ticks)
             loadRecipes()
+            loadResearches()
         }
 
         val end = System.currentTimeMillis()
@@ -191,6 +218,35 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         val end = System.currentTimeMillis()
         logger.info("Loaded recipes in ${(end - start) / 1000.0}s")
+    }
+
+    private fun loadResearches() {
+        logger.info("Loading researches...")
+        val start = System.currentTimeMillis()
+
+        for (addon in PylonRegistry.ADDONS) {
+            mergeGlobalConfig(addon, "researches.yml", "researches/${addon.key.namespace}.yml")
+        }
+
+        val researchDir = dataPath.resolve("researches")
+        if (researchDir.exists()) {
+            for (namespaceDir in researchDir.listDirectoryEntries()) {
+                val namespace = namespaceDir.nameWithoutExtension
+
+                if (!namespaceDir.isRegularFile()) continue
+
+                val mainResearchConfig = Config(namespaceDir)
+                for (key in mainResearchConfig.keys) {
+                    val nsKey = NamespacedKey(namespace, key)
+                    val section = mainResearchConfig.getSection(key) ?: continue
+
+                    Research.loadFromConfig(section, nsKey).register()
+                }
+            }
+        }
+
+        val end = System.currentTimeMillis()
+        logger.info("Loaded researches in ${(end - start) / 1000.0}s")
     }
 
     override fun onDisable() {

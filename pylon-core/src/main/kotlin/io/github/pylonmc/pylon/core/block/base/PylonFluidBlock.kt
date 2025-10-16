@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.content.fluid.FluidEndpointDisplay
 import io.github.pylonmc.pylon.core.fluid.FluidPointType
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
 import io.github.pylonmc.pylon.core.util.rotateToPlayerFacing
-import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -34,12 +33,7 @@ import org.jetbrains.annotations.ApiStatus
  * @see PylonFluidBufferBlock
  * @see PylonFluidTank
  */
-interface PylonFluidBlock : PylonEntityHolderBlock, PylonDirectionalBlock {
-
-    /**
-     * Automatically implemented when this interface is implemented by a PylonBlock
-     */
-    val block: Block
+interface PylonFluidBlock : PylonEntityHolderBlock, PylonDirectionalBlock, PylonBreakHandler {
 
     override fun getFacing(): BlockFace? =
         getHeldPylonEntity(FluidEndpointDisplay::class.java, "fluid_point_output")?.face
@@ -127,7 +121,6 @@ interface PylonFluidBlock : PylonEntityHolderBlock, PylonDirectionalBlock {
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
         val player = (context as? BlockBreakContext.PlayerBreak)?.event?.player
         getFluidPointDisplay(FluidPointType.INPUT)?.pipeDisplay?.delete(player, drops)
-        super.onBreak(drops, context)
     }
 
     /**

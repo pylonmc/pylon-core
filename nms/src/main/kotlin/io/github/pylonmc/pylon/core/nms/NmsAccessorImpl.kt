@@ -30,8 +30,12 @@ object NmsAccessorImpl : NmsAccessor {
     }
 
     override fun resendInventory(player: Player) {
-        val handler = players[player.uniqueId] ?: return
-        handler.resendInventory()
+        val player = (player as CraftPlayer).handle
+        val inventory = player.containerMenu
+        for (slot in 0..45) {
+            val item = inventory.getSlot(slot).item
+            player.containerSynchronizer.sendSlotChange(inventory, slot, item)
+        }
     }
 
     override fun resendRecipeBook(player: Player) {

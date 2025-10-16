@@ -6,9 +6,9 @@ import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext.PlayerBreak
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
-import io.github.pylonmc.pylon.core.block.waila.WailaConfig
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -44,8 +44,8 @@ class FluidSectionMarker : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock
         pipeDisplay?.delete(player, drops)
     }
 
-    override fun getWaila(player: Player): WailaConfig?
-        = WailaConfig(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", pipe!!.stack.effectiveName())))
+    override fun getWaila(player: Player): WailaDisplay?
+        = WailaDisplay(defaultWailaTranslationKey.arguments(PylonArgument.of("pipe", pipe!!.stack.effectiveName())))
 
     override fun getDropItem(context: BlockBreakContext) = null
 

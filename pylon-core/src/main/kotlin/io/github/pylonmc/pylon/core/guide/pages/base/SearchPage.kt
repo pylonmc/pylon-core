@@ -6,9 +6,11 @@ import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.plainText
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -69,8 +71,8 @@ abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStatic
                     }
 
                     try {
-                        searches[player.uniqueId] = search.lowercase()
-                        lowerGui.setContent(getItems(player, search.lowercase()))
+                        searches[player.uniqueId] = search.lowercase(player.locale())
+                        lowerGui.setContent(getItems(player, search.lowercase(player.locale())))
                     } catch (t: Throwable) { // If uncaught, will crash the server
                         t.printStackTrace()
                     }
@@ -176,7 +178,9 @@ abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStatic
                 } else {
                     PylonItem.fromStack(item.getItemProvider(player).get())?.key ?: return null
                 }
-                return if (key.namespace.startsWith(filter, true)) 0.0 else null
+                val addon = PylonRegistry.ADDONS[NamespacedKey(key.namespace, key.namespace)] ?: return null
+                val compactName = GlobalTranslator.render(addon.displayName, player.locale()).plainText.replace(" ", "").lowercase(player.locale())
+                return if (key.namespace.startsWith(filter) || compactName.startsWith(filter)) 0.0 else null
             }
         }
 
@@ -184,7 +188,7 @@ abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStatic
             override fun weight(player: Player, entry: Pair<Item, String>): Double? {
                 val stack = entry.first.getItemProvider(player).get()
                 return stack.lore()?.map {
-                    weight(filter, it.plainText.lowercase())
+                    weight(filter, it.plainText.lowercase(player.locale()))
                 }?.filterNotNull()?.minOrNull()
             }
         }

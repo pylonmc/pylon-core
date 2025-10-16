@@ -1,7 +1,9 @@
-name: docs.yml
+name: Deploy Kdocs/Javadocs
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "**/src/**"
   workflow_dispatch:
 
 permissions:
@@ -36,7 +38,7 @@ jobs:
           ref: pylon
 
       - name: Publish Dokka to Maven local
-        run: ./gradlew :dokka:publishToMavenLocal -Pversion=2.1.0-pylon-SNAPSHOT
+        run: ./gradlew publishToMavenLocal -Pversion=2.1.0-pylon-SNAPSHOT
 
       - name: Checkout
         uses: actions/checkout@v5
