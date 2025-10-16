@@ -21,10 +21,10 @@ item:
       <arrow> <insn>Shift left click</insn> a block/entity to remove it
       <arrow> <insn>Right click</insn> a block/entity to view its Pylon data
 
-  fluid_pipe_connector:
+  fluid_pipe_intersection_marker:
     waila: "%pipe%"
 
-  fluid_pipe_marker:
+  fluid_pipe_section_marker:
     waila: "%pipe%"
 
 fluid:
@@ -47,6 +47,12 @@ message:
       not_ticking: "<gold>Ticking: <red>No"
     data: "<gold>Data: <white>%data%"
     deleted_data: "<red>Removed <white>%type% <gray>(%location%)"
+
+  pipe:
+    connecting: "<insn>Right click</insn> <gray>to place, <insn>deselect the pipe item</insn> <gray>to cancel"
+    cannot_place_here: "<red>You cannot place a pipe here"
+    not_enough_pipes: "<red>Not enough pipes"
+    not_of_same_type: "<red>Pipes are of different types"
 
   disabled:
     message: "<white>%item% <red>has been disabled"

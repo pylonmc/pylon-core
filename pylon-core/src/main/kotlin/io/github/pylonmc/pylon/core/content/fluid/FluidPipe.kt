@@ -5,20 +5,21 @@ import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.fluid.FluidManager
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
-import io.github.pylonmc.pylon.core.fluid.connecting.*
+import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementPoint
+import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
 import io.github.pylonmc.pylon.core.fluid.tags.FluidTemperature
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
-import io.github.pylonmc.pylon.core.item.base.PylonItemEntityInteractor
+import io.github.pylonmc.pylon.core.util.getTargetEntity
 import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.block.Block
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
-import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -33,7 +34,7 @@ import org.bukkit.inventory.ItemStack
  * You should generally not need to extend this class. Instead, simply register an item with class
  * FluidPipe.class to create a new pipe type.
  */
-open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityInteractor, PylonInteractor {
+open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
     val material = getSettings().getOrThrow("material", ConfigAdapter.MATERIAL)
     val fluidPerSecond = getSettings().getOrThrow("fluid-per-second", ConfigAdapter.DOUBLE)
     val allowedTemperatures = getSettings().get(
@@ -54,32 +55,8 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
     /**
      * Returns whether the pipe is capable of moving the given fluid through it.
      */
-    open fun canPass(fluid: PylonFluid): Boolean {
-        return allowedTemperatures == null
-                || fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedTemperatures
-    }
-
-    override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
-        if (event.hand != EquipmentSlot.HAND) {
-            return
-        }
-
-        val interaction = EntityStorage.get(event.rightClicked)
-        if (interaction is FluidPointInteraction) {
-            if (!ConnectingService.isConnecting(event.getPlayer())) {
-                ConnectingService.startConnection(event.getPlayer(), ConnectingPointInteraction(interaction), this)
-                return
-            }
-        }
-
-        if (ConnectingService.isConnecting(event.player)) {
-            val segment = ConnectingService.placeConnection(event.player)
-            if (segment != null) {
-                FluidManager.setFluidPerSecond(segment, fluidPerSecond)
-                FluidManager.setFluidPredicate(segment, this::canPass)
-            }
-        }
-    }
+    open fun canPass(fluid: PylonFluid) = allowedTemperatures == null
+            || fluid.hasTag<FluidTemperature>() && fluid.getTag<FluidTemperature>() in allowedTemperatures
 
     override fun onUsedToRightClick(event: PlayerInteractEvent) {
         if (event.hand != EquipmentSlot.HAND) {
@@ -87,56 +64,81 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonItemEntityIntera
         }
 
         val action = event.action
-        val block: Block? = event.clickedBlock
-        val player: Player = event.player
+        val block = event.clickedBlock
+        val player = event.player
 
-        if (block != null && action == Action.RIGHT_CLICK_BLOCK && !ConnectingService.isConnecting(player)) {
-            if (!tryStartConnection(player, block)) {
-                tryStartConnection(player, block.getRelative(event.blockFace))
-            }
+        if (FluidPipePlacementService.connectedLastTick(player)) {
+            return
         }
 
-        if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) && ConnectingService.isConnecting(
-                player
-            )
-        ) {
-            val segment = ConnectingService.placeConnection(player)
-            if (segment != null) {
-                FluidManager.setFluidPerSecond(segment, fluidPerSecond)
-                FluidManager.setFluidPredicate(segment, this::canPass)
+        if (FluidPipePlacementService.isConnecting(player))  {
+            // Player is already connecting; see if we can finish the connection
+            if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+                val segment = FluidPipePlacementService.placeConnection(player)
+                if (segment != null) {
+                    FluidManager.setFluidPerSecond(segment, fluidPerSecond)
+                    FluidManager.setFluidPredicate(segment, this::canPass)
+                }
+            }
+        } else {
+            // Player is not yet connecting a pipe; see if they have right clicked a endpoint display, then see if we can start a connection
+            val targetEntity = getTargetEntity(player, 1.5F * FluidEndpointDisplay.distanceFromFluidPointCenterToCorner)
+            if (targetEntity != null) {
+                if (tryStartConnection(player, targetEntity)) {
+                    return
+                }
+            }
+
+            // Player is not yet connecting a pipe; see if they have right clicked a block, then see if we can start a connection
+            if (block != null && action == Action.RIGHT_CLICK_BLOCK) {
+                if (!tryStartConnection(player, block)) {
+                    tryStartConnection(player, block.getRelative(event.blockFace))
+                }
             }
         }
     }
 
     private fun tryStartConnection(player: Player, block: Block): Boolean {
         val pylonBlock = BlockStorage.get(block)
-        if (pylonBlock is FluidPipeConnector) {
-            if (pylonBlock.pipe != this) {
+
+        if (pylonBlock is FluidIntersectionMarker) {
+            if (pylonBlock.pipe == this) {
+                // This pipe matches the pipe we right clicked; start a connection
+                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(pylonBlock.fluidIntersectionDisplay), this)
+            } else {
+                // This pipe does not match the pipe we right clicked
                 player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
-                return true
             }
-            val connectingPoint = ConnectingPointPipeConnector(pylonBlock)
-            ConnectingService.startConnection(player, connectingPoint, this)
             return true
         }
 
-        if (pylonBlock is FluidPipeMarker) {
-            val pipeDisplay = pylonBlock.getPipeDisplay()!!
-            if (pipeDisplay.pipe != this) {
+        if (pylonBlock is FluidSectionMarker) {
+            if (pylonBlock.pipeDisplay!!.pipe == this) {
+                // This pipe matches the pipe we right clicked; start a connection
+                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.Section(pylonBlock), this)
+            } else {
+                // This pipe does not match the pipe we right clicked
                 player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
-                return true
             }
-            val connectingPoint = ConnectingPointPipeMarker(pylonBlock)
-            ConnectingService.startConnection(player, connectingPoint, this)
             return true
         }
 
         if (block.type.isAir()) {
-            val connectingPoint = ConnectingPointNewBlock(BlockPosition(block))
-            ConnectingService.startConnection(player, connectingPoint, this)
+            FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.EmptyBlock(BlockPosition(block)), this)
             return true
         }
 
+        return false
+    }
+
+    private fun tryStartConnection(player: Player, entity: Entity): Boolean {
+        val hitPylonEntity = EntityStorage.get(entity)
+        if (hitPylonEntity is FluidPointDisplay) {
+            if (hitPylonEntity.connectedPipeDisplays.isEmpty()) {
+                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(hitPylonEntity), this)
+                return true
+            }
+        }
         return false
     }
 }

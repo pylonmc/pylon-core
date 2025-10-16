@@ -138,7 +138,7 @@ object EntityStorage : Listener {
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
      */
     @JvmStatic
-    fun <T: PylonEntity<*>> whenEntityLoads(uuid: UUID, clazz: Class<T>, consumer: Consumer<T>) {
+    fun <T> whenEntityLoads(uuid: UUID, clazz: Class<T>, consumer: Consumer<T>) {
         val pylonEntity = getAs(clazz, uuid)
         if (pylonEntity != null) {
             consumer.accept(pylonEntity)
@@ -156,7 +156,7 @@ object EntityStorage : Listener {
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
      */
     @JvmStatic
-    inline fun <reified T: PylonEntity<*>> whenEntityLoads(uuid: UUID, crossinline consumer: (T) -> Unit)
+    inline fun <reified T> whenEntityLoads(uuid: UUID, crossinline consumer: (T) -> Unit)
             = whenEntityLoads(uuid, T::class.java) { t -> consumer(t) }
 
     /**
