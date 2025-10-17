@@ -92,7 +92,7 @@ open class PylonBlock internal constructor(val block: Block) {
         if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
             null
         } else {
-            val entity = BlockTextureEntity()
+            val entity = BlockTextureEntity(this)
             val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
             setupBlockTexture(entity, meta)
         }
@@ -142,7 +142,7 @@ open class PylonBlock internal constructor(val block: Block) {
      */
     protected open fun setupBlockTexture(entity: BlockTextureEntity, meta: ItemDisplayMeta): BlockTextureEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
-        entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
+        entity.spawn(Location(this@PylonBlock.block.x + 0.5, this@PylonBlock.block.y + 0.5, this@PylonBlock.block.z + 0.5, 0f, 0f))
 
         val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
         item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
@@ -169,12 +169,22 @@ open class PylonBlock internal constructor(val block: Block) {
      * Call this method to refresh the block texture entity's item to be the result of
      * [getBlockTextureItem], or a barrier if that returns null.
      */
-    protected fun refreshBlockTextureItem() {
+    fun refreshBlockTextureItem() {
         updateBlockTexture { _, meta ->
             val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
             item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
             meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
         }
+    }
+
+    /**
+     * Returns whether the block texture item should automatically refresh on the [PylonConfig.BlockTextureConfig.stateUpdateInterval].
+     * By default, this returns true if the block has any state properties (vanilla or custom). For example,
+     * a lever has a "powered" property, so it would return true, whereas a stone block has no properties,
+     * so it would return false unless a custom property is provided by overriding [getBlockTextureProperties].
+     */
+    open fun shouldAutoRefreshBlockTextureItem(): Boolean {
+        return NmsAccessor.instance.getStateProperties(block, getBlockTextureProperties()).isNotEmpty()
     }
 
     /**

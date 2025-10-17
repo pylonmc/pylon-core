@@ -126,6 +126,9 @@ object PylonConfig {
         val forced = config.getOrThrow("custom-block-textures.force", ConfigAdapter.BOOLEAN)
 
         @JvmStatic
+        val stateUpdateInterval = config.getOrThrow("custom-block-textures.state-update-interval", ConfigAdapter.INT)
+
+        @JvmStatic
         val occludingCacheRefreshInterval = config.getOrThrow("custom-block-textures.culling.occluding-cache-refresh-interval", ConfigAdapter.INT)
 
         @JvmStatic

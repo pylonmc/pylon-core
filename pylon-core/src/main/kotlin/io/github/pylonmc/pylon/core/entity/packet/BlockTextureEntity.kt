@@ -6,7 +6,9 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.util.Vector3f
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
+import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.wrapper.WrapperEntity
@@ -22,13 +24,26 @@ import kotlin.math.min
  * 
  * (see [PylonBlock.blockTextureEntity] and [BlockTextureEngine])
  */
-class BlockTextureEntity : WrapperEntity(EntityTypes.ITEM_DISPLAY) {
+class BlockTextureEntity(
+    val block: PylonBlock
+) : WrapperEntity(EntityTypes.ITEM_DISPLAY) {
+    val shouldAutoUpdate = PylonConfig.BlockTextureConfig.stateUpdateInterval.ticks > 0 && block.shouldAutoRefreshBlockTextureItem()
+    /**
+     * Randomize the initial last update time so that not all entities update on the same tick.
+     */
+    var nextUpdate: Long = System.currentTimeMillis() + (Math.random() * PylonConfig.BlockTextureConfig.stateUpdateInterval.ticks).toLong()
+
     override fun addViewer(viewer: UUID?) {
         addOrRefreshViewer(viewer, null)
     }
 
     fun addOrRefreshViewer(viewer: UUID?, distanceSquared: Double?) {
         viewer!!
+        if (shouldAutoUpdate && nextUpdate < System.currentTimeMillis()) {
+            block.refreshBlockTextureItem()
+            nextUpdate = System.currentTimeMillis() + PylonConfig.BlockTextureConfig.stateUpdateInterval.ticks
+        }
+
         if (this.viewers.add(viewer)) {
             if (location != null && isSpawned) {
                 sendPacketToViewer(viewer, this.createSpawnPacket());
