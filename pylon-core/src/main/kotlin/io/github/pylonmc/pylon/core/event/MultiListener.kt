@@ -37,7 +37,7 @@ interface MultiListener : Listener {
                 val lookup = MethodHandles.lookup()
                 val methodHandle = lookup.unreflect(method)
                 if (method.returnType != Void.TYPE) {
-                    plugin.logger.warning("Method ${method.name} in class ${this::class.java.name} is annotated with @MultiHandler but has a non-void return type. The return value will be ignored.")
+                    plugin.logger.warning("Method ${method.name} in class ${this::class.java.name} is annotated with @MultiHandler/@UniversalHandler but has a non-void return type. The return value will be ignored.")
                 }
 
                 @Suppress("UNCHECKED_CAST")
