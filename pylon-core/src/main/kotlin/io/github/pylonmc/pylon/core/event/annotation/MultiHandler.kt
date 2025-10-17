@@ -47,21 +47,10 @@ annotation class MultiHandler(
                     val lookup = MethodHandles.lookup()
                     val methodHandle = lookup.unreflect(method)
 
-                    var priorities = setOf<EventPriority>()
-                    var ignoreCancelled = false
-                    if (method.isAnnotationPresent(EventHandler::class.java)) {
-                        val annotation = method.getAnnotation(EventHandler::class.java)
-                        priorities = setOf(annotation.priority)
-                        ignoreCancelled = annotation.ignoreCancelled
-                    } else if (method.isAnnotationPresent(MultiHandler::class.java)) {
-                        val annotation = method.getAnnotation(MultiHandler::class.java)
-                        priorities = annotation.priorities.toSet()
-                        ignoreCancelled = annotation.ignoreCancelled
-                    } else if (method.isAnnotationPresent(UniversalHandler::class.java)) {
-                        priorities = EventPriority.entries.toSet()
-                    } else {
-                        throw IllegalStateException("Method ${method.name} in class ${directClass.name} is not annotated with @EventHandler, @MultiHandler, or @UniversalHandler")
-                    }
+                    val annotation = method.getAnnotation(MultiHandler::class.java)
+                        ?: throw IllegalStateException("Method ${method.name} in class ${directClass.name} is not annotated with @MultiHandler")
+                    var priorities = annotation.priorities.toSet()
+                    var ignoreCancelled = annotation.ignoreCancelled
 
                     { instance, evt, priority ->
                         if ((evt !is Cancellable || !evt.isCancelled || !ignoreCancelled) && priorities.contains(priority)) {
