@@ -101,7 +101,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
-        Bukkit.getPluginManager().registerEvents(EntityListener, this)
+        EntityListener.register(this)
         Bukkit.getPluginManager().registerEvents(Research, this)
         Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)

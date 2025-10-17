@@ -7,8 +7,11 @@ import io.github.pylonmc.pylon.core.entity.base.PylonDeathEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonUnloadEntity
 import io.github.pylonmc.pylon.core.entity.base.*
+import io.github.pylonmc.pylon.core.event.MultiListener
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
+import io.github.pylonmc.pylon.core.event.annotation.MultiHandler
+import io.github.pylonmc.pylon.core.event.annotation.UniversalHandler
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener.logEventHandleErr
 import io.github.pylonmc.pylon.core.item.base.PylonArrow
@@ -20,20 +23,25 @@ import org.bukkit.entity.AbstractArrow
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
 import org.bukkit.event.entity.*
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import java.util.*
 
-internal object EntityListener : Listener {
+internal object EntityListener : MultiListener {
     private val entityErrMap: MutableMap<UUID, Int> = mutableMapOf()
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    private fun handle(event: PlayerInteractEntityEvent) {
+    @UniversalHandler
+    private fun handle(event: PlayerInteractEntityEvent, priority: EventPriority) {
         val pylonEntity = EntityStorage.get(event.rightClicked)
         if (pylonEntity is PylonInteractEntity) {
             try {
-                pylonEntity.onInteract(event)
+                MultiHandler.handleEvent(
+                    pylonEntity,
+                    PylonInteractEntity::class.java,
+                    "onInteract",
+                    event,
+                    priority
+                )
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonEntity)
             }

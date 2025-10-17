@@ -8,7 +8,6 @@ import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
@@ -30,7 +29,6 @@ import org.bukkit.block.BlockFace
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
@@ -81,14 +79,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
      * needs to be placed in a specific location.
      */
     class MultiblockGhostBlock(entity: ItemDisplay, val name: String) :
-        PylonEntity<ItemDisplay>(KEY, entity), PylonInteractEntity {
+        PylonEntity<ItemDisplay>(KEY, entity) {
 
         constructor(entity: ItemDisplay)
                 : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
-
-        override fun onInteract(event: PlayerInteractEntityEvent) {
-            event.player.sendMessage(name)
-        }
 
         override fun write(pdc: PersistentDataContainer) {
             pdc.set(NAME_KEY, PylonSerializers.STRING, name)

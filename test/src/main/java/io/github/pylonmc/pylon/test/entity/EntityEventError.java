@@ -7,6 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,8 +26,8 @@ public class EntityEventError extends PylonEntity<LivingEntity> implements Pylon
         super(entity);
     }
 
-    @Override
-    public void onInteract(@NotNull PlayerInteractEntityEvent event) {
+    @Override @EventHandler
+    public void onInteract(@NotNull PlayerInteractEntityEvent event, @NotNull EventPriority priority) {
         throw new RuntimeException("This exception is thrown as part of a test");
     }
 }
