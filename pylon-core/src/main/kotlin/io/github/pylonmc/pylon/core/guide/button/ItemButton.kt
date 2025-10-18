@@ -2,20 +2,17 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.PylonItemSchema
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.recipe.RecipeInput
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.withArguments
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
@@ -173,10 +170,10 @@ class ItemButton @JvmOverloads constructor(
                         val pylonItem = PylonItem.fromStack(clonedUnkown)
 
                         if (pylonItem == null) {
-                            // item is vanilla
+                            // item is not pylon
                             val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
-                            val clonedVanilla = ItemStack(type, 1)
-                            player.setItemOnCursor(clonedVanilla)
+                            val clonedNotPylon = ItemStack(type, 1)
+                            player.setItemOnCursor(clonedNotPylon)
                         } else {
                             // pylon item handling
                             val clonedPylon = pylonItem.schema.itemStack
