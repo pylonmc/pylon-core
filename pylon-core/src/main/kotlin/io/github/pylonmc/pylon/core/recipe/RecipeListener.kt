@@ -53,9 +53,6 @@ internal object PylonRecipeListener : Listener {
 
         val hasPylonItems = inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }
 
-        // Prevent pylon crafting, we have no way to know
-        // if the researches have been unlocked properly, maybe
-        // we can save the player that placed down the crafter...
         if (hasPylonItems) {
             e.isCancelled = true
         }
