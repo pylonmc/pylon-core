@@ -50,6 +50,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Display
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
@@ -167,7 +168,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonItem.register<PylonGuide>(PylonGuide.STACK)
         PylonGuide.hideItem(PylonGuide.KEY)
 
-        PylonEntity.register<ItemDisplay, PylonSimpleMultiblock.MultiblockGhostBlock>(
+        PylonEntity.register<Display, PylonSimpleMultiblock.MultiblockGhostBlock>(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
         )
 
