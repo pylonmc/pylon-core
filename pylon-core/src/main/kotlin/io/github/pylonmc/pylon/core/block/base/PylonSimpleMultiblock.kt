@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
+import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
@@ -28,6 +29,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
+import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -80,10 +82,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
      * A block display that represents this block, showing the player what block
      * needs to be placed in a specific location.
      */
-    class MultiblockGhostBlock(entity: ItemDisplay, val name: String) :
-        PylonEntity<ItemDisplay>(KEY, entity), PylonInteractEntity {
+    class MultiblockGhostBlock(entity: Display, val name: String) :
+        PylonEntity<Display>(KEY, entity), PylonInteractEntity {
 
-        constructor(entity: ItemDisplay)
+        constructor(entity: Display)
                 : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
 
         override fun onInteract(event: PlayerInteractEntityEvent) {
@@ -118,7 +120,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         override fun matches(block: Block): Boolean = !BlockStorage.isPylonBlock(block) && block.type in materials
 
         override fun spawnGhostBlock(block: Block): UUID {
-            val display = ItemDisplayBuilder()
+            val blockDataList = materials.map { it.createBlockData() }
+            val display = BlockDisplayBuilder()
                 .material(materials.first())
                 .glow(Color.WHITE)
                 .transformation(TransformBuilder().scale(0.5))
@@ -129,7 +132,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
                 PylonCore.launch {
                     var i = 0
                     while (display.isValid) {
-                        display.setItemStack(ItemStack(materials[i]))
+                        display.block = blockDataList[i]
                         i++
                         i %= materials.size
                         delay(1.seconds)
@@ -161,7 +164,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
 
         override fun spawnGhostBlock(block: Block): UUID {
             val stringDatas: List<String> = blockDatas.map { it.getAsString(true) }
-            val display = ItemDisplayBuilder()
+            val display = BlockDisplayBuilder()
                 .material(blockDatas.first().material)
                 .glow(Color.WHITE)
                 .transformation(TransformBuilder().scale(0.5))
@@ -172,15 +175,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
                 PylonCore.launch {
                     var i = 0
                     while (display.isValid) {
-                        // skip non items or exception
-                        val mat = blockDatas[i].material
-                        if(!mat.isItem) {
-                            i++
-                            i %= blockDatas.size
-                            continue
-                        }
-
-                        display.setItemStack(ItemStack(mat))
+                        display.block = blockDatas[i]
                         i++
                         i %= blockDatas.size
                         delay(1.seconds)
