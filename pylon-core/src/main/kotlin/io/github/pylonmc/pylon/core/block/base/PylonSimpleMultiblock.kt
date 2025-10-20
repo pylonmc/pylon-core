@@ -27,6 +27,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.data.BlockData
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -37,8 +38,7 @@ import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.MustBeInvokedByOverriders
 import org.joml.Vector3i
-import java.util.IdentityHashMap
-import java.util.UUID
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
@@ -132,6 +132,57 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
                         display.setItemStack(ItemStack(materials[i]))
                         i++
                         i %= materials.size
+                        delay(1.seconds)
+                    }
+                }
+            }
+
+            return display.uniqueId
+        }
+    }
+
+    data class VanillaBlockdataMultiblockComponent(val blockDatas: List<BlockData>) : MultiblockComponent {
+
+        constructor(first: BlockData, vararg materials: BlockData) : this(listOf(first) + materials)
+
+        init {
+            check(blockDatas.isNotEmpty()) { "BlockData list cannot be empty" }
+        }
+
+        override fun matches(block: Block): Boolean {
+            if (BlockStorage.isPylonBlock(block)) return false
+            for (blockData in blockDatas) {
+                // IMPORTANT, a.matches(b) != b.matches(a), if you invert this check, kaboom
+                if (block.blockData.matches(blockData)) return true
+            }
+
+            return false
+        }
+
+        override fun spawnGhostBlock(block: Block): UUID {
+            val stringDatas: List<String> = blockDatas.map { it.getAsString(true) }
+            val display = ItemDisplayBuilder()
+                .material(blockDatas.first().material)
+                .glow(Color.WHITE)
+                .transformation(TransformBuilder().scale(0.5))
+                .build(block.location.toCenterLocation())
+            EntityStorage.add(MultiblockGhostBlock(display, stringDatas.joinToString(", ")))
+
+            if (blockDatas.size > 1) {
+                PylonCore.launch {
+                    var i = 0
+                    while (display.isValid) {
+                        // skip non items or exception
+                        val mat = blockDatas[i].material
+                        if(!mat.isItem) {
+                            i++
+                            i %= blockDatas.size
+                            continue
+                        }
+
+                        display.setItemStack(ItemStack(mat))
+                        i++
+                        i %= blockDatas.size
                         delay(1.seconds)
                     }
                 }
