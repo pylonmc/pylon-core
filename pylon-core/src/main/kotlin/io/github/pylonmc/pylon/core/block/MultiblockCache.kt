@@ -2,22 +2,18 @@ package io.github.pylonmc.pylon.core.block
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import io.github.pylonmc.pylon.core.block.base.PylonMultiblock
-import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
-import io.github.pylonmc.pylon.core.event.PylonChunkBlocksLoadEvent
-import io.github.pylonmc.pylon.core.event.PylonChunkBlocksUnloadEvent
-import io.github.pylonmc.pylon.core.event.PylonMultiblockFormEvent
-import io.github.pylonmc.pylon.core.event.PylonMultiblockRefreshEvent
-import io.github.pylonmc.pylon.core.event.PylonMultiblockUnformEvent
+import io.github.pylonmc.pylon.core.event.*
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import org.bukkit.block.Block
+import org.bukkit.block.BlockState
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.world.StructureGrowEvent
 
 /**
  * This class does a lot and is quite dense and complicated. Here's the summary of what it does:
@@ -260,7 +256,9 @@ internal object MultiblockCache : Listener {
     // Otherwise, we would be able to handle blocks being moved by pistons and not have to cancel
     @EventHandler(ignoreCancelled = true)
     private fun blockUpdate(event: BlockPistonExtendEvent) {
-        if (event.blocks.any { loadedMultiblocksWithComponent(event.block).isNotEmpty() }) {
+        val blocksBefore = event.blocks
+        val blocksAfter = event.blocks.map { it.getRelative(event.direction) }
+        if (blocksBefore.any { loadedMultiblocksWithComponent(it).isNotEmpty() } || blocksAfter.any { loadedMultiblocksWithComponent(it).isNotEmpty()}) {
             event.isCancelled = true
         }
     }
@@ -270,8 +268,15 @@ internal object MultiblockCache : Listener {
     // Otherwise, we would be able to handle blocks being moved by pistons and not have to cancel
     @EventHandler(ignoreCancelled = true)
     private fun blockUpdate(event: BlockPistonRetractEvent) {
-        if (event.blocks.any { loadedMultiblocksWithComponent(event.block).isNotEmpty() }) {
+        val blocksBefore = event.blocks
+        val blocksAfter = event.blocks.map { it.getRelative(event.direction) }
+        if (blocksBefore.any { loadedMultiblocksWithComponent(it).isNotEmpty() } || blocksAfter.any { loadedMultiblocksWithComponent(it).isNotEmpty()}) {
             event.isCancelled = true
         }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private fun blockUpdate(event: StructureGrowEvent) {
+        event.blocks.map(BlockState::getBlock).forEach(this::onBlockModified)
     }
 }
