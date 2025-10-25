@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
+import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -37,11 +38,11 @@ open class SimpleDynamicGuidePage(
      * Supplies the buttons to be displayed on this page.
      */
     val buttonSupplier: Supplier<List<Item>>,
-) : GuidePage {
+) : PagedGuidePage {
 
     override fun getKey() = key
 
-    override val item = ItemStackBuilder.of(material)
+    override val item = ItemStackBuilder.gui(material, "${pylonKey("guide_page")}:$key")
         .name(Component.translatable("pylon.${key.namespace}.guide.page.${key.key}"))
 
     /**
@@ -63,6 +64,7 @@ open class SimpleDynamicGuidePage(
         .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+        .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
     override fun getGui(player: Player): Gui {
         val buttons = buttonSupplier.get()
@@ -72,6 +74,6 @@ open class SimpleDynamicGuidePage(
             gui.addContent(button)
         }
 
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 }

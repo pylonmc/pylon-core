@@ -86,7 +86,10 @@ internal object PylonItemListener : Listener {
             pylonItem is PylonCooldownable &&
             event.player.getCooldown(pylonItem.stack) > 0 &&
             pylonItem.respectCooldown
-        ) return
+        ) {
+            event.isCancelled = true
+            return
+        }
         if (pylonItem is PylonBlockInteractor && event.hasBlock()) {
             try {
                 pylonItem.onUsedToClickBlock(event)

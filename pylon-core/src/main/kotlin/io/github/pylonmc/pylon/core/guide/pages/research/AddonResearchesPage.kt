@@ -24,7 +24,7 @@ class AddonResearchesPage(val addon: PylonAddon) : SimpleDynamicGuidePage(
     }
 ) {
     override val item: ItemStackBuilder
-        get() = ItemStackBuilder.of(addon.material)
+        get() = ItemStackBuilder.gui(addon.material, addon.key)
             .name(addon.displayName)
 
     override val title: Component

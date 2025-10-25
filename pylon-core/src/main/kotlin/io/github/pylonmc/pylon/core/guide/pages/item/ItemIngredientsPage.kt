@@ -85,6 +85,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         .addIngredient('b', BackButton())
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+        .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
     override fun getGui(player: Player): Gui {
         val pages = mutableListOf<Gui>()
@@ -98,7 +99,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         for (page in pages) {
             gui.addContent(page)
         }
-        return gui.build()
+        return gui.build().apply { loadCurrentPage(player, this) }
     }
 
     companion object {
@@ -115,7 +116,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             is Container.Item -> ItemButton.from(container.item) { item: ItemStack, player: Player ->
                 ItemStackBuilder.of(item).name(
                     GlobalTranslator.render(Component.translatable(
-                        "pylon.pyloncore.message.guide.ingredients-page.item",
+                        "pylon.pyloncore.guide.ingredient",
                         PylonArgument.of("item_ingredients_page_amount", container.item.amount),
                         PylonArgument.of("item_ingredients_page_item", container.item.getData(DataComponentTypes.ITEM_NAME)!!)),
                         player.locale())

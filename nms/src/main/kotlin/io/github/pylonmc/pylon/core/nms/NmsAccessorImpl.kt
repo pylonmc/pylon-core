@@ -2,6 +2,9 @@ package io.github.pylonmc.pylon.core.nms
 
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.i18n.packet.PlayerPacketHandler
+import io.papermc.paper.adventure.PaperAdventure
+import net.kyori.adventure.text.Component
+import net.minecraft.nbt.TextComponentTagVisitor
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer
 import org.bukkit.entity.Player
@@ -27,8 +30,12 @@ object NmsAccessorImpl : NmsAccessor {
     }
 
     override fun resendInventory(player: Player) {
-        val handler = players[player.uniqueId] ?: return
-        handler.resendInventory()
+        val player = (player as CraftPlayer).handle
+        val inventory = player.containerMenu
+        for (slot in 0..45) {
+            val item = inventory.getSlot(slot).item
+            player.containerSynchronizer.sendSlotChange(inventory, slot, item)
+        }
     }
 
     override fun resendRecipeBook(player: Player) {
@@ -36,6 +43,6 @@ object NmsAccessorImpl : NmsAccessor {
         player.recipeBook.sendInitialRecipeBook(player)
     }
 
-    override fun serializePdc(pdc: PersistentDataContainer): String
-        = (pdc as CraftPersistentDataContainer).serialize()
+    override fun serializePdc(pdc: PersistentDataContainer): Component
+        = PaperAdventure.asAdventure(TextComponentTagVisitor("  ").visit((pdc as CraftPersistentDataContainer).toTagCompound()))
 }

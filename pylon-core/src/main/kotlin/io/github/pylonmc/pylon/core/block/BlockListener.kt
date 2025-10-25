@@ -31,10 +31,12 @@ import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.inventory.BlockInventoryHolder
 import java.util.*
 
 
@@ -111,29 +113,28 @@ internal object BlockListener : Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
-        if (BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
+        if (BlockStorage.isPylonBlock(event.block) && BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
             event.isCancelled = true
             return
         }
+
         val it = event.blockList().iterator()
         while (it.hasNext()) {
-            if (BlockStorage.breakBlock(it.next(), BlockBreakContext.BlockExploded(event)) == null) {
+            val block = it.next()
+            if (BlockStorage.isPylonBlock(block) && BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event)) == null) {
                 it.remove()
             }
         }
-        for (block in event.blockList()) {
-            BlockStorage.breakBlock(block, BlockBreakContext.BlockExploded(event))
-        }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
         val it = event.blockList().iterator()
         while (it.hasNext()) {
             val block = it.next()
-            if (BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(block, event)) == null) {
+            if (BlockStorage.isPylonBlock(block) && BlockStorage.breakBlock(block, BlockBreakContext.EntityExploded(block, event)) == null) {
                 it.remove()
             }
         }
@@ -142,7 +143,7 @@ internal object BlockListener : Listener {
     // Event added by paper, not really documented when it's called so two separate handlers might
     // fire for some block breaks but this shouldn't be an issue
     // Primarily added to handle sensitive blocks
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockDestroyEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
             BlockStorage.breakBlock(event.block, BlockBreakContext.Destroyed(event))
@@ -789,16 +790,27 @@ internal object BlockListener : Listener {
     }
 
     @EventHandler
+    private fun onInventoryOpen(event: InventoryOpenEvent) {
+        val holder = event.inventory.holder
+        if (holder is Container) {
+            val block = BlockStorage.get(holder.block)
+            if (block is PylonVanillaContainerBlock) {
+                block.onInventoryOpen(event)
+            }
+        }
+    }
+
+    @EventHandler
     private fun onItemMove(event: InventoryMoveItemEvent) {
         val sourceHolder = event.source.holder
-        if (sourceHolder is Container) {
+        if (sourceHolder is BlockInventoryHolder) {
             val sourceBlock = BlockStorage.get(sourceHolder.block)
             if (sourceBlock is PylonVanillaContainerBlock) {
                 sourceBlock.onItemMoveFrom(event)
             }
         }
         val destHolder = event.destination.holder
-        if (destHolder is Container) {
+        if (destHolder is BlockInventoryHolder) {
             val destBlock = BlockStorage.get(destHolder.block)
             if (destBlock is PylonVanillaContainerBlock) {
                 destBlock.onItemMoveTo(event)
