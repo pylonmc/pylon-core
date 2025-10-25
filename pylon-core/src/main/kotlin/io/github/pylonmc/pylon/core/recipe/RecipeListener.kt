@@ -1,24 +1,20 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.item.base.VanillaCookingFuel
-import io.github.pylonmc.pylon.core.item.base.VanillaCookingItem
-import io.github.pylonmc.pylon.core.item.base.VanillaCraftingItem
-import io.github.pylonmc.pylon.core.item.base.VanillaSmithingMineral
-import io.github.pylonmc.pylon.core.item.base.VanillaSmithingTemplate
+import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.recipe.vanilla.CookingRecipeWrapper
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
-import io.github.pylonmc.pylon.core.util.isPylonSimilar
-import org.bukkit.Bukkit
 import org.bukkit.Keyed
+import org.bukkit.block.Crafter
 import org.bukkit.block.Furnace
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockCookEvent
+import org.bukkit.event.block.CrafterCraftEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
@@ -47,6 +43,18 @@ internal object PylonRecipeListener : Listener {
         }
         if (anyViewerDoesNotHaveResearch) {
             inventory.result = null
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onCrafterCraft(e: CrafterCraftEvent) {
+        val crafterState = e.block.state as? Crafter ?: return
+        val inventory = crafterState.inventory
+
+        val hasPylonItems = inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }
+
+        if (hasPylonItems) {
+            e.isCancelled = true
         }
     }
 
