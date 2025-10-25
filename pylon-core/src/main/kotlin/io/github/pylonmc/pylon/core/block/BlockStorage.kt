@@ -312,6 +312,9 @@ object BlockStorage : Listener {
         require(blockPosition.chunk.isLoaded) { "You can only break Pylon blocks in loaded chunks" }
 
         val block = get(blockPosition) ?: return null
+        if (block is PylonBreakHandler && !block.preBreak(context)) {
+            return null
+        }
 
         val event = PrePylonBlockBreakEvent(blockPosition.block, block, context)
         event.callEvent()
@@ -335,7 +338,7 @@ object BlockStorage : Listener {
             blockPosition.block.type = Material.AIR
         }
         if (block is PylonBreakHandler) {
-            block.postBreak()
+            block.postBreak(context)
         }
 
         BlockTextureEngine.remove(block)
@@ -386,6 +389,39 @@ object BlockStorage : Listener {
     @JvmOverloads
     fun breakBlock(location: Location, context: BlockBreakContext = BlockBreakContext.PluginBreak(location.block)) =
         breakBlock(BlockPosition(location), context)
+
+    /**
+     * Deletes the Pylon block and removes the physical block in the world.
+     * Does nothing if the block is not a Pylon block.
+     * Only call on the main thread.
+     *
+     * This differs from [breakBlock] in that it cannot be cancelled and does not drop any items.
+     */
+    @JvmSynthetic
+    internal fun deleteBlock(blockPosition: BlockPosition) {
+        require(blockPosition.chunk.isLoaded) { "You can only delete Pylon block data in loaded chunks" }
+
+        val block = get(blockPosition) ?: return
+
+        val context = BlockBreakContext.Delete(block.block)
+        if (block is PylonBreakHandler) {
+            block.onBreak(mutableListOf(), context)
+        }
+
+        lockBlockWrite {
+            blocks.remove(blockPosition)
+            blocksByKey[block.schema.key]?.remove(block)
+            blocksByChunk[blockPosition.chunk]?.remove(block)
+        }
+
+        block.block.type = Material.AIR
+        if (block is PylonBreakHandler) {
+            block.postBreak(context)
+        }
+
+        BlockTextureEngine.remove(block)
+        PylonBlockBreakEvent(blockPosition.block, block, context, mutableListOf()).callEvent()
+    }
 
     private fun load(world: World, chunk: Chunk): List<PylonBlock> {
         val type = PylonSerializers.LIST.listTypeFrom(PylonSerializers.TAG_CONTAINER)
@@ -493,10 +529,10 @@ object BlockStorage : Listener {
         }
     }
 
-    @JvmSynthetic
     /**
      * Turns the block into a [PhantomBlock] which represents a block which has failed for some reason
      */
+    @JvmSynthetic
     internal fun makePhantom(block: PylonBlock) = lockBlockWrite {
         PylonBlockSchema.schemaCache[block.block.position] = PhantomBlock.schema
         val phantomBlock = PhantomBlock(
@@ -510,6 +546,7 @@ object BlockStorage : Listener {
         blocksByKey[block.key]!!.add(phantomBlock)
         blocksByChunk[block.block.chunk.position]!!.remove(block)
         blocksByChunk[block.block.chunk.position]!!.add(phantomBlock)
+        BlockTextureEngine.remove(block)
     }
 
     @JvmSynthetic

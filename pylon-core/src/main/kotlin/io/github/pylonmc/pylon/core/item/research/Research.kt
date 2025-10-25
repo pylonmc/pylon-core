@@ -3,7 +3,9 @@ package io.github.pylonmc.pylon.core.item.research
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
@@ -17,6 +19,7 @@ import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.persistentData
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.delay
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
@@ -25,7 +28,6 @@ import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
-import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -93,22 +95,16 @@ data class Research(
             )
         }
 
-        if (effects) {
+        if (effects && player.researchEffects) {
             val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
             val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
             val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
             ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
 
-            fun Sound.playSoundLater(delay: Long, pitch: Float = 1f) {
+            for ((delay, sound) in PylonConfig.researchSounds) {
                 Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
-                    player.playSound(player.location, this, 1.5f, pitch)
+                    player.playSound(sound.create(), Sound.Emitter.self())
                 }, delay)
-            }
-
-            repeat(2) {
-                Sound.ENTITY_FIREWORK_ROCKET_BLAST.playSoundLater(3L * it)
-                Sound.ENTITY_PLAYER_LEVELUP.playSoundLater(6L * it, 0.9f)
-                Sound.ENTITY_FIREWORK_ROCKET_LAUNCH.playSoundLater(9L * it)
             }
         }
     }
@@ -144,16 +140,19 @@ data class Research(
     companion object : Listener {
         private val researchesKey = pylonKey("researches")
         private val researchPointsKey = pylonKey("research_points")
+        private val researchEffectsKey = pylonKey("research_effects")
         private val researchesType =
             PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
-        @get:JvmStatic
-        @set:JvmStatic
+        @JvmStatic
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
+        var Player.researchEffects: Boolean by persistentData(researchEffectsKey, PylonSerializers.BOOLEAN, true)
+
+        @JvmStatic
         fun getResearches(player: OfflinePlayer): Set<Research> {
-            var researches = player.persistentDataContainer.get(researchesKey, researchesType)
+            val researches = player.persistentDataContainer.get(researchesKey, researchesType)
             if (researches == null && player is Player) {
                 setResearches(player, setOf())
                 return setOf()
@@ -302,6 +301,25 @@ data class Research(
                     if (researches.isNotEmpty()) continue
                     player.discoverRecipe(recipe.key)
                 }
+            }
+        }
+
+
+        @JvmStatic
+        fun loadFromConfig(section: ConfigSection, key : NamespacedKey) : Research {
+
+            try {
+                val material = section.getOrThrow("material", ConfigAdapter.MATERIAL)
+                val name = section.get("name", ConfigAdapter.STRING) ?: "pylon.${key.namespace}.research.${key.key}"
+                val cost = section.get("cost", ConfigAdapter.LONG)
+                val unlocks = section.get("unlocks", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY)) ?: emptySet()
+
+                return Research(key, material, Component.translatable(name), cost, unlocks)
+            } catch (e: Exception) {
+                throw IllegalArgumentException(
+                    "Failed to load research '$key' from config",
+                    e
+                )
             }
         }
     }

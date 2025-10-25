@@ -78,11 +78,11 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         @Suppress("UnstableApiUsage")
         private fun checkName(schema: PylonItemSchema) {
             // Adventure is a perfect API with absolutely no problems whatsoever.
-            val name = schema.itemStack.getData(DataComponentTypes.ITEM_NAME) as? TranslatableComponent
+            val name = schema.getItemStack().getData(DataComponentTypes.ITEM_NAME) as? TranslatableComponent
 
             var isNameValid = true
             if (name == null || name.key() != ItemStackBuilder.nameKey(schema.key)) {
-                PylonCore.logger.warning("Item ${schema.key}'s name is not a translation key; check your item uses ItemStackBuilder.pylonItem(...)")
+                PylonCore.logger.warning("Item ${schema.key}'s name is not a translation key; check your item uses PylonItemStackBuilder.of(...)")
                 isNameValid = false
             }
 
@@ -107,6 +107,9 @@ open class PylonItem(val stack: ItemStack) : Keyed {
                 checkName(schema)
             }
             PylonRegistry.ITEMS.register(schema)
+
+            // pre-merge configs and check for constructor errors
+            fromStack(schema.getItemStack())
         }
 
         @JvmStatic
@@ -142,11 +145,11 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         /**
-         * Suppresses warnings about missing/incorrect translation keys for item names and lores
+         * Suppresses warnings about missing/incorrect translation keys for the item name and lore
          * for the given item key
          */
         @JvmStatic
-        fun supressNameWarnings(key: NamespacedKey) {
+        fun suppressNameWarnings(key: NamespacedKey) {
             nameWarningsSuppressed.add(key)
         }
 

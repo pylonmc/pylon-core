@@ -10,13 +10,11 @@ import java.nio.file.Path
  *
  * If the file changes on disk, you will need to create a new Config object to
  * get the latest version of the file.
+ *
+ * @property internalConfig The [YamlConfiguration] that this object wraps.
  */
 class Config(
     val file: File,
-
-    /**
-     * The [YamlConfiguration] that this object wraps.
-     */
     val internalConfig: YamlConfiguration = YamlConfiguration.loadConfiguration(file)
 ) : ConfigSection(internalConfig) {
 
