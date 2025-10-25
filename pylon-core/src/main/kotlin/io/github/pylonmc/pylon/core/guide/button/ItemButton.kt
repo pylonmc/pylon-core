@@ -163,7 +163,7 @@ class ItemButton @JvmOverloads constructor(
                             player.setItemOnCursor(clonedNotPylon)
                         } else {
                             // pylon item handling
-                            val clonedPylon = pylonItem.schema.itemStack
+                            val clonedPylon = pylonItem.schema.getItemStack()
                             clonedPylon.amount = 1
                             player.setItemOnCursor(clonedPylon)
                         }
