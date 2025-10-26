@@ -373,6 +373,7 @@ fun <T> persistentData(
  * at the [to] path, reads and returns the file at the [to] path.
  *
  * @param from The path to the config file. Must be a YAML file.
+ * @param warnMissing if set to true, the logger will warn if the resource in [from] is missing
  * @return The merged config
  */
 internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String, warnMissing: Boolean = true): Config {
