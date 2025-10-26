@@ -152,22 +152,24 @@ class ItemButton @JvmOverloads constructor(
                 }
 
                 ClickType.MIDDLE -> {
-                    if (player.hasPermission("pylon.command.give")) {
-                        val clonedUnkown = currentStack.clone()
-                        val pylonItem = PylonItem.fromStack(clonedUnkown)
+                    if (!player.hasPermission("pylon.command.give")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = stack.maxStackSize
+                    player.setItemOnCursor(stack)
+                }
 
-                        if (pylonItem == null) {
-                            // item is not pylon
-                            val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
-                            val clonedNotPylon = ItemStack(type, 1)
-                            player.setItemOnCursor(clonedNotPylon)
-                        } else {
-                            // pylon item handling
-                            val clonedPylon = pylonItem.schema.getItemStack()
-                            clonedPylon.amount = 1
-                            player.setItemOnCursor(clonedPylon)
-                        }
-                    }
+                ClickType.DROP -> {
+                    if (!player.hasPermission("pylon.command.give")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = 1
+                    player.dropItem(stack)
+                }
+
+                ClickType.CONTROL_DROP -> {
+                    if (!player.hasPermission("pylon.command.give")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = stack.maxStackSize
+                    player.dropItem(stack)
                 }
 
                 else -> {}
@@ -178,6 +180,24 @@ class ItemButton @JvmOverloads constructor(
     }
 
     companion object {
+        fun getCheatItemStack(currentStack: ItemStack, event: InventoryClickEvent): ItemStack {
+            val clonedUnkown = currentStack.clone()
+            val pylonItem = PylonItem.fromStack(clonedUnkown)
+
+            if (pylonItem == null) {
+                // item is not pylon
+                val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
+                val amount = if (event.isShiftClick) { type.maxStackSize } else { 1 }
+                val clonedNotPylon = ItemStack(type, amount)
+                return clonedNotPylon
+            } else {
+                // pylon item handling
+                val clonedPylon = pylonItem.schema.getItemStack()
+                clonedPylon.amount = if (event.isShiftClick) { clonedPylon.maxStackSize } else { 1 }
+                return clonedPylon
+            }
+        }
+
         @JvmStatic
         fun from(stack: ItemStack?): Item {
             if (stack == null) {
