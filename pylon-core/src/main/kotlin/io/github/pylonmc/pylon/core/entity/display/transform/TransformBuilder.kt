@@ -4,7 +4,7 @@ import org.bukkit.Location
 import org.joml.*
 
 @Suppress("unused")
-class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
+open class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
 
     constructor(): this(ArrayDeque())
 

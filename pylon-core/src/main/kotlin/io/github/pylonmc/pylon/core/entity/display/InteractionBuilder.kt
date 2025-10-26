@@ -4,7 +4,7 @@ import org.bukkit.Location
 import org.bukkit.entity.Interaction
 
 @Suppress("unused")
-class InteractionBuilder() {
+open class InteractionBuilder() {
 
     var width: Float? = null
     var height: Float? = null

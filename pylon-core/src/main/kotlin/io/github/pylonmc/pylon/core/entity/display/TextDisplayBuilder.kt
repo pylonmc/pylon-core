@@ -12,7 +12,7 @@ import org.joml.Matrix4f
 
 
 @Suppress("unused")
-class TextDisplayBuilder() {
+open class TextDisplayBuilder() {
 
     private var text: Component? = null
     private var transformation: Matrix4f? = null

@@ -8,7 +8,7 @@ import org.joml.Vector3f
  *
  * You must specify [from], [to], and [thickness]; other fields are optional.
  */
-class LineBuilder {
+open class LineBuilder {
 
     var translation: Vector3f = Vector3f()
     var from: Vector3f? = null

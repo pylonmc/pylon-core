@@ -7,7 +7,7 @@ import org.joml.Vector3f
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-class LookAlong(direction: Vector3f) : TransformComponent {
+open class LookAlong(direction: Vector3f) : TransformComponent {
 
     constructor(direction: Vector3d): this(Vector3f(direction))
 

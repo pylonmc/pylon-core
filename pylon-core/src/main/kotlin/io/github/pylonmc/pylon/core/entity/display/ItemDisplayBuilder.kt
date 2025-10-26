@@ -14,7 +14,7 @@ import org.joml.Matrix4f
 
 
 @Suppress("unused")
-class ItemDisplayBuilder() {
+open class ItemDisplayBuilder() {
 
     var itemStack: ItemStack? = null
     var transformation: Matrix4f? = null

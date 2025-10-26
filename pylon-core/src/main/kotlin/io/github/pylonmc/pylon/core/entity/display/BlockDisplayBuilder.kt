@@ -11,7 +11,7 @@ import org.joml.Matrix4f
 
 
 @Suppress("unused")
-class BlockDisplayBuilder() {
+open class BlockDisplayBuilder() {
 
     private var material: Material? = null
     private var blockData: BlockData? = null

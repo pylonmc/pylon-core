@@ -4,7 +4,7 @@ import org.joml.Matrix4f
 import org.joml.Vector3d
 import org.joml.Vector3f
 
-class Translation(private val translation: Vector3f) : TransformComponent {
+open class Translation(private val translation: Vector3f) : TransformComponent {
 
     constructor(translation: Vector3d): this(Vector3f(translation))
 
