@@ -116,7 +116,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             is Container.Item -> ItemButton.from(container.item) { item: ItemStack, player: Player ->
                 ItemStackBuilder.of(item).name(
                     GlobalTranslator.render(Component.translatable(
-                        "pylon.pyloncore.guide.ingredient",
+                        "pylon.pyloncore.guide.button.ingredient",
                         PylonArgument.of("item_ingredients_page_amount", container.item.amount),
                         PylonArgument.of("item_ingredients_page_item", container.item.getData(DataComponentTypes.ITEM_NAME)!!)),
                         player.locale())
