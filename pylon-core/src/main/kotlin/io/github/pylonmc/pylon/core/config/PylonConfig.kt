@@ -63,6 +63,9 @@ object PylonConfig {
     @JvmStatic
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
 
+    @JvmStatic
+    val inventoryTickerBaseRate = config.getOrThrow("inventory-ticker-base-rate", ConfigAdapter.LONG)
+
     object WailaConfig {
         private val config = Config(PylonCore, "config.yml")
 
