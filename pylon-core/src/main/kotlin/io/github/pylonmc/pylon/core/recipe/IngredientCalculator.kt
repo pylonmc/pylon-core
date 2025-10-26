@@ -10,7 +10,6 @@ import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import net.kyori.adventure.key.Key
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import kotlin.math.ceil
 
 /**
  * Used to recursively calculate raw material requirements and
@@ -86,7 +85,7 @@ object IngredientCalculator {
 
         val pylonFluid = PylonFluid.fromStack(stack)
         if (pylonFluid != null) {
-            // PylonItem has recipes
+            // PylonFluid has recipes
             val requiredAmount = stack.amount.toDouble()
             val baseCalculation = calculateFinal(FluidOrItem.of(pylonFluid, requiredAmount) as FluidOrItem.Fluid, depth + 1)
             val recipeOutputAmount = baseCalculation.outputAmount
@@ -264,42 +263,11 @@ data class IngredientCalculation(
      */
     fun flat(): IngredientCalculation {
         val flattedInput = mutableListOf<Container>()
-        for (component in inputs) {
-            var flag = true
-            for (exist in flattedInput) {
-                if (exist.isPylonSimilar(component)) {
-                    if (exist is Container.Item && component is Container.Item) {
-                        exist.item.amount += component.item.amount
-                        flag = false
-                    } else if (exist is Container.Fluid && component is Container.Fluid) {
-                        exist.amountMillibuckets += component.amountMillibuckets
-                        flag = false
-                    }
-                }
-            }
-            if (flag) {
-                flattedInput += component
-            }
-        }
+        flat(inputs, flattedInput)
 
         val flattedIntermediates = mutableListOf<Container>()
-        for (component in intermediates) {
-            var flag = true
-            for (exist in flattedIntermediates) {
-                if (exist.isPylonSimilar(component)) {
-                    if (exist is Container.Item && component is Container.Item) {
-                        exist.item.amount += component.item.amount
-                        flag = false
-                    } else if (exist is Container.Fluid && component is Container.Fluid) {
-                        exist.amountMillibuckets += component.amountMillibuckets
-                        flag = false
-                    }
-                }
-            }
-            if (flag) {
-                flattedIntermediates += component
-            }
-        }
+        flat(intermediates, flattedIntermediates)
+
         return IngredientCalculation(
             flattedInput.toMutableList(),
             flattedIntermediates.toMutableList(),
@@ -421,7 +389,6 @@ sealed class Container {
             return Item(item.asQuantity(amount))
         }
 
-        @Suppress("deprecation")
         fun of(choice: RecipeChoice): Container {
             return Item(choice.itemStack.clone())
         }
@@ -448,17 +415,7 @@ private fun findRecipeFor(item: PylonItem): PylonRecipe? {
         .toList()
 
     if (singleOutputRecipes.isNotEmpty()) {
-        // try to find a recipe, which only needs to input fluid
-        val recipe = singleOutputRecipes.firstOrNull {
-            it.inputs.all { input ->
-                when (input) {
-                    is RecipeInput.Fluid -> true
-                    is RecipeInput.Item -> false
-                }
-            }
-        }
-
-        if (recipe != null) return recipe
+        findFluidInputOnlyRecipe(singleOutputRecipes)?.let { return it }
         fallback = singleOutputRecipes.first()
     }
 
@@ -471,16 +428,7 @@ private fun findRecipeFor(item: PylonItem): PylonRecipe? {
         .toList()
 
     if (multiOutputRecipes.isNotEmpty()) {
-        // try to find a recipe, which only needs to input fluid
-        val recipe = multiOutputRecipes.firstOrNull {
-            it.inputs.all { input ->
-                when (input) {
-                    is RecipeInput.Fluid -> true
-                    is RecipeInput.Item -> false
-                }
-            }
-        }
-        if (recipe != null) return recipe
+        findFluidInputOnlyRecipe(multiOutputRecipes)?.let { return it }
         if (fallback == null) {
             fallback = multiOutputRecipes.first()
         }
@@ -518,17 +466,7 @@ private fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
         .toList()
 
     if (singleOutputRecipes.isNotEmpty()) {
-        // try to find a recipe, which only needs to input fluid
-        val recipe = singleOutputRecipes.firstOrNull {
-            it.inputs.all { input ->
-                when (input) {
-                    is RecipeInput.Fluid -> true
-                    is RecipeInput.Item -> false
-                }
-            }
-        }
-
-        if (recipe != null) return recipe
+        findFluidInputOnlyRecipe(singleOutputRecipes)?.let { return it }
         if (fallback == null) fallback = singleOutputRecipes.first()
     }
 
@@ -541,20 +479,41 @@ private fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
         .toList()
 
     if (multiOutputRecipes.isNotEmpty()) {
-        // try to find a recipe, which only needs to input fluid
-        val recipe = multiOutputRecipes.firstOrNull {
-            it.inputs.all { input ->
-                when (input) {
-                    is RecipeInput.Fluid -> true
-                    is RecipeInput.Item -> false
-                }
-            }
-        }
-        if (recipe != null) return recipe
+        findFluidInputOnlyRecipe(multiOutputRecipes)?.let { return it }
         if (fallback == null) {
             fallback = multiOutputRecipes.first()
         }
     }
 
     return fallback
+}
+
+private fun findFluidInputOnlyRecipe(list: List<PylonRecipe>): PylonRecipe? =
+    list.firstOrNull {
+        it.inputs.all { input ->
+            when (input) {
+                is RecipeInput.Fluid -> true
+                is RecipeInput.Item -> false
+            }
+        }
+    }
+
+private fun flat(from: MutableList<Container>, to: MutableList<Container>) {
+    for (component in from) {
+        var isNewObject = true
+        for (exist in to) {
+            if (exist.isPylonSimilar(component)) {
+                if (exist is Container.Item && component is Container.Item) {
+                    exist.item.amount += component.item.amount
+                    isNewObject = false
+                } else if (exist is Container.Fluid && component is Container.Fluid) {
+                    exist.amountMillibuckets += component.amountMillibuckets
+                    isNewObject = false
+                }
+            }
+        }
+        if (isNewObject) {
+            to += component
+        }
+    }
 }
