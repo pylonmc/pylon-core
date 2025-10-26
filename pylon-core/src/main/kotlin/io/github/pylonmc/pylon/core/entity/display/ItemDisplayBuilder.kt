@@ -16,14 +16,14 @@ import org.joml.Matrix4f
 @Suppress("unused")
 open class ItemDisplayBuilder() {
 
-    var itemStack: ItemStack? = null
-    var transformation: Matrix4f? = null
-    var brightness: Brightness? = null
-    var glowColor: Color? = null
-    var billboard: Billboard? = null
-    var viewRange: Float? = null
-    var interpolationDelay: Int? = null
-    var interpolationDuration: Int? = null
+    protected var itemStack: ItemStack? = null
+    protected var transformation: Matrix4f? = null
+    protected var brightness: Brightness? = null
+    protected var glowColor: Color? = null
+    protected var billboard: Billboard? = null
+    protected var viewRange: Float? = null
+    protected var interpolationDelay: Int? = null
+    protected var interpolationDuration: Int? = null
 
     constructor(other: ItemDisplayBuilder): this() {
         this.itemStack = other.itemStack
@@ -49,14 +49,14 @@ open class ItemDisplayBuilder() {
     fun interpolationDelay(interpolationDelay: Int): ItemDisplayBuilder = apply { this.interpolationDelay = interpolationDelay }
     fun interpolationDuration(interpolationDuration: Int): ItemDisplayBuilder = apply { this.interpolationDuration = interpolationDuration }
 
-    fun build(location: Location): ItemDisplay {
+    open fun build(location: Location): ItemDisplay {
         val finalLocation = location.clone()
         finalLocation.yaw = 0.0F
         finalLocation.pitch = 0.0F
         return finalLocation.getWorld().spawn(finalLocation, ItemDisplay::class.java, this::update)
     }
 
-    fun update(display: Display) {
+    open fun update(display: Display) {
         if (display !is ItemDisplay) {
             throw IllegalArgumentException("Must provide an ItemDisplay")
         }

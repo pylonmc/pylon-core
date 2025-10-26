@@ -6,8 +6,8 @@ import org.bukkit.entity.Interaction
 @Suppress("unused")
 open class InteractionBuilder() {
 
-    var width: Float? = null
-    var height: Float? = null
+    protected var width: Float? = null
+    protected var height: Float? = null
 
     constructor(other: InteractionBuilder): this() {
         this.width = other.width
@@ -17,7 +17,7 @@ open class InteractionBuilder() {
     fun width(width: Float): InteractionBuilder = apply { this.width = width }
     fun height(height: Float): InteractionBuilder = apply { this.height = height }
 
-    fun build(location: Location): Interaction {
+    open fun build(location: Location): Interaction {
         val finalLocation = location.clone()
         // Account for Mojang deciding to center the entity on Y but not X and Z for some reason
         if (height != null) {
@@ -26,7 +26,7 @@ open class InteractionBuilder() {
         return location.getWorld().spawn(finalLocation, Interaction::class.java, this::update)
     }
 
-    fun update(interaction: Interaction) {
+    open fun update(interaction: Interaction) {
         if (width != null) {
             interaction.interactionWidth = width!!
         }

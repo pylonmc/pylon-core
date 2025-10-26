@@ -4,7 +4,7 @@ import org.joml.Matrix4f
 import org.joml.Vector3d
 import org.joml.Vector3f
 
-open class Scale(private val scale: Vector3f) : TransformComponent {
+open class Scale(protected val scale: Vector3f) : TransformComponent {
 
     constructor(scale: Vector3d): this(Vector3f(scale))
 
