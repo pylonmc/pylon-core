@@ -461,7 +461,7 @@ private fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
     // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
     val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
         .flatMap { it.recipes }
-        .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size > 1 }
+        .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size == 1 }
         .sortedBy { it.key }
         .toList()
 
