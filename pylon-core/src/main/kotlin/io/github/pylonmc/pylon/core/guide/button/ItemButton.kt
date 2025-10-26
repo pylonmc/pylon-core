@@ -17,6 +17,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
+import org.bukkit.Registry
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -152,7 +153,20 @@ class ItemButton @JvmOverloads constructor(
 
                 ClickType.MIDDLE -> {
                     if (player.hasPermission("pylon.command.give")) {
-                        player.setItemOnCursor(currentStack)
+                        val clonedUnkown = currentStack.clone()
+                        val pylonItem = PylonItem.fromStack(clonedUnkown)
+
+                        if (pylonItem == null) {
+                            // item is not pylon
+                            val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
+                            val clonedNotPylon = ItemStack(type, 1)
+                            player.setItemOnCursor(clonedNotPylon)
+                        } else {
+                            // pylon item handling
+                            val clonedPylon = pylonItem.schema.getItemStack()
+                            clonedPylon.amount = 1
+                            player.setItemOnCursor(clonedPylon)
+                        }
                     }
                 }
 
