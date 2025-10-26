@@ -75,14 +75,26 @@ object IngredientCalculator {
         checkRecursiveDepth(depth)
 
         val pylonItem = PylonItem.fromStack(stack)
-        return pylonItem?.let {
+        if (pylonItem != null) {
             // PylonItem has recipes
             val requiredAmount = stack.amount.toDouble()
-            val baseCalculation = calculateBase(it, depth + 1)
+            val baseCalculation = calculateBase(pylonItem, depth + 1)
             val recipeOutputAmount = baseCalculation.outputAmount
             val scaleMultiplier = requiredAmount / recipeOutputAmount
-            baseCalculation.scaleBy(scaleMultiplier).copy(outputAmount = requiredAmount)
-        } ?: IngredientCalculation.asIngredient(stack) // Not PylonItem, no recipes for vanilla items so far.
+            return baseCalculation.scaleBy(scaleMultiplier).copy(outputAmount = requiredAmount)
+        }
+
+        val pylonFluid = PylonFluid.fromStack(stack)
+        if (pylonFluid != null) {
+            // PylonItem has recipes
+            val requiredAmount = stack.amount.toDouble()
+            val baseCalculation = calculateFinal(FluidOrItem.of(pylonFluid, requiredAmount) as FluidOrItem.Fluid, depth + 1)
+            val recipeOutputAmount = baseCalculation.outputAmount
+            val scaleMultiplier = requiredAmount / recipeOutputAmount
+            return baseCalculation.scaleBy(scaleMultiplier).copy(outputAmount = requiredAmount)
+        }
+
+        return IngredientCalculation.asIngredient(stack) // Not PylonItem, no recipes for vanilla items so far.
     }
 
     /**

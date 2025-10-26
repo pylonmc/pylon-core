@@ -66,7 +66,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             }
             .addModifier {
                 for (i in 1..8) {
-                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(9 * page + i - 1)))
+                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(8 * page + i - 1)))
                 }
             }
             .build()
@@ -90,7 +90,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
     override fun getGui(player: Player): Gui {
         val pages = mutableListOf<Gui>()
         val calculation = IngredientCalculator.calculateFinal(stack).flat()
-        val maxPage = max(calculation.inputs.size / 27, calculation.intermediates.size / 9)
+        val maxPage = max(calculation.inputs.size / 27, calculation.intermediates.size / 8)
         for (i in 0..maxPage) {
             pages += getSubPage(player, stack, calculation, i, maxPage)
         }
