@@ -373,9 +373,10 @@ fun <T> persistentData(
  * at the [to] path, reads and returns the file at the [to] path.
  *
  * @param from The path to the config file. Must be a YAML file.
+ * @param warnMissing if set to true, the logger will warn if the resource in [from] is missing
  * @return The merged config
  */
-internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Config {
+internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String, warnMissing: Boolean = true): Config {
     require(from.endsWith(".yml")) { "Config file must be a YAML file" }
     require(to.endsWith(".yml")) { "Config file must be a YAML file" }
     val cached = globalConfigCache[from to to]
@@ -390,7 +391,7 @@ internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Con
     val config = Config(globalConfig)
     val resource = addon.javaPlugin.getResource(from)
     if (resource == null) {
-        PylonCore.logger.warning("Resource not found: $from")
+        if (warnMissing) PylonCore.logger.warning("Resource not found: $from")
     } else {
         val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
         config.internalConfig.setDefaults(newConfig)
