@@ -250,7 +250,7 @@ data class IngredientCalculation(
 
         val scaledInputs = inputs.map { scaleComponent(it, multiplier) }
         val scaledIntermediates = intermediates.map { scaleComponent(it, multiplier) }
-        val scaledOutputAmount = outputAmount * multiplier  // 不使用ceil函数向上取整
+        val scaledOutputAmount = outputAmount * multiplier
 
         return IngredientCalculation(
             scaledInputs.toMutableList(),
@@ -316,10 +316,10 @@ data class IngredientCalculation(
     private fun scaleComponent(component: Container, multiplier: Double): Container {
         return when (component) {
             is Container.Fluid ->
-                Container.of(component.fluid, component.amountMillibuckets * multiplier)  // 不使用ceil函数向上取整
+                Container.of(component.fluid, component.amountMillibuckets * multiplier)
 
             is Container.Item -> {
-                val newAmount = component.item.amount * multiplier  // 不使用ceil函数向上取整
+                val newAmount = component.item.amount * multiplier
                 val newItem = component.item.clone().apply { amount = newAmount.toInt() }
                 Container.of(newItem)
             }
