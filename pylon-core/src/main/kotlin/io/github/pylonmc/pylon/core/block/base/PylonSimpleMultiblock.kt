@@ -144,6 +144,27 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         }
     }
 
+    /**
+     * Represents a vanilla component of a multiblock, which can have one or more blockdatas.
+     *
+     * If multiple blockdatas are specified, the ghost block will automatically cycle through all
+     * the given blockdatas in order.
+     *
+     * This should be used only when you want to impose some constraints about the blockdata, for instance:
+     *
+     * <pre>{@code
+     * BlockData data = Material.CAMPFIRE.createBlockData("[lit=true]") // requires the campfire to be lit
+     * new VanillaBlockdataMultiblockComponent(data);
+     *
+     * // or if you prefer
+     * Campfire fire = (Campfire) Material.CAMPFIRE.createBlockData();
+     * fire.setLit(true);
+     * new VanillaBlockdataMultiblockComponent(fire);
+     * }
+     * </pre>
+     *
+     */
+    @JvmRecord
     data class VanillaBlockdataMultiblockComponent(val blockDatas: List<BlockData>) : MultiblockComponent {
 
         constructor(first: BlockData, vararg materials: BlockData) : this(listOf(first) + materials)
