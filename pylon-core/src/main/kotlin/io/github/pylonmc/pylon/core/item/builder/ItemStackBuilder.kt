@@ -282,7 +282,6 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         miningDurabilityDamage: Int
     ) = apply {
         set(DataComponentTypes.TOOL, Tool.tool()
-            .defaultMiningSpeed(miningSpeed)
             .damagePerBlock(miningDurabilityDamage)
             .addRule(Tool.rule(blocks, miningSpeed, TriState.TRUE)))
     }
