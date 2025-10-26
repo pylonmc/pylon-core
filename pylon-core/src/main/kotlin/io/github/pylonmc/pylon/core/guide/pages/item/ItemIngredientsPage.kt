@@ -66,7 +66,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             }
             .addModifier {
                 for (i in 1..8) {
-                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(9 * page + i)))
+                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(9 * page + i - 1)))
                 }
             }
             .build()
@@ -118,7 +118,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
                     GlobalTranslator.render(Component.translatable(
                         "pylon.pyloncore.guide.button.ingredient",
                         PylonArgument.of("item_ingredients_page_amount", container.item.amount),
-                        PylonArgument.of("item_ingredients_page_item", container.item.getData(DataComponentTypes.ITEM_NAME)!!)),
+                        PylonArgument.of("item_ingredients_page_item", getItemName(container.item))),
                         player.locale())
                 ).build()
             }
@@ -140,4 +140,10 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             .name(Component.translatable("pylon.pyloncore.guide.button.main_product.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.main_product.lore"))
     )
+
+    private fun getItemName(item: ItemStack): Component {
+        val name = item.getData(DataComponentTypes.ITEM_NAME)
+        if (name != null) return name
+        return Component.translatable(item.translationKey())
+    }
 }

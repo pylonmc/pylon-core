@@ -8,7 +8,7 @@ import java.util.UUID
 /**
  * A connection in a fluid network, like a machine's output or the end of a pipe.
  *
- * The VirtualFluidnPoint class is stored in memory for every loaded point. VirtualFluidPoints
+ * The VirtualFluidPoint class is stored in memory for every loaded point. VirtualFluidPoints
  * are persisted when unloaded, but do not store the segment UUID - this is decided at runtime.
  */
 data class VirtualFluidPoint(

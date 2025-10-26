@@ -22,7 +22,7 @@ import kotlin.math.ceil
  * How it works:
  *
  *                    Vanilla items (Not support yet)
- *  [calculateFinal] ----------------> [IngredientCalculation.asIngredient]
+ *  [calculateFinal] --------------------------------------> [IngredientCalculation.asIngredient]
  *        |
  *        | PylonItems/PylonFluid
  *        ↓
@@ -41,12 +41,15 @@ import kotlin.math.ceil
  *        |     outputAmount  = 3                        ╰-- [Merge ingredients and return value]
  *        | }
  *        | ```
+ *        |
  *        | After scaling (×4), it will be:
+ *        | ```
  *        | baseCalculation = {
  *        |     inputs        = [Ax4, Bx52, Cx76]
  *        |     intermediates = [Mx64, Nx36]
  *        |     outputAmount  = 12
  *        | }
+ *        | ```
  *        |
  *        ↓
  *  [scaling and return value]
@@ -77,7 +80,7 @@ object IngredientCalculator {
             val requiredAmount = stack.amount.toDouble()
             val baseCalculation = calculateBase(it, depth + 1)
             val recipeOutputAmount = baseCalculation.outputAmount
-            val scaleMultiplier = ceil(requiredAmount / recipeOutputAmount)
+            val scaleMultiplier = requiredAmount / recipeOutputAmount
             baseCalculation.scaleBy(scaleMultiplier).copy(outputAmount = requiredAmount)
         } ?: IngredientCalculation.asIngredient(stack) // Not PylonItem, no recipes for vanilla items so far.
     }
@@ -107,7 +110,7 @@ object IngredientCalculator {
             )
 
         val additionalIntermediates = recipe.results.filter { it != targetFluid }
-        val scaleMultiplier = ceil(fluid.amountMillibuckets / targetFluid.amountMillibuckets)
+        val scaleMultiplier = fluid.amountMillibuckets / targetFluid.amountMillibuckets
 
         return IngredientCalculation(
             inputs = Container.of(recipe.inputs.mapTo(mutableListOf()) {
@@ -235,7 +238,7 @@ data class IngredientCalculation(
 
         val scaledInputs = inputs.map { scaleComponent(it, multiplier) }
         val scaledIntermediates = intermediates.map { scaleComponent(it, multiplier) }
-        val scaledOutputAmount = ceil(outputAmount * multiplier)
+        val scaledOutputAmount = outputAmount * multiplier  // 不使用ceil函数向上取整
 
         return IngredientCalculation(
             scaledInputs.toMutableList(),
@@ -301,10 +304,10 @@ data class IngredientCalculation(
     private fun scaleComponent(component: Container, multiplier: Double): Container {
         return when (component) {
             is Container.Fluid ->
-                Container.of(component.fluid, component.amountMillibuckets * multiplier)
+                Container.of(component.fluid, component.amountMillibuckets * multiplier)  // 不使用ceil函数向上取整
 
             is Container.Item -> {
-                val newAmount = ceil(component.item.amount * multiplier)
+                val newAmount = component.item.amount * multiplier  // 不使用ceil函数向上取整
                 val newItem = component.item.clone().apply { amount = newAmount.toInt() }
                 Container.of(newItem)
             }
@@ -425,52 +428,121 @@ private fun findRecipeFor(item: PylonItem): PylonRecipe? {
 
     // 2. if there's a recipe which produces *only* that item, use that
     // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
+    var fallback: PylonRecipe? = null
     val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
         .flatMap { it.recipes }
         .filter { recipe -> recipe.isOutput(item.stack) && recipe.results.size == 1 }
         .sortedBy { it.key }
         .toList()
 
-    if (singleOutputRecipes.isNotEmpty()) return singleOutputRecipes.first()
+    if (singleOutputRecipes.isNotEmpty()) {
+        // try to find a recipe, which only needs to input fluid
+        val recipe = singleOutputRecipes.firstOrNull {
+            it.inputs.all { input ->
+                when (input) {
+                    is RecipeInput.Fluid -> true
+                    is RecipeInput.Item -> false
+                }
+            }
+        }
+
+        if (recipe != null) return recipe
+        fallback = singleOutputRecipes.first()
+    }
 
     // 4. if there's a recipe which produces the item *alongside* other things, use that
     // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
     val multiOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
         .flatMap { it.recipes }
-        .filter { recipe -> recipe.isOutput(item.stack) }
+        .filter { recipe -> recipe.isOutput(item.stack) && recipe.results.size > 1 }
         .sortedBy { it.key }
         .toList()
 
-    if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
+    if (multiOutputRecipes.isNotEmpty()) {
+        // try to find a recipe, which only needs to input fluid
+        val recipe = multiOutputRecipes.firstOrNull {
+            it.inputs.all { input ->
+                when (input) {
+                    is RecipeInput.Fluid -> true
+                    is RecipeInput.Item -> false
+                }
+            }
+        }
+        if (recipe != null) return recipe
+        if (fallback == null) {
+            fallback = multiOutputRecipes.first()
+        }
+    }
 
-    return null
+    return fallback
 }
 
 private fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
+    var fallback: PylonRecipe? = null
     // 1. if there's a recipe with the same key as the item, use that
-    PylonRegistry.RECIPE_TYPES
+    val recipe = PylonRegistry.RECIPE_TYPES
         .map { it.getRecipe(fluid.key) }
-        .find { it != null }?.let { return it }
+        .find { it != null }
+
+    if (recipe != null) {
+        if (recipe.inputs.all { input ->
+            when (input) {
+                is RecipeInput.Fluid -> true
+                is RecipeInput.Item -> false
+            }
+        }) {
+            return recipe
+        }
+
+        fallback = recipe
+    }
 
     // 2. if there's a recipe which produces *only* that item, use that
     // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
     val singleOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
         .flatMap { it.recipes }
-        .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size == 1 }
+        .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size > 1 }
         .sortedBy { it.key }
         .toList()
 
-    if (singleOutputRecipes.isNotEmpty()) return singleOutputRecipes.first()
+    if (singleOutputRecipes.isNotEmpty()) {
+        // try to find a recipe, which only needs to input fluid
+        val recipe = singleOutputRecipes.firstOrNull {
+            it.inputs.all { input ->
+                when (input) {
+                    is RecipeInput.Fluid -> true
+                    is RecipeInput.Item -> false
+                }
+            }
+        }
+
+        if (recipe != null) return recipe
+        if (fallback == null) fallback = singleOutputRecipes.first()
+    }
 
     // 4. if there's a recipe which produces the item *alongside* other things, use that
     // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
     val multiOutputRecipes = PylonRegistry.RECIPE_TYPES.asSequence()
         .flatMap { it.recipes }
-        .filter { recipe -> recipe.isOutput(fluid) }
-        .sortedWith { a: PylonRecipe, b: PylonRecipe -> a.key.compareTo(b.key) }
+        .filter { recipe -> recipe.isOutput(fluid) && recipe.results.size > 1 }
+        .sortedBy { it.key }
         .toList()
 
-    if (multiOutputRecipes.isNotEmpty()) return multiOutputRecipes.first()
+    if (multiOutputRecipes.isNotEmpty()) {
+        // try to find a recipe, which only needs to input fluid
+        val recipe = multiOutputRecipes.firstOrNull {
+            it.inputs.all { input ->
+                when (input) {
+                    is RecipeInput.Fluid -> true
+                    is RecipeInput.Item -> false
+                }
+            }
+        }
+        if (recipe != null) return recipe
+        if (fallback == null) {
+            fallback = multiOutputRecipes.first()
+        }
+    }
 
-    return null
+    return fallback
 }
