@@ -36,6 +36,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.event.world.StructureGrowEvent
 import org.bukkit.inventory.BlockInventoryHolder
 import java.util.*
 
@@ -188,6 +189,16 @@ internal object BlockListener : Listener {
     private fun disallowMovementByPistons(event: BlockPistonRetractEvent) {
         for (block in event.blocks) {
             if (BlockStorage.isPylonBlock(block)) {
+                event.isCancelled = true
+                return
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private fun disallowStructureGrow(event: StructureGrowEvent) {
+        for (state in event.blocks) {
+            if (BlockStorage.isPylonBlock(state.block)) {
                 event.isCancelled = true
                 return
             }
