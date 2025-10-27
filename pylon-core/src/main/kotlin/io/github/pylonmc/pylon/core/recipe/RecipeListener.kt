@@ -6,6 +6,8 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.recipe.vanilla.CookingRecipeWrapper
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
+import io.github.pylonmc.pylon.core.util.isPylonSimilar
+import io.papermc.paper.datacomponent.DataComponentTypes
 import org.bukkit.Keyed
 import org.bukkit.block.Crafter
 import org.bukkit.block.Furnace
@@ -16,8 +18,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockCookEvent
 import org.bukkit.event.block.CrafterCraftEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
+import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
+import org.bukkit.inventory.ItemStack
 
 internal object PylonRecipeListener : Listener {
 
@@ -33,6 +37,38 @@ internal object PylonRecipeListener : Listener {
 
         // Prevent the erroneous crafting of vanilla items with Pylon ingredients
         if (hasPylonItems && isNotPylonCraftingRecipe) {
+            inventory.result = null
+        }
+
+        // Allow merging Pylon tools/weapons/armour in crafting grid unless marked with PylonUnmergeable
+        if (hasPylonItems && e.isRepair) {
+            var firstItem: ItemStack? = null
+            var secondItem: ItemStack? = null
+            for (item in e.inventory.matrix) {
+                if (item != null && !item.isEmpty)  {
+                    if (firstItem == null) {
+                        firstItem = item
+                    } else if (secondItem == null) {
+                        secondItem = item
+                    } else {
+                        error("How the hell is it possible that there are more than two items in an item repair recipe")
+                    }
+                }
+            }
+            check(firstItem != null)
+            check(secondItem != null)
+            if (firstItem.isPylonSimilar(secondItem)) {
+                val pylonItem = PylonItem.fromStack(firstItem)!!
+                if (pylonItem !is PylonUnmergeable) {
+                    val result = pylonItem.schema.getItemStack()
+                    val resultDamage = inventory.result!!.getData(DataComponentTypes.DAMAGE)!!
+                    result.setData(DataComponentTypes.DAMAGE, resultDamage)
+                    inventory.result = result
+                }
+            } else {
+                inventory.result = null
+            }
+        } else {
             inventory.result = null
         }
 
@@ -118,6 +154,21 @@ internal object PylonRecipeListener : Listener {
         }
         if (anyViewerDoesNotHaveResearch) {
             inv.result = null
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onAnvilSlotChanged(e: PrepareAnvilEvent) {
+        val inventory = e.inventory
+        val firstItem = inventory.firstItem
+        val secondItem = inventory.secondItem
+        val firstPylonItem = PylonItem.fromStack(firstItem)
+        val secondPylonItem = PylonItem.fromStack(secondItem)
+
+        // Disallow mixing Pylon and non-Pylon items
+        if (firstPylonItem != null || secondPylonItem != null) {
+            e.result = null
+            return
         }
     }
 }
