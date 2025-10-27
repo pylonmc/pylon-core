@@ -95,6 +95,7 @@ class ItemButton @JvmOverloads constructor(
                     .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
 
                 if (item.research != null) {
+                    builder.lore("")
                     builder.lore(Component.translatable(
                             "pylon.pyloncore.guide.button.item.not-researched-with-name",
                             PylonArgument.of("research_name", item.research!!.name)
