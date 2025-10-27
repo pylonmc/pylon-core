@@ -101,6 +101,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         }
 
         saveDefaultConfig()
+        // Add any keys that are missing from global config - saveDefaultConfig will not do anything if config already present
+        mergeGlobalConfig(PylonCore, "config.yml", "config.yml")
 
         Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
         Bukkit.getPluginManager().registerEvents(PylonAddon, this)
