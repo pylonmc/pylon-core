@@ -154,7 +154,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         }
 
         if (PylonConfig.researchesEnabled) {
-            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchEffects)
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchConfetti)
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchSounds)
         }
 
         Bukkit.getScheduler().runTaskTimer(

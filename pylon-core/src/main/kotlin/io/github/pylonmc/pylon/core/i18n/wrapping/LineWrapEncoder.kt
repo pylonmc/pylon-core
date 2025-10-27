@@ -24,7 +24,7 @@ class LineWrapEncoder private constructor() {
                 comp = Component.text(comp.fallback()!!).style(comp.style())
             } else {
                 val content = PlainTextComponentSerializer.plainText().serialize(comp)
-                comp = Component.text("{ERROR ${comp.javaClass.simpleName} $content}")
+                comp = Component.text("{ERROR: Missing translation key $content (in ${comp.javaClass.simpleName})}")
                     .color(NamedTextColor.RED)
             }
         }
