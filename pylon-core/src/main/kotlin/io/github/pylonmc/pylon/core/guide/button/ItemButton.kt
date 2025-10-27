@@ -16,6 +16,7 @@ import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.papermc.paper.datacomponent.DataComponentTypes
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Registry
 import org.bukkit.entity.Player
@@ -152,24 +153,31 @@ class ItemButton @JvmOverloads constructor(
                 }
 
                 ClickType.MIDDLE -> {
-                    if (!player.hasPermission("pylon.command.give")) return
+                    if (!player.hasPermission("pylon.guide.cheat")) return
                     val stack = getCheatItemStack(currentStack, event)
                     stack.amount = stack.maxStackSize
                     player.setItemOnCursor(stack)
                 }
 
                 ClickType.DROP -> {
-                    if (!player.hasPermission("pylon.command.give")) return
+                    if (!player.hasPermission("pylon.guide.cheat")) return
                     val stack = getCheatItemStack(currentStack, event)
                     stack.amount = 1
                     player.dropItem(stack)
                 }
 
                 ClickType.CONTROL_DROP -> {
-                    if (!player.hasPermission("pylon.command.give")) return
+                    if (!player.hasPermission("pylon.guide.cheat")) return
                     val stack = getCheatItemStack(currentStack, event)
                     stack.amount = stack.maxStackSize
                     player.dropItem(stack)
+                }
+
+                ClickType.SWAP_OFFHAND -> {
+                    if (!player.hasPermission("pylon.guide.cheat")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = 1
+                    player.give(stack)
                 }
 
                 else -> {}
