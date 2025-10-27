@@ -311,6 +311,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     fun durability(durability: Int, damage: Int) = apply {
         set(DataComponentTypes.MAX_DAMAGE, durability)
         set(DataComponentTypes.DAMAGE, damage)
+        set(DataComponentTypes.MAX_STACK_SIZE, 1)
     }
 
     fun useCooldown(cooldownTicks: Int, cooldownGroup: Key?)
