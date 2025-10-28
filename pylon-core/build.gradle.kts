@@ -31,16 +31,16 @@ dependencies {
     paperLibraryApi("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
     paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
-    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
 
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
-    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.46")
+    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.47")
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
-    paperLibrary("xyz.xenondevs.invui:inventory-access-r24:1.46:remapped-mojang")
+    paperLibrary("xyz.xenondevs.invui:inventory-access-r25:1.47:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.46")
     api("com.github.Tofaa2.EntityLib:spigot:2.4.11")
-    implementation("com.github.retrooper:packetevents-spigot:2.9.5")
+    implementation("com.github.retrooper:packetevents-spigot:2.10.0")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.2.2")
