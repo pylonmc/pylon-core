@@ -47,7 +47,7 @@ open class ProgressItem @JvmOverloads constructor(
         }
 
     /**
-     * The time at which the progress should be 0 (if [countDown] is false) or 100 (if [countDown] is true)
+     * The total time of whatever process this item is representing
      */
     var totalTime: Duration? = null
         set(value) {
