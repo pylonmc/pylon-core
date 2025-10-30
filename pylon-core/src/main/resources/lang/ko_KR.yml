@@ -1,0 +1,366 @@
+addon: Core
+item:
+  error_item:
+    name: <red>에러
+    lore: |-
+      <red>로드가 실패된 블록에서 떨어진 아이템입니다.
+      <red>오류가 난 블록:</red> <yellow>%block%
+  guide:
+    name: <white>파일런 가이드
+    lore: <arrow> <insn>오른쪽 클릭</insn>으로 열기
+  phantom_block:
+    name: <red>팬텀 블록 (%block%)
+  debug_waxed_weathered_cut_copper_stairs:
+    name: <red>디버그 밀랍칠한 녹슨 깎인 구리 계단
+    lore: |-
+      <arrow> <insn>쉬프트 오른쪽 클릭</insn>으로 블록/엔티티 제거
+      <arrow> <insn>오른쪽 클릭</insn>으로 블록/엔티티의 파일런 데이터 확인
+  fluid_pipe_connector:
+    waila: '%pipe%'
+  fluid_pipe_marker:
+    waila: '%pipe%'
+fluid:
+  temperature:
+    display-text: <arrow> <attr>온도:</attr> %temperature%
+    cold: <#1cb3d8>차가움
+    normal: <#c9d81c>보통
+    hot: <#d81c1c>뜨거움
+message:
+  debug:
+    not_a_block: <red>파일런 블록이 아닙니다
+    not_an_entity: <red>파일런 엔티티가 아닙니다
+    data: '<gold>데이터: <white>%data%'
+    deleted_data: <white>%type% <gray>(%location%) <red>제거됨
+    key:
+      block: '<gold>파일런 블록 키: <white>%key%'
+      entity: '<gold>파일런 엔티티 키: <white>%key%'
+    ticking:
+      ticking: '<gold>Ticking: <green>Yes'
+      errored: '<gold>Ticking: <red>Ticker has errored'
+      not_ticking: '<gold>Ticking: <red>No'
+  disabled:
+    message: <white>%item%<red>이(가) 비활성화되었습니다
+    lore: <arrow> <#ff0000>비활성화됨 - 조합은 가능하지만 사용할 수 없습니다
+  research:
+    unknown: <red>%item%을(를) 사용하는 방법을 알 수 없습니다. %research%에 대해 연구해 보세요.
+    unlocked: <green>%research%에 대한 연구를 마쳤습니다
+    click_to_research: <green>클릭해서 연구하기 (%points% 포인트)
+  command:
+    error:
+      no_permission: <red>이 명령어를 사용할 권한이 없습니다
+      must_be_player: <red>플레이어만 이 명령어를 사용할 수 있습니다
+    key:
+      hover: 클릭해서 클립보드에 복사
+      no_item: <red>파일론 아이템을 들고 있지 않습니다
+    waila:
+      활성화: <green>WAILA 활성화
+      disabled: <red>WAILA 비활성화
+    gametest:
+      started: %location% 에서 %test% 테스트를 실행합니다
+      failed: '<red>%test% 테스트 실패: %reason%'
+      success: <green>%test% 테스트 성공
+    research:
+      added: %player%에게 연구 %research%을(를) 추가했습니다
+      removed: %player%에게 연구 %research%을(를) 제거했습니다
+      already_discovered: <red>이미 %research%에 대한 연구를 마쳤습니다
+      cannot_unlock: <red>연구 포인트로 %research%을(를) 해금할 수 없습니다
+      not_enough_points: <red>%research% 연구를 위한 지식이 모자랍니다 (%points%/%cost% 포인트)
+      list:
+        none_self: <red>해금한 연구가 없습니다
+        none_other: <red>%player%가 해금한 연구가 없습니다
+        discovered_self: '%count%개의 연구를 해금하였습니다: %list%'
+        discovered_other: '%player%는 %count%개의 연구를 해금하였습니다: %list%'
+      points:
+        set: %player%의 연구 포인트를 %points%로 설정하였습니다
+        added: %player%의 연구 포인트를 %points% 추가했습니다
+        removed: %player%의 연구 포인트를 %points% 제거했습니다
+        query: '%player%의 연구 포인트: %points%'
+    exposerecipe:
+      not-configurable: <red>레시피를 설정할 수 없습니다
+      warning: '<yellow>주의: 레시피 구성을 노출하면 자동으로 업데이트되지 않습니다.
+        되돌리려면 %file%을 삭제하세요'
+  guide:
+    ingredients-page:
+      item: <yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%
+  waila:
+    type-disabled: <red>이 서버는 더 이상 이전에 설정한 %type% WAILA 표시 유형을 
+        허용하지 않습니다. 기본값으로 재설정되었습니다.
+gui:
+  time_left: '남은 시간: %time%'
+  scroll:
+    up: 위로 스크롤
+    down: 아래로 스크롤
+    left: 왼쪽으로 스크롤
+    right: 오른쪽으로 스크롤
+  page:
+    next: 다음 페이지 (%current%/%total%)
+    previous: 이전 페이지 (%current%/%total%)
+guide:
+  title: 파일런 가이드
+  button:
+    ingredient: <yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%
+    back:
+      name: <yellow>뒤로
+      lore: ''
+    search-specifiers:
+      name: 검색 지정자
+      lore: |-
+        <arrow:#3a293> 기본적으로 정확한 이름만을 검색합니다 ("철 주괴"는 "철"과 "주괴"가 아닌 "철 주괴"만을 검색합니다)
+        <arrow:#3a293> 접두사 <light_purple>@</light_purple>는 <light_purple>애드온</light_purple>의 id나 표기되는 이름을 검색합니다. 예시) "pylonbase" 또는 "base"
+        <arrow:#3a293> 접두사 <aqua>$</aqua>는 아이템의 <aqua>설명</aqua>을 검색합니다
+        <arrow:#3a293> 접두사 검색은 접두사 바로 뒤에 있는 단어에만 적용됩니다
+        <arrow:#3a293> 예시) <light_purple>@pylonbase <white>철 <aqua>$온도 <white>슬러리
+    research:
+      instructions: |-
+        <arrow:#3a293> <guideinsn>왼쪽 클릭</guideinsn>으로 연구
+        <arrow:#3a293> <guideinsn>오른쪽 클릭</guideinsn>으로 해금되는 아이템 보기
+      unlocks-title: <u>해금되는 아이템</u>
+      unlocks-item: <diamond> <white>%item%
+      more-researches: <diamond> <gray>외 <aqua>%amount%<gray>개 - <guideinsn>오른쪽 클릭</guideinsn> <gray>으로 모두 보기
+      error: 연구 로드 실패
+      cost:
+        not-enough: <arrow> <attr>해금 비용:</attr> <#e23b28>%points%/%cost%
+        enough: <arrow> <attr>해금 비용:</attr> <#61ea38>%points%/%cost%
+        researched: <arrow> <attr>해금 비용:</attr> <#61ea38>%cost% (연구됨)
+    fluid:
+      name: '%fluid% <gray>(%amount%<gray>)'
+      error: <red>유체 아이템 로드 실패
+    item:
+      not-researched: <red><u>연구되지 않은 아이템</u>
+      not-researched-with-name: <red><u>연구되지 않은 아이템 <gray>(%research_name%<gray>)
+      research-instructions: |-
+        <arrow:#3a2939> <guideinsn>쉬프트 왼쪽 클릭</guideinsn>으로 연구
+        <arrow:#3a2939> <guideinsn>쉬프트 오른쪽 클릭</guideinsn>으로 해금되는 연구 보기
+      error: <red>아이템 로드 실패
+    toggle-waila:
+      활성화:
+        name: '<gray>WAILA: <green>활성화됨 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> WAILA는 바라보고 있는 파일런 블록의 정보를 표시합니다
+      disabled:
+        name: '<gray>WAILA: <red>비활성화됨 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> WAILA는 바라보고 있는 파일런 블록의 정보를 표시합니다
+    toggle-vanilla-waila:
+      활성화:
+        name: '<gray>바닐라 WAILA: <green>활성화됨 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> WAILA가 바닐라의 블록/엔티티 정볼르 표시하도록 합니다
+      disabled:
+        name: '<gray>Vanilla WAILA: <red>비활성화됨 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> WAILA가 바닐라의 블록/엔티티 정볼르 표시하도록 합니다
+    cycle-waila-type:
+      bossbar:
+        name: '<gray>WAILA 표시 방식: <green>보스바 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> WAILA가 화면 상단에 보스바로 표시됩니다
+      actionbar:
+        name: '<gray>WAILA 표시 방식: <aqua>액션바 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> WAILA가 핫바 위 액션바에 표시됩니다
+    intermediates:
+      name: <blue>↑ 입력 ↑
+      lore: <yellow>↓ 부산물 ↓
+    main_product:
+      name: <blue>↑ 입력 ↑
+      lore: <gold>↓ 주요 생산물 ↓
+    toggle-block-textures:
+      활성화:
+        name: '<gray>커스텀 블록 텍스쳐: <green>활성화 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 파일론 블록 텍스처를 추가하는 리소스 팩이 있는 경우, 이를 사용할 수 있도록 활성화하세요
+        그렇지 않은 경우 안전하게 비활성화할 수 있지만, 많은 수의 파일론 블록으로 인해 FPS에 부정적인 영향을 미칠 수 있습니다
+      disabled:
+        name: '<gray>Custom Block Textures: <red>Disabled <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 파일론 블록 텍스처를 추가하는 리소스 팩이 있는 경우, 이를 사용할 수 있도록 활성화하세요
+        그렇지 않은 경우 안전하게 비활성화할 수 있지만, <red>그 경우 많은 수의 파일론 블록으로 인해 FPS에 부정적인 영향을 미칠 수 있습니다
+    cycle-culling-preset:
+      disabled:
+        name: '<gray>컬링 프리셋: 비활성화 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 시야 거리 내에 있는 모든 파일론 블록 엔티티는 클라이언트로 전송됩니다
+        <red>장치의 수와 성능에 따라 FPS에 큰 부정적인 영향을 미칠 수 있습니다
+      low:
+        name: '<gray>컬링 프리셋: <green>낮음 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 품질을 중시하여 %alwaysShowRadius%블록 내의 엔티티를 항상 표시하고
+          %cullRadius%블록 내의 엔티티를 최소한으로 컬링합니다
+          (시야와 블록 사이에 %maxOccludingCount%개 이상의 블록이 있는 경우 컬링)
+      medium:
+        name: '<gray>컬링 프리셋: <yellow>중간 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 성능과 품질 사이의 균형을 맞추어 %alwaysShowRadius%블록 내의 엔티티를 항상 표시하고
+          %cullRadius%블록 내의 엔티티를 적당히 컬링합니다 
+          (시야와 블록 사이에 %maxOccludingCount%개 이상의 블록이 있는 경우 컬링)
+      high:
+        name: '<gray>컬링 프리셋: <red>높음 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 성능을 중시하여 %alwaysShowRadius%블록 내의 엔티티를 항상 표시하고 
+          %cullRadius%블록 내의 엔티티를 최대한 컬링합니다
+          (시야와 블록 사이에 %maxOccludingCount%개 이상의 블록이 있는 경우 컬링)
+    toggle-armor-textures:
+      활성화:
+        name: '<gray>커스텀 갑옷 텍스쳐: <green>활성화 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> <bold>장비</bold>했을 때 파일론 갑옷(아이템 제외)의 텍스쳐를 추가하는 리소스팩을 사용하려면
+          활성화하고, 아닌 경우 비활성화하세요
+      disabled:
+        name: '<gray>커스텀 갑옷 텍스쳐: <red>비활성화 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> <bold>장비</bold>했을 때 파일론 갑옷(아이템 제외)의 텍스쳐를 추가하는 리소스팩을 사용하려면
+          활성화하고, 아닌 경우 비활성화하세요
+    toggle-research-effects:
+      활성화:
+        name: '<gray>연구 효과: <green>활성화 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 새 연구를 해금했을 때 소리를 재생하고 색종이 조각을 나타내려면 활성화하세요
+      disabled:
+        name: '<gray>연구 효과: <red>비활성화 <dark_gray>(클릭해서 전환)'
+        lore: <arrow:#3a2939> 새 연구를 해금했을 때 소리를 재생하고 색종이 조각을 나타내려면 활성화하세요
+  recipe:
+    cooking: <attr>조리 시간:</attr> %time%
+  page:
+    fluids: 유체
+    info: 정보
+    researches: 연구
+    research-items: 연구 아이템
+    root: 파일런 가이드
+    search: 검색
+    settings: 설정
+    waila_settings: WAILA 설정
+    resource_pack_settings: 리소스팩 설정
+    block_texture_settings: 블록 텍스쳐 설정
+    item_recipes: 아이템 조합법
+    fluid_recipes: 유체 조합법
+    item_usages: 아이템 사용법
+    fluid_usages: 유체 사용법
+    item_ingredients: 재료 확인
+unit:
+  prefix:
+    quetta:
+      name: 퀘타
+      abbr: Q
+    ronna:
+      name: 로나
+      abbr: R
+    yotta:
+      name: 요타
+      abbr: Y
+    zetta:
+      name: 제타
+      abbr: Z
+    exa:
+      name: 엑사
+      abbr: E
+    peta:
+      name: 페타
+      abbr: P
+    tera:
+      name: 테라
+      abbr: T
+    giga:
+      name: 기가
+      abbr: G
+    mega:
+      name: 메가
+      abbr: M
+    kilo:
+      name: 킬로
+      abbr: k
+    hecto:
+      name: 헥토
+      abbr: h
+    deca:
+      name: 데카
+      abbr: da
+    none:
+      name: ''
+      abbr: ''
+    deci:
+      name: 데시
+      abbr: d
+    centi:
+      name: 센티
+      abbr: c
+    milli:
+      name: 밀리
+      abbr: m
+    micro:
+      name: 마이크로
+      abbr: μ
+    nano:
+      name: 나노
+      abbr: n
+    pico:
+      name: 피코
+      abbr: p
+    femto:
+      name: 펨토
+      abbr: f
+    atto:
+      name: 아토
+      abbr: a
+    zepto:
+      name: 젭토
+      abbr: z
+    yocto:
+      name: 욕토
+      abbr: y
+    ronto:
+      name: 론토
+      abbr: r
+    quecto:
+      name: 퀙토
+      abbr: q
+  blocks:
+    singular: 블록
+    plural: 블록
+  blocks_per_second:
+    singular: 블록/초
+    plural: 블록/초
+    abbr: b/s
+  chunks:
+    singular: 청크
+    plural: 청크
+  hearts:
+    singular: 하트
+    plural: 하트
+    abbr: ❤
+  percent:
+    singular: 퍼센트
+    plural: 퍼센트
+    abbr: '%'
+  research_points:
+    singular: 연구 포인트
+    plural: 연구 포인트
+  celsius:
+    singular: 도
+    plural: 도
+    abbr: °C
+  buckets:
+    singular: 버킷
+    plural: 버킷
+    abbr: B
+  buckets_per_second:
+    singular: 버킷/초
+    plural: 버킷/초
+    abbr: B/s
+  days:
+    singular: 일
+    plural: 일
+    abbr: 일
+  hours:
+    singular: 시간
+    plural: 시간
+    abbr: 시간
+  minutes:
+    singular: 분
+    plural: 분
+    abbr: 분
+  seconds:
+    singular: 초
+    plural: 초
+    abbr: 초
+  joules:
+    singular: 줄
+    plural: 줄
+    abbr: J
+  watts:
+    singular: 와트
+    plural: 와트
+    abbr: W
+  experience:
+    singular: 경험치 포인트
+    plural: 경험치 포인트
+    abbr: XP
+  experience_per_second:
+    singular: 경험치 포인트/초
+    plural: 경험치 포인트/초
+    abbr: XP/s
