@@ -189,7 +189,7 @@ class ItemButton @JvmOverloads constructor(
     }
 
     companion object {
-        fun getCheatItemStack(currentStack: ItemStack, event: InventoryClickEvent): ItemStack {
+        private fun getCheatItemStack(currentStack: ItemStack, event: InventoryClickEvent): ItemStack {
             val clonedUnkown = currentStack.clone()
             val pylonItem = PylonItem.fromStack(clonedUnkown)
 
