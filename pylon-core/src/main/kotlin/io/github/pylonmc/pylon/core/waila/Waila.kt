@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -30,6 +31,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.UUID
 import kotlin.math.max
+import kotlin.math.pow
 
 /**
  * Handles WAILAs (the text that displays a block's name when looking
@@ -105,8 +107,16 @@ class Waila private constructor(private val player: Player, playerConfig: Player
             builder.start(player.eyeLocation)
             builder.direction(player.eyeLocation.direction)
             builder.maxDistance(max(entityReach, blockReach))
-            builder.entityFilter { entity -> entity != player && entity.location.distanceSquared(player.location) <= entityReach * entityReach }
-            builder.blockFilter { block -> block.location.distanceSquared(player.location) <= blockReach * blockReach }
+            builder.entityFilter { entity ->
+                entity != player && entity.location.distanceSquared(player.eyeLocation) <= entityReach * entityReach
+            }
+            // Add 0.707 (approximate distance from center to corner of block) and use center location to make sure that all locations on blocks
+            // within range are considered. Without this, looking for example at the further end of the side of a block may be filtered out.
+            // The real solution would be to check if the point on the block that the player is looking at is within blockReach distance, but
+            // this is annoying
+            builder.blockFilter { block ->
+                block.location.toCenterLocation().distanceSquared(player.eyeLocation) <= (blockReach + 0.707).pow(2)
+            }
             builder.targets(RayTraceTarget.ENTITY, RayTraceTarget.BLOCK)
         }
 

@@ -300,6 +300,8 @@ object BlockStorage : Listener {
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
+     * @return The items that were dropped by the block being broken
+     *
      * @throws IllegalArgumentException if the chunk of the given [blockPosition] is not
      * loaded.
      */
@@ -356,6 +358,8 @@ object BlockStorage : Listener {
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
+     * @return The items that were dropped by the block being broken
+     *
      * @throws IllegalArgumentException if the chunk of the given [block] is not
      * loaded.
      */
@@ -369,6 +373,8 @@ object BlockStorage : Listener {
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
      *
+     * @return The items that were dropped by the block being broken
+     *
      * @throws IllegalArgumentException if the chunk of the given [block] is not
      * loaded.
      */
@@ -381,6 +387,8 @@ object BlockStorage : Listener {
      * Removes a Pylon block and breaks the physical block in the world.
      * Does nothing if the block is not a Pylon block.
      * Only call on the main thread.
+     *
+     * @return The items that were dropped by the block being broken
      *
      * @throws IllegalArgumentException if the chunk of the given [location] is not
      * loaded.

@@ -9,7 +9,8 @@ import io.github.pylonmc.pylon.core.guide.button.setting.TogglePlayerSettingButt
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchEffects
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchConfetti
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchSounds
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.cullingPreset
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.hasCustomBlockTextures
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
@@ -124,10 +125,17 @@ class PlayerSettingsPage(
         }
 
         @JvmStatic
-        val researchEffects = TogglePlayerSettingButton(
-            pylonKey("toggle-research-effects"),
-            toggle = { player -> player.researchEffects = !player.researchEffects },
-            isEnabled = { player -> player.researchEffects }
+        val researchConfetti = TogglePlayerSettingButton(
+            pylonKey("toggle-research-confetti"),
+            toggle = { player -> player.researchConfetti = !player.researchConfetti },
+            isEnabled = { player -> player.researchConfetti }
+        )
+
+        @JvmStatic
+        val researchSounds = TogglePlayerSettingButton(
+            pylonKey("toggle-research-sounds"),
+            toggle = { player -> player.researchSounds = !player.researchSounds },
+            isEnabled = { player -> player.researchSounds }
         )
     }
 }

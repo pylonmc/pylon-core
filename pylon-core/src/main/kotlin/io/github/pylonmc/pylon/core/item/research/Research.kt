@@ -95,16 +95,20 @@ data class Research(
             )
         }
 
-        if (effects && player.researchEffects) {
-            val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
-            val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
-            val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
-            ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
+        if (effects) {
+            if (player.researchConfetti) {
+                val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
+                val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
+                val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
+                ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
+            }
 
-            for ((delay, sound) in PylonConfig.researchSounds) {
-                Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
-                    player.playSound(sound.create(), Sound.Emitter.self())
-                }, delay)
+            if (player.researchSounds) {
+                for ((delay, sound) in PylonConfig.researchSounds) {
+                    Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
+                        player.playSound(sound.create(), Sound.Emitter.self())
+                    }, delay)
+                }
             }
         }
     }
@@ -148,7 +152,10 @@ data class Research(
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
-        var Player.researchEffects: Boolean by persistentData(researchEffectsKey, PylonSerializers.BOOLEAN, true)
+        var Player.researchConfetti: Boolean by persistentData(researchEffectsKey, PylonSerializers.BOOLEAN, true)
+
+        @JvmStatic
+        var Player.researchSounds: Boolean by persistentData(researchEffectsKey, PylonSerializers.BOOLEAN, true)
 
         @JvmStatic
         fun getResearches(player: OfflinePlayer): Set<Research> {
