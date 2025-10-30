@@ -17,9 +17,11 @@ interface PylonInventoryEffectItem : PylonInventoryTicker {
         tasks.putIfAbsent(itemKey, HashMap())
         tasks[itemKey]!![player.uniqueId]?.cancel()
         if (!player.persistentDataContainer.has(itemKey)) {
+            player.persistentDataContainer.set(itemKey, PersistentDataType.BOOLEAN, true)
             onAddedToInventory(player)
         }
         tasks[itemKey]!![player.uniqueId] = Bukkit.getScheduler().runTaskLater(PylonCore.javaPlugin, Runnable {
+            player.persistentDataContainer.remove(itemKey)
             onRemovedFromInventory(player)
         }, tickInterval * PylonConfig.inventoryTickerBaseRate + 1)
     }
