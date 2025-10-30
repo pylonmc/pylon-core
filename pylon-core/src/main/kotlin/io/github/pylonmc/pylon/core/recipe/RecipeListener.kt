@@ -165,7 +165,10 @@ internal object PylonRecipeListener : Listener {
         val firstPylonItem = PylonItem.fromStack(firstItem)
         val secondPylonItem = PylonItem.fromStack(secondItem)
 
-        // Disallow mixing Pylon and non-Pylon items
+        // Disallow using Pylon items
+        // Have tried to support this. It's really hard because you end up effectively
+        // having to do the repair manually for items that can't usually be repaired.
+        // Gave up after 2 hours or so
         if (firstPylonItem != null || secondPylonItem != null) {
             e.result = null
             return
