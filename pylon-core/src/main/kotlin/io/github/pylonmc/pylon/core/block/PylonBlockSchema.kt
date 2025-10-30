@@ -32,14 +32,20 @@ class PylonBlockSchema(
 
     val addon = getAddon(key)
 
+    val nameTranslationKey: TranslatableComponent
+    val loreTranslationKey: TranslatableComponent
     val defaultWailaTranslationKey: TranslatableComponent
 
     init {
         val prefix = "pylon.${key.namespace}.item.${key.key}"
+        nameTranslationKey = Component.translatable("$prefix.name")
+        loreTranslationKey = Component.translatable("$prefix.lore")
         val default = "$prefix.waila"
-        defaultWailaTranslationKey = Component.translatable(
-            if (addon.translator.languages.any { addon.translator.canTranslate(default, it) }) default else "$prefix.name"
-        )
+        defaultWailaTranslationKey = if (addon.translator.languages.any { addon.translator.canTranslate(default, it) }) {
+            Component.translatable(default)
+        } else {
+            nameTranslationKey
+        }
     }
 
     private val createConstructor: MethodHandle = blockClass.findConstructorMatching(

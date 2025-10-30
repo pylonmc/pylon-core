@@ -109,7 +109,9 @@ gui:
     next: "Next page (%current%/%total%)"
     previous: "Previous page (%current%/%total%)"
 
-  time_left: "Time left: %time%"
+  time_left: "<arrow> Time left: <#d6d1b3>%time%"
+  input: "Input"
+  output: "Output"
 
 guide:
   title: "Pylon Guide"

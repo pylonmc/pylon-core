@@ -25,6 +25,8 @@ import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.TranslationArgument
+import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.VirtualComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
@@ -225,7 +227,11 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             editData(DataComponentTypes.LORE) { lore ->
                 val newLore = lore.lines().flatMap { line ->
                     if (!isPylon(line)) return@flatMap listOf(line)
-                    val translated = GlobalTranslator.render(line.withArguments(arguments), locale)
+                    val concatenatedArguments: MutableList<TranslationArgumentLike> = arguments.toMutableList()
+                    if (line is TranslatableComponent) {
+                        concatenatedArguments.addAll(line.arguments())
+                    }
+                    val translated = GlobalTranslator.render(line.withArguments(concatenatedArguments), locale)
                     if (translated.plainText.isBlank()) return@flatMap emptyList()
                     val encoded = LineWrapEncoder.encode(translated)
                     val wrapped = encoded.copy(
