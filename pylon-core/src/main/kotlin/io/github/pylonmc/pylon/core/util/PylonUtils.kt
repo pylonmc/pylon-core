@@ -428,7 +428,7 @@ val Component.plainText: String
 /**
  * Does not include first or last block
  */
-fun blocksOnPath(from: BlockPosition, to: BlockPosition): MutableList<Block> {
+fun blocksOnPath(from: BlockPosition, to: BlockPosition): List<Block> {
     val originBlock = from.block
     val offset = to.location
         .subtract(originBlock.location)

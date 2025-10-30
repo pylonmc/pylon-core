@@ -23,7 +23,7 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 import kotlin.math.roundToLong
 
-class FluidPipePlacementTask(
+internal class FluidPipePlacementTask(
     val player: Player,
     val origin: FluidPipePlacementPoint,
     val pipe: FluidPipe

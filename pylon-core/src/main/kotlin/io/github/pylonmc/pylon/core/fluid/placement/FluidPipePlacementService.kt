@@ -20,7 +20,7 @@ import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.EquipmentSlot
 import java.util.UUID
 
-object FluidPipePlacementService : Listener {
+internal object FluidPipePlacementService : Listener {
     /**
      * Maps player doing the connection to the origin of the connection
      */

@@ -13,13 +13,11 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
-import org.jetbrains.annotations.ApiStatus
 
 /**
  * An invisible block (structure block) that exists purely to represent a pipe and prevent
  * blocks from being placed on top of them.
  */
-@ApiStatus.Internal
 class FluidSectionMarker : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
     override var disableBlockTextureEntity = true
 

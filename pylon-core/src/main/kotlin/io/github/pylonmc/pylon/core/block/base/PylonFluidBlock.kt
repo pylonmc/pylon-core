@@ -170,9 +170,8 @@ interface PylonFluidBlock : PylonEntityHolderBlock, PylonDirectionalBlock, Pylon
         error("Block supplied fluids, but does not implement removeFluid")
     }
 
-    @ApiStatus.Internal
     companion object {
-        fun getFluidPointName(type: FluidPointType) = when (type) {
+        internal fun getFluidPointName(type: FluidPointType) = when (type) {
             FluidPointType.INPUT -> "fluid_point_input"
             FluidPointType.OUTPUT -> "fluid_point_output"
             FluidPointType.INTERSECTION -> throw IllegalStateException("You cannot create an intersection point from a fluid block")

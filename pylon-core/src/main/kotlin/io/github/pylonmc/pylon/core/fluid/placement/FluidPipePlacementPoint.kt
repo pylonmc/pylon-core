@@ -10,9 +10,10 @@ import io.github.pylonmc.pylon.core.content.fluid.FluidSectionMarker
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import org.bukkit.block.BlockFace
 import org.joml.Vector3f
+import java.lang.AssertionError
 import java.util.UUID
 
-sealed interface FluidPipePlacementPoint {
+internal sealed interface FluidPipePlacementPoint {
 
     /**
      * The position of this point relative to its block
@@ -57,7 +58,7 @@ sealed interface FluidPipePlacementPoint {
         override val offset: Vector3f = when (display) {
             is FluidEndpointDisplay -> display.face.direction.multiply(display.radius).toVector3f()
             is FluidIntersectionDisplay -> Vector3f(0.0F, 0.0F, 0.0F)
-            else -> error("unreachable, or at least it had better be or I'm going to going and live in a hut in the woods forever")
+            else -> throw AssertionError("unreachable, or at least it had better be or I'm going to going and live in a hut in the woods forever")
         }
 
         override val connectedPipeDisplays
