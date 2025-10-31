@@ -12,6 +12,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.isFakeEvent
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
@@ -38,6 +39,7 @@ import org.bukkit.event.player.PlayerTakeLecternBookEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.event.world.StructureGrowEvent
 import org.bukkit.inventory.BlockInventoryHolder
+import org.bukkit.inventory.EquipmentSlot
 import java.util.*
 
 
@@ -97,11 +99,7 @@ internal object BlockListener : Listener {
             }
             event.isDropItems = false
             event.expToDrop = 0
-
-            val player = event.player
-            val tool = player.inventory.itemInMainHand
-
-            tool.damage(1, player)
+            event.player.damageItemStack(EquipmentSlot.HAND, 1)
         }
     }
 
