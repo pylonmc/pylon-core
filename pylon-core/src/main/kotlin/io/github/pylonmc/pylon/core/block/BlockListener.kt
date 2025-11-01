@@ -11,8 +11,10 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
+import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
@@ -99,11 +101,10 @@ internal object BlockListener : Listener {
             }
             event.isDropItems = false
             event.expToDrop = 0
-            // Paper's javadocs lie currently, the damageItemStack method does not
-            // respect gamemode, so we have to check it ourselves
-            if (event.player.gameMode != GameMode.CREATIVE) {
-                event.player.damageItemStack(EquipmentSlot.HAND, 1)
-            }
+
+            val toolItem = event.player.equipment.getItem(EquipmentSlot.HAND)
+            val tool = toolItem.getData(DataComponentTypes.TOOL) ?: return
+            damageItem(toolItem, tool.damagePerBlock(), event.player)
         }
     }
 
