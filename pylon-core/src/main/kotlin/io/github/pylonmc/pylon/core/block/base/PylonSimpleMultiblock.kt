@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
+import io.github.pylonmc.pylon.core.entity.display.BlockDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
@@ -27,6 +28,8 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.data.BlockData
+import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -37,8 +40,7 @@ import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.MustBeInvokedByOverriders
 import org.joml.Vector3i
-import java.util.IdentityHashMap
-import java.util.UUID
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
@@ -80,10 +82,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
      * A block display that represents this block, showing the player what block
      * needs to be placed in a specific location.
      */
-    class MultiblockGhostBlock(entity: ItemDisplay, val name: String) :
-        PylonEntity<ItemDisplay>(KEY, entity), PylonInteractEntity {
+    class MultiblockGhostBlock(entity: Display, val name: String) :
+        PylonEntity<Display>(KEY, entity), PylonInteractEntity {
 
-        constructor(entity: ItemDisplay)
+        constructor(entity: Display)
                 : this(entity, entity.persistentDataContainer.get(NAME_KEY, PylonSerializers.STRING)!!)
 
         override fun onInteract(event: PlayerInteractEntityEvent) {
@@ -118,7 +120,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         override fun matches(block: Block): Boolean = !BlockStorage.isPylonBlock(block) && block.type in materials
 
         override fun spawnGhostBlock(block: Block): UUID {
-            val display = ItemDisplayBuilder()
+            val blockDataList = materials.map { it.createBlockData() }
+            val display = BlockDisplayBuilder()
                 .material(materials.first())
                 .glow(Color.WHITE)
                 .transformation(TransformBuilder().scale(0.5))
@@ -129,9 +132,73 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
                 PylonCore.launch {
                     var i = 0
                     while (display.isValid) {
-                        display.setItemStack(ItemStack(materials[i]))
+                        display.block = blockDataList[i]
                         i++
                         i %= materials.size
+                        delay(1.seconds)
+                    }
+                }
+            }
+
+            return display.uniqueId
+        }
+    }
+
+    /**
+     * Represents a vanilla component of a multiblock, which can have one or more blockdatas.
+     *
+     * If multiple blockdatas are specified, the ghost block will automatically cycle through all
+     * the given blockdatas in order.
+     *
+     * This should be used only when you want to impose some constraints about the blockdata, for instance:
+     *
+     * <pre>{@code
+     * BlockData data = Material.CAMPFIRE.createBlockData("[lit=true]") // requires the campfire to be lit
+     * new VanillaBlockdataMultiblockComponent(data);
+     *
+     * // or if you prefer
+     * Campfire fire = (Campfire) Material.CAMPFIRE.createBlockData();
+     * fire.setLit(true);
+     * new VanillaBlockdataMultiblockComponent(fire);
+     * }
+     * </pre>
+     *
+     */
+    @JvmRecord
+    data class VanillaBlockdataMultiblockComponent(val blockDatas: List<BlockData>) : MultiblockComponent {
+
+        constructor(first: BlockData, vararg materials: BlockData) : this(listOf(first) + materials)
+
+        init {
+            check(blockDatas.isNotEmpty()) { "BlockData list cannot be empty" }
+        }
+
+        override fun matches(block: Block): Boolean {
+            if (BlockStorage.isPylonBlock(block)) return false
+            for (blockData in blockDatas) {
+                // IMPORTANT, a.matches(b) != b.matches(a), if you invert this check, kaboom
+                if (block.blockData.matches(blockData)) return true
+            }
+
+            return false
+        }
+
+        override fun spawnGhostBlock(block: Block): UUID {
+            val stringDatas: List<String> = blockDatas.map { it.getAsString(true) }
+            val display = BlockDisplayBuilder()
+                .material(blockDatas.first().material)
+                .glow(Color.WHITE)
+                .transformation(TransformBuilder().scale(0.5))
+                .build(block.location.toCenterLocation())
+            EntityStorage.add(MultiblockGhostBlock(display, stringDatas.joinToString(", ")))
+
+            if (blockDatas.size > 1) {
+                PylonCore.launch {
+                    var i = 0
+                    while (display.isValid) {
+                        display.block = blockDatas[i]
+                        i++
+                        i %= blockDatas.size
                         delay(1.seconds)
                     }
                 }

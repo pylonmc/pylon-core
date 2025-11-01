@@ -505,6 +505,32 @@ private val confetti = buildCommand("confetti") {
     }
 }
 
+private val setphantom = buildCommand("setphantom") {
+    argument("pos", ArgumentTypes.blockPosition()) {
+        permission("pylon.command.setphantom")
+        executes { sender ->
+            PylonMetrics.onCommandRun("/py setphantom")
+            val position = getArgument<PaperBlockPosition>("pos").toLocation(source.location.world)
+            if (!position.world.isPositionLoaded(position)) {
+                source.sender.sendMessage(Component.translatable("argument.pos.unloaded"))
+                return@executes
+            } else if (position.blockX !in -30000000..30000000 || position.blockZ !in -30000000..30000000 || position.blockY !in position.world.minHeight..position.world.maxHeight) {
+                source.sender.sendMessage(Component.translatable("argument.pos.outofworld"))
+                return@executes
+            }
+
+            val block = BlockStorage.get(position)
+            if (block == null) {
+                source.sender.sendVanillaFeedback("setblock.failed", Component.text(position.blockX), Component.text(position.blockY), Component.text(position.blockZ))
+                return@executes
+            }
+
+            BlockStorage.makePhantom(block)
+            source.sender.sendVanillaFeedback("setblock.success", Component.text(position.blockX), Component.text(position.blockY), Component.text(position.blockZ))
+        }
+    }
+}
+
 @JvmSynthetic
 internal val ROOT_COMMAND = buildCommand("pylon") {
     permission("pylon.command.guide")
@@ -518,6 +544,7 @@ internal val ROOT_COMMAND = buildCommand("pylon") {
     then(debug)
     then(key)
     then(setblock)
+    then(setphantom)
     if (PylonConfig.WailaConfig.enabled) {
         then(waila)
     }

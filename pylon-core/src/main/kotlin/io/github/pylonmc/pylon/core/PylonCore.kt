@@ -25,6 +25,7 @@ import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.button.setting.TogglePlayerSettingButton
 import io.github.pylonmc.pylon.core.guide.pages.PlayerSettingsPage
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
+import io.github.pylonmc.pylon.core.item.PylonInventoryTicker
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
@@ -33,10 +34,10 @@ import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine.hasCustomArmorTextures
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
+import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.Waila
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
@@ -50,13 +51,14 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Display
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
-import java.util.Locale
+import java.util.*
 import kotlin.io.path.*
 
 /**
@@ -98,6 +100,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
+        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.inventoryTickerBaseRate)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
@@ -167,7 +170,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonItem.register<PylonGuide>(PylonGuide.STACK)
         PylonGuide.hideItem(PylonGuide.KEY)
 
-        PylonEntity.register<ItemDisplay, PylonSimpleMultiblock.MultiblockGhostBlock>(
+        PylonEntity.register<Display, PylonSimpleMultiblock.MultiblockGhostBlock>(
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
         )
 
@@ -226,7 +229,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val start = System.currentTimeMillis()
 
         for (addon in PylonRegistry.ADDONS) {
-            mergeGlobalConfig(addon, "researches.yml", "researches/${addon.key.namespace}.yml")
+            mergeGlobalConfig(addon, "researches.yml", "researches/${addon.key.namespace}.yml", false)
         }
 
         val researchDir = dataPath.resolve("researches")
