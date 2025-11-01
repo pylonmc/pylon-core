@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
@@ -15,7 +16,9 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.datacomponent.DataComponentTypes
+import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
@@ -81,8 +84,19 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         // Create a new PDC - doesn't matter what type because we won't be saving it, so we just use the block's
         // chunk to get a PDC context
         val pdc = block.chunk.persistentDataContainer.adapterContext.newPersistentDataContainer()
+        if (!pylonBlock.disableBlockTextureEntity) {
+            val entity = pylonBlock.blockTextureEntity
+            if (entity != null) {
+                pdc.set(
+                    PylonBlock.pylonBlockTextureEntityKey,
+                    PylonSerializers.ITEM_STACK_READABLE,
+                    SpigotConversionUtil.toBukkitItemStack(entity.getEntityMeta(ItemDisplayMeta::class.java).item)
+                )
+            }
+        }
         pylonBlock.writeDebugInfo(pdc)
         PylonBlockSerializeEvent(block, pylonBlock, pdc).callEvent()
+
         val serialized = NmsAccessor.instance.serializePdc(pdc)
         player.sendDebug(
             "data",
