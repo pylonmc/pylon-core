@@ -28,6 +28,7 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.datacomponent.DataComponentTypes
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
 import net.kyori.adventure.key.Key
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
@@ -160,6 +161,16 @@ open class PylonBlock internal constructor(val block: Block) {
         blockTextureEntity?.let {
             val meta = it.getEntityMeta(ItemDisplayMeta::class.java)
             updater(it, meta)
+        }
+    }
+
+    /**
+     * Schedules the block texture item to be refreshed on the next server tick.
+     * See [refreshBlockTextureItem].
+     */
+    fun scheduleBlockTextureItemRefresh() {
+        Bukkit.getScheduler().runTask(PylonCore) { _ ->
+            refreshBlockTextureItem()
         }
     }
 
