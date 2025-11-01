@@ -104,7 +104,7 @@ internal object BlockListener : Listener {
 
             val toolItem = event.player.equipment.getItem(EquipmentSlot.HAND)
             val tool = toolItem.getData(DataComponentTypes.TOOL) ?: return
-            damageItem(toolItem, tool.damagePerBlock(), event.player)
+            damageItem(toolItem, tool.damagePerBlock(), event.player, EquipmentSlot.HAND)
         }
     }
 
