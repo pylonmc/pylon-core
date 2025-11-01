@@ -99,7 +99,11 @@ internal object BlockListener : Listener {
             }
             event.isDropItems = false
             event.expToDrop = 0
-            event.player.damageItemStack(EquipmentSlot.HAND, 1)
+            // Paper's javadocs lie currently, the damageItemStack method does not
+            // respect gamemode, so we have to check it ourselves
+            if (event.player.gameMode != GameMode.CREATIVE) {
+                event.player.damageItemStack(EquipmentSlot.HAND, 1)
+            }
         }
     }
 
