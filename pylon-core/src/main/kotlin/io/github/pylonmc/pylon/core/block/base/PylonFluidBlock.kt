@@ -171,6 +171,8 @@ interface PylonFluidBlock : PylonEntityHolderBlock, PylonDirectionalBlock, Pylon
     }
 
     companion object {
+
+        @JvmSynthetic
         internal fun getFluidPointName(type: FluidPointType) = when (type) {
             FluidPointType.INPUT -> "fluid_point_input"
             FluidPointType.OUTPUT -> "fluid_point_output"

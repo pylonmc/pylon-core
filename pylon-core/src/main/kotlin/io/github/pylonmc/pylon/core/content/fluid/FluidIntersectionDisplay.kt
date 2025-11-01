@@ -67,6 +67,7 @@ class FluidIntersectionDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, Flu
         private val CONNECTED_PIPE_DISPLAYS_TYPE = PylonSerializers.SET.setTypeFrom(PylonSerializers.UUID)
         private val CONNECTION_POINT_KEY = pylonKey("connection_point")
 
+        @JvmSynthetic
         internal fun makeEntity(block: Block): ItemDisplay {
             return ItemDisplayBuilder()
                 .brightness(7)
