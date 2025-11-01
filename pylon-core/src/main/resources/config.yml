@@ -145,16 +145,6 @@ custom-block-textures:
   # the entities will appear invisible (no visual change).
   default: true
 
-  # How often (in Minecraft ticks) should block texture entities be automatically updated to match
-  # the block state of the block they are representing. Set to 0 to disable automatic updates.
-  # The purpose of this is to ensure that if a block changes state (e.g. a lever being toggled)
-  # the entity representing it also updates to match the new state, in case the Pylon block doesn't
-  # notify Pylon to make the update itself.
-  # Note: Only pylon block textures sent to players will be updated, and they will only be updated if
-  # the block has state properties that can be changed (e.g. a lever, door, etc). Blocks without state properties
-  # (e.g. stone, dirt, etc) will not be updated.
-  state-update-interval: 20
-
   # Custom Block Textures uses ray tracing to cull entities not visible to the player.
   # There are 4 default presets to choose from, each with different client performance and visual quality tradeoffs.
   # It is not recommended to change these settings (excluding default-preset) unless you know what you're doing

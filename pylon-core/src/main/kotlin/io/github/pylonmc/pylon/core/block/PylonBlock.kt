@@ -72,23 +72,21 @@ open class PylonBlock internal constructor(val block: Block) {
     open var disableBlockTextureEntity = false
 
     /**
-     * A packet based [ItemDisplay] sent to players with `customBlockTextures` enabled.
+     * A packet based [ItemDisplay] sent to players who have `customBlockTextures` enabled.
+     *
+     * You can override [getBlockTextureProperties] if you have any custom block state properties
+     * you want to expose to resource packs for custom models/textures. If those properties change
+     * you can call [refreshBlockTextureItem] to update the model accordingly.
+     *
+     * Upon initialization the entity is set up by [setupBlockTexture] (which can be overridden),
+     * and modifications afterward can be done using [updateBlockTexture].
      *
      * Being lazily initialized, if you do not access the entity directly it will only be created
      * when a player with `customBlockTextures` comes within range for the first time. This is to
      * avoid unnecessary entity creation, memory usage, and entity update overhead when no players
      * can actually see it.
-     *
-     * Upon initialization the entity is set up by [setupBlockTexture] (which can be overridden),
-     * and modifications afterward can be done using [updateBlockTexture].
-     *
-     * For example, if you have a block that faces different directions, you can override [setupBlockTexture]
-     * and rotate the entity based on the block's facing direction.
-     *
-     * Or let's say you have a furnace block that changes texture based on whether it's lit or not,
-     * you can use [updateBlockTexture] to change the entity's item to reflect the lit/unlit state.
      */
-    val blockTextureEntity: BlockTextureEntity? by lazy {
+    open val blockTextureEntity: BlockTextureEntity? by lazy {
         if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
             null
         } else {
@@ -175,16 +173,6 @@ open class PylonBlock internal constructor(val block: Block) {
             item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
             meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
         }
-    }
-
-    /**
-     * Returns whether the block texture item should automatically refresh on the [PylonConfig.BlockTextureConfig.stateUpdateInterval].
-     * By default, this returns true if the block has any state properties (vanilla or custom). For example,
-     * a lever has a "powered" property, so it would return true, whereas a stone block has no properties,
-     * so it would return false unless a custom property is provided by overriding [getBlockTextureProperties].
-     */
-    open fun shouldAutoRefreshBlockTextureItem(): Boolean {
-        return NmsAccessor.instance.getStateProperties(block, getBlockTextureProperties()).isNotEmpty()
     }
 
     /**

@@ -158,11 +158,12 @@ object BlockTextureEngine : Listener {
                     // Send all block entities within view distance and hide all others
                     val radius = player.sendViewDistance * 16 / 2.0
                     val query = octree.query(BoundingBox.of(eye, radius, radius, radius))
-                    visible.toSet().subtract(query).forEach { it.blockTextureEntity?.removeViewer(uuid) }
+                    visible.toSet().subtract(query.toSet()).forEach { it.blockTextureEntity?.removeViewer(uuid) }
 
                     for (block in query) {
                         val entity = block.blockTextureEntity ?: continue
-                        entity.addViewer(uuid)
+                        val distanceSquared = block.block.location.distanceSquared(player.location)
+                        entity.addOrRefreshViewer(uuid, distanceSquared)
                         visible.add(block)
                     }
                     delay(preset.updateInterval.ticks)
@@ -171,7 +172,7 @@ object BlockTextureEngine : Listener {
 
                 // Query all possibly visible blocks within cull radius, and hide all others
                 val query = octree.query(BoundingBox.of(eye, preset.cullRadius.toDouble(), preset.cullRadius.toDouble(), preset.cullRadius.toDouble()))
-                visible.toSet().subtract(query).forEach { it.blockTextureEntity?.removeViewer(uuid) }
+                visible.toSet().subtract(query.toSet()).forEach { it.blockTextureEntity?.removeViewer(uuid) }
 
                 for (block in query) {
                     val entity = block.blockTextureEntity ?: continue
