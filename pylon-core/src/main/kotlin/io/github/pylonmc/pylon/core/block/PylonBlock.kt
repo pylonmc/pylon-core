@@ -198,7 +198,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * instead of returning a new map entirely, to ensure that any properties provided by superclasses
      * are preserved. (e.g. [PylonDirectionalBlock])
      */
-    open fun getBlockTextureProperties(): Map<String, Pair<String, Int>> {
+    open fun getBlockTextureProperties(): MutableMap<String, Pair<String, Int>> {
         val properties = mutableMapOf<String, Pair<String, Int>>()
         if (this is PylonDirectionalBlock) {
             val facing = getFacing()
@@ -301,7 +301,9 @@ open class PylonBlock internal constructor(val block: Block) {
 
     companion object {
 
+        @JvmStatic
         val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
+
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
 

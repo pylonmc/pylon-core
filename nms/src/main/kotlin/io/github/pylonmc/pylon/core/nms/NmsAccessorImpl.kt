@@ -51,10 +51,9 @@ object NmsAccessorImpl : NmsAccessor {
 
     override fun getStateProperties(block: Block, custom: Map<String, Pair<String, Int>>): Map<String, String> {
         val state = (block as CraftBlock).nms
-        val properties = arrayListOf(state.properties)
         val map = mutableMapOf<String, String>()
         val possibleValues = mutableMapOf<String, Int>()
-        for (property in properties) {
+        for (property in state.properties) {
             @Suppress("UNCHECKED_CAST")
             property as Property<Comparable<Any>>
             map[property.name] = state.getOptionalValue(property).map(property::getName).orElse("none")
