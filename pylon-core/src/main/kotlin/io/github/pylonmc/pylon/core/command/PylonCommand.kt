@@ -84,7 +84,7 @@ private val guide = buildCommand("guide") {
 private val open_guide = buildCommand("open_guide") {
     permission("pylon.command.open_guide")
     executesWithPlayer { player ->
-        PylonMetrics.onCommandRun("/py openguide")
+        PylonMetrics.onCommandRun("/py open_guide")
         PylonGuide.open(player)
     }
 }
