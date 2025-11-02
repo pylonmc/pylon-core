@@ -91,6 +91,13 @@ object PylonSerializers {
     @JvmField
     val ITEM_STACK = ItemStackPersistentDataType
 
+    /**
+     * Unlike the regular [ItemStackPersistentDataType], which serializes directly to a byte array,
+     * this serializes item stacks to a human-readable format backed by vanilla item serialization.
+     */
+    @JvmField
+    val ITEM_STACK_READABLE = ReadableItemStackPersistentDataType
+
     @JvmField
     val INVENTORY = InventoryPersistentDataType
 
