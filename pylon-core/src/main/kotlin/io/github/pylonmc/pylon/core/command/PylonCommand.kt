@@ -8,7 +8,6 @@ import com.mojang.brigadier.arguments.DoubleArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.LongArgumentType
 import com.mojang.brigadier.context.CommandContext
-import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
@@ -44,7 +43,6 @@ import io.papermc.paper.command.brigadier.argument.resolvers.RotationResolver
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
 import io.papermc.paper.math.FinePosition
-import java.util.UUID
 import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
@@ -83,16 +81,11 @@ private val guide = buildCommand("guide") {
     }
 }
 
-private val guide = buildCommand("open_guide") {
-    permission("pylon.command.guide")
+private val open_guide = buildCommand("open_guide") {
+    permission("pylon.command.open_guide")
     executesWithPlayer { player ->
         PylonMetrics.onCommandRun("/py openguide")
-        val history = history.getOrPut(player.uniqueId) { mutableListOf() }
-        if (history.isEmpty()) {
-            rootPage.open(player)
-        } else {
-            history.removeLast().open(player)
-        }
+        PylonGuide.open(player)
     }
 }
 
