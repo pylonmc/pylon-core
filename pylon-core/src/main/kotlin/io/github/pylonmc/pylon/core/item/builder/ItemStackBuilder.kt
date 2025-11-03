@@ -41,6 +41,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.ApiStatus
+import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
 import kotlin.collections.forEach
@@ -68,6 +69,8 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     fun set(type: DataComponentType.NonValued) = apply {
         stack.setData(type)
     }
+
+    fun <T : Any> get(type: DataComponentType.Valued<T>) = stack.getData(type)
 
     /**
      * @see ItemStack.unsetData
@@ -133,6 +136,10 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     fun lore(vararg loreToAdd: ComponentLike) = lore(loreToAdd.toList())
 
     fun lore(vararg lore: String) = lore(*lore.map(::fromMiniMessage).toTypedArray())
+
+    fun clearLore() = apply {
+        stack.setData(DataComponentTypes.LORE, ItemLore.lore())
+    }
 
     fun hideFromTooltip(componentType: DataComponentType) = apply {
         val tooltipDisplay = stack.getData(DataComponentTypes.TOOLTIP_DISPLAY)
@@ -316,6 +323,10 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
     fun useCooldown(cooldownTicks: Int, cooldownGroup: Key?)
             = set(DataComponentTypes.USE_COOLDOWN, UseCooldown.useCooldown(cooldownTicks / 20.0f).cooldownGroup(cooldownGroup))
 
+    public override fun clone(): ItemStackBuilder {
+        return of(stack.clone())
+    }
+
     fun build(): ItemStack = stack.clone()
 
     /**
@@ -361,6 +372,11 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         @JvmStatic
         fun of(material: Material): ItemStackBuilder {
             return of(ItemStack(material))
+        }
+
+        @JvmStatic
+        fun of(item: Item): ItemStackBuilder {
+            return of(ItemStack(item.itemProvider.get()))
         }
 
         /**
