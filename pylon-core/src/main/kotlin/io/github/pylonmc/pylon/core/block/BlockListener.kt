@@ -150,7 +150,9 @@ internal object BlockListener : Listener {
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockDestroyEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
-            BlockStorage.breakBlock(event.block, BlockBreakContext.Destroyed(event))
+            if (BlockStorage.breakBlock(event.block, BlockBreakContext.Destroyed(event)) == null) {
+                event.isCancelled = true
+            }
             event.setWillDrop(false)
         }
     }

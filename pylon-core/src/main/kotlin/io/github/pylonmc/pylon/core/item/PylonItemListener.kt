@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.findPylonItemInInventory
 import io.papermc.paper.event.player.PlayerPickItemEvent
+import org.bukkit.GameMode
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
@@ -415,10 +416,12 @@ internal object PylonItemListener : Listener {
         }
 
         // Otherwise, we'll just attempt to add a new item and set the source to be that item
-        if (event.player.inventory.addItem(blockItem).isNotEmpty()) {
-            // Inventory full, can't pick the item
-            event.isCancelled = true
-            return
+        if (event.player.gameMode == GameMode.CREATIVE) {
+            if (event.player.inventory.addItem(blockItem).isNotEmpty()) {
+                // Inventory full, can't pick the item
+                event.isCancelled = true
+                return
+            }
         }
 
         val newSourceSlot = findPylonItemInInventory(event.player.inventory, blockPylonItem)

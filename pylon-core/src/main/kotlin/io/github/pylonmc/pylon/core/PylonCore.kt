@@ -41,6 +41,7 @@ import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.Waila
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
+import io.papermc.paper.ServerBuildInfo
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
 import me.tofaa.entitylib.APIConfig
@@ -66,6 +67,8 @@ import kotlin.io.path.*
  */
 object PylonCore : JavaPlugin(), PylonAddon {
 
+    const val EXPECTED_MINECRAFT_VERSION = "1.21.8"
+
     override fun onLoad() {
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this))
         PacketEvents.getAPI().load()
@@ -73,6 +76,16 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
     override fun onEnable() {
         val start = System.currentTimeMillis()
+
+        if (ServerBuildInfo.buildInfo().minecraftVersionId() != EXPECTED_MINECRAFT_VERSION) {
+            logger.severe("!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!")
+            logger.severe("You are running Pylon on Minecraft version ${ServerBuildInfo.buildInfo().minecraftVersionId()}")
+            logger.severe("This build of Pylon expects Minecraft version $EXPECTED_MINECRAFT_VERSION")
+            logger.severe("Pylon may run fine, but you may encounter bugs ranging from mild to catastrophic")
+            logger.severe("Please update your Pylon version accordingly")
+            logger.severe("Please see https://github.com/pylonmc/pylon-core/releases for available Pylon versions")
+            logger.severe("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        }
 
         InvUI.getInstance().setPlugin(this)
 
@@ -88,6 +101,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         }
 
         saveDefaultConfig()
+        // Add any keys that are missing from global config - saveDefaultConfig will not do anything if config already present
+        mergeGlobalConfig(PylonCore, "config.yml", "config.yml")
 
         Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
         Bukkit.getPluginManager().registerEvents(PylonAddon, this)
@@ -141,7 +156,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         }
 
         if (PylonConfig.researchesEnabled) {
-            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchEffects)
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchConfetti)
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchSounds)
         }
 
         Bukkit.getScheduler().runTaskTimer(
