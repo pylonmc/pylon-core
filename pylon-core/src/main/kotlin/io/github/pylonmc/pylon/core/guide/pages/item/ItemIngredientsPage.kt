@@ -66,7 +66,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             }
             .addModifier {
                 for (i in 1..8) {
-                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(9 * page + i)))
+                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(8 * page + i - 1)))
                 }
             }
             .build()
@@ -90,7 +90,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
     override fun getGui(player: Player): Gui {
         val pages = mutableListOf<Gui>()
         val calculation = IngredientCalculator.calculateFinal(stack).flat()
-        val maxPage = max(calculation.inputs.size / 27, calculation.intermediates.size / 9)
+        val maxPage = max(calculation.inputs.size / 27, calculation.intermediates.size / 8)
         for (i in 0..maxPage) {
             pages += getSubPage(player, stack, calculation, i, maxPage)
         }
@@ -116,9 +116,9 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             is Container.Item -> ItemButton.from(container.item) { item: ItemStack, player: Player ->
                 ItemStackBuilder.of(item).name(
                     GlobalTranslator.render(Component.translatable(
-                        "pylon.pyloncore.guide.ingredient",
+                        "pylon.pyloncore.guide.button.ingredient",
                         PylonArgument.of("item_ingredients_page_amount", container.item.amount),
-                        PylonArgument.of("item_ingredients_page_item", container.item.getData(DataComponentTypes.ITEM_NAME)!!)),
+                        PylonArgument.of("item_ingredients_page_item", getItemName(container.item))),
                         player.locale())
                 ).build()
             }
@@ -140,4 +140,10 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             .name(Component.translatable("pylon.pyloncore.guide.button.main_product.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.main_product.lore"))
     )
+
+    private fun getItemName(item: ItemStack): Component {
+        val name = item.getData(DataComponentTypes.ITEM_NAME)
+        if (name != null) return name
+        return Component.translatable(item.translationKey())
+    }
 }
