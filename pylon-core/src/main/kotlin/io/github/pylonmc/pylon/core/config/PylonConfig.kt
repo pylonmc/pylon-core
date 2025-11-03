@@ -52,7 +52,10 @@ object PylonConfig {
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
     @JvmStatic
-    val pipePlacementMaxDistance = config.getOrThrow("pipe-placement.max-distance", ConfigAdapter.LONG)
+    val pipePlacementMaxLength = config.getOrThrow("pipe-placement.max-length", ConfigAdapter.LONG)
+
+    @JvmStatic
+    val pipePlacementCancelDistance = config.getOrThrow("pipe-placement.cancel-distance", ConfigAdapter.INT)
 
     @JvmStatic
     val translationWrapLimit = config.getOrThrow("translation-wrap-limit", ConfigAdapter.INT)

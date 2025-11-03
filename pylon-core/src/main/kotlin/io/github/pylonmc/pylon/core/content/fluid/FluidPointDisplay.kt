@@ -1,40 +1,15 @@
 package io.github.pylonmc.pylon.core.content.fluid
 
-import io.github.pylonmc.pylon.core.entity.EntityStorage
-import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
-import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.entity.ItemDisplay
-import org.bukkit.util.Vector
+import java.util.UUID
 
-/**
- * A 'fluid point' is one of the red/green displays that indicates a block's fluid input/output.
- */
-class FluidPointDisplay(entity: ItemDisplay) : PylonEntity<ItemDisplay>(KEY, entity) {
+interface FluidPointDisplay {
+    val entity: ItemDisplay
+    val uuid: UUID
+    val point: VirtualFluidPoint
+    val connectedPipeDisplays: Set<UUID>
 
-    companion object {
-
-        val KEY = pylonKey("fluid_connection_display")
-
-        @JvmStatic
-        fun make(point: VirtualFluidPoint, translation: Vector): FluidPointDisplay {
-            val display = ItemDisplayBuilder()
-                .brightness(7)
-                .transformation(TransformBuilder()
-                    .translate(translation.toVector3d())
-                    .scale(FluidPointInteraction.POINT_SIZE)
-                )
-
-                .itemStack(ItemStackBuilder.of(point.type.material)
-                    .addCustomModelDataString("fluid_point_display:${point.type.name.lowercase()}")
-                )
-                .build(point.position.location.toCenterLocation())
-            val entity = FluidPointDisplay(display)
-            EntityStorage.add(entity)
-            return entity
-        }
-    }
+    fun connectPipeDisplay(uuid: UUID)
+    fun disconnectPipeDisplay(uuid: UUID)
 }

@@ -20,7 +20,7 @@ import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
+import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.button.setting.TogglePlayerSettingButton
 import io.github.pylonmc.pylon.core.guide.pages.PlayerSettingsPage
@@ -53,7 +53,6 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Display
-import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -127,7 +126,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonFluidBufferBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
-        Bukkit.getPluginManager().registerEvents(ConnectingService, this)
+        Bukkit.getPluginManager().registerEvents(FluidPipePlacementService, this)
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
 
@@ -190,12 +189,12 @@ object PylonCore : JavaPlugin(), PylonAddon {
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
         )
 
-        PylonEntity.register<ItemDisplay, FluidPointDisplay>(FluidPointDisplay.KEY)
-        PylonEntity.register<Interaction, FluidPointInteraction>(FluidPointInteraction.KEY)
+        PylonEntity.register<ItemDisplay, FluidEndpointDisplay>(FluidEndpointDisplay.KEY)
+        PylonEntity.register<ItemDisplay, FluidIntersectionDisplay>(FluidIntersectionDisplay.KEY)
         PylonEntity.register<ItemDisplay, FluidPipeDisplay>(FluidPipeDisplay.KEY)
 
-        PylonBlock.register<FluidPipeMarker>(FluidPipeMarker.KEY, Material.STRUCTURE_VOID)
-        PylonBlock.register<FluidPipeConnector>(FluidPipeConnector.KEY, Material.STRUCTURE_VOID)
+        PylonBlock.register<FluidSectionMarker>(FluidSectionMarker.KEY, Material.STRUCTURE_VOID)
+        PylonBlock.register<FluidIntersectionMarker>(FluidIntersectionMarker.KEY, Material.STRUCTURE_VOID)
 
         RecipeType.addVanillaRecipes()
 
@@ -271,7 +270,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
     override fun onDisable() {
         PacketEvents.getAPI().terminate()
-        ConnectingService.cleanup()
+        FluidPipePlacementService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
         PylonMetrics.save()

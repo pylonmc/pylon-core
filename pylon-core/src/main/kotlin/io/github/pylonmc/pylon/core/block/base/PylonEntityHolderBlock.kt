@@ -83,7 +83,6 @@ interface PylonEntityHolderBlock {
             = EntityStorage.getAs(clazz, getHeldEntityUuidOrThrow(name))
         ?: throw IllegalArgumentException("Entity $name is not of type ${clazz.simpleName}")
 
-
     /**
      * Returns false if the block holds no entity with the provided name, the entity is unloaded or does not
      * physically exist.
