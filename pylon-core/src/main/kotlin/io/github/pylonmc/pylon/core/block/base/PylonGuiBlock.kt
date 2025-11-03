@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -46,7 +45,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
      * The title of the GUI
      */
     val guiTitle: Component
-        get() = (this as PylonBlock).defaultWailaTranslationKey
+        get() = (this as PylonBlock).nameTranslationKey
 
     /**
      * The GUI associated with this block.

@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.papermc.paper.datacomponent.DataComponentType
@@ -17,15 +18,19 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.Registry
+import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
@@ -379,9 +384,10 @@ fun <T> persistentData(
  * at the [to] path, reads and returns the file at the [to] path.
  *
  * @param from The path to the config file. Must be a YAML file.
+ * @param warnMissing if set to true, the logger will warn if the resource in [from] is missing
  * @return The merged config
  */
-internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Config {
+internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String, warnMissing: Boolean = true): Config {
     require(from.endsWith(".yml")) { "Config file must be a YAML file" }
     require(to.endsWith(".yml")) { "Config file must be a YAML file" }
     val cached = globalConfigCache[from to to]
@@ -396,7 +402,7 @@ internal fun mergeGlobalConfig(addon: PylonAddon, from: String, to: String): Con
     val config = Config(globalConfig)
     val resource = addon.javaPlugin.getResource(from)
     if (resource == null) {
-        PylonCore.logger.warning("Resource not found: $from")
+        if (warnMissing) PylonCore.logger.warning("Resource not found: $from")
     } else {
         val newConfig = resource.reader().use(YamlConfiguration::loadConfiguration)
         config.internalConfig.setDefaults(newConfig)
@@ -512,3 +518,11 @@ fun pickaxeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_PICKAXE)
 fun axeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_AXE)
 fun shovelMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_SHOVEL)
 fun hoeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_HOE)
+
+@JvmOverloads
+fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Material) -> Unit = {}, force: Boolean = false) =
+    NmsAccessor.instance.damageItem(itemStack, amount, world, onBreak, force)
+
+@JvmOverloads
+fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot? = null, force: Boolean = false) =
+    NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)

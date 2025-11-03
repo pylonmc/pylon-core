@@ -6,9 +6,9 @@ import org.joml.Quaternionf
 import org.joml.Vector3d
 import org.joml.Vector3f
 
-class RotationBackwards private constructor(
-    private val vector: Vector3f?,
-    private val quaternion: Quaternionf?
+open class RotationBackwards private constructor(
+    protected val vector: Vector3f?,
+    protected val quaternion: Quaternionf?
 ) : TransformComponent {
 
     constructor(rotation: Vector3f): this(rotation, null)

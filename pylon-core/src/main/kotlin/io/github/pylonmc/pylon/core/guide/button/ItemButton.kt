@@ -16,7 +16,9 @@ import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.papermc.paper.datacomponent.DataComponentTypes
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.Registry
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -93,6 +95,7 @@ class ItemButton @JvmOverloads constructor(
                     .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
 
                 if (item.research != null) {
+                    builder.lore("")
                     builder.lore(Component.translatable(
                             "pylon.pyloncore.guide.button.item.not-researched-with-name",
                             PylonArgument.of("research_name", item.research!!.name)
@@ -151,9 +154,31 @@ class ItemButton @JvmOverloads constructor(
                 }
 
                 ClickType.MIDDLE -> {
-                    if (player.hasPermission("pylon.command.give")) {
-                        player.setItemOnCursor(currentStack)
-                    }
+                    if (!player.hasPermission("pylon.guide.cheat")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = stack.maxStackSize
+                    player.setItemOnCursor(stack)
+                }
+
+                ClickType.DROP -> {
+                    if (!player.hasPermission("pylon.guide.cheat")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = 1
+                    player.dropItem(stack)
+                }
+
+                ClickType.CONTROL_DROP -> {
+                    if (!player.hasPermission("pylon.guide.cheat")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = stack.maxStackSize
+                    player.dropItem(stack)
+                }
+
+                ClickType.SWAP_OFFHAND -> {
+                    if (!player.hasPermission("pylon.guide.cheat")) return
+                    val stack = getCheatItemStack(currentStack, event)
+                    stack.amount = 1
+                    player.give(stack)
                 }
 
                 else -> {}
@@ -164,6 +189,24 @@ class ItemButton @JvmOverloads constructor(
     }
 
     companion object {
+        private fun getCheatItemStack(currentStack: ItemStack, event: InventoryClickEvent): ItemStack {
+            val clonedUnkown = currentStack.clone()
+            val pylonItem = PylonItem.fromStack(clonedUnkown)
+
+            if (pylonItem == null) {
+                // item is not pylon
+                val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
+                val amount = if (event.isShiftClick) { type.maxStackSize } else { 1 }
+                val clonedNotPylon = ItemStack(type, amount)
+                return clonedNotPylon
+            } else {
+                // pylon item handling
+                val clonedPylon = pylonItem.schema.getItemStack()
+                clonedPylon.amount = if (event.isShiftClick) { clonedPylon.maxStackSize } else { 1 }
+                return clonedPylon
+            }
+        }
+
         @JvmStatic
         fun from(stack: ItemStack?): Item {
             if (stack == null) {

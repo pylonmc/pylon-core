@@ -14,7 +14,7 @@ import org.joml.Matrix4f
 
 
 @Suppress("unused")
-class ItemDisplayBuilder() {
+open class ItemDisplayBuilder() {
 
     var itemStack: ItemStack? = null
     var transformation: Matrix4f? = null
@@ -55,14 +55,14 @@ class ItemDisplayBuilder() {
     fun width(width: Float): ItemDisplayBuilder = apply { this.width = width }
     fun height(height: Float): ItemDisplayBuilder = apply { this.height = height }
 
-    fun build(location: Location): ItemDisplay {
+    open fun build(location: Location): ItemDisplay {
         val finalLocation = location.clone()
         finalLocation.yaw = 0.0F
         finalLocation.pitch = 0.0F
         return finalLocation.getWorld().spawn(finalLocation, ItemDisplay::class.java, this::update)
     }
 
-    fun update(display: Display) {
+    open fun update(display: Display) {
         if (display !is ItemDisplay) {
             throw IllegalArgumentException("Must provide an ItemDisplay")
         }

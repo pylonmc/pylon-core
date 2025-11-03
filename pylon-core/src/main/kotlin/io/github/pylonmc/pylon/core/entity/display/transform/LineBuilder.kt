@@ -8,14 +8,14 @@ import org.joml.Vector3f
  *
  * You must specify [from], [to], and [thickness]; other fields are optional.
  */
-class LineBuilder {
+open class LineBuilder {
 
-    var translation: Vector3f = Vector3f()
-    var from: Vector3f? = null
-    var to: Vector3f? = null
-    var thickness: Float? = null
-    var extraLength: Float = 0.0F
-    var roll: Float = 0.0F
+    protected var translation: Vector3f = Vector3f()
+    protected var from: Vector3f? = null
+    protected var to: Vector3f? = null
+    protected var thickness: Float? = null
+    protected var extraLength: Float = 0.0F
+    protected var roll: Float = 0.0F
 
     fun translation(translation: Vector3f) = apply { this.translation = translation }
     fun translation(translation: Vector3d) = translation(Vector3f(translation))
@@ -36,7 +36,7 @@ class LineBuilder {
     fun roll(roll: Float) = apply { this.roll = roll }
     fun roll(roll: Double) = roll(roll.toFloat())
 
-    fun build(): TransformBuilder {
+    open fun build(): TransformBuilder {
         if (from == null || to == null || thickness == null) {
             throw IllegalStateException("From, to, and thickness in LineBuilder must all be specified")
         }

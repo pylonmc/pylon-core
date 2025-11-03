@@ -48,6 +48,24 @@ object GuiItems {
     )
 
     /**
+     * A lime glass pane named 'Input'
+     */
+    @JvmStatic
+    fun input(): Item = SimpleItem(
+        ItemStackBuilder.gui(Material.LIME_STAINED_GLASS_PANE, pylonKey("input"))
+            .name(Component.translatable("pylon.pyloncore.gui.input"))
+    )
+
+    /**
+     * An orange glass pane named 'Output'
+     */
+    @JvmStatic
+    fun output(): Item = SimpleItem(
+        ItemStackBuilder.gui(Material.ORANGE_STAINED_GLASS_PANE, pylonKey("output"))
+            .name(Component.translatable("pylon.pyloncore.gui.output"))
+    )
+
+    /**
      * Item that automatically cycles through durability to represent processing time.
      * Intended for use in recipe displays.
      *
