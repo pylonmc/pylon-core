@@ -66,8 +66,6 @@ import kotlin.io.path.*
  */
 object PylonCore : JavaPlugin(), PylonAddon {
 
-    const val EXPECTED_MINECRAFT_VERSION = "1.21.8"
-
     override fun onLoad() {
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this))
         PacketEvents.getAPI().load()
@@ -76,10 +74,12 @@ object PylonCore : JavaPlugin(), PylonAddon {
     override fun onEnable() {
         val start = System.currentTimeMillis()
 
-        if (ServerBuildInfo.buildInfo().minecraftVersionId() != EXPECTED_MINECRAFT_VERSION) {
+        val expectedVersion = pluginMeta.apiVersion
+        val actualVersion = ServerBuildInfo.buildInfo().minecraftVersionId()
+        if (actualVersion != expectedVersion) {
             logger.severe("!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!")
-            logger.severe("You are running Pylon on Minecraft version ${ServerBuildInfo.buildInfo().minecraftVersionId()}")
-            logger.severe("This build of Pylon expects Minecraft version $EXPECTED_MINECRAFT_VERSION")
+            logger.severe("You are running Pylon on Minecraft version $actualVersion")
+            logger.severe("This build of Pylon expects Minecraft version $expectedVersion")
             logger.severe("Pylon may run fine, but you may encounter bugs ranging from mild to catastrophic")
             logger.severe("Please update your Pylon version accordingly")
             logger.severe("Please see https://github.com/pylonmc/pylon-core/releases for available Pylon versions")
@@ -94,7 +94,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val entityLibPlatform = SpigotEntityLibPlatform(this)
         val entityLibSettings = APIConfig(packetEvents).tickTickables()
         EntityLib.init(entityLibPlatform, entityLibSettings)
-        entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type ->
+        entityLibPlatform.entityIdProvider = EntityIdProvider { _, _ ->
             @Suppress("DEPRECATION")
             Bukkit.getUnsafe().nextEntityId()
         }

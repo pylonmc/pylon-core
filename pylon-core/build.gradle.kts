@@ -19,6 +19,8 @@ repositories {
     }
 }
 
+val minecraftVersion = property("minecraft.version").toString()
+
 dependencies {
     fun paperLibraryApi(dependency: Any) {
         paperLibrary(dependency)
@@ -31,7 +33,7 @@ dependencies {
     paperLibraryApi("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
     paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
-    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:$minecraftVersion-R0.1-SNAPSHOT")
 
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
@@ -81,8 +83,8 @@ dokka {
     }
     dokkaSourceSets.configureEach {
         externalDocumentationLinks.register("Paper") {
-            url("https://jd.papermc.io/paper/1.21.8/")
-            packageListUrl("https://jd.papermc.io/paper/1.21.8/element-list")
+            url("https://jd.papermc.io/paper/$minecraftVersion/")
+            packageListUrl("https://jd.papermc.io/paper/$minecraftVersion/element-list")
         }
         externalDocumentationLinks.register("JOML") {
             url("https://javadoc.io/doc/org.joml/joml/latest/")
@@ -158,7 +160,7 @@ paper {
     main = "io.github.pylonmc.pylon.core.PylonCore"
     version = project.version.toString()
     authors = listOf("Pylon team")
-    apiVersion = "1.21"
+    apiVersion = minecraftVersion
     load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }
 
