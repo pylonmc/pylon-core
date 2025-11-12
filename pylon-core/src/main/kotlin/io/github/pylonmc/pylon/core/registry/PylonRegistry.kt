@@ -6,12 +6,18 @@ import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
-import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Stream
 
+/**
+ * Represents a list of things that can be registered and looked up by [NamespacedKey].
+ * This class is not thread safe and any concurrent access must be synchronized externally.
+ *
+ * @param T the type of the registered values
+ * @property key the key of this registry
+ */
 class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
 
-    private val values: MutableMap<NamespacedKey, T> = ConcurrentHashMap()
+    private val values: MutableMap<NamespacedKey, T> = LinkedHashMap()
 
     fun register(vararg values: T) {
         for (value in values) {
