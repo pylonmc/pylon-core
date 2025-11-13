@@ -24,6 +24,7 @@ import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.util.rotateVectorToFace
 import kotlinx.coroutines.delay
+import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -505,6 +506,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         val facing = simpleMultiblockData.facing
         val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
         for ((offset, component) in rotatedComponents) {
+            val mainKey = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
             val entity = getHeldPylonEntity(
                 MultiblockGhostBlock::class.java,
                 "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
@@ -514,6 +516,23 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
                     Color.GREEN
                 } else {
                     Color.RED
+                }
+            } else {
+                for (entry in heldEntities.entries) {
+                    if (!entry.key.startsWith(mainKey)) continue
+
+                    val entityEntry = getHeldPylonEntity(
+                        MultiblockGhostBlock::class.java,
+                        entry.key
+                    )
+
+                    if (entityEntry == null) continue
+
+                    entityEntry.entity.glowColorOverride = if (component.matches((block.position + offset).block)) {
+                        Color.GREEN
+                    } else {
+                        Color.RED
+                    }
                 }
             }
         }
