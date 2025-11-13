@@ -30,11 +30,9 @@ import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Display
-import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
@@ -67,6 +65,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
          * Creates a 'ghost block' entity that represents this block.
          */
         fun spawnGhostBlock(block: Block): UUID
+
+        fun materialList() : List<Material>
 
         companion object {
 
@@ -118,6 +118,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         }
 
         override fun matches(block: Block): Boolean = !BlockStorage.isPylonBlock(block) && block.type in materials
+
+        override fun materialList(): List<Material> = materials
 
         override fun spawnGhostBlock(block: Block): UUID {
             val blockDataList = materials.map { it.createBlockData() }
@@ -183,6 +185,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
             return false
         }
 
+        override fun materialList(): List<Material> = blockDatas.map { it.material }
+
         override fun spawnGhostBlock(block: Block): UUID {
             val stringDatas: List<String> = blockDatas.map { it.getAsString(true) }
             val display = BlockDisplayBuilder()
@@ -208,12 +212,67 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         }
     }
 
+     class MixedMultiblockComponent : MultiblockComponent {
+        val materials: List<Material>
+        val multiblockComponents: Collection<MultiblockComponent>
+
+        constructor(multiblockComponents: Collection<MultiblockComponent>) {
+            this.multiblockComponents = multiblockComponents
+            this.materials = multiblockComponents.flatMap { it.materialList() }
+            check(materials.isNotEmpty()) { "Materials list cannot be empty" }
+        }
+
+        constructor(vararg validators: MultiblockComponent) : this(validators.toList())
+
+        override fun matches(block: Block): Boolean {
+            for (validator in multiblockComponents) {
+                if (validator.matches(block)) {
+                    return true
+                }
+            }
+
+            return false
+        }
+
+        override fun materialList(): List<Material> = materials
+
+        override fun spawnGhostBlock(block: Block): UUID {
+            val display = BlockDisplayBuilder()
+                .material(materials.first())
+                .glow(Color.WHITE)
+                .transformation(TransformBuilder().scale(0.5))
+                .build(block.location.toCenterLocation())
+            EntityStorage.add(MultiblockGhostBlock(display, materials.joinToString(", ") { it.key.toString() }))
+
+            val blockDatas = materials.map { it.createBlockData() }
+            if (materials.size > 1) {
+                PylonCore.launch {
+                    var i = 0
+                    while (display.isValid) {
+                        display.block = blockDatas[i]
+                        i++
+                        i %= blockDatas.size
+                        delay(1.seconds)
+                    }
+                }
+            }
+
+            return display.uniqueId
+        }
+    }
+
     /**
      * Represents a Pylon block component of a multiblock.
      */
     @JvmRecord
     data class PylonMultiblockComponent(val key: NamespacedKey) : MultiblockComponent {
         override fun matches(block: Block): Boolean = BlockStorage.get(block)?.schema?.key == key
+
+        override fun materialList(): List<Material> {
+            val schema = PylonRegistry.BLOCKS[key]
+                ?: throw IllegalArgumentException("Block schema $key does not exist")
+            return Collections.singletonList(schema.material)
+        }
 
         override fun spawnGhostBlock(block: Block): UUID {
             val schema = PylonRegistry.BLOCKS[key]
