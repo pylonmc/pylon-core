@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.MultiblockCache
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
@@ -29,7 +30,9 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
+import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Display
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
@@ -55,18 +58,19 @@ import kotlin.time.Duration.Companion.seconds
  */
 interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, PylonDirectionalBlock {
 
+    interface SingleGhostBlock {
+        fun spawnGhostBlock(block: Block): UUID
+    }
+
+    interface MultipleGhostBlocks {
+        fun spawnGhostBlocks(block: Block): List<UUID>
+    }
+
     /**
      * Represents a single block of a multiblock.
      */
     interface MultiblockComponent {
         fun matches(block: Block): Boolean
-
-        /**
-         * Creates a 'ghost block' entity that represents this block.
-         */
-        fun spawnGhostBlock(block: Block): UUID
-
-        fun materialList() : List<Material>
 
         companion object {
 
@@ -76,6 +80,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
             @JvmStatic
             fun of(key: NamespacedKey) = PylonMultiblockComponent(key)
         }
+    }
+
+    interface MultiblockComponentBlockDisplay {
+        fun blockDataList() : List<BlockData>
     }
 
     /**
@@ -109,7 +117,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
      * the given materials in order.
      */
     @JvmRecord
-    data class VanillaMultiblockComponent(val materials: List<Material>) : MultiblockComponent {
+    data class VanillaMultiblockComponent(val materials: List<Material>) : SingleGhostBlock, MultiblockComponent, MultiblockComponentBlockDisplay {
 
         constructor(first: Material, vararg materials: Material) : this(listOf(first) + materials)
 
@@ -119,10 +127,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
 
         override fun matches(block: Block): Boolean = !BlockStorage.isPylonBlock(block) && block.type in materials
 
-        override fun materialList(): List<Material> = materials
-
         override fun spawnGhostBlock(block: Block): UUID {
-            val blockDataList = materials.map { it.createBlockData() }
+            val blockDataList = blockDataList()
             val display = BlockDisplayBuilder()
                 .material(materials.first())
                 .glow(Color.WHITE)
@@ -144,6 +150,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
 
             return display.uniqueId
         }
+
+        override fun blockDataList(): List<BlockData> = materials.map { it.createBlockData() }
     }
 
     /**
@@ -167,7 +175,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
      *
      */
     @JvmRecord
-    data class VanillaBlockdataMultiblockComponent(val blockDatas: List<BlockData>) : MultiblockComponent {
+    data class VanillaBlockdataMultiblockComponent(val blockDatas: List<BlockData>) : SingleGhostBlock, MultiblockComponent, MultiblockComponentBlockDisplay {
 
         constructor(first: BlockData, vararg materials: BlockData) : this(listOf(first) + materials)
 
@@ -184,8 +192,6 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
 
             return false
         }
-
-        override fun materialList(): List<Material> = blockDatas.map { it.material }
 
         override fun spawnGhostBlock(block: Block): UUID {
             val stringDatas: List<String> = blockDatas.map { it.getAsString(true) }
@@ -210,16 +216,15 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
 
             return display.uniqueId
         }
+
+        override fun blockDataList(): List<BlockData> = blockDatas
     }
 
-     class MixedMultiblockComponent : MultiblockComponent {
-        val materials: List<Material>
+     class MixedMultiblockComponent : MultiblockComponent, MultipleGhostBlocks {
         val multiblockComponents: Collection<MultiblockComponent>
 
         constructor(multiblockComponents: Collection<MultiblockComponent>) {
             this.multiblockComponents = multiblockComponents
-            this.materials = multiblockComponents.flatMap { it.materialList() }
-            check(materials.isNotEmpty()) { "Materials list cannot be empty" }
         }
 
         constructor(vararg validators: MultiblockComponent) : this(validators.toList())
@@ -234,30 +239,81 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
             return false
         }
 
-        override fun materialList(): List<Material> = materials
+        override fun spawnGhostBlocks(block: Block): List<UUID> {
+            var blockDisplay: BlockDisplay? = null
+            var itemDisplay: ItemDisplay? = null
 
-        override fun spawnGhostBlock(block: Block): UUID {
-            val display = BlockDisplayBuilder()
-                .material(materials.first())
-                .glow(Color.WHITE)
-                .transformation(TransformBuilder().scale(0.5))
-                .build(block.location.toCenterLocation())
-            EntityStorage.add(MultiblockGhostBlock(display, materials.joinToString(", ") { it.key.toString() }))
+            val displayUpdates: MutableList<Runnable> = mutableListOf()
+            var name = ""
+            for (component in multiblockComponents) {
+                if (component is MultiblockComponentBlockDisplay) {
+                    val blockDatas = component.blockDataList()
+                    if (blockDisplay == null) {
+                        blockDisplay = BlockDisplayBuilder()
+                            .material(blockDatas.first().material)
+                            .glow(Color.WHITE)
+                            .transformation(TransformBuilder().scale(0.5))
+                            .build(block.location.toCenterLocation())
+                    }
 
-            val blockDatas = materials.map { it.createBlockData() }
-            if (materials.size > 1) {
+                    for (blockData in blockDatas) {
+                        displayUpdates.add {
+                            itemDisplay?.isVisibleByDefault = false
+                            blockDisplay.isVisibleByDefault = true
+                            blockDisplay.block = blockData
+                        }
+
+                        name += blockData.getAsString(true) + ", "
+                    }
+                } else if (component is PylonMultiblockComponent) {
+                    val key = component.key
+                    val schema = component.schema()
+                    val itemBuilder = ItemStackBuilder.of(schema.material).addCustomModelDataString(key.toString())
+                    if (itemDisplay == null) {
+                        itemDisplay = ItemDisplayBuilder()
+                            .itemStack(itemBuilder)
+                            .glow(Color.WHITE)
+                            .transformation(TransformBuilder().scale(0.5))
+                            .build(block.location.toCenterLocation())
+                    }
+
+                    displayUpdates.add {
+                        blockDisplay?.isVisibleByDefault = false
+                        itemDisplay.isVisibleByDefault = true
+                        itemDisplay.setItemStack(
+                            itemBuilder.build()
+                        )
+                    }
+
+                    name += "$key, "
+                }
+            }
+
+            blockDisplay?.let {
+                EntityStorage.add(MultiblockGhostBlock(it, name))
+            }
+
+            itemDisplay?.let {
+                EntityStorage.add(MultiblockGhostBlock(it, name))
+            }
+
+            if (displayUpdates.size > 1) {
                 PylonCore.launch {
                     var i = 0
-                    while (display.isValid) {
-                        display.block = blockDatas[i]
+                    while (itemDisplay?.isValid ?: true && blockDisplay?.isValid ?: true) {
+                        displayUpdates[i].run()
                         i++
-                        i %= blockDatas.size
+                        i %= displayUpdates.size
                         delay(1.seconds)
                     }
                 }
             }
 
-            return display.uniqueId
+            val mutableList = mutableListOf<UUID>()
+            blockDisplay?.let { mutableList.add(it.uniqueId) }
+            itemDisplay?.let { mutableList.add(it.uniqueId) }
+
+            return mutableList
         }
     }
 
@@ -265,18 +321,14 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
      * Represents a Pylon block component of a multiblock.
      */
     @JvmRecord
-    data class PylonMultiblockComponent(val key: NamespacedKey) : MultiblockComponent {
+    data class PylonMultiblockComponent(val key: NamespacedKey) : SingleGhostBlock, MultiblockComponent {
+        fun schema() : PylonBlockSchema = PylonRegistry.BLOCKS[key]
+            ?: throw IllegalArgumentException("Block schema $key does not exist")
+
         override fun matches(block: Block): Boolean = BlockStorage.get(block)?.schema?.key == key
 
-        override fun materialList(): List<Material> {
-            val schema = PylonRegistry.BLOCKS[key]
-                ?: throw IllegalArgumentException("Block schema $key does not exist")
-            return Collections.singletonList(schema.material)
-        }
-
         override fun spawnGhostBlock(block: Block): UUID {
-            val schema = PylonRegistry.BLOCKS[key]
-                ?: throw IllegalArgumentException("Block schema $key does not exist")
+            val schema = schema()
             val display = ItemDisplayBuilder()
                 .itemStack(ItemStackBuilder.of(schema.material).addCustomModelDataString(key.toString()))
                 .glow(Color.WHITE)
@@ -343,10 +395,24 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         val facing = simpleMultiblockData.facing
         val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
         for ((offset, component) in rotatedComponents) {
-            val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
-            if (!isHeldEntityPresent(key)) {
-                val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
-                heldEntities[key] = ghostBlock
+            val startSection = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
+
+            if (component is SingleGhostBlock) {
+                if (!isHeldEntityPresent(startSection)) {
+                    val ghostBlock = component.spawnGhostBlock((block.position + offset).block)
+                    heldEntities[startSection] = ghostBlock
+                }
+            } else if (component is MultipleGhostBlocks) {
+                if (!heldEntities.keys.any { it.startsWith(startSection) }) {
+                    val ghostBlocks = component.spawnGhostBlocks((block.position + offset).block)
+
+                    var i = 0
+                    ghostBlocks.forEach { ghostBlock ->
+                        val key = "${startSection}_$i"
+                        i++
+                        heldEntities[key] = ghostBlock
+                    }
+                }
             }
         }
         updateGhostBlockColors()
