@@ -259,8 +259,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
 
                     for (blockData in blockDatas) {
                         displayUpdates.add {
-                            itemDisplay?.isVisibleByDefault = false
                             blockDisplay.isVisibleByDefault = true
+                            itemDisplay?.isVisibleByDefault = false
                             blockDisplay.block = blockData
                         }
 
@@ -279,8 +279,8 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
                     }
 
                     displayUpdates.add {
-                        blockDisplay?.isVisibleByDefault = false
                         itemDisplay.isVisibleByDefault = true
+                        blockDisplay?.isVisibleByDefault = false
                         itemDisplay.setItemStack(
                             itemBuilder.build()
                         )
