@@ -18,21 +18,37 @@ object ItemTagConfigAdapter : ConfigAdapter<Tag<ItemTypeWrapper>> {
         if (!string.startsWith("#")) {
             throw IllegalArgumentException("Item tag must start with '#': $value")
         }
+
         val tagKey = NamespacedKey.fromString(string.drop(1)) ?: throw IllegalArgumentException("Invalid tag: $value")
-        val tag = Bukkit.getTag("items", tagKey, Material::class.java)
-        if (tag != null) {
-            return tag.toItemTypeTag()
+
+        // Allow all item tags
+        val itemTag = Bukkit.getTag(Tag.REGISTRY_ITEMS, tagKey, Material::class.java)
+        if (itemTag != null) {
+            return itemTag.toItemTypeTag()
         }
 
+        // Allow block tags, but only if they can be translated to items successfully
+        val blockTag = Bukkit.getTag(Tag.REGISTRY_BLOCKS, tagKey, Material::class.java)
+        if (blockTag != null) {
+            if (blockTag.values.any { !it.isItem }) {
+                throw IllegalArgumentException("Block tag detected, but invalid due to it containing a block that can't be translated to item")
+            }
+
+            return blockTag.toItemTypeTag()
+        }
+
+        // Allow usage of paper's material tag registry, which is separate from the bukkit one
         val paperTag = paperRegistry[tagKey]
         if (paperTag != null) {
             return paperTag
         }
 
+        // Check our own tags
         val pylonTag = PylonRegistry.ITEM_TAGS[tagKey]
         if (pylonTag != null) {
             return pylonTag
         }
+
         throw IllegalArgumentException("Item tag not found: $value")
     }
 
