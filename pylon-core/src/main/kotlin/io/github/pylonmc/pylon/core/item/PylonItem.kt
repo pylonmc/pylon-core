@@ -135,6 +135,14 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
         }
 
+        @JvmStatic
+        @Contract("null -> null")
+        fun <T : PylonItem> fromStack(stack: ItemStack?, clazz: Class<T>): T? {
+            val pylonItem = fromStack(stack) ?: return null
+            if (!clazz.isInstance(pylonItem)) return null
+            return clazz.cast(pylonItem)
+        }
+
         /**
          * Checks if [stack] is a Pylon item.
          */
