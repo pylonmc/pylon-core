@@ -13,7 +13,6 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -21,6 +20,7 @@ import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Container
+import org.bukkit.entity.memory.MemoryKey
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -30,11 +30,8 @@ import org.bukkit.event.block.BellRingEvent
 import org.bukkit.event.enchantment.EnchantItemEvent
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.inventory.BrewingStandFuelEvent
-import org.bukkit.event.inventory.FurnaceBurnEvent
-import org.bukkit.event.inventory.FurnaceExtractEvent
-import org.bukkit.event.inventory.InventoryMoveItemEvent
-import org.bukkit.event.inventory.InventoryOpenEvent
+import org.bukkit.event.entity.VillagerCareerChangeEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -831,6 +828,19 @@ internal object BlockListener : Listener {
             if (destBlock is PylonVanillaContainerBlock) {
                 destBlock.onItemMoveTo(event)
             }
+        }
+    }
+
+    @EventHandler
+    private fun onVillagerCareerChange(event: VillagerCareerChangeEvent) {
+        if (event.reason != VillagerCareerChangeEvent.ChangeReason.EMPLOYED) {
+            return;
+        }
+        val jobsite = event.entity.getMemory(MemoryKey.JOB_SITE)
+        jobsite ?: return
+        val block = BlockStorage.get(jobsite.block)
+        if (block is PylonJobBlock) {
+            block.onVillagerGetJob(event)
         }
     }
 
