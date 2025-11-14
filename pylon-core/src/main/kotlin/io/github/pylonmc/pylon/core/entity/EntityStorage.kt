@@ -3,10 +3,12 @@ package io.github.pylonmc.pylon.core.entity
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
+import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.entity.base.PylonTickableEntity
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
@@ -24,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.function.Consumer
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Basically [BlockStorage], but for entities. Works on all the same principles.
@@ -37,6 +40,7 @@ object EntityStorage : Listener {
     private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*>>> = ConcurrentHashMap()
     private val entityAutosaveTasks: MutableMap<UUID, Job> = ConcurrentHashMap()
     private val whenEntityLoadsTasks: MutableMap<UUID, MutableSet<Consumer<PylonEntity<*>>>> = ConcurrentHashMap()
+    private val tickMap: MutableMap<UUID, Job> = ConcurrentHashMap()
 
     /**
      * All the loaded [PylonEntity]s
@@ -215,6 +219,15 @@ object EntityStorage : Listener {
                 whenEntityLoadsTasks.remove(pylonEntity.uuid)
             }
 
+            if (pylonEntity is PylonTickableEntity) {
+                tickMap[pylonEntity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
+                    while (true) {
+                        pylonEntity.tick()
+                        delay(pylonEntity.tickDelay().ticks)
+                    }
+                }
+            }
+
             PylonEntityLoadEvent(pylonEntity).callEvent()
         }
     }
@@ -224,6 +237,7 @@ object EntityStorage : Listener {
     @EventHandler
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
         val pylonEntity = get(event.entity.uniqueId) ?: return
+        tickMap[pylonEntity.uuid]?.cancel()
 
         if (!event.entity.isDead) {
             PylonEntity.serialize(pylonEntity)
