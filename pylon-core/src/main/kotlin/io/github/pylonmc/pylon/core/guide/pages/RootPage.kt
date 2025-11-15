@@ -44,14 +44,19 @@ class RootPage() : SimpleStaticGuidePage(
             .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
         for (button in buttons) {
-            gui.addContent(button)
+            if (button is PageButton) {
+                if (button.page.shouldDisplay(player)) {
+                    gui.addContent(button)
+                }
+            } else {
+                gui.addContent(button)
+            }
         }
 
         return gui.build().apply { loadCurrentPage(player, this) }
     }
 
     override fun open(player: Player) {
-        // Reset history
         try {
             Window.single()
                 .setGui(getGui(player))

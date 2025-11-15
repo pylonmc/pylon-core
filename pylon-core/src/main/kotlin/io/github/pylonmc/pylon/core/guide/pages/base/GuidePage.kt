@@ -27,6 +27,11 @@ interface GuidePage : Keyed {
         get() = Component.translatable("pylon.${key.namespace}.guide.page.${key.key}")
 
     /**
+     * Should the page be displayed to said player? If not it won't be added to the button list
+     */
+    fun shouldDisplay(player: Player): Boolean = true
+
+    /**
      * Created the page for the given [player].
      */
     fun getGui(player: Player): Gui

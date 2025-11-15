@@ -14,6 +14,7 @@ import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.impl.controlitem.PageItem
 import java.util.function.Supplier
 
 /**
@@ -71,7 +72,13 @@ open class SimpleDynamicGuidePage(
         val gui = getHeader(player, buttons)
 
         for (button in buttons) {
-            gui.addContent(button)
+            if (button is PageButton) {
+                if (button.page.shouldDisplay(player)) {
+                    gui.addContent(button)
+                }
+            } else {
+                gui.addContent(button)
+            }
         }
 
         return gui.build().apply { loadCurrentPage(player, this) }
