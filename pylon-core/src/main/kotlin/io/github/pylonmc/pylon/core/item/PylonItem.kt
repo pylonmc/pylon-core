@@ -143,6 +143,11 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             return clazz.cast(pylonItem)
         }
 
+        inline fun <reified T : PylonItem> fromStack(stack: ItemStack?): T? {
+            val pylonItem = fromStack(stack) ?: return null
+            return pylonItem as? T
+        }
+
         /**
          * Checks if [stack] is a Pylon item.
          */
