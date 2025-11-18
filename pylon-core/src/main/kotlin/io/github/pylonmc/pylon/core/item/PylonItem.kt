@@ -121,7 +121,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             register(T::class.java, template, pylonBlockKey)
 
         /**
-         * Converts a regular ItemStack to a PylonItemStack
+         * Gets a PylonItem from an ItemStack if the item is a Pylon item
          * Returns null if the ItemStack is not a Pylon item
          */
         @JvmStatic
