@@ -223,7 +223,7 @@ object EntityStorage : Listener {
                 tickMap[pylonEntity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
                     while (true) {
                         pylonEntity.tick()
-                        delay(pylonEntity.tickDelay().ticks)
+                        delay(pylonEntity.tickDelay.ticks)
                     }
                 }
             }
