@@ -143,6 +143,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             return clazz.cast(pylonItem)
         }
 
+        @JvmSynthetic
         inline fun <reified T : PylonItem> fromStack(stack: ItemStack?): T? {
             val pylonItem = fromStack(stack) ?: return null
             return pylonItem as? T
