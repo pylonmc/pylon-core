@@ -21,7 +21,7 @@ interface PylonTickableEntity {
     /**
      * Sets whether the [tick] function should be called asynchronously.
      *
-     * WARNING: Settings a entity to tick asynchronously could have unintended consequences.
+     * WARNING: Settings an entity to tick asynchronously could have unintended consequences.
      *
      * Only set this option if you understand what 'asynchronous' means, and note that you
      * cannot interact with the world asynchronously.
