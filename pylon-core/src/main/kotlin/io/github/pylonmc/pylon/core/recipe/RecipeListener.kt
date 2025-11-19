@@ -68,8 +68,6 @@ internal object PylonRecipeListener : Listener {
             } else {
                 inventory.result = null
             }
-        } else {
-            inventory.result = null
         }
 
         // Prevent crafting of unresearched items
