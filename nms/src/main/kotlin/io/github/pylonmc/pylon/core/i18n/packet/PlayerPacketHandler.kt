@@ -78,6 +78,15 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                         packet.replace
                     )
                 }
+                is ClientboundMerchantOffersPacket -> {
+                    for (offer in packet.offers) {
+                        translate(offer.baseCostA.itemStack)
+                        offer.costB.ifPresent {
+                            translate(it.itemStack)
+                        }
+                        translate(offer.result)
+                    }
+                }
 
                 is ClientboundPlaceGhostRecipePacket -> {
                     packet = ClientboundPlaceGhostRecipePacket(
