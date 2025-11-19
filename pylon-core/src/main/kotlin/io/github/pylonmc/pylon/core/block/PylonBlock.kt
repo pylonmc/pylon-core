@@ -1,10 +1,8 @@
 package io.github.pylonmc.pylon.core.block
 
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.register
 import io.github.pylonmc.pylon.core.block.base.PylonDirectionalBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonGuiBlock
@@ -15,9 +13,13 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.entity.packet.BlockTextureEntity
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -25,17 +27,12 @@ import io.github.pylonmc.pylon.core.waila.WailaDisplay
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.datacomponent.DataComponentTypes
 import me.tofaa.entitylib.meta.display.ItemDisplayMeta
-import me.tofaa.entitylib.wrapper.WrapperEntity
-import org.bukkit.Axis
 import net.kyori.adventure.key.Key
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
-import org.bukkit.block.data.Directional
-import org.bukkit.block.data.Orientable
-import org.bukkit.block.data.Rotatable
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -78,27 +75,25 @@ open class PylonBlock internal constructor(val block: Block) {
     open var disableBlockTextureEntity = false
 
     /**
-     * A packet based [ItemDisplay] sent to players with `customBlockTextures` enabled.
+     * A packet based [ItemDisplay] sent to players who have `customBlockTextures` enabled.
+     *
+     * You can override [getBlockTextureProperties] if you have any custom block state properties
+     * you want to expose to resource packs for custom models/textures. If those properties change
+     * you can call [refreshBlockTextureItem] to update the model accordingly.
+     *
+     * Upon initialization the entity is set up by [setupBlockTexture] (which can be overridden),
+     * and modifications afterward can be done using [updateBlockTexture].
      *
      * Being lazily initialized, if you do not access the entity directly it will only be created
      * when a player with `customBlockTextures` comes within range for the first time. This is to
      * avoid unnecessary entity creation, memory usage, and entity update overhead when no players
      * can actually see it.
-     *
-     * Upon initialization the entity is set up by [setupBlockTexture] (which can be overridden),
-     * and modifications afterward can be done using [updateBlockTexture].
-     *
-     * For example, if you have a block that faces different directions, you can override [setupBlockTexture]
-     * and rotate the entity based on the block's facing direction.
-     *
-     * Or let's say you have a furnace block that changes texture based on whether it's lit or not,
-     * you can use [updateBlockTexture] to change the entity's item to reflect the lit/unlit state.
      */
-    val blockTextureEntity: WrapperEntity? by lazy {
+    open val blockTextureEntity: BlockTextureEntity? by lazy {
         if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
             null
         } else {
-            val entity = WrapperEntity(EntityTypes.ITEM_DISPLAY)
+            val entity = BlockTextureEntity(this)
             val meta = entity.getEntityMeta(ItemDisplayMeta::class.java)
             setupBlockTexture(entity, meta)
         }
@@ -144,51 +139,27 @@ open class PylonBlock internal constructor(val block: Block) {
      * item returned by [getBlockTextureItem] (or a barrier if none is provided), set's its item
      * model to air, making it invisible for players without a resource pack, scales it to
      * 1.00085f in all directions to prevent z-fighting with the vanilla block model, and maxes its
-     * brightness. If the block is directional (either by implementing [PylonDirectionalBlock],
-     * or by having block data that is [Orientable], [Directional], or [Rotatable]), the entity
-     * is rotated to face the same direction as the block.
+     * brightness. It sets the display type to be "fixed".
      */
-    protected open fun setupBlockTexture(entity: WrapperEntity, meta: ItemDisplayMeta): WrapperEntity = entity.apply {
+    protected open fun setupBlockTexture(entity: BlockTextureEntity, meta: ItemDisplayMeta): BlockTextureEntity = entity.apply {
         // TODO: Add a way to easily just change the transformation of the entity, without having to override this method entirely
-        entity.spawn(Location(block.x + 0.5, block.y + 0.5, block.z + 0.5, 0f, 0f))
+        entity.spawn(Location(this@PylonBlock.block.x + 0.5, this@PylonBlock.block.y + 0.5, this@PylonBlock.block.z + 0.5, 0f, 0f))
 
         val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
         item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
         meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
+        meta.displayType = ItemDisplayMeta.DisplayType.FIXED
         meta.brightnessOverride = 15 shl 4 or 15 shl 20;
-        meta.scale = Vector3f(1.0009f, 1.0009f, 1.0009f)
+        meta.scale = Vector3f(1.0000175f, 1.0000175f, 1.0000175f)
         meta.width = 0f
         meta.height = 0f
-
-        val blockData = block.blockData
-        var facing = (this@PylonBlock as? PylonDirectionalBlock)?.getFacing()
-        if (facing == null) {
-            if (blockData is Orientable) {
-                facing = when (blockData.axis) {
-                    Axis.X -> BlockFace.EAST
-                    Axis.Y -> BlockFace.UP
-                    Axis.Z -> BlockFace.SOUTH
-                }
-            } else if (blockData is Directional) {
-                facing = blockData.facing
-            } else if (blockData is Rotatable) {
-                facing = blockData.rotation
-            }
-        }
-
-        if (facing != null) {
-            val direction = facing.direction
-            entity.teleport(entity.location.apply {
-                this.direction = Vector3f(direction.x.toFloat(), direction.y.toFloat(), direction.z.toFloat())
-            })
-        }
     }
 
     /**
      * Use this method to make any changes to the block texture entity, such as changing its item,
      * transformation, etc, after initialization. (see [setupBlockTexture])
      */
-    protected fun updateBlockTexture(updater: (WrapperEntity, ItemDisplayMeta) -> Unit) {
+    protected fun updateBlockTexture(updater: (BlockTextureEntity, ItemDisplayMeta) -> Unit) {
         blockTextureEntity?.let {
             val meta = it.getEntityMeta(ItemDisplayMeta::class.java)
             updater(it, meta)
@@ -196,16 +167,72 @@ open class PylonBlock internal constructor(val block: Block) {
     }
 
     /**
+     * Schedules the block texture item to be refreshed on the next server tick.
+     * See [refreshBlockTextureItem].
+     */
+    fun scheduleBlockTextureItemRefresh() {
+        Bukkit.getScheduler().runTask(PylonCore) { _ ->
+            refreshBlockTextureItem()
+        }
+    }
+
+    /**
      * Call this method to refresh the block texture entity's item to be the result of
      * [getBlockTextureItem], or a barrier if that returns null.
      */
-    protected fun refreshBlockTextureItem() {
+    fun refreshBlockTextureItem() {
         updateBlockTexture { _, meta ->
             val item = getBlockTextureItem() ?: ItemStack(Material.BARRIER)
             item.setData(DataComponentTypes.ITEM_MODEL, Key.key("air"))
             meta.item = SpigotConversionUtil.fromBukkitItemStack(item)
         }
     }
+
+    /**
+     * Returns a map of custom block state properties to be used for the block texture item.
+     * These properties will be merged with the vanilla block state properties of the block.
+     *
+     * Your map should be in the form of `propertyName -> (propertyValue, numberOfPossibleValues)`.
+     * For example, if you have a property called "facing" that can be "up", "down", "north", "south", "east", or "west",
+     * you may return `mapOf("facing" to ("north", 6))`.
+     *
+     * When overriding this method you most likely want to work off the result of `super.getBlockTextureProperties()`
+     * instead of returning a new map entirely, to ensure that any properties provided by superclasses
+     * are preserved. (e.g. [PylonDirectionalBlock])
+     */
+    open fun getBlockTextureProperties(): MutableMap<String, Pair<String, Int>> {
+        val properties = mutableMapOf<String, Pair<String, Int>>()
+        if (this is PylonDirectionalBlock) {
+            val facing = getFacing()
+            if (facing != null) {
+                properties["facing"] = facing.name.lowercase() to IMMEDIATE_FACES.size
+            }
+        }
+        return properties
+    }
+
+    /**
+     * Returns the item that should be used to display the block's texture.
+     *
+     * By default, returns the item with the same key as the block, marked with the
+     * [pylonBlockTextureEntityKey]. The item will also have custom model data with
+     * the vanilla block state properties of the block, merged with any custom
+     * properties provided by the block. (see [getBlockTextureProperties])
+     * This allows resource packs to provide different models/textures for different
+     * block states.
+     *
+     * It is recommended to only override this method if you definitely need to, for
+     * most use cases you should only ever need to override [getBlockTextureProperties].
+     *
+     * @return the item that should be used to display the block's texture
+     */
+    open fun getBlockTextureItem() = defaultItem?.getItemStack()?.let { ItemStackBuilder(it) }?.apply {
+        editPdc { it.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true) }
+        val properties = NmsAccessor.instance.getStateProperties(block, getBlockTextureProperties())
+        for ((property, value) in properties) {
+            addCustomModelDataString("$property=$value")
+        }
+    }?.build()
 
     /**
      * WAILA is the text that shows up when looking at a block to tell you what the block is.
@@ -245,17 +272,6 @@ open class PylonBlock internal constructor(val block: Block) {
     open fun getPickItem() = defaultItem?.getItemStack()
 
     /**
-     * Returns the item that should be used to display the block's texture.
-     *
-     * By default, returns the item with the same key as the block.
-     *
-     * @return the item that should be used to display the block's texture
-     */
-    open fun getBlockTextureItem() = defaultItem?.getItemStack()?.apply {
-        itemMeta.persistentDataContainer.set(pylonBlockTextureEntityKey, PylonSerializers.BOOLEAN, true)
-    }
-
-    /**
      * Called when debug info is requested for the block by someone
      * using the [DebugWaxedWeatheredCutCopperStairs]. If there is
      * any transient data that can be useful for debugging, you're
@@ -287,7 +303,9 @@ open class PylonBlock internal constructor(val block: Block) {
 
     companion object {
 
-        private val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
+        @JvmStatic
+        val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
+
         private val pylonBlockKeyKey = pylonKey("pylon_block_key")
         private val pylonBlockPositionKey = pylonKey("position")
 
