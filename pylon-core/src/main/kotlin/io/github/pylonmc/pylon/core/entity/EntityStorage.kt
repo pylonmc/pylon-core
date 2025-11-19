@@ -1,11 +1,13 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.block.BlockListener.logEventHandleErr
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.base.PylonTickableEntity
@@ -220,10 +222,23 @@ object EntityStorage : Listener {
             }
 
             if (pylonEntity is PylonTickableEntity) {
-                tickMap[pylonEntity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
+                val dispatcher =
+                    if (pylonEntity.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
+                tickMap[pylonEntity.uuid] = PylonCore.launch(dispatcher) {
+
+                    var lastTickNanos = System.nanoTime()
                     while (true) {
-                        pylonEntity.tick()
-                        delay(pylonEntity.tickDelay.ticks)
+                        delay(pylonEntity.tickInterval.ticks)
+                        try {
+                            val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
+                            lastTickNanos = System.nanoTime()
+                            pylonEntity.tick(dt)
+                        } catch (e: Exception) {
+                            PylonCore.launch(PylonCore.minecraftDispatcher) {
+                                PylonCore.logger.severe("Error when handling entity(${pylonEntity.key}, ${pylonEntity.entity.location}) error: ${e.localizedMessage}")
+                                e.printStackTrace()
+                            }
+                        }
                     }
                 }
             }
