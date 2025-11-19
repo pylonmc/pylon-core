@@ -64,9 +64,19 @@ class UnitFormat @JvmOverloads constructor(
         return format(BigDecimal.valueOf(value.toDouble()))
     }
 
+    fun format(value: Float, decimalPlaces: Int): Formatted {
+        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
+        return format(BigDecimal.valueOf(value.toDouble()).setScale(decimalPlaces))
+    }
+
     fun format(value: Double): Formatted {
         check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
         return format(BigDecimal.valueOf(value))
+    }
+
+    fun format(value: Double, decimalPlaces: Int): Formatted {
+        check(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
+        return format(BigDecimal.valueOf(value).setScale(decimalPlaces))
     }
 
     /**
