@@ -62,6 +62,8 @@ open class PylonBlock internal constructor(val block: Block) {
 
     val key = schema.key
 
+    val nameTranslationKey = schema.nameTranslationKey
+    val loreTranslationKey = schema.loreTranslationKey
     val defaultWailaTranslationKey = schema.defaultWailaTranslationKey
 
     /**

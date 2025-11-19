@@ -207,6 +207,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         val item = PylonItem.fromStack(bukkitStack) ?: return stack
         val prototype = item.schema.getItemStack()
         prototype.copyDataFrom(bukkitStack) { it != DataComponentTypes.ITEM_NAME && it != DataComponentTypes.LORE }
+        prototype.amount = bukkitStack.amount
         val translatedPrototype = prototype.clone()
         try {
             handler.handleItem(translatedPrototype)

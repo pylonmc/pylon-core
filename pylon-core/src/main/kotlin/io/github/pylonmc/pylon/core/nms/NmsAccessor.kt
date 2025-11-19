@@ -3,7 +3,12 @@ package io.github.pylonmc.pylon.core.nms
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import net.kyori.adventure.text.Component
 import org.bukkit.block.Block
+import org.bukkit.Material
+import org.bukkit.World
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.ApiStatus
 
@@ -13,6 +18,10 @@ import org.jetbrains.annotations.ApiStatus
 @ApiStatus.Internal
 @ApiStatus.NonExtendable
 interface NmsAccessor {
+
+    fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Material) -> Unit, force: Boolean = false)
+
+    fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot?, force: Boolean = false)
 
     fun registerTranslationHandler(player: Player, handler: PlayerTranslationHandler)
 

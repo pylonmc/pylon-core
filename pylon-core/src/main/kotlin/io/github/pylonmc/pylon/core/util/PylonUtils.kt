@@ -8,7 +8,9 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys
 import net.kyori.adventure.text.Component
@@ -16,25 +18,34 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.attribute.Attribute
 import org.bukkit.Registry
+import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
+import org.joml.Matrix3f
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import kotlin.math.absoluteValue
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -431,7 +442,98 @@ fun ItemStack.vanillaDisplayName(): Component
 val Component.plainText: String
     get() = PlainTextComponentSerializer.plainText().serialize(this)
 
+/**
+ * Does not include first or last block
+ */
+fun blocksOnPath(from: BlockPosition, to: BlockPosition): List<Block> {
+    val originBlock = from.block
+    val offset = to.location
+        .subtract(originBlock.location)
+        .toVector().toVector3i()
+
+    val blocks = mutableListOf<Block>()
+    var block = originBlock
+    // math.round to make it an integer - the length will already be an integer
+    for (i in 0..<offset.length().roundToInt() - 1) {
+        block = block.getRelative(vectorToBlockFace(offset))
+        blocks.add(block)
+    }
+
+    return blocks
+}
+
+/* Returns lambda where
+ * r1 = p1 + lambda*d1 (line 1)
+ * r2 = p2 + mu*d2 (line 2)
+ * r3 = p3 + phi*d3 (an imagined perpendicular line between them used to solve for closest points)
+ */
+fun findClosestPointBetweenSkewLines(p1: Vector3f, d1: Vector3f, p2: Vector3f, d2: Vector3f): Float {
+    val d3 = Vector3f(d1).cross(d2)
+    // solve for lamdba, mu, phi using the matrix inversion method
+    val mat = Matrix3f(d1, Vector3f(d2).mul(-1f), d3)
+        .invert()
+    val solution = Vector3f(p2).sub(p1).mul(mat)
+    return solution.y
+}
+
+/**
+ * @param p The point
+ * @param p1 The starting point of the line
+ * @param d1 The direction of the line
+ *
+ * @return Supposing the equation of the line is p1 + t*d1, returns the t representing the closest point
+ *
+ * @see <a href="https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d">
+ */
+fun findClosestPointToOtherPointOnLine(p: Vector3f, p1: Vector3f, d1: Vector3f): Float {
+    val v = Vector3f(p).sub(p1)
+    return Vector3f(v).dot(d1)
+}
+
+/**
+ * Unidirectional, meaning if the closest point is 'behind' the starting point, returns the distance
+ * from the starting point.
+ *
+ * @param p The point
+ * @param p1 The starting point of the line
+ * @param d1 The direction of the line
+ *
+ * @see <a href="https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d">
+ */
+fun findClosestDistanceBetweenLineAndPoint(p: Vector3f, p1: Vector3f, d1: Vector3f): Float {
+    val t = max(0.0F, findClosestPointToOtherPointOnLine(p, p1, d1))
+    val closestPoint = Vector3f(p1).add(Vector3f(d1).mul(t))
+    return (Vector3f(closestPoint).sub(p)).length()
+}
+
+@JvmSynthetic
+internal fun getTargetEntity(player: Player, maxDistanceBetweenRayAndEntity: Float): Entity? {
+    val range = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)!!.value
+    val entities = player.getNearbyEntities(range, range, range)
+
+    for (entity in entities) {
+        val distance = findClosestDistanceBetweenLineAndPoint(
+            entity.location.toVector().toVector3f(),
+            player.eyeLocation.toVector().toVector3f(),
+            player.eyeLocation.getDirection().toVector3f()
+        )
+        if (distance <= maxDistanceBetweenRayAndEntity) {
+            return entity
+        }
+    }
+
+    return null
+}
+
 fun pickaxeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_PICKAXE)
 fun axeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_AXE)
 fun shovelMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_SHOVEL)
 fun hoeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_HOE)
+
+@JvmOverloads
+fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Material) -> Unit = {}, force: Boolean = false) =
+    NmsAccessor.instance.damageItem(itemStack, amount, world, onBreak, force)
+
+@JvmOverloads
+fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot? = null, force: Boolean = false) =
+    NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)

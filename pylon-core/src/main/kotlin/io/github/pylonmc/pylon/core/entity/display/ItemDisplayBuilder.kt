@@ -16,14 +16,16 @@ import org.joml.Matrix4f
 @Suppress("unused")
 open class ItemDisplayBuilder() {
 
-    protected var itemStack: ItemStack? = null
-    protected var transformation: Matrix4f? = null
-    protected var brightness: Brightness? = null
-    protected var glowColor: Color? = null
-    protected var billboard: Billboard? = null
-    protected var viewRange: Float? = null
-    protected var interpolationDelay: Int? = null
-    protected var interpolationDuration: Int? = null
+    var itemStack: ItemStack? = null
+    var transformation: Matrix4f? = null
+    var brightness: Brightness? = null
+    var glowColor: Color? = null
+    var billboard: Billboard? = null
+    var viewRange: Float? = null
+    var interpolationDelay: Int? = null
+    var interpolationDuration: Int? = null
+    var width: Float? = null
+    var height: Float? = null
 
     constructor(other: ItemDisplayBuilder): this() {
         this.itemStack = other.itemStack
@@ -34,6 +36,8 @@ open class ItemDisplayBuilder() {
         this.viewRange = other.viewRange
         this.interpolationDelay = other.interpolationDelay
         this.interpolationDuration = other.interpolationDuration
+        this.width = other.width
+        this.height = other.height
     }
 
     fun material(material: Material): ItemDisplayBuilder = apply { this.itemStack = ItemStack(material) }
@@ -48,6 +52,8 @@ open class ItemDisplayBuilder() {
     fun viewRange(viewRange: Float): ItemDisplayBuilder = apply { this.viewRange = viewRange }
     fun interpolationDelay(interpolationDelay: Int): ItemDisplayBuilder = apply { this.interpolationDelay = interpolationDelay }
     fun interpolationDuration(interpolationDuration: Int): ItemDisplayBuilder = apply { this.interpolationDuration = interpolationDuration }
+    fun width(width: Float): ItemDisplayBuilder = apply { this.width = width }
+    fun height(height: Float): ItemDisplayBuilder = apply { this.height = height }
 
     open fun build(location: Location): ItemDisplay {
         val finalLocation = location.clone()
@@ -84,6 +90,12 @@ open class ItemDisplayBuilder() {
         }
         if (interpolationDuration != null) {
             display.interpolationDuration = interpolationDuration!!
+        }
+        if (width != null) {
+            display.displayWidth = width!!
+        }
+        if (height != null) {
+            display.displayWidth = height!!
         }
     }
 }

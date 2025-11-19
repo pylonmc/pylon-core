@@ -20,7 +20,7 @@ import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.fluid.connecting.ConnectingService
+import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.button.setting.TogglePlayerSettingButton
 import io.github.pylonmc.pylon.core.guide.pages.PlayerSettingsPage
@@ -41,6 +41,7 @@ import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.Waila
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
+import io.papermc.paper.ServerBuildInfo
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.delay
 import me.tofaa.entitylib.APIConfig
@@ -52,7 +53,6 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Display
-import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -74,6 +74,18 @@ object PylonCore : JavaPlugin(), PylonAddon {
     override fun onEnable() {
         val start = System.currentTimeMillis()
 
+        val expectedVersion = pluginMeta.apiVersion
+        val actualVersion = ServerBuildInfo.buildInfo().minecraftVersionId()
+        if (actualVersion != expectedVersion) {
+            logger.severe("!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!")
+            logger.severe("You are running Pylon on Minecraft version $actualVersion")
+            logger.severe("This build of Pylon expects Minecraft version $expectedVersion")
+            logger.severe("Pylon may run fine, but you may encounter bugs ranging from mild to catastrophic")
+            logger.severe("Please update your Pylon version accordingly")
+            logger.severe("Please see https://github.com/pylonmc/pylon-core/releases for available Pylon versions")
+            logger.severe("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        }
+
         InvUI.getInstance().setPlugin(this)
 
         val packetEvents = PacketEvents.getAPI()
@@ -82,12 +94,14 @@ object PylonCore : JavaPlugin(), PylonAddon {
         val entityLibPlatform = SpigotEntityLibPlatform(this)
         val entityLibSettings = APIConfig(packetEvents).tickTickables()
         EntityLib.init(entityLibPlatform, entityLibSettings)
-        entityLibPlatform.entityIdProvider = EntityIdProvider { uuid, type ->
+        entityLibPlatform.entityIdProvider = EntityIdProvider { _, _ ->
             @Suppress("DEPRECATION")
             Bukkit.getUnsafe().nextEntityId()
         }
 
         saveDefaultConfig()
+        // Add any keys that are missing from global config - saveDefaultConfig will not do anything if config already present
+        mergeGlobalConfig(PylonCore, "config.yml", "config.yml")
 
         Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
         Bukkit.getPluginManager().registerEvents(PylonAddon, this)
@@ -112,7 +126,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonFluidBufferBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
-        Bukkit.getPluginManager().registerEvents(ConnectingService, this)
+        Bukkit.getPluginManager().registerEvents(FluidPipePlacementService, this)
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
 
@@ -141,7 +155,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         }
 
         if (PylonConfig.researchesEnabled) {
-            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchEffects)
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchConfetti)
+            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchSounds)
         }
 
         Bukkit.getScheduler().runTaskTimer(
@@ -174,12 +189,12 @@ object PylonCore : JavaPlugin(), PylonAddon {
             PylonSimpleMultiblock.MultiblockGhostBlock.KEY,
         )
 
-        PylonEntity.register<ItemDisplay, FluidPointDisplay>(FluidPointDisplay.KEY)
-        PylonEntity.register<Interaction, FluidPointInteraction>(FluidPointInteraction.KEY)
+        PylonEntity.register<ItemDisplay, FluidEndpointDisplay>(FluidEndpointDisplay.KEY)
+        PylonEntity.register<ItemDisplay, FluidIntersectionDisplay>(FluidIntersectionDisplay.KEY)
         PylonEntity.register<ItemDisplay, FluidPipeDisplay>(FluidPipeDisplay.KEY)
 
-        PylonBlock.register<FluidPipeMarker>(FluidPipeMarker.KEY, Material.STRUCTURE_VOID)
-        PylonBlock.register<FluidPipeConnector>(FluidPipeConnector.KEY, Material.STRUCTURE_VOID)
+        PylonBlock.register<FluidSectionMarker>(FluidSectionMarker.KEY, Material.STRUCTURE_VOID)
+        PylonBlock.register<FluidIntersectionMarker>(FluidIntersectionMarker.KEY, Material.STRUCTURE_VOID)
 
         RecipeType.addVanillaRecipes()
 
@@ -255,7 +270,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
     override fun onDisable() {
         PacketEvents.getAPI().terminate()
-        ConnectingService.cleanup()
+        FluidPipePlacementService.cleanup()
         BlockStorage.cleanupEverything()
         EntityStorage.cleanupEverything()
         PylonMetrics.save()

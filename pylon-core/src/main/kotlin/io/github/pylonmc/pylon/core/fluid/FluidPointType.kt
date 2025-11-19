@@ -19,5 +19,5 @@ enum class FluidPointType(val material: Material) {
     /**
      * This connection point serves to connect other connection points together
      */
-    CONNECTOR(Material.GRAY_CONCRETE);
+    INTERSECTION(Material.GRAY_CONCRETE);
 }
