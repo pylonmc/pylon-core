@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -23,6 +22,7 @@ import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.Inventory
 import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.UpdateReason
 import xyz.xenondevs.invui.window.Window
 import java.util.IdentityHashMap
 
@@ -46,7 +46,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
      * The title of the GUI
      */
     val guiTitle: Component
-        get() = (this as PylonBlock).defaultWailaTranslationKey
+        get() = (this as PylonBlock).nameTranslationKey
 
     /**
      * The GUI associated with this block.
@@ -103,6 +103,8 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
 
     @ApiStatus.Internal
     companion object : Listener {
+        val initializeReason = object : UpdateReason {}
+
         private val inventoryKey = pylonKey("inventories")
         private val inventoryType =
             PylonSerializers.LIST.listTypeFrom(PylonSerializers.LIST.listTypeFrom(PylonSerializers.ITEM_STACK))
@@ -127,7 +129,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
             val invs = inventories.getOrPut(block) { block.gui.getAllInventories() }
             for ((old, new) in invs.zip(items)) {
                 repeat(old.size) { i ->
-                    old.setItemSilently(i, new[i])
+                    old.forceSetItem(initializeReason, i, new[i])
                 }
             }
         }

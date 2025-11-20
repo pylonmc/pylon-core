@@ -10,8 +10,10 @@ repositories {
     maven("https://repo.xenondevs.xyz/releases")
 }
 
+val minecraftVersion = property("minecraft.version").toString()
+
 dependencies {
-    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
     compileOnly(project(":pylon-core"))
 }
 

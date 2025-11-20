@@ -25,12 +25,11 @@ import kotlin.math.sqrt
 /**
  * A 'endpoint display' is one of the red/green displays that indicates a block's fluid input/output.
  */
-@ApiStatus.Internal
 class FluidEndpointDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, FluidPointDisplay {
     override val point: VirtualFluidPoint
     var connectedPipeDisplay: UUID?
     override val connectedPipeDisplays: Set<UUID>
-        get() = if (connectedPipeDisplay != null) setOf(connectedPipeDisplay!!) else emptySet()
+        get() = setOfNotNull(connectedPipeDisplay)
     val face: BlockFace
     val radius: Float
     val pipeDisplay
@@ -82,7 +81,10 @@ class FluidEndpointDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, FluidPo
     companion object {
         const val POINT_SIZE: Float = 0.12f
 
+        @JvmField
         val distanceFromFluidPointCenterToCorner = sqrt(3 * (POINT_SIZE / 2.0F).pow(2))
+
+        @JvmField
         val KEY = pylonKey("fluid_pipe_endpoint_display")
 
         private val CONNECTED_PIPE_DISPLAY_KEY = pylonKey("connected_pipe_display")

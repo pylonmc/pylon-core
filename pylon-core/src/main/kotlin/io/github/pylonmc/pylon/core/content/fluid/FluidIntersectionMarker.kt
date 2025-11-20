@@ -15,13 +15,11 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
-import org.jetbrains.annotations.ApiStatus
 
 /**
  * A 'fluid pipe connector' is one of the small gray displays that appears
  * on pipe corners/junctions.
  */
-@ApiStatus.Internal
 class FluidIntersectionMarker : PylonBlock, PylonEntityHolderBlock, PylonBreakHandler {
 
     @Suppress("unused")
@@ -61,6 +59,7 @@ class FluidIntersectionMarker : PylonBlock, PylonEntityHolderBlock, PylonBreakHa
     override fun getPickItem() = pipe.stack
 
     companion object {
+        @JvmField
         val KEY = pylonKey("fluid_pipe_intersection_marker")
     }
 }

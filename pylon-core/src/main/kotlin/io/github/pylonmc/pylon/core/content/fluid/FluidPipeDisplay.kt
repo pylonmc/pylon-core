@@ -22,7 +22,6 @@ import java.util.UUID
 /**
  * A display that visually represents a pipe.
  */
-@ApiStatus.Internal
 class FluidPipeDisplay : PylonEntity<ItemDisplay> {
     val fromDisplay: UUID
     val toDisplay: UUID

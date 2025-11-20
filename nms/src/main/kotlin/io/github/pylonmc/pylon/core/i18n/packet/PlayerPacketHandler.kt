@@ -78,6 +78,15 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                         packet.replace
                     )
                 }
+                is ClientboundMerchantOffersPacket -> {
+                    for (offer in packet.offers) {
+                        translate(offer.baseCostA.itemStack)
+                        offer.costB.ifPresent {
+                            translate(it.itemStack)
+                        }
+                        translate(offer.result)
+                    }
+                }
 
                 is ClientboundPlaceGhostRecipePacket -> {
                     packet = ClientboundPlaceGhostRecipePacket(
@@ -207,6 +216,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
         val item = PylonItem.fromStack(bukkitStack) ?: return stack
         val prototype = item.schema.getItemStack()
         prototype.copyDataFrom(bukkitStack) { it != DataComponentTypes.ITEM_NAME && it != DataComponentTypes.LORE }
+        prototype.amount = bukkitStack.amount
         val translatedPrototype = prototype.clone()
         try {
             handler.handleItem(translatedPrototype)

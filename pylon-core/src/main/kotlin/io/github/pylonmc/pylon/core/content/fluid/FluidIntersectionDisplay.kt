@@ -15,13 +15,11 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.block.Block
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.persistence.PersistentDataContainer
-import org.jetbrains.annotations.ApiStatus
 import java.util.UUID
 
 /**
  * A 'intersection display' is one of the gray displays that indicates one or more pipes being joined together.
  */
-@ApiStatus.Internal
 class FluidIntersectionDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, FluidPointDisplay {
     override val point: VirtualFluidPoint
     override val connectedPipeDisplays: MutableSet<UUID>
@@ -62,13 +60,15 @@ class FluidIntersectionDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, Flu
     }
 
     companion object {
+        @JvmStatic
         val KEY = pylonKey("fluid_pipe_intersection_display")
 
         private val CONNECTED_PIPE_DISPLAYS_KEY = pylonKey("connected_pipe_displays")
         private val CONNECTED_PIPE_DISPLAYS_TYPE = PylonSerializers.SET.setTypeFrom(PylonSerializers.UUID)
         private val CONNECTION_POINT_KEY = pylonKey("connection_point")
 
-        fun makeEntity(block: Block): ItemDisplay {
+        @JvmSynthetic
+        internal fun makeEntity(block: Block): ItemDisplay {
             return ItemDisplayBuilder()
                 .brightness(7)
                 .transformation(TransformBuilder()

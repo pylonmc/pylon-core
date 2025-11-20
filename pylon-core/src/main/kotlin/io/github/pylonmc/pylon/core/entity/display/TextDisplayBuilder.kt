@@ -12,18 +12,18 @@ import org.joml.Matrix4f
 
 
 @Suppress("unused")
-class TextDisplayBuilder() {
+open class TextDisplayBuilder() {
 
-    private var text: Component? = null
-    private var transformation: Matrix4f? = null
-    private var brightness: Brightness? = null
-    private var glowColor: Color? = null
-    private var viewRange: Float? = null
-    private var billboard: Billboard? = null
-    private var alignment: TextAlignment? = null
-    private var backgroundColor: Color? = null
-    private var interpolationDelay: Int? = null
-    private var interpolationDuration: Int? = null
+    protected var text: Component? = null
+    protected var transformation: Matrix4f? = null
+    protected var brightness: Brightness? = null
+    protected var glowColor: Color? = null
+    protected var viewRange: Float? = null
+    protected var billboard: Billboard? = null
+    protected var alignment: TextAlignment? = null
+    protected var backgroundColor: Color? = null
+    protected var interpolationDelay: Int? = null
+    protected var interpolationDuration: Int? = null
 
     constructor(other: TextDisplayBuilder) : this() {
         this.text = other.text
@@ -52,7 +52,7 @@ class TextDisplayBuilder() {
     fun interpolationDelay(interpolationDelay: Int): TextDisplayBuilder = apply { this.interpolationDelay = interpolationDelay }
     fun interpolationDuration(interpolationDuration: Int): TextDisplayBuilder = apply { this.interpolationDuration = interpolationDuration }
 
-    fun build(location: Location): TextDisplay {
+    open fun build(location: Location): TextDisplay {
         val finalLocation = location.clone()
         finalLocation.yaw = 0f
         finalLocation.pitch = 0f
@@ -60,7 +60,7 @@ class TextDisplayBuilder() {
         return finalLocation.world.spawn(finalLocation, TextDisplay::class.java, this::update)
     }
 
-    fun update(display: TextDisplay) {
+    open fun update(display: TextDisplay) {
         if (text != null) {
             display.text(text)
         }

@@ -5,7 +5,7 @@ import org.bukkit.block.BlockFace
 import org.joml.*
 
 @Suppress("unused")
-class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
+open class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
 
     constructor(): this(ArrayDeque())
 
@@ -52,7 +52,7 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
         = apply { add(LookAlong(xFrom, yFrom, zFrom, xTo, yTo, zTo)) }
     fun lookAlong(direction: BlockFace) = lookAlong(direction.direction.toVector3f())
 
-    private fun build(): Matrix4f {
+    open fun build(): Matrix4f {
         val matrix = Matrix4f()
         while (!components.isEmpty()) {
             components.removeFirst().apply(matrix)
@@ -64,17 +64,17 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
      * Adjusts the transformation so that the transformation acts on the center of the block
      * display; otherwise it would act on a corner
      */
-    fun buildForBlockDisplay(): Matrix4f {
+    open fun buildForBlockDisplay(): Matrix4f {
         val cloned = TransformBuilder(this)
         cloned.components.addLast(Translation(BLOCK_DISPLAY_ADJUSTMENT))
         return cloned.build()
     }
 
-    fun buildForItemDisplay(): Matrix4f {
+    open fun buildForItemDisplay(): Matrix4f {
         return TransformBuilder(this).build()
     }
 
-    fun buildForTextDisplay(): Matrix4f {
+    open fun buildForTextDisplay(): Matrix4f {
         return TransformBuilder(this).build()
     }
 

@@ -11,16 +11,16 @@ import org.joml.Matrix4f
 
 
 @Suppress("unused")
-class BlockDisplayBuilder() {
+open class BlockDisplayBuilder() {
 
-    private var material: Material? = null
-    private var blockData: BlockData? = null
-    private var transformation: Matrix4f? = null
-    private var glowColor: Color? = null
-    private var brightness: Brightness? = null
-    private var viewRange: Float? = null
-    private var interpolationDelay: Int? = null
-    private var interpolationDuration: Int? = null
+    protected var material: Material? = null
+    protected var blockData: BlockData? = null
+    protected var transformation: Matrix4f? = null
+    protected var glowColor: Color? = null
+    protected var brightness: Brightness? = null
+    protected var viewRange: Float? = null
+    protected var interpolationDelay: Int? = null
+    protected var interpolationDuration: Int? = null
 
     constructor(other: BlockDisplayBuilder): this() {
         this.material = other.material
@@ -48,14 +48,14 @@ class BlockDisplayBuilder() {
     fun interpolationDelay(interpolationDelay: Int): BlockDisplayBuilder = apply { this.interpolationDelay = interpolationDelay }
     fun interpolationDuration(interpolationDuration: Int): BlockDisplayBuilder = apply { this.interpolationDuration = interpolationDuration }
 
-    fun build(location: Location): BlockDisplay {
+    open fun build(location: Location): BlockDisplay {
         val finalLocation = location.clone()
         finalLocation.yaw = 0.0f
         finalLocation.pitch = 0.0f
         return location.world.spawn(finalLocation, BlockDisplay::class.java, this::update)
     }
 
-    fun update(display: BlockDisplay) {
+    open fun update(display: BlockDisplay) {
         if (material != null) {
             display.block = material!!.createBlockData()
         }

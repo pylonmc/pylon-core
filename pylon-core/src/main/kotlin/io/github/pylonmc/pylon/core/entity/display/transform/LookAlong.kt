@@ -7,7 +7,10 @@ import org.joml.Vector3f
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-class LookAlong(direction: Vector3f) : TransformComponent {
+open class LookAlong(direction: Vector3f) : TransformComponent {
+
+    val angleX = -atan2(direction.y, sqrt(direction.x * direction.x + direction.z * direction.z))
+    val angleY = atan2(direction.x, direction.z)
 
     constructor(direction: Vector3d): this(Vector3f(direction))
 
@@ -22,9 +25,6 @@ class LookAlong(direction: Vector3f) : TransformComponent {
 
     constructor(xFrom: Double, yFrom: Double, zFrom: Double, xTo: Double, yTo: Double, zTo: Double)
             : this(Vector3d(xFrom, yFrom, zFrom), Vector3d(xTo, yTo, zTo))
-
-    val angleX = -atan2(direction.y, sqrt(direction.x * direction.x + direction.z * direction.z))
-    val angleY = atan2(direction.x, direction.z)
 
     override fun apply(matrix: Matrix4f) {
         matrix.mul(Matrix4f().rotateY(angleY).rotateX(angleX))
