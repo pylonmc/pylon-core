@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.entity.display.transform
 
 import org.bukkit.Location
+import org.bukkit.block.BlockFace
 import org.joml.*
 
 @Suppress("unused")
@@ -49,6 +50,7 @@ class TransformBuilder(val components: ArrayDeque<TransformComponent>) {
         = apply { add(LookAlong(xFrom, yFrom, zFrom, xTo, yTo, zTo)) }
     fun lookAlong(xFrom: Double, yFrom: Double, zFrom: Double, xTo: Double, yTo: Double, zTo: Double)
         = apply { add(LookAlong(xFrom, yFrom, zFrom, xTo, yTo, zTo)) }
+    fun lookAlong(direction: BlockFace) = lookAlong(direction.direction.toVector3f())
 
     private fun build(): Matrix4f {
         val matrix = Matrix4f()

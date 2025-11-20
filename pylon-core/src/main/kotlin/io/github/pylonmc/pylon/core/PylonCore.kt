@@ -111,6 +111,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(FluidPipePlacementService, this)
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
+        Bukkit.getPluginManager().registerEvents(PylonLogisticBlock, this)
+        Bukkit.getPluginManager().registerEvents(PylonCargoBlock, this)
 
         if (PylonConfig.WailaConfig.enabled) {
             PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.wailaSettings))
