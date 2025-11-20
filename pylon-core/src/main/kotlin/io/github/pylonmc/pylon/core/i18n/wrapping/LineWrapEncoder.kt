@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.i18n.wrapping
 
+import kotlinx.coroutines.CompletableDeferred
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
@@ -20,8 +21,17 @@ class LineWrapEncoder private constructor() {
     private fun encode(component: Component) {
         var comp = component
         if (comp !is TextComponent) {
-            if (comp is TranslatableComponent && comp.fallback() != null) {
-                comp = Component.text(comp.fallback()!!).style(comp.style())
+            if (comp is TranslatableComponent) {
+                if (comp.fallback() != null) {
+                    comp = Component.text(comp.fallback()!!).style(comp.style())
+                } else if (comp.key().startsWith("pylon")) {
+                    val content = PlainTextComponentSerializer.plainText().serialize(comp)
+                    comp = Component.text("{ERROR: Missing translation key $content (in component class ${comp.javaClass.simpleName})}")
+                        .color(NamedTextColor.RED)
+                } else { // ignore non pylon tags
+                    val content = PlainTextComponentSerializer.plainText().serialize(comp)
+                    comp = Component.text(content).style(comp.style())
+                }
             } else {
                 val content = PlainTextComponentSerializer.plainText().serialize(comp)
                 comp = Component.text("{ERROR: Missing translation key $content (in component class ${comp.javaClass.simpleName})}")
