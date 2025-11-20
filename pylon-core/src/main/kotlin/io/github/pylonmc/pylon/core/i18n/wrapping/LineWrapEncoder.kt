@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.i18n.wrapping
 
-import kotlinx.coroutines.CompletableDeferred
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
