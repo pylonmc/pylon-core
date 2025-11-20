@@ -102,7 +102,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
             translation = translation.replaceText(replacer)
         }
         return translation
-            .children(translation.children().map { GlobalTranslator.render(it, locale) })
+            .append(component.children().map { GlobalTranslator.render(it, locale) })
             .style(translation.style().merge(component.style(), Style.Merge.Strategy.IF_ABSENT_ON_TARGET))
     }
 
