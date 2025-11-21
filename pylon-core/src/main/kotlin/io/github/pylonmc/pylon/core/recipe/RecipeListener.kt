@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
 import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.event.player.CartographyItemEvent
 import org.bukkit.Keyed
 import org.bukkit.block.Crafter
 import org.bukkit.block.Furnace
@@ -78,6 +79,17 @@ internal object PylonRecipeListener : Listener {
             it is Player && it.canCraft(pylonItemResult, true)
         }
         if (anyViewerDoesNotHaveResearch) {
+            inventory.result = null
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onCartography(e: CartographyItemEvent) {
+        val inventory = e.inventory
+        val hasPylonItems = inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }
+
+        // Should we add a RECIPE_TYPE For this or just let addon devs handle it?
+        if (hasPylonItems) {
             inventory.result = null
         }
     }
