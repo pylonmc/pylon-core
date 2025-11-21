@@ -69,6 +69,9 @@ object PylonConfig {
     @JvmStatic
     val inventoryTickerBaseRate = config.getOrThrow("inventory-ticker-base-rate", ConfigAdapter.LONG)
 
+    @JvmStatic
+    val cargoTickInterval = config.getOrThrow("cargo-tick-interval", ConfigAdapter.INT)
+
     object WailaConfig {
         private val config = Config(PylonCore, "config.yml")
 

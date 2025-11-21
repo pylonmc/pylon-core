@@ -12,7 +12,7 @@ open class VirtualInventoryLogisticSlot(
 
     override fun getAmount() = getItemStack()?.amount?.toLong() ?: 0L
 
-    override fun canSet(stack: ItemStack?) = true
+    override fun getMaxAmount(stack: ItemStack) = stack.maxStackSize.toLong()
 
     override fun set(stack: ItemStack?, amount: Long) {
         inventory.setItem(LogisticUpdateReason, slot, stack?.apply {

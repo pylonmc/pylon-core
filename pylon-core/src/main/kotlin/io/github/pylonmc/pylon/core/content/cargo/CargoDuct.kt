@@ -1,11 +1,14 @@
 package io.github.pylonmc.pylon.core.content.cargo
 
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
+import io.github.pylonmc.pylon.core.block.base.PylonCargoBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
 import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.util.setNullable
@@ -28,23 +31,30 @@ class CargoDuct : PylonBlock, PylonBreakHandler {
         previousFace = null
         nextFace = null
 
-        // Find previous duct
+        // Find next and previous blocks if any of the adjacent blocks are a CargoDuct or PylonCargoBlock
         for (face in IMMEDIATE_FACES) {
-            val otherDuct = BlockStorage.getAs<CargoDuct>(block.getRelative(face))
-            if (otherDuct != null && otherDuct.nextFace == null) {
-                previousFace = face
-                otherDuct.nextFace = face.oppositeFace
-                break
-            }
-        }
+            val adjacentBlock = BlockStorage.get(block.getRelative(face))
 
-        // Find next duct
-        for (face in IMMEDIATE_FACES) {
-            val otherDuct = BlockStorage.getAs<CargoDuct>(block.getRelative(face))
-            if (otherDuct != null && otherDuct.previousFace == null && previousFace != face) {
-                nextFace = face
-                otherDuct.previousFace = face.oppositeFace
-                break
+            // Previous face
+            if (previousFace == null) {
+                if (adjacentBlock is CargoDuct && adjacentBlock.nextFace == null && nextFace != face) {
+                    previousFace = face
+                    adjacentBlock.nextFace = face.oppositeFace
+                }
+                if (adjacentBlock is PylonCargoBlock && adjacentBlock.cargoFaces[face.oppositeFace] == LogisticSlotType.OUTPUT) {
+                    previousFace = face
+                }
+            }
+
+            // Next face
+            if (nextFace == null) {
+                if (adjacentBlock is CargoDuct && adjacentBlock.previousFace == null && previousFace != face) {
+                    nextFace = face
+                    adjacentBlock.previousFace = face.oppositeFace
+                }
+                if (adjacentBlock is PylonCargoBlock && adjacentBlock.cargoFaces[face.oppositeFace] == LogisticSlotType.INPUT) {
+                    nextFace = face
+                }
             }
         }
     }

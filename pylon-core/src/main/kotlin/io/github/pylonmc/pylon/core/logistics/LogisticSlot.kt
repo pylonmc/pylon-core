@@ -19,15 +19,10 @@ interface LogisticSlot {
     fun getAmount(): Long
 
     /**
-     * Returns whether the provided item stack can be inserted into the slot.
-     *
-     * This can be used to only allow certain items to be inserted into this
-     * slot (or to prevent certain items from being inserted).
-     *
-     * Any logic in this function should disregard the stack amount; this is
-     * checked separately.
+     * Returns the maximum amount for the given stack (which may not necessarily
+     * be the same as the stack returned by [getItemStack].
      */
-    fun canSet(stack: ItemStack?): Boolean
+    fun getMaxAmount(stack: ItemStack): Long
 
     fun set(stack: ItemStack?, amount: Long)
 }

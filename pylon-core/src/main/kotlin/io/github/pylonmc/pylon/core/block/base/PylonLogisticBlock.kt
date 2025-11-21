@@ -1,9 +1,13 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticSlot
 import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
+import io.github.pylonmc.pylon.core.logistics.LogisticGroup
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -29,48 +33,64 @@ interface PylonLogisticBlock {
 
     /**
      * Sets up all the logistic slot groups. This is where you should
-     * call [createLogisticSlotGroup] to create all the logistic slot
+     * call [createLogisticGroup] to create all the logistic slot
      * groups you want.
      */
-    fun setupLogisticSlotGroups()
+    fun setupLogisticGroups()
 
     /**
      * Creates a group of logistic slots.
      */
-    fun createLogisticSlotGroup(slotGroup: String, slotType: LogisticSlotType, vararg slots: LogisticSlot) {
+    fun createLogisticGroup(groupName: String, group: LogisticGroup) {
         val logisticBlockData = (logisticBlocks.getOrPut(this) { mutableMapOf() })
-        check(!logisticBlockData.contains(slotGroup)) { "The slot group $slotGroup already exists" }
-        logisticBlockData.put(slotGroup, Pair(slotType, slots))
+        check(!logisticBlockData.contains(groupName)) { "The slot group $groupName already exists" }
+        logisticBlockData.put(groupName, group)
     }
 
     /**
-     * Returns all the logistic slots in the given [group]
+     * Creates a group of logistic slots.
      */
-    fun getLogisticSlots(group: String): Array<out LogisticSlot>
-        = getLogisticSlotGroups()[group]?.second ?: error("Grop $group does not exist")
+    fun createLogisticGroup(groupName: String, slotType: LogisticSlotType, vararg slots: LogisticSlot)
+        = createLogisticGroup(groupName, LogisticGroup(slotType, *slots))
 
     /**
-     * Returns the [LogisticSlotType] of the given [group]
+     * Returns all the logistic slots in the given [groupName]
      */
-    fun getLogisticGroupType(group: String): LogisticSlotType
-        = getLogisticSlotGroups()[group]?.first ?: error("Group $group does not exist")
+    fun getLogisticGroup(groupName: String): LogisticGroup
+        = getLogisticSlotGroups()[groupName] ?: error("Group $groupName does not exist")
 
     /**
      * Returns a map of all the logistic slot groups
      */
-    fun getLogisticSlotGroups(): Map<String, Pair<LogisticSlotType, Array<out LogisticSlot>>>
+    fun getLogisticSlotGroups(): Map<String, LogisticGroup>
         = logisticBlocks.getOrPut(this) { mutableMapOf() }
 
     @ApiStatus.Internal
     companion object : Listener {
 
-        private val logisticBlocks = IdentityHashMap<PylonLogisticBlock, MutableMap<String, Pair<LogisticSlotType, Array<out LogisticSlot>>>>()
+        private val logisticBlocks = IdentityHashMap<PylonLogisticBlock, MutableMap<String, LogisticGroup>>()
 
         @EventHandler
-        private fun onDeserialize(event: PylonBlockDeserializeEvent) {
+        private fun onPlace(event: PylonBlockPlaceEvent) {
             val block = event.pylonBlock
             if (block is PylonLogisticBlock) {
-                block.setupLogisticSlotGroups()
+                block.setupLogisticGroups()
+            }
+        }
+
+        @EventHandler
+        private fun onLoad(event: PylonBlockLoadEvent) {
+            val block = event.pylonBlock
+            if (block is PylonLogisticBlock) {
+                block.setupLogisticGroups()
+            }
+        }
+
+        @EventHandler
+        private fun onBreak(event: PylonBlockBreakEvent) {
+            val block = event.pylonBlock
+            if (block is PylonLogisticBlock) {
+                logisticBlocks.remove(block)
             }
         }
 

@@ -14,6 +14,9 @@ allowed-entity-errors: 5
 # The interval (in Minecraft ticks) between fluid network ticks
 fluid-tick-interval: 5
 
+# The interval (in Minecraft ticks) between cargo ticks
+cargo-tick-interval: 20
+
 block-data-autosave-interval-seconds: 60
 
 entity-data-autosave-interval-seconds: 60
