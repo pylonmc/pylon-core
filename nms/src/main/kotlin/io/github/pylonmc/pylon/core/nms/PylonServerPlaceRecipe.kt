@@ -191,10 +191,6 @@ class PylonServerPlaceRecipe private constructor(
                 methodMap[method.name] = lookup.unreflect(method)
             }
 
-            for (c in ServerPlaceRecipe::class.java.declaredConstructors) {
-                println("Constructor: ${c.parameterTypes.joinToString(", ") { it.typeName }}")
-            }
-
             constructor = lookup.findConstructor(
                 ServerPlaceRecipe::class.java,
                 MethodType.methodType(
