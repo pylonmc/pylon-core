@@ -2,18 +2,22 @@ package io.github.pylonmc.pylon.core.nms.item
 
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.papermc.paper.inventory.recipe.ItemOrExact
-import io.papermc.paper.inventory.recipe.StackedContentsExtrasMap
 import net.minecraft.world.entity.player.StackedContents
-import net.minecraft.world.entity.player.StackedContents.IngredientInfo
+import net.minecraft.world.entity.player.StackedItemContents
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.CraftingInput
 import net.minecraft.world.item.crafting.Recipe
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodHandles
 import kotlin.math.min
 
 
 class ExtraStackedItemContents {
-    private val raw = StackedContents<ItemOrExact?>()
-    private var extrasMap: StackedContentsExtrasMap? = null
+    private val delegate = StackedItemContents()
+
+    init {
+        initialize()
+    }
 
     fun accountStack(stack: ItemStack) {
         this.accountStack(stack, stack.maxStackSize)
@@ -25,22 +29,13 @@ class ExtraStackedItemContents {
         val min = min(maxStackSize, stack.count)
 
         // Determine if this is a Pylon item
-        val isPylon = PylonItem.isPylonItem(stack.bukkitStack)
-
-        if (isPylon) {
+        if (PylonItem.isPylonItem(stack.bukkitStack)) {
             val r = ItemOrExact.Exact(stack.copy())
-            this.raw.account(r, min)
+            delegate.getRaw().account(r, min)
             return
-        } else {
-            val r = ItemOrExact.Item(stack.copy())
-            this.raw.account(r, min)
         }
 
-        // Extras map is still used for exact matching of Pylon items
-        if (this.extrasMap == null) {
-            this.extrasMap = StackedContentsExtrasMap(this.raw)
-        }
-        this.extrasMap!!.accountStack(stack, min)
+        delegate.accountStack(stack, maxStackSize)
     }
 
     fun canCraft(
@@ -51,11 +46,7 @@ class ExtraStackedItemContents {
     }
 
     fun initializeExtras(recipe: Recipe<*>, input: CraftingInput?) {
-        if (this.extrasMap == null) {
-            this.extrasMap = StackedContentsExtrasMap(this.raw)
-        }
-        this.extrasMap!!.initialize(recipe)
-        if (input != null) this.extrasMap!!.accountInput(input)
+        delegate.initializeExtras(recipe, input)
     }
 
     fun canCraft(
@@ -63,16 +54,7 @@ class ExtraStackedItemContents {
         maxCount: Int,
         output: StackedContents.Output<ItemOrExact?>?
     ): Boolean {
-        val placementInfo = recipe.placementInfo()
-        return !placementInfo.isImpossibleToPlace && this.canCraft(placementInfo.ingredients(), maxCount, output)
-    }
-
-    private fun canCraft(
-        ingredients: MutableList<out IngredientInfo<ItemOrExact?>?>,
-        maxCount: Int,
-        output: StackedContents.Output<ItemOrExact?>?
-    ): Boolean {
-        return this.raw.tryPick(ingredients, maxCount, output)
+        return delegate.canCraft(recipe, maxCount, output)
     }
 
     fun getBiggestCraftableStack(
@@ -87,6 +69,23 @@ class ExtraStackedItemContents {
         maxCount: Int,
         output: StackedContents.Output<ItemOrExact?>?
     ): Int {
-        return this.raw.tryPickAll(recipe.placementInfo().ingredients(), maxCount, output)
+        return delegate.getBiggestCraftableStack(recipe, maxCount, output)
+    }
+
+    companion object {
+        var initialized = false
+        lateinit var rawGetter: MethodHandle
+
+        fun initialize() {
+            if (initialized) return
+            val lookup = MethodHandles.privateLookupIn(StackedItemContents::class.java, MethodHandles.lookup())
+            rawGetter = lookup.findGetter(StackedItemContents::class.java, "raw", StackedContents::class.java)
+
+            initialized = true
+        }
+
+        fun StackedItemContents.getRaw(): StackedContents<ItemOrExact> {
+            return rawGetter.invokeExact(this) as StackedContents<ItemOrExact>
+        }
     }
 }

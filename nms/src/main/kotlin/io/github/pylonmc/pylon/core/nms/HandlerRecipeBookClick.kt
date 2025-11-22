@@ -1,8 +1,6 @@
 package io.github.pylonmc.pylon.core.nms
 
 import com.destroystokyo.paper.event.player.PlayerRecipeBookClickEvent
-import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.nms.item.ExtraStackedItemContents
 import io.papermc.paper.configuration.GlobalConfiguration
 import net.kyori.adventure.text.Component
 import net.minecraft.core.registries.Registries
@@ -13,13 +11,10 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.TickThrottler
-import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.inventory.AbstractCraftingMenu
 import net.minecraft.world.inventory.RecipeBookMenu
 import net.minecraft.world.inventory.RecipeBookMenu.PostPlaceAction
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.CraftingRecipe
-import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.item.crafting.RecipeHolder
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
@@ -88,7 +83,7 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
             ResourceKey.create(
                 Registries.RECIPE, CraftNamespacedKey.toMinecraft(recipeName)
             )
-        ).orElse(null) // Paper - Add PlayerRecipeBookClickEvent - forward to legacy event
+        ).orElse(null)
         if (recipeHolder == null) {
             return
         }
