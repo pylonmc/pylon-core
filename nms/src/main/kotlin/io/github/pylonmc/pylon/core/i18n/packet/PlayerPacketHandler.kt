@@ -2,9 +2,12 @@
 
 package io.github.pylonmc.pylon.core.i18n.packet
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.nms.HandlerRecipeBookClick
 import io.github.pylonmc.pylon.core.util.editData
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
@@ -122,6 +125,14 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                     packet.slotNum,
                     reset(packet.itemStack)
                 )
+
+                is ServerboundPlaceRecipePacket -> {
+                    val handler = HandlerRecipeBookClick(player)
+                    PylonCore.launch(PylonCore.minecraftDispatcher) {
+                        handler.handlePlaceRecipe(packet as ServerboundPlaceRecipePacket)
+                    }
+                    return // replace super
+                }
 
                 else -> packet
             }
