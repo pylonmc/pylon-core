@@ -13,7 +13,6 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
-import kotlinx.coroutines.withContext
 import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.game.*
