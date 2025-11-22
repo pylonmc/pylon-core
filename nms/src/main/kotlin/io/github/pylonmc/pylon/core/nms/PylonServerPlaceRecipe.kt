@@ -129,7 +129,7 @@ class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
             }
         }
 
-        if (i != Int.Companion.MAX_VALUE) {
+        if (i != Int.MAX_VALUE) {
             ++i
         }
 

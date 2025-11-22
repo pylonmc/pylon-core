@@ -26,7 +26,9 @@ import org.bukkit.Keyed
 import org.bukkit.craftbukkit.CraftServer
 import org.bukkit.craftbukkit.event.CraftEventFactory
 import org.bukkit.craftbukkit.util.CraftNamespacedKey
-import java.lang.reflect.InvocationTargetException
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodHandles
+import java.lang.invoke.MethodType
 
 class HandlerRecipeBookClick(val player: ServerPlayer) {
     val recipeSpamPackets: TickThrottler = TickThrottler(
@@ -142,18 +144,9 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
     ): PostPlaceAction {
         val recipeHolder = recipe as RecipeHolder<CraftingRecipe?>
 
-        try {
-            val beginPlacingRecipe = AbstractCraftingMenu::class.java.getDeclaredMethod("beginPlacingRecipe")
-            beginPlacingRecipe.setAccessible(true)
-            beginPlacingRecipe.invoke(menu)
-        } catch (e: IllegalAccessException) {
-            throw RuntimeException(e)
-        } catch (e: InvocationTargetException) {
-            throw RuntimeException(e)
-        } catch (e: NoSuchMethodException) {
-            throw RuntimeException(e)
-        }
+        init()
 
+        beginPlacingRecipe.invokeExact(menu)
         var postPlaceAction: PostPlaceAction
         try {
             val inputGridSlots = menu.inputGridSlots
@@ -215,24 +208,35 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
                 isCreative
             )!!
         } finally {
-            try {
-                val finishPlacingRecipe =
-                    AbstractCraftingMenu::class.java.getDeclaredMethod("finishPlacingRecipe", ServerLevel::class.java, RecipeHolder::class.java)
-                finishPlacingRecipe.setAccessible(true)
-                finishPlacingRecipe.invoke(menu, level, recipe)
-            } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
-            } catch (e: InvocationTargetException) {
-                throw RuntimeException(e)
-            } catch (e: NoSuchMethodException) {
-                throw RuntimeException(e)
-            }
+            finishPlacingRecipe.invokeExact(menu, level, recipe)
         }
 
         return postPlaceAction
     }
 
     companion object {
+
+        var initialized = false
+        lateinit var beginPlacingRecipe: MethodHandle
+        lateinit var finishPlacingRecipe: MethodHandle
+
+        fun init() {
+            if (initialized) return
+
+            initialized = true
+            val lookup = MethodHandles.privateLookupIn(
+                AbstractCraftingMenu::class.java,
+                MethodHandles.lookup()
+            )
+
+            val beginPlacingRecipeType = MethodType.methodType(Void.TYPE)
+            beginPlacingRecipe = lookup.findVirtual(AbstractCraftingMenu::class.java, "beginPlacingRecipe", beginPlacingRecipeType)
+
+            val finishPlacingRecipeType = MethodType.methodType(Void.TYPE, ServerLevel::class.java, RecipeHolder::class.java)
+            finishPlacingRecipe = lookup.findVirtual(AbstractCraftingMenu::class.java, "finishPlacingRecipe", finishPlacingRecipeType)
+        }
+
+
         fun Ingredient.ingredientMatchesPylon(stack: ItemStack): Boolean {
             // First test vanilla rules (tag/item matches)
             if (!this.test(stack)) return false
