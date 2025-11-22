@@ -3,7 +3,6 @@ package io.github.pylonmc.pylon.core.nms.item
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.papermc.paper.inventory.recipe.ItemOrExact
 import io.papermc.paper.inventory.recipe.StackedContentsExtrasMap
-import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.StackedContents
 import net.minecraft.world.entity.player.StackedContents.IngredientInfo
 import net.minecraft.world.item.ItemStack
@@ -15,18 +14,6 @@ import kotlin.math.min
 class ExtraStackedItemContents {
     private val raw = StackedContents<ItemOrExact?>()
     private var extrasMap: StackedContentsExtrasMap? = null
-
-    fun accountSimpleStack(stack: ItemStack) {
-        if (this.extrasMap != null && this.extrasMap!!.accountStack(
-                stack,
-                min(64, stack.count)
-            )
-        ) return  // Paper - Improve exact choice recipe ingredients; max of 64 due to accountStack method below
-
-        if (Inventory.isUsableForCrafting(stack)) {
-            this.accountStack(stack)
-        }
-    }
 
     fun accountStack(stack: ItemStack) {
         this.accountStack(stack, stack.maxStackSize)
@@ -71,12 +58,6 @@ class ExtraStackedItemContents {
         if (input != null) this.extrasMap!!.accountInput(input)
     }
 
-    fun resetExtras() {
-        if (this.extrasMap != null && !this.raw.amounts.isEmpty()) {
-            this.extrasMap!!.resetExtras()
-        }
-    }
-
     fun canCraft(
         recipe: Recipe<*>,
         maxCount: Int,
@@ -91,13 +72,13 @@ class ExtraStackedItemContents {
         maxCount: Int,
         output: StackedContents.Output<ItemOrExact?>?
     ): Boolean {
-        return this.raw.tryPick(wrapIngredients(ingredients), maxCount, output)
+        return this.raw.tryPick(ingredients, maxCount, output)
     }
 
     fun getBiggestCraftableStack(
         recipe: Recipe<*>,
         output: StackedContents.Output<ItemOrExact?>?
-    ): Int { // Paper - Improve exact choice recipe ingredients
+    ): Int {
         return this.getBiggestCraftableStack(recipe, Int.MAX_VALUE, output)
     }
 
@@ -106,10 +87,6 @@ class ExtraStackedItemContents {
         maxCount: Int,
         output: StackedContents.Output<ItemOrExact?>?
     ): Int {
-        return this.raw.tryPickAll(wrapIngredients(recipe.placementInfo().ingredients()), maxCount, output)
-    }
-
-    fun clear() {
-        this.raw.clear()
+        return this.raw.tryPickAll(recipe.placementInfo().ingredients(), maxCount, output)
     }
 }

@@ -43,7 +43,7 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
     fun handlePlaceRecipe(packet: ServerboundPlaceRecipePacket) {
         if (!Bukkit.isPrimaryThread()) {
             if (!recipeSpamPackets.isIncrementAndUnderThreshold) {
-                this.disconnect()
+                player.bukkitEntity.kick(Component.translatable("disconnect.spam"))
                 return
             }
         }
@@ -60,9 +60,7 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
             return
         }
 
-        if (this.player.containerMenu !is RecipeBookMenu) {
-            return
-        }
+        val menu = this.player.containerMenu as? RecipeBookMenu ?: return
 
         if (recipeHolder.value().placementInfo().isImpossibleToPlace) {
             return
@@ -85,9 +83,6 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
             recipeName = (event.recipe as Keyed).key
             makeAll = event.isShiftClick
         }
-        if (this.player.containerMenu !is RecipeBookMenu) {
-            return
-        }
 
         recipeHolder = this.server.recipeManager.byKey(
             ResourceKey.create(
@@ -98,20 +93,12 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
             return
         }
 
-        // Pylon Start
-        val postPlaceAction: PostPlaceAction?
-        val menu = player.containerMenu
-        if (menu !is RecipeBookMenu) return
-
-
-        postPlaceAction = if (menu is AbstractCraftingMenu) {
+        val postPlaceAction = if (menu is AbstractCraftingMenu) {
             handlePylonItemPlacement(
                 menu,
                 makeAll,
-                this.player.isCreative,
                 recipeHolder,
                 this.player.level(),
-                this.player.getInventory()
             )
         } else {
             menu.handlePlacement(
@@ -119,7 +106,6 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
             )
         }
 
-        // Pylon end
         if (postPlaceAction == PostPlaceAction.PLACE_GHOST_RECIPE) {
             this.player.connection.send(
                 ClientboundPlaceGhostRecipePacket(
@@ -130,19 +116,13 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
         }
     }
 
-    fun disconnect() {
-        player.bukkitEntity.kick(Component.translatable("disconnect.spam"))
-    }
-
     fun handlePylonItemPlacement(
         menu: AbstractCraftingMenu,
         useMaxItems: Boolean,
-        isCreative: Boolean,
         recipe: RecipeHolder<*>?,
         level: ServerLevel?,
-        playerInventory: Inventory
     ): PostPlaceAction {
-        val recipeHolder = recipe as RecipeHolder<CraftingRecipe?>
+        val recipeHolder = recipe as RecipeHolder<CraftingRecipe>
 
         init()
 
@@ -151,62 +131,13 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
         try {
             val inputGridSlots = menu.inputGridSlots
             postPlaceAction = PylonServerPlaceRecipe.placeRecipe(
-                object : PylonServerPlaceRecipe.PylonCraftingMenuAccess<CraftingRecipe?> {
-                    override fun fillCraftSlotsStackedContents(stackedItemContents: ExtraStackedItemContents) {
-                        for (stack in menu.craftSlots.contents) {
-                            stackedItemContents.accountStack(stack)
-                        }
-                    }
-
-                    override fun clearCraftingContent() {
-                        menu.resultSlots.clearContent()
-                        menu.craftSlots.clearContent()
-                    }
-
-                    override fun recipeMatches(recipe1: RecipeHolder<CraftingRecipe?>): Boolean {
-
-                        /*
-                        val recipe: CraftingRecipe = repiceHolder.value() ?: return false
-                        val input = menu.craftSlots.asCraftInput()
-                        val ingredients = recipe.placementInfo().ingredients()
-
-                        if (ingredients.size != input.items().size) {
-                            return false
-                        }
-
-                        for (i in ingredients.indices) {
-                            val ingredient = ingredients[i]
-                            val stack = input.getItem(i)
-
-                            if (ingredient.isEmpty) {
-                                if (!stack.isEmpty) {
-                                    return false
-                                }
-                                continue
-                            }
-
-                            if (!ingredientMatchesPylon(ingredient, stack)) {
-                                return false
-                            }
-                        }
-
-                        return true*/
-
-                        return recipe1.value()!!.matches(
-                            menu.craftSlots.asCraftInput(),
-                            player.level()
-                        )
-                    }
-                },
-                menu.gridWidth,
-                menu.gridHeight,
+                menu,
+                player,
                 inputGridSlots,
                 inputGridSlots,
-                playerInventory,
                 recipeHolder,
-                useMaxItems,
-                isCreative
-            )!!
+                useMaxItems
+            )
         } finally {
             finishPlacingRecipe.invokeExact(menu, level, recipe)
         }
@@ -234,40 +165,6 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
 
             val finishPlacingRecipeType = MethodType.methodType(Void.TYPE, ServerLevel::class.java, RecipeHolder::class.java)
             finishPlacingRecipe = lookup.findVirtual(AbstractCraftingMenu::class.java, "finishPlacingRecipe", finishPlacingRecipeType)
-        }
-
-
-        fun Ingredient.ingredientMatchesPylon(stack: ItemStack): Boolean {
-            // First test vanilla rules (tag/item matches)
-            if (!this.test(stack)) return false
-
-            // Then test Pylon matching
-            // Compare with ingredient’s exemplar item(s) — we only need one
-            if (this.isEmpty) return true
-            val stacks = this.itemStacks()
-
-            if (stacks?.isEmpty() ?: true) return true
-
-            // Check Pylon-aware match with ANY ingredient exemplar
-            return stacks.any { itemsMatchPylon(it, stack) }
-        }
-
-        fun itemsMatchPylon(a: ItemStack, b: ItemStack): Boolean {
-            if (a.isEmpty || b.isEmpty) return false
-            if (a.item != b.item) return false
-            if (a.count < b.count) return false
-
-            // Compare exact components
-            val aBukkit = a.bukkitStack
-            val bBukkit = b.bukkitStack
-
-            val aPylon = PylonItem.fromStack(aBukkit)
-            val bPylon = PylonItem.fromStack(bBukkit);
-
-            if (aPylon === null && bPylon === null) return aBukkit.isSimilar(bBukkit)
-            aPylon ?: return false
-
-            return aPylon == bPylon
         }
     }
 }

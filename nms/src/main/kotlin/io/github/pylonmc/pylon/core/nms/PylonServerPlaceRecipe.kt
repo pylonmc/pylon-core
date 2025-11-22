@@ -4,10 +4,13 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.nms.item.ExtraStackedItemContents
 import io.papermc.paper.inventory.recipe.ItemOrExact
 import net.minecraft.recipebook.PlaceRecipeHelper
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.inventory.AbstractCraftingMenu
 import net.minecraft.world.inventory.RecipeBookMenu.PostPlaceAction
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.crafting.CraftingRecipe
 import net.minecraft.world.item.crafting.Recipe
 import net.minecraft.world.item.crafting.RecipeHolder
 import net.minecraft.world.item.crafting.RecipeInput
@@ -17,31 +20,40 @@ import kotlin.math.min
 /**
  * This is a slightly changed copy of net.minecraft.recipebook.ServerPlaceRecipe
  */
-class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
-    private val menu: PylonCraftingMenuAccess<R?>,
-    private val inventory: Inventory,
+class PylonServerPlaceRecipe(
+    private val menu: AbstractCraftingMenu,
+    private val player: ServerPlayer,
     private val useMaxItems: Boolean,
-    private val gridWidth: Int,
-    private val gridHeight: Int,
     private val inputGridSlots: MutableList<Slot>,
     private val slotsToClear: MutableList<Slot>
 ) {
-    interface PylonCraftingMenuAccess<T : Recipe<*>?> {
-        fun fillCraftSlotsStackedContents(var1: ExtraStackedItemContents)
 
-        fun clearCraftingContent()
-
-        fun recipeMatches(repiceHolder: RecipeHolder<T?>): Boolean
+    fun clearCraftingContent() {
+        menu.resultSlots.clearContent()
+        menu.craftSlots.clearContent()
     }
 
-    private fun tryPlaceRecipe(recipe: RecipeHolder<R?>, stackedItemContents: ExtraStackedItemContents): PostPlaceAction {
+    fun recipeMatches(recipe1: RecipeHolder<CraftingRecipe>): Boolean {
+        return recipe1.value()!!.matches(
+            menu.craftSlots.asCraftInput(),
+            player.level()
+        )
+    }
+
+    fun fillCraftSlotsStackedContents(stackedItemContents: ExtraStackedItemContents) {
+        for (stack in menu.craftSlots.contents) {
+            stackedItemContents.accountStack(stack)
+        }
+    }
+
+    private fun tryPlaceRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: ExtraStackedItemContents): PostPlaceAction {
         if (stackedItemContents.canCraft(recipe.value()!!, null)) {
             this.placeRecipe(recipe, stackedItemContents)
-            this.inventory.setChanged()
+            this.player.inventory.setChanged()
             return PostPlaceAction.NOTHING
         } else {
             this.clearGrid()
-            this.inventory.setChanged()
+            this.player.inventory.setChanged()
             return PostPlaceAction.PLACE_GHOST_RECIPE
         }
     }
@@ -49,15 +61,15 @@ class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
     private fun clearGrid() {
         for (slot in this.slotsToClear) {
             val itemStack = slot.item.copy()
-            this.inventory.placeItemBackInInventory(itemStack, false)
+            this.player.inventory.placeItemBackInInventory(itemStack, false)
             slot.set(itemStack)
         }
 
-        this.menu.clearCraftingContent()
+        this.clearCraftingContent()
     }
 
-    private fun placeRecipe(recipe: RecipeHolder<R?>, stackedItemContents: ExtraStackedItemContents) {
-        val flag = this.menu.recipeMatches(recipe)
+    private fun placeRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: ExtraStackedItemContents) {
+        val flag = this.recipeMatches(recipe)
         val rcp = recipe.value()!!
         val biggestCraftableStack = stackedItemContents.getBiggestCraftableStack(rcp, null)
         if (flag) {
@@ -90,8 +102,8 @@ class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
 
             this.clearGrid()
             PlaceRecipeHelper.placeRecipe(
-                this.gridWidth,
-                this.gridHeight,
+                this.menu.gridWidth,
+                this.menu.gridHeight,
                 recipe.value(),
                 recipe.value()!!.placementInfo().slotsToIngredientIndex()
             ) { item1: Int?, slot1: Int, _: Int, _: Int ->
@@ -137,17 +149,17 @@ class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
     }
 
     private fun moveItemToGrid(slot: Slot, item: ItemOrExact, count: Int): Int {
-        val item1 = slot.getItem()
-        val i = findSlotMatchingCraftingIngredient(this.inventory.contents, item, item1)
+        val item1 = slot.item
+        val i = findSlotMatchingCraftingIngredient(this.player.inventory.contents, item, item1)
         if (i == -1) {
             return -1
         }
 
-        val item2 = this.inventory.getItem(i)
+        val item2 = this.player.inventory.getItem(i)
         val itemStack = if (count < item2.count) {
-            this.inventory.removeItem(i, count)
+            this.player.inventory.removeItem(i, count)
         } else {
-            this.inventory.removeItemNoUpdate(i)
+            this.player.inventory.removeItemNoUpdate(i)
         }
 
         val count1 = itemStack.count
@@ -168,7 +180,7 @@ class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
             val itemStack = slot.item.copy()
             if (itemStack.isEmpty) continue
 
-            val slotWithRemainingSpace = this.inventory.getSlotWithRemainingSpace(itemStack)
+            val slotWithRemainingSpace = this.player.inventory.getSlotWithRemainingSpace(itemStack)
             if (slotWithRemainingSpace == -1 && list.size <= amountOfFreeSlotsInInventory) {
                 for (itemStack1 in list) {
                     if (ItemStack.isSameItem(
@@ -197,18 +209,7 @@ class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
         return true
     }
 
-    private val amountOfFreeSlotsInInventory: Int
-        get() {
-            var i = 0
-
-            for (itemStack in this.inventory.nonEquipmentItems) {
-                if (itemStack.isEmpty) {
-                    ++i
-                }
-            }
-
-            return i
-        }
+    private val amountOfFreeSlotsInInventory = this.player.inventory.nonEquipmentItems.count { it.isEmpty }
 
     fun findSlotMatchingCraftingIngredient(items: List<ItemStack>, item: ItemOrExact, stack: ItemStack): Int {
         for (i in items.indices) {
@@ -231,39 +232,33 @@ class PylonServerPlaceRecipe<R : Recipe<*>?> private constructor(
     }
 
     companion object {
-        private const val ITEM_NOT_FOUND = -1
-        fun <I : RecipeInput?, R : Recipe<I?>?> placeRecipe(
-            menu: PylonCraftingMenuAccess<R?>,
-            gridWidth: Int,
-            gridHeight: Int,
+        fun placeRecipe(
+            menu: AbstractCraftingMenu,
+            player: ServerPlayer,
             inputGridSlots: MutableList<Slot>,
             slotsToClear: MutableList<Slot>,
-            inventory: Inventory,
-            recipe: RecipeHolder<R?>,
-            useMaxItems: Boolean,
-            isCreative: Boolean
+            recipe: RecipeHolder<CraftingRecipe>,
+            useMaxItems: Boolean
         ): PostPlaceAction {
             val serverPlaceRecipe = PylonServerPlaceRecipe(
                 menu,
-                inventory,
+                player,
                 useMaxItems,
-                gridWidth,
-                gridHeight,
                 inputGridSlots,
                 slotsToClear
             )
-            if (!isCreative && !serverPlaceRecipe.testClearGrid()) {
+            if (!player.isCreative && !serverPlaceRecipe.testClearGrid()) {
                 return PostPlaceAction.NOTHING
             }
 
             val stackedItemContents = ExtraStackedItemContents()
             stackedItemContents.initializeExtras(recipe.value()!!, null)
 
-            for (itemStack in inventory) {
+            for (itemStack in player.inventory) {
                 stackedItemContents.accountStack(itemStack)
             }
 
-            menu.fillCraftSlotsStackedContents(stackedItemContents)
+            serverPlaceRecipe.fillCraftSlotsStackedContents(stackedItemContents)
             return serverPlaceRecipe.tryPlaceRecipe(recipe, stackedItemContents)
         }
 
