@@ -15,9 +15,11 @@ import net.minecraft.world.inventory.AbstractCraftingMenu
 import net.minecraft.world.inventory.RecipeBookMenu
 import net.minecraft.world.inventory.RecipeBookMenu.PostPlaceAction
 import net.minecraft.world.item.crafting.CraftingRecipe
+import net.minecraft.world.item.crafting.Recipe
 import net.minecraft.world.item.crafting.RecipeHolder
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
+import org.bukkit.NamespacedKey
 import org.bukkit.craftbukkit.CraftServer
 import org.bukkit.craftbukkit.event.CraftEventFactory
 import org.bukkit.craftbukkit.util.CraftNamespacedKey
@@ -33,7 +35,6 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
     private val server: MinecraftServer = MinecraftServer.getServer()
     private val cserver: CraftServer = server.server
 
-    // Yoinked from ServerGamePacketListenerImpl#handlePlaceRecipe during version 1.21.10
     @Suppress("removal")
     fun handlePlaceRecipe(packet: ServerboundPlaceRecipePacket) {
         if (!Bukkit.isPrimaryThread()) {
@@ -63,12 +64,13 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
 
         var recipeName = CraftNamespacedKey.fromMinecraft(recipeHolder.id().location())
         var makeAll = packet.useMaxItems()
-        val paperEvent = PlayerRecipeBookClickEvent(
-            this.player.bukkitEntity, recipeName, makeAll
-        )
+
+        //region Call paper and bukkit events
+        val paperEvent = PlayerRecipeBookClickEvent(this.player.bukkitEntity, recipeName, makeAll)
         if (!paperEvent.callEvent()) {
             return
         }
+
         recipeName = paperEvent.recipe
         makeAll = paperEvent.isMakeAll
         if (org.bukkit.event.player.PlayerRecipeBookClickEvent.getHandlerList().getRegisteredListeners().size > 0) {
@@ -78,15 +80,11 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
             recipeName = (event.recipe as Keyed).key
             makeAll = event.isShiftClick
         }
+        //endregion
 
-        recipeHolder = this.server.recipeManager.byKey(
-            ResourceKey.create(
-                Registries.RECIPE, CraftNamespacedKey.toMinecraft(recipeName)
-            )
-        ).orElse(null)
-        if (recipeHolder == null) {
-            return
-        }
+        recipeHolder = this.server.recipeManager
+            .byKey(createRecipeKey(recipeName))
+            .orElse(null) ?: return
 
         val postPlaceAction = if (menu is AbstractCraftingMenu) {
             handlePylonItemPlacement(
@@ -110,6 +108,10 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
             )
         }
     }
+
+    private fun createRecipeKey(recipeName: NamespacedKey): ResourceKey<Recipe<*>?> = ResourceKey.create(
+        Registries.RECIPE, CraftNamespacedKey.toMinecraft(recipeName)
+    )
 
     fun handlePylonItemPlacement(
         menu: AbstractCraftingMenu,
