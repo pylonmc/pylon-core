@@ -42,6 +42,10 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         ConfigAdapter.LIST.from(ConfigAdapter.FLUID_TEMPERATURE)
     )
 
+    companion object {
+        val MESSAGE_NOT_OF_SAME_TYPE = Component.translatable("pylon.pyloncore.message.pipe.not_of_same_type")
+    }
+
     override fun getPlaceholders(): List<PylonArgument> = listOf(
         PylonArgument.of("fluid_per_second", UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond)),
         PylonArgument.of(
@@ -71,7 +75,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
             return
         }
 
-        if (FluidPipePlacementService.isConnecting(player))  {
+        if (FluidPipePlacementService.isConnecting(player)) {
             // Player is already connecting; see if we can finish the connection
             if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
                 val segment = FluidPipePlacementService.placeConnection(player)
@@ -104,10 +108,14 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         if (pylonBlock is FluidIntersectionMarker) {
             if (pylonBlock.pipe == this) {
                 // This pipe matches the pipe we right clicked; start a connection
-                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(pylonBlock.fluidIntersectionDisplay), this)
+                FluidPipePlacementService.startConnection(
+                    player,
+                    FluidPipePlacementPoint.PointDisplay(pylonBlock.fluidIntersectionDisplay),
+                    this
+                )
             } else {
                 // This pipe does not match the pipe we right clicked
-                player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
+                player.sendActionBar(MESSAGE_NOT_OF_SAME_TYPE)
             }
             return true
         }
@@ -118,13 +126,17 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
                 FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.Section(pylonBlock), this)
             } else {
                 // This pipe does not match the pipe we right clicked
-                player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
+                player.sendActionBar(MESSAGE_NOT_OF_SAME_TYPE)
             }
             return true
         }
 
         if (block.type.isAir()) {
-            FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.EmptyBlock(BlockPosition(block)), this)
+            FluidPipePlacementService.startConnection(
+                player,
+                FluidPipePlacementPoint.EmptyBlock(BlockPosition(block)),
+                this
+            )
             return true
         }
 
@@ -135,7 +147,11 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val hitPylonEntity = EntityStorage.get(entity)
         if (hitPylonEntity is FluidPointDisplay) {
             if (hitPylonEntity.connectedPipeDisplays.isEmpty()) {
-                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(hitPylonEntity), this)
+                FluidPipePlacementService.startConnection(
+                    player,
+                    FluidPipePlacementPoint.PointDisplay(hitPylonEntity),
+                    this
+                )
                 return true
             }
         }
