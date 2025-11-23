@@ -240,10 +240,6 @@ class PylonServerPlaceRecipe private constructor(
                 inputGridSlots
             )
 
-            if (!player.isCreative && !serverPlaceRecipe.testClearGrid()) {
-                return PostPlaceAction.NOTHING
-            }
-
             serverPlaceRecipe.delegate = makeDelegate(
                 serverPlaceRecipe,
                 player.inventory,
@@ -253,6 +249,10 @@ class PylonServerPlaceRecipe private constructor(
                 inputGridSlots,
                 slotsToClear
             )
+
+            if (!player.isCreative && !serverPlaceRecipe.testClearGrid()) {
+                return PostPlaceAction.NOTHING
+            }
 
             val stackedItemContents = StackedItemContents()
             stackedItemContents.initializeExtras(recipe.value()!!, null)
