@@ -14,6 +14,7 @@ import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.content.cargo.CargoDuct
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
@@ -29,8 +30,7 @@ import io.github.pylonmc.pylon.core.item.PylonInventoryTicker
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemListener
 import io.github.pylonmc.pylon.core.item.research.Research
-import io.github.pylonmc.pylon.core.logistics.cargo.CargoRoutes
-import io.github.pylonmc.pylon.core.logistics.cargo.CargoTicker
+import io.github.pylonmc.pylon.core.logistics.CargoRoutes
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
@@ -134,7 +134,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonLogisticBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonCargoBlock, this)
         Bukkit.getPluginManager().registerEvents(CargoRoutes, this)
-        Bukkit.getPluginManager().registerEvents(CargoTicker, this)
+        Bukkit.getPluginManager().registerEvents(CargoDuct, this)
 
         if (PylonConfig.WailaConfig.enabled) {
             PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.wailaSettings))

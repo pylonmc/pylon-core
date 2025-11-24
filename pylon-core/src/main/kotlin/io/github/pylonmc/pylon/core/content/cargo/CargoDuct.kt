@@ -12,8 +12,10 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
-import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
+import io.github.pylonmc.pylon.core.event.PylonCargoDuctConnectEvent
+import io.github.pylonmc.pylon.core.event.PylonCargoDuctDisconnectEvent
 import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.util.setNullable
@@ -21,7 +23,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
-import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityRemoveEvent
@@ -29,56 +30,97 @@ import org.bukkit.persistence.PersistentDataContainer
 
 class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
 
-    var previousFace: BlockFace?
-    var nextFace: BlockFace?
-
-    val nextDuct
-        get() = nextFace?.let { face -> BlockStorage.getAs<CargoDuct>(block.getRelative(face)) }
-    val previousDuct
-        get() = previousFace?.let { face -> BlockStorage.getAs<CargoDuct>(block.getRelative(face)) }
+    var connectedFaces = mutableListOf<BlockFace>()
 
     @Suppress("unused")
     constructor(block: Block, context: BlockCreateContext) : super(block) {
-        previousFace = null
-        nextFace = null
+        updateConnectedFaces()
+    }
 
-        // Find previous block if any of the adjacent blocks are a CargoDuct or PylonCargoBlock
+    @Suppress("unused")
+    constructor(block: Block, pdc: PersistentDataContainer) : super(block) {
+        connectedFaces = pdc.get(connectedFacesKey, connectedFacesType)!!.toMutableList()
+    }
+
+    override fun write(pdc: PersistentDataContainer) {
+        pdc.setNullable(connectedFacesKey, connectedFacesType, connectedFaces)
+    }
+
+    override fun postBreak(context: BlockBreakContext) {
+        for (face in connectedFaces) {
+            val connectedBlock = connectedBlock(face)
+            when (connectedBlock) {
+                is CargoDuct -> {
+                    connectedBlock.connectedFaces.remove(face.oppositeFace)
+                    connectedBlock.updateConnectedFaces()
+                    PylonCargoDuctDisconnectEvent(this, connectedBlock).callEvent()
+                }
+                is PylonCargoBlock -> {
+                    PylonCargoDuctDisconnectEvent(this, connectedBlock).callEvent()
+                }
+            }
+        }
+    }
+
+    fun updateConnectedFaces() {
+        if (connectedFaces.size == 2) {
+            return
+        }
+
+        val adjacentCargoBlocks = mutableMapOf<BlockFace, PylonBlock>()
         for (face in IMMEDIATE_FACES) {
             val adjacentBlock = BlockStorage.get(block.getRelative(face))
-            if (adjacentBlock is PylonCargoBlock && adjacentBlock.cargoFaces[face.oppositeFace] == LogisticSlotType.OUTPUT) {
-                previousFace = face
-                break // Prioritise cargo blocks over ducts
-            }
-            if (adjacentBlock is CargoDuct && adjacentBlock.nextFace == null && nextFace != face) {
-                if (previousFace != null && adjacentBlock.previousFace != null) {
-                    continue // Prioritise cargo ducts which already have another connection
-                }
-                previousFace = face
-                adjacentBlock.nextFace = face.oppositeFace
+            if (face !in connectedFaces && (adjacentBlock is CargoDuct || adjacentBlock is PylonCargoBlock)) {
+                adjacentCargoBlocks.put(face, adjacentBlock)
             }
         }
 
-        // Find next block if any of the adjacent blocks are a CargoDuct or PylonCargoBlock
-        for (face in IMMEDIATE_FACES) {
-            val adjacentBlock = BlockStorage.get(block.getRelative(face))
-            if (adjacentBlock is PylonCargoBlock && adjacentBlock.cargoFaces[face.oppositeFace] == LogisticSlotType.INPUT) {
-                nextFace = face
-                break // Prioritise cargo blocks over cargo ducts
-            }
-            if (adjacentBlock is CargoDuct && adjacentBlock.previousFace == null && previousFace != face) {
-                if (nextFace != null && adjacentBlock.nextFace != null) {
-                    continue // Prioritise cargo ducts which already have another connection
+        // 1: Prioritise PylonCargoBlocks
+        for ((face, block) in adjacentCargoBlocks) {
+            if (connectedFaces.size != 2 && block is PylonCargoBlock && block.cargoLogisticGroups.containsKey(face.oppositeFace)) {
+                if (PylonCargoDuctConnectEvent(this, block).callEvent()) {
+                    connectedFaces.add(face)
                 }
-                nextFace = face
-                adjacentBlock.previousFace = face.oppositeFace
             }
         }
 
-        // Delete any outdated item displays and create new ones
-        val nextDuct = nextDuct
-        val previousDuct = previousDuct
-        val blocksToNextCorner = blocksToNextCorner()
-        val blocksToPreviousCorner = blocksToPreviousCorner()
+        // 2: Prioritise PylonDucts which already have a connection
+        for ((face, block) in adjacentCargoBlocks) {
+            if (connectedFaces.size != 2 && block is CargoDuct && block.connectedFaces.size == 1) {
+                if (PylonCargoDuctConnectEvent(this, block).callEvent()) {
+                    connectedFaces.add(face)
+                    block.connectedFaces.add(face.oppositeFace)
+                }
+            }
+        }
+
+        // 3: Prioritise PylonDucts without connections
+        for ((face, block) in adjacentCargoBlocks) {
+            if (connectedFaces.size != 2 && block is CargoDuct && block.connectedFaces.isEmpty()) {
+                if (PylonCargoDuctConnectEvent(this, block).callEvent()) {
+                    connectedFaces.add(face)
+                    block.connectedFaces.add(face.oppositeFace)
+                }
+            }
+        }
+
+        updateDisplays()
+    }
+
+    fun updateDisplays() {
+        // Delete any existing, outdated displays (either a single 'not connected' cube display or a
+        // display that continues the same direction as any of the connected faces)
+        for (face in connectedFaces) {
+            (connectedBlock(face) as? CargoDuct)
+                ?.getHeldEntity(ductDisplayName(face))
+                ?.remove()
+            (connectedBlock(face) as? CargoDuct)
+                ?.getHeldEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME)
+                ?.remove()
+        }
+        for (entity in heldEntities.keys.toList()) { // clone to prevent concurrent modification exception
+            getHeldEntity(entity)?.remove()
+        }
 
         // For performance reasons, if we can use one display entity instead of
         // several, we always should. We do this by deleting any existing entities
@@ -87,133 +129,30 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
         // span the entire line from this duct to the end of the next and previous
         // lines
 
-        // First, remove any existing displays on the same line
-        previousDuct?.getHeldEntity(ItemDisplay::class.java, "duct-item-display:next")?.remove()
-        nextDuct?.getHeldEntity(ItemDisplay::class.java, "duct-item-display:previous")?.remove()
-
-        // If neither next nor previous faces exist, we need one display to
-        // represent this lone cargo duct
-        if (nextFace == null && previousFace == null) {
-            val newDisplay = createLoneDuctDisplay(block.location.toCenterLocation())
-            addEntity("duct-item-display:next", newDisplay)
-            addEntity("duct-item-display:previous", newDisplay)
+        // Case 1: Duct has no connected blocks
+        if (connectedFaces.isEmpty()) {
+            // Spawn a cube display
+            createNotConnectedDuctDisplay(block.location.toCenterLocation())
         }
 
-        // If next and previous face both exist and are on the same line, we only
-        // need one display connecting the corners
-        if (nextFace != null && nextFace == previousFace?.oppositeFace) {
-            val line = blocksToPreviousCorner!! + block + blocksToNextCorner!!
-            val newDisplay = createDuctDisplay(
-                line.first().location.toCenterLocation(),
-                line.last().location.toCenterLocation()
-            )
-            newDisplay.persistentDataContainer.set(
-                blocksKey,
-                PylonSerializers.LIST.listTypeFrom(PylonSerializers.BLOCK_POSITION),
-                line.map { it.position }
-            )
+        // Case 2: Duct has two connected blocks on opposite sides, forming a line
+        else if (connectedFaces.size == 2 && connectedFaces[0] == connectedFaces[1].oppositeFace) {
+            // Spawn a display spanning the entire line
+            val endpoint0 = findEndOfLine(connectedFaces[0])
+            val endpoint1 = findEndOfLine(connectedFaces[1])
+            createDuctDisplay(endpoint0, endpoint1, connectedFaces[0].oppositeFace)
+        }
 
-            // start
-            BlockStorage.getAs<CargoDuct>(line.first())?.addEntity("duct-item-display:next", newDisplay)
-
-            // middle
-            val lineExcludingCorners = line.toMutableList()
-            lineExcludingCorners.removeFirst()
-            lineExcludingCorners.removeLast()
-            for (block in lineExcludingCorners) {
-                BlockStorage.getAs<CargoDuct>(block)?.let { duct ->
-                    duct.addEntity("duct-item-display:next", newDisplay)
-                    duct.addEntity("duct-item-display:previous", newDisplay)
-                }
+        // Case 3: Duct has either one or two connected blocks, and if two blocks are
+        // connected, they do not form a line across this block (this is handled in
+        // case 2)
+        else {
+            // Spawn a display to each of the two connected blocks
+            createDuctDisplay(findEndOfLine(connectedFaces[0]), this.block, connectedFaces[0].oppositeFace)
+            if (connectedFaces.size == 2) {
+                createDuctDisplay(findEndOfLine(connectedFaces[1]), this.block, connectedFaces[1].oppositeFace)
             }
-
-            // This block will not have been added to BlockStorage yet so we have to
-            // add the entities directly
-            addEntity("duct-item-display:next", newDisplay)
-            addEntity("duct-item-display:previous", newDisplay)
-
-            // end
-            BlockStorage.getAs<CargoDuct>(line.last())?.addEntity("duct-item-display:previous", newDisplay)
-
-            return
         }
-
-        // Otherwise, we must create one display for the next node (if it exists),
-        // and one display for the previous node (if it exists)
-
-        // Next duct
-        if (blocksToNextCorner != null) {
-            val newEntity = createDuctDisplay(
-                block.location.toCenterLocation(),
-                blocksToNextCorner.last().location.toCenterLocation()
-            )
-            newEntity.persistentDataContainer.set(
-                blocksKey,
-                PylonSerializers.LIST.listTypeFrom(PylonSerializers.BLOCK_POSITION),
-                (listOf(block) + blocksToNextCorner).map { it.position }
-            )
-
-            // start of line (this block)
-            addEntity("duct-item-display:next", newEntity)
-
-            // middle of line
-            val blocksToNextCornerExcludingCorner = blocksToNextCorner.toMutableList()
-            blocksToNextCornerExcludingCorner.removeLast()
-            for (block in blocksToNextCornerExcludingCorner) {
-                BlockStorage.getAs<CargoDuct>(block)?.let { duct ->
-                    duct.addEntity("duct-item-display:next", newEntity)
-                    duct.addEntity("duct-item-display:previous", newEntity)
-                }
-            }
-
-            // end of line (corner)
-            BlockStorage.getAs<CargoDuct>(blocksToNextCorner.last())?.addEntity("duct-item-display:previous", newEntity)
-        }
-
-        // Previous duct
-        if (blocksToPreviousCorner != null) {
-            val newEntity = createDuctDisplay(
-                block.location.toCenterLocation(),
-                blocksToPreviousCorner.last().location.toCenterLocation()
-            )
-            newEntity.persistentDataContainer.set(
-                blocksKey,
-                PylonSerializers.LIST.listTypeFrom(PylonSerializers.BLOCK_POSITION),
-                (listOf(block) + blocksToPreviousCorner).map { it.position }
-            )
-
-            // start of line (this block)
-            addEntity("duct-item-display:previous", newEntity)
-
-            // middle of line
-            val blocksToPreviousCornerExcludingCorner = blocksToPreviousCorner.toMutableList()
-            blocksToPreviousCornerExcludingCorner.removeLast()
-            for (block in blocksToPreviousCornerExcludingCorner) {
-                BlockStorage.getAs<CargoDuct>(block)?.let { duct ->
-                    duct.addEntity("duct-item-display:previous", newEntity)
-                    duct.addEntity("duct-item-display:next", newEntity)
-                }
-            }
-
-            // end of line (corner)
-            BlockStorage.getAs<CargoDuct>(blocksToPreviousCorner.last())?.addEntity("duct-item-display:next", newEntity)
-        }
-    }
-
-    @Suppress("unused")
-    constructor(block: Block, pdc: PersistentDataContainer) : super(block) {
-        nextFace = pdc.get(nextKey, PylonSerializers.BLOCK_FACE)
-        previousFace = pdc.get(previousKey, PylonSerializers.BLOCK_FACE)
-    }
-
-    override fun write(pdc: PersistentDataContainer) {
-        pdc.setNullable(nextKey, PylonSerializers.BLOCK_FACE, nextFace)
-        pdc.setNullable(previousKey, PylonSerializers.BLOCK_FACE, previousFace)
-    }
-
-    override fun postBreak(context: BlockBreakContext) {
-        nextDuct?.previousFace = null
-        previousDuct?.nextFace = null
     }
 
     /**
@@ -221,93 +160,148 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
      *
      * This has the effect of traversing to the end of the line whose direction
      * is provided by the current block and the next block.
-     *
-     * If there is no next block, null is returned.
-     *
-     * Excludes this duct.
      */
-    fun blocksToNextCorner(): List<Block>? {
-        if (nextFace == null) {
-            return null
-        }
-
-        var current = this
-        val blocks = mutableListOf<Block>()
+    private fun findEndOfLine(face: BlockFace): Block {
+        var currentDuct = this
         while (true) {
-            if (current.nextFace != nextFace) {
-                return blocks
+            val nextBlock = currentDuct.connectedBlock(face)
+            if (nextBlock is CargoDuct) {
+                currentDuct = nextBlock
+                continue
             }
-            val next = BlockStorage.get(current.block.getRelative(current.nextFace!!))
-            if (next is PylonCargoBlock) {
-                blocks.add(next.block)
-                return blocks
+
+            if (nextBlock is PylonCargoBlock) {
+                return nextBlock.block
             }
-            if (next is CargoDuct) {
-                current = next
+
+            if (nextBlock == null) {
+                return currentDuct.block
             }
-            blocks.add(current.block)
         }
     }
 
-    /**
-     * Recursively traverses the previous face only if it is the provided face.
-     *
-     * This has the effect of traversing to the end of the line whose direction
-     * is provided by the current block and the previous block.
-     *
-     * If there is no previous block, null is returned.
-     *
-     * Excludes this duct.
-     */
-    fun blocksToPreviousCorner(): List<Block>? {
-        if (previousFace == null) {
+    private fun connectedBlock(face: BlockFace): PylonBlock? {
+        if (face !in connectedFaces) {
             return null
         }
-
-        var current = this
-        val blocks = mutableListOf<Block>()
-        while (true) {
-            if (current.previousFace != previousFace) {
-                return blocks
-            }
-            val previous = BlockStorage.get(current.block.getRelative(current.previousFace!!))
-            if (previous is PylonCargoBlock) {
-                blocks.add(previous.block)
-                return blocks
-            }
-            if (previous is CargoDuct) {
-                current = previous
-            }
-            blocks.add(current.block)
-        }
+        return BlockStorage.get(block.getRelative(face))
     }
 
-    companion object : Listener {
-        const val THICKNESS = 0.4
-        val nextKey = pylonKey("next")
-        val previousKey = pylonKey("previous")
-        val blocksKey = pylonKey("blocks")
-
-        fun createDuctDisplay(from: Location, to: Location): ItemDisplay {
-            val center = from.clone().add(to).multiply(0.5)
-            return ItemDisplayBuilder()
-                .transformation(LineBuilder()
-                    .from(center.clone().subtract(from).toVector().toVector3d())
-                    .to(center.clone().subtract(to).toVector().toVector3d())
-                    .thickness(THICKNESS)
-                    .extraLength(THICKNESS)
-                    .build()
-                )
-                .material(Material.GRAY_CONCRETE)
-                .build(center)
+    private fun createDuctDisplay(from: Block, to: Block, fromToFace: BlockFace) {
+        // Need to do some detective work to find out the correct thickness. The rule
+        // is that the thickness of the display connecting [from] and [to] must be
+        // different to the thickness of the existing display on [from] and [to] (if
+        // they exist). Note there can only be one other existing display considering
+        // we're in the process of making a new connection to the duct here.
+        val availableThicknesses = thicknesses.toMutableList()
+        val fromDuct = if (from == this.block) {
+            this // Special case: This block is not in BlockStorage yet
+        } else {
+            BlockStorage.getAs<CargoDuct>(from)
         }
+        fromDuct?.heldEntities?.keys?.forEach { name ->
+            fromDuct.getHeldEntity(name)?.persistentDataContainer?.get(thicknessKey, thicknessType).let { thickness ->
+                availableThicknesses.remove(thickness)
+            }
+        }
+        val toDuct = if (this.block == to) {
+            this // Special case: This block is not in BlockStorage yet
+        } else {
+            BlockStorage.getAs<CargoDuct>(to)
+        }
+        toDuct?.heldEntities?.keys?.forEach { name ->
+            toDuct.getHeldEntity(name)?.persistentDataContainer?.get(thicknessKey, thicknessType)?.let { thickness ->
+                availableThicknesses.remove(thickness)
+            }
+        }
+        val thickness = availableThicknesses[0]
 
-        fun createLoneDuctDisplay(center: Location) = ItemDisplayBuilder()
+        // Now to actually build the display
+        // It's possible one of the displays will be a PylonCargoBlock, in which case it could be a solid block
+        // This would occlude the display entity and cause it to render with brightness 0
+        // To avoid this, we'll just spawn the entity at this duct, since we know it's a duct (and therefore a
+        // structure void, which will not occlude the display entity)
+        var spawnLocation = this.block.location.toCenterLocation()
+        val display = ItemDisplayBuilder()
+            .transformation(LineBuilder()
+                .from(from.location.toCenterLocation().subtract(spawnLocation).toVector().toVector3d())
+                .to(to.location.toCenterLocation().subtract(spawnLocation).toVector().toVector3d())
+                .thickness(thickness)
+                .extraLength(thickness)
+                .build()
+            )
+            .material(Material.GRAY_CONCRETE)
+            .build(spawnLocation)
+        display.persistentDataContainer.set(thicknessKey, thicknessType, thickness)
+
+        // Add the display to every CargoDuct on the line
+        val associatedBlocks = mutableListOf<BlockPosition>()
+        // (start)
+        BlockStorage.getAs<CargoDuct>(from)?.addEntity(ductDisplayName(fromToFace), display)
+        if (from == this.block) {
+            // Special case: This block is not in BlockStorage yet so above code will not work
+            addEntity(ductDisplayName(fromToFace), display)
+        }
+        associatedBlocks.add(from.position)
+        // (middle)
+        var current = from
+        while (true) {
+            current = current.getRelative(fromToFace)
+            if (current == to) {
+                break
+            }
+            BlockStorage.getAs<CargoDuct>(current)?.let {
+                it.addEntity(ductDisplayName(fromToFace), display)
+                it.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+            }
+            if (current == this.block) {
+                // Special case: This block is not in BlockStorage yet so above code will not work
+                addEntity(ductDisplayName(fromToFace), display)
+                addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+            }
+            associatedBlocks.add(current.position)
+        }
+        // (end)
+        BlockStorage.getAs<CargoDuct>(to)?.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+        if (to == this.block) {
+            // Special case: This block is not in BlockStorage yet so above code will not work
+            addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+        }
+        associatedBlocks.add(to.position)
+
+        // Also add the blocks to the display's PDC (see onEntityRemove in companion for explanation)
+        display.persistentDataContainer.set(blocksKey, blocksType, associatedBlocks)
+    }
+
+    private fun createNotConnectedDuctDisplay(center: Location) {
+        val display = ItemDisplayBuilder()
             .transformation(TransformBuilder()
-                .scale(THICKNESS)
+                .scale(thicknesses[0])
             )
             .material(Material.GRAY_CONCRETE)
             .build(center)
+
+        addEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME, display)
+    }
+
+    companion object : Listener {
+        const val NOT_CONNECTED_DUCT_DISPLAY_NAME = "duct-item-display:not-connected"
+
+        // Q: 'Why the hell are there 3 different thicknesses?'
+        // A: To prevent Z-fighting. It's expected that blocks trying to create a seamless connection
+        // to cargo ducts will use thickness 0.35 hence why it isn't used here
+        val thicknesses = mutableListOf(0.3495F, 0.3490F, 0.3485F)
+
+        val thicknessKey = pylonKey("thickness")
+        val thicknessType = PylonSerializers.FLOAT
+
+        val connectedFacesKey = pylonKey("connected_faces")
+        val connectedFacesType = PylonSerializers.LIST.listTypeFrom(PylonSerializers.BLOCK_FACE)
+
+        val blocksKey = pylonKey("blocks")
+        val blocksType = PylonSerializers.LIST.listTypeFrom(PylonSerializers.BLOCK_POSITION)
+
+        fun ductDisplayName(face: BlockFace) = "duct-item-display:${face.name}"
 
         /**
          * Cargo duct displays are 'owned' by multiple blocks, but the entity removal
@@ -319,12 +313,9 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
         @EventHandler
         private fun onEntityRemove(event: EntityRemoveEvent) {
             if (event.cause == EntityRemoveEvent.Cause.UNLOAD || event.cause == EntityRemoveEvent.Cause.PLAYER_QUIT) return
-            val blockPositions = event.entity.persistentDataContainer.get(
-                blocksKey,
-                PylonSerializers.LIST.listTypeFrom(PylonSerializers.BLOCK_POSITION)
-            ) ?: return
+            val blockPositions = event.entity.persistentDataContainer.get(blocksKey, blocksType) ?: return
             for (blockPos in blockPositions) {
-                val block = BlockStorage.get(blockPos) as? PylonEntityHolderBlock ?: return
+                val block = BlockStorage.get(blockPos) as? PylonEntityHolderBlock ?: continue
                 holders[block]?.entries?.removeIf { it.value == event.entity.uniqueId }
             }
         }

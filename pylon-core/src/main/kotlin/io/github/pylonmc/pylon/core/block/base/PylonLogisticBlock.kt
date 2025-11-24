@@ -3,15 +3,16 @@ package io.github.pylonmc.pylon.core.block.base
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticSlot
 import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
-import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
+import io.github.pylonmc.pylon.core.logistics.VirtualInventoryLogisticSlot
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
+import xyz.xenondevs.invui.inventory.VirtualInventory
 import java.util.IdentityHashMap
 
 /**
@@ -38,31 +39,33 @@ interface PylonLogisticBlock {
      */
     fun setupLogisticGroups()
 
-    /**
-     * Creates a group of logistic slots.
-     */
     fun createLogisticGroup(groupName: String, group: LogisticGroup) {
         val logisticBlockData = (logisticBlocks.getOrPut(this) { mutableMapOf() })
         check(!logisticBlockData.contains(groupName)) { "The slot group $groupName already exists" }
         logisticBlockData.put(groupName, group)
     }
 
-    /**
-     * Creates a group of logistic slots.
-     */
     fun createLogisticGroup(groupName: String, slotType: LogisticSlotType, vararg slots: LogisticSlot)
         = createLogisticGroup(groupName, LogisticGroup(slotType, *slots))
 
-    /**
-     * Returns all the logistic slots in the given [groupName]
-     */
-    fun getLogisticGroup(groupName: String): LogisticGroup
-        = getLogisticSlotGroups()[groupName] ?: error("Group $groupName does not exist")
+    fun createLogisticGroup(groupName: String, slotType: LogisticSlotType, slots: List<LogisticSlot>)
+        = createLogisticGroup(groupName, LogisticGroup(slotType, *slots.toTypedArray()))
 
-    /**
-     * Returns a map of all the logistic slot groups
-     */
-    fun getLogisticSlotGroups(): Map<String, LogisticGroup>
+    fun createLogisticGroup(groupName: String, slotType: LogisticSlotType, inventory: VirtualInventory) {
+        val slots = mutableListOf<LogisticSlot>()
+        for (slot in 0..<inventory.size) {
+            slots.add(VirtualInventoryLogisticSlot(inventory, slot))
+        }
+        createLogisticGroup(groupName, slotType, slots)
+    }
+
+    fun getLogisticGroup(groupName: String): LogisticGroup?
+        = getLogisticGroups()[groupName]
+
+    fun getLogisticGroupOrThrow(groupName: String): LogisticGroup
+        = getLogisticGroup(groupName) ?: error("Group $groupName does not exist")
+
+    fun getLogisticGroups(): Map<String, LogisticGroup>
         = logisticBlocks.getOrPut(this) { mutableMapOf() }
 
     @ApiStatus.Internal

@@ -1,7 +1,7 @@
-package io.github.pylonmc.pylon.core.logistics.cargo
+package io.github.pylonmc.pylon.core.logistics
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.block.base.PylonLogisticBlock
+import io.github.pylonmc.pylon.core.block.base.PylonCargoBlock
 import io.github.pylonmc.pylon.core.content.cargo.CargoDuct
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
@@ -30,7 +30,7 @@ import org.jetbrains.annotations.ApiStatus
 @ApiStatus.Internal
 object CargoRoutes : Listener {
 
-    class CargoRouteEndpoint(val block: PylonLogisticBlock, val face: BlockFace)
+    class CargoRouteEndpoint(val block: PylonCargoBlock, val face: BlockFace)
 
     private val routeCache: MutableMap<CargoRouteEndpoint, CargoRouteEndpoint?> = mutableMapOf()
 
@@ -52,47 +52,52 @@ object CargoRoutes : Listener {
             recalculateTarget(source)
         }
 
-    fun getCargoTarget(sourceBlock: PylonLogisticBlock, sourceFace: BlockFace): CargoRouteEndpoint?
+    fun getCargoTarget(sourceBlock: PylonCargoBlock, sourceFace: BlockFace): CargoRouteEndpoint?
         = getCargoTarget(CargoRouteEndpoint(sourceBlock, sourceFace))
 
     private fun recalculateTarget(source: CargoRouteEndpoint): CargoRouteEndpoint? {
         // We use block positions here to avoid loading chunks across the entire route.
-        // (Doing block.nextDuct or using block.getRelative(...) will load chunks)
         var lastFaceUsed = source.face
         val previous = source.block.block.position
         var current = previous.getRelative(source.face)
         val routeBlocksAndAdjacentBlocks = mutableListOf<BlockPosition>()
+        var endpoint: CargoRouteEndpoint? = null
 
         while (current.chunk.isLoaded) {
             routeBlocksAndAdjacentBlocks.add(current)
             val currentBlock = BlockStorage.get(current.block)
 
             if (currentBlock is CargoDuct) {
-                // Annoying hacky thing: The order of cargo duct next/previous does not necessarily
-                // correspond to the order of item movement. So we need to account for the fact that
-                // we might need to traverse the route forwards OR backwards to get to the target.
-                if (currentBlock.nextFace != null && current.getRelative(currentBlock.nextFace!!) != previous) {
-                    current = current.getRelative(currentBlock.nextFace!!)
-                    lastFaceUsed = currentBlock.nextFace!!
-                } else if (currentBlock.previousFace != null && current.getRelative(currentBlock.previousFace!!) != previous) {
-                    current = current.getRelative(currentBlock.previousFace!!)
-                    lastFaceUsed = currentBlock.previousFace!!
+                // we can assume the size is either 1 or 2 given we must have come from one of the faces
+                if (currentBlock.connectedFaces.size == 1) {
+                    break
                 }
 
-            } else if (currentBlock is PylonLogisticBlock) {
+                val faces = currentBlock.connectedFaces.toMutableList()
+                faces.remove(lastFaceUsed.oppositeFace)
+                check(faces.size == 1) { "Expected node to have one traversable face but had ${faces.size}" }
+                val nextFace = faces[0]
+
+                current = current.getRelative(nextFace)
+                lastFaceUsed = nextFace
+
+            } else if (currentBlock is PylonCargoBlock) {
                 // Route endpoint found
-                routeBlocksCache.put(source, routeBlocksAndAdjacentBlocks)
-                for (block in routeBlocksAndAdjacentBlocks) {
-                    blockRoutesCache.getOrPut(block) { mutableListOf() }.add(source)
-                }
-                return CargoRouteEndpoint(currentBlock, lastFaceUsed)
+
+                endpoint = CargoRouteEndpoint(currentBlock, lastFaceUsed.oppositeFace)
+                break
 
             } else {
-                return null
+                break
             }
         }
 
-        return null
+        routeBlocksCache.put(source, routeBlocksAndAdjacentBlocks)
+        for (block in routeBlocksAndAdjacentBlocks) {
+            blockRoutesCache.getOrPut(block) { mutableListOf() }.add(source)
+        }
+
+        return endpoint
     }
 
     private fun invalidateRouteCache(source: CargoRouteEndpoint) {

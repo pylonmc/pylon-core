@@ -358,7 +358,7 @@ unit:
   blocks_per_second:
     singular: "block per second"
     plural: "blocks per second"
-    abbr: "b/s"
+    abbr: "blocks/s"
   chunks:
     singular: "chunk"
     plural: "chunks"
@@ -417,3 +417,10 @@ unit:
     singular: "experience point per second"
     plural: "experience points per second"
     abbr: "XP/s"
+  items:
+    singular: "item"
+    plural: "items"
+  items_per_second:
+    singular: "item per second"
+    plural: "items per second"
+    abbr: "items/s"

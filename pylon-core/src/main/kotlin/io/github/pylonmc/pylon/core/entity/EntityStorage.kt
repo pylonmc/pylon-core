@@ -113,7 +113,7 @@ object EntityStorage : Listener {
         }
 
     /**
-     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * Schedules a task to run when the Pylon entity with id [uuid] is loaded, or runs the task immediately
      * if the entity is already loaded.
      *
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
@@ -132,7 +132,7 @@ object EntityStorage : Listener {
     }
 
     /**
-     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * Schedules a task to run when the Pylon entity with id [uuid] is loaded, or runs the task immediately
      * if the entity is already loaded.
      *
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
@@ -150,7 +150,7 @@ object EntityStorage : Listener {
     }
 
     /**
-     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * Schedules a task to run when the Pylon entity with id [uuid] is loaded, or runs the task immediately
      * if the entity is already loaded
      *
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
