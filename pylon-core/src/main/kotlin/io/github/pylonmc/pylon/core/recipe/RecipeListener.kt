@@ -103,7 +103,7 @@ internal object PylonRecipeListener : Listener {
             val input = inventory.inputItem ?: return
 
             // Should I make a recipe impl for this?
-            if (input.isPylonAndIsNot<VanillaCookingItem>()) {
+            if (input.isPylonAndIsNot<VanillaCraftingItem>()) {
                 e.isCancelled = true
             }
         }
