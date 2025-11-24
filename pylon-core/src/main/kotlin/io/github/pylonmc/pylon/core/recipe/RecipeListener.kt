@@ -88,7 +88,6 @@ internal object PylonRecipeListener : Listener {
         val inventory = e.inventory
         val hasPylonItems = inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }
 
-        // Should we add a RECIPE_TYPE For this or just let addon devs handle it?
         if (hasPylonItems) {
             inventory.result = null
         }
