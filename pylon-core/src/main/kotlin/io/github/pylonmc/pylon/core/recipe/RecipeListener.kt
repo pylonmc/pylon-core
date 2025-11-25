@@ -19,10 +19,12 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockCookEvent
 import org.bukkit.event.block.CrafterCraftEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.StonecutterInventory
 
 internal object PylonRecipeListener : Listener {
 
@@ -100,6 +102,18 @@ internal object PylonRecipeListener : Listener {
 
         if (hasPylonItems) {
             e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun itemInsertEvent(e: InventoryClickEvent) {
+        val inventory = e.inventory;
+        if (inventory is StonecutterInventory) {
+            val input = inventory.inputItem ?: return
+
+            if (input.isPylonAndIsNot<VanillaCraftingItem>()) {
+                e.isCancelled = true
+            }
         }
     }
 
