@@ -205,7 +205,7 @@ interface PylonCargoBlock : PylonLogisticBlock {
             }
 
             // Connect adjacent cargo ducts
-            for ((face, _) in block.cargoBlockData.groups) {
+            for ((face, _) in block.cargoBlockData.groups.toMap()) {
                 BlockStorage.getAs<CargoDuct>(block.block.getRelative(face))?.updateConnectedFaces()
             }
 
