@@ -63,11 +63,11 @@ interface PylonCargoBlock : PylonLogisticBlock {
     fun getCargoLogisticGroup(face: BlockFace): LogisticGroup?
             = cargoBlockData.groups[face]?.let { getLogisticGroup(it) }
 
-    val cargoLogisticGroups
+    val cargoLogisticGroups: Map<BlockFace, String>
         @ApiStatus.NonExtendable
         get() = cargoBlockData.groups.toMap()
 
-    var cargoTransferRate
+    var cargoTransferRate: Int
         /**
          * Note that [cargoTransferRate] will be multiplied by [PylonConfig.cargoTransferRateMultiplier],
          * and the result will be the maximum number of items that can be transferred

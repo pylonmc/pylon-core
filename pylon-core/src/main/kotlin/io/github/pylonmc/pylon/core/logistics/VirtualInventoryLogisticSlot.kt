@@ -21,7 +21,5 @@ open class VirtualInventoryLogisticSlot(
         })
     }
 
-    companion object {
-        object LogisticUpdateReason : UpdateReason
-    }
+    object LogisticUpdateReason : UpdateReason
 }

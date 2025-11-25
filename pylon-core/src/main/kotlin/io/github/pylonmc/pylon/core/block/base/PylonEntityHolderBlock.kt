@@ -112,6 +112,7 @@ interface PylonEntityHolderBlock {
         private val blockKey = pylonKey("entity_holder_block")
         private val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
 
+        @JvmSynthetic
         internal val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
 
         @EventHandler
