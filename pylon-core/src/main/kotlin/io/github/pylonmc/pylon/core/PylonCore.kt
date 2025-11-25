@@ -32,6 +32,7 @@ import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
+import io.github.pylonmc.pylon.core.recipe.RecipeCompletion
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
@@ -103,36 +104,38 @@ object PylonCore : JavaPlugin(), PylonAddon {
         // Add any keys that are missing from global config - saveDefaultConfig will not do anything if config already present
         mergeGlobalConfig(PylonCore, "config.yml", "config.yml")
 
-        Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
-        Bukkit.getPluginManager().registerEvents(PylonAddon, this)
+        val pm = Bukkit.getPluginManager()
+        pm.registerEvents(PylonTranslator, this)
+        pm.registerEvents(PylonAddon, this)
 
         PylonMetrics // initialize metrics by referencing it
 
         // Anything that listens for addon registration must be above this line
         registerWithPylon()
 
-        Bukkit.getPluginManager().registerEvents(BlockStorage, this)
-        Bukkit.getPluginManager().registerEvents(BlockListener, this)
-        Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
+        pm.registerEvents(BlockStorage, this)
+        pm.registerEvents(BlockListener, this)
+        pm.registerEvents(PylonItemListener, this)
         Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.inventoryTickerBaseRate)
-        Bukkit.getPluginManager().registerEvents(TickManager, this)
-        Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
-        Bukkit.getPluginManager().registerEvents(EntityStorage, this)
-        Bukkit.getPluginManager().registerEvents(EntityListener, this)
-        Bukkit.getPluginManager().registerEvents(Research, this)
-        Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
-        Bukkit.getPluginManager().registerEvents(PylonFluidBufferBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
-        Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
-        Bukkit.getPluginManager().registerEvents(FluidPipePlacementService, this)
-        Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonGuide, this)
+        pm.registerEvents(TickManager, this)
+        pm.registerEvents(MultiblockCache, this)
+        pm.registerEvents(EntityStorage, this)
+        pm.registerEvents(EntityListener, this)
+        pm.registerEvents(Research, this)
+        pm.registerEvents(PylonGuiBlock, this)
+        pm.registerEvents(PylonEntityHolderBlock, this)
+        pm.registerEvents(PylonSimpleMultiblock, this)
+        pm.registerEvents(PylonFluidBufferBlock, this)
+        pm.registerEvents(PylonFluidTank, this)
+        pm.registerEvents(PylonRecipeListener, this)
+        pm.registerEvents(FluidPipePlacementService, this)
+        pm.registerEvents(PylonTickingBlock, this)
+        pm.registerEvents(PylonGuide, this)
+        pm.registerEvents(RecipeCompletion, this)
 
         if (PylonConfig.WailaConfig.enabled) {
             PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.wailaSettings))
-            Bukkit.getPluginManager().registerEvents(Waila, this)
+            pm.registerEvents(Waila, this)
         }
 
         PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.resourcePackSettings))
@@ -150,7 +153,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         if (PylonConfig.BlockTextureConfig.enabled) {
             PlayerSettingsPage.resourcePackSettings.addSetting(PageButton(PlayerSettingsPage.blockTextureSettings))
-            Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
+            pm.registerEvents(BlockTextureEngine, this)
             BlockTextureEngine.updateOccludingCacheJob.start()
         }
 
