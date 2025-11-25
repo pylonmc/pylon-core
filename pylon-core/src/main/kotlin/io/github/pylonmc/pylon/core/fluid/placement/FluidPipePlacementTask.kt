@@ -86,7 +86,7 @@ internal class FluidPipePlacementTask(
         } else if (!this.isPipeTypeValid) {
             // Pipe is not of the correct type
             isValid = false
-            player.sendActionBar(Component.translatable("pylon.pyloncore.message.pipe.not_of_same_type"))
+            player.sendActionBar(FluidPipe.MESSAGE_NOT_OF_SAME_TYPE)
             display.setItemStack(ItemStack(Material.RED_CONCRETE))
         } else if (!this.isPlacementValid) {
             // Points cannot be joined together (eg blocks in the way, one faces the wrong direction)

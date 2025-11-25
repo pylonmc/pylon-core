@@ -42,6 +42,10 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         ConfigAdapter.LIST.from(ConfigAdapter.FLUID_TEMPERATURE)
     )
 
+    companion object {
+        val MESSAGE_NOT_OF_SAME_TYPE = Component.translatable("pylon.pyloncore.message.pipe.not_of_same_type")
+    }
+
     override fun getPlaceholders(): List<PylonArgument> = listOf(
         PylonArgument.of("fluid_per_second", UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond)),
         PylonArgument.of(
@@ -107,7 +111,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
                 FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(pylonBlock.fluidIntersectionDisplay), this)
             } else {
                 // This pipe does not match the pipe we right clicked
-                player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
+                player.sendActionBar(MESSAGE_NOT_OF_SAME_TYPE)
             }
             return true
         }
@@ -118,7 +122,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
                 FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.Section(pylonBlock), this)
             } else {
                 // This pipe does not match the pipe we right clicked
-                player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
+                player.sendActionBar(MESSAGE_NOT_OF_SAME_TYPE)
             }
             return true
         }
