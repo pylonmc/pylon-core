@@ -7,7 +7,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
-import io.github.pylonmc.pylon.core.logistics.VirtualInventoryLogisticSlot
+import io.github.pylonmc.pylon.core.logistics.slot.VirtualInventoryLogisticSlot
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

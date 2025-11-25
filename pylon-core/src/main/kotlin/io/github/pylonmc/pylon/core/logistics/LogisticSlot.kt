@@ -16,13 +16,13 @@ interface LogisticSlot {
      */
     fun getItemStack(): ItemStack?
 
-    fun getAmount(): Long
+    fun getAmount() = getItemStack()?.amount?.toLong() ?: 0L
 
     /**
      * Returns the maximum amount for the given stack (which may not necessarily
      * be the same as the stack returned by [getItemStack].
      */
-    fun getMaxAmount(stack: ItemStack): Long
+    fun getMaxAmount(stack: ItemStack) = stack.maxStackSize.toLong()
 
     fun set(stack: ItemStack?, amount: Long)
 }
