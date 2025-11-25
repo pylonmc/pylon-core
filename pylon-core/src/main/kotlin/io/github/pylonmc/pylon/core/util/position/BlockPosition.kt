@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.util.Vector
 import org.joml.Vector3i
 import java.util.UUID
@@ -74,6 +75,8 @@ class BlockPosition(val worldId: UUID?, val x: Int, val y: Int, val z: Int) {
     fun withScalar(x: Int, y: Int, z: Int): BlockPosition {
         return BlockPosition(worldId, x, y, z)
     }
+
+    fun getRelative(face: BlockFace) = plus(face.direction.toVector3i())
 
     operator fun plus(other: BlockPosition): BlockPosition {
         check(worldId == other.worldId) { "Cannot add two BlockPositions in different worlds" }

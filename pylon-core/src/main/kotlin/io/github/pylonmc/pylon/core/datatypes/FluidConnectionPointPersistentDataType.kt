@@ -7,7 +7,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
-object FluidConnectionPointDataType : PersistentDataType<PersistentDataContainer, VirtualFluidPoint> {
+object FluidConnectionPointPersistentDataType : PersistentDataType<PersistentDataContainer, VirtualFluidPoint> {
 
     private val ID_KEY = pylonKey("id")
     private val POSITION_KEY = pylonKey("position")

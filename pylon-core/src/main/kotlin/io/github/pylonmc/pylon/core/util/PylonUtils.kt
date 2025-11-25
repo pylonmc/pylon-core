@@ -221,6 +221,18 @@ val IMMEDIATE_FACES_WITH_DIAGONALS: Array<BlockFace> = arrayOf(
     BlockFace.EAST
 )
 
+/**
+ * Returns all the immediate faces that are perpendicular to the given [face]
+ *
+ * @see IMMEDIATE_FACES
+ */
+fun perpendicularImmediateFaces(face: BlockFace): List<BlockFace> {
+    val faces = IMMEDIATE_FACES.toMutableList()
+    faces.remove(face)
+    faces.remove(face.oppositeFace)
+    return faces
+}
+
 @JvmSynthetic
 internal fun pylonKey(key: String): NamespacedKey = NamespacedKey(PylonCore, key)
 
