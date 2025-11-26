@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
 import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.event.player.CartographyItemEvent
 import org.bukkit.Keyed
 import org.bukkit.block.Crafter
 import org.bukkit.block.Furnace
@@ -18,10 +19,12 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockCookEvent
 import org.bukkit.event.block.CrafterCraftEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.event.inventory.PrepareItemCraftEvent
 import org.bukkit.event.inventory.PrepareSmithingEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.StonecutterInventory
 
 internal object PylonRecipeListener : Listener {
 
@@ -68,8 +71,6 @@ internal object PylonRecipeListener : Listener {
             } else {
                 inventory.result = null
             }
-        } else {
-            inventory.result = null
         }
 
         // Prevent crafting of unresearched items
@@ -83,6 +84,16 @@ internal object PylonRecipeListener : Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
+    private fun onCartography(e: CartographyItemEvent) {
+        val inventory = e.inventory
+        val hasPylonItems = inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }
+
+        if (hasPylonItems) {
+            inventory.result = null
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     private fun onCrafterCraft(e: CrafterCraftEvent) {
         val crafterState = e.block.state as? Crafter ?: return
         val inventory = crafterState.inventory
@@ -91,6 +102,18 @@ internal object PylonRecipeListener : Listener {
 
         if (hasPylonItems) {
             e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun itemInsertEvent(e: InventoryClickEvent) {
+        val inventory = e.inventory;
+        if (inventory is StonecutterInventory) {
+            val input = inventory.inputItem ?: return
+
+            if (input.isPylonAndIsNot<VanillaCraftingItem>()) {
+                e.isCancelled = true
+            }
         }
     }
 
