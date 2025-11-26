@@ -13,6 +13,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.annotations.Contract
 import java.lang.invoke.MethodHandle
 
 /**
@@ -71,5 +72,14 @@ class PylonItemSchema @JvmOverloads internal constructor(
 
     companion object {
         val pylonItemKeyKey = pylonKey("pylon_item_key")
+
+        @JvmStatic
+        @Contract("null -> null")
+        fun fromStack(stack: ItemStack?) : PylonItemSchema? {
+            if (stack == null || stack.isEmpty) return null
+            val id = stack.persistentDataContainer.get(pylonItemKeyKey, PylonSerializers.NAMESPACED_KEY)
+                ?: return null
+            return PylonRegistry.ITEMS[id]
+        }
     }
 }
