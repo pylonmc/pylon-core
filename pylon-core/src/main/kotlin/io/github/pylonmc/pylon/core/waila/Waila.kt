@@ -15,12 +15,12 @@ import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.papermc.paper.raytracing.PositionedRayTraceConfigurationBuilder
 import io.papermc.paper.raytracing.RayTraceTarget
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -103,29 +103,9 @@ class Waila private constructor(private val player: Player, playerConfig: Player
         val entityReach = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)?.value ?: 3.0
         val blockReach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
 
-        val rayTraceResult = player.world.rayTrace { builder ->
-            builder.start(player.eyeLocation)
-            builder.direction(player.eyeLocation.direction)
-            builder.maxDistance(max(entityReach, blockReach))
-            builder.entityFilter { entity ->
-                entity != player && entity.location.distanceSquared(player.eyeLocation) <= entityReach * entityReach
-            }
-            // Add 0.707 (approximate distance from center to corner of block) and use center location to make sure that all locations on blocks
-            // within range are considered. Without this, looking for example at the further end of the side of a block may be filtered out.
-            // The real solution would be to check if the point on the block that the player is looking at is within blockReach distance, but
-            // this is annoying
-            builder.blockFilter { block ->
-                block.location.toCenterLocation().distanceSquared(player.eyeLocation) <= (blockReach + 0.707).pow(2)
-            }
-            builder.targets(RayTraceTarget.ENTITY, RayTraceTarget.BLOCK)
-        }
+        val rayTraceResultEntity = player.world.rayTrace(rayTrace(entityReach, RayTraceTarget.ENTITY))
 
-        if (rayTraceResult == null) {
-            hide()
-            return
-        }
-
-        rayTraceResult.hitEntity?.let { entity ->
+        rayTraceResultEntity?.hitEntity?.let { entity ->
             try {
                 var display = entityOverrides[entity.uniqueId]?.invoke(player)
                     ?: entity.let(EntityStorage::get)?.getWaila(player)
@@ -139,19 +119,17 @@ class Waila private constructor(private val player: Player, playerConfig: Player
                     event.callEvent()
                     if (!event.isCancelled && event.display != null) {
                         send(event.display!!)
-                    } else {
-                        hide()
+                        return
                     }
-                } else {
-                    hide()
                 }
             } catch(e: Exception) {
                 e.printStackTrace()
-                hide()
             }
         }
 
-        rayTraceResult.hitBlock?.let { block ->
+        val rayTraceResultBlock = player.world.rayTrace(rayTrace(blockReach, RayTraceTarget.BLOCK))
+
+        rayTraceResultBlock?.hitBlock?.let { block ->
             try {
                 var display = blockOverrides[block.position]?.invoke(player)
                     ?: block.let(BlockStorage::get)?.getWaila(player)
@@ -165,17 +143,36 @@ class Waila private constructor(private val player: Player, playerConfig: Player
                     event.callEvent()
                     if (!event.isCancelled && event.display != null) {
                         send(event.display!!)
-                    } else {
-                        hide()
+                        return
                     }
-                } else {
-                    hide()
                 }
             } catch(e: Exception) {
                 e.printStackTrace()
-                hide()
             }
         }
+
+        hide()
+    }
+
+    private fun rayTrace(
+        reach: Double,
+        firstTarget: RayTraceTarget,
+        vararg targets: RayTraceTarget
+    ): (PositionedRayTraceConfigurationBuilder) -> Unit  = { builder ->
+        builder.start(player.eyeLocation)
+        builder.direction(player.eyeLocation.direction)
+        builder.maxDistance(reach)
+        builder.entityFilter { entity ->
+            entity != player && entity.location.distanceSquared(player.eyeLocation) <= reach * reach
+        }
+        // Add 0.707 (approximate distance from center to corner of block) and use center location to make sure that all locations on blocks
+        // within range are considered. Without this, looking for example at the further end of the side of a block may be filtered out.
+        // The real solution would be to check if the point on the block that the player is looking at is within blockReach distance, but
+        // this is annoying
+        builder.blockFilter { block ->
+            block.location.toCenterLocation().distanceSquared(player.eyeLocation) <= (reach + 0.707).pow(2)
+        }
+        builder.targets(firstTarget, *targets)
     }
 
     enum class Type {
