@@ -1,9 +1,9 @@
-package io.github.pylonmc.pylon.core.nms
+package io.github.pylonmc.pylon.core.nms.recipe
 
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.inventory.AbstractCraftingMenu
-import net.minecraft.world.inventory.RecipeBookMenu.PostPlaceAction
+import net.minecraft.world.inventory.RecipeBookMenu
 import net.minecraft.world.item.crafting.CraftingRecipe
 import net.minecraft.world.item.crafting.RecipeHolder
 import java.lang.invoke.MethodHandle
@@ -17,16 +17,16 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
         useMaxItems: Boolean,
         recipe: RecipeHolder<*>?,
         level: ServerLevel?,
-    ): PostPlaceAction {
+    ): RecipeBookMenu.PostPlaceAction {
         val recipeHolder = recipe as RecipeHolder<CraftingRecipe>
 
         init()
 
         beginPlacingRecipe.invokeExact(menu)
-        var postPlaceAction: PostPlaceAction
+        var postPlaceAction: RecipeBookMenu.PostPlaceAction
         try {
             val inputGridSlots = menu.inputGridSlots
-            postPlaceAction = PylonServerPlaceRecipe.placeRecipe(
+            postPlaceAction = PylonServerPlaceRecipe.Companion.placeRecipe(
                 menu,
                 player,
                 inputGridSlots,

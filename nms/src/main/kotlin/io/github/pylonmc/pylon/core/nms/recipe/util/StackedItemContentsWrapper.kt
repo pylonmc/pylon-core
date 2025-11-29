@@ -1,7 +1,7 @@
-package io.github.pylonmc.pylon.core.nms.util
+package io.github.pylonmc.pylon.core.nms.recipe.util
 
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.nms.util.StackedItemContentsWrapper.rawGetter
+import io.github.pylonmc.pylon.core.nms.recipe.util.StackedItemContentsWrapper.rawGetter
 import io.papermc.paper.inventory.recipe.ItemOrExact
 import net.minecraft.world.entity.player.StackedContents
 import net.minecraft.world.entity.player.StackedItemContents
@@ -23,9 +23,7 @@ object StackedItemContentsWrapper {
     }
 }
 
-fun StackedItemContents.getRaw(): StackedContents<ItemOrExact> {
-    return rawGetter.invokeExact(this) as StackedContents<ItemOrExact>
-}
+fun StackedItemContents.getRaw(): StackedContents<ItemOrExact> = rawGetter.invokeExact(this) as StackedContents<ItemOrExact>
 
 fun StackedItemContents.accountStackPylon(stack: ItemStack, maxStackSize: Int = stack.maxStackSize) {
     if (stack.isEmpty) return

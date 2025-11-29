@@ -5,7 +5,6 @@ import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import net.kyori.adventure.text.Component
 import org.bukkit.block.Block
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player

@@ -1,17 +1,16 @@
-package io.github.pylonmc.pylon.core.nms
+package io.github.pylonmc.pylon.core.nms.recipe
 
 import io.github.pylonmc.pylon.core.item.PylonItem
-import io.github.pylonmc.pylon.core.nms.util.StackedItemContentsWrapper
-import io.github.pylonmc.pylon.core.nms.util.accountStackPylon
+import io.github.pylonmc.pylon.core.nms.recipe.util.StackedItemContentsWrapper
+import io.github.pylonmc.pylon.core.nms.recipe.util.accountStackPylon
 import io.papermc.paper.inventory.recipe.ItemOrExact
 import net.minecraft.recipebook.PlaceRecipeHelper
 import net.minecraft.recipebook.ServerPlaceRecipe
-import net.minecraft.recipebook.ServerPlaceRecipe.CraftingMenuAccess
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.StackedItemContents
 import net.minecraft.world.inventory.AbstractCraftingMenu
-import net.minecraft.world.inventory.RecipeBookMenu.PostPlaceAction
+import net.minecraft.world.inventory.RecipeBookMenu
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.CraftingRecipe
@@ -20,16 +19,18 @@ import net.minecraft.world.item.crafting.RecipeHolder
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
-import java.util.*
+import java.util.ArrayList
+import java.util.HashMap
+import java.util.Objects
 import kotlin.math.min
 
 class PylonServerPlaceRecipe private constructor(
     private val menu: AbstractCraftingMenu,
     private val player: ServerPlayer,
     private val inputGridSlots: MutableList<Slot>
-) : CraftingMenuAccess<CraftingRecipe> {
+) : ServerPlaceRecipe.CraftingMenuAccess<CraftingRecipe> {
     private lateinit var delegate: ServerPlaceRecipe<*>
-    
+
     init {
         StackedItemContentsWrapper.initialize()
         initialize()
@@ -53,15 +54,15 @@ class PylonServerPlaceRecipe private constructor(
         }
     }
 
-    private fun tryPlaceRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: StackedItemContents): PostPlaceAction {
+    private fun tryPlaceRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: StackedItemContents): RecipeBookMenu.PostPlaceAction {
         if (stackedItemContents.canCraft(recipe.value()!!, null)) {
             this.placeRecipe(recipe, stackedItemContents)
             this.player.inventory.setChanged()
-            return PostPlaceAction.NOTHING
+            return RecipeBookMenu.PostPlaceAction.NOTHING
         } else {
             this.clearGrid()
             this.player.inventory.setChanged()
-            return PostPlaceAction.PLACE_GHOST_RECIPE
+            return RecipeBookMenu.PostPlaceAction.PLACE_GHOST_RECIPE
         }
     }
 
@@ -165,7 +166,7 @@ class PylonServerPlaceRecipe private constructor(
 
             if (item is ItemOrExact.Item) {
                 if (!Inventory.isUsableForCrafting(itemStack)) continue
-                if (PylonItem.isPylonItem(itemStack.bukkitStack)) continue // skip our pylon items
+                if (PylonItem.Companion.isPylonItem(itemStack.bukkitStack)) continue // skip our pylon items
             }
 
             if (stack.isEmpty || ItemStack.isSameItemSameComponents(stack, itemStack)) {
@@ -195,7 +196,7 @@ class PylonServerPlaceRecipe private constructor(
                 ServerPlaceRecipe::class.java,
                 MethodType.methodType(
                     Void.TYPE,
-                    CraftingMenuAccess::class.java,
+                    ServerPlaceRecipe.CraftingMenuAccess::class.java,
                     Inventory::class.java,
                     Boolean::class.javaPrimitiveType,  // boolean
                     Integer::class.javaPrimitiveType,  // int
@@ -207,7 +208,7 @@ class PylonServerPlaceRecipe private constructor(
         }
 
         fun <T : Recipe<*>> makeDelegate(
-            menu: CraftingMenuAccess<T>,
+            menu: ServerPlaceRecipe.CraftingMenuAccess<T>,
             inventory: Inventory,
             useMaxItems: Boolean,
             gridWidth: Int,
@@ -233,7 +234,7 @@ class PylonServerPlaceRecipe private constructor(
             slotsToClear: MutableList<Slot>,
             recipe: RecipeHolder<CraftingRecipe>,
             useMaxItems: Boolean
-        ): PostPlaceAction {
+        ): RecipeBookMenu.PostPlaceAction {
             val serverPlaceRecipe = PylonServerPlaceRecipe(
                 menu,
                 player,
@@ -244,14 +245,13 @@ class PylonServerPlaceRecipe private constructor(
                 serverPlaceRecipe,
                 player.inventory,
                 useMaxItems,
-                menu.gridWidth,
-                menu.gridHeight,
+                menu.gridWidth, menu.gridHeight,
                 inputGridSlots,
                 slotsToClear
             )
 
             if (!player.isCreative && !serverPlaceRecipe.testClearGrid()) {
-                return PostPlaceAction.NOTHING
+                return RecipeBookMenu.PostPlaceAction.NOTHING
             }
 
             val stackedItemContents = StackedItemContents()

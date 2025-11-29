@@ -3,12 +3,11 @@ package io.github.pylonmc.pylon.core.nms
 import com.destroystokyo.paper.event.player.PlayerRecipeBookClickEvent
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
-import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.i18n.packet.PlayerPacketHandler
+import io.github.pylonmc.pylon.core.nms.recipe.HandlerRecipeBookClick
 import io.papermc.paper.adventure.PaperAdventure
-import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.TextComponentTagVisitor
