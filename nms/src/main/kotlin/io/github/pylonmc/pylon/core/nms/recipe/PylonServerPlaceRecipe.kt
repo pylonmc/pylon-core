@@ -42,7 +42,7 @@ class PylonServerPlaceRecipe private constructor(
     }
 
     override fun recipeMatches(recipe1: RecipeHolder<CraftingRecipe>): Boolean {
-        return recipe1.value()!!.matches(
+        return recipe1.value().matches(
             menu.craftSlots.asCraftInput(),
             player.level()
         )
@@ -55,7 +55,7 @@ class PylonServerPlaceRecipe private constructor(
     }
 
     private fun tryPlaceRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: StackedItemContents): RecipeBookMenu.PostPlaceAction {
-        if (stackedItemContents.canCraft(recipe.value()!!, null)) {
+        if (stackedItemContents.canCraft(recipe.value(), null)) {
             this.placeRecipe(recipe, stackedItemContents)
             this.player.inventory.setChanged()
             return RecipeBookMenu.PostPlaceAction.NOTHING
@@ -72,7 +72,7 @@ class PylonServerPlaceRecipe private constructor(
 
     private fun placeRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: StackedItemContents) {
         val flag = this.recipeMatches(recipe)
-        val rcp = recipe.value()!!
+        val rcp = recipe.value()
         val biggestCraftableStack = stackedItemContents.getBiggestCraftableStack(rcp, null)
         if (flag) {
             for (slot in this.inputGridSlots) {
@@ -85,14 +85,14 @@ class PylonServerPlaceRecipe private constructor(
 
         val i = this.calculateAmountToCraft(biggestCraftableStack, flag)
         val list: MutableList<ItemOrExact> = ArrayList()
-        var selectedRecipe: Recipe<*> = recipe.value()!!
+        var selectedRecipe: Recipe<*> = recipe.value()
         Objects.requireNonNull(list)
         if (!stackedItemContents.canCraft(selectedRecipe, i) { e: ItemOrExact? -> list.add(e!!) }) return
 
         val i1: Int = clampToMaxStackSize(i, list)
         if (i1 != i) {
             list.clear()
-            selectedRecipe = recipe.value()!!
+            selectedRecipe = recipe.value()
             Objects.requireNonNull(list)
             if (!stackedItemContents.canCraft(
                     selectedRecipe,
@@ -108,7 +108,7 @@ class PylonServerPlaceRecipe private constructor(
             this.menu.gridWidth,
             this.menu.gridHeight,
             recipe.value(),
-            recipe.value()!!.placementInfo().slotsToIngredientIndex()
+            recipe.value().placementInfo().slotsToIngredientIndex()
         ) { item1: Int?, slot1: Int, _: Int, _: Int ->
             if (item1 != -1) {
                 val slot2 = this.inputGridSlots[slot1]

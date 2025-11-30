@@ -26,7 +26,7 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
         var postPlaceAction: RecipeBookMenu.PostPlaceAction
         try {
             val inputGridSlots = menu.inputGridSlots
-            postPlaceAction = PylonServerPlaceRecipe.Companion.placeRecipe(
+            postPlaceAction = PylonServerPlaceRecipe.placeRecipe(
                 menu,
                 player,
                 inputGridSlots,

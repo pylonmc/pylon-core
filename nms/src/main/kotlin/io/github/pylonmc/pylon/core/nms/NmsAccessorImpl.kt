@@ -105,40 +105,38 @@ object NmsAccessorImpl : NmsAccessor {
         val serverPlayer = (event.player as CraftPlayer).handle
         val menu = serverPlayer.containerMenu
 
-        if (menu is AbstractCraftingMenu) {
-            val server = MinecraftServer.getServer()
-            val recipeName = event.recipe
-            val recipeHolder = server.recipeManager
-                .byKey(ResourceKey.create(
-                    Registries.RECIPE, CraftNamespacedKey.toMinecraft(recipeName)
-                ))
-                .orElse(null) ?: return
+        if (menu !is AbstractCraftingMenu) return
+        val server = MinecraftServer.getServer()
+        val recipeName = event.recipe
+        val recipeHolder = server.recipeManager
+            .byKey(ResourceKey.create(
+                Registries.RECIPE, CraftNamespacedKey.toMinecraft(recipeName)
+            ))
+            .orElse(null) ?: return
 
-            val postPlaceAction = HandlerRecipeBookClick(serverPlayer).handlePylonItemPlacement(
-                menu,
-                event.isMakeAll,
-                recipeHolder,
-                serverPlayer.level(),
-            )
+        val postPlaceAction = HandlerRecipeBookClick(serverPlayer).handlePylonItemPlacement(
+            menu,
+            event.isMakeAll,
+            recipeHolder,
+            serverPlayer.level(),
+        )
 
 
-            val displayRecipes = recipeHolder.value().display()
-            if (postPlaceAction == PostPlaceAction.PLACE_GHOST_RECIPE && !displayRecipes.isEmpty()) {
-                PylonCore.javaPlugin.launch(PylonCore.asyncDispatcher) {
-                    val max = displayRecipes.size
-                    for (i in 0..<max) {
-                        serverPlayer.connection.send(
-                            ClientboundPlaceGhostRecipePacket(
-                                serverPlayer.containerMenu.containerId,
-                                displayRecipes[i]
-                            )
+        val displayRecipes = recipeHolder.value().display()
+        if (postPlaceAction == PostPlaceAction.PLACE_GHOST_RECIPE && !displayRecipes.isEmpty()) {
+            PylonCore.javaPlugin.launch(PylonCore.asyncDispatcher) {
+                val max = displayRecipes.size
+                for (i in 0..<max) {
+                    serverPlayer.connection.send(
+                        ClientboundPlaceGhostRecipePacket(
+                            serverPlayer.containerMenu.containerId,
+                            displayRecipes[i]
                         )
-                    }
+                    )
                 }
             }
-
-            event.isCancelled = true
-            return
         }
+
+        event.isCancelled = true
     }
 }
