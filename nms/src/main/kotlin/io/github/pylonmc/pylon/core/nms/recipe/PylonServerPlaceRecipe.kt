@@ -14,14 +14,10 @@ import net.minecraft.world.inventory.RecipeBookMenu
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.CraftingRecipe
-import net.minecraft.world.item.crafting.Recipe
 import net.minecraft.world.item.crafting.RecipeHolder
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.Objects
 import kotlin.math.min
 
 class PylonServerPlaceRecipe private constructor(
@@ -72,8 +68,8 @@ class PylonServerPlaceRecipe private constructor(
 
     private fun placeRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: StackedItemContents) {
         val flag = this.recipeMatches(recipe)
-        val rcp = recipe.value()
-        val biggestCraftableStack = stackedItemContents.getBiggestCraftableStack(rcp, null)
+        val selectedRecipe = recipe.value()
+        val biggestCraftableStack = stackedItemContents.getBiggestCraftableStack(selectedRecipe, null)
         if (flag) {
             for (slot in this.inputGridSlots) {
                 val item = slot.item
@@ -84,16 +80,12 @@ class PylonServerPlaceRecipe private constructor(
         }
 
         val i = this.calculateAmountToCraft(biggestCraftableStack, flag)
-        val list: MutableList<ItemOrExact> = ArrayList()
-        var selectedRecipe: Recipe<*> = recipe.value()
-        Objects.requireNonNull(list)
+        val list = ArrayList<ItemOrExact>()
         if (!stackedItemContents.canCraft(selectedRecipe, i) { e: ItemOrExact? -> list.add(e!!) }) return
 
         val i1: Int = clampToMaxStackSize(i, list)
         if (i1 != i) {
             list.clear()
-            selectedRecipe = recipe.value()
-            Objects.requireNonNull(list)
             if (!stackedItemContents.canCraft(
                     selectedRecipe,
                     i1
@@ -107,8 +99,8 @@ class PylonServerPlaceRecipe private constructor(
         PlaceRecipeHelper.placeRecipe(
             this.menu.gridWidth,
             this.menu.gridHeight,
-            recipe.value(),
-            recipe.value().placementInfo().slotsToIngredientIndex()
+            selectedRecipe,
+            selectedRecipe.placementInfo().slotsToIngredientIndex()
         ) { item1: Int?, slot1: Int, _: Int, _: Int ->
             if (item1 != -1) {
                 val slot2 = this.inputGridSlots[slot1]
@@ -166,7 +158,7 @@ class PylonServerPlaceRecipe private constructor(
 
             if (item is ItemOrExact.Item) {
                 if (!Inventory.isUsableForCrafting(itemStack)) continue
-                if (PylonItem.Companion.isPylonItem(itemStack.bukkitStack)) continue // skip our pylon items
+                if (PylonItem.isPylonItem(itemStack.bukkitStack)) continue // skip our pylon items
             }
 
             if (stack.isEmpty || ItemStack.isSameItemSameComponents(stack, itemStack)) {
@@ -207,26 +199,6 @@ class PylonServerPlaceRecipe private constructor(
             )
         }
 
-        fun <T : Recipe<*>> makeDelegate(
-            menu: ServerPlaceRecipe.CraftingMenuAccess<T>,
-            inventory: Inventory,
-            useMaxItems: Boolean,
-            gridWidth: Int,
-            gridHeight: Int,
-            inputGridSlots: List<Slot>,
-            slotsToClear: List<Slot>
-        ): ServerPlaceRecipe<T> {
-            return constructor.invokeExact(
-                menu,
-                inventory,
-                useMaxItems,
-                gridWidth,
-                gridHeight,
-                inputGridSlots,
-                slotsToClear
-            ) as ServerPlaceRecipe<T>
-        }
-
         fun placeRecipe(
             menu: AbstractCraftingMenu,
             player: ServerPlayer,
@@ -241,21 +213,21 @@ class PylonServerPlaceRecipe private constructor(
                 inputGridSlots
             )
 
-            serverPlaceRecipe.delegate = makeDelegate(
-                serverPlaceRecipe,
+            serverPlaceRecipe.delegate = constructor.invokeExact(
+                serverPlaceRecipe as ServerPlaceRecipe.CraftingMenuAccess<CraftingRecipe>, // important for invokeExact
                 player.inventory,
                 useMaxItems,
                 menu.gridWidth, menu.gridHeight,
                 inputGridSlots,
                 slotsToClear
-            )
+            ) as ServerPlaceRecipe<CraftingRecipe>
 
             if (!player.isCreative && !serverPlaceRecipe.testClearGrid()) {
                 return RecipeBookMenu.PostPlaceAction.NOTHING
             }
 
             val stackedItemContents = StackedItemContents()
-            stackedItemContents.initializeExtras(recipe.value()!!, null)
+            stackedItemContents.initializeExtras(recipe.value(), null)
 
             for (itemStack in player.inventory) {
                 stackedItemContents.accountStackPylon(itemStack)
