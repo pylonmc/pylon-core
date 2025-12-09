@@ -156,7 +156,7 @@ interface PylonCargoBlock : PylonLogisticBlock {
 
         @JvmStatic
         fun cargoItemsTransferredPerSecond(cargoTransferRate: Int)
-            = (cargoTransferRate * PylonConfig.cargoTransferRateMultiplier).toFloat() / PylonConfig.cargoTickInterval.toFloat()
+            = (cargoTransferRate * PylonConfig.cargoTransferRateMultiplier).toDouble() / PylonConfig.cargoTickInterval.toDouble()
 
         internal data class CargoBlockData(
             var groups: MutableMap<BlockFace, String>,
