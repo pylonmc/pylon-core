@@ -25,6 +25,15 @@ object StackedItemContentsWrapper {
 
 fun StackedItemContents.getRaw(): StackedContents<ItemOrExact> = rawGetter.invokeExact(this) as StackedContents<ItemOrExact>
 
+/**
+ *
+ * Behaves like the StackedItemContents#accountStack, however for pylon items we instead
+ * account them as ItemOrExact#Exact when added to the StackedContents that handles crafting,
+ * so that only exact picks, and not material pick, will show up as valid
+ *
+ * @param stack stack to add
+ * @param maxStackSize max stack size of the itemstack, by default obtained with DataComponents#MAX_STACK_SIZE
+ */
 fun StackedItemContents.accountStackPylon(stack: ItemStack, maxStackSize: Int = stack.maxStackSize) {
     if (stack.isEmpty) return
 

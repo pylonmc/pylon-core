@@ -20,6 +20,12 @@ import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
 import kotlin.math.min
 
+/**
+ * Handling pylon item placing and accounting, delegates most of the stuff to
+ * nms's ServerPlaceRecipe class, tries to match the method signatures and implements
+ * ServerPlaceRecipe#CraftingMenuAccess as we don't need an anonymous object as we are
+ * only going to change that specific case
+ */
 class PylonServerPlaceRecipe private constructor(
     private val menu: AbstractCraftingMenu,
     private val player: ServerPlayer,
@@ -50,6 +56,9 @@ class PylonServerPlaceRecipe private constructor(
         }
     }
 
+    /**
+     * We override this because we need to use our own placeRecipe
+     */
     private fun tryPlaceRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: StackedItemContents): RecipeBookMenu.PostPlaceAction {
         if (stackedItemContents.canCraft(recipe.value(), null)) {
             this.placeRecipe(recipe, stackedItemContents)
@@ -66,6 +75,9 @@ class PylonServerPlaceRecipe private constructor(
         methodMap["clearGrid"]!!.invokeExact(delegate)
     }
 
+    /**
+     * We override this because we need to use our own moveItemToGrid
+     */
     private fun placeRecipe(recipe: RecipeHolder<CraftingRecipe>, stackedItemContents: StackedItemContents) {
         val flag = this.recipeMatches(recipe)
         val selectedRecipe = recipe.value()
@@ -121,6 +133,9 @@ class PylonServerPlaceRecipe private constructor(
         return methodMap["calculateAmountToCraft"]!!.invokeExact(delegate, max, recipeMatches) as Int
     }
 
+    /**
+     * We override this because we need to use our own findSlotMatchingCraftingIngredient
+     */
     private fun moveItemToGrid(slot: Slot, item: ItemOrExact, count: Int): Int {
         val item1 = slot.item
         val matchingSlot = findSlotMatchingCraftingIngredient(this.player.inventory.contents, item, item1)
@@ -149,6 +164,9 @@ class PylonServerPlaceRecipe private constructor(
         return methodMap["testClearGrid"]!!.invokeExact(delegate) as Boolean
     }
 
+    /**
+     * Behave like normal, however skip pylon items from material matches
+     */
     fun findSlotMatchingCraftingIngredient(items: List<ItemStack>, item: ItemOrExact, stack: ItemStack): Int {
         for (i in items.indices) {
             val itemStack = items[i]

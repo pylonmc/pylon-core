@@ -12,6 +12,10 @@ import java.lang.invoke.MethodType
 
 class HandlerRecipeBookClick(val player: ServerPlayer) {
 
+    /**
+     * Mimics AbstractCraftingMenu#handlePlacement, but instead we are using our own
+     * PylonServerPlaceRecipe#placeRecipe to handle the crafting, in order to handle pylon items
+     */
     fun handlePylonItemPlacement(
         menu: AbstractCraftingMenu,
         useMaxItems: Boolean,

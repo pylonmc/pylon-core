@@ -123,20 +123,19 @@ object NmsAccessorImpl : NmsAccessor {
 
 
         val displayRecipes = recipeHolder.value().display()
-        if (postPlaceAction == PostPlaceAction.PLACE_GHOST_RECIPE && !displayRecipes.isEmpty()) {
-            PylonCore.javaPlugin.launch(PylonCore.asyncDispatcher) {
-                val max = displayRecipes.size
-                for (i in 0..<max) {
-                    serverPlayer.connection.send(
-                        ClientboundPlaceGhostRecipePacket(
-                            serverPlayer.containerMenu.containerId,
-                            displayRecipes[i]
-                        )
+        event.isCancelled = true
+        if (postPlaceAction != PostPlaceAction.PLACE_GHOST_RECIPE || displayRecipes.isEmpty()) return
+
+        PylonCore.javaPlugin.launch(PylonCore.asyncDispatcher) {
+            val max = displayRecipes.size
+            for (i in 0..<max) {
+                serverPlayer.connection.send(
+                    ClientboundPlaceGhostRecipePacket(
+                        serverPlayer.containerMenu.containerId,
+                        displayRecipes[i]
                     )
-                }
+                )
             }
         }
-
-        event.isCancelled = true
     }
 }
