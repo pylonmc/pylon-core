@@ -10,4 +10,9 @@ enum class LogisticSlotType {
      * Output from the attached machine
      */
     OUTPUT,
+
+    /**
+     * Both input to and output from the attached machine
+     */
+    BOTH,
 }

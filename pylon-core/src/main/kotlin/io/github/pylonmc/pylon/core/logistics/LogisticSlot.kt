@@ -13,6 +13,9 @@ interface LogisticSlot {
      *
      * This allows for arbitrarily large amounts to be set, instead of being
      * constrained by the maximum amount of an ItemStack.
+     *
+     * WARNING: Callers to this function should not mutate the ItemStack
+     * that is returned. This will likely lead to unexpected behaviour.
      */
     fun getItemStack(): ItemStack?
 

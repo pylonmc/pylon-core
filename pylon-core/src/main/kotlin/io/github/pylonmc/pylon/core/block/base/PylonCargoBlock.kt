@@ -89,7 +89,7 @@ interface PylonCargoBlock : PylonLogisticBlock {
     fun tickCargo() {
         for ((face, group) in cargoBlockData.groups) {
             val sourceGroup = getLogisticGroup(group)
-            if (sourceGroup == null || sourceGroup.slotType != LogisticSlotType.OUTPUT) {
+            if (sourceGroup == null || sourceGroup.slotType == LogisticSlotType.INPUT) {
                 continue
             }
 
@@ -99,7 +99,7 @@ interface PylonCargoBlock : PylonLogisticBlock {
             }
 
             val targetGroup = target.block.getCargoLogisticGroup(target.face)
-            if (targetGroup == null || targetGroup.slotType != LogisticSlotType.INPUT) {
+            if (targetGroup == null || targetGroup.slotType == LogisticSlotType.OUTPUT) {
                 continue
             }
 
