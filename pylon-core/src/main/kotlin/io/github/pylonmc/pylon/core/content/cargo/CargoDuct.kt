@@ -13,7 +13,7 @@ import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
 import io.github.pylonmc.pylon.core.event.PylonCargoConnectEvent
-import io.github.pylonmc.pylon.core.event.PylonCargoDuctDisconnectEvent
+import io.github.pylonmc.pylon.core.event.PylonCargoDisconnectEvent
 import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -53,10 +53,10 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
                 is CargoDuct -> {
                     connectedBlock.connectedFaces.remove(face.oppositeFace)
                     connectedBlock.updateConnectedFaces()
-                    PylonCargoDuctDisconnectEvent(this, connectedBlock).callEvent()
+                    PylonCargoDisconnectEvent(this, connectedBlock).callEvent()
                 }
                 is PylonCargoBlock -> {
-                    PylonCargoDuctDisconnectEvent(this, connectedBlock).callEvent()
+                    PylonCargoDisconnectEvent(this, connectedBlock).callEvent()
                 }
             }
         }

@@ -9,7 +9,7 @@ import org.bukkit.event.HandlerList
 /**
  * Called after a [CargoDuct] disconnects from an adjacent [CargoDuct] or [PylonCargoBlock]
  */
-class PylonCargoDuctDisconnectEvent(
+class PylonCargoDisconnectEvent(
     val block1: PylonBlock,
     val block2: PylonBlock
 ) : Event() {
