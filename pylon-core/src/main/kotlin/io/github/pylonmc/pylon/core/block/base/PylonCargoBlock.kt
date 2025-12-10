@@ -8,13 +8,15 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.cargo.CargoDuct
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
+import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
-import io.github.pylonmc.pylon.core.event.PylonCargoDuctConnectEvent
+import io.github.pylonmc.pylon.core.event.PylonCargoConnectEvent
 import io.github.pylonmc.pylon.core.event.PylonCargoDuctDisconnectEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
 import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
@@ -22,10 +24,14 @@ import io.github.pylonmc.pylon.core.logistics.CargoRoutes
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
+import org.joml.Vector3d
 import java.util.IdentityHashMap
 import kotlin.math.min
 
@@ -41,7 +47,7 @@ import kotlin.math.min
  * `setCargoTransferRate` to set the maximum number of items that can be transferred
  * out of this block per cargo tick.
  */
-interface PylonCargoBlock : PylonLogisticBlock {
+interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
     private val cargoBlockData: CargoBlockData
         get() = cargoBlocks.getOrPut(this) { CargoBlockData(
@@ -82,7 +88,7 @@ interface PylonCargoBlock : PylonLogisticBlock {
         @ApiStatus.NonExtendable
         get() = cargoBlockData.transferRate
 
-    fun onDuctConnected(event: PylonCargoDuctConnectEvent) {}
+    fun onDuctConnected(event: PylonCargoConnectEvent) {}
 
     fun onDuctDisconnected(event: PylonCargoDuctDisconnectEvent) {}
 
@@ -184,6 +190,14 @@ interface PylonCargoBlock : PylonLogisticBlock {
                 return
             }
 
+            // Disconnect from directly adjacent cargo blocks
+            for (face in block.cargoBlockData.groups.toMap().keys) {
+                val otherBlock = BlockStorage.get(block.block.getRelative(face))
+                if (otherBlock is PylonCargoBlock) {
+                    otherBlock.getHeldEntity("cargo:direct-connection:${face.oppositeFace}")?.remove()
+                }
+            }
+
             // Disconnect adjacent cargo ducts
             for ((face, _) in block.cargoBlockData.groups) {
                 BlockStorage.getAs<CargoDuct>(block.block.getRelative(face))?.let { duct ->
@@ -197,11 +211,37 @@ interface PylonCargoBlock : PylonLogisticBlock {
             cargoTickers.remove(block)?.cancel()
         }
 
-        @EventHandler
+        // Should fire after logistic groups have been set up
+        @EventHandler(priority = EventPriority.HIGH)
         private fun onPlace(event: PylonBlockPlaceEvent) {
             val block = event.pylonBlock
             if (block !is PylonCargoBlock) {
                 return
+            }
+
+            // Connect to directly adjacent cargo blocks
+            for (face in block.cargoBlockData.groups.toMap().keys) {
+                val otherBlock = BlockStorage.get(block.block.getRelative(face))
+                if (otherBlock !is PylonCargoBlock
+                    || face.oppositeFace !in otherBlock.cargoBlockData.groups
+                    || !PylonCargoConnectEvent(block, otherBlock).callEvent()
+                ) {
+                    continue
+                }
+
+                val fromLocation = block.block.location.toCenterLocation()
+                val toLocation = otherBlock.block.location.toCenterLocation()
+                val display = ItemDisplayBuilder()
+                    .transformation(LineBuilder()
+                        .from(Vector3d())
+                        .to(toLocation.subtract(fromLocation).toVector().toVector3d())
+                        .thickness(0.3505)
+                        .extraLength(0.3505)
+                        .build()
+                    )
+                    .material(Material.GRAY_CONCRETE)
+                    .build(fromLocation)
+                block.addEntity("cargo:direct-connection:${face}", display)
             }
 
             // Connect adjacent cargo ducts
@@ -247,8 +287,8 @@ interface PylonCargoBlock : PylonLogisticBlock {
         }
 
         @EventHandler
-        private fun onDuctConnected(event: PylonCargoDuctConnectEvent) {
-            val block = event.otherBlock
+        private fun onDuctConnected(event: PylonCargoConnectEvent) {
+            val block = event.block2
             if (block is PylonCargoBlock) {
                 block.onDuctConnected(event)
             }
