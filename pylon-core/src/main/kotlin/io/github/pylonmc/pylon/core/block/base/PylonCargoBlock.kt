@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.content.cargo.CargoDuct
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -21,6 +22,7 @@ import io.github.pylonmc.pylon.core.event.PylonCargoDuctDisconnectEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
 import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
 import io.github.pylonmc.pylon.core.logistics.CargoRoutes
+import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -91,6 +93,44 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
     fun onDuctConnected(event: PylonCargoConnectEvent) {}
 
     fun onDuctDisconnected(event: PylonCargoDuctDisconnectEvent) {}
+
+    /**
+     * Checks if the block can connect to any adjacent cargo blocks, and if so, creates
+     * a duct display between this block and the adjacent cargo block in question.
+     */
+    @ApiStatus.NonExtendable
+    fun updateDirectlyConnectedFaces() {
+        for (face in IMMEDIATE_FACES) {
+            // We iterate IMMEDIATE_FACES instead of [cargoBlockData.groups] in case [cargoBlockData.groups] is
+            // modified at some point while iterating, e.g. by a PylonCargoConnectEvent listener
+            if (face !in cargoBlockData.groups || getHeldEntity("cargo:direct-connection:${face}") != null) {
+                continue
+            }
+
+            val otherBlock = BlockStorage.get(block.getRelative(face))
+            if (otherBlock !is PylonCargoBlock
+                || face.oppositeFace !in otherBlock.cargoBlockData.groups
+                || !PylonCargoConnectEvent(this as PylonBlock, otherBlock).callEvent()
+            ) {
+                continue
+            }
+
+            val fromLocation = block.location.toCenterLocation()
+            val toLocation = otherBlock.block.location.toCenterLocation()
+            val display = ItemDisplayBuilder()
+                .transformation(
+                    LineBuilder()
+                        .from(Vector3d())
+                        .to(toLocation.subtract(fromLocation).toVector().toVector3d())
+                        .thickness(0.3505)
+                        .extraLength(0.3505)
+                        .build()
+                )
+                .material(Material.GRAY_CONCRETE)
+                .build(fromLocation)
+            addEntity("cargo:direct-connection:${face}", display)
+        }
+    }
 
     fun tickCargo() {
         for ((face, group) in cargoBlockData.groups) {
@@ -193,17 +233,21 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
             // Disconnect from directly adjacent cargo blocks
             for (face in block.cargoBlockData.groups.toMap().keys) {
                 val otherBlock = BlockStorage.get(block.block.getRelative(face))
-                if (otherBlock is PylonCargoBlock) {
+                if (otherBlock is PylonCargoBlock && face.oppositeFace in otherBlock.cargoBlockData.groups) {
                     otherBlock.getHeldEntity("cargo:direct-connection:${face.oppositeFace}")?.remove()
+                    PylonCargoDuctDisconnectEvent(otherBlock, block).callEvent()
+                    otherBlock.updateDirectlyConnectedFaces()
                 }
             }
 
             // Disconnect adjacent cargo ducts
             for ((face, _) in block.cargoBlockData.groups) {
                 BlockStorage.getAs<CargoDuct>(block.block.getRelative(face))?.let { duct ->
-                    duct.connectedFaces.remove(face.oppositeFace)
-                    duct.updateConnectedFaces()
-                    PylonCargoDuctDisconnectEvent(duct, block).callEvent()
+                    if (face in duct.connectedFaces) {
+                        duct.connectedFaces.remove(face.oppositeFace)
+                        duct.updateConnectedFaces()
+                        PylonCargoDuctDisconnectEvent(duct, block).callEvent()
+                    }
                 }
             }
 
@@ -221,27 +265,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
             // Connect to directly adjacent cargo blocks
             for (face in block.cargoBlockData.groups.toMap().keys) {
-                val otherBlock = BlockStorage.get(block.block.getRelative(face))
-                if (otherBlock !is PylonCargoBlock
-                    || face.oppositeFace !in otherBlock.cargoBlockData.groups
-                    || !PylonCargoConnectEvent(block, otherBlock).callEvent()
-                ) {
-                    continue
-                }
-
-                val fromLocation = block.block.location.toCenterLocation()
-                val toLocation = otherBlock.block.location.toCenterLocation()
-                val display = ItemDisplayBuilder()
-                    .transformation(LineBuilder()
-                        .from(Vector3d())
-                        .to(toLocation.subtract(fromLocation).toVector().toVector3d())
-                        .thickness(0.3505)
-                        .extraLength(0.3505)
-                        .build()
-                    )
-                    .material(Material.GRAY_CONCRETE)
-                    .build(fromLocation)
-                block.addEntity("cargo:direct-connection:${face}", display)
+                BlockStorage.getAs<PylonCargoBlock>(block.block.getRelative(face))?.updateDirectlyConnectedFaces()
             }
 
             // Connect adjacent cargo ducts
@@ -288,17 +312,25 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
         @EventHandler
         private fun onDuctConnected(event: PylonCargoConnectEvent) {
-            val block = event.block2
-            if (block is PylonCargoBlock) {
-                block.onDuctConnected(event)
+            val block1 = event.block1
+            if (block1 is PylonCargoBlock) {
+                block1.onDuctConnected(event)
+            }
+            val block2 = event.block2
+            if (block2 is PylonCargoBlock) {
+                block2.onDuctConnected(event)
             }
         }
 
         @EventHandler
         private fun onDuctDisconnected(event: PylonCargoDuctDisconnectEvent) {
-            val block = event.otherBlock
-            if (block is PylonCargoBlock) {
-                block.onDuctDisconnected(event)
+            val block1 = event.block1
+            if (block1 is PylonCargoBlock) {
+                block1.onDuctDisconnected(event)
+            }
+            val block2 = event.block2
+            if (block2 is PylonCargoBlock) {
+                block2.onDuctDisconnected(event)
             }
         }
     }
