@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.EquipmentSlot
 import java.util.UUID
@@ -161,6 +162,21 @@ internal object FluidPipePlacementService : Listener {
         val heldItem = event.getPlayer().inventory.getItem(event.previousSlot)
         if (PylonItem.fromStack(heldItem) is FluidPipe && connectionsInProgress.containsKey(event.getPlayer())) {
             cancelConnection(event.getPlayer())
+        }
+    }
+
+    @EventHandler
+    private fun onSwap(e: PlayerSwapHandItemsEvent) {
+        val mainHandPylon = PylonItem.fromStack(e.mainHandItem)
+        if (mainHandPylon != null && mainHandPylon is FluidPipe) {
+            e.isCancelled = true
+            return
+        }
+
+        val otherHandPylon = PylonItem.fromStack(e.offHandItem)
+        if (otherHandPylon != null && otherHandPylon is FluidPipe) {
+            e.isCancelled = true
+            return
         }
     }
 
