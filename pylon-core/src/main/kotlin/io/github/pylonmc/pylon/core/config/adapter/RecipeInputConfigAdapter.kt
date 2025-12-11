@@ -37,7 +37,7 @@ object RecipeInputItemAdapter : ConfigAdapter<RecipeInput.Item> {
                 if (value.startsWith("#")) {
                     RecipeInput.Item(ConfigAdapter.ITEM_TAG.convert(value), 1)
                 } else {
-                    val nsKey = NamespacedKey.fromString(value) ?: throw IllegalArgumentException("Namespaced key invalid for $value item recipe key")
+                    val nsKey = NamespacedKey.fromString(value) ?: throw IllegalArgumentException("'$value' is not a namespaced key")
                     RecipeInput.Item(hashSetOf(ItemTypeWrapper.invoke(nsKey)), 1)
                 }
             }
