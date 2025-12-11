@@ -166,16 +166,18 @@ internal object FluidPipePlacementService : Listener {
     }
 
     @EventHandler
-    private fun onSwap(e: PlayerSwapHandItemsEvent) {
-        val mainHandPylon = PylonItem.fromStack(e.mainHandItem)
-        if (mainHandPylon != null && mainHandPylon is FluidPipe) {
-            e.isCancelled = true
+    private fun onSwap(event: PlayerSwapHandItemsEvent) {
+        if (!connectionsInProgress.containsKey(event.getPlayer())) return
+
+        val mainHandPylon = PylonItem.fromStack(event.mainHandItem)
+        if (mainHandPylon is FluidPipe) {
+            event.isCancelled = true
             return
         }
 
-        val otherHandPylon = PylonItem.fromStack(e.offHandItem)
-        if (otherHandPylon != null && otherHandPylon is FluidPipe) {
-            e.isCancelled = true
+        val otherHandPylon = PylonItem.fromStack(event.offHandItem)
+        if (otherHandPylon is FluidPipe) {
+            event.isCancelled = true
             return
         }
     }
