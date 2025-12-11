@@ -4,16 +4,21 @@ import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import com.destroystokyo.paper.event.player.PlayerJumpEvent
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.pylonBlockPositionKey
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
+import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -21,6 +26,7 @@ import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Container
+import org.bukkit.entity.FallingBlock
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -29,6 +35,7 @@ import org.bukkit.event.block.*
 import org.bukkit.event.block.BellRingEvent
 import org.bukkit.event.enchantment.EnchantItemEvent
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent
+import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.inventory.BrewingStandFuelEvent
 import org.bukkit.event.inventory.FurnaceBurnEvent
@@ -89,6 +96,40 @@ internal object BlockListener : Listener {
 
         if (pylonBlock != null && player.gameMode != GameMode.CREATIVE) {
             player.inventory.getItem(event.hand).subtract()
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private fun entityBlockChange(event: EntityChangeBlockEvent) {
+        val entity = event.entity
+
+        if (entity !is FallingBlock) return
+
+        if (!entity.isInWorld) {
+            val pylonBlock = BlockStorage.get(event.block) ?: return
+            val pylonFallingBlock = pylonBlock as? PylonFallingBlock
+            if (pylonFallingBlock == null) {
+                event.isCancelled = true
+                return
+            }
+
+            pylonFallingBlock.onFallStart(event)
+            if (!event.isCancelled) {
+                val blockPdc = PylonBlock.serialize(pylonBlock, entity.persistentDataContainer.adapterContext)
+
+                BlockStorage.deleteBlock(event.block.position)
+                EntityStorage.add(
+                    PylonFallingBlock.FallingBlockEntity(pylonBlock.schema, blockPdc, entity)
+                )
+            }
+        } else {
+            val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.FallingBlockEntity ?: return
+            val pylonBlock = pylonEntity.block(event.block)
+
+            (pylonBlock as PylonFallingBlock).onFallStop(event, pylonEntity)
+            if (!event.isCancelled) {
+                BlockStorage.rawPlace(pylonBlock)
+            }
         }
     }
 

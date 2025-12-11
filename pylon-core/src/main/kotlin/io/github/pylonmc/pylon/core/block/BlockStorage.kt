@@ -61,7 +61,7 @@ import kotlin.random.Random
  */
 object BlockStorage : Listener {
 
-    private val pylonBlocksKey = pylonKey("blocks")
+    val pylonBlocksKey = pylonKey("blocks")
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized
     // to prevent them briefly going out of sync
@@ -97,6 +97,15 @@ object BlockStorage : Listener {
     fun get(blockPosition: BlockPosition): PylonBlock? {
         require(blockPosition.chunk.isLoaded) { "You can only get Pylon blocks in loaded chunks" }
         return lockBlockRead { blocks[blockPosition] }
+    }
+
+    /**
+     * Raw access to the block map, only use this if you know what you are doing and need
+     * access for the internals, if you are trying to place a block use [placeBlock]
+     */
+    @JvmStatic
+    fun rawPlace(pyBlock: PylonBlock) = lockBlockWrite {
+        blocks[pyBlock.block.position] = pyBlock
     }
 
     /**
