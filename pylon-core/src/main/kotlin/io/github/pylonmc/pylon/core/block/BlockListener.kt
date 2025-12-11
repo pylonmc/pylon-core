@@ -113,14 +113,12 @@ internal object BlockListener : Listener {
                 return
             }
 
-            pylonFallingBlock.onFallStart(event)
+            val blockPdc = PylonBlock.serialize(pylonBlock, entity.persistentDataContainer.adapterContext)
+            val fallingEntity = PylonFallingBlock.FallingBlockEntity(pylonBlock.schema, blockPdc, entity)
+            pylonFallingBlock.onFallStart(event, fallingEntity)
             if (!event.isCancelled) {
-                val blockPdc = PylonBlock.serialize(pylonBlock, entity.persistentDataContainer.adapterContext)
-
                 BlockStorage.deleteBlock(event.block.position)
-                EntityStorage.add(
-                    PylonFallingBlock.FallingBlockEntity(pylonBlock.schema, blockPdc, entity)
-                )
+                EntityStorage.add(fallingEntity)
             }
         } else {
             val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.FallingBlockEntity ?: return

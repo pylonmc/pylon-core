@@ -19,7 +19,7 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
 interface PylonFallingBlock {
-    fun onFallStart(event: EntityChangeBlockEvent) {
+    fun onFallStart(event: EntityChangeBlockEvent, spawnedEntity: FallingBlockEntity) {
 
     }
 
