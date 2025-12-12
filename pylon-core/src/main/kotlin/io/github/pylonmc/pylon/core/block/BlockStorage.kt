@@ -27,6 +27,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataContainer
+import org.bukkit.persistence.PersistentDataType
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -268,6 +270,48 @@ object BlockStorage : Listener {
         PylonBlockPlaceEvent(blockPosition.block, block, context).callEvent()
 
         return block
+    }
+
+    /**
+     * Loads Pylon block data at a location. Only call on the main thread.
+     *
+     * @return The block that was placed, or null if the block placement was cancelled
+     *
+     * @throws IllegalArgumentException if the chunk of the given [blockPosition] is not
+     * loaded, the block already contains a Pylon block, or the block type given by
+     * [key] does not exist.
+     */
+    @JvmStatic
+    fun loadBlock(
+        blockPosition: BlockPosition,
+        schema: PylonBlockSchema,
+        pdcData: PersistentDataContainer
+    ): PylonBlock? {
+        val context = BlockCreateContext.ManualLoading(blockPosition.block)
+        val block = blockPosition.block
+        pdcData.set(PylonBlock.pylonBlockPositionKey, PersistentDataType.LONG, blockPosition.asLong)
+
+        require(block.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
+        require(!isPylonBlock(block)) { "You cannot place a new Pylon block in place of an existing Pylon blocks" }
+
+        if (!PrePylonBlockPlaceEvent(block, schema, context).callEvent()) return null
+        if (context.shouldSetType) {
+            block.type = schema.material
+        }
+
+        val pyBlock = PylonBlock.deserialize(block.world, pdcData)!!
+
+        lockBlockWrite {
+            check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
+            blocks[blockPosition] = pyBlock
+            blocksByKey.getOrPut(schema.key, ::mutableListOf).add(pyBlock)
+            blocksByChunk[blockPosition.chunk]!!.add(pyBlock)
+        }
+
+        BlockTextureEngine.insert(pyBlock)
+        PylonBlockPlaceEvent(block, pyBlock, context).callEvent()
+
+        return pyBlock
     }
 
     /**

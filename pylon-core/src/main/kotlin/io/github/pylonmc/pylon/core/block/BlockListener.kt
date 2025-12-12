@@ -105,28 +105,29 @@ internal object BlockListener : Listener {
 
         if (entity !is FallingBlock) return
 
+        val block = event.block
         if (!entity.isInWorld) {
-            val pylonBlock = BlockStorage.get(event.block) ?: return
+            val pylonBlock = BlockStorage.get(block) ?: return
             val pylonFallingBlock = pylonBlock as? PylonFallingBlock
             if (pylonFallingBlock == null) {
                 event.isCancelled = true
                 return
             }
 
-            val blockPdc = PylonBlock.serialize(pylonBlock, entity.persistentDataContainer.adapterContext)
+            val blockPdc = PylonBlock.serialize(pylonBlock, block.chunk.persistentDataContainer.adapterContext)
             val fallingEntity = PylonFallingBlock.FallingBlockEntity(pylonBlock.schema, blockPdc, entity)
             pylonFallingBlock.onFallStart(event, fallingEntity)
             if (!event.isCancelled) {
-                BlockStorage.deleteBlock(event.block.position)
+                BlockStorage.deleteBlock(block.position)
                 EntityStorage.add(fallingEntity)
             }
         } else {
             val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.FallingBlockEntity ?: return
-            val pylonBlock = pylonEntity.block(event.block)
+            val pylonBlock = pylonEntity.block(block) as PylonFallingBlock
 
-            (pylonBlock as PylonFallingBlock).onFallStop(event, pylonEntity)
+            pylonBlock.onFallStop(event, pylonEntity)
             if (!event.isCancelled) {
-                BlockStorage.rawPlace(pylonBlock)
+                BlockStorage.loadBlock(block.position, pylonEntity.blockSchema, pylonEntity.blockData)
             }
         }
     }

@@ -98,9 +98,12 @@ interface PylonEntityHolderBlock {
 
     @ApiStatus.Internal
     companion object : Listener {
-        private val entityKey = pylonKey("entity_holder_entity_uuids")
-        private val blockKey = pylonKey("entity_holder_block")
-        private val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
+        @JvmStatic
+        val entityKey = pylonKey("entity_holder_entity_uuids")
+        @JvmStatic
+        val blockKey = pylonKey("entity_holder_block")
+        @JvmStatic
+        val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
 
         private val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
 
