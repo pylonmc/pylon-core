@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.datatypes.NamespacedKeyPersistentDataType
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.entity.FallingBlock
@@ -26,12 +27,14 @@ interface PylonFallingBlock {
     fun onFallStop(event: EntityChangeBlockEvent, entity: FallingBlockEntity)
 
     class FallingBlockEntity : PylonEntity<FallingBlock> {
+        val fallingStart: BlockPosition
         val blockSchema: PylonBlockSchema
         val blockData: PersistentDataContainer
 
-        constructor(blockSchema: PylonBlockSchema, blockData: PersistentDataContainer, entity: FallingBlock) : super(KEY, entity) {
+        constructor(blockSchema: PylonBlockSchema, blockData: PersistentDataContainer, fallingStart: BlockPosition, entity: FallingBlock) : super(KEY, entity) {
             this.blockSchema = blockSchema
             this.blockData = blockData
+            this.fallingStart = fallingStart
         }
 
         constructor(entity: FallingBlock) : super(entity) {
@@ -40,6 +43,7 @@ interface PylonFallingBlock {
             val fallingBlockType = pdc.get(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType)!!
             this.blockSchema = PylonRegistry.BLOCKS[fallingBlockType]!!
             this.blockData = pdc.get(FALLING_BLOCK_DATA, PersistentDataType.TAG_CONTAINER)!!
+            this.fallingStart = BlockPosition(entity.world, pdc.get(FALLING_BLOCK_START, PersistentDataType.LONG)!!)
         }
 
         fun block(block: Block): PylonBlock {
@@ -49,6 +53,7 @@ interface PylonFallingBlock {
         override fun write(pdc: PersistentDataContainer) {
             pdc.set(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType, blockSchema.key)
             pdc.set(FALLING_BLOCK_DATA, PersistentDataType.TAG_CONTAINER, blockData)
+            pdc.set(FALLING_BLOCK_START, PersistentDataType.LONG, fallingStart.asLong)
         }
     }
 
@@ -61,5 +66,8 @@ interface PylonFallingBlock {
 
         @JvmField
         val FALLING_BLOCK_TYPE = NamespacedKey(PylonCore, "falling_pylon_block_type")
+
+        @JvmField
+        val FALLING_BLOCK_START = NamespacedKey(PylonCore, "falling_pylon_block_start")
     }
 }
