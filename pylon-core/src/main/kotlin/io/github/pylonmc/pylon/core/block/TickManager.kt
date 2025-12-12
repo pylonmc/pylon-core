@@ -64,11 +64,10 @@ object TickManager : Listener {
         if (pylonBlock is PylonTickingBlock) {
             val dispatcher =
                 if (pylonBlock.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
-            val tickDelay = pylonBlock.tickInterval
             tickingBlocks[pylonBlock] = PylonCore.launch(dispatcher) {
                 var lastTickNanos = System.nanoTime()
                 while (true) {
-                    delay(tickDelay.ticks)
+                    delay(pylonBlock.tickInterval.ticks)
                     try {
                         val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                         lastTickNanos = System.nanoTime()
