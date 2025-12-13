@@ -44,6 +44,11 @@ interface PylonEntityHolderBlock {
     fun addEntity(name: String, entity: PylonEntity<*>)
         = addEntity(name, entity.entity)
 
+    fun removeEntity(name: String) {
+        val uuid = heldEntities[name] ?: return
+        Bukkit.getEntity(uuid)?.remove()
+    }
+
     @ApiStatus.NonExtendable
     fun getHeldEntityUuid(name: String) = heldEntities[name]
 
