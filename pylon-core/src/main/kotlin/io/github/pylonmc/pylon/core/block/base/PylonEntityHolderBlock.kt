@@ -49,6 +49,12 @@ interface PylonEntityHolderBlock {
         Bukkit.getEntity(uuid)?.remove()
     }
 
+    fun nukeEntities() {
+        heldEntities.values.forEach {
+            Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
+        }
+    }
+
     @ApiStatus.NonExtendable
     fun getHeldEntityUuid(name: String) = heldEntities[name]
 
@@ -136,9 +142,7 @@ interface PylonEntityHolderBlock {
             val block = event.pylonBlock
             if (block is PylonEntityHolderBlock) {
                 // Best-effort removal; unlikely to cause issues
-                block.heldEntities.values.forEach {
-                    Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
-                }
+                block.nukeEntities()
                 holders.remove(block)
             } else if (block is PhantomBlock) {
                 block.pdc.get(entityKey, entityType)?.values?.forEach {
