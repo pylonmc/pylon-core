@@ -50,8 +50,7 @@ interface PylonEntityHolderBlock {
     }
 
     fun nukeEntities() {
-        val list = ArrayList<UUID>(heldEntities.values.size)
-        list.addAll(heldEntities.values)
+        val list = heldEntities.values.toList()
         list.forEach {
             Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
         }
