@@ -122,9 +122,10 @@ interface PylonProcessor {
         private fun onSerialize(event: PylonBlockSerializeEvent) {
             val block = event.pylonBlock
             if (block is PylonProcessor) {
-                processorBlocks[block]?.let { data ->
-                    event.pdc.set(processorKey, PylonSerializers.PROCESSOR_DATA, data)
+                val data = processorBlocks[block] ?: error {
+                    "No recipe processor data found for ${block.key}"
                 }
+                event.pdc.set(processorKey, PylonSerializers.PROCESSOR_DATA, data)
             }
         }
 

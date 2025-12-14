@@ -139,10 +139,11 @@ interface PylonRecipeProcessor<T: PylonRecipe> {
         private fun onSerialize(event: PylonBlockSerializeEvent) {
             val block = event.pylonBlock
             if (block is PylonRecipeProcessor<*>) {
-                recipeProcessorBlocks[block]?.let { data ->
-                    event.pdc.set(recipeProcessorKey, PylonSerializers.RECIPE_PROCESSOR_DATA, data)
-                    check(data.recipeType != null) { "No recipe type set for ${event.pylonBlock.key}; did you forget to call setRecipeType in your place constructor?" }
+                val data = recipeProcessorBlocks[block] ?: error {
+                    "No recipe processor data found for ${block.key}"
                 }
+                event.pdc.set(recipeProcessorKey, PylonSerializers.RECIPE_PROCESSOR_DATA, data)
+                check(data.recipeType != null) { "No recipe type set for ${event.pylonBlock.key}; did you forget to call setRecipeType in your place constructor?" }
             }
         }
 
