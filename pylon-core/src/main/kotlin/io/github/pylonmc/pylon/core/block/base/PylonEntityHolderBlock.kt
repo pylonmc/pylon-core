@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.block.base
 
-import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PhantomBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -49,7 +48,7 @@ interface PylonEntityHolderBlock {
         Bukkit.getEntity(uuid)?.remove()
     }
 
-    fun nukeEntities() {
+    fun removeAllEntities() {
         val list = heldEntities.values.toList()
         list.forEach {
             Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
@@ -143,7 +142,7 @@ interface PylonEntityHolderBlock {
             val block = event.pylonBlock
             if (block is PylonEntityHolderBlock) {
                 // Best-effort removal; unlikely to cause issues
-                block.nukeEntities()
+                block.removeAllEntities()
                 holders.remove(block)
             } else if (block is PhantomBlock) {
                 block.pdc.get(entityKey, entityType)?.values?.forEach {
