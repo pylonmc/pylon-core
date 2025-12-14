@@ -138,7 +138,6 @@ internal object BlockListener : Listener {
         val entity = event.entity
         if (entity !is FallingBlock) return
         fallMap.remove(event.entity.uniqueId)
-        println("Removed")
     }
 
     @EventHandler(ignoreCancelled = true)
