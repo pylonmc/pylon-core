@@ -39,6 +39,7 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import org.joml.Matrix3f
 import org.joml.RoundingMode
+import org.joml.Vector3d
 import org.joml.Vector3f
 import org.joml.Vector3i
 import xyz.xenondevs.invui.inventory.VirtualInventory
@@ -131,6 +132,22 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
     BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
     BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
     BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+    else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+}
+
+/**
+ * Rotates [vector] to face a direction
+ *
+ * Assumes north to be the default direction (i.e. supplying north will result in no rotation)
+ *
+ * @param face Must be a horizontal cardinal direction (north, east, south, west)
+ * @return The rotated vector
+ */
+fun rotateVectorToFace(vector: Vector3d, face: BlockFace) = when (face) {
+    BlockFace.NORTH -> vector
+    BlockFace.EAST -> Vector3d(-vector.z, vector.y, vector.x)
+    BlockFace.SOUTH -> Vector3d(-vector.x, vector.y, -vector.z)
+    BlockFace.WEST -> Vector3d(vector.z, vector.y, -vector.x)
     else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
 }
 
