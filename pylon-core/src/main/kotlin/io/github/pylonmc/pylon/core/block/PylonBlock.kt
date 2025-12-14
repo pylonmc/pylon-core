@@ -306,7 +306,10 @@ open class PylonBlock internal constructor(val block: Block) {
         @JvmStatic
         val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
 
+        @JvmStatic
         val pylonBlockKeyKey = pylonKey("pylon_block_key")
+
+        @JvmStatic
         val pylonBlockPositionKey = pylonKey("position")
 
         @get:JvmStatic
