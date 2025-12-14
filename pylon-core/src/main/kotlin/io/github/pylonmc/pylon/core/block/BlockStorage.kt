@@ -102,15 +102,6 @@ object BlockStorage : Listener {
     }
 
     /**
-     * Raw access to the block map, only use this if you know what you are doing and need
-     * access for the internals, if you are trying to place a block use [placeBlock]
-     */
-    @JvmStatic
-    fun rawPlace(pyBlock: PylonBlock) = lockBlockWrite {
-        blocks[pyBlock.block.position] = pyBlock
-    }
-
-    /**
      * Returns the Pylon block at the given [block], or null if the block does not exist.
      *
      * @throws IllegalArgumentException if the chunk containing the block is not loaded
@@ -275,11 +266,10 @@ object BlockStorage : Listener {
     /**
      * Loads Pylon block data at a location. Only call on the main thread.
      *
-     * @return The block that was placed, or null if the block placement was cancelled
+     * @return The block that was loaded, or null if the block loading was cancelled
      *
      * @throws IllegalArgumentException if the chunk of the given [blockPosition] is not
-     * loaded, the block already contains a Pylon block, or the block type given by
-     * [key] does not exist.
+     * loaded, the block already contains a Pylon block
      */
     @JvmStatic
     fun loadBlock(
