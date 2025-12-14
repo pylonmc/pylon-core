@@ -18,11 +18,13 @@ import org.bukkit.persistence.PersistentDataType
 interface PylonFallingBlock {
     /**
      * When calling this, the entity doesn't exist yet in [io.github.pylonmc.pylon.core.entity.EntityStorage]
+     * Called after serialization
      */
     fun onFallStart(event: EntityChangeBlockEvent, spawnedEntity: FallingBlockEntity)
 
     /**
      * When calling this, the block doesn't exist yet in [BlockStorage]
+     * Called before deserialization
      */
     fun onFallStop(event: EntityChangeBlockEvent, entity: FallingBlockEntity)
 
