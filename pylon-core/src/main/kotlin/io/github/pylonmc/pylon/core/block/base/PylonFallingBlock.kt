@@ -15,6 +15,20 @@ import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
+/**
+ * Interface meant to be used for all pylon blocks affected by gravity, like sand, gravel etc.
+ *
+ * If you implement this interface, and the block can't fall, then the methods will never be called.
+ *
+ * Beware of how you modify the passed data in the entity, because of the order of serialization and deserialization
+ * some modification need to be applied directly to the PDC stored in the entity, or they will be lost.
+ *
+ * Also at some steps, the entity or the block might not exist yet in their relative storage,
+ * handle this interface with caution as it needs to handle state using internals most of the time.
+ *
+ * As a suggestion, don't make important blocks with lots of data affected by gravity,
+ * or it might become a nightmare to apply the correct changes.
+ */
 interface PylonFallingBlock {
     /**
      * When calling this, the entity doesn't exist yet in [io.github.pylonmc.pylon.core.entity.EntityStorage]
