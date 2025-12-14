@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.PylonBlockSchema
 import io.github.pylonmc.pylon.core.datatypes.NamespacedKeyPersistentDataType
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -58,8 +59,8 @@ interface PylonFallingBlock {
 
             val fallingBlockType = pdc.get(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType)!!
             this.blockSchema = PylonRegistry.BLOCKS[fallingBlockType]!!
-            this.blockData = pdc.get(FALLING_BLOCK_DATA, PersistentDataType.TAG_CONTAINER)!!
-            this.fallingStart = BlockPosition(entity.world, pdc.get(FALLING_BLOCK_START, PersistentDataType.LONG)!!)
+            this.blockData = pdc.get(FALLING_BLOCK_DATA, PylonSerializers.TAG_CONTAINER)!!
+            this.fallingStart = BlockPosition(entity.world, pdc.get(FALLING_BLOCK_START, PylonSerializers.LONG)!!)
         }
 
         fun block(block: Block): PylonBlock {
@@ -68,8 +69,8 @@ interface PylonFallingBlock {
 
         override fun write(pdc: PersistentDataContainer) {
             pdc.set(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType, blockSchema.key)
-            pdc.set(FALLING_BLOCK_DATA, PersistentDataType.TAG_CONTAINER, blockData)
-            pdc.set(FALLING_BLOCK_START, PersistentDataType.LONG, fallingStart.asLong)
+            pdc.set(FALLING_BLOCK_DATA, PylonSerializers.TAG_CONTAINER, blockData)
+            pdc.set(FALLING_BLOCK_START, PylonSerializers.LONG, fallingStart.asLong)
         }
     }
 
