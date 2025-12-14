@@ -60,7 +60,7 @@ interface PylonFallingBlock {
             val fallingBlockType = pdc.get(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType)!!
             this.blockSchema = PylonRegistry.BLOCKS[fallingBlockType]!!
             this.blockData = pdc.get(FALLING_BLOCK_DATA, PylonSerializers.TAG_CONTAINER)!!
-            this.fallingStart = BlockPosition(entity.world, pdc.get(FALLING_BLOCK_START, PylonSerializers.LONG)!!)
+            this.fallingStart = pdc.get(FALLING_BLOCK_START, PylonSerializers.BLOCK_POSITION)!!
         }
 
         fun block(block: Block): PylonBlock {
@@ -70,7 +70,7 @@ interface PylonFallingBlock {
         override fun write(pdc: PersistentDataContainer) {
             pdc.set(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType, blockSchema.key)
             pdc.set(FALLING_BLOCK_DATA, PylonSerializers.TAG_CONTAINER, blockData)
-            pdc.set(FALLING_BLOCK_START, PylonSerializers.LONG, fallingStart.asLong)
+            pdc.set(FALLING_BLOCK_START, PylonSerializers.BLOCK_POSITION, fallingStart)
         }
     }
 
