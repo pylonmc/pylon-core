@@ -4,12 +4,10 @@ import com.destroystokyo.paper.event.block.BeaconEffectEvent
 import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import com.destroystokyo.paper.event.player.PlayerJumpEvent
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.block.PylonBlock.Companion.pylonBlockPositionKey
 import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.config.PylonConfig
-import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -17,7 +15,6 @@ import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
@@ -36,12 +33,10 @@ import org.bukkit.event.block.BellRingEvent
 import org.bukkit.event.enchantment.EnchantItemEvent
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent
 import org.bukkit.event.entity.EntityChangeBlockEvent
+import org.bukkit.event.entity.EntityDropItemEvent
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.inventory.BrewingStandFuelEvent
-import org.bukkit.event.inventory.FurnaceBurnEvent
-import org.bukkit.event.inventory.FurnaceExtractEvent
-import org.bukkit.event.inventory.InventoryMoveItemEvent
-import org.bukkit.event.inventory.InventoryOpenEvent
+import org.bukkit.event.entity.EntityRemoveEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -99,6 +94,8 @@ internal object BlockListener : Listener {
         }
     }
 
+    private val fallMap = HashMap<UUID, PylonBlockSchema>();
+
     @EventHandler(ignoreCancelled = true)
     private fun entityBlockChange(event: EntityChangeBlockEvent) {
         val entity = event.entity
@@ -120,6 +117,8 @@ internal object BlockListener : Listener {
             if (!event.isCancelled) {
                 BlockStorage.deleteBlock(block.position)
                 EntityStorage.add(fallingEntity)
+                // save this here as the entity storage is going to nuke it if the item drops
+                fallMap[entity.uniqueId] = fallingEntity.blockSchema
             }
         } else {
             val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.FallingBlockEntity ?: return
@@ -130,6 +129,33 @@ internal object BlockListener : Listener {
                 BlockStorage.loadBlock(block.position, pylonEntity.blockSchema, pylonEntity.blockData)
             }
         }
+    }
+
+    @EventHandler
+    private fun entityDespawn(event: EntityRemoveEvent) {
+        // DESPAWN = Fell and created block ; OUT_OF_WORLD = Fell and dropped item
+        if (event.cause != EntityRemoveEvent.Cause.DESPAWN) return
+        val entity = event.entity
+        if (entity !is FallingBlock) return
+        fallMap.remove(event.entity.uniqueId)
+        println("Removed")
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private fun fallingBlockDrop(event: EntityDropItemEvent) {
+        val entity = event.entity
+
+        if (entity !is FallingBlock) return
+
+        val blockSchema = fallMap[entity.uniqueId] ?: return
+        val relativeItem = PylonRegistry.ITEMS[blockSchema.key]
+        fallMap.remove(entity.uniqueId)
+        if (relativeItem == null) {
+            event.isCancelled = true
+            return
+        }
+
+        event.itemDrop.itemStack = relativeItem.getItemStack()
     }
 
     @EventHandler(ignoreCancelled = true)
