@@ -41,6 +41,8 @@ import org.joml.Matrix3f
 import org.joml.RoundingMode
 import org.joml.Vector3f
 import org.joml.Vector3i
+import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import kotlin.math.absoluteValue
@@ -549,3 +551,12 @@ fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Materi
 @JvmOverloads
 fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot? = null, force: Boolean = false) =
     NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)
+
+
+fun disallowAddingItems(inventory: VirtualInventory) {
+    inventory.setPreUpdateHandler{ event ->
+        if (!event.isRemove && event.updateReason is PlayerUpdateReason) {
+            event.isCancelled = true
+        }
+    }
+}
