@@ -9,7 +9,7 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
-import io.github.pylonmc.pylon.core.block.base.PylonFallingBlock.FallingBlockEntity
+import io.github.pylonmc.pylon.core.block.base.PylonFallingBlock.PylonFallingBlockEntity
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.config.Config
@@ -195,7 +195,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonEntity.register<ItemDisplay, FluidIntersectionDisplay>(FluidIntersectionDisplay.KEY)
         PylonEntity.register<ItemDisplay, FluidPipeDisplay>(FluidPipeDisplay.KEY)
 
-        PylonEntity.register<FallingBlock, FallingBlockEntity>(PylonFallingBlock.KEY)
+        PylonEntity.register<FallingBlock, PylonFallingBlockEntity>(PylonFallingBlock.KEY)
 
         PylonBlock.register<FluidSectionMarker>(FluidSectionMarker.KEY, Material.STRUCTURE_VOID)
         PylonBlock.register<FluidIntersectionMarker>(FluidIntersectionMarker.KEY, Material.STRUCTURE_VOID)

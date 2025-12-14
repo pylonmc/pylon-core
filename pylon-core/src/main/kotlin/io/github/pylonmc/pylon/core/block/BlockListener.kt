@@ -112,7 +112,7 @@ internal object BlockListener : Listener {
             }
 
             val blockPdc = PylonBlock.serialize(pylonBlock, block.chunk.persistentDataContainer.adapterContext)
-            val fallingEntity = PylonFallingBlock.FallingBlockEntity(pylonBlock.schema, blockPdc, block.position, entity)
+            val fallingEntity = PylonFallingBlock.PylonFallingBlockEntity(pylonBlock.schema, blockPdc, block.position, entity)
             pylonFallingBlock.onFallStart(event, fallingEntity)
             if (!event.isCancelled) {
                 BlockStorage.deleteBlock(block.position)
@@ -121,7 +121,7 @@ internal object BlockListener : Listener {
                 fallMap[entity.uniqueId] = fallingEntity.blockSchema
             }
         } else {
-            val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.FallingBlockEntity ?: return
+            val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.PylonFallingBlockEntity ?: return
             val pylonBlock = pylonEntity.block(block) as PylonFallingBlock
 
             pylonBlock.onFallStop(event, pylonEntity)

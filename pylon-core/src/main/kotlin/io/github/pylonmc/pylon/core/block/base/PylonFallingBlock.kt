@@ -20,15 +20,15 @@ interface PylonFallingBlock {
      * When calling this, the entity doesn't exist yet in [io.github.pylonmc.pylon.core.entity.EntityStorage]
      * Called after serialization
      */
-    fun onFallStart(event: EntityChangeBlockEvent, spawnedEntity: FallingBlockEntity)
+    fun onFallStart(event: EntityChangeBlockEvent, spawnedEntity: PylonFallingBlockEntity)
 
     /**
      * When calling this, the block doesn't exist yet in [BlockStorage]
      * Called before deserialization
      */
-    fun onFallStop(event: EntityChangeBlockEvent, entity: FallingBlockEntity)
+    fun onFallStop(event: EntityChangeBlockEvent, entity: PylonFallingBlockEntity)
 
-    class FallingBlockEntity : PylonEntity<FallingBlock> {
+    class PylonFallingBlockEntity : PylonEntity<FallingBlock> {
         val fallingStart: BlockPosition
         val blockSchema: PylonBlockSchema
         val blockData: PersistentDataContainer
