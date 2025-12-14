@@ -264,7 +264,7 @@ object BlockStorage : Listener {
     }
 
     /**
-     * Loads Pylon block data at a location. Only call on the main thread.
+     * Manually loads Pylon block data at a location from a persistent data container that contains the serialised block. Only call on the main thread.
      *
      * @return The block that was loaded, or null if the block loading was cancelled
      *
