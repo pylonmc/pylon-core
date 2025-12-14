@@ -43,9 +43,12 @@ import org.joml.Vector3d
 import org.joml.Vector3f
 import org.joml.Vector3i
 import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
+import xyz.xenondevs.invui.inventory.event.UpdateReason
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.util.function.Consumer
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -570,10 +573,20 @@ fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: Eq
     NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)
 
 
-fun disallowAddingItems(inventory: VirtualInventory) {
-    inventory.setPreUpdateHandler{ event ->
-        if (!event.isRemove && event.updateReason is PlayerUpdateReason) {
-            event.isCancelled = true
-        }
+/**
+ * A shorthand for a commonly used [VirtualInventory] handler which prevents players
+ * from removing items from it.
+ *
+ * Usage: Call [VirtualInventory.setPreUpdateHandler] and supply this function to it
+ */
+@JvmField
+val DISALLOW_PLAYERS_FROM_ADDING_ITEMS_HANDLER = Consumer<ItemPreUpdateEvent> { event: ItemPreUpdateEvent ->
+    if (!event.isRemove && event.updateReason is PlayerUpdateReason) {
+        event.isCancelled = true
     }
 }
+
+/**
+ * Indicates a machine has updated an inventory slot.
+ */
+class MachineUpdateReason : UpdateReason
