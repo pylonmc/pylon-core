@@ -11,7 +11,6 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
@@ -120,7 +119,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
             inventories[block] = block.gui.getAllInventories()
         }
 
-        @EventHandler(priority = EventPriority.HIGH) // Likely to depend on other interfaces
+        @EventHandler
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
             if (block !is PylonGuiBlock) return
