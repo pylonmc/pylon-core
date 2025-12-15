@@ -234,6 +234,10 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         override fun blockDataList(): List<BlockData> = blockDatas
     }
 
+    /**
+     * Displays all kind of MultiblockComponents that implement [MultiblockComponentBlockDisplay], together with
+     * special item handling for [PylonMultiblockComponent]
+     */
     class MixedMultiblockComponent : MultiblockComponent, MultipleGhostBlocks {
         val multiblockComponents: Collection<MultiblockComponent>
 
