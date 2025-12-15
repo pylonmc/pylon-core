@@ -39,7 +39,8 @@ interface PylonFallingBlock {
 
     /**
      * When calling this, the block doesn't exist yet in [BlockStorage]
-     * Called before deserialization
+     * Called after deserialization
+     * Cancelling the event at this step does nothing, and the entity is about to be removed
      */
     fun onFallStop(event: EntityChangeBlockEvent, entity: PylonFallingBlockEntity)
 

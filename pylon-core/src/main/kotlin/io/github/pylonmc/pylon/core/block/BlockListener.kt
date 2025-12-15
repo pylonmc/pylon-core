@@ -122,12 +122,9 @@ internal object BlockListener : Listener {
             }
         } else {
             val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.PylonFallingBlockEntity ?: return
-            val pylonBlock = pylonEntity.block(block) as PylonFallingBlock
+            val pylonBlock = BlockStorage.loadBlock(block.position, pylonEntity.blockSchema, pylonEntity.blockData) as PylonFallingBlock
 
             pylonBlock.onFallStop(event, pylonEntity)
-            if (!event.isCancelled) {
-                BlockStorage.loadBlock(block.position, pylonEntity.blockSchema, pylonEntity.blockData)
-            }
         }
     }
 
