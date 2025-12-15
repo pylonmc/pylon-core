@@ -59,10 +59,23 @@ import kotlin.time.Duration.Companion.seconds
  */
 interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, PylonDirectionalBlock {
 
+    /**
+     * Implement this together with [MultiblockComponent], it is used to spawn a single entity
+     * to display the needs of a single multiblock requirement
+     *
+     * You must implement either this or [MultipleGhostBlocks], together with [MultiblockComponent] for a correct implementation
+     */
     interface SingleGhostBlock {
         fun spawnGhostBlock(block: Block): UUID
     }
 
+    /**
+     * Implement this together with [MultiblockComponent], it is used to spawn multiple entities
+     * to display the needs of a single multiblock requirement, you are going to need this only when
+     * you can't display a block requirement with only a single [ItemDisplay] or [BlockDisplay]
+     *
+     * You must implement either this or [SingleGhostBlock], together with [MultiblockComponent] for a correct implementation
+     */
     interface MultipleGhostBlocks {
         fun spawnGhostBlocks(block: Block): List<UUID>
     }
@@ -221,7 +234,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         override fun blockDataList(): List<BlockData> = blockDatas
     }
 
-     class MixedMultiblockComponent : MultiblockComponent, MultipleGhostBlocks {
+    class MixedMultiblockComponent : MultiblockComponent, MultipleGhostBlocks {
         val multiblockComponents: Collection<MultiblockComponent>
 
         constructor(multiblockComponents: Collection<MultiblockComponent>) {
