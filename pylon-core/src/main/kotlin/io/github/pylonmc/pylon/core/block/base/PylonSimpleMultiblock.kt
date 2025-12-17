@@ -30,11 +30,9 @@ import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Display
-import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
@@ -55,7 +53,7 @@ import kotlin.time.Duration.Companion.seconds
  * If you need something more flexible (eg: a fluid tank that can have up to 10
  * fluid casings added to increase the capacity), see [PylonMultiblock].
  */
-interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, PylonDirectionalBlock {
+interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
 
     /**
      * Represents a single block of a multiblock.
@@ -246,23 +244,23 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
      *
      * Leave this unset to accept any direction.
      */
-    fun setFacing(facing: BlockFace?) {
-        simpleMultiblockData.facing = facing
+    fun setDirection(direction: BlockFace?) {
+        simpleMultiblockData.direction = direction
     }
 
     /**
      * The 'direction' we expect the multiblock to be built in. This is not the *actual* direction that
      * the multiblock has been built in.
      */
-    override fun getFacing(): BlockFace?
-            = simpleMultiblockData.facing
+    fun getMultiblockDirection(): BlockFace?
+            = simpleMultiblockData.direction
 
     /**
      * Returns all the valid configurations of the multiblock. If any of these is satisfied, the multiblock
      * will be considered complete.
      */
     fun validStructures(): List<Map<Vector3i, MultiblockComponent>> {
-        val facing = simpleMultiblockData.facing
+        val facing = simpleMultiblockData.direction
         return if (facing == null) {
             listOf(
                 components,
@@ -281,7 +279,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
     @ApiStatus.Internal
     fun spawnGhostBlocks() {
         val block = (this as PylonBlock).block
-        val facing = simpleMultiblockData.facing
+        val facing = simpleMultiblockData.direction
         val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
         for ((offset, component) in rotatedComponents) {
             val key = "multiblock_ghost_block_${offset.x}_${offset.y}_${offset.z}"
@@ -377,7 +375,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
         }
 
         val block = (this as PylonBlock).block
-        val facing = simpleMultiblockData.facing
+        val facing = simpleMultiblockData.direction
         val rotatedComponents = if (facing == null) components else rotateComponentsToFace(components, facing)
         for ((offset, component) in rotatedComponents) {
             val entity = getHeldPylonEntity(
@@ -397,7 +395,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
     @ApiStatus.Internal
     companion object : Listener {
 
-        internal data class SimpleMultiblockData(var facing: BlockFace?)
+        internal data class SimpleMultiblockData(var direction: BlockFace?)
 
         private val simpleMultiblockKey = pylonKey("simple_multiblock_data")
 

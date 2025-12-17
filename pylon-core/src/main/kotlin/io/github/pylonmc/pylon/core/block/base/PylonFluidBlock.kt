@@ -9,7 +9,6 @@ import io.github.pylonmc.pylon.core.util.rotateToPlayerFacing
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.jetbrains.annotations.ApiStatus
 
 /**
  * A block that interacts with fluids in some way.
@@ -25,19 +24,11 @@ import org.jetbrains.annotations.ApiStatus
  *
  * Multiple inputs/outputs are not supported. You can have at most 1 input and 1 output.
  *
- * PylonFLuidBlocks automatically implement [PylonDirectionalBlock]. If the block has
- * an input or output point, the block direction will be towards the output or input
- * point's face. Output points take precedence over input points. You can override
- * this behaviour by overriding [getFacing].
  *
  * @see PylonFluidBufferBlock
  * @see PylonFluidTank
  */
-interface PylonFluidBlock : PylonEntityHolderBlock, PylonDirectionalBlock, PylonBreakHandler {
-
-    override fun getFacing(): BlockFace? =
-        getHeldPylonEntity(FluidEndpointDisplay::class.java, "fluid_point_output")?.face
-            ?: getHeldPylonEntity(FluidEndpointDisplay::class.java, "fluid_point_input")?.face
+interface PylonFluidBlock : PylonEntityHolderBlock, PylonBreakHandler {
 
     fun getFluidPointDisplay(type: FluidPointType) =
         getHeldPylonEntity(FluidEndpointDisplay::class.java, getFluidPointName(type))
