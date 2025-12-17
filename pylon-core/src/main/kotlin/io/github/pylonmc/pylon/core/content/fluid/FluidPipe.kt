@@ -42,10 +42,6 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         ConfigAdapter.LIST.from(ConfigAdapter.FLUID_TEMPERATURE)
     )
 
-    companion object {
-        val MESSAGE_NOT_OF_SAME_TYPE = Component.translatable("pylon.pyloncore.message.pipe.not_of_same_type")
-    }
-
     override fun getPlaceholders(): List<PylonArgument> = listOf(
         PylonArgument.of("fluid_per_second", UnitFormat.MILLIBUCKETS_PER_SECOND.format(fluidPerSecond)),
         PylonArgument.of(
