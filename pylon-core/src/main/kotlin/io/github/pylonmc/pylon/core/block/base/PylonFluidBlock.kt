@@ -116,30 +116,30 @@ interface PylonFluidBlock : PylonEntityHolderBlock, PylonBreakHandler {
 
     /**
      * Returns a map of fluid types - and their corresponding amounts - that can be supplied by
-     * the block for this fluid tick. deltaSeconds is the time since the last fluid tick.
+     * the block for this fluid tick.
      *
      * If you have a machine that can supply up to 100 fluid per second, it should supply
-     * 100*deltaSeconds of that fluid
+     * 5 * PylonConfig.fluidTickInterval of that fluid
      *
      * Any implementation of this method must NEVER call the same method for any other connection
      * point, otherwise you risk creating infinite loops.
      *
      * Called exactly one per fluid tick.
      */
-    fun getSuppliedFluids(deltaSeconds: Double): Map<PylonFluid, Double> = mapOf()
+    fun getSuppliedFluids(): Map<PylonFluid, Double> = mapOf()
 
     /**
      * Returns the amount of the given fluid that the machine wants to receive next tick.
      *
-     * If you have a machine that consumes 100 water per second, it should request
-     * 100*deltaSeconds of water, and return 0 for every other fluid.
+     * If you have a machine that consumes 5 water per tick, it should request
+     * 5*PylonConfig.fluidTickInterval of water, and return 0 for every other fluid.
      *
      * Any implementation of this method must NEVER call the same method for any other connection
      * point, otherwise you risk creating infinite loops.
      *
      * Called at most once for any given fluid type per tick.
      */
-    fun fluidAmountRequested(fluid: PylonFluid, deltaSeconds: Double): Double = 0.0
+    fun fluidAmountRequested(fluid: PylonFluid): Double = 0.0
 
     /**
      * `amount` is always at most `getRequestedFluids().get(fluid)` and will never

@@ -244,7 +244,7 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock {
      *
      * Leave this unset to accept any direction.
      */
-    fun setDirection(direction: BlockFace?) {
+    fun setMultiblockDirection(direction: BlockFace?) {
         simpleMultiblockData.direction = direction
     }
 

@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.block.PylonBlock;
 import io.github.pylonmc.pylon.core.block.base.PylonFluidBlock;
 import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
+import io.github.pylonmc.pylon.core.config.PylonConfig;
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent;
 import io.github.pylonmc.pylon.core.fluid.FluidManager;
@@ -56,9 +57,9 @@ public class FluidProducer extends PylonBlock implements PylonFluidBlock, PylonU
     }
 
     @Override
-    public @NotNull Map<PylonFluid, Double> getSuppliedFluids(double deltaSeconds) {
+    public @NotNull Map<PylonFluid, Double> getSuppliedFluids() {
         return Map.of(
-                getFluidType(), FLUID_PER_SECOND * deltaSeconds
+                getFluidType(), FLUID_PER_SECOND * PylonConfig.fluidTickInterval / 20.0
         );
     }
 

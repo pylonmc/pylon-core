@@ -12,67 +12,67 @@ object PylonConfig {
 
     private val config = Config(PylonCore, "config.yml")
 
-    @JvmStatic
+    @JvmField
     val pylonGuideOnFirstJoin = config.getOrThrow("pylon-guide-on-first-join", ConfigAdapter.BOOLEAN)
 
-    @JvmStatic
+    @JvmField
     val defaultTickInterval = config.getOrThrow("default-tick-interval", ConfigAdapter.INT)
 
-    @JvmStatic
+    @JvmField
     val allowedBlockErrors = config.getOrThrow("allowed-block-errors", ConfigAdapter.INT)
 
-    @JvmStatic
+    @JvmField
     val allowedEntityErrors = config.getOrThrow("allowed-entity-errors", ConfigAdapter.INT)
 
-    @JvmStatic
+    @JvmField
     val fluidTickInterval = config.getOrThrow("fluid-tick-interval", ConfigAdapter.INT)
 
-    @JvmStatic
+    @JvmField
     val blockDataAutosaveIntervalSeconds = config.getOrThrow("block-data-autosave-interval-seconds", ConfigAdapter.LONG)
 
-    @JvmStatic
+    @JvmField
     val entityDataAutosaveIntervalSeconds = config.getOrThrow("entity-data-autosave-interval-seconds", ConfigAdapter.LONG)
 
-    @JvmStatic
+    @JvmField
     val researchesEnabled = config.getOrThrow("research.enabled", ConfigAdapter.BOOLEAN)
 
-    @JvmStatic
+    @JvmField
     val researchBaseConfettiAmount = config.get("research.confetti.base-amount", ConfigAdapter.DOUBLE, 70.0)
 
-    @JvmStatic
+    @JvmField
     val researchMultiplierConfettiAmount = config.get("research.confetti.multiplier", ConfigAdapter.DOUBLE, 0.2)
 
-    @JvmStatic
+    @JvmField
     val researchMaxConfettiAmount = config.get("research.confetti.max-amount", ConfigAdapter.INT, 700)
 
-    @JvmStatic
+    @JvmField
     val researchSounds = config.getOrThrow("research.sounds", ConfigAdapter.MAP.from(ConfigAdapter.LONG, ConfigAdapter.RANDOMIZED_SOUND))
 
-    @JvmStatic
+    @JvmField
     val pipePlacementTaskIntervalTicks = config.getOrThrow("pipe-placement.tick-interval", ConfigAdapter.LONG)
 
-    @JvmStatic
+    @JvmField
     val pipePlacementMaxLength = config.getOrThrow("pipe-placement.max-length", ConfigAdapter.LONG)
 
-    @JvmStatic
+    @JvmField
     val pipePlacementCancelDistance = config.getOrThrow("pipe-placement.cancel-distance", ConfigAdapter.INT)
 
-    @JvmStatic
+    @JvmField
     val translationWrapLimit = config.getOrThrow("translation-wrap-limit", ConfigAdapter.INT)
 
-    @JvmStatic
+    @JvmField
     val metricsSaveIntervalTicks = config.getOrThrow("metrics-save-interval-ticks", ConfigAdapter.LONG)
 
-    @JvmStatic
+    @JvmField
     val disabledItems = config.getOrThrow("disabled-items", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY))
 
-    @JvmStatic
+    @JvmField
     val inventoryTickerBaseRate = config.getOrThrow("inventory-ticker-base-rate", ConfigAdapter.LONG)
 
-    @JvmStatic
+    @JvmField
     val cargoTickInterval = config.getOrThrow("cargo-tick-interval", ConfigAdapter.INT)
 
-    @JvmStatic
+    @JvmField
     val cargoTransferRateMultiplier = config.getOrThrow("cargo-transfer-rate-multiplier", ConfigAdapter.INT)
 
     object WailaConfig {
@@ -82,26 +82,26 @@ object PylonConfig {
         val enabled
             get() = tickInterval > 0 && enabledTypes.isNotEmpty()
 
-        @JvmStatic
+        @JvmField
         val tickInterval = config.getOrThrow("waila.tick-interval", ConfigAdapter.INT)
 
-        @JvmStatic
+        @JvmField
         val enabledTypes = config.getOrThrow("waila.enabled-types", ConfigAdapter.LIST.from(ConfigAdapter.ENUM.from(Waila.Type::class.java)))
 
-        @JvmStatic
+        @JvmField
         val defaultType = config.getOrThrow("waila.default-type", ConfigAdapter.ENUM.from(Waila.Type::class.java)).apply {
             if (!enabledTypes.contains(this)) {
                 throw IllegalStateException("Default Waila type $this is not in the list of enabled types: $enabledTypes")
             }
         }
 
-        @JvmStatic
+        @JvmField
         val allowedBossBarColors = config.getOrThrow("waila.bossbar.allowed-colors", ConfigAdapter.SET.from(ConfigAdapter.ENUM.from(BossBar.Color::class.java)))
 
-        @JvmStatic
+        @JvmField
         val allowedBossBarOverlays = config.getOrThrow("waila.bossbar.allowed-overlays", ConfigAdapter.SET.from(ConfigAdapter.ENUM.from(BossBar.Overlay::class.java)))
 
-        @JvmStatic
+        @JvmField
         val defaultDisplay = config.getOrThrow("waila.default-display.bossbar", ConfigAdapter.WAILA_DISPLAY).apply {
             if (!allowedBossBarColors.contains(color)) {
                 throw IllegalStateException("Default bossbar color $color is not in the list of allowed colors: $allowedBossBarColors")
@@ -116,10 +116,10 @@ object PylonConfig {
 
         private val config = Config(PylonCore, "config.yml")
 
-        @JvmStatic
+        @JvmField
         val enabled = config.getOrThrow("custom-armor-textures.enabled", ConfigAdapter.BOOLEAN)
 
-        @JvmStatic
+        @JvmField
         val forced = config.getOrThrow("custom-armor-textures.force", ConfigAdapter.BOOLEAN)
 
     }
@@ -128,25 +128,25 @@ object PylonConfig {
 
         private val config = Config(PylonCore, "config.yml")
 
-        @JvmStatic
+        @JvmField
         val enabled = config.getOrThrow("custom-block-textures.enabled", ConfigAdapter.BOOLEAN)
 
-        @JvmStatic
+        @JvmField
         val default = config.getOrThrow("custom-block-textures.default", ConfigAdapter.BOOLEAN)
 
-        @JvmStatic
+        @JvmField
         val forced = config.getOrThrow("custom-block-textures.force", ConfigAdapter.BOOLEAN)
 
-        @JvmStatic
+        @JvmField
         val occludingCacheRefreshInterval = config.getOrThrow("custom-block-textures.culling.occluding-cache-refresh-interval", ConfigAdapter.INT)
 
-        @JvmStatic
+        @JvmField
         val occludingCacheRefreshShare = config.getOrThrow("custom-block-textures.culling.occluding-cache-refresh-share", ConfigAdapter.DOUBLE)
 
-        @JvmStatic
+        @JvmField
         val cullingPresets = config.getOrThrow("custom-block-textures.culling.presets", ConfigAdapter.MAP.from(ConfigAdapter.STRING, ConfigAdapter.CULLING_PRESET))
 
-        @JvmStatic
+        @JvmField
         val defaultCullingPreset = run {
             val key = config.getOrThrow<String>("custom-block-textures.culling.default-preset", ConfigAdapter.STRING)
             cullingPresets[key] ?: error("No culling preset with id '$key' found")
