@@ -113,6 +113,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
+        Bukkit.getPluginManager().registerEvents(PylonCopperBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
         Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.inventoryTickerBaseRate)
         Bukkit.getPluginManager().registerEvents(TickManager, this)
