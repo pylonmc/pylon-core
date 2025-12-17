@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
+import org.bukkit.Keyed
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,10 +19,10 @@ import kotlin.collections.set
  *
  * Internally only used for rotating [PylonBlock.blockTextureEntity]s.
  */
-interface PylonDirectionalBlock {
+interface PylonDirectionalBlock : Keyed {
 
     var facing: BlockFace
-        get() = directionalBlocks[this] ?: error("No direction was set")
+        get() = directionalBlocks[this] ?: error("No direction was set for block $key")
         set(value) {
             directionalBlocks[this] = value
         }

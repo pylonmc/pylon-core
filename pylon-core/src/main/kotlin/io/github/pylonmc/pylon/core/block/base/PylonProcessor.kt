@@ -48,8 +48,7 @@ interface PylonProcessor {
         }
 
     /**
-     * Starts a new process with duration [ticks], with [ticks] being the number of server
-     * ticks the process will take.
+     * Starts a new process with duration [ticks]
      */
     fun startProcess(ticks: Int) {
         processorData.processTimeTicks = ticks
@@ -75,6 +74,9 @@ interface PylonProcessor {
 
     fun onProcessFinished() {}
 
+    /**
+     * Progresses the progress by [ticks] ticks
+     */
     fun progressProcess(ticks: Int) {
         val data = processorData
         if (data.processTimeTicks != null) {
@@ -119,10 +121,7 @@ interface PylonProcessor {
         private fun onSerialize(event: PylonBlockSerializeEvent) {
             val block = event.pylonBlock
             if (block is PylonProcessor) {
-                val data = processorBlocks[block] ?: error {
-                    "No recipe processor data found for ${block.key}"
-                }
-                event.pdc.set(processorKey, PylonSerializers.PROCESSOR_DATA, data)
+                event.pdc.set(processorKey, PylonSerializers.PROCESSOR_DATA, block.processorData)
             }
         }
 
