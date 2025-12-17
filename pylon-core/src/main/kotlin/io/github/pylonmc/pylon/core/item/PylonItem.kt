@@ -148,7 +148,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         @JvmSynthetic
-        inline fun <reified T : PylonItem> fromStack(stack: ItemStack?): T? {
+        inline fun <reified T : PylonItem> from(stack: ItemStack?): T? {
             val pylonItem = fromStack(stack) ?: return null
             return pylonItem as? T
         }
