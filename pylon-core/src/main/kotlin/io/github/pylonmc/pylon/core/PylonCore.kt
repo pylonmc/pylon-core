@@ -129,6 +129,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(PylonFluidBufferBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
         Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
+        Bukkit.getPluginManager().registerEvents(PylonDirectionalBlock, this)
         Bukkit.getPluginManager().registerEvents(FluidPipePlacementService, this)
         Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
         Bukkit.getPluginManager().registerEvents(PylonGuide, this)
