@@ -14,7 +14,6 @@ import org.bukkit.block.Block
 import org.bukkit.entity.FallingBlock
 import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.persistence.PersistentDataContainer
-import org.bukkit.persistence.PersistentDataType
 
 /**
  * Interface meant to be used for all pylon blocks affected by gravity, like sand, gravel etc.
@@ -45,14 +44,14 @@ interface PylonFallingBlock {
     fun onFallStop(event: EntityChangeBlockEvent, entity: PylonFallingBlockEntity)
 
     class PylonFallingBlockEntity : PylonEntity<FallingBlock> {
-        val fallingStart: BlockPosition
+        val fallStartPosition: BlockPosition
         val blockSchema: PylonBlockSchema
         val blockData: PersistentDataContainer
 
         constructor(blockSchema: PylonBlockSchema, blockData: PersistentDataContainer, fallingStart: BlockPosition, entity: FallingBlock) : super(KEY, entity) {
             this.blockSchema = blockSchema
             this.blockData = blockData
-            this.fallingStart = fallingStart
+            this.fallStartPosition = fallingStart
         }
 
         constructor(entity: FallingBlock) : super(entity) {
@@ -61,7 +60,7 @@ interface PylonFallingBlock {
             val fallingBlockType = pdc.get(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType)!!
             this.blockSchema = PylonRegistry.BLOCKS[fallingBlockType]!!
             this.blockData = pdc.get(FALLING_BLOCK_DATA, PylonSerializers.TAG_CONTAINER)!!
-            this.fallingStart = pdc.get(FALLING_BLOCK_START, PylonSerializers.BLOCK_POSITION)!!
+            this.fallStartPosition = pdc.get(FALLING_BLOCK_START, PylonSerializers.BLOCK_POSITION)!!
         }
 
         fun block(block: Block): PylonBlock {
@@ -71,7 +70,7 @@ interface PylonFallingBlock {
         override fun write(pdc: PersistentDataContainer) {
             pdc.set(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType, blockSchema.key)
             pdc.set(FALLING_BLOCK_DATA, PylonSerializers.TAG_CONTAINER, blockData)
-            pdc.set(FALLING_BLOCK_START, PylonSerializers.BLOCK_POSITION, fallingStart)
+            pdc.set(FALLING_BLOCK_START, PylonSerializers.BLOCK_POSITION, fallStartPosition)
         }
     }
 
