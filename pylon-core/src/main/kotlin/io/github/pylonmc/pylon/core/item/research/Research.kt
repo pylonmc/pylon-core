@@ -7,7 +7,6 @@ import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
@@ -267,28 +266,6 @@ data class Research(
                     delay(1.ticks)
                     entity.ejectUnknownItems()
                 }
-            }
-        }
-
-        @EventHandler
-        private fun onPrePylonCraft(event: PrePylonCraftEvent<*>) {
-            if (event.player == null) {
-                return
-            }
-
-            val canCraft = event.recipe.results.all {
-                when (it) {
-                    is FluidOrItem.Item -> {
-                        val item = PylonItem.fromStack(it.item)
-                        item == null || event.player.canCraft(item, true)
-                    }
-
-                    else -> true
-                }
-            }
-
-            if (!canCraft) {
-                event.isCancelled = true
             }
         }
 

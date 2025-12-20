@@ -5,10 +5,10 @@ import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.content.fluid.FluidEndpointDisplay
 import io.github.pylonmc.pylon.core.fluid.FluidPointType
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
-import io.github.pylonmc.pylon.core.util.rotateToPlayerFacing
+import io.github.pylonmc.pylon.core.util.rotateFaceToReference
 import org.bukkit.block.BlockFace
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.annotations.MustBeInvokedByOverriders
 
 /**
  * A block that interacts with fluids in some way.
@@ -52,34 +52,19 @@ interface PylonFluidBlock : PylonEntityHolderBlock, PylonBreakHandler {
     /**
      * Creates a fluid input point. Call in your place constructor. Should be called at most once per block.
      *
-     * @param player If supplied, the point will be rotated to the player's frame of reference, with NORTH
-     * considered 'forward'
+     * @param context If a player placed the block, the point will be rotated to the player's frame of reference,
+     * with NORTH considered 'forward'
      * @param allowVerticalFaces Whether up/down should be considered when rotating to the player's frame
      * of reference
      *
-     * @see rotateToPlayerFacing
+     * @see rotateFaceToReference
      */
-    fun createFluidPoint(type: FluidPointType, face: BlockFace, player: Player?, allowVerticalFaces: Boolean, radius: Float) {
-        var finalFace = face
-        if (player != null) {
-            finalFace = rotateToPlayerFacing(player, face, allowVerticalFaces)
-        }
-        createFluidPoint(type, finalFace, radius)
-    }
-
-    /**
-     * Creates a fluid input point. Call in your place constructor. Should be called at most once per block.
-     *
-     * @param player If supplied, the point will be rotated to the player's frame of reference, with NORTH
-     * considered 'forward'
-     * @param allowVerticalFaces Whether up/down should be considered when rotating to the player's frame
-     * of reference
-     *
-     * @see rotateToPlayerFacing
-     */
-    fun createFluidPoint(type: FluidPointType, face: BlockFace, player: Player?, allowVerticalFaces: Boolean) {
-        createFluidPoint(type, face, player, allowVerticalFaces, 0.5F)
-    }
+    fun createFluidPoint(type: FluidPointType, face: BlockFace, context: BlockCreateContext, allowVerticalFaces: Boolean, radius: Float)
+        = createFluidPoint(
+            type,
+            rotateFaceToReference(if (allowVerticalFaces) context.facingVertical else context.facing, face),
+            radius
+        )
 
     /**
      * Creates a fluid input point. Call in your place constructor. Should be called at most once per block.
@@ -89,26 +74,12 @@ interface PylonFluidBlock : PylonEntityHolderBlock, PylonBreakHandler {
      * @param allowVerticalFaces Whether up/down should be considered when rotating to the player's frame
      * of reference
      *
-     * @see rotateToPlayerFacing
+     * @see rotateFaceToReference
      */
-    fun createFluidPoint(type: FluidPointType, face: BlockFace, context: BlockCreateContext, allowVerticalFaces: Boolean) {
-        createFluidPoint(type, face, (context as? BlockCreateContext.PlayerPlace)?.player, allowVerticalFaces)
-    }
+    fun createFluidPoint(type: FluidPointType, face: BlockFace, context: BlockCreateContext, allowVerticalFaces: Boolean)
+        = createFluidPoint(type, face, context, allowVerticalFaces, 0.5F)
 
-    /**
-     * Creates a fluid input point. Call in your place constructor. Should be called at most once per block.
-     *
-     * @param context If a player placed the block, the point will be rotated to the player's frame of reference,
-     * with NORTH considered 'forward'
-     * @param allowVerticalFaces Whether up/down should be considered when rotating to the player's frame
-     * of reference
-     *
-     * @see rotateToPlayerFacing
-     */
-    fun createFluidPoint(type: FluidPointType, face: BlockFace, context: BlockCreateContext, allowVerticalFaces: Boolean, radius: Float) {
-        createFluidPoint(type, face, (context as? BlockCreateContext.PlayerPlace)?.player, allowVerticalFaces, radius)
-    }
-
+    @MustBeInvokedByOverriders
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
         val player = (context as? BlockBreakContext.PlayerBreak)?.event?.player
         getFluidPointDisplay(FluidPointType.INPUT)?.pipeDisplay?.delete(player, drops)

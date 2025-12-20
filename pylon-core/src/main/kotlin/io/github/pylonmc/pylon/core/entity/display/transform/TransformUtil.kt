@@ -22,11 +22,25 @@ object TransformUtil {
         = yawToCardinalDirection(yaw.toDouble()).toFloat()
 
     @JvmStatic
-    fun yawToFace(yaw: Double): BlockFace
+    fun yawToCardinalFace(yaw: Double): BlockFace
         = AXIS[(yaw / 90.0F).roundToInt() and 0x3]
     @JvmStatic
-    fun yawToFace(yaw: Float): BlockFace
-        = yawToFace(yaw.toDouble())
+    fun yawToCardinalFace(yaw: Float): BlockFace
+        = yawToCardinalFace(yaw.toDouble())
+
+    @JvmStatic
+    fun yawAndPitchToFace(yaw: Double, pitch: Double): BlockFace {
+        if (pitch > 45) {
+            return BlockFace.UP
+        }
+        if (pitch < -45) {
+            return BlockFace.DOWN
+        }
+        return yawToCardinalFace(yaw)
+    }
+    @JvmStatic
+    fun yawAndPitchToFace(yaw: Float, pitch: Float): BlockFace
+        = yawAndPitchToFace(yaw.toDouble(), pitch.toDouble())
 
     @JvmStatic
     fun rotatedRadius(radius: Float, x: Float, y: Float, z: Float): Vector3f

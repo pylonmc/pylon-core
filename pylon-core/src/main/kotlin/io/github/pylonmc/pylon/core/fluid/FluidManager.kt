@@ -358,7 +358,7 @@ internal object FluidManager {
 
             // Use round-robin to compute how much fluid to take from each supplier
             // Done in-place using the info's 'blocks' map to reduce memory operations
-            totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * PylonConfig.fluidTickInterval)
+            totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * PylonConfig.fluidTickInterval / 20.0)
             val suppliers = info.blocks
             var remainingFluidNeeded = totalRequested
             var totalFluidSupplied = 0.0;
