@@ -63,10 +63,6 @@ interface PylonFallingBlock {
             this.fallStartPosition = pdc.get(FALLING_BLOCK_START, PylonSerializers.BLOCK_POSITION)!!
         }
 
-        fun block(block: Block): PylonBlock {
-            return blockSchema.load(block, blockData)
-        }
-
         override fun write(pdc: PersistentDataContainer) {
             pdc.set(FALLING_BLOCK_TYPE, NamespacedKeyPersistentDataType, blockSchema.key)
             pdc.set(FALLING_BLOCK_DATA, PylonSerializers.TAG_CONTAINER, blockData)
