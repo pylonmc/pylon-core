@@ -134,7 +134,7 @@ internal object BlockListener : Listener {
         if (event.cause != EntityRemoveEvent.Cause.DESPAWN) return
         val entity = event.entity
         if (entity !is FallingBlock) return
-        fallMap.remove(event.entity.uniqueId)
+        fallMap.remove(entity.uniqueId)
     }
 
     @EventHandler(ignoreCancelled = true)
