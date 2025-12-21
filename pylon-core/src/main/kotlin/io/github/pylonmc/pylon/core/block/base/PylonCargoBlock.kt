@@ -121,7 +121,7 @@ interface PylonCargoBlock : PylonLogisticBlock {
                 val targetAmount = targetSlot.getAmount()
                 val targetMaxAmount = targetSlot.getMaxAmount(sourceStack)
 
-                if (targetAmount == targetMaxAmount || targetStack != null && !targetStack.isSimilar(sourceStack)) {
+                if (targetAmount == targetMaxAmount || !sourceStack.isSimilar(targetStack)) {
                     continue
                 }
 
