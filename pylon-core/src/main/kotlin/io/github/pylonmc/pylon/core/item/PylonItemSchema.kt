@@ -23,7 +23,7 @@ import java.lang.invoke.MethodHandle
  * You should not need to use this if you are not working on Pylon Core.
  */
 class PylonItemSchema @JvmOverloads internal constructor(
-    @JvmSynthetic internal val itemClass: Class<out PylonItem>,
+    val itemClass: Class<out PylonItem>,
     private val template: ItemStack,
     val pylonBlockKey: NamespacedKey? = null
 ) : Keyed, RegistryHandler {
