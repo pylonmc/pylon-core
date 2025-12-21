@@ -80,12 +80,14 @@ interface PylonProcessor {
 
     fun progressProcess(ticks: Int) {
         val data = processorData
-        if (data.processTimeTicks != null) {
-            data.processTicksRemaining = data.processTicksRemaining!! - ticks
-            data.progressItem?.setRemainingTimeTicks(data.processTicksRemaining!!)
-            if (data.processTicksRemaining!! <= 0) {
-                finishProcess()
-            }
+        if (data.processTimeTicks == null) {
+            return
+        }
+
+        data.processTicksRemaining = data.processTicksRemaining!! - ticks
+        data.progressItem?.setRemainingTimeTicks(data.processTicksRemaining!!)
+        if (data.processTicksRemaining!! <= 0) {
+            finishProcess()
         }
     }
 
@@ -98,11 +100,13 @@ interface PylonProcessor {
         @EventHandler
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
-            if (block is PylonProcessor) {
-                val data = event.pdc.get(processorKey, PylonSerializers.PROCESSOR_DATA)
-                    ?: error("Processor data not found for ${block.key}")
-                processorBlocks[block] = data
+            if (block !is PylonProcessor) {
+                return
             }
+
+            val data = event.pdc.get(processorKey, PylonSerializers.PROCESSOR_DATA)
+                ?: error("Processor data not found for ${block.key}")
+            processorBlocks[block] = data
         }
 
         @EventHandler

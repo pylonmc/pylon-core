@@ -6,8 +6,6 @@ import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.TooltipDisplay
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.TextColor
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
