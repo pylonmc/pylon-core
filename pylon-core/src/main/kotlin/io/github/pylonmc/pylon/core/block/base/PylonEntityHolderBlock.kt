@@ -43,12 +43,12 @@ interface PylonEntityHolderBlock {
     fun addEntity(name: String, entity: PylonEntity<*>)
         = addEntity(name, entity.entity)
 
-    fun removeEntity(name: String) {
+    fun tryRemoveEntity(name: String) {
         val uuid = heldEntities[name] ?: return
         Bukkit.getEntity(uuid)?.remove()
     }
 
-    fun removeAllEntities() {
+    fun tryRemoveAllEntities() {
         val list = heldEntities.values.toList()
         list.forEach {
             Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
@@ -142,7 +142,7 @@ interface PylonEntityHolderBlock {
             val block = event.pylonBlock
             if (block is PylonEntityHolderBlock) {
                 // Best-effort removal; unlikely to cause issues
-                block.removeAllEntities()
+                block.tryRemoveAllEntities()
                 holders.remove(block)
             } else if (block is PhantomBlock) {
                 block.pdc.get(entityKey, entityType)?.values?.forEach {
