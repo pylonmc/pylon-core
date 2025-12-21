@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.waila.Waila
 import org.bukkit.Material
@@ -123,7 +124,13 @@ object PylonSerializers {
     internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
 
     @JvmField
-    val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
+    val FLUID_CONNECTION_POINT = FluidConnectionPointPersistentDataType
+
+    @JvmField
+    val LOGISTIC_POINT_TYPE = EnumPersistentDataType(LogisticSlotType::class.java)
+
+    @JvmSynthetic
+    internal val CARGO_BLOCK_DATA = CargoBlockPersistentDataType
 
     @JvmSynthetic
     internal val WAILA_TYPE = EnumPersistentDataType(Waila.Type::class.java)
