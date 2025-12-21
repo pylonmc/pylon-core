@@ -27,14 +27,15 @@ interface PylonCopperBlock {
 
             val hand = event.hand ?: return
             val block = event.clickedBlock ?: return
+            val pylonBlock = BlockStorage.get(block) ?: return
 
             val stack = event.player.inventory.getItem(hand)
             val type = stack.type
 
+
             if (!Tag.ITEMS_AXES.isTagged(type) && type != Material.HONEYCOMB) return
             if (!block.type.toString().lowercase().contains("copper")) return
 
-            val pylonBlock = BlockStorage.get(block)
             if (pylonBlock is PylonCopperBlock) {
                 try {
                     pylonBlock.changeWaxing(event)
