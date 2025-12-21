@@ -14,7 +14,6 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -844,10 +843,10 @@ internal object BlockListener : Listener {
         val holder = inv.holder
         if (holder is Hopper) {
             val pyBlock = BlockStorage.get(holder.block) as? PylonHopper ?: return
-            pyBlock.onHopper(event)
+            pyBlock.onHopperPickUpItem(event)
         } else if (holder is HopperMinecart) {
             val pyEntity = EntityStorage.get(holder.entity) as? PylonHopper ?: return
-            pyEntity.onHopper(event)
+            pyEntity.onHopperPickUpItem(event)
         }
     }
 
