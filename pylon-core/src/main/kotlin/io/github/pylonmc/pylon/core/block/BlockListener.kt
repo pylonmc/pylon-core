@@ -844,9 +844,6 @@ internal object BlockListener : Listener {
         if (holder is Hopper) {
             val pyBlock = BlockStorage.get(holder.block) as? PylonHopper ?: return
             pyBlock.onHopperPickUpItem(event)
-        } else if (holder is HopperMinecart) {
-            val pyEntity = EntityStorage.get(holder.entity) as? PylonHopper ?: return
-            pyEntity.onHopperPickUpItem(event)
         }
     }
 
