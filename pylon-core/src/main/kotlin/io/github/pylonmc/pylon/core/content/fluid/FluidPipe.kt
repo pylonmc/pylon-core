@@ -107,7 +107,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
                 FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(pylonBlock.fluidIntersectionDisplay), this)
             } else {
                 // This pipe does not match the pipe we right clicked
-                player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
+                player.sendActionBar(Component.translatable("pylon.pyloncore.message.pipe.not_of_same_type"))
             }
             return true
         }
@@ -118,7 +118,7 @@ open class FluidPipe(stack: ItemStack) : PylonItem(stack), PylonInteractor {
                 FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.Section(pylonBlock), this)
             } else {
                 // This pipe does not match the pipe we right clicked
-                player.sendActionBar(Component.translatable("pylon.pylonbase.message.pipe.not_of_same_type"))
+                player.sendActionBar(Component.translatable("pylon.pyloncore.message.pipe.not_of_same_type"))
             }
             return true
         }

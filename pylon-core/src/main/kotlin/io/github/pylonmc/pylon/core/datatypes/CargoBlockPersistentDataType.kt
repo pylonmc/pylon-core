@@ -20,7 +20,7 @@ internal object CargoBlockPersistentDataType : PersistentDataType<PersistentData
         context: PersistentDataAdapterContext
     ): PylonCargoBlock.Companion.CargoBlockData {
         val groups = primitive.get(groupsKey, groupsType)!!.toMutableMap()
-        val transferRate = primitive.get(transferRateKey, PersistentDataType.INTEGER)!!
+        val transferRate = primitive.get(transferRateKey, PylonSerializers.INTEGER)!!
         return PylonCargoBlock.Companion.CargoBlockData(groups, transferRate)
     }
 
@@ -30,7 +30,7 @@ internal object CargoBlockPersistentDataType : PersistentDataType<PersistentData
     ): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()
         pdc.set(groupsKey, groupsType, complex.groups)
-        pdc.set(transferRateKey, PersistentDataType.INTEGER, complex.transferRate)
+        pdc.set(transferRateKey, PylonSerializers.INTEGER, complex.transferRate)
         return pdc
     }
 }
