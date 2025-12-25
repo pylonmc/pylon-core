@@ -23,7 +23,7 @@ import java.lang.invoke.MethodHandle
 class PylonBlockSchema(
     private val key: NamespacedKey,
     val material: Material,
-    blockClass: Class<out PylonBlock>,
+    val blockClass: Class<out PylonBlock>,
 ) : Keyed {
 
     init {
