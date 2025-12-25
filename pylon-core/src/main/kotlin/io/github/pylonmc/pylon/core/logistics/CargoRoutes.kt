@@ -30,7 +30,7 @@ import org.jetbrains.annotations.ApiStatus
 @ApiStatus.Internal
 object CargoRoutes : Listener {
 
-    class CargoRouteEndpoint(val block: PylonCargoBlock, val face: BlockFace)
+    data class CargoRouteEndpoint(val block: PylonCargoBlock, val face: BlockFace)
 
     private val routeCache: MutableMap<CargoRouteEndpoint, CargoRouteEndpoint?> = mutableMapOf()
 
