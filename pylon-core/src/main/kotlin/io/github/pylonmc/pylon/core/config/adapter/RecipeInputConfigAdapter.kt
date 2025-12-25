@@ -1,7 +1,9 @@
 package io.github.pylonmc.pylon.core.config.adapter
 
+import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
 import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.RecipeInput
+import org.bukkit.NamespacedKey
 import org.bukkit.configuration.ConfigurationSection
 
 object RecipeInputConfigAdapter : ConfigAdapter<RecipeInput> {
@@ -31,7 +33,14 @@ object RecipeInputItemAdapter : ConfigAdapter<RecipeInput.Item> {
                 RecipeInput.Item(tag, amount)
             }
 
-            is String -> RecipeInput.Item(ConfigAdapter.ITEM_TAG.convert(value), 1)
+            is String -> {
+                if (value.startsWith("#")) {
+                    RecipeInput.Item(ConfigAdapter.ITEM_TAG.convert(value), 1)
+                } else {
+                    val nsKey = NamespacedKey.fromString(value) ?: throw IllegalArgumentException("'$value' is not a namespaced key")
+                    RecipeInput.Item(hashSetOf(ItemTypeWrapper.invoke(nsKey)), 1)
+                }
+            }
             else -> throw IllegalArgumentException("Cannot convert $value to item recipe input")
         }
     }

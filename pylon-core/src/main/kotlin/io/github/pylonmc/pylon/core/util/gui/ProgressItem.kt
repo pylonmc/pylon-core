@@ -32,6 +32,7 @@ import kotlin.math.min
  */
 open class ProgressItem @JvmOverloads constructor(
     builder: ItemStackBuilder,
+    @JvmSynthetic
     internal val countDown: Boolean = true
 ) : AbstractItem() {
 
