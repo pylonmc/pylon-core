@@ -136,6 +136,24 @@ open class PylonItem(val stack: ItemStack) : Keyed {
         }
 
         /**
+         * Converts a regular ItemStack to a PylonItem of class [clazz]
+         * Returns null if the ItemStack is not a Pylon item or is not of the specified [clazz]
+         */
+        @JvmStatic
+        @Contract("null -> null")
+        fun <T : PylonItem> fromStack(stack: ItemStack?, clazz: Class<T>): T? {
+            val pylonItem = fromStack(stack) ?: return null
+            if (!clazz.isInstance(pylonItem)) return null
+            return clazz.cast(pylonItem)
+        }
+
+        @JvmSynthetic
+        inline fun <reified T : PylonItem> from(stack: ItemStack?): T? {
+            val pylonItem = fromStack(stack) ?: return null
+            return pylonItem as? T
+        }
+
+        /**
          * Checks if [stack] is a Pylon item.
          */
         @JvmStatic
