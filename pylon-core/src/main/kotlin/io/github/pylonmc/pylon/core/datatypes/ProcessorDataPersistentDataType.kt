@@ -9,7 +9,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
-object ProcessorDataPersistentDataType : PersistentDataType<PersistentDataContainer, PylonProcessor.ProcessorData> {
+internal object ProcessorDataPersistentDataType : PersistentDataType<PersistentDataContainer, PylonProcessor.ProcessorData> {
 
     private val PROCESS_TIME_TICKS_KEY = pylonKey("total_process_ticks")
     private val PROCESS_TICKS_REMAINING_KEY = pylonKey("process_ticks_remaining")

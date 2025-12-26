@@ -21,6 +21,7 @@ import java.util.IdentityHashMap
  */
 interface PylonProcessor {
 
+    @ApiStatus.Internal
     data class ProcessorData(
         var processTimeTicks: Int?,
         var processTicksRemaining: Int?,
@@ -29,14 +30,16 @@ interface PylonProcessor {
     private val processorData: ProcessorData
         get() = processorBlocks.getOrPut(this) { ProcessorData(null, null, null)}
 
-
     val processTimeTicks: Int?
+        @ApiStatus.NonExtendable
         get() = processorData.processTimeTicks
 
     val processTicksRemaining: Int?
+        @ApiStatus.NonExtendable
         get() = processorData.processTicksRemaining
 
     val isProcessing: Boolean
+        @ApiStatus.NonExtendable
         get() = processTimeTicks != null
 
      /**
@@ -45,7 +48,6 @@ interface PylonProcessor {
      * Does not persist; you must call this whenever the block is initialised (e.g.
      * in [io.github.pylonmc.pylon.core.block.PylonBlock.postInitialise])
      */
-    @ApiStatus.NonExtendable
     fun setProgressItem(item: ProgressItem) {
         processorData.progressItem = item
     }
@@ -78,6 +80,7 @@ interface PylonProcessor {
 
     fun onProcessFinished() {}
 
+    @ApiStatus.Internal
     fun progressProcess(ticks: Int) {
         val data = processorData
         if (data.processTimeTicks == null) {
@@ -91,6 +94,7 @@ interface PylonProcessor {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         private val processorKey = pylonKey("processor_data")
