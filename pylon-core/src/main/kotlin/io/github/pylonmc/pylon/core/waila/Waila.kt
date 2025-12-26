@@ -20,8 +20,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.attribute.Attribute
+import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -257,6 +257,19 @@ class Waila private constructor(private val player: Player, playerConfig: Player
         }
 
         /**
+         * Adds a WAILA override for the given position. This will always show the
+         * provided WAILA config when a WAILA-enabled player looks at the block at
+         * the given position, regardless of the block type or even if the block is
+         * not a Pylon block.
+         *
+         * If an override is added for a position that already has an override, the
+         * old override will be replaced.
+         */
+        @JvmStatic
+        fun addWailaOverride(block: Block, provider: (Player) -> WailaDisplay?)
+                = addWailaOverride(block.position, provider)
+
+        /**
          * Adds a WAILA override for the given entity. This will always show the
          * provided WAILA config when a WAILA-enabled player looks at the entity
          * regardless of any other factors.
@@ -278,6 +291,13 @@ class Waila private constructor(private val player: Player, playerConfig: Player
         }
 
         /**
+         * Removes any existing WAILA override for the given position.
+         */
+        @JvmStatic
+        fun removeWailaOverride(block: Block)
+                = removeWailaOverride(block.position)
+
+        /**
          * Removes any existing WAILA override for the given entity.
          */
         @JvmStatic
@@ -288,12 +308,6 @@ class Waila private constructor(private val player: Player, playerConfig: Player
         @EventHandler(priority = EventPriority.MONITOR)
         private fun onPlayerJoin(event: PlayerJoinEvent) {
             val player = event.player
-
-            // TODO: Remove this migration code in a future version
-            if (player.persistentDataContainer.has(wailaKey, PylonSerializers.BOOLEAN)) {
-                player.persistentDataContainer.remove(wailaKey)
-            }
-
             if (player.wailaConfig.enabled) {
                 addPlayer(player)
             }
