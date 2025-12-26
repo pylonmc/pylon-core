@@ -38,6 +38,7 @@ object TransformUtil {
         }
         return yawToCardinalFace(yaw)
     }
+
     @JvmStatic
     fun yawAndPitchToFace(yaw: Float, pitch: Float): BlockFace
         = yawAndPitchToFace(yaw.toDouble(), pitch.toDouble())

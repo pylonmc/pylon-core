@@ -13,7 +13,6 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -843,7 +842,7 @@ internal object BlockListener : Listener {
         }
         e.printStackTrace()
         blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
-        if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
+        if (blockErrMap[block]!! > PylonConfig.ALLOWED_BLOCK_ERRORS) {
             BlockStorage.makePhantom(block)
             if (block is PylonTickingBlock) {
                 PylonTickingBlock.stopTicking(block)

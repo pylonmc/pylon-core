@@ -90,7 +90,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * can actually see it.
      */
     open val blockTextureEntity: BlockTextureEntity? by lazy {
-        if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
+        if (!PylonConfig.BlockTextureConfig.ENABLED || disableBlockTextureEntity) {
             null
         } else {
             val entity = BlockTextureEntity(this)

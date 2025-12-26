@@ -116,7 +116,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         Bukkit.getPluginManager().registerEvents(BlockStorage, this)
         Bukkit.getPluginManager().registerEvents(BlockListener, this)
         Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
-        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.inventoryTickerBaseRate)
+        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.INVENTORY_TICKER_BASE_RATE)
         Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
         Bukkit.getPluginManager().registerEvents(EntityStorage, this)
         Bukkit.getPluginManager().registerEvents(EntityListener, this)
@@ -145,8 +145,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
 
         PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.resourcePackSettings))
 
-        if (PylonConfig.ArmorTextureConfig.enabled) {
-            if (!PylonConfig.ArmorTextureConfig.forced) {
+        if (PylonConfig.ArmorTextureConfig.ENABLED) {
+            if (!PylonConfig.ArmorTextureConfig.FORCED) {
                 PlayerSettingsPage.resourcePackSettings.addSetting(TogglePlayerSettingButton(
                     pylonKey("toggle-armor-textures"),
                     toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
@@ -156,13 +156,13 @@ object PylonCore : JavaPlugin(), PylonAddon {
             packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
         }
 
-        if (PylonConfig.BlockTextureConfig.enabled) {
+        if (PylonConfig.BlockTextureConfig.ENABLED) {
             PlayerSettingsPage.resourcePackSettings.addSetting(PageButton(PlayerSettingsPage.blockTextureSettings))
             Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
             BlockTextureEngine.updateOccludingCacheJob.start()
         }
 
-        if (PylonConfig.researchesEnabled) {
+        if (PylonConfig.RESEARCHES_ENABLED) {
             PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchConfetti)
             PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchSounds)
         }

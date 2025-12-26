@@ -43,7 +43,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
-    val isDisabled = key in PylonConfig.disabledItems
+    val isDisabled = key in PylonConfig.DISABLED_ITEMS
     val research get() = schema.research
 
     /**
