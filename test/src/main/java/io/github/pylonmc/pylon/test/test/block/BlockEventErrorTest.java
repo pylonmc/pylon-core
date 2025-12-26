@@ -21,7 +21,7 @@ public class BlockEventErrorTest extends GameTest {
                 .setUp(test -> {
                     Block block = BlockStorage.placeBlock(test.location(), BlockEventError.KEY).getBlock();
                     Entity theRinger = test.location().getWorld().spawn(test.location().clone().add(1, 0, 0), Skeleton.class);
-                    for(int i = 0; i < PylonConfig.getAllowedBlockErrors() + 1; i++){
+                    for(int i = 0; i < PylonConfig.allowedBlockErrors + 1; i++){
                         new BellRingEvent(block, BlockFace.EAST, theRinger).callEvent();
                     }
                     test.succeedWhen(() -> BlockStorage.get(block) instanceof PhantomBlock);
