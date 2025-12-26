@@ -22,6 +22,9 @@ import java.util.*
  * Slots can be in multiple groups. For example, you could have a 'buffer'
  * slot be in both an input and an output group, allowing items to be both
  * inserted and removed.
+ *
+ * To use this interface, all you need to do is call `createLogisticGroup`
+ * to create all the logistic groups you want in `postInitialise`.
  */
 interface PylonLogisticBlock {
 
