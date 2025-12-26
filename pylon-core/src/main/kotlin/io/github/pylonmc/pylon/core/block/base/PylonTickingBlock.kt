@@ -142,8 +142,8 @@ interface PylonTickingBlock {
          */
         @JvmStatic
         @ApiStatus.Internal
-        fun isTicking(block: PylonTickingBlock): Boolean {
-            return tickingBlocks[block]?.job?.isActive == true
+        fun isTicking(block: PylonBlock?): Boolean {
+            return block is PylonTickingBlock && tickingBlocks[block]?.job?.isActive == true
         }
 
         @JvmSynthetic
