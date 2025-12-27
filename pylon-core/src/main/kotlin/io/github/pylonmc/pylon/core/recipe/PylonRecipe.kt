@@ -1,7 +1,6 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
-import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import org.bukkit.Keyed
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
@@ -30,7 +29,7 @@ interface PylonRecipe : Keyed {
 
     fun isOutput(stack: ItemStack) = results.any {
         when (it) {
-            is FluidOrItem.Item -> it.item.isPylonSimilar(stack)
+            is FluidOrItem.Item -> it.item.isSimilar(stack)
             else -> false
         }
     }

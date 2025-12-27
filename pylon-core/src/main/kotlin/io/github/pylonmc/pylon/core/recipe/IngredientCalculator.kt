@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateBase
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.calculateFinal
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator.checkRecursiveDepth
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
-import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import net.kyori.adventure.key.Key
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
@@ -171,7 +170,7 @@ object IngredientCalculator {
         for (outputResult in recipe.results) {
             when (outputResult) {
                 is FluidOrItem.Item -> {
-                    if (!outputResult.item.isPylonSimilar(pylonItem.stack)) {
+                    if (!outputResult.item.isSimilar(pylonItem.stack)) {
                         baseResult.intermediates += Container.of(outputResult)
                     }
                 }
@@ -194,7 +193,7 @@ object IngredientCalculator {
         var outputAmount = 0
         recipe.results.forEach { outputResult ->
             if (outputResult is FluidOrItem.Item &&
-                outputResult.item.isPylonSimilar(targetItem.stack)
+                outputResult.item.isSimilar(targetItem.stack)
             ) {
                 outputAmount += outputResult.item.amount
             }
@@ -355,10 +354,10 @@ sealed class Container {
     data class Item(val item: ItemStack) : Container()
     data class Fluid(val fluid: PylonFluid, var amountMillibuckets: Double) : Container()
 
-    fun isPylonSimilar(other: Container): Boolean {
+    fun isSimilar(other: Container): Boolean {
         return when (this) {
             is Item -> when (other) {
-                is Item -> item.isPylonSimilar(other.item)
+                is Item -> item.isSimilar(other.item)
                 is Fluid -> false
             }
 
@@ -502,7 +501,7 @@ private fun flat(from: MutableList<Container>, to: MutableList<Container>) {
     for (component in from) {
         var isNewObject = true
         for (exist in to) {
-            if (exist.isPylonSimilar(component)) {
+            if (exist.isSimilar(component)) {
                 if (exist is Container.Item && component is Container.Item) {
                     exist.item.amount += component.item.amount
                     isNewObject = false
