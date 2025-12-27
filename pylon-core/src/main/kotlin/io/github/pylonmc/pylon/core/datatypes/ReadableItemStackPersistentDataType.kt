@@ -24,14 +24,14 @@ object ReadableItemStackPersistentDataType : PersistentDataType<PersistentDataCo
             (serialized["count"] as? Int)?.let { primitive.set(countKey, PersistentDataType.INTEGER, it) }
 
             val primitiveComponents = context.newPersistentDataContainer()
-            val components = serialized["components"] as? Map<String, Any>
+            @Suppress("UNCHECKED_CAST") val components = serialized["components"] as? Map<String, Any>
             components?.forEach { (key, value) ->
                 primitiveComponents.set(NamespacedKey.fromString(key)!!, PersistentDataType.STRING, value as String)
             }
             primitive.set(componentsKey, PersistentDataType.TAG_CONTAINER, primitiveComponents)
 
             primitive.set(dataVersionKey, PersistentDataType.INTEGER, serialized["DataVersion"] as Int)
-            return primitive
+            primitive
         }
     }
 
