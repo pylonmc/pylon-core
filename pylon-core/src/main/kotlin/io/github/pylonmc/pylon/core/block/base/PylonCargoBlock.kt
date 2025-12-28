@@ -148,6 +148,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
                 continue
             }
 
+
             tickCargoFace(sourceGroup, targetGroup)
         }
     }
@@ -166,7 +167,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
                 val targetAmount = targetSlot.getAmount()
                 val targetMaxAmount = targetSlot.getMaxAmount(sourceStack)
 
-                if (targetAmount == targetMaxAmount || !sourceStack.isSimilar(targetStack)) {
+                if (targetAmount == targetMaxAmount || (targetStack != null && !sourceStack.isSimilar(targetStack))) {
                     continue
                 }
 
@@ -242,7 +243,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
             // Disconnect adjacent cargo ducts
             for ((face, _) in block.cargoBlockData.groups) {
                 BlockStorage.getAs<CargoDuct>(block.block.getRelative(face))?.let { duct ->
-                    if (face in duct.connectedFaces) {
+                    if (face.oppositeFace in duct.connectedFaces) {
                         duct.connectedFaces.remove(face.oppositeFace)
                         duct.updateConnectedFaces()
                         PylonCargoDisconnectEvent(duct, block).callEvent()
