@@ -7,6 +7,9 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.logistics.LogisticGroup
+import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
+import io.github.pylonmc.pylon.core.logistics.VanillaInventoryLogisticSlot
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -19,11 +22,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.attribute.Attribute
 import org.bukkit.Registry
 import org.bukkit.World
+import org.bukkit.attribute.Attribute
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.Furnace
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
@@ -45,6 +49,7 @@ import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
 import xyz.xenondevs.invui.inventory.event.UpdateReason
+import java.lang.Math
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.util.function.Consumer
@@ -617,3 +622,16 @@ class MachineUpdateReason : UpdateReason
 // https://minecraft.wiki/w/Breaking#Calculation
 fun getBlockBreakTicks(tool: ItemStack, block: Block)
     = round(100 * block.type.getHardness() / block.getDestroySpeed(tool, true))
+
+
+fun getVanillaLogisticSlots(block: Block?): Map<String, LogisticGroup> {
+    val blockData = block?.blockData
+    return when (blockData) {
+        is Furnace -> mapOf<String, LogisticGroup>(
+            "output" to LogisticGroup(LogisticSlotType.OUTPUT, VanillaInventoryLogisticSlot(blockData.inventory, 0)),
+            "fuel" to LogisticGroup(LogisticSlotType.INPUT, VanillaInventoryLogisticSlot(blockData.inventory, 1)),
+            "input" to LogisticGroup(LogisticSlotType.INPUT, VanillaInventoryLogisticSlot(blockData.inventory, 2)),
+        )
+        else -> mapOf<String, LogisticGroup>()
+    }
+}
