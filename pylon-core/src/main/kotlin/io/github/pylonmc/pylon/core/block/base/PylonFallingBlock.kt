@@ -10,9 +10,9 @@ import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import org.bukkit.NamespacedKey
-import org.bukkit.block.Block
 import org.bukkit.entity.FallingBlock
 import org.bukkit.event.entity.EntityChangeBlockEvent
+import org.bukkit.event.entity.EntityDropItemEvent
 import org.bukkit.persistence.PersistentDataContainer
 
 /**
@@ -37,11 +37,15 @@ interface PylonFallingBlock {
     fun onFallStart(event: EntityChangeBlockEvent, spawnedEntity: PylonFallingBlockEntity)
 
     /**
-     * When calling this, the block doesn't exist yet in [BlockStorage]
      * Called after deserialization
      * Cancelling the event at this step does nothing, and the entity is about to be removed
      */
     fun onFallStop(event: EntityChangeBlockEvent, entity: PylonFallingBlockEntity)
+
+    /**
+     * When called the block doesn't exist in the world and in [BlockStorage]
+     */
+    fun onItemDrop(event: EntityDropItemEvent, entity: PylonFallingBlockEntity) = PylonRegistry.ITEMS[(this as PylonBlock).key]?.getItemStack()
 
     class PylonFallingBlockEntity : PylonEntity<FallingBlock> {
         val fallStartPosition: BlockPosition

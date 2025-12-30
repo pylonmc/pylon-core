@@ -94,7 +94,7 @@ internal object BlockListener : Listener {
         }
     }
 
-    private val fallMap = HashMap<UUID, PylonBlockSchema>();
+    private val fallMap = HashMap<UUID, Pair<PylonFallingBlock, PylonFallingBlock.PylonFallingBlockEntity>>();
 
     @EventHandler(ignoreCancelled = true)
     private fun entityBlockChange(event: EntityChangeBlockEvent) {
@@ -118,7 +118,7 @@ internal object BlockListener : Listener {
                 BlockStorage.deleteBlock(block.position)
                 EntityStorage.add(fallingEntity)
                 // save this here as the entity storage is going to nuke it if the item drops
-                fallMap[entity.uniqueId] = fallingEntity.blockSchema
+                fallMap[entity.uniqueId] = Pair(pylonFallingBlock, fallingEntity)
             }
         } else {
             val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.PylonFallingBlockEntity ?: return
@@ -143,15 +143,17 @@ internal object BlockListener : Listener {
 
         if (entity !is FallingBlock) return
 
-        val blockSchema = fallMap[entity.uniqueId] ?: return
-        val relativeItem = PylonRegistry.ITEMS[blockSchema.key]
+        val (pylonFallingBlock, pylonFallingEntity) = fallMap[entity.uniqueId] ?: return
         fallMap.remove(entity.uniqueId)
+
+        val relativeItem = pylonFallingBlock.onItemDrop(event, pylonFallingEntity)
+        if (event.isCancelled) return
         if (relativeItem == null) {
             event.isCancelled = true
             return
         }
 
-        event.itemDrop.itemStack = relativeItem.getItemStack()
+        event.itemDrop.itemStack = relativeItem
     }
 
     @EventHandler(ignoreCancelled = true)
