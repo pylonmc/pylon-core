@@ -255,9 +255,9 @@ object BlockStorage : Listener {
             blocksByChunk[blockPosition.chunk]!!.add(block)
         }
 
-        BlockTextureEngine.insert(block)
         PylonBlockPlaceEvent(blockPosition.block, block, context).callEvent()
         block.postInitialise()
+        BlockTextureEngine.insert(block)
 
         return block
     }
