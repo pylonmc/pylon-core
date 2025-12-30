@@ -625,7 +625,7 @@ fun getBlockBreakTicks(tool: ItemStack, block: Block)
 
 
 fun getVanillaLogisticSlots(block: Block?): Map<String, LogisticGroup> {
-    val blockData = block?.blockData
+    val blockData = block?.state
     return when (blockData) {
         is Furnace -> mapOf<String, LogisticGroup>(
             "output" to LogisticGroup(LogisticSlotType.OUTPUT, VanillaInventoryLogisticSlot(blockData.inventory, 0)),
