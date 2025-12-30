@@ -12,7 +12,7 @@ internal object RecipeProcessorDataPersistentDataType : PersistentDataType<Persi
 
     private val RECIPE_TYPE_KEY = pylonKey("recipe_type")
     private val CURRENT_RECIPE_KEY = pylonKey("current_recipe")
-    private val TOTAL_RECIPE_TICKS_KEY = pylonKey("total_recipe_ticks")
+    private val RECIPE_TIME_TICKS_KEY = pylonKey("recipe_time_ticks")
     private val RECIPE_TICKS_REMAINING_KEY = pylonKey("recipe_ticks_remaining")
 
     private val RECIPE_TYPE_TYPE = PylonSerializers.KEYED.keyedTypeFrom { key -> PylonRegistry.RECIPE_TYPES.getOrThrow(key) }
@@ -27,7 +27,7 @@ internal object RecipeProcessorDataPersistentDataType : PersistentDataType<Persi
         return PylonRecipeProcessor.RecipeProcessorData(
             recipeType,
             primitive.get(CURRENT_RECIPE_KEY, recipePDT),
-            primitive.get(TOTAL_RECIPE_TICKS_KEY, PylonSerializers.INTEGER),
+            primitive.get(RECIPE_TIME_TICKS_KEY, PylonSerializers.INTEGER),
             primitive.get(RECIPE_TICKS_REMAINING_KEY, PylonSerializers.INTEGER),
             null
         )
@@ -38,7 +38,7 @@ internal object RecipeProcessorDataPersistentDataType : PersistentDataType<Persi
         val recipePDT = PylonSerializers.KEYED.keyedTypeFrom { complex.recipeType!!.getRecipeOrThrow(it) }
         pdc.setNullable(RECIPE_TYPE_KEY, RECIPE_TYPE_TYPE, complex.recipeType)
         pdc.setNullable(CURRENT_RECIPE_KEY, recipePDT, complex.currentRecipe)
-        pdc.setNullable(TOTAL_RECIPE_TICKS_KEY, PylonSerializers.INTEGER, complex.totalRecipeTicks)
+        pdc.setNullable(RECIPE_TIME_TICKS_KEY, PylonSerializers.INTEGER, complex.recipeTimeTicks)
         pdc.setNullable(RECIPE_TICKS_REMAINING_KEY, PylonSerializers.INTEGER, complex.recipeTicksRemaining)
         return pdc
     }

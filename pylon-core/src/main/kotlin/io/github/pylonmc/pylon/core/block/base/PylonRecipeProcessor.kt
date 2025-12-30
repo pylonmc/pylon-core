@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import com.google.common.base.Preconditions
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
@@ -17,32 +18,35 @@ import java.util.IdentityHashMap
 /**
  * An interface that stores and progresses a recipe.
  *
- * This does not actually handle the recipe inputs and outputs. Instead, it simply
- * tracks a recipe that is being processed and how much time is left on it, ticking
- * automatically.
- *
- * This interface overrides [PylonTickingBlock.tick], meaning the rate at which the
- * recipe ticks is determined by [PylonTickingBlock.setTickInterval].
+ * @see PylonProcessor
  */
-interface PylonRecipeProcessor<T: PylonRecipe> : PylonTickingBlock {
+interface PylonRecipeProcessor<T: PylonRecipe> {
 
+    @ApiStatus.Internal
     data class RecipeProcessorData(
         var recipeType: RecipeType<*>?,
         var currentRecipe: PylonRecipe?,
-        var totalRecipeTicks: Int?,
+        var recipeTimeTicks: Int?,
         var recipeTicksRemaining: Int?,
         var progressItem: ProgressItem?,
     )
 
     private val recipeProcessorData: RecipeProcessorData
+        @ApiStatus.NonExtendable
         get() = recipeProcessorBlocks.getOrPut(this) { RecipeProcessorData(null, null, null, null, null)}
 
     val currentRecipe: T?
+        @ApiStatus.NonExtendable
         // cast should always be safe due to type restriction when starting recipe
         get() = recipeProcessorData.currentRecipe as T?
 
     val recipeTicksRemaining: Int?
+        @ApiStatus.NonExtendable
         get() = recipeProcessorData.recipeTicksRemaining
+
+    val isProcessingRecipe: Boolean
+        @ApiStatus.NonExtendable
+        get() = currentRecipe != null
 
     /**
      * Set the progress item that should be updated as the recipe progresses. Optional.
@@ -71,37 +75,43 @@ interface PylonRecipeProcessor<T: PylonRecipe> : PylonTickingBlock {
      */
     fun startRecipe(recipe: T, ticks: Int) {
         recipeProcessorData.currentRecipe = recipe
-        recipeProcessorData.totalRecipeTicks = ticks
+        recipeProcessorData.recipeTimeTicks = ticks
         recipeProcessorData.recipeTicksRemaining = ticks
         recipeProcessorData.progressItem?.setTotalTimeTicks(ticks)
         recipeProcessorData.progressItem?.setRemainingTimeTicks(ticks)
     }
 
+    fun stopRecipe() {
+        val data = recipeProcessorData
+        data.currentRecipe = null
+        data.recipeTimeTicks = null
+        data.recipeTicksRemaining = null
+        data.progressItem?.totalTime = null
+    }
+
+    fun finishRecipe() {
+        check(isProcessingRecipe) {
+            "Cannot finish recipe because there is no recipe being processed"
+        }
+        @Suppress("UNCHECKED_CAST") // cast should always be safe due to type restriction when starting recipe
+        onRecipeFinished(recipeProcessorData.currentRecipe as T)
+        stopRecipe()
+    }
+
     fun onRecipeFinished(recipe: T)
 
-    override fun tick(deltaSeconds: Double) {
+    fun progressRecipe(ticks: Int) {
         val data = recipeProcessorData
-
         if (data.currentRecipe != null && data.recipeTicksRemaining != null) {
+            data.recipeTicksRemaining = data.recipeTicksRemaining!! - ticks
             data.progressItem?.setRemainingTimeTicks(data.recipeTicksRemaining!!)
-
-            // tick recipe
-            if (data.recipeTicksRemaining!! > 0) {
-                data.recipeTicksRemaining = data.recipeTicksRemaining!! - tickInterval
-                return
+            if (data.recipeTicksRemaining!! <= 0) {
+                finishRecipe()
             }
-
-            // finish recipe
-            onRecipeFinished(data.currentRecipe as T)
-            data.currentRecipe = null
-            data.totalRecipeTicks = null
-            data.recipeTicksRemaining = null
-            data.progressItem?.totalTime = null
-            // cast should always be safe due to type restriction when starting recipe
-            return
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         private val recipeProcessorKey = pylonKey("recipe_processor_data")
@@ -126,7 +136,7 @@ interface PylonRecipeProcessor<T: PylonRecipe> : PylonTickingBlock {
             val block = event.pylonBlock
             if (block is PylonRecipeProcessor<*>) {
                 val data = recipeProcessorBlocks[block]!!
-                data.progressItem?.setTotalTimeTicks(data.totalRecipeTicks)
+                data.progressItem?.setTotalTimeTicks(data.recipeTimeTicks)
                 data.recipeTicksRemaining?.let { data.progressItem?.setRemainingTimeTicks(it) }
             }
         }
@@ -135,7 +145,11 @@ interface PylonRecipeProcessor<T: PylonRecipe> : PylonTickingBlock {
         private fun onSerialize(event: PylonBlockSerializeEvent) {
             val block = event.pylonBlock
             if (block is PylonRecipeProcessor<*>) {
-                event.pdc.set(recipeProcessorKey, PylonSerializers.RECIPE_PROCESSOR_DATA, recipeProcessorBlocks[block]!!)
+                val data = recipeProcessorBlocks[block] ?: error {
+                    "No recipe processor data found for ${block.key}"
+                }
+                event.pdc.set(recipeProcessorKey, PylonSerializers.RECIPE_PROCESSOR_DATA, data)
+                check(data.recipeType != null) { "No recipe type set for ${event.pylonBlock.key}; did you forget to call setRecipeType in your place constructor?" }
             }
         }
 
