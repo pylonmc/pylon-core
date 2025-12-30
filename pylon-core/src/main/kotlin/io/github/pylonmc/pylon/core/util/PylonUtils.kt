@@ -50,6 +50,7 @@ import java.lang.invoke.MethodHandles
 import java.util.function.Consumer
 import kotlin.math.absoluteValue
 import kotlin.math.max
+import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -612,3 +613,7 @@ val DISALLOW_PLAYERS_FROM_ADDING_ITEMS_HANDLER = Consumer<ItemPreUpdateEvent> { 
  * Indicates a machine has updated an inventory slot.
  */
 class MachineUpdateReason : UpdateReason
+
+// https://minecraft.wiki/w/Breaking#Calculation
+fun getBlockBreakTicks(tool: ItemStack, block: Block)
+    = round(100 * block.type.getHardness() / block.getDestroySpeed(tool, true))
