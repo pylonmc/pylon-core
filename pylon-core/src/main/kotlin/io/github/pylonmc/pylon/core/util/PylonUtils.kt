@@ -2,6 +2,7 @@
 
 package io.github.pylonmc.pylon.core.util
 
+import io.github.pylonmc.pylon.base.util.BaseUtils
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
@@ -11,6 +12,7 @@ import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.papermc.paper.datacomponent.DataComponentType
+import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -19,9 +21,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.attribute.Attribute
 import org.bukkit.Registry
 import org.bukkit.World
+import org.bukkit.attribute.Attribute
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.file.YamlConfiguration
@@ -45,8 +47,10 @@ import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
 import xyz.xenondevs.invui.inventory.event.UpdateReason
+import java.lang.Math
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.util.Map
 import java.util.function.Consumer
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -617,3 +621,47 @@ class MachineUpdateReason : UpdateReason
 // https://minecraft.wiki/w/Breaking#Calculation
 fun getBlockBreakTicks(tool: ItemStack, block: Block)
     = round(100 * block.type.getHardness() / block.getDestroySpeed(tool, true))
+
+private val BLOCK_ITEM_FALLBACK = Map.of<Material?, Material?>(
+    Material.FIRE, Material.FLINT_AND_STEEL,
+    Material.SOUL_FIRE, Material.FLINT_AND_STEEL
+)
+
+fun itemFromKey(key: NamespacedKey): ItemStack {
+    return if (key.namespace == "minecraft") {
+        makeItemVanilla(key)
+    } else {
+        makeItemPylon(key)
+    }
+}
+
+fun makeItemVanilla(materialKey: NamespacedKey): ItemStack {
+    var material = Registry.MATERIAL.get(materialKey)
+    if (material == null) {
+        val stack = ItemStack(Material.BARRIER)
+        stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.text("ERROR: " + materialKey))
+        return stack
+    }
+
+    if (material.isItem) {
+        return ItemStack(material)
+    }
+
+    material = BLOCK_ITEM_FALLBACK.getOrDefault(material, Material.BARRIER)
+    val stack = ItemStack(material)
+    stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.translatable(material.translationKey()))
+    return stack
+}
+
+fun makeItemPylon(blockKey: NamespacedKey): ItemStack {
+    val item = PylonRegistry.ITEMS[blockKey]
+    if (item == null) {
+        val block = PylonRegistry.BLOCKS[blockKey]
+            ?: throw UnsupportedOperationException("Can't make pylon item, no block or item available for such key")
+        val stack = ItemStack(Material.BARRIER)
+        stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.text(block.getKey().toString()))
+        return stack
+    }
+
+    return item.getItemStack()
+}
