@@ -19,7 +19,6 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import java.util.IdentityHashMap
@@ -31,7 +30,7 @@ interface PylonTickingBlock {
 
     private val tickingData: TickingBlockData
         get() = tickingBlocks.getOrPut(this) { TickingBlockData(
-            PylonConfig.defaultTickInterval,
+            PylonConfig.DEFAULT_TICK_INTERVAL,
             false,
             null
         )}
@@ -72,7 +71,7 @@ interface PylonTickingBlock {
     /**
      * The function that should be called periodically.
      */
-    fun tick(deltaSeconds: Double)
+    fun tick()
 
     @ApiStatus.Internal
     companion object : Listener {
@@ -154,13 +153,10 @@ interface PylonTickingBlock {
         private fun startTicker(tickingBlock: PylonTickingBlock) {
             val dispatcher = if (tickingBlock.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
             tickingBlocks[tickingBlock]?.job = PylonCore.launch(dispatcher) {
-                var lastTickNanos = System.nanoTime()
                 while (true) {
                     delay(tickingBlock.tickInterval.ticks)
                     try {
-                        val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
-                        lastTickNanos = System.nanoTime()
-                        tickingBlock.tick(dt)
+                        tickingBlock.tick()
                     } catch (e: Exception) {
                         PylonCore.launch(PylonCore.minecraftDispatcher) {
                             logEventHandleErr(null, e, tickingBlock as PylonBlock)

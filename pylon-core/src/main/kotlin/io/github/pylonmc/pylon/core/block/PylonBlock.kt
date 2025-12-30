@@ -90,7 +90,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * can actually see it.
      */
     open val blockTextureEntity: BlockTextureEntity? by lazy {
-        if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
+        if (!PylonConfig.BlockTextureConfig.ENABLED || disableBlockTextureEntity) {
             null
         } else {
             val entity = BlockTextureEntity(this)
@@ -215,10 +215,7 @@ open class PylonBlock internal constructor(val block: Block) {
     open fun getBlockTextureProperties(): MutableMap<String, Pair<String, Int>> {
         val properties = mutableMapOf<String, Pair<String, Int>>()
         if (this is PylonDirectionalBlock) {
-            val facing = getFacing()
-            if (facing != null) {
-                properties["facing"] = facing.name.lowercase() to IMMEDIATE_FACES.size
-            }
+            properties["facing"] = facing.name.lowercase() to IMMEDIATE_FACES.size
         }
         return properties
     }

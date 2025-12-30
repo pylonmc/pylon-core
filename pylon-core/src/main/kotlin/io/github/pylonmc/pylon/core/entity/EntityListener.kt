@@ -810,7 +810,7 @@ internal object EntityListener : Listener {
         PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
         e.printStackTrace()
         entityErrMap[entity.uuid] = entityErrMap[entity.uuid]?.plus(1) ?: 1
-        if (entityErrMap[entity.uuid]!! > PylonConfig.allowedEntityErrors) {
+        if (entityErrMap[entity.uuid]!! > PylonConfig.ALLOWED_ENTITY_ERRORS) {
             entity.entity.remove()
         }
     }

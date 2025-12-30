@@ -24,7 +24,7 @@ public class TickingErrorBlock extends PylonBlock implements PylonTickingBlock {
     }
 
     @Override
-    public void tick(double deltaSeconds) {
+    public void tick() {
         throw new RuntimeException("This exception is thrown as part of a test");
     }
 }

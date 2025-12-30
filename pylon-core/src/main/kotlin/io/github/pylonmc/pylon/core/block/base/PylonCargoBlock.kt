@@ -76,7 +76,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
     var cargoTransferRate: Int
         /**
-         * Note that [cargoTransferRate] will be multiplied by [PylonConfig.cargoTransferRateMultiplier],
+         * Note that [cargoTransferRate] will be multiplied by [PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER],
          * and the result will be the maximum number of items that can be transferred
          * out of this block per cargo tick.
          *
@@ -172,7 +172,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
                 val toTransfer = min(
                     min(targetMaxAmount - targetAmount, sourceAmount),
-                    cargoBlockData.transferRate.toLong() * PylonConfig.cargoTransferRateMultiplier
+                    cargoBlockData.transferRate.toLong() * PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER
                 )
 
                 if (sourceAmount == toTransfer) {
@@ -201,7 +201,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
         @JvmStatic
         fun cargoItemsTransferredPerSecond(cargoTransferRate: Int)
-            = (cargoTransferRate * PylonConfig.cargoTransferRateMultiplier).toDouble() / PylonConfig.cargoTickInterval.toDouble()
+            = (20 * cargoTransferRate * PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER).toDouble() / PylonConfig.CARGO_TICK_INTERVAL.toDouble()
 
         internal data class CargoBlockData(
             var groups: MutableMap<BlockFace, String>,
@@ -216,7 +216,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
         private fun startTicker(block: PylonCargoBlock) {
             cargoTickers[block] = PylonCore.launch(PylonCore.minecraftDispatcher) {
                 while (true) {
-                    delay(PylonConfig.cargoTickInterval.ticks)
+                    delay(PylonConfig.CARGO_TICK_INTERVAL.ticks)
                     block.tickCargo()
                 }
             }

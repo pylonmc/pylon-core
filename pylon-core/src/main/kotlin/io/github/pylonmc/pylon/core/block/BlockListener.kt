@@ -858,7 +858,7 @@ internal object BlockListener : Listener {
         }
         e.printStackTrace()
         blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
-        if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
+        if (blockErrMap[block]!! > PylonConfig.ALLOWED_BLOCK_ERRORS) {
             BlockStorage.makePhantom(block)
             if (block is PylonTickingBlock) {
                 PylonTickingBlock.stopTicking(block)

@@ -280,7 +280,7 @@ internal object FluidManager {
     data class FluidSupplyInfo(var amount: Double, val blocks: IdentityHashMap<PylonFluidBlock, Double>)
 
     @JvmStatic
-    fun getSuppliedFluids(segment: UUID, deltaSeconds: Double): Map<PylonFluid, FluidSupplyInfo> {
+    fun getSuppliedFluids(segment: UUID): Map<PylonFluid, FluidSupplyInfo> {
         val suppliedFluids: MutableMap<PylonFluid, FluidSupplyInfo> = mutableMapOf()
         for (point in getPoints(segment, FluidPointType.OUTPUT)) {
             try {
@@ -289,7 +289,7 @@ internal object FluidManager {
                 }
                 val block = BlockStorage.getAs<PylonFluidBlock>(point.position)
                     ?: continue
-                for ((fluid, amount) in block.getSuppliedFluids(deltaSeconds)) {
+                for ((fluid, amount) in block.getSuppliedFluids()) {
                     if (amount < 1.0e-6) {
                         // prevent floating point issues supplying tiny amounts of liquid
                         continue
@@ -313,7 +313,7 @@ internal object FluidManager {
      * Ignore input points requesting zero or effectively zero of the fluid
      */
     fun getRequestedFluids(
-        segment: UUID, fluid: PylonFluid, deltaSeconds: Double
+        segment: UUID, fluid: PylonFluid
     ): Pair<MutableMap<PylonFluidBlock, Double>, Double> {
         val requesters: MutableMap<PylonFluidBlock, Double> = mutableMapOf()
         var totalRequested = 0.0
@@ -324,7 +324,7 @@ internal object FluidManager {
                 }
                 val block = BlockStorage.getAs<PylonFluidBlock>(point.position)
                     ?: continue
-                val fluidAmountRequested = block.fluidAmountRequested(fluid, deltaSeconds)
+                val fluidAmountRequested = block.fluidAmountRequested(fluid)
                 if (fluidAmountRequested < 1.0e-9) {
                     continue
                 }
@@ -338,8 +338,8 @@ internal object FluidManager {
         return Pair(requesters, totalRequested)
     }
 
-    private fun tick(segment: UUID, deltaSeconds: Double) {
-        val suppliedFluids = getSuppliedFluids(segment, deltaSeconds)
+    private fun tick(segment: UUID) {
+        val suppliedFluids = getSuppliedFluids(segment)
 
         for ((fluid, info) in suppliedFluids) {
 
@@ -349,7 +349,7 @@ internal object FluidManager {
                 continue
             }
 
-            var (requesters, totalRequested) = getRequestedFluids(segment, fluid, deltaSeconds)
+            var (requesters, totalRequested) = getRequestedFluids(segment, fluid)
 
             // Continue if no machine is requesting the fluid
             if (requesters.isEmpty()) {
@@ -358,7 +358,7 @@ internal object FluidManager {
 
             // Use round-robin to compute how much fluid to take from each supplier
             // Done in-place using the info's 'blocks' map to reduce memory operations
-            totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * deltaSeconds)
+            totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * PylonConfig.FLUID_TICK_INTERVAL / 20.0)
             val suppliers = info.blocks
             var remainingFluidNeeded = totalRequested
             var totalFluidSupplied = 0.0;
@@ -428,10 +428,10 @@ internal object FluidManager {
         tickers[segment] = PylonCore.launch {
             var lastTickNanos = System.nanoTime()
             while (true) {
-                delay(PylonConfig.fluidTickInterval.ticks)
+                delay(PylonConfig.FLUID_TICK_INTERVAL.ticks)
                 val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                 lastTickNanos = System.nanoTime()
-                tick(segment, dt)
+                tick(segment)
             }
         }
     }
