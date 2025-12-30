@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.util.gui.ProgressItem
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.jetbrains.annotations.ApiStatus
 import java.util.IdentityHashMap
 
 /**
