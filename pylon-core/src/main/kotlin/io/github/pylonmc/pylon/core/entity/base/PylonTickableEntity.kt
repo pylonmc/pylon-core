@@ -22,7 +22,7 @@ import org.jetbrains.annotations.ApiStatus
 import java.util.*
 
 /**
- * Represents a block that 'ticks' (does something at a fixed time interval).
+ * Represents an entity that 'ticks' (does something at a fixed time interval).
  */
 interface PylonTickableEntity {
 
@@ -57,7 +57,7 @@ interface PylonTickableEntity {
     /**
      * Sets whether the [tick] function should be called asynchronously.
      *
-     * WARNING: Settings a block to tick asynchronously could have unintended consequences.
+     * WARNING: Setting an entity to tick asynchronously could have unintended consequences.
      *
      * Only set this option if you understand what 'asynchronous' means, and note that you
      * cannot interact with the world asynchronously.
@@ -117,30 +117,30 @@ interface PylonTickableEntity {
         }
 
         /**
-         * Returns true if the block is still ticking, or false if the block does
-         * not exist, is not a ticking block, or has errored and been unloaded.
+         * Returns true if the entity is still ticking, or false if the entity does
+         * not exist, is not a ticking entity, or has errored and been unloaded.
          */
         @JvmStatic
         @ApiStatus.Internal
-        fun isTicking(block: PylonEntity<*>?): Boolean {
-            return block is PylonTickableEntity && tickingEntities[block]?.job?.isActive == true
+        fun isTicking(entity: PylonEntity<*>?): Boolean {
+            return entity is PylonTickableEntity && tickingEntities[entity]?.job?.isActive == true
         }
 
         @JvmSynthetic
-        internal fun stopTicking(block: PylonTickableEntity) {
-            tickingEntities[block]?.job?.cancel()
+        internal fun stopTicking(entity: PylonTickableEntity) {
+            tickingEntities[entity]?.job?.cancel()
         }
 
-        private fun startTicker(tickingBlock: PylonTickableEntity) {
-            val dispatcher = if (tickingBlock.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
-            tickingEntities[tickingBlock]?.job = PylonCore.launch(dispatcher) {
+        private fun startTicker(tickingEntity: PylonTickableEntity) {
+            val dispatcher = if (tickingEntity.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
+            tickingEntities[tickingEntity]?.job = PylonCore.launch(dispatcher) {
                 while (true) {
-                    delay(tickingBlock.tickInterval.ticks)
+                    delay(tickingEntity.tickInterval.ticks)
                     try {
-                        tickingBlock.tick()
+                        tickingEntity.tick()
                     } catch (e: Exception) {
                         PylonCore.launch(PylonCore.minecraftDispatcher) {
-                            EntityListener.logEventHandleErr(null, e, tickingBlock as PylonEntity<*>)
+                            EntityListener.logEventHandleErr(null, e, tickingEntity as PylonEntity<*>)
                         }
                     }
                 }
