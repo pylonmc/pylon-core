@@ -20,7 +20,7 @@ internal object TickingBlockPersistentDataType : PersistentDataType<PersistentDa
     ): PylonTickingBlock.Companion.TickingBlockData {
         val tickInterval = primitive.get(tickIntervalKey, PersistentDataType.INTEGER)!!
         val isAsync = primitive.get(isAsyncKey, PersistentDataType.BOOLEAN)!!
-        return PylonTickingBlock.Companion.TickingBlockData(tickInterval, isAsync)
+        return PylonTickingBlock.Companion.TickingBlockData(tickInterval, isAsync, null)
     }
 
     override fun toPrimitive(

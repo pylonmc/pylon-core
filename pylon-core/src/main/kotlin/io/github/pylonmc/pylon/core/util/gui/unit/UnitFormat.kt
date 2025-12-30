@@ -300,6 +300,29 @@ class UnitFormat @JvmOverloads constructor(
             abbreviate = true
         )
 
+        @JvmField
+        val ITEMS = UnitFormat(
+            "items",
+            TextColor.color(0x09e2c2),
+            abbreviate = false
+        )
+
+        @JvmField
+        val ITEMS_PER_SECOND = UnitFormat(
+            "items_per_second",
+            TextColor.color(0x09e2c2),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
+        )
+
+        @JvmField
+        val CYCLES_PER_SECOND = UnitFormat(
+            "cycles_per_second",
+            TextColor.color(0xb672bf),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
+        )
+
         /**
          * Helper function that automatically formats a duration into days:hours:minutes:seconds
          */

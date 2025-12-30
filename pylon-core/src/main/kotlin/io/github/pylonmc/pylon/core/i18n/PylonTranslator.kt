@@ -25,7 +25,6 @@ import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.TranslationArgument
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.VirtualComponent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -235,7 +234,7 @@ class PylonTranslator private constructor(private val addon: PylonAddon) : Trans
                     if (translated.plainText.isBlank()) return@flatMap emptyList()
                     val encoded = LineWrapEncoder.encode(translated)
                     val wrapped = encoded.copy(
-                        lines = encoded.lines.flatMap { wrapText(it, PylonConfig.translationWrapLimit) }
+                        lines = encoded.lines.flatMap { wrapText(it, PylonConfig.TRANSLATION_WRAP_LIMIT) }
                     )
                     wrapped.toComponentLines().map {
                         Component.text()

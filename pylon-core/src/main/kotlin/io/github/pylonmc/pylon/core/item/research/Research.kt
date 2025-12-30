@@ -7,7 +7,6 @@ import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
-import io.github.pylonmc.pylon.core.event.PrePylonCraftEvent
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canPickUp
@@ -97,14 +96,14 @@ data class Research(
 
         if (effects) {
             if (player.researchConfetti) {
-                val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.researchMultiplierConfettiAmount
-                val amount = (PylonConfig.researchBaseConfettiAmount * multiplier).toInt()
-                val spawnedConfetti = min(amount, PylonConfig.researchMaxConfettiAmount)
+                val multiplier = (cost?.toDouble() ?: 0.0) * PylonConfig.RESEARCH_MULTIPLIER_CONFETTI_AMOUNT
+                val amount = (PylonConfig.RESEARCH_BASE_CONFETTI_AMOUNT * multiplier).toInt()
+                val spawnedConfetti = min(amount, PylonConfig.RESEARCH_MAX_CONFETTI_AMOUNT)
                 ConfettiParticle.spawnMany(player.location, spawnedConfetti).run()
             }
 
             if (player.researchSounds) {
-                for ((delay, sound) in PylonConfig.researchSounds) {
+                for ((delay, sound) in PylonConfig.RESEARCH_SOUNDS) {
                     Bukkit.getScheduler().runTaskLater(PylonCore, Runnable {
                         player.playSound(sound.create(), Sound.Emitter.self())
                     }, delay)
@@ -190,7 +189,7 @@ data class Research(
         @JvmOverloads
         @JvmName("canPlayerCraft")
         fun Player.canCraft(item: PylonItem, sendMessage: Boolean = false): Boolean {
-            if (!PylonConfig.researchesEnabled || this.hasPermission(item.researchBypassPermission)) return true
+            if (!PylonConfig.RESEARCHES_ENABLED || this.hasPermission(item.researchBypassPermission)) return true
 
             val research = item.research ?: return true
 
@@ -244,7 +243,7 @@ data class Research(
         @JvmOverloads
         @JvmName("canPlayerUse")
         fun Player.canUse(item: PylonItem, sendMessage: Boolean = false): Boolean {
-            if (PylonConfig.disabledItems.contains(item.key)) {
+            if (PylonConfig.DISABLED_ITEMS.contains(item.key)) {
                 if (sendMessage) {
                     this.sendMessage(
                         Component.translatable(
@@ -271,30 +270,8 @@ data class Research(
         }
 
         @EventHandler
-        private fun onPrePylonCraft(event: PrePylonCraftEvent<*>) {
-            if (event.player == null) {
-                return
-            }
-
-            val canCraft = event.recipe.results.all {
-                when (it) {
-                    is FluidOrItem.Item -> {
-                        val item = PylonItem.fromStack(it.item)
-                        item == null || event.player.canCraft(item, true)
-                    }
-
-                    else -> true
-                }
-            }
-
-            if (!canCraft) {
-                event.isCancelled = true
-            }
-        }
-
-        @EventHandler
         private fun onJoin(e: PlayerJoinEvent) {
-            if (!PylonConfig.researchesEnabled) return
+            if (!PylonConfig.RESEARCHES_ENABLED) return
             val player = e.player
 
             // discover only the recipes that have no research whenever an ingredient is added to the inventory

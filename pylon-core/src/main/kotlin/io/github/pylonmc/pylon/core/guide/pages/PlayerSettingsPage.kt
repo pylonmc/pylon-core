@@ -71,10 +71,10 @@ class PlayerSettingsPage(
                 toggle = { player -> player.wailaConfig.vanillaWailaEnabled = !player.wailaConfig.vanillaWailaEnabled },
                 isEnabled = { player -> player.wailaConfig.vanillaWailaEnabled }
             ))
-            if (PylonConfig.WailaConfig.enabledTypes.size > 1) {
+            if (PylonConfig.WailaConfig.ENABLED_TYPES.size > 1) {
                 addSetting(CyclePlayerSettingButton(
                     pylonKey("cycle-waila-type"),
-                    PylonConfig.WailaConfig.enabledTypes,
+                    PylonConfig.WailaConfig.ENABLED_TYPES,
                     identifier = { type -> type.name.lowercase() },
                     getter = { player -> player.wailaConfig.type },
                     setter = { player, type -> player.wailaConfig.type = type },
@@ -97,7 +97,7 @@ class PlayerSettingsPage(
             pylonKey("block_texture_settings"),
             Material.BOOKSHELF
         ).apply {
-            if (!PylonConfig.BlockTextureConfig.forced) {
+            if (!PylonConfig.BlockTextureConfig.FORCED) {
                 addSetting(TogglePlayerSettingButton(
                     pylonKey("toggle-block-textures"),
                     toggle = { player -> player.hasCustomBlockTextures = !player.hasCustomBlockTextures },
@@ -106,7 +106,7 @@ class PlayerSettingsPage(
             }
             addSetting(CyclePlayerSettingButton(
                 pylonKey("cycle-culling-preset"),
-                PylonConfig.BlockTextureConfig.cullingPresets.values.sortedBy { it.index },
+                PylonConfig.BlockTextureConfig.CULLING_PRESETS.values.sortedBy { it.index },
                 identifier = { preset -> preset.id },
                 getter = { player -> player.cullingPreset },
                 setter = { player, preset -> player.cullingPreset = preset },

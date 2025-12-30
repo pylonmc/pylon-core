@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.waila.Waila
 import org.bukkit.Material
@@ -91,6 +92,13 @@ object PylonSerializers {
     @JvmField
     val ITEM_STACK = ItemStackPersistentDataType
 
+    /**
+     * Unlike the regular [ItemStackPersistentDataType], which serializes directly to a byte array,
+     * this serializes item stacks to a human-readable format backed by vanilla item serialization.
+     */
+    @JvmField
+    val ITEM_STACK_READABLE = ReadableItemStackPersistentDataType
+
     @JvmField
     val INVENTORY = InventoryPersistentDataType
 
@@ -103,6 +111,27 @@ object PylonSerializers {
     @JvmField
     val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid>(PylonRegistry.FLUIDS::getOrThrow)
 
+    @JvmField
+    val FLUID_CONNECTION_POINT = FluidConnectionPointPersistentDataType
+
+    @JvmField
+    val LOGISTIC_POINT_TYPE = EnumPersistentDataType(LogisticSlotType::class.java)
+
+    @JvmField
+    val DURATION = DurationPersistentDataType
+
+    @JvmField
+    val PROGRESS_ITEM = ProgressItemPersistentDataType
+
+    @JvmSynthetic
+    internal val CARGO_BLOCK_DATA = CargoBlockPersistentDataType
+
+    @JvmSynthetic
+    internal val WAILA_TYPE = EnumPersistentDataType(Waila.Type::class.java)
+
+    @JvmSynthetic
+    internal val PLAYER_WAILA_CONFIG = PlayerWailaConfigPersistentDataType
+
     @JvmSynthetic
     internal val FLUID_BUFFER_DATA = FluidBufferDataPersistentDataType
 
@@ -110,17 +139,15 @@ object PylonSerializers {
     internal val FLUID_TANK_DATA = FluidTankDataPersistentDataType
 
     @JvmSynthetic
+    internal val PROCESSOR_DATA = ProcessorDataPersistentDataType
+
+    @JvmSynthetic
+    internal val RECIPE_PROCESSOR_DATA = RecipeProcessorDataPersistentDataType
+
+    @JvmSynthetic
     internal val SIMPLE_MULTIBLOCK_DATA = SimpleMultiblockDataPersistentDataType
 
     @JvmSynthetic
     internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
 
-    @JvmField
-    val FLUID_CONNECTION_POINT = FluidConnectionPointDataType
-
-    @JvmSynthetic
-    internal val WAILA_TYPE = EnumPersistentDataType(Waila.Type::class.java)
-
-    @JvmSynthetic
-    internal val PLAYER_WAILA_CONFIG = PlayerWailaConfigPersistentDataType
 }

@@ -11,6 +11,9 @@ import org.bukkit.World
 import org.bukkit.craftbukkit.CraftEquipmentSlot
 import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.entity.CraftLivingEntity
+import net.minecraft.world.level.block.state.properties.Property
+import org.bukkit.block.Block
+import org.bukkit.craftbukkit.block.CraftBlock
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.craftbukkit.inventory.CraftItemType
@@ -68,4 +71,21 @@ object NmsAccessorImpl : NmsAccessor {
 
     override fun serializePdc(pdc: PersistentDataContainer): Component
         = PaperAdventure.asAdventure(TextComponentTagVisitor("  ").visit((pdc as CraftPersistentDataContainer).toTagCompound()))
+
+    override fun getStateProperties(block: Block, custom: Map<String, Pair<String, Int>>): Map<String, String> {
+        val state = (block as CraftBlock).nms
+        val map = mutableMapOf<String, String>()
+        val possibleValues = mutableMapOf<String, Int>()
+        for (property in state.properties) {
+            @Suppress("UNCHECKED_CAST")
+            property as Property<Comparable<Any>>
+            map[property.name] = state.getOptionalValue(property).map(property::getName).orElse("none")
+            possibleValues[property.name] = property.possibleValues.size
+        }
+        for ((name, pair) in custom) {
+            map[name] = pair.first
+            possibleValues[name] = pair.second
+        }
+        return map.toSortedMap().toSortedMap(compareBy<String> { possibleValues[it] ?: 0 }.reversed())
+    }
 }

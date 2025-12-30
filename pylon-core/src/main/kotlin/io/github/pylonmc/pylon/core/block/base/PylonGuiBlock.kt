@@ -22,8 +22,9 @@ import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.Inventory
 import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.UpdateReason
 import xyz.xenondevs.invui.window.Window
-import java.util.IdentityHashMap
+import java.util.*
 
 /**
  * A block that has an associated InvUI GUI that can be opened by right-clicking the block.
@@ -54,12 +55,26 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
     val gui: AbstractGui
         get() = guiBlocks.getOrPut(this) { createGui() as AbstractGui }
 
+    /**
+     * A map of inventory names to inventories in the block's GUI
+     */
+    fun createInventoryMapping(): Map<String, Inventory>
+
+    @ApiStatus.NonExtendable
+    fun getInventory(name: String): Inventory? = inventories[this]!![name]
+
+    @ApiStatus.NonExtendable
+    fun getInventoryOrThrow(name: String): Inventory =
+        getInventory(name)
+            ?: throw IllegalArgumentException("No inventory with name '$name' found in ${this::class.simpleName}")
+
     @MustBeInvokedByOverriders
     override fun onInteract(event: PlayerInteractEvent) {
         if (!event.action.isRightClick
             || event.player.isSneaking
             || event.hand != EquipmentSlot.HAND
-            || event.useInteractedBlock() == Event.Result.DENY) {
+            || event.useInteractedBlock() == Event.Result.DENY
+        ) {
             return
         }
 
@@ -78,7 +93,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
     override fun onBreak(drops: MutableList<ItemStack>, context: BlockBreakContext) {
         guiBlocks.remove(this)
         val invs = inventories.remove(this) ?: return
-        for (inv in invs) {
+        for (inv in invs.values) {
             for (item in inv.unsafeItems) {
                 item?.let(drops::add)
             }
@@ -89,10 +104,10 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
      * Returns all the (non-null) items stored across all inventories in the
      * block's GUI.
      */
-    fun getItems() : List<ItemStack> {
+    fun getItems(): List<ItemStack> {
         val items = mutableListOf<ItemStack>()
         val invs = inventories[this] ?: return listOf()
-        for (inv in invs) {
+        for (inv in invs.values) {
             for (item in inv.items) {
                 item?.let(items::add)
             }
@@ -100,33 +115,37 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
         return items
     }
 
+    object InitializeReason : UpdateReason
+
     @ApiStatus.Internal
     companion object : Listener {
+
         private val inventoryKey = pylonKey("inventories")
-        private val inventoryType =
-            PylonSerializers.LIST.listTypeFrom(PylonSerializers.LIST.listTypeFrom(PylonSerializers.ITEM_STACK))
+        private val inventoryType = PylonSerializers.MAP.mapTypeFrom(
+            PylonSerializers.STRING,
+            PylonSerializers.LIST.listTypeFrom(PylonSerializers.ITEM_STACK)
+        )
 
         private val guiBlocks = IdentityHashMap<PylonGuiBlock, AbstractGui>()
-        private val inventories = IdentityHashMap<PylonGuiBlock, Collection<Inventory>>()
+        private val inventories = IdentityHashMap<PylonGuiBlock, Map<String, Inventory>>()
 
         @EventHandler
         private fun onPlace(event: PylonBlockPlaceEvent) {
             val block = event.pylonBlock
             if (block !is PylonGuiBlock) return
-            inventories[block] = block.gui.getAllInventories()
+            inventories[block] = block.createInventoryMapping()
         }
 
         @EventHandler
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
             val block = event.pylonBlock
             if (block !is PylonGuiBlock) return
-            val items = event.pdc.getOrDefault(inventoryKey, inventoryType, emptyList()).map { inv ->
-                inv.map { item -> item.takeUnless { it.isEmpty } }
-            }
-            val invs = inventories.getOrPut(block) { block.gui.getAllInventories() }
-            for ((old, new) in invs.zip(items)) {
-                repeat(old.size) { i ->
-                    old.setItemSilently(i, new[i])
+            val items = event.pdc.getOrDefault(inventoryKey, inventoryType, emptyMap())
+            val invs = inventories.getOrPut(block) { block.createInventoryMapping() }
+            for ((name, invItems) in items) {
+                val inv = invs[name] ?: continue
+                for ((index, item) in invItems.withIndex()) {
+                    inv.forceSetItem(InitializeReason, index, item.takeUnless { it.isEmpty })
                 }
             }
         }
@@ -138,7 +157,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
             event.pdc.set(
                 inventoryKey,
                 inventoryType,
-                inventories[block]!!.map { inv -> inv.unsafeItems.map { it ?: ItemStack.empty() } }
+                inventories[block]!!.mapValues { (_, inv) -> inv.unsafeItems.map { it ?: ItemStack.empty() } }
             )
         }
 

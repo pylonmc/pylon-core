@@ -43,7 +43,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
     val researchBypassPermission = schema.researchBypassPermission
     val addon = schema.addon
     val pylonBlock = schema.pylonBlockKey
-    val isDisabled = key in PylonConfig.disabledItems
+    val isDisabled = key in PylonConfig.DISABLED_ITEMS
     val research get() = schema.research
 
     /**
@@ -121,7 +121,7 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             register(T::class.java, template, pylonBlockKey)
 
         /**
-         * Converts a regular ItemStack to a PylonItemStack
+         * Gets a PylonItem from an ItemStack if the item is a Pylon item
          * Returns null if the ItemStack is not a Pylon item
          */
         @JvmStatic
@@ -133,6 +133,24 @@ open class PylonItem(val stack: ItemStack) : Keyed {
             val schema = PylonRegistry.ITEMS[id]
                 ?: return null
             return schema.itemClass.cast(schema.loadConstructor.invoke(stack))
+        }
+
+        /**
+         * Converts a regular ItemStack to a PylonItem of class [clazz]
+         * Returns null if the ItemStack is not a Pylon item or is not of the specified [clazz]
+         */
+        @JvmStatic
+        @Contract("null -> null")
+        fun <T : PylonItem> fromStack(stack: ItemStack?, clazz: Class<T>): T? {
+            val pylonItem = fromStack(stack) ?: return null
+            if (!clazz.isInstance(pylonItem)) return null
+            return clazz.cast(pylonItem)
+        }
+
+        @JvmSynthetic
+        inline fun <reified T : PylonItem> from(stack: ItemStack?): T? {
+            val pylonItem = fromStack(stack) ?: return null
+            return pylonItem as? T
         }
 
         /**
