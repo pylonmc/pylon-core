@@ -1,10 +1,16 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine.isVisibilityInverted
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import java.util.UUID
+
 /**
  * TODO: Come up with a better name if possible
  *
- * A [PylonCulledBlock] that requires other [PylonCulledBlock]s to all be culled
- * for the culling to actually take effect.
+ * A variant of [PylonCulledBlock] that defines groups of [PylonGroupCulledBlock]s and entity [UUID]s
+ * that should be culled together. (i.e. all blocks in the group must be culled for the entities to be culled)
  *
  * For example, [io.github.pylonmc.pylon.core.content.fluid.FluidPipe] and [io.github.pylonmc.pylon.core.content.cargo.CargoDuct] both use greedy meshing,
  * on the display entities (multiple blocks use the same entity), and therefor should
@@ -13,6 +19,34 @@ package io.github.pylonmc.pylon.core.block.base
  * TODO: allow defining multiple groups per block with entities per group
  *  likely requires not extending PylonCulledBlock because that only allows one set of culledEntityIds
  */
-interface PylonGroupCulledBlock : PylonCulledBlock {
-    val cullingGroup: Iterable<PylonGroupCulledBlock>
+interface PylonGroupCulledBlock {
+    val cullingGroups: Iterable<CullingGroup>
+
+    fun showEntities(player: Player, id: String) {
+        val group = cullingGroups.firstOrNull { it.id == id } ?: return
+        for (entityId in group.entityIds) {
+            if (player.isVisibilityInverted(entityId)) {
+                Bukkit.getEntity(entityId)?.let { entity ->
+                    player.showEntity(PylonCore, entity)
+                }
+            }
+        }
+    }
+
+    fun hideEntities(player: Player, id: String) {
+        val group = cullingGroups.firstOrNull { it.id == id } ?: return
+        for (entityId in group.entityIds) {
+            if (!player.isVisibilityInverted(entityId)) {
+                Bukkit.getEntity(entityId)?.let { entity ->
+                    player.hideEntity(PylonCore, entity)
+                }
+            }
+        }
+    }
+
+    data class CullingGroup(
+        val id: String,
+        val blocks: MutableSet<PylonGroupCulledBlock> = mutableSetOf(),
+        val entityIds: MutableSet<UUID> = mutableSetOf()
+    )
 }

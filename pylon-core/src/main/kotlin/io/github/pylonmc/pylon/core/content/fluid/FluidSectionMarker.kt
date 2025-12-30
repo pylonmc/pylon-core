@@ -17,6 +17,8 @@ import org.bukkit.persistence.PersistentDataContainer
 /**
  * An invisible block (structure block) that exists purely to represent a pipe and prevent
  * blocks from being placed on top of them.
+ *
+ * TODO: [io.github.pylonmc.pylon.core.block.base.PylonGroupCulledBlock]
  */
 class FluidSectionMarker : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
     override var disableBlockTextureEntity = true

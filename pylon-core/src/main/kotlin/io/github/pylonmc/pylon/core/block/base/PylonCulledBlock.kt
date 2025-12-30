@@ -13,21 +13,21 @@ interface PylonCulledBlock {
      */
     val culledEntityIds: Iterable<UUID>
 
-    fun hideEntities(player: Player) {
-        for (entityId in culledEntityIds) {
-            if (!player.isVisibilityInverted(entityId)) {
-                Bukkit.getEntity(entityId)?.let { entity ->
-                    player.hideEntity(PylonCore, entity)
-                }
-            }
-        }
-    }
-
     fun showEntities(player: Player) {
         for (entityId in culledEntityIds) {
             if (player.isVisibilityInverted(entityId)) {
                 Bukkit.getEntity(entityId)?.let { entity ->
                     player.showEntity(PylonCore, entity)
+                }
+            }
+        }
+    }
+
+    fun hideEntities(player: Player) {
+        for (entityId in culledEntityIds) {
+            if (!player.isVisibilityInverted(entityId)) {
+                Bukkit.getEntity(entityId)?.let { entity ->
+                    player.hideEntity(PylonCore, entity)
                 }
             }
         }

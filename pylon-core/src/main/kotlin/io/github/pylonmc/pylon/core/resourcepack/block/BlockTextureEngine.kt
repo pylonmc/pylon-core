@@ -62,6 +62,7 @@ object BlockTextureEngine : Listener {
     private val culledBlockOctrees = mutableMapOf<UUID, Octree<PylonBlock>>()
     private val jobs = mutableMapOf<UUID, Job>()
     private val syncJobTasks = ConcurrentHashMap<UUID, MutableMap<PylonCulledBlock, Boolean>>()
+    private val syncJobGroupTasks = ConcurrentHashMap<UUID, MutableMap<PylonGroupCulledBlock, MutableMap<String, Boolean>>>()
 
     /**
      * Periodically invalidates a share of the occluding cache, to ensure stale data isn't perpetuated.
@@ -117,6 +118,21 @@ object BlockTextureEngine : Listener {
                 }
                 tasks.clear()
             }
+
+            for ((uuid, groupTasks) in syncJobGroupTasks) {
+                val player = Bukkit.getPlayer(uuid) ?: continue
+                for ((block, tasks) in groupTasks) {
+                    for ((id, shouldShow) in tasks) {
+                        if (shouldShow) {
+                            block.showEntities(player, id)
+                        } else {
+                            block.hideEntities(player, id)
+                        }
+                    }
+                }
+                groupTasks.clear()
+            }
+
             tick++
         }
     }
@@ -155,7 +171,7 @@ object BlockTextureEngine : Listener {
         if (!block.disableBlockTextureEntity) {
             getOctree(block.block.world, blockTextureOctrees).insert(block)
         }
-        if (block is PylonCulledBlock) {
+        if (block is PylonCulledBlock || block is PylonGroupCulledBlock) {
             getOctree(block.block.world, culledBlockOctrees).insert(block)
         }
     }
@@ -167,7 +183,7 @@ object BlockTextureEngine : Listener {
             getOctree(block.block.world, blockTextureOctrees).remove(block)
             block.blockTextureEntity?.removeAllViewers()
         }
-        if (block is PylonCulledBlock) {
+        if (block is PylonCulledBlock || block is PylonGroupCulledBlock) {
             getOctree(block.block.world, culledBlockOctrees).remove(block)
         }
     }
@@ -211,6 +227,7 @@ object BlockTextureEngine : Listener {
                 val world = player.world
                 val occludingCache = occludingCache.getOrPut(world.uid) { mutableMapOf() }
                 val syncTasks = syncJobTasks.getOrPut(uuid) { ConcurrentHashMap() }
+                val syncGroupTasks = syncJobGroupTasks.getOrPut(uuid) { ConcurrentHashMap() }
 
                 val location = player.location
                 val eye = player.eyeLocation.toVector()
@@ -249,7 +266,7 @@ object BlockTextureEngine : Listener {
                 }
                 visible.retainAll(query)
 
-                val groupCulledBlocks = mutableSetOf<Iterable<PylonGroupCulledBlock>>()
+                val cullingGroups = mutableSetOf<PylonGroupCulledBlock.CullingGroup>()
 
                 // First step go through all blocks in the query and determine if they should be shown or hidden
                 // If a block isn't a PylonGroupCulledBlock, either immediately change its visibility or schedule it if necessary (PylonCulledBlock's)
@@ -266,16 +283,18 @@ object BlockTextureEngine : Listener {
                         if (block is PylonCulledBlock) {
                             syncTasks[block] = true
                         }
+                        if (block is PylonGroupCulledBlock) {
+                            cullingGroups.addAll(block.cullingGroups)
+                        }
                         visible.add(block)
                         continue
                     } else if (distanceSquared > preset.cullRadius * preset.cullRadius) {
                         entity?.removeViewer(uuid)
                         if (block is PylonCulledBlock) {
-                            if (block is PylonGroupCulledBlock) {
-                                groupCulledBlocks.add(block.cullingGroup)
-                            } else {
-                                syncTasks[block] = false
-                            }
+                            syncTasks[block] = false
+                        }
+                        if (block is PylonGroupCulledBlock) {
+                            cullingGroups.addAll(block.cullingGroups)
                         }
                         visible.remove(block)
                         continue
@@ -313,15 +332,17 @@ object BlockTextureEngine : Listener {
                             if (block is PylonCulledBlock) {
                                 syncTasks[block] = true
                             }
+                            if (block is PylonGroupCulledBlock) {
+                                cullingGroups.addAll(block.cullingGroups)
+                            }
                             visible.add(block)
                         } else {
                             entity?.removeViewer(uuid)
                             if (block is PylonCulledBlock) {
-                                if (block is PylonGroupCulledBlock) {
-                                    groupCulledBlocks.add(block.cullingGroup)
-                                } else {
-                                    syncTasks[block] = false
-                                }
+                                syncTasks[block] = false
+                            }
+                            if (block is PylonGroupCulledBlock) {
+                                cullingGroups.addAll(block.cullingGroups)
                             }
                             visible.remove(block)
                         }
@@ -331,23 +352,18 @@ object BlockTextureEngine : Listener {
                 // Second step, handle group culled blocks
                 // If any one member of the group is visible, all members are visible
                 // This only affects the PylonCulledBlock aspect, block texture entities are never group culled
-                for (group in groupCulledBlocks) {
+                for (group in cullingGroups) {
                     var anyVisible = false
-                    for (block in group) {
+                    for (block in group.blocks) {
                         if (visible.contains(block as PylonBlock)) {
                             anyVisible = true
                             break
                         }
                     }
 
-                    for (block in group) {
-                        if (anyVisible) {
-                            syncTasks[block] = true
-                            visible.add(block as PylonBlock)
-                        } else {
-                            syncTasks[block] = false
-                        }
-                    }
+                    val first = group.blocks.firstOrNull() ?: continue
+                    val groupTasks = syncGroupTasks.getOrPut(first) { ConcurrentHashMap() }
+                    groupTasks[group.id] = anyVisible
                 }
 
                 delay(preset.updateInterval.ticks)

@@ -4,13 +4,13 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.base.PylonCargoBlock
-import io.github.pylonmc.pylon.core.block.base.PylonCulledBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock.Companion.holders
 import io.github.pylonmc.pylon.core.block.base.PylonGroupCulledBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
@@ -25,16 +25,18 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.persistence.PersistentDataContainer
-import java.util.UUID
 
 class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGroupCulledBlock {
 
     var connectedFaces = mutableListOf<BlockFace>()
-    override var cullingGroup = mutableSetOf<PylonGroupCulledBlock>()
+    val faceGroups = mutableMapOf<BlockFace, PylonGroupCulledBlock.CullingGroup>()
+    override val cullingGroups
+        get() = faceGroups.values
     override var disableBlockTextureEntity = true
 
     @Suppress("unused")
@@ -45,6 +47,27 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
     @Suppress("unused")
     constructor(block: Block, pdc: PersistentDataContainer) : super(block) {
         connectedFaces = pdc.get(connectedFacesKey, connectedFacesType)!!.toMutableList()
+    }
+
+    override fun postLoad() {
+        for (face in connectedFaces) {
+            val displayId = getHeldEntityUuid(ductDisplayName(face)) ?: continue
+            EntityStorage.whenEntityLoads(displayId) { display: ItemDisplay ->
+                if (faceGroups.containsKey(face)) {
+                    return@whenEntityLoads
+                }
+
+                val cullingGroup = PylonGroupCulledBlock.CullingGroup(face.name)
+                cullingGroup.entityIds.add(display.uniqueId)
+
+                val blockPositions = display.persistentDataContainer.get(blocksKey, blocksType) ?: return@whenEntityLoads
+                for (blockPos in blockPositions) {
+                    val block = BlockStorage.get(blockPos) as? CargoDuct ?: continue
+                    block.faceGroups[face] = cullingGroup
+                    cullingGroup.blocks.add(block)
+                }
+            }
+        }
     }
 
     override fun write(pdc: PersistentDataContainer) {
@@ -116,16 +139,17 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
         // Delete any existing, outdated displays (either a single 'not connected' cube display or a
         // display that continues the same direction as any of the connected faces)
         for (face in connectedFaces) {
-            (connectedBlock(face) as? CargoDuct)
-                ?.getHeldEntity(ductDisplayName(face))
-                ?.remove()
-            (connectedBlock(face) as? CargoDuct)
-                ?.getHeldEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME)
-                ?.remove()
+            (connectedBlock(face) as? CargoDuct)?.let {
+                it.getHeldEntity(ductDisplayName(face))?.remove()
+                it.getHeldEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME)?.remove()
+                it.faceGroups.remove(face)
+                it.faceGroups.remove(BlockFace.SELF)
+            }
         }
         for (entity in heldEntities.keys.toList()) { // clone to prevent concurrent modification exception
             getHeldEntity(entity)?.remove()
         }
+        faceGroups.clear()
 
         // For performance reasons, if we can use one display entity instead of
         // several, we always should. We do this by deleting any existing entities
@@ -138,8 +162,11 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
         if (connectedFaces.isEmpty()) {
             // Spawn a cube display
             createNotConnectedDuctDisplay(block.location.toCenterLocation())
-            // We are the only one using this display, so no culling group
-            cullingGroup = mutableSetOf(this)
+            // We are the only one using this display, so a singular group for ourselves
+            faceGroups[BlockFace.SELF] = PylonGroupCulledBlock.CullingGroup("SELF").also {
+                it.blocks.add(this)
+                it.entityIds.add(getHeldEntityUuidOrThrow(NOT_CONNECTED_DUCT_DISPLAY_NAME))
+            }
         }
 
         // Case 2: Duct has two connected blocks on opposite sides, forming a line
@@ -243,18 +270,19 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
 
         // Add the display to every CargoDuct on the line
         val associatedBlocks = mutableListOf<BlockPosition>()
-        val cullingGroup = mutableSetOf<PylonGroupCulledBlock>()
+        val cullingGroup = PylonGroupCulledBlock.CullingGroup(fromToFace.name)
+        cullingGroup.entityIds.add(display.uniqueId)
         // (start)
         BlockStorage.getAs<CargoDuct>(from)?.let {
             it.addEntity(ductDisplayName(fromToFace), display)
-            it.cullingGroup = cullingGroup
-            cullingGroup.add(it)
+            it.faceGroups[fromToFace] = cullingGroup
+            cullingGroup.blocks.add(it)
         }
         if (from == this.block) {
             // Special case: This block is not in BlockStorage yet so above code will not work
             this.addEntity(ductDisplayName(fromToFace), display)
-            this.cullingGroup = cullingGroup
-            cullingGroup.add(this)
+            this.faceGroups[fromToFace] = cullingGroup
+            cullingGroup.blocks.add(this)
         }
         associatedBlocks.add(from.position)
         // (middle)
@@ -267,29 +295,30 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
             BlockStorage.getAs<CargoDuct>(current)?.let {
                 it.addEntity(ductDisplayName(fromToFace), display)
                 it.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
-                it.cullingGroup = cullingGroup
-                cullingGroup.add(it)
+                it.faceGroups[fromToFace] = cullingGroup
+                it.faceGroups[fromToFace.oppositeFace] = cullingGroup
+                cullingGroup.blocks.add(it)
             }
             if (current == this.block) {
                 // Special case: This block is not in BlockStorage yet so above code will not work
                 this.addEntity(ductDisplayName(fromToFace), display)
                 this.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
-                this.cullingGroup = cullingGroup
-                cullingGroup.add(this)
+                this.faceGroups[fromToFace] = cullingGroup
+                cullingGroup.blocks.add(this)
             }
             associatedBlocks.add(current.position)
         }
         // (end)
         BlockStorage.getAs<CargoDuct>(to)?.let {
             it.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
-            it.cullingGroup = cullingGroup
-            cullingGroup.add(it)
+            it.faceGroups[fromToFace.oppositeFace] = cullingGroup
+            cullingGroup.blocks.add(it)
         }
         if (to == this.block) {
             // Special case: This block is not in BlockStorage yet so above code will not work
             this.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
-            this.cullingGroup = cullingGroup
-            cullingGroup.add(this)
+            this.faceGroups[fromToFace.oppositeFace] = cullingGroup
+            cullingGroup.blocks.add(this)
         }
         associatedBlocks.add(to.position)
 
@@ -307,9 +336,6 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
 
         addEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME, display)
     }
-
-    override val culledEntityIds: Iterable<UUID>
-        get() = heldEntities.values
 
     companion object : Listener {
         const val NOT_CONNECTED_DUCT_DISPLAY_NAME = "duct-item-display:not-connected"
