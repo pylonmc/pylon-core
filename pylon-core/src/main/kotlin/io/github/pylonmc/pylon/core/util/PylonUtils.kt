@@ -2,7 +2,6 @@
 
 package io.github.pylonmc.pylon.core.util
 
-import io.github.pylonmc.pylon.base.util.BaseUtils
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
