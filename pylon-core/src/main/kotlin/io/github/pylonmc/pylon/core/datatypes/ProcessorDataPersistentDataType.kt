@@ -1,8 +1,6 @@
 package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.block.base.PylonProcessor
-import io.github.pylonmc.pylon.core.block.base.PylonRecipeProcessor
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.util.setNullable
 import org.bukkit.persistence.PersistentDataAdapterContext
@@ -13,6 +11,7 @@ internal object ProcessorDataPersistentDataType : PersistentDataType<PersistentD
 
     private val PROCESS_TIME_TICKS_KEY = pylonKey("total_process_ticks")
     private val PROCESS_TICKS_REMAINING_KEY = pylonKey("process_ticks_remaining")
+    private val PROGRESS_ITEM_KEY = pylonKey("progress_item")
 
     override fun getPrimitiveType(): Class<PersistentDataContainer> = PersistentDataContainer::class.java
 
@@ -22,7 +21,7 @@ internal object ProcessorDataPersistentDataType : PersistentDataType<PersistentD
         return PylonProcessor.ProcessorData(
             primitive.get(PROCESS_TIME_TICKS_KEY, PylonSerializers.INTEGER),
             primitive.get(PROCESS_TICKS_REMAINING_KEY, PylonSerializers.INTEGER),
-            null
+            primitive.get(PROGRESS_ITEM_KEY, PylonSerializers.PROGRESS_ITEM),
         )
     }
 
@@ -30,6 +29,7 @@ internal object ProcessorDataPersistentDataType : PersistentDataType<PersistentD
         val pdc = context.newPersistentDataContainer()
         pdc.setNullable(PROCESS_TIME_TICKS_KEY, PylonSerializers.INTEGER, complex.processTimeTicks)
         pdc.setNullable(PROCESS_TICKS_REMAINING_KEY, PylonSerializers.INTEGER, complex.processTicksRemaining)
+        pdc.setNullable(PROGRESS_ITEM_KEY, PylonSerializers.PROGRESS_ITEM, complex.progressItem)
         return pdc
     }
 }

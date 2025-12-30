@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.block.base
 
-import com.google.common.base.Preconditions
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
@@ -17,6 +16,10 @@ import java.util.IdentityHashMap
 
 /**
  * An interface that stores and progresses a recipe.
+ *
+ * You can set a progress item with `setRecipeProgressItem`. This item
+ * will be automatically synchronized to the recipe progress, and will
+ * be persisted.
  *
  * @see PylonProcessor
  */
@@ -48,6 +51,12 @@ interface PylonRecipeProcessor<T: PylonRecipe> {
         @ApiStatus.NonExtendable
         get() = currentRecipe != null
 
+    var recipeProgressItem: ProgressItem
+        get() = recipeProcessorData.progressItem ?: error("No recipe progress item was set")
+        set(progressItem) {
+            recipeProcessorData.progressItem = progressItem
+        }
+
     /**
      * Set the progress item that should be updated as the recipe progresses. Optional.
      *
@@ -56,17 +65,6 @@ interface PylonRecipeProcessor<T: PylonRecipe> {
     @ApiStatus.NonExtendable
     fun setRecipeType(type: RecipeType<T>) {
         recipeProcessorData.recipeType = type
-    }
-
-    /**
-     * Set the progress item that should be updated as the recipe progresses. Optional.
-     *
-     * Does not persist; you must call this whenever the block is initialised (e.g.
-     * in [io.github.pylonmc.pylon.core.block.PylonBlock.postInitialise])
-     */
-    @ApiStatus.NonExtendable
-    fun setProgressItem(item: ProgressItem) {
-        recipeProcessorData.progressItem = item
     }
 
     /**
@@ -94,8 +92,9 @@ interface PylonRecipeProcessor<T: PylonRecipe> {
             "Cannot finish recipe because there is no recipe being processed"
         }
         @Suppress("UNCHECKED_CAST") // cast should always be safe due to type restriction when starting recipe
-        onRecipeFinished(recipeProcessorData.currentRecipe as T)
+        val currentRecipe = recipeProcessorData.currentRecipe as T
         stopRecipe()
+        onRecipeFinished(currentRecipe)
     }
 
     fun onRecipeFinished(recipe: T)

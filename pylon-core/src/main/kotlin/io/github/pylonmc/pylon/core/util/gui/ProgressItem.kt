@@ -10,6 +10,8 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import java.time.Duration
@@ -30,10 +32,15 @@ import kotlin.math.min
  */
 open class ProgressItem @JvmOverloads constructor(
     builder: ItemStackBuilder,
-    private val countDown: Boolean = true
+    @JvmSynthetic
+    internal val countDown: Boolean = true
 ) : AbstractItem() {
 
     @JvmOverloads constructor(material: Material, inverse: Boolean = true) : this(ItemStackBuilder.of(material), inverse)
+
+    @JvmOverloads constructor(stack: ItemStack, inverse: Boolean = true) : this(ItemStackBuilder.of(stack), inverse)
+
+    @JvmOverloads constructor(item: Item, inverse: Boolean = true) : this(ItemStackBuilder.of(item), inverse)
 
     /**
      * The item to be displayed

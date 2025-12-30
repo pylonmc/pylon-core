@@ -14,6 +14,7 @@ internal object RecipeProcessorDataPersistentDataType : PersistentDataType<Persi
     private val CURRENT_RECIPE_KEY = pylonKey("current_recipe")
     private val RECIPE_TIME_TICKS_KEY = pylonKey("recipe_time_ticks")
     private val RECIPE_TICKS_REMAINING_KEY = pylonKey("recipe_ticks_remaining")
+    private val PROGRESS_ITEM_KEY = pylonKey("progress_item")
 
     private val RECIPE_TYPE_TYPE = PylonSerializers.KEYED.keyedTypeFrom { key -> PylonRegistry.RECIPE_TYPES.getOrThrow(key) }
 
@@ -29,7 +30,7 @@ internal object RecipeProcessorDataPersistentDataType : PersistentDataType<Persi
             primitive.get(CURRENT_RECIPE_KEY, recipePDT),
             primitive.get(RECIPE_TIME_TICKS_KEY, PylonSerializers.INTEGER),
             primitive.get(RECIPE_TICKS_REMAINING_KEY, PylonSerializers.INTEGER),
-            null
+            primitive.get(PROGRESS_ITEM_KEY, PylonSerializers.PROGRESS_ITEM)
         )
     }
 
@@ -40,6 +41,7 @@ internal object RecipeProcessorDataPersistentDataType : PersistentDataType<Persi
         pdc.setNullable(CURRENT_RECIPE_KEY, recipePDT, complex.currentRecipe)
         pdc.setNullable(RECIPE_TIME_TICKS_KEY, PylonSerializers.INTEGER, complex.recipeTimeTicks)
         pdc.setNullable(RECIPE_TICKS_REMAINING_KEY, PylonSerializers.INTEGER, complex.recipeTicksRemaining)
+        pdc.setNullable(PROGRESS_ITEM_KEY, PylonSerializers.PROGRESS_ITEM, complex.progressItem)
         return pdc
     }
 }

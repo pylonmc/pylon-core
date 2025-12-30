@@ -111,6 +111,27 @@ object PylonSerializers {
     @JvmField
     val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid>(PylonRegistry.FLUIDS::getOrThrow)
 
+    @JvmField
+    val FLUID_CONNECTION_POINT = FluidConnectionPointPersistentDataType
+
+    @JvmField
+    val LOGISTIC_POINT_TYPE = EnumPersistentDataType(LogisticSlotType::class.java)
+
+    @JvmField
+    val DURATION = DurationPersistentDataType
+
+    @JvmField
+    val PROGRESS_ITEM = ProgressItemPersistentDataType
+
+    @JvmSynthetic
+    internal val CARGO_BLOCK_DATA = CargoBlockPersistentDataType
+
+    @JvmSynthetic
+    internal val WAILA_TYPE = EnumPersistentDataType(Waila.Type::class.java)
+
+    @JvmSynthetic
+    internal val PLAYER_WAILA_CONFIG = PlayerWailaConfigPersistentDataType
+
     @JvmSynthetic
     internal val FLUID_BUFFER_DATA = FluidBufferDataPersistentDataType
 
@@ -129,18 +150,4 @@ object PylonSerializers {
     @JvmSynthetic
     internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
 
-    @JvmField
-    val FLUID_CONNECTION_POINT = FluidConnectionPointPersistentDataType
-
-    @JvmField
-    val LOGISTIC_POINT_TYPE = EnumPersistentDataType(LogisticSlotType::class.java)
-
-    @JvmSynthetic
-    internal val CARGO_BLOCK_DATA = CargoBlockPersistentDataType
-
-    @JvmSynthetic
-    internal val WAILA_TYPE = EnumPersistentDataType(Waila.Type::class.java)
-
-    @JvmSynthetic
-    internal val PLAYER_WAILA_CONFIG = PlayerWailaConfigPersistentDataType
 }

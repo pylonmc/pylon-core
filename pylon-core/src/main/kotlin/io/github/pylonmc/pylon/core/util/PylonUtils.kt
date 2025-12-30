@@ -39,10 +39,16 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import org.joml.Matrix3f
 import org.joml.RoundingMode
+import org.joml.Vector3d
 import org.joml.Vector3f
 import org.joml.Vector3i
+import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
+import xyz.xenondevs.invui.inventory.event.UpdateReason
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.util.function.Consumer
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -129,6 +135,22 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
     BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
     BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
     BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+    else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
+}
+
+/**
+ * Rotates [vector] to face a direction
+ *
+ * Assumes north to be the default direction (i.e. supplying north will result in no rotation)
+ *
+ * @param face Must be a horizontal cardinal direction (north, east, south, west)
+ * @return The rotated vector
+ */
+fun rotateVectorToFace(vector: Vector3d, face: BlockFace) = when (face) {
+    BlockFace.NORTH -> vector
+    BlockFace.EAST -> Vector3d(-vector.z, vector.y, vector.x)
+    BlockFace.SOUTH -> Vector3d(-vector.x, vector.y, -vector.z)
+    BlockFace.WEST -> Vector3d(vector.z, vector.y, -vector.x)
     else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
 }
 
@@ -549,3 +571,22 @@ fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Materi
 @JvmOverloads
 fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot? = null, force: Boolean = false) =
     NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)
+
+
+/**
+ * A shorthand for a commonly used [VirtualInventory] handler which prevents players
+ * from removing items from it.
+ *
+ * Usage: Call [VirtualInventory.setPreUpdateHandler] and supply this function to it
+ */
+@JvmField
+val DISALLOW_PLAYERS_FROM_ADDING_ITEMS_HANDLER = Consumer<ItemPreUpdateEvent> { event: ItemPreUpdateEvent ->
+    if (!event.isRemove && event.updateReason is PlayerUpdateReason) {
+        event.isCancelled = true
+    }
+}
+
+/**
+ * Indicates a machine has updated an inventory slot.
+ */
+class MachineUpdateReason : UpdateReason

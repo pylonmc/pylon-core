@@ -9,15 +9,17 @@ import io.github.pylonmc.pylon.core.util.gui.ProgressItem
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.jetbrains.annotations.ApiStatus
 import java.util.IdentityHashMap
 
 /**
  * An interface that tracks progress of some kind of process, such as processing a
  * recipe, burning a piece of fuel, enchanting an item, etc
  *
- * This interface overrides [PylonTickingBlock.tick], meaning the rate at which the
- * block progresses is determined by [PylonTickingBlock.setTickInterval].
+ * You can set a progress item with `setRecipeProgressItem`. This item
+ * will be automatically synchronized to the process progress, and will
+ * be persisted.
+ *
+ * @see PylonRecipeProcessor
  */
 interface PylonProcessor {
 
@@ -42,15 +44,11 @@ interface PylonProcessor {
         @ApiStatus.NonExtendable
         get() = processTimeTicks != null
 
-     /**
-     * Set the progress item that should be updated as the process progresses. Optional.
-     *
-     * Does not persist; you must call this whenever the block is initialised (e.g.
-     * in [io.github.pylonmc.pylon.core.block.PylonBlock.postInitialise])
-     */
-    fun setProgressItem(item: ProgressItem) {
-        processorData.progressItem = item
-    }
+    var processProgressItem: ProgressItem
+        get() = processorData.progressItem ?: error("No recipe progress item was set")
+        set(progressItem) {
+            processorData.progressItem = progressItem
+        }
 
     /**
      * Starts a new process with duration [ticks], with [ticks] being the number of server
@@ -74,8 +72,8 @@ interface PylonProcessor {
         check(isProcessing) {
             "Cannot finish process because there is no process ongoing"
         }
-        onProcessFinished()
         stopProcess()
+        onProcessFinished()
     }
 
     fun onProcessFinished() {}
