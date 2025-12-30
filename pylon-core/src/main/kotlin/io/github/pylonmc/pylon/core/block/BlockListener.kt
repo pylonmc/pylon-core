@@ -8,12 +8,12 @@ import io.github.pylonmc.pylon.core.block.base.*
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
@@ -21,6 +21,8 @@ import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Container
+import org.bukkit.block.Hopper
+import org.bukkit.entity.minecart.HopperMinecart
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -35,6 +37,7 @@ import org.bukkit.event.inventory.FurnaceBurnEvent
 import org.bukkit.event.inventory.FurnaceExtractEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
+import org.bukkit.event.inventory.InventoryPickupItemEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -833,6 +836,18 @@ internal object BlockListener : Listener {
             }
         }
     }
+
+    @EventHandler
+    private fun onInventoryPickup(event: InventoryPickupItemEvent) {
+        val inv = event.inventory
+        val holder = inv.holder
+        if (holder is Hopper) {
+            val pyBlock = BlockStorage.get(holder.block) as? PylonHopper ?: return
+            pyBlock.onHopperPickUpItem(event)
+        }
+    }
+
+
 
     @JvmSynthetic
     internal fun logEventHandleErr(event: Event?, e: Exception, block: PylonBlock) {
