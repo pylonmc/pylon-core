@@ -257,6 +257,7 @@ object BlockStorage : Listener {
 
         BlockTextureEngine.insert(block)
         PylonBlockPlaceEvent(blockPosition.block, block, context).callEvent()
+        block.postInitialise()
 
         return block
     }

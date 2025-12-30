@@ -118,6 +118,9 @@ object PylonSerializers {
     internal val FLUID_TANK_DATA = FluidTankDataPersistentDataType
 
     @JvmSynthetic
+    internal val RECIPE_PROCESSOR_DATA = RecipeProcessorDataPersistentDataType
+
+    @JvmSynthetic
     internal val SIMPLE_MULTIBLOCK_DATA = SimpleMultiblockDataPersistentDataType
 
     @JvmSynthetic

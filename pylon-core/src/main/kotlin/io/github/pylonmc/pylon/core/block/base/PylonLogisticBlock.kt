@@ -1,20 +1,17 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
-import io.github.pylonmc.pylon.core.logistics.LogisticSlot
-import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
-import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
-import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
+import io.github.pylonmc.pylon.core.logistics.LogisticSlot
+import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
 import io.github.pylonmc.pylon.core.logistics.VirtualInventoryLogisticSlot
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import xyz.xenondevs.invui.inventory.VirtualInventory
-import java.util.IdentityHashMap
+import java.util.*
 
 /**
  * A block which can have items removed or added via a logistics system.
@@ -32,13 +29,6 @@ interface PylonLogisticBlock {
      * Automatically implemented when this interface is implemented by a [io.github.pylonmc.pylon.core.block.PylonBlock]
      */
     val block: Block
-
-    /**
-     * Sets up all the logistic slot groups. This is where you should
-     * call [createLogisticGroup] to create all the logistic slot
-     * groups you want.
-     */
-    fun setupLogisticGroups()
 
     fun createLogisticGroup(groupName: String, group: LogisticGroup) {
         val logisticBlockData = (logisticBlocks.getOrPut(this) { mutableMapOf() })
@@ -73,22 +63,6 @@ interface PylonLogisticBlock {
     companion object : Listener {
 
         private val logisticBlocks = IdentityHashMap<PylonLogisticBlock, MutableMap<String, LogisticGroup>>()
-
-        @EventHandler
-        private fun onPlace(event: PylonBlockPlaceEvent) {
-            val block = event.pylonBlock
-            if (block is PylonLogisticBlock) {
-                block.setupLogisticGroups()
-            }
-        }
-
-        @EventHandler
-        private fun onLoad(event: PylonBlockLoadEvent) {
-            val block = event.pylonBlock
-            if (block is PylonLogisticBlock) {
-                block.setupLogisticGroups()
-            }
-        }
 
         @EventHandler
         private fun onBreak(event: PylonBlockBreakEvent) {
