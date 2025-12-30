@@ -2,6 +2,8 @@ package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.*
 import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.BlockStorage
+import io.github.pylonmc.pylon.core.block.base.PylonHopper
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.entity.base.PylonDeathEntity
 import io.github.pylonmc.pylon.core.entity.base.PylonInteractEntity
@@ -16,12 +18,15 @@ import io.github.pylonmc.pylon.core.item.base.PylonLingeringPotion
 import io.github.pylonmc.pylon.core.item.base.PylonSplashPotion
 import io.papermc.paper.event.entity.*
 import io.papermc.paper.event.entity.EntityKnockbackEvent
+import org.bukkit.block.Hopper
 import org.bukkit.entity.AbstractArrow
+import org.bukkit.entity.minecart.HopperMinecart
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.*
+import org.bukkit.event.inventory.InventoryPickupItemEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import java.util.*
 
@@ -81,6 +86,16 @@ internal object EntityListener : Listener {
             } catch (e: Exception) {
                 logEventHandleErr(event, e, pylonEntity)
             }
+        }
+    }
+
+    @EventHandler
+    private fun onInventoryPickup(event: InventoryPickupItemEvent) {
+        val inv = event.inventory
+        val holder = inv.holder
+        if (holder is HopperMinecart) {
+            val pyEntity = EntityStorage.get(holder.entity) as? PylonHopper ?: return
+            pyEntity.onHopperPickUpItem(event)
         }
     }
 
