@@ -1,16 +1,13 @@
 package io.github.pylonmc.pylon.core.entity
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
-import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
-import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
-import io.github.pylonmc.pylon.core.block.BlockListener.logEventHandleErr
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
-import io.github.pylonmc.pylon.core.entity.base.PylonTickableEntity
+import io.github.pylonmc.pylon.core.event.PylonEntityAddEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
@@ -23,12 +20,11 @@ import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.EntitiesLoadEvent
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.function.Consumer
 import kotlin.random.Random
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Basically [BlockStorage], but for entities. Works on all the same principles.
@@ -200,6 +196,7 @@ object EntityStorage : Listener {
                 delay(PylonConfig.ENTITY_DATA_AUTOSAVE_INTERVAL_SECONDS * 1000)
             }
         }
+        PylonEntityAddEvent(entity).callEvent()
         entity
     }
 
@@ -219,28 +216,6 @@ object EntityStorage : Listener {
                     }
                 }
                 whenEntityLoadsTasks.remove(pylonEntity.uuid)
-            }
-
-            if (pylonEntity is PylonTickableEntity) {
-                val dispatcher =
-                    if (pylonEntity.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
-                tickMap[pylonEntity.uuid] = PylonCore.launch(dispatcher) {
-
-                    var lastTickNanos = System.nanoTime()
-                    while (true) {
-                        delay(pylonEntity.tickInterval.ticks)
-                        try {
-                            val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
-                            lastTickNanos = System.nanoTime()
-                            pylonEntity.tick(dt)
-                        } catch (e: Exception) {
-                            PylonCore.launch(PylonCore.minecraftDispatcher) {
-                                PylonCore.logger.severe("Error when handling entity(${pylonEntity.key}, ${pylonEntity.entity.location}) error: ${e.localizedMessage}")
-                                e.printStackTrace()
-                            }
-                        }
-                    }
-                }
             }
 
             PylonEntityLoadEvent(pylonEntity).callEvent()
