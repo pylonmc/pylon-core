@@ -139,7 +139,7 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
             // Spawn a cube display
             createNotConnectedDuctDisplay(block.location.toCenterLocation())
             // We are the only one using this display, so no culling group
-            cullingGroup = mutableSetOf()
+            cullingGroup = mutableSetOf(this)
         }
 
         // Case 2: Duct has two connected blocks on opposite sides, forming a line

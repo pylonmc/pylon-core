@@ -61,7 +61,7 @@ object BlockTextureEngine : Listener {
     private val blockTextureOctrees = mutableMapOf<UUID, Octree<PylonBlock>>()
     private val culledBlockOctrees = mutableMapOf<UUID, Octree<PylonBlock>>()
     private val jobs = mutableMapOf<UUID, Job>()
-    private val syncJobTasks = mutableMapOf<UUID, MutableMap<PylonCulledBlock, Boolean>>()
+    private val syncJobTasks = ConcurrentHashMap<UUID, MutableMap<PylonCulledBlock, Boolean>>()
 
     /**
      * Periodically invalidates a share of the occluding cache, to ensure stale data isn't perpetuated.
