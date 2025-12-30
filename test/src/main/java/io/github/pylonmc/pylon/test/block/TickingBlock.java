@@ -26,7 +26,7 @@ public class TickingBlock extends PylonBlock implements PylonTickingBlock {
     }
 
     @Override
-    public void tick(double deltaSeconds) {
+    public void tick() {
         ticks++;
     }
 }

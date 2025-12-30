@@ -27,7 +27,7 @@ internal object SimpleMultiblockDataPersistentDataType : PersistentDataType<Pers
         context: PersistentDataAdapterContext
     ): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()
-        pdc.setNullable(facingKey, PylonSerializers.BLOCK_FACE, complex.facing)
+        pdc.setNullable(facingKey, PylonSerializers.BLOCK_FACE, complex.direction)
         return pdc
     }
 }

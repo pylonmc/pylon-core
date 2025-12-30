@@ -14,8 +14,8 @@ import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.LineBuilder
 import io.github.pylonmc.pylon.core.entity.display.transform.TransformBuilder
-import io.github.pylonmc.pylon.core.event.PylonCargoDuctConnectEvent
-import io.github.pylonmc.pylon.core.event.PylonCargoDuctDisconnectEvent
+import io.github.pylonmc.pylon.core.event.PylonCargoConnectEvent
+import io.github.pylonmc.pylon.core.event.PylonCargoDisconnectEvent
 import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
@@ -58,10 +58,10 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
                 is CargoDuct -> {
                     connectedBlock.connectedFaces.remove(face.oppositeFace)
                     connectedBlock.updateConnectedFaces()
-                    PylonCargoDuctDisconnectEvent(this, connectedBlock).callEvent()
+                    PylonCargoDisconnectEvent(this, connectedBlock).callEvent()
                 }
                 is PylonCargoBlock -> {
-                    PylonCargoDuctDisconnectEvent(this, connectedBlock).callEvent()
+                    PylonCargoDisconnectEvent(this, connectedBlock).callEvent()
                 }
             }
         }
@@ -83,7 +83,7 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
         // 1: Prioritise PylonCargoBlocks
         for ((face, block) in adjacentCargoBlocks) {
             if (connectedFaces.size != 2 && block is PylonCargoBlock && block.cargoLogisticGroups.containsKey(face.oppositeFace)) {
-                if (PylonCargoDuctConnectEvent(this, block).callEvent()) {
+                if (PylonCargoConnectEvent(this, block).callEvent()) {
                     connectedFaces.add(face)
                 }
             }
@@ -92,7 +92,7 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
         // 2: Prioritise PylonDucts which already have a connection
         for ((face, block) in adjacentCargoBlocks) {
             if (connectedFaces.size != 2 && block is CargoDuct && block.connectedFaces.size == 1) {
-                if (PylonCargoDuctConnectEvent(this, block).callEvent()) {
+                if (PylonCargoConnectEvent(this, block).callEvent()) {
                     connectedFaces.add(face)
                     block.connectedFaces.add(face.oppositeFace)
                 }
@@ -102,7 +102,7 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
         // 3: Prioritise PylonDucts without connections
         for ((face, block) in adjacentCargoBlocks) {
             if (connectedFaces.size != 2 && block is CargoDuct && block.connectedFaces.isEmpty()) {
-                if (PylonCargoDuctConnectEvent(this, block).callEvent()) {
+                if (PylonCargoConnectEvent(this, block).callEvent()) {
                     connectedFaces.add(face)
                     block.connectedFaces.add(face.oppositeFace)
                 }

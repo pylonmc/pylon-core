@@ -1,6 +1,8 @@
 package io.github.pylonmc.pylon.core.block.context
 
+import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
@@ -10,6 +12,16 @@ import org.bukkit.plugin.Plugin
  * Information surrounding a block place event.
  */
 interface BlockCreateContext {
+
+    /**
+     * The direction in which this block was placed. NORTH, EAST, SOUTH, WEST.
+     */
+    val facing: BlockFace
+
+    /**
+     * The direction in which this block was placed. NORTH, EAST, SOUTH, WEST, UP, DOWN
+     */
+    val facingVertical: BlockFace
 
     /**
      * The old block where the new block is about to be created.
@@ -37,6 +49,8 @@ interface BlockCreateContext {
         override val item: ItemStack,
         val event: BlockPlaceEvent
     ) : BlockCreateContext {
+        override val facing: BlockFace = TransformUtil.yawToCardinalFace(player.yaw)
+        override val facingVertical: BlockFace = TransformUtil.yawAndPitchToFace(player.yaw, player.pitch)
         override val block = event.blockPlaced
         override val shouldSetType = false // The action of the placement sets the block
     }
@@ -50,8 +64,10 @@ interface BlockCreateContext {
     @JvmRecord
     data class PluginGenerate(
         val plugin: Plugin,
+        override val facing: BlockFace = BlockFace.NORTH,
+        override val facingVertical: BlockFace = BlockFace.NORTH,
         override val block: Block,
-        override val item: ItemStack
+        override val item: ItemStack,
     ) : BlockCreateContext
 
     /**
@@ -60,6 +76,8 @@ interface BlockCreateContext {
     @JvmRecord
     data class Default @JvmOverloads constructor(
         override val block: Block,
+        override val facing: BlockFace = BlockFace.NORTH,
+        override val facingVertical: BlockFace = BlockFace.NORTH,
         override val item: ItemStack? = null,
         override val shouldSetType: Boolean = true
     ) : BlockCreateContext

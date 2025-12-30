@@ -23,7 +23,7 @@ interface PylonInventoryEffectItem : PylonInventoryTicker {
         tasks[itemKey]!![player.uniqueId] = Bukkit.getScheduler().runTaskLater(PylonCore.javaPlugin, Runnable {
             player.persistentDataContainer.remove(itemKey)
             onRemovedFromInventory(player)
-        }, tickInterval * PylonConfig.inventoryTickerBaseRate + 1)
+        }, tickInterval * PylonConfig.INVENTORY_TICKER_BASE_RATE + 1)
     }
 
     /**

@@ -15,6 +15,6 @@ interface PylonInventoryTicker {
     fun onTick(player: Player)
 
     /** Determines the rate at which the [onTick] method will be called.
-     * [onTick] will be called at [tickInterval] * [PylonConfig.inventoryTickerBaseRate] */
+     * [onTick] will be called at [tickInterval] * [PylonConfig.INVENTORY_TICKER_BASE_RATE] */
     val tickInterval: Long
 }

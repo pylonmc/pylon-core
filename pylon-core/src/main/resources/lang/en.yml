@@ -424,3 +424,7 @@ unit:
     singular: "item per second"
     plural: "items per second"
     abbr: "items/s"
+  cycles_per_second:
+    singular: "cycle per second"
+    plural: "cycles per second"
+    abbr: "cycles/s"

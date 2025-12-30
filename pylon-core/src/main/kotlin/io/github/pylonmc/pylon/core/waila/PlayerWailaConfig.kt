@@ -19,7 +19,7 @@ class PlayerWailaConfig {
             player?.wailaConfig = this
         }
 
-    var type: Waila.Type = PylonConfig.WailaConfig.defaultType
+    var type: Waila.Type = PylonConfig.WailaConfig.DEFAULT_TYPE
         set(value) {
             field = value
             player?.wailaConfig = this

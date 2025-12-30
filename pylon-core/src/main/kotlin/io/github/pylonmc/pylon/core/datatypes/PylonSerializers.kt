@@ -111,23 +111,17 @@ object PylonSerializers {
     @JvmField
     val PYLON_FLUID = KEYED.keyedTypeFrom<PylonFluid>(PylonRegistry.FLUIDS::getOrThrow)
 
-    @JvmSynthetic
-    internal val FLUID_BUFFER_DATA = FluidBufferDataPersistentDataType
-
-    @JvmSynthetic
-    internal val FLUID_TANK_DATA = FluidTankDataPersistentDataType
-
-    @JvmSynthetic
-    internal val SIMPLE_MULTIBLOCK_DATA = SimpleMultiblockDataPersistentDataType
-
-    @JvmSynthetic
-    internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
-
     @JvmField
     val FLUID_CONNECTION_POINT = FluidConnectionPointPersistentDataType
 
     @JvmField
     val LOGISTIC_POINT_TYPE = EnumPersistentDataType(LogisticSlotType::class.java)
+
+    @JvmField
+    val DURATION = DurationPersistentDataType
+
+    @JvmField
+    val PROGRESS_ITEM = ProgressItemPersistentDataType
 
     @JvmSynthetic
     internal val CARGO_BLOCK_DATA = CargoBlockPersistentDataType
@@ -137,4 +131,23 @@ object PylonSerializers {
 
     @JvmSynthetic
     internal val PLAYER_WAILA_CONFIG = PlayerWailaConfigPersistentDataType
+
+    @JvmSynthetic
+    internal val FLUID_BUFFER_DATA = FluidBufferDataPersistentDataType
+
+    @JvmSynthetic
+    internal val FLUID_TANK_DATA = FluidTankDataPersistentDataType
+
+    @JvmSynthetic
+    internal val PROCESSOR_DATA = ProcessorDataPersistentDataType
+
+    @JvmSynthetic
+    internal val RECIPE_PROCESSOR_DATA = RecipeProcessorDataPersistentDataType
+
+    @JvmSynthetic
+    internal val SIMPLE_MULTIBLOCK_DATA = SimpleMultiblockDataPersistentDataType
+
+    @JvmSynthetic
+    internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
+
 }

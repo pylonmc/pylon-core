@@ -27,7 +27,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : PagedGuidePage {
         for (type in PylonRegistry.RECIPE_TYPES) {
             for (recipe in type.recipes) {
                 if (!recipe.isHidden && recipe.isOutput(fluid)) {
-                    pages.add(recipe.display())
+                    recipe.display()?.let { pages.add(it) }
                 }
             }
         }

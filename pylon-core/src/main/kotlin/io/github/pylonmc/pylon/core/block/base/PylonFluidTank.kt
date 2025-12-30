@@ -122,7 +122,7 @@ interface PylonFluidTank : PylonFluidBlock {
 
     fun isAllowedFluid(fluid: PylonFluid): Boolean
 
-    override fun fluidAmountRequested(fluid: PylonFluid, deltaSeconds: Double): Double{
+    override fun fluidAmountRequested(fluid: PylonFluid): Double{
         if (!isAllowedFluid(fluid)) {
             return 0.0
         }
@@ -137,7 +137,7 @@ interface PylonFluidTank : PylonFluidBlock {
         }
     }
 
-    override fun getSuppliedFluids(deltaSeconds: Double): Map<PylonFluid, Double> {
+    override fun getSuppliedFluids(): Map<PylonFluid, Double> {
         val fluidData = this.fluidData // local variable to save calling fluidData getter multiple times
         return if (fluidData.fluid == null) {
             emptyMap()

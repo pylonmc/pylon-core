@@ -8,11 +8,11 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Called before a [CargoDuct] connects to an adjacent [CargoDuct] or [PylonCargoBlock]
+ * Called before a [CargoDuct] or [PylonCargoBlock] connects to an adjacent [CargoDuct] or [PylonCargoBlock]
  */
-class PylonCargoDuctConnectEvent(
-    val duct: CargoDuct,
-    val otherBlock: PylonBlock
+class PylonCargoConnectEvent(
+    val block1: PylonBlock,
+    val block2: PylonBlock
 ) : Event(), Cancellable {
 
     private var cancelled = false

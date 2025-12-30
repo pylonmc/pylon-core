@@ -315,6 +315,14 @@ class UnitFormat @JvmOverloads constructor(
             prefix = MetricPrefix.NONE
         )
 
+        @JvmField
+        val CYCLES_PER_SECOND = UnitFormat(
+            "cycles_per_second",
+            TextColor.color(0xb672bf),
+            abbreviate = true,
+            prefix = MetricPrefix.NONE
+        )
+
         /**
          * Helper function that automatically formats a duration into days:hours:minutes:seconds
          */

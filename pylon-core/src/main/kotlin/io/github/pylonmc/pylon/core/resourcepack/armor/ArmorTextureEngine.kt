@@ -28,8 +28,8 @@ object ArmorTextureEngine : PacketListener {
 
     @JvmStatic
     var Player.hasCustomArmorTextures: Boolean
-        get() = PylonConfig.ArmorTextureConfig.forced || this.persistentDataContainer.getOrDefault(customArmorTexturesKey, PersistentDataType.BOOLEAN, false)
-        set(value) = this.persistentDataContainer.set(customArmorTexturesKey, PersistentDataType.BOOLEAN, PylonConfig.ArmorTextureConfig.forced || value)
+        get() = PylonConfig.ArmorTextureConfig.FORCED || this.persistentDataContainer.getOrDefault(customArmorTexturesKey, PersistentDataType.BOOLEAN, false)
+        set(value) = this.persistentDataContainer.set(customArmorTexturesKey, PersistentDataType.BOOLEAN, PylonConfig.ArmorTextureConfig.FORCED || value)
 
     override fun onPacketSend(event: PacketSendEvent?) {
         if (event == null) return
