@@ -31,7 +31,9 @@ open class BlockTextureEntity(
                 sendPacketToViewer(viewer, this.entityMeta.createPacket(), distanceSquared);
             }
         } else {
-            refreshViewer(viewer, distanceSquared);
+            if (location != null && isSpawned) {
+                refreshViewer(viewer, distanceSquared);
+            }
         }
     }
 
@@ -54,6 +56,12 @@ open class BlockTextureEntity(
         val protocolManager = EntityLib.getOptionalApi().orElse(null)?.packetEvents?.protocolManager ?: return
         val channel = protocolManager.getChannel(viewer) ?: return
         protocolManager.sendPacket(channel, packet)
+    }
+
+    open fun removeAllViewers() {
+        for (viewer in viewers.toSet()) {
+            removeViewer(viewer)
+        }
     }
 
     protected companion object {

@@ -57,7 +57,7 @@ import kotlin.time.Duration.Companion.seconds
  * If you need something more flexible (eg: a fluid tank that can have up to 10
  * fluid casings added to increase the capacity), see [PylonMultiblock].
  */
-interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, PylonDirectionalBlock {
+interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, PylonDirectionalBlock, PylonCulledBlock {
 
     /**
      * Implement this together with [MultiblockComponent], it is used to spawn a single entity
@@ -509,6 +509,9 @@ interface PylonSimpleMultiblock : PylonMultiblock, PylonEntityHolderBlock, Pylon
     override fun isPartOfMultiblock(otherBlock: Block): Boolean = validStructures().any {
         it.contains((otherBlock.position - block.position).vector3i)
     }
+
+    override val culledEntityIds: Iterable<UUID>
+        get() = heldEntities.values
 
     /**
      * Updates the color of all ghost blocks to indicate whether the block is correctly placed.

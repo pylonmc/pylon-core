@@ -158,6 +158,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
             PlayerSettingsPage.resourcePackSettings.addSetting(PageButton(PlayerSettingsPage.blockTextureSettings))
             Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
             BlockTextureEngine.updateOccludingCacheJob.start()
+            BlockTextureEngine.syncCullingJob.start()
         }
 
         if (PylonConfig.researchesEnabled) {

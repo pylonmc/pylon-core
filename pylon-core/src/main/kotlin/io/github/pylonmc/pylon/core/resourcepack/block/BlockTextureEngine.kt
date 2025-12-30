@@ -8,10 +8,11 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.block.base.PylonCulledBlock
+import io.github.pylonmc.pylon.core.block.base.PylonGroupCulledBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.util.Octree
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
-import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -29,6 +30,7 @@ import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.event.world.WorldLoadEvent
@@ -36,8 +38,10 @@ import org.bukkit.event.world.WorldUnloadEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
+import java.lang.invoke.MethodHandles
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.Map.Entry
 import kotlin.math.ceil
 
@@ -47,10 +51,17 @@ object BlockTextureEngine : Listener {
     val customBlockTexturesKey = pylonKey("custom_block_textures")
     val presetKey = pylonKey("culling_preset")
 
+    private val invertedVisibility = Class.forName("org.bukkit.craftbukkit.entity.CraftPlayer").let {
+        MethodHandles.privateLookupIn(it, MethodHandles.lookup()).unreflectVarHandle(it.getDeclaredField("invertedVisibilityEntities"))
+    }
+    private val invertedVisibilityCache = mutableMapOf<UUID, MutableMap<UUID, *>>()
+
     private val occludingCache = mutableMapOf<UUID, MutableMap<Long, ChunkData>>()
 
-    private val octrees = mutableMapOf<UUID, Octree<PylonBlock>>()
+    private val blockTextureOctrees = mutableMapOf<UUID, Octree<PylonBlock>>()
+    private val culledBlockOctrees = mutableMapOf<UUID, Octree<PylonBlock>>()
     private val jobs = mutableMapOf<UUID, Job>()
+    private val syncJobTasks = mutableMapOf<UUID, MutableMap<PylonCulledBlock, Boolean>>()
 
     /**
      * Periodically invalidates a share of the occluding cache, to ensure stale data isn't perpetuated.
@@ -89,6 +100,36 @@ object BlockTextureEngine : Listener {
         }
     }
 
+    @JvmSynthetic
+    internal val syncCullingJob = PylonCore.launch(start = CoroutineStart.LAZY) {
+        var tick = 0
+        while (true) {
+            delay(500L) // TODO: Make configurable, currently every 10 ticks
+
+            for ((uuid, tasks) in syncJobTasks) {
+                val player = Bukkit.getPlayer(uuid) ?: continue
+                for ((block, shouldShow) in tasks) {
+                    if (shouldShow) {
+                        block.showEntities(player)
+                    } else {
+                        block.hideEntities(player)
+                    }
+                }
+                tasks.clear()
+            }
+            tick++
+        }
+    }
+
+    @JvmSynthetic
+    fun Player.isVisibilityInverted(entity: UUID): Boolean {
+        val cache = invertedVisibilityCache.getOrPut(this.uniqueId) {
+            @Suppress("UNCHECKED_CAST")
+            invertedVisibility.get(this) as MutableMap<UUID, *>
+        }
+        return cache.containsKey(entity)
+    }
+
     @JvmStatic
     var Player.hasCustomBlockTextures: Boolean
         get() = (this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, PylonConfig.BlockTextureConfig.default) || PylonConfig.BlockTextureConfig.forced)
@@ -99,27 +140,40 @@ object BlockTextureEngine : Listener {
         get() = PylonConfig.BlockTextureConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, PylonConfig.BlockTextureConfig.defaultCullingPreset.id)) {
             PylonConfig.BlockTextureConfig.defaultCullingPreset
         }
-        set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
+        set(value) {
+            this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
+            if (value.id == DISABLED_PRESET) {
+                getOctree(this.world, culledBlockOctrees).forEach { block ->
+                    (block as? PylonCulledBlock)?.showEntities(this)
+                }
+            }
+        }
 
     @JvmSynthetic
     internal fun insert(block: PylonBlock) {
-        if (!PylonConfig.BlockTextureConfig.enabled || block.disableBlockTextureEntity) return
-        getOctree(block.block.world).insert(block)
-    }
-
-    @JvmSynthetic
-    internal fun remove(block: PylonBlock) {
-        if (!PylonConfig.BlockTextureConfig.enabled || block.disableBlockTextureEntity) return
-        getOctree(block.block.world).remove(block)
-        block.blockTextureEntity?.let {
-            for (viewer in it.viewers.toSet()) {
-                it.removeViewer(viewer)
-            }
+        if (!PylonConfig.BlockTextureConfig.enabled) return
+        if (!block.disableBlockTextureEntity) {
+            getOctree(block.block.world, blockTextureOctrees).insert(block)
+        }
+        if (block is PylonCulledBlock) {
+            getOctree(block.block.world, culledBlockOctrees).insert(block)
         }
     }
 
     @JvmSynthetic
-    internal fun getOctree(world: World): Octree<PylonBlock> {
+    internal fun remove(block: PylonBlock) {
+        if (!PylonConfig.BlockTextureConfig.enabled) return
+        if (!block.disableBlockTextureEntity) {
+            getOctree(block.block.world, blockTextureOctrees).remove(block)
+            block.blockTextureEntity?.removeAllViewers()
+        }
+        if (block is PylonCulledBlock) {
+            getOctree(block.block.world, culledBlockOctrees).remove(block)
+        }
+    }
+
+    @JvmSynthetic
+    internal fun getOctree(world: World, octrees: MutableMap<UUID, Octree<PylonBlock>>): Octree<PylonBlock> {
         check(PylonConfig.BlockTextureConfig.enabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
 
         val border = world.worldBorder
@@ -138,7 +192,7 @@ object BlockTextureEngine : Listener {
     @JvmSynthetic
     internal fun launchBlockTextureJob(player: Player) {
         val uuid = player.uniqueId
-        if (!PylonConfig.BlockTextureConfig.enabled || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
+        if (!PylonConfig.BlockTextureConfig.enabled || jobs.containsKey(uuid)) return
 
         jobs[uuid] = PylonCore.launch(PylonCore.asyncDispatcher) {
             val visible = mutableSetOf<PylonBlock>()
@@ -146,8 +200,8 @@ object BlockTextureEngine : Listener {
 
             while (true) {
                 val player = Bukkit.getPlayer(uuid)
-                if (player == null || !player.hasCustomBlockTextures) {
-                    octrees.values.forEach { it.forEach { b -> b.blockTextureEntity?.removeViewer(uuid) } }
+                if (player == null) {
+                    blockTextureOctrees.values.forEach { it.forEach { b -> b.blockTextureEntity?.removeViewer(uuid) } }
                     jobs.remove(uuid)
                     break
                 }
@@ -157,44 +211,73 @@ object BlockTextureEngine : Listener {
 
                 val world = player.world
                 val occludingCache = occludingCache.getOrPut(world.uid) { mutableMapOf() }
+                val syncTasks = syncJobTasks.getOrPut(uuid) { ConcurrentHashMap() }
 
                 val location = player.location
                 val eye = player.eyeLocation.toVector()
                 val preset = player.cullingPreset
-                val octree = getOctree(world)
+                val blockTextureOctree = getOctree(world, blockTextureOctrees)
                 if (preset.id == DISABLED_PRESET) {
-                    // Send all block entities within view distance and hide all others
-                    val radius = player.sendViewDistance * 16 / 2.0
-                    val query = octree.query(BoundingBox.of(eye, radius, radius, radius))
-                    visible.toSet().subtract(query.toSet()).forEach { it.blockTextureEntity?.removeViewer(uuid) }
+                    if (player.hasCustomBlockTextures) {
+                        // Send all entities within view distance and hide all others
+                        val radius = player.sendViewDistance * 16 / 2.0
+                        val query = blockTextureOctree.query(BoundingBox.of(eye, radius, radius, radius))
+                        visible.toSet().subtract(query.toSet()).forEach { it.blockTextureEntity?.removeViewer(uuid) }
+                        visible.clear()
 
-                    for (block in query) {
-                        val entity = block.blockTextureEntity ?: continue
-                        val distanceSquared = block.block.location.distanceSquared(location)
-                        entity.addOrRefreshViewer(uuid, distanceSquared)
-                        visible.add(block)
+                        for (block in query) {
+                            val entity = block.blockTextureEntity ?: continue
+                            val distanceSquared = block.block.location.distanceSquared(location)
+                            entity.addOrRefreshViewer(uuid, distanceSquared)
+                        }
+                        visible.addAll(query)
                     }
                     delay(preset.updateInterval.ticks)
                     continue
                 }
 
                 // Query all possibly visible blocks within cull radius, and hide all others
-                val query = octree.query(BoundingBox.of(eye, preset.cullRadius.toDouble(), preset.cullRadius.toDouble(), preset.cullRadius.toDouble()))
-                visible.toSet().subtract(query.toSet()).forEach { it.blockTextureEntity?.removeViewer(uuid) }
+                val culledBlockOctree = getOctree(world, culledBlockOctrees)
+                val query = culledBlockOctree.query(BoundingBox.of(eye, preset.cullRadius.toDouble(), preset.cullRadius.toDouble(), preset.cullRadius.toDouble()))
+                if (player.hasCustomBlockTextures) {
+                    query.addAll(blockTextureOctree.query(BoundingBox.of(eye, preset.cullRadius.toDouble(), preset.cullRadius.toDouble(), preset.cullRadius.toDouble())))
+                }
+                visible.toSet().subtract(query.toSet()).forEach {
+                    it.blockTextureEntity?.removeViewer(uuid)
+                    if (it is PylonCulledBlock && it !is PylonGroupCulledBlock) {
+                        syncTasks[it] = false
+                    }
+                }
+                visible.retainAll(query)
 
+                val groupCulledBlocks = mutableSetOf<Iterable<PylonGroupCulledBlock>>()
+
+                // First step go through all blocks in the query and determine if they should be shown or hidden
+                // If a block isn't a PylonGroupCulledBlock, either immediately change its visibility or schedule it if necessary (PylonCulledBlock's)
+                // If it is a PylonGroupCulledBlock, handle it in the next step
                 for (block in query) {
-                    val entity = block.blockTextureEntity ?: continue
+                    val entity = block.blockTextureEntity
+                    val seen = entity?.viewers?.contains(uuid) ?: (block is PylonCulledBlock && block.culledEntityIds.first().let { !player.isVisibilityInverted(it) })
 
                     // If we are within the always show radius, show, if we are outside cull radius, hide
                     // (our query is a cube not a sphere, so blocks in the corners can still be outside the cull radius)
-                    val seen = entity.hasViewer(uuid)
                     val distanceSquared = block.block.location.distanceSquared(location)
                     if (distanceSquared <= preset.alwaysShowRadius * preset.alwaysShowRadius) {
-                        entity.addOrRefreshViewer(uuid, distanceSquared)
+                        entity?.addOrRefreshViewer(uuid, distanceSquared)
+                        if (block is PylonCulledBlock) {
+                            syncTasks[block] = true
+                        }
                         visible.add(block)
                         continue
                     } else if (distanceSquared > preset.cullRadius * preset.cullRadius) {
-                        entity.removeViewer(uuid)
+                        entity?.removeViewer(uuid)
+                        if (block is PylonCulledBlock) {
+                            if (block is PylonGroupCulledBlock) {
+                                groupCulledBlocks.add(block.cullingGroup)
+                            } else {
+                                syncTasks[block] = false
+                            }
+                        }
                         visible.remove(block)
                         continue
                     }
@@ -227,11 +310,43 @@ object BlockTextureEngine : Listener {
 
                         val shouldSee = occluding <= preset.maxOccludingCount
                         if (shouldSee) {
-                            entity.addOrRefreshViewer(uuid, distanceSquared)
+                            entity?.addOrRefreshViewer(uuid, distanceSquared)
+                            if (block is PylonCulledBlock) {
+                                syncTasks[block] = true
+                            }
                             visible.add(block)
                         } else {
-                            entity.removeViewer(uuid)
+                            entity?.removeViewer(uuid)
+                            if (block is PylonCulledBlock) {
+                                if (block is PylonGroupCulledBlock) {
+                                    groupCulledBlocks.add(block.cullingGroup)
+                                } else {
+                                    syncTasks[block] = false
+                                }
+                            }
                             visible.remove(block)
+                        }
+                    }
+                }
+
+                // Second step, handle group culled blocks
+                // If any one member of the group is visible, all members are visible
+                // This only affects the PylonCulledBlock aspect, block texture entities are never group culled
+                for (group in groupCulledBlocks) {
+                    var anyVisible = false
+                    for (block in group) {
+                        if (visible.contains(block as PylonBlock)) {
+                            anyVisible = true
+                            break
+                        }
+                    }
+
+                    for (block in group) {
+                        if (anyVisible) {
+                            syncTasks[block] = true
+                            visible.add(block as PylonBlock)
+                        } else {
+                            syncTasks[block] = false
                         }
                     }
                 }
@@ -250,7 +365,8 @@ object BlockTextureEngine : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onWorldLoad(event: WorldLoadEvent) {
         occludingCache[event.world.uid] = mutableMapOf()
-        getOctree(event.world)
+        getOctree(event.world, blockTextureOctrees)
+        getOctree(event.world, culledBlockOctrees)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -297,7 +413,15 @@ object BlockTextureEngine : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     private fun onWorldUnload(event: WorldUnloadEvent) {
         occludingCache.remove(event.world.uid)
-        octrees.remove(event.world.uid)
+        blockTextureOctrees.remove(event.world.uid)
+        culledBlockOctrees.remove(event.world.uid)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    private fun onPlayerQuit(event: PlayerQuitEvent) {
+        jobs.remove(event.player.uniqueId)?.cancel()
+        invertedVisibilityCache.remove(event.player.uniqueId)
+        syncJobTasks.remove(event.player.uniqueId)
     }
 
     private data class ChunkData(
@@ -307,13 +431,11 @@ object BlockTextureEngine : Listener {
             .build()
     ) {
         fun insert(block: Block, isOccluding: Boolean = block.blockData.isOccluding) {
-            val key = BlockPosition.asLong(block.x, block.y, block.z)
-            occluding.put(key, isOccluding)
+            occluding.put(BlockPosition.asLong(block.x, block.y, block.z), isOccluding)
         }
 
         fun isOccluding(world: World, blockX: Int, blockY: Int, blockZ: Int): Boolean {
-            val key = BlockPosition.asLong(blockX, blockY, blockZ)
-            return occluding.get(key) {
+            return occluding.get(BlockPosition.asLong(blockX, blockY, blockZ)) {
                 world.getBlockAt(blockX, blockY, blockZ).blockData.isOccluding
             }
         }

@@ -4,8 +4,10 @@ import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.block.base.PylonBreakHandler
 import io.github.pylonmc.pylon.core.block.base.PylonCargoBlock
+import io.github.pylonmc.pylon.core.block.base.PylonCulledBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock
 import io.github.pylonmc.pylon.core.block.base.PylonEntityHolderBlock.Companion.holders
+import io.github.pylonmc.pylon.core.block.base.PylonGroupCulledBlock
 import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.context.BlockCreateContext
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -27,10 +29,13 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.persistence.PersistentDataContainer
+import java.util.UUID
 
-class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
+class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGroupCulledBlock {
 
     var connectedFaces = mutableListOf<BlockFace>()
+    override var cullingGroup = mutableSetOf<PylonGroupCulledBlock>()
+    override var disableBlockTextureEntity = true
 
     @Suppress("unused")
     constructor(block: Block, context: BlockCreateContext) : super(block) {
@@ -133,6 +138,8 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
         if (connectedFaces.isEmpty()) {
             // Spawn a cube display
             createNotConnectedDuctDisplay(block.location.toCenterLocation())
+            // We are the only one using this display, so no culling group
+            cullingGroup = mutableSetOf()
         }
 
         // Case 2: Duct has two connected blocks on opposite sides, forming a line
@@ -221,7 +228,7 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
         // This would occlude the display entity and cause it to render with brightness 0
         // To avoid this, we'll just spawn the entity at this duct, since we know it's a duct (and therefore a
         // structure void, which will not occlude the display entity)
-        var spawnLocation = this.block.location.toCenterLocation()
+        val spawnLocation = this.block.location.toCenterLocation()
         val display = ItemDisplayBuilder()
             .transformation(LineBuilder()
                 .from(from.location.toCenterLocation().subtract(spawnLocation).toVector().toVector3d())
@@ -236,11 +243,18 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
 
         // Add the display to every CargoDuct on the line
         val associatedBlocks = mutableListOf<BlockPosition>()
+        val cullingGroup = mutableSetOf<PylonGroupCulledBlock>()
         // (start)
-        BlockStorage.getAs<CargoDuct>(from)?.addEntity(ductDisplayName(fromToFace), display)
+        BlockStorage.getAs<CargoDuct>(from)?.let {
+            it.addEntity(ductDisplayName(fromToFace), display)
+            it.cullingGroup = cullingGroup
+            cullingGroup.add(it)
+        }
         if (from == this.block) {
             // Special case: This block is not in BlockStorage yet so above code will not work
-            addEntity(ductDisplayName(fromToFace), display)
+            this.addEntity(ductDisplayName(fromToFace), display)
+            this.cullingGroup = cullingGroup
+            cullingGroup.add(this)
         }
         associatedBlocks.add(from.position)
         // (middle)
@@ -253,19 +267,29 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
             BlockStorage.getAs<CargoDuct>(current)?.let {
                 it.addEntity(ductDisplayName(fromToFace), display)
                 it.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+                it.cullingGroup = cullingGroup
+                cullingGroup.add(it)
             }
             if (current == this.block) {
                 // Special case: This block is not in BlockStorage yet so above code will not work
-                addEntity(ductDisplayName(fromToFace), display)
-                addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+                this.addEntity(ductDisplayName(fromToFace), display)
+                this.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+                this.cullingGroup = cullingGroup
+                cullingGroup.add(this)
             }
             associatedBlocks.add(current.position)
         }
         // (end)
-        BlockStorage.getAs<CargoDuct>(to)?.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+        BlockStorage.getAs<CargoDuct>(to)?.let {
+            it.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+            it.cullingGroup = cullingGroup
+            cullingGroup.add(it)
+        }
         if (to == this.block) {
             // Special case: This block is not in BlockStorage yet so above code will not work
-            addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+            this.addEntity(ductDisplayName(fromToFace.oppositeFace), display)
+            this.cullingGroup = cullingGroup
+            cullingGroup.add(this)
         }
         associatedBlocks.add(to.position)
 
@@ -283,6 +307,9 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock {
 
         addEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME, display)
     }
+
+    override val culledEntityIds: Iterable<UUID>
+        get() = heldEntities.values
 
     companion object : Listener {
         const val NOT_CONNECTED_DUCT_DISPLAY_NAME = "duct-item-display:not-connected"
