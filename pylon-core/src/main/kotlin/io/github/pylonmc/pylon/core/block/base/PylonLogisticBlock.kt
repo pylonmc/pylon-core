@@ -10,6 +10,7 @@ import io.github.pylonmc.pylon.core.logistics.LogisticGroup
 import io.github.pylonmc.pylon.core.logistics.VirtualInventoryLogisticSlot
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import xyz.xenondevs.invui.inventory.VirtualInventory
