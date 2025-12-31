@@ -156,13 +156,14 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
     fun tickCargoFace(sourceGroup: LogisticGroup, targetGroup: LogisticGroup) {
         for (sourceSlot in sourceGroup.slots) {
             val sourceStack = sourceSlot.getItemStack()
-            val sourceAmount = sourceSlot.getAmount()
             if (sourceStack == null || (targetGroup.filter != null && !targetGroup.filter!!(sourceStack))) {
                 continue
             }
 
             var wasTargetModified = false
+            var remainingAvailableTransfers = cargoBlockData.transferRate.toLong() * PylonConfig.cargoTransferRateMultiplier
             for (targetSlot in targetGroup.slots) {
+                val sourceAmount = sourceSlot.getAmount()
                 val targetStack = targetSlot.getItemStack()
                 val targetAmount = targetSlot.getAmount()
                 val targetMaxAmount = targetSlot.getMaxAmount(sourceStack)
@@ -172,8 +173,8 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
                 }
 
                 val toTransfer = min(
+                    remainingAvailableTransfers,
                     min(targetMaxAmount - targetAmount, sourceAmount),
-                    cargoBlockData.transferRate.toLong() * PylonConfig.cargoTransferRateMultiplier
                 )
 
                 if (sourceAmount == toTransfer) {
@@ -183,7 +184,8 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
                 }
                 targetSlot.set(sourceStack, targetAmount + toTransfer)
 
-                if (sourceAmount == toTransfer) {
+                remainingAvailableTransfers -= toTransfer
+                if (remainingAvailableTransfers <= 0) {
                     return
                 }
 
