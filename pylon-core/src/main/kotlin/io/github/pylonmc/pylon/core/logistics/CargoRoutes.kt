@@ -7,8 +7,11 @@ import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
+import io.github.pylonmc.pylon.core.util.CARDINAL_FACES
+import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
+import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -47,10 +50,14 @@ object CargoRoutes : Listener {
      */
     private val routeBlocksCache: MutableMap<CargoRouteEndpoint, List<BlockPosition>> = mutableMapOf()
 
-    fun getCargoTarget(source: CargoRouteEndpoint): CargoRouteEndpoint?
-        = routeCache.getOrPut(source) {
-            recalculateTarget(source)
+    fun getCargoTarget(source: CargoRouteEndpoint): CargoRouteEndpoint? {
+        // Using getOrPut here does not work because supplying null to getOrPut WILL NOT ACTUALLY ADD
+        // NULL TO THE MAP
+        if (!routeCache.containsKey(source)) {
+            routeCache[source] = recalculateTarget(source)
         }
+        return routeCache[source]
+    }
 
     fun getCargoTarget(sourceBlock: PylonCargoBlock, sourceFace: BlockFace): CargoRouteEndpoint?
         = getCargoTarget(CargoRouteEndpoint(sourceBlock, sourceFace))
@@ -60,11 +67,11 @@ object CargoRoutes : Listener {
         var lastFaceUsed = source.face
         val previous = source.block.block.position
         var current = previous.getRelative(source.face)
-        val routeBlocksAndAdjacentBlocks = mutableListOf<BlockPosition>()
-        var endpoint: CargoRouteEndpoint? = null
+        val routeBlocks = mutableListOf<BlockPosition>(source.block.block.position)
+        var endpoint: CargoRouteEndpoint? = null // 42 70 -37
 
         while (current.chunk.isLoaded) {
-            routeBlocksAndAdjacentBlocks.add(current)
+            routeBlocks.add(current)
             val currentBlock = BlockStorage.get(current.block)
 
             if (currentBlock is CargoDuct) {
@@ -92,8 +99,15 @@ object CargoRoutes : Listener {
             }
         }
 
-        routeBlocksCache.put(source, routeBlocksAndAdjacentBlocks)
-        for (block in routeBlocksAndAdjacentBlocks) {
+        // if final block is cargo duct, add adjacent blocks in case another duct or cargo block is connected to it
+        if (endpoint == null) {
+            for (face in IMMEDIATE_FACES) {
+                routeBlocks.add(current.getRelative(face))
+            }
+        }
+
+        routeBlocksCache.put(source, routeBlocks)
+        for (block in routeBlocks) {
             blockRoutesCache.getOrPut(block) { mutableListOf() }.add(source)
         }
 
@@ -101,10 +115,13 @@ object CargoRoutes : Listener {
     }
 
     private fun invalidateRouteCache(source: CargoRouteEndpoint) {
-        val blocks = routeBlocksCache.remove(source)!!
-        for (block in blocks) {
-            blockRoutesCache.remove(block)
+        val blocks = routeBlocksCache.remove(source)
+        if (blocks != null) {
+            for (block in blocks) {
+                blockRoutesCache.remove(block)
+            }
         }
+        routeCache.remove(source)
     }
 
     private fun invalidateRouteCachesForBlock(block: Block) {
