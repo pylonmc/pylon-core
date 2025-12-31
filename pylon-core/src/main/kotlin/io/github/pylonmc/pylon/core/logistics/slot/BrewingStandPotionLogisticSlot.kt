@@ -1,7 +1,6 @@
-package io.github.pylonmc.pylon.core.logistics
+package io.github.pylonmc.pylon.core.logistics.slot
 
 import io.papermc.paper.datacomponent.DataComponentTypes
-import org.bukkit.Tag
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 

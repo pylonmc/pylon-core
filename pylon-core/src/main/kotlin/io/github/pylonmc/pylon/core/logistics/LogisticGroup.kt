@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.logistics
 
+import io.github.pylonmc.pylon.core.logistics.slot.LogisticSlot
 import org.bukkit.inventory.ItemStack
 
 /**
