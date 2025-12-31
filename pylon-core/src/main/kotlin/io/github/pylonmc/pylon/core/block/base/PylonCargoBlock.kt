@@ -20,7 +20,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.event.PylonCargoConnectEvent
 import io.github.pylonmc.pylon.core.event.PylonCargoDisconnectEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
-import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
+import io.github.pylonmc.pylon.core.logistics.LogisticGroupType
 import io.github.pylonmc.pylon.core.logistics.CargoRoutes
 import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -134,7 +134,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
     fun tickCargo() {
         for ((face, group) in cargoBlockData.groups) {
             val sourceGroup = getLogisticGroup(group)
-            if (sourceGroup == null || sourceGroup.slotType == LogisticSlotType.INPUT) {
+            if (sourceGroup == null || sourceGroup.slotType == LogisticGroupType.INPUT) {
                 continue
             }
 
@@ -144,7 +144,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
             }
 
             val targetGroup = target.block.getCargoLogisticGroup(target.face)
-            if (targetGroup == null || targetGroup.slotType == LogisticSlotType.OUTPUT) {
+            if (targetGroup == null || targetGroup.slotType == LogisticGroupType.OUTPUT) {
                 continue
             }
 

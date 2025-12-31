@@ -10,11 +10,11 @@ import org.bukkit.inventory.ItemStack
  * 'catalyst' group with 1 slot, and a 'output' group with 9 slots.
  */
 class LogisticGroup(
-    val slotType: LogisticSlotType,
+    val slotType: LogisticGroupType,
     val slots: List<LogisticSlot>
 ) {
 
-    constructor(slotType: LogisticSlotType, vararg slots: LogisticSlot) : this(slotType, slots.toList())
+    constructor(slotType: LogisticGroupType, vararg slots: LogisticSlot) : this(slotType, slots.toList())
 
     /**
      * Returns whether the provided item stack can be inserted into any slots
