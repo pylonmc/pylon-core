@@ -168,7 +168,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
                 val targetAmount = targetSlot.getAmount()
                 val targetMaxAmount = targetSlot.getMaxAmount(sourceStack)
 
-                if (targetAmount == targetMaxAmount || (targetStack != null && !sourceStack.isSimilar(targetStack))) {
+                if (targetAmount == targetMaxAmount || (targetStack != null && !targetStack.isEmpty && !sourceStack.isSimilar(targetStack))) {
                     continue
                 }
 
