@@ -10,8 +10,10 @@ import org.bukkit.inventory.ItemStack
  */
 class LogisticGroup(
     val slotType: LogisticSlotType,
-    vararg val slots: LogisticSlot,
+    val slots: List<LogisticSlot>
 ) {
+
+    constructor(slotType: LogisticSlotType, vararg slots: LogisticSlot) : this(slotType, slots.toList())
 
     /**
      * Returns whether the provided item stack can be inserted into any slots
