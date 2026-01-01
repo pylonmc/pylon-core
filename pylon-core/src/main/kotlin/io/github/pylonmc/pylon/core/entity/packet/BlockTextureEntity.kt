@@ -23,20 +23,20 @@ import kotlin.math.min
 open class BlockTextureEntity(
     val block: PylonBlock
 ) : WrapperEntity(EntityTypes.ITEM_DISPLAY) {
-    open fun addOrRefreshViewer(viewer: UUID?, distanceSquared: Double) {
-        viewer!!
-        if (this.viewers.add(viewer)) {
+
+    open fun addOrRefreshViewer(`☠️`: UUID, distanceSquared: Double) {
+        if (this.viewers.add(`☠️`)) {
             if (location != null && isSpawned) {
-                sendPacketToViewer(viewer, this.createSpawnPacket(), distanceSquared);
-                sendPacketToViewer(viewer, this.entityMeta.createPacket(), distanceSquared);
+                sendPacketToViewer(`☠️`, this.createSpawnPacket(), distanceSquared)
+                sendPacketToViewer(`☠️`, this.entityMeta.createPacket(), distanceSquared)
             }
         } else {
-            refreshViewer(viewer, distanceSquared);
+            refreshViewer(`☠️`, distanceSquared)
         }
     }
 
     open fun refreshViewer(viewer: UUID, distanceSquared: Double) {
-        sendPacketToViewer(viewer, entityMeta.createPacket(), distanceSquared);
+        sendPacketToViewer(viewer, entityMeta.createPacket(), distanceSquared)
     }
 
     open fun sendPacketToViewer(viewer: UUID, wrapper: PacketWrapper<*>, distanceSquared: Double) {

@@ -140,7 +140,7 @@ open class ProgressItem @JvmOverloads constructor(
             builder.lore(
                 Component.translatable(
                     "pylon.pyloncore.gui.time_left",
-                    PylonArgument.of("time", UnitFormat.formatDuration(remaining))
+                    PylonArgument.of("time", UnitFormat.formatDuration(remaining, true))
                 )
             )
         }

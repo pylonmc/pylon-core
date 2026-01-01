@@ -11,6 +11,8 @@ item:
     name: "<white>Pylon Guide"
     lore: |-
       <arrow> <insn>Right click</insn> to open
+      <arrow> Use <insn>/py guide</insn> to get a new guide
+      <arrow> You can open the guide without this item with <insn>/py</insn>
 
   phantom_block:
     name: "<red>Phantom Block (%block%)"
@@ -401,6 +403,10 @@ unit:
     singular: "second"
     plural: "seconds"
     abbr: "s"
+  milliseconds:
+    singular: "millisecond"
+    plural: "milliseconds"
+    abbr: "ms"
   joules:
     singular: "joule"
     plural: "joules"

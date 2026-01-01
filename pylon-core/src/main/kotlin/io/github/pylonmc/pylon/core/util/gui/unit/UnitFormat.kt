@@ -271,6 +271,13 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
+        val MILLISECONDS = UnitFormat(
+            "milliseconds",
+            TextColor.color(0xc9c786),
+            abbreviate = true
+        )
+
+        @JvmField
         val JOULES = UnitFormat(
             "joules",
             TextColor.color(0xF2A900),
@@ -327,7 +334,7 @@ class UnitFormat @JvmOverloads constructor(
          * Helper function that automatically formats a duration into days:hours:minutes:seconds
          */
         @JvmStatic
-        fun formatDuration(duration: Duration): Component {
+        @JvmOverloads fun formatDuration(duration: Duration, abbreviate: Boolean = true): Component {
             var component = Component.text()
             var isEmpty = true
 
@@ -336,7 +343,6 @@ class UnitFormat @JvmOverloads constructor(
                 component = component.append(
                     DAYS.format(days)
                         .abbreviate(false)
-                        .unitStyle(Style.empty())
                 )
                 isEmpty = false
             }
@@ -347,8 +353,7 @@ class UnitFormat @JvmOverloads constructor(
                 }
                 component = component.append(
                     HOURS.format(hours)
-                        .abbreviate(false)
-                        .unitStyle(Style.empty())
+                        .abbreviate(abbreviate)
                 )
                 isEmpty = false
             }
@@ -359,21 +364,31 @@ class UnitFormat @JvmOverloads constructor(
                 }
                 component = component.append(
                     MINUTES.format(minutes)
-                        .abbreviate(false)
-                        .unitStyle(Style.empty())
+                        .abbreviate(abbreviate)
                 )
                 isEmpty = false
             }
             val seconds = duration.toSecondsPart()
-            if (seconds > 0 || isEmpty) {
+            if (seconds > 0) {
                 if (!isEmpty) {
                     component = component.append(Component.text(" "))
                 }
                 component = component.append(
                     SECONDS.format(seconds)
-                        .abbreviate(false)
-                        .unitStyle(Style.empty())
+                        .abbreviate(abbreviate)
                 )
+                isEmpty = false
+            }
+            val millis = duration.toMillisPart()
+            if (millis > 0 || isEmpty) {
+                if (!isEmpty) {
+                    component = component.append(Component.text(" "))
+                }
+                component = component.append(
+                    MILLISECONDS.format(millis)
+                        .abbreviate(abbreviate)
+                )
+                isEmpty = false
             }
             return component.build()
         }
