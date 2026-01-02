@@ -38,7 +38,6 @@ object EntityStorage : Listener {
     private val entitiesByKey: MutableMap<NamespacedKey, MutableSet<PylonEntity<*>>> = ConcurrentHashMap()
     private val entityAutosaveTasks: MutableMap<UUID, Job> = ConcurrentHashMap()
     private val whenEntityLoadsTasks: MutableMap<UUID, MutableSet<Consumer<PylonEntity<*>>>> = ConcurrentHashMap()
-    private val tickMap: MutableMap<UUID, Job> = ConcurrentHashMap()
 
     /**
      * All the loaded [PylonEntity]s
@@ -227,7 +226,6 @@ object EntityStorage : Listener {
     @EventHandler
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
         val pylonEntity = get(event.entity.uniqueId) ?: return
-        tickMap[pylonEntity.uuid]?.cancel()
 
         if (!event.entity.isDead) {
             PylonEntity.serialize(pylonEntity)
