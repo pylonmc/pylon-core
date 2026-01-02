@@ -140,7 +140,7 @@ interface PylonTickingEntity {
                         tickingEntity.tick()
                     } catch (e: Exception) {
                         PylonCore.launch(PylonCore.minecraftDispatcher) {
-                            EntityListener.logEventHandleErr(null, e, tickingEntity as PylonEntity<*>)
+                            EntityListener.logEventHandleErrTicking(e, tickingEntity as PylonEntity<*>)
                         }
                     }
                 }
