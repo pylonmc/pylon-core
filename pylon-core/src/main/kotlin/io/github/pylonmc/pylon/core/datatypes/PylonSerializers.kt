@@ -103,6 +103,9 @@ object PylonSerializers {
     val INVENTORY = InventoryPersistentDataType
 
     @JvmField
+    val VIRTUAL_INVENTORY = VirtualInventoryPersistentDataType
+
+    @JvmField
     val KEYED = KeyedPersistentDataType
 
     @JvmField
