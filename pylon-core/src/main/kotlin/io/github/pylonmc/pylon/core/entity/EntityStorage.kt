@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.config.PylonConfig
+import io.github.pylonmc.pylon.core.event.PylonEntityAddEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
@@ -19,7 +20,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.EntitiesLoadEvent
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.function.Consumer
@@ -194,6 +195,7 @@ object EntityStorage : Listener {
                 delay(PylonConfig.ENTITY_DATA_AUTOSAVE_INTERVAL_SECONDS * 1000)
             }
         }
+        PylonEntityAddEvent(entity).callEvent()
         entity
     }
 

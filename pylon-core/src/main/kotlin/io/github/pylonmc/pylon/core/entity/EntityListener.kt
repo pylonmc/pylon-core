@@ -807,7 +807,17 @@ internal object EntityListener : Listener {
 
     @JvmSynthetic
     internal fun logEventHandleErr(event: Event, e: Exception, entity: PylonEntity<*>) {
-        PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event.javaClass.simpleName}: ${e.localizedMessage}")
+        PylonCore.logger.severe("Error when handling entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}) event handler ${event?.javaClass?.simpleName}: ${e.localizedMessage}")
+        e.printStackTrace()
+        entityErrMap[entity.uuid] = entityErrMap[entity.uuid]?.plus(1) ?: 1
+        if (entityErrMap[entity.uuid]!! > PylonConfig.ALLOWED_ENTITY_ERRORS) {
+            entity.entity.remove()
+        }
+    }
+
+    @JvmSynthetic
+    internal fun logEventHandleErrTicking(e: Exception, entity: PylonEntity<*>) {
+        PylonCore.logger.severe("Error when handling ticking entity(${entity.key}, ${entity.uuid}, ${entity.entity.location}): ${e.localizedMessage}")
         e.printStackTrace()
         entityErrMap[entity.uuid] = entityErrMap[entity.uuid]?.plus(1) ?: 1
         if (entityErrMap[entity.uuid]!! > PylonConfig.ALLOWED_ENTITY_ERRORS) {
