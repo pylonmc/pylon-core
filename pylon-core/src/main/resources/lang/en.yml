@@ -403,10 +403,6 @@ unit:
     singular: "second"
     plural: "seconds"
     abbr: "s"
-  milliseconds:
-    singular: "millisecond"
-    plural: "milliseconds"
-    abbr: "ms"
   joules:
     singular: "joule"
     plural: "joules"

@@ -21,7 +21,6 @@ import java.util.EnumSet
  * For example, if you create a 'grams' unit and specify 'kilo' as the default prefix, calling [format] with
  * 100 will return '100 kilograms'
  * @param defaultStyle The style to apply to the unit (not the value)
- * @param usePrefixes Whether we should automatically calculate and apply a prefix (kilo, nano, etc)
  * to the output.
  */
 class UnitFormat @JvmOverloads constructor(
@@ -31,7 +30,6 @@ class UnitFormat @JvmOverloads constructor(
     val abbreviation: Component? = null,
     val defaultPrefix: MetricPrefix = MetricPrefix.NONE,
     val defaultStyle: Style = Style.empty(),
-    val usePrefixes: Boolean = true
 ) {
 
     private constructor(
@@ -46,7 +44,6 @@ class UnitFormat @JvmOverloads constructor(
         abbreviation = Component.translatable("pylon.pyloncore.unit.$name.abbr").takeIf { abbreviate },
         defaultPrefix = prefix ?: MetricPrefix.NONE,
         defaultStyle = Style.style(color),
-        usePrefixes = prefix != null
     )
 
     init {
@@ -152,9 +149,6 @@ class UnitFormat @JvmOverloads constructor(
             }
             while (usedPrefix in badPrefixes) {
                 usedPrefix = MetricPrefix.entries[MetricPrefix.entries.indexOf(usedPrefix) + 1]
-            }
-            if (!usePrefixes) {
-                usedPrefix = MetricPrefix.NONE
             }
 
             usedValue = usedValue.movePointLeft(usedPrefix.scale - defaultPrefix.scale)
@@ -267,14 +261,7 @@ class UnitFormat @JvmOverloads constructor(
         val SECONDS = UnitFormat(
             "seconds",
             TextColor.color(0xc9c786),
-            abbreviate = true
-        )
-
-        @JvmField
-        val MILLISECONDS = UnitFormat(
-            "milliseconds",
-            TextColor.color(0xc9c786),
-            abbreviate = true
+            abbreviate = true,
         )
 
         @JvmField
@@ -334,7 +321,7 @@ class UnitFormat @JvmOverloads constructor(
          * Helper function that automatically formats a duration into days:hours:minutes:seconds
          */
         @JvmStatic
-        @JvmOverloads fun formatDuration(duration: Duration, abbreviate: Boolean = true): Component {
+        @JvmOverloads fun formatDuration(duration: Duration, abbreviate: Boolean = true, useMillis: Boolean = false): Component {
             var component = Component.text()
             var isEmpty = true
 
@@ -369,7 +356,7 @@ class UnitFormat @JvmOverloads constructor(
                 isEmpty = false
             }
             val seconds = duration.toSecondsPart()
-            if (seconds > 0) {
+            if (seconds > 0 || (!useMillis && isEmpty)) {
                 if (!isEmpty) {
                     component = component.append(Component.text(" "))
                 }
@@ -379,16 +366,19 @@ class UnitFormat @JvmOverloads constructor(
                 )
                 isEmpty = false
             }
-            val millis = duration.toMillisPart()
-            if (millis > 0 || isEmpty) {
-                if (!isEmpty) {
-                    component = component.append(Component.text(" "))
+            if (useMillis) {
+                val millis = duration.toMillisPart()
+                if (millis > 0 || isEmpty) {
+                    if (!isEmpty) {
+                        component = component.append(Component.text(" "))
+                    }
+                    component = component.append(
+                        SECONDS.format(millis / 1000)
+                            .prefix(MetricPrefix.MILLI)
+                            .abbreviate(abbreviate)
+                    )
+                    isEmpty = false
                 }
-                component = component.append(
-                    MILLISECONDS.format(millis)
-                        .abbreviate(abbreviate)
-                )
-                isEmpty = false
             }
             return component.build()
         }

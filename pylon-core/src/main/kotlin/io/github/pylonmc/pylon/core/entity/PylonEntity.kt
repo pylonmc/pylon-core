@@ -61,7 +61,7 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
      *
      * *Do not assume that when this is called, the entity is being unloaded.* This
      * may be called for other reasons, such as when a player right clicks with
-     * [DebugWaxedWeatheredCutCopperStairs]. Instead, uise [onUnload]
+     * [DebugWaxedWeatheredCutCopperStairs]. Instead, use [onUnload]
      */
     open fun write(pdc: PersistentDataContainer) {}
 
