@@ -6,7 +6,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
-object TickingEntityPersistentDataType : PersistentDataType<PersistentDataContainer, PylonTickingEntity.Companion.TickingEntityData> {
+internal object TickingEntityPersistentDataType : PersistentDataType<PersistentDataContainer, PylonTickingEntity.Companion.TickingEntityData> {
     val tickIntervalKey = pylonKey("tick_interval")
     val isAsyncKey = pylonKey("is_async")
 
