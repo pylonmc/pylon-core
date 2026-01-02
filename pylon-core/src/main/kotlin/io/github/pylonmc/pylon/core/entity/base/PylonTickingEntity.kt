@@ -24,7 +24,7 @@ import java.util.*
 /**
  * Represents an entity that 'ticks' (does something at a fixed time interval).
  */
-interface PylonTickableEntity {
+interface PylonTickingEntity {
 
     private val tickingData: TickingEntityData
         get() = tickingEntities.getOrPut(this) { TickingEntityData(
@@ -82,12 +82,12 @@ interface PylonTickableEntity {
 
         private val tickingEntityKey = pylonKey("ticking_entity_data")
 
-        private val tickingEntities = IdentityHashMap<PylonTickableEntity, TickingEntityData>()
+        private val tickingEntities = IdentityHashMap<PylonTickingEntity, TickingEntityData>()
 
         @EventHandler
         private fun onSerialize(event: PylonEntityAddEvent) { //todo serialize
             val entity = event.pylonEntity
-            if (entity is PylonTickableEntity) {
+            if (entity is PylonTickingEntity) {
                 entity.entity.persistentDataContainer.set(tickingEntityKey, PylonSerializers.TICKING_ENTITY_DATA, tickingEntities[entity]!!)
             }
         }
@@ -95,7 +95,7 @@ interface PylonTickableEntity {
         @EventHandler
         private fun onUnload(event: PylonEntityUnloadEvent) {
             val entity = event.pylonEntity
-            if (entity is PylonTickableEntity) {
+            if (entity is PylonTickingEntity) {
                 tickingEntities.remove(entity)?.job?.cancel()
             }
         }
@@ -103,7 +103,7 @@ interface PylonTickableEntity {
         @EventHandler
         private fun onDeath(event: PylonEntityDeathEvent) {
             val entity = event.pylonEntity
-            if (entity is PylonTickableEntity) {
+            if (entity is PylonTickingEntity) {
                 tickingEntities.remove(entity)?.job?.cancel()
             }
         }
@@ -111,7 +111,7 @@ interface PylonTickableEntity {
         @EventHandler
         private fun onEntityLoad(event: PylonEntityLoadEvent) {
             val entity = event.pylonEntity
-            if (entity is PylonTickableEntity) {
+            if (entity is PylonTickingEntity) {
                 startTicker(entity)
             }
         }
@@ -123,15 +123,15 @@ interface PylonTickableEntity {
         @JvmStatic
         @ApiStatus.Internal
         fun isTicking(entity: PylonEntity<*>?): Boolean {
-            return entity is PylonTickableEntity && tickingEntities[entity]?.job?.isActive == true
+            return entity is PylonTickingEntity && tickingEntities[entity]?.job?.isActive == true
         }
 
         @JvmSynthetic
-        internal fun stopTicking(entity: PylonTickableEntity) {
+        internal fun stopTicking(entity: PylonTickingEntity) {
             tickingEntities[entity]?.job?.cancel()
         }
 
-        private fun startTicker(tickingEntity: PylonTickableEntity) {
+        private fun startTicker(tickingEntity: PylonTickingEntity) {
             val dispatcher = if (tickingEntity.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
             tickingEntities[tickingEntity]?.job = PylonCore.launch(dispatcher) {
                 while (true) {
