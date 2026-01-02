@@ -373,7 +373,7 @@ class UnitFormat @JvmOverloads constructor(
                         component = component.append(Component.text(" "))
                     }
                     component = component.append(
-                        SECONDS.format(millis / 1000)
+                        SECONDS.format(millis / 1000.0)
                             .prefix(MetricPrefix.MILLI)
                             .abbreviate(abbreviate)
                     )
