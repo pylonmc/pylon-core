@@ -113,7 +113,7 @@ object EntityStorage : Listener {
         }
 
     /**
-     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * Schedules a task to run when the Pylon entity with id [uuid] is loaded, or runs the task immediately
      * if the entity is already loaded.
      *
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
@@ -132,7 +132,7 @@ object EntityStorage : Listener {
     }
 
     /**
-     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * Schedules a task to run when the Pylon entity with id [uuid] is loaded, or runs the task immediately
      * if the entity is already loaded.
      *
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
@@ -150,7 +150,7 @@ object EntityStorage : Listener {
     }
 
     /**
-     * Schedules a task to run when the entity with id [uuid] is loaded, or runs the task immediately
+     * Schedules a task to run when the Pylon entity with id [uuid] is loaded, or runs the task immediately
      * if the entity is already loaded
      *
      * Useful for when you don't know whether a block or one of its associated entity will be loaded first.
@@ -185,13 +185,13 @@ object EntityStorage : Listener {
         entityAutosaveTasks[entity.uuid] = PylonCore.launch(PylonCore.minecraftDispatcher) {
 
             // Wait a random delay before starting, this is to help smooth out lag from saving
-            delay(Random.nextLong(PylonConfig.entityDataAutosaveIntervalSeconds * 1000))
+            delay(Random.nextLong(PylonConfig.ENTITY_DATA_AUTOSAVE_INTERVAL_SECONDS * 1000))
 
             while (true) {
                 lockEntityRead {
                     entity.write(entity.entity.persistentDataContainer)
                 }
-                delay(PylonConfig.entityDataAutosaveIntervalSeconds * 1000)
+                delay(PylonConfig.ENTITY_DATA_AUTOSAVE_INTERVAL_SECONDS * 1000)
             }
         }
         entity

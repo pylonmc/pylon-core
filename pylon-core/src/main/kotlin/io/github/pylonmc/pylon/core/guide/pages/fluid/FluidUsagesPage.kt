@@ -26,7 +26,7 @@ open class FluidUsagesPage(val fluid: PylonFluid) : PagedGuidePage {
         for (type in PylonRegistry.RECIPE_TYPES) {
             for (recipe in type.recipes) {
                 if (!recipe.isHidden && recipe.isInput(fluid)) {
-                    pages.add(recipe.display())
+                    recipe.display()?.let { pages.add(it) }
                 }
             }
         }
