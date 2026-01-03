@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.block.MultiblockCache
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import org.bukkit.block.Block
 import org.jetbrains.annotations.ApiStatus
@@ -77,4 +78,13 @@ interface PylonMultiblock {
      * [partUnloaded] is true if the multiblock became unformed because part of it was unloaded, false otherwise.
      */
     fun onMultiblockUnformed(partUnloaded: Boolean) {}
+
+    companion object {
+        /**
+         * Returns a list of the block positions of any multiblocks which have [block] as a component
+         */
+        @JvmStatic
+        fun loadedMultiblocksWithComponent(block: Block)
+                = MultiblockCache.loadedMultiblocksWithComponent(block)
+    }
 }
