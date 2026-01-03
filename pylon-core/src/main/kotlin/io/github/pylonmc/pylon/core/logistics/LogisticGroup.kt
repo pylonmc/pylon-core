@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.logistics
 
+import io.github.pylonmc.pylon.core.logistics.slot.LogisticSlot
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -9,9 +10,11 @@ import org.bukkit.inventory.ItemStack
  * 'catalyst' group with 1 slot, and a 'output' group with 9 slots.
  */
 class LogisticGroup(
-    val slotType: LogisticSlotType,
-    vararg val slots: LogisticSlot,
+    val slotType: LogisticGroupType,
+    val slots: List<LogisticSlot>
 ) {
+
+    constructor(slotType: LogisticGroupType, vararg slots: LogisticSlot) : this(slotType, slots.toList())
 
     /**
      * Returns whether the provided item stack can be inserted into any slots

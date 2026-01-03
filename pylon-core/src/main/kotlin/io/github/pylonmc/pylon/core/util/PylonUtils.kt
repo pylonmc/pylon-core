@@ -7,6 +7,15 @@ import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
 import io.github.pylonmc.pylon.core.item.PylonItem
+import io.github.pylonmc.pylon.core.logistics.slot.BrewingStandFuelLogisticSlot
+import io.github.pylonmc.pylon.core.logistics.slot.BrewingStandPotionLogisticSlot
+import io.github.pylonmc.pylon.core.logistics.slot.ChiseledBookshelfFuelLogisticSlot
+import io.github.pylonmc.pylon.core.logistics.slot.FurnaceFuelLogisticSlot
+import io.github.pylonmc.pylon.core.logistics.slot.JukeboxLogisticSlot
+import io.github.pylonmc.pylon.core.logistics.LogisticGroup
+import io.github.pylonmc.pylon.core.logistics.slot.LogisticSlot
+import io.github.pylonmc.pylon.core.logistics.LogisticGroupType
+import io.github.pylonmc.pylon.core.logistics.slot.VanillaInventoryLogisticSlot
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
@@ -19,11 +28,24 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.attribute.Attribute
 import org.bukkit.Registry
 import org.bukkit.World
+import org.bukkit.attribute.Attribute
+import org.bukkit.block.Barrel
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.BrewingStand
+import org.bukkit.block.Chest
+import org.bukkit.block.ChiseledBookshelf
+import org.bukkit.block.Crafter
+import org.bukkit.block.Dispenser
+import org.bukkit.block.DoubleChest
+import org.bukkit.block.Dropper
+import org.bukkit.block.Furnace
+import org.bukkit.block.Hopper
+import org.bukkit.block.Jukebox
+import org.bukkit.block.Shelf
+import org.bukkit.block.ShulkerBox
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
@@ -45,6 +67,7 @@ import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
 import xyz.xenondevs.invui.inventory.event.UpdateReason
+import java.lang.Math
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.util.function.Consumer
@@ -617,3 +640,41 @@ class MachineUpdateReason : UpdateReason
 // https://minecraft.wiki/w/Breaking#Calculation
 fun getBlockBreakTicks(tool: ItemStack, block: Block)
     = round(100 * block.type.getHardness() / block.getDestroySpeed(tool, true))
+
+fun getVanillaLogisticSlots(block: Block?): Map<String, LogisticGroup> {
+    val blockData = block?.state
+    return when (blockData) {
+        is Furnace -> mapOf<String, LogisticGroup>(
+            "input" to LogisticGroup(LogisticGroupType.INPUT, VanillaInventoryLogisticSlot(blockData.inventory, 0)),
+            "fuel" to LogisticGroup(LogisticGroupType.INPUT, FurnaceFuelLogisticSlot(blockData.inventory, 1)),
+            "output" to LogisticGroup(LogisticGroupType.OUTPUT, VanillaInventoryLogisticSlot(blockData.inventory, 2)),
+        )
+        is BrewingStand -> mapOf<String, LogisticGroup>(
+            "output" to LogisticGroup(LogisticGroupType.BOTH,
+                BrewingStandPotionLogisticSlot(blockData.inventory, 0),
+                BrewingStandPotionLogisticSlot(blockData.inventory, 1),
+                BrewingStandPotionLogisticSlot(blockData.inventory, 2),
+            ),
+            "input" to LogisticGroup(LogisticGroupType.INPUT, VanillaInventoryLogisticSlot(blockData.inventory, 3)),
+            "fuel" to LogisticGroup(LogisticGroupType.INPUT, BrewingStandFuelLogisticSlot(blockData.inventory, 4)),
+        )
+        is ChiseledBookshelf -> {
+            val slots = mutableListOf<LogisticSlot>()
+            for (slot in 0..<blockData.inventory.size) {
+                slots.add(ChiseledBookshelfFuelLogisticSlot(blockData.inventory, slot))
+            }
+            return mapOf<String, LogisticGroup>("inventory" to LogisticGroup(LogisticGroupType.BOTH, slots))
+        }
+        is Jukebox -> mapOf<String, LogisticGroup>(
+            "inventory" to LogisticGroup(LogisticGroupType.BOTH, JukeboxLogisticSlot(blockData.inventory, 0)),
+        )
+        is Dispenser, is Dropper, is Hopper, is Barrel, is DoubleChest, is Chest, is Shelf, is ShulkerBox, is Crafter -> {
+            val slots = mutableListOf<LogisticSlot>()
+            for (slot in 0..<blockData.inventory.size) {
+                slots.add(VanillaInventoryLogisticSlot(blockData.inventory, slot))
+            }
+            return mapOf<String, LogisticGroup>("inventory" to LogisticGroup(LogisticGroupType.BOTH, slots))
+        }
+        else -> mapOf<String, LogisticGroup>()
+    }
+}
