@@ -16,10 +16,7 @@ import xyz.xenondevs.invui.item.Item
 /**
  * Allows you to search all items and fluids by hijacking the anvil GUI.
  */
-class SearchItemsAndFluidsPage : SearchPage(
-    pylonKey("search"),
-    Material.OAK_SIGN
-) {
+class SearchItemsAndFluidsPage : SearchPage(pylonKey("search")) {
 
     fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.ITEMS.filter {
         it.key !in PylonGuide.hiddenItems

@@ -16,7 +16,6 @@ import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.papermc.paper.datacomponent.DataComponentTypes
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Registry
 import org.bukkit.entity.Player

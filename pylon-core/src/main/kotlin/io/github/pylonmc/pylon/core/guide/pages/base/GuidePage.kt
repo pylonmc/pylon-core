@@ -6,19 +6,12 @@ import org.bukkit.Keyed
 import org.bukkit.entity.Player
 import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.window.Window
 
 /**
  * Represents a page in the [PylonGuide].
  */
 interface GuidePage : Keyed {
-
-    /**
-     * The item representing this page. This will be used in any [io.github.pylonmc.pylon.core.guide.button.PageButton]s
-     * that point to this page.
-     */
-    val item: ItemProvider
 
     /**
      * The title of this page, displayed at the top of the GUI when the page is open.

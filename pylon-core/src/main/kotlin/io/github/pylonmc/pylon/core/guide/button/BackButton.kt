@@ -13,7 +13,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 /**
  * Represents the back button in the guide.
  */
-open class BackButton() : AbstractItem() {
+class BackButton : AbstractItem() {
 
     override fun getItemProvider() = ItemStackBuilder.gui(Material.ENCHANTED_BOOK, pylonKey("guide_back"))
         .name(Component.translatable("pylon.pyloncore.guide.button.back.name"))
@@ -24,7 +24,7 @@ open class BackButton() : AbstractItem() {
 
         if (clickType.isShiftClick) {
             history.clear()
-            PylonGuide.rootPage.open(player);
+            PylonGuide.rootPage.open(player)
         } else if (history.size >= 2) {
             history.removeLast() // remove the current page
             history.removeLast().open(player)

@@ -35,7 +35,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
  * - This is useful for adding visual indicators of the current setting value, such as changing the material or custom model data.
  * - The name and lore of the button will be applied on top of this ItemStack.
  *
- * [placeholderProvider] Provides additional placeholders for the translation. (See [TranslatableComponent.arguments] and [PylonArgument])
+ * [placeholderProvider] Provides additional placeholders for the translation. (See [net.kyori.adventure.text.TranslatableComponent.arguments] and [PylonArgument])
  * - By default there is a placeholder "value" which contains the current setting value.
  */
 data class NumericPlayerSettingButton<N : Number>(

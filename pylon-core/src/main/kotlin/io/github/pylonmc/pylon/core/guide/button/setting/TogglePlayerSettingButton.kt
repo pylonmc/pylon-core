@@ -27,7 +27,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
  * - The name and lore of the button will be applied on top of this ItemStack.
  * - By default the button is lime concrete when enabled and red concrete when disabled with custom model data of "{key}_enabled" and "{key}_disabled" respectively.
  *
- * [placeholderProvider] Provides additional placeholders for the translation. (See [TranslatableComponent.arguments] and [PylonArgument])
+ * [placeholderProvider] Provides additional placeholders for the translation. (See [net.kyori.adventure.text.TranslatableComponent.arguments] and [PylonArgument])
  */
 data class TogglePlayerSettingButton(
     val key: NamespacedKey,
