@@ -126,19 +126,19 @@ guide:
     search-specifiers:
       name: "Search Specifiers"
       lore: |-
-        <arrow:#3a293> By default, searches through item names greedily ("iron ingot" searches for exactly "iron ingot" not "iron" and "ingot")
-        <arrow:#3a293> Prefix <light_purple>@</light_purple> to search by <light_purple>addon</light_purple> id or display name (e.g. "pylonbase" or "base")
-        <arrow:#3a293> Prefix <aqua>$</aqua> to search in <aqua>lore</aqua>
-        <arrow:#3a293> Prefixed searches only apply to the word directly after the prefix
-        <arrow:#3a293> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature <white>slurry
+        <guidearrow> By default, searches through item names greedily ("iron ingot" searches for exactly "iron ingot" not "iron" and "ingot")
+        <guidearrow> Prefix <light_purple>@</light_purple> to search by <light_purple>addon</light_purple> id or display name (e.g. "pylonbase" or "base")
+        <guidearrow> Prefix <aqua>$</aqua> to search in <aqua>lore</aqua>
+        <guidearrow> Prefixed searches only apply to the word directly after the prefix
+        <guidearrow> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature <white>slurry
     research:
       cost:
         not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
         enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%points%/%cost%"
         researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%cost% (researched)"
       instructions: |-
-        <arrow:#3a293> <guideinsn>Left click</guideinsn> to research
-        <arrow:#3a293> <guideinsn>Right click</guideinsn> to see unlocked items
+        <guidearrow> <guideinsn>Left click</guideinsn> to research
+        <guidearrow> <guideinsn>Right click</guideinsn> to see unlocked items
       unlocks-title: "<u>Unlocks</u>"
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>more - <guideinsn>right click</guideinsn> <gray>to see all"
@@ -150,16 +150,16 @@ guide:
       not-researched: "<red><u>Not researched yet</u>"
       not-researched-with-name: "<red><u>Not researched yet <gray>(%research_name%<gray>)"
       research-instructions: |-
-        <arrow:#3a2939> <guideinsn>Shift left click</guideinsn> to research
-        <arrow:#3a2939> <guideinsn>Shift right click</guideinsn> to see other research unlocks
+        <guidearrow> <guideinsn>Shift left click</guideinsn> to research
+        <guidearrow> <guideinsn>Shift right click</guideinsn> to see other research unlocks
       error: "<red>Item failed to load"
     toggle-waila:
       enabled:
         name: "<white>WAILA: <green>Enabled <dark_gray>(Click to toggle)"
-        lore: "<arrow:#3a2939> Whether to show information about the Pylon block/entity you're looking at"
+        lore: "<guidearrow> Whether to show information about the Pylon block/entity you're looking at"
       disabled:
         name: "<white>WAILA: <red>Disabled <dark_gray>(Click to toggle)"
-        lore: "<arrow:#3a2939> Whether to show information about the Pylon block/entity you're looking at"
+        lore: "<guidearrow> Whether to show information about the Pylon block/entity you're looking at"
     toggle-vanilla-waila:
       enabled:
         name: "<white>Vanilla WAILA: <green>Enabled <dark_gray>(Click to toggle)"
@@ -171,15 +171,15 @@ guide:
       bossbar:
         name: "<white>WAILA display type: <green>Bossbar <dark_gray>(Click to cycle)"
         lore: |-
-          <arrow:#3a2939> Whether your WAILA is displayed as an actionbar or bossbar
-          <arrow:#3a2939> <green>Bossbar <dark_gray>- <gray>at the top of your screen
-          <arrow:#3a2939> <aqua>Actionbar <dark_gray>- <gray>at the bottom of your screen
+          <guidearrow> Whether your WAILA is displayed as an actionbar or bossbar
+          <guidearrow> <green>Bossbar <dark_gray>- <gray>at the top of your screen
+          <guidearrow> <aqua>Actionbar <dark_gray>- <gray>at the bottom of your screen
       actionbar:
         name: "<white>WAILA display type: <aqua>Actionbar <dark_gray>(Click to cycle)"
         lore: |-
-          <arrow:#3a2939> Whether your WAILA is displayed as an actionbar or bossbar
-          <arrow:#3a2939> <green>Bossbar <dark_gray>- <gray>at the top of your screen
-          <arrow:#3a2939> <aqua>Actionbar <dark_gray>- <gray>at the bottom of your screen
+          <guidearrow> Whether your WAILA is displayed as an actionbar or bossbar
+          <guidearrow> <green>Bossbar <dark_gray>- <gray>at the top of your screen
+          <guidearrow> <aqua>Actionbar <dark_gray>- <gray>at the bottom of your screen
     intermediates:
       name: "<blue>↑ Inputs ↑"
       lore: |-
@@ -193,69 +193,76 @@ guide:
       enabled:
         name: "<white>Custom block textures: <green>Enabled <dark_gray>(Click to toggle)"
         lore: |-
-          <arrow:#3a2939> Enable only if you are using a resource pack that adds textures for Pylon blocks
-          <arrow:#3a2939> <red>Warning:</red> This may negatively affect your game's performance with large numbers of Pylon blocks
+          <guidearrow> Enable only if you are using a resource pack that adds textures for Pylon blocks
+          <guidearrow> <red>Warning:</red> This may negatively affect your game's performance with large numbers of Pylon blocks
       disabled:
         name: "<white>Custom block textures: <red>Disabled <dark_gray>(Click to toggle)"
         lore: |-
-          <arrow:#3a2939> Enable only if you are using a resource pack that adds textures for Pylon blocks
-          <arrow:#3a2939> <red>Warning:</red> This may negatively affect your game's performance with large numbers of Pylon blocks
+          <guidearrow> Enable only if you are using a resource pack that adds textures for Pylon blocks
+          <guidearrow> <red>Warning:</red> This may negatively affect your game's performance with large numbers of Pylon blocks
     cycle-culling-preset:
       disabled:
         name: "<white>Culling preset: <aqua>No Culling <dark_gray>(Click to cycle)"
         lore: |-
-          <arrow:#3a2939> Changes how aggressively block texture entities are hidden from you
-          <arrow:#3a2939> More aggressive culling settings will generally improve your game's performance
-          <arrow:#3a2939> <aqua>(No Culling) <gray>You will see all block texture entities within view distance
+          <guidearrow> Changes how aggressively block texture entities are hidden from you
+          <guidearrow> More aggressive culling settings will generally improve your game's performance
+          <guidearrow> <aqua>(No Culling) <gray>You will see all block texture entities within view distance
       low:
         name: "<white>Culling preset: <green>Low <dark_gray>(Click to cycle)"
         lore: |-
-          <arrow:#3a2939> Changes how aggressively block texture entities are hidden from you
-          <arrow:#3a2939> More aggressive culling settings will generally improve your game's performance
-          <arrow:#3a2939> <green>(Low) <gray>You will see all block texture entities within <yellow>%alwaysShowRadius% blocks</yellow>
-          <arrow:#3a2939> <green>(Low) <gray>Block texture entities within <yellow>%alwaysShowRadius% to %cullRadius% blocks</yellow> will be conservatively culled
-          <arrow:#3a2939> <green>(Low) <gray>Culling will only occur if there are more than <yellow>%maxOccludingCount% blocks</yellow> between you and the block texture entity
+          <guidearrow> Changes how aggressively block texture entities are hidden from you
+          <guidearrow> More aggressive culling settings will generally improve your game's performance
+          <guidearrow> <green>(Low) <gray>You will see all block texture entities within <yellow>%alwaysShowRadius% blocks</yellow>
+          <guidearrow> <green>(Low) <gray>Block texture entities within <yellow>%alwaysShowRadius% to %cullRadius% blocks</yellow> will be conservatively culled
+          <guidearrow> <green>(Low) <gray>Culling will only occur if there are more than <yellow>%maxOccludingCount% blocks</yellow> between you and the block texture entity
       medium:
         name: "<white>Culling preset: <yellow>Medium <dark_gray>(Click to cycle)"
         lore: |-
-          <arrow:#3a2939> Changes how aggressively block texture entities are hidden from you
-          <arrow:#3a2939> More aggressive culling settings will generally improve your game's performance
-          <arrow:#3a2939> <yellow>(Medium) <gray>You will see all block texture entities within <yellow>%alwaysShowRadius% blocks</yellow>
-          <arrow:#3a2939> <yellow>(Medium) <gray>Block texture entities within <yellow>%alwaysShowRadius% to %cullRadius% blocks</yellow> will be moderately culled
-          <arrow:#3a2939> <yellow>(Medium) <gray>Culling will only occur if there are more than <yellow>%maxOccludingCount% blocks</yellow> between you and the block texture entity
+          <guidearrow> Changes how aggressively block texture entities are hidden from you
+          <guidearrow> More aggressive culling settings will generally improve your game's performance
+          <guidearrow> <yellow>(Medium) <gray>You will see all block texture entities within <yellow>%alwaysShowRadius% blocks</yellow>
+          <guidearrow> <yellow>(Medium) <gray>Block texture entities within <yellow>%alwaysShowRadius% to %cullRadius% blocks</yellow> will be moderately culled
+          <guidearrow> <yellow>(Medium) <gray>Culling will only occur if there are more than <yellow>%maxOccludingCount% blocks</yellow> between you and the block texture entity
       high:
         name: "<white>Culling preset: <red>High <dark_gray>(Click to cycle)"
         lore: |-
-          <arrow:#3a2939> Changes how aggressively block texture entities are hidden from you
-          <arrow:#3a2939> More aggressive culling settings will generally improve your game's performance
-          <arrow:#3a2939> <red>(High) <gray>You will see all block texture entities within <yellow>%alwaysShowRadius% blocks</yellow>
-          <arrow:#3a2939> <red>(High) <gray>Block texture entities within <yellow>%alwaysShowRadius% to %cullRadius% blocks</yellow> will be aggressively culled
-          <arrow:#3a2939> <red>(High) <gray>Culling will only occur if there are more than <yellow>%maxOccludingCount% blocks</yellow> between you and the block texture entity
+          <guidearrow> Changes how aggressively block texture entities are hidden from you
+          <guidearrow> More aggressive culling settings will generally improve your game's performance
+          <guidearrow> <red>(High) <gray>You will see all block texture entities within <yellow>%alwaysShowRadius% blocks</yellow>
+          <guidearrow> <red>(High) <gray>Block texture entities within <yellow>%alwaysShowRadius% to %cullRadius% blocks</yellow> will be aggressively culled
+          <guidearrow> <red>(High) <gray>Culling will only occur if there are more than <yellow>%maxOccludingCount% blocks</yellow> between you and the block texture entity
     toggle-armor-textures:
       enabled:
         name: "<white>Custom Armor Textures: <green>Enabled <dark_gray>(Click to toggle)"
         lore: |-
-          <arrow:#3a2939> Enable only if you are using a resource pack which adds custom armour textures
-          <arrow:#3a2939> This setting is for the textures that display when you <bold>wear</bold> the armour - not the texture displayed in your inventory
+          <guidearrow> Enable only if you are using a resource pack which adds custom armour textures
+          <guidearrow> This setting is for the textures that display when you <bold>wear</bold> the armour - not the texture displayed in your inventory
       disabled:
         name: "<white>Custom Armor Textures: <red>Disabled <dark_gray>(Click to toggle)"
         lore: |-
-          <arrow:#3a2939> Enable only if you are using a resource pack which adds custom armour textures
-          <arrow:#3a2939> This setting is for the textures that display when you <bold>wear</bold> the armour - not the texture displayed in your inventory
+          <guidearrow> Enable only if you are using a resource pack which adds custom armour textures
+          <guidearrow> This setting is for the textures that display when you <bold>wear</bold> the armour - not the texture displayed in your inventory
     toggle-research-confetti:
       enabled:
         name: "<white>Research Confetti: <green>Enabled <dark_gray>(Click to toggle)"
-        lore: "<arrow> Whether to show confetti when something is researched"
+        lore: "<guidearrow> Whether to show confetti when something is researched"
       disabled:
         name: "<white>Research Confetti: <red>Disabled <dark_gray>(Click to toggle)"
-        lore: "<arrow> Whether to show confetti when something is researched"
+        lore: "<guidearrow> Whether to show confetti when something is researched"
     toggle-research-sounds:
       enabled:
         name: "<white>Research Sounds: <green>Enabled <dark_gray>(Click to toggle)"
-        lore: "<arrow> Whether to play sounds when something is researched"
+        lore: "<guidearrow> Whether to play sounds when something is researched"
       disabled:
         name: "<white>Research Sounds: <red>Disabled <dark_gray>(Click to toggle)"
-        lore: "<arrow> Whether to play sounds when something is researched"
+        lore: "<guidearrow> Whether to play sounds when something is researched"
+    toggle-guide-hints:
+      enabled:
+        name: "<white>Guide Hints: <green>Enabled <dark_gray>(Click to toggle)"
+        lore: "<guidearrow> Whether to play sounds when something is researched"
+      disabled:
+        name: "<white>Guide Hints: <red>Disabled <dark_gray>(Click to toggle)"
+        lore: "<guidearrow> Whether to play sounds when something is researched"
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 

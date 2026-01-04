@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.guideHints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.util.getAddon
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -34,7 +35,9 @@ open class ResearchButton(val research: Research) : AbstractItem() {
             }
         } else {
             addResearchCostLore(item, player, research)
-            item.lore(Component.translatable("pylon.pyloncore.guide.button.research.instructions"))
+            if (player.guideHints) {
+                item.lore(Component.translatable("pylon.pyloncore.guide.button.research.instructions"))
+            }
         }
 
         item.lore(Component.translatable("pylon.pyloncore.guide.button.research.unlocks-title"))

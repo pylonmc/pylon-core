@@ -143,7 +143,9 @@ data class Research(
     companion object : Listener {
         private val researchesKey = pylonKey("researches")
         private val researchPointsKey = pylonKey("research_points")
-        private val researchEffectsKey = pylonKey("research_effects")
+        private val researchConfettiKey = pylonKey("research_confetti")
+        private val researchSoundsKey = pylonKey("research_sounds")
+        private val guideHintsKey = pylonKey("guide_hints")
         private val researchesType =
             PylonSerializers.SET.setTypeFrom(PylonSerializers.KEYED.keyedTypeFrom(PylonRegistry.RESEARCHES::getOrThrow))
 
@@ -151,10 +153,13 @@ data class Research(
         var Player.researchPoints: Long by persistentData(researchPointsKey, PylonSerializers.LONG, 0)
 
         @JvmStatic
-        var Player.researchConfetti: Boolean by persistentData(researchEffectsKey, PylonSerializers.BOOLEAN, true)
+        var Player.researchConfetti: Boolean by persistentData(researchConfettiKey, PylonSerializers.BOOLEAN, true)
 
         @JvmStatic
-        var Player.researchSounds: Boolean by persistentData(researchEffectsKey, PylonSerializers.BOOLEAN, true)
+        var Player.researchSounds: Boolean by persistentData(researchSoundsKey, PylonSerializers.BOOLEAN, true)
+
+        @JvmStatic
+        var Player.guideHints: Boolean by persistentData(guideHintsKey, PylonSerializers.BOOLEAN, true)
 
         @JvmStatic
         fun getResearches(player: OfflinePlayer): Set<Research> {
