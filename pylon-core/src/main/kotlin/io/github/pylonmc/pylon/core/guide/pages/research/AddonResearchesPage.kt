@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.guide.button.ResearchButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleDynamicGuidePage
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
+import net.kyori.adventure.text.format.Style
 
 /**
  * Shows all the researches for the given [addon].
@@ -19,4 +20,6 @@ class AddonResearchesPage(val addon: PylonAddon) : SimpleDynamicGuidePage(
             ResearchButton(it)
         }
     }
-)
+) {
+    override val title = addon.displayName.style(Style.empty())
+}

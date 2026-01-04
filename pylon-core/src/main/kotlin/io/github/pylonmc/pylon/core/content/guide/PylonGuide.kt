@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
+import io.github.pylonmc.pylon.core.guide.button.ResearchesButton
 import io.github.pylonmc.pylon.core.guide.pages.RootPage
 import io.github.pylonmc.pylon.core.guide.pages.SearchItemsAndFluidsPage
 import io.github.pylonmc.pylon.core.guide.pages.base.GuidePage
@@ -107,13 +108,10 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         fun addonResearchesPage(addon: PylonAddon) = AddonResearchesPage(addon)
 
         @JvmStatic
-        fun addonResearchesButton(addon: PylonAddon) = PageButton(addon.material, addonResearchesPage(addon))
+        fun addonResearchesButton(addon: PylonAddon) = ResearchesButton(addon)
 
         @JvmStatic
         fun researchItemsPage(research: Research) = ResearchItemsPage(research)
-
-        @JvmStatic
-        fun researchItemsButton(research: Research) = PageButton(research.material, researchItemsPage(research))
 
         @JvmStatic
         val rootPage = RootPage()
