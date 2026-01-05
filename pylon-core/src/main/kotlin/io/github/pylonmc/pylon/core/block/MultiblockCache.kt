@@ -140,6 +140,7 @@ internal object MultiblockCache : Listener {
             BlockStorage.getAs<PylonMultiblock>(it)?.let { markDirty(it) }
         }
 
+    @JvmSynthetic
     internal fun loadedMultiblocksWithComponent(block: Block): List<BlockPosition>
             = loadedMultiblocksWithComponentsInChunk(block.position.chunk).filter {
         BlockStorage.getAs<PylonMultiblock>(it)?.isPartOfMultiblock(block) == true
