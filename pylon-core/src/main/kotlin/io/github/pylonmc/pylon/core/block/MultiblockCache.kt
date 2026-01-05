@@ -140,8 +140,7 @@ internal object MultiblockCache : Listener {
             BlockStorage.getAs<PylonMultiblock>(it)?.let { markDirty(it) }
         }
 
-    @JvmSynthetic
-    internal fun loadedMultiblocksWithComponent(block: Block): List<BlockPosition>
+    private fun loadedMultiblocksWithComponent(block: Block): List<BlockPosition>
             = loadedMultiblocksWithComponentsInChunk(block.position.chunk).filter {
         BlockStorage.getAs<PylonMultiblock>(it)?.isPartOfMultiblock(block) == true
     }
@@ -150,29 +149,29 @@ internal object MultiblockCache : Listener {
         = multiblocksWithComponentsInChunk[chunkPosition] ?: emptySet()
 
     @EventHandler
+    private fun handle(event: PylonBlockLoadEvent) {
+        if (event.pylonBlock is PylonMultiblock) {
+            onMultiblockAdded(event.pylonBlock)
+        }
+    }
+
+    @EventHandler
     private fun handle(event: PylonChunkBlocksLoadEvent) {
         // Refresh existing multiblocks with a component in the chunk that was just loaded
         for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
             BlockStorage.getAs<PylonMultiblock>(multiblockPosition)?.let { refreshFullyLoaded(it) }
         }
+    }
 
-        // Add new multiblocks
-        for (pylonBlock in event.pylonBlocks) {
-            if (pylonBlock is PylonMultiblock) {
-                onMultiblockAdded(pylonBlock)
-            }
+    @EventHandler
+    private fun handle(event: PylonBlockUnloadEvent) {
+        if (event.pylonBlock is PylonMultiblock) {
+            onMultiblockRemoved(event.pylonBlock)
         }
     }
 
     @EventHandler
     private fun handle(event: PylonChunkBlocksUnloadEvent) {
-        // Remove multiblocks that were just unloaded
-        for (pylonBlock in event.pylonBlocks) {
-            if (pylonBlock is PylonMultiblock) {
-                onMultiblockRemoved(pylonBlock)
-            }
-        }
-
         // Mark existing multiblocks with components as not formed and not fully loaded
         for (multiblockPosition in loadedMultiblocksWithComponentsInChunk(event.chunk.position)) {
             val multiblock = BlockStorage.getAs<PylonMultiblock>(multiblockPosition)

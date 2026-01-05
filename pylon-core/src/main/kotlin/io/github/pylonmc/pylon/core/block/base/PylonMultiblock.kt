@@ -78,13 +78,4 @@ interface PylonMultiblock {
      * [partUnloaded] is true if the multiblock became unformed because part of it was unloaded, false otherwise.
      */
     fun onMultiblockUnformed(partUnloaded: Boolean) {}
-
-    companion object {
-        /**
-         * Returns a list of the block positions of any multiblocks which have [block] as a component
-         */
-        @JvmStatic
-        fun loadedMultiblocksWithComponent(block: Block)
-                = MultiblockCache.loadedMultiblocksWithComponent(block)
-    }
 }
