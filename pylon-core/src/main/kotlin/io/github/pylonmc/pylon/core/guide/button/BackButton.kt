@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.guideHints
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.Component
@@ -16,10 +17,15 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
  */
 class BackButton : AbstractItem() {
 
-    override fun getItemProvider() = ItemStackBuilder.gui(Material.ENCHANTED_BOOK, pylonKey("guide_back"))
-        .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
-        .name(Component.translatable("pylon.pyloncore.guide.button.back.name"))
-        .lore(Component.translatable("pylon.pyloncore.guide.button.back.lore"))
+    override fun getItemProvider(player: Player): ItemStackBuilder {
+        val stack = ItemStackBuilder.gui(Material.ENCHANTED_BOOK, pylonKey("guide_back"))
+            .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
+            .name(Component.translatable("pylon.pyloncore.guide.button.back.name"))
+        if (player.guideHints) {
+            stack.lore(Component.translatable("pylon.pyloncore.guide.button.back.hints"))
+        }
+        return stack
+    }
 
     override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
         val history = PylonGuide.history.getOrPut(player.uniqueId) { mutableListOf() }

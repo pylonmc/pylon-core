@@ -121,8 +121,10 @@ guide:
   title: "Pylon Guide"
   button:
     back:
-      name: "<yellow>Back"
-      lore: ""
+      name: "<white>Back"
+      hints: |-
+        <guidearrow> <guideinsn>Click</guideinsn> to go back one page
+        <guidearrow> <guideinsn>Shift left click</guideinsn> to go back to the main menu
     search-specifiers:
       name: "Search Specifiers"
       lore: |-
@@ -136,22 +138,49 @@ guide:
         not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
         enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%points%/%cost%"
         researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%cost% (researched)"
-      instructions: |-
-        <guidearrow> <guideinsn>Left click</guideinsn> to research
-        <guidearrow> <guideinsn>Right click</guideinsn> to see unlocked items
-      unlocks-title: "<u>Unlocks</u>"
+      hints:
+        research: |-
+          
+          <u>Hints</u>
+          <guidearrow> <guideinsn>Right click</guideinsn> to see unlocked items
+        unresearched: |-
+          
+          <u>Hints</u>
+          <guidearrow> <guideinsn>Left click</guideinsn> to research
+          <guidearrow> <guideinsn>Right click</guideinsn> to see unlocked items
+      unlocks-title: |-
+      
+        <u>Unlocks</u>
       unlocks-item: "<diamond> <white>%item%"
       more-researches: "<diamond> <gray>And <aqua>%amount% <gray>more - <guideinsn>right click</guideinsn> <gray>to see all"
       error: "Research failed to load"
     fluid:
       name: "%fluid% <gray>(%amount%<gray>)"
       error: "<red>Fluid item failed to load"
+      hints: |-
+        
+          <u>Hints</u>
+          <guidearrow> <guideinsn>Left click</guideinsn> to see recipe
+          <guidearrow> <guideinsn>Right click</guideinsn> to see usages
     item:
       not-researched: "<red><u>Not researched yet</u>"
       not-researched-with-name: "<red><u>Not researched yet <gray>(%research_name%<gray>)"
-      research-instructions: |-
-        <guidearrow> <guideinsn>Shift left click</guideinsn> to research
-        <guidearrow> <guideinsn>Shift right click</guideinsn> to see other research unlocks
+      hints:
+        researched: |-
+          
+          <u>Hints</u>
+          <guidearrow> <guideinsn>Left click</guideinsn> to see recipe
+          <guidearrow> <guideinsn>Right click</guideinsn> to see usages
+        unresearched: |-
+          
+          <u>Hints</u>
+          <guidearrow> <guideinsn>Left click</guideinsn> to see recipe
+          <guidearrow> <guideinsn>Right click</guideinsn> to see usages
+          <guidearrow> <guideinsn>Shift left click</guideinsn> to research
+          <guidearrow> <guideinsn>Shift right click</guideinsn> to see other research unlocks
+        admin: |-
+          <guidearrow> <guideinsn>Press Q</guideinsn> to cheat in one item <#ff0000>(admin only)</#ff0000>
+          <guidearrow> <guideinsn>Middle click</guideinsn> to cheat in a stack <#ff0000>(admin only)</#ff0000>
       error: "<red>Item failed to load"
     toggle-waila:
       enabled:
@@ -259,10 +288,12 @@ guide:
     toggle-guide-hints:
       enabled:
         name: "<white>Guide Hints: <green>Enabled <dark_gray>(Click to toggle)"
-        lore: "<guidearrow> Whether to play sounds when something is researched"
+        lore: |-
+          <guidearrow> Whether to show <guideinsn>hints</guideinsn> in the guide
       disabled:
         name: "<white>Guide Hints: <red>Disabled <dark_gray>(Click to toggle)"
-        lore: "<guidearrow> Whether to play sounds when something is researched"
+        lore: |-
+          <guidearrow> Whether to show <guideinsn>hints</guideinsn> in the guide
   recipe:
     cooking: "<attr>Cooking time:</attr> %time%"
 

@@ -35,9 +35,6 @@ open class ResearchButton(val research: Research) : AbstractItem() {
             }
         } else {
             addResearchCostLore(item, player, research)
-            if (player.guideHints) {
-                item.lore(Component.translatable("pylon.pyloncore.guide.button.research.instructions"))
-            }
         }
 
         item.lore(Component.translatable("pylon.pyloncore.guide.button.research.unlocks-title"))
@@ -66,6 +63,12 @@ open class ResearchButton(val research: Research) : AbstractItem() {
             item.lore(Component.translatable(
                 "pylon.pyloncore.guide.button.research.more-researches",
                 PylonArgument.of("amount", research.unlocks.size - i)
+            ))
+        }
+
+        if (player.guideHints) {
+            item.lore(Component.translatable("pylon.pyloncore.guide.button.research.hints."
+                    + (if (playerHasResearch) "researched" else "unresearched")
             ))
         }
 
