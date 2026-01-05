@@ -93,11 +93,9 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val fluidsPage = object : SimpleDynamicGuidePage(
             pylonKey("fluids"),
             {
-                PylonRegistry.FLUIDS.filter {
-                    it.key !in hiddenFluids
-                }.map {
-                    FluidButton(it)
-                }.toMutableList()
+                PylonRegistry.FLUIDS.filter { it.key !in hiddenFluids }
+                    .map { FluidButton(it) }
+                    .toMutableList()
             }
         ) {}
 
