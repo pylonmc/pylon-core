@@ -1,12 +1,23 @@
 package io.github.pylonmc.pylon.core.block.base
 
+import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
+import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
+import com.github.shynixn.mccoroutine.bukkit.ticks
+import io.github.pylonmc.pylon.core.PylonCore
+import io.github.pylonmc.pylon.core.block.BlockListener.logEventHandleErr
+import io.github.pylonmc.pylon.core.block.PylonBlock
 import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockSerializeEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
@@ -19,8 +30,9 @@ interface PylonTickingBlock {
 
     private val tickingData: TickingBlockData
         get() = tickingBlocks.getOrPut(this) { TickingBlockData(
-            PylonConfig.defaultTickInterval,
-            false
+            PylonConfig.DEFAULT_TICK_INTERVAL,
+            false,
+            null
         )}
 
     /**
@@ -59,7 +71,7 @@ interface PylonTickingBlock {
     /**
      * The function that should be called periodically.
      */
-    fun tick(deltaSeconds: Double)
+    fun tick()
 
     @ApiStatus.Internal
     companion object : Listener {
@@ -67,6 +79,7 @@ interface PylonTickingBlock {
         internal data class TickingBlockData(
             var tickInterval: Int,
             var isAsync: Boolean,
+            var job: Job?,
         )
 
         private val tickingBlockKey = pylonKey("ticking_block_data")
@@ -94,7 +107,7 @@ interface PylonTickingBlock {
         private fun onUnload(event: PylonBlockUnloadEvent) {
             val block = event.pylonBlock
             if (block is PylonTickingBlock) {
-                tickingBlocks.remove(block)
+                tickingBlocks.remove(block)?.job?.cancel()
             }
         }
 
@@ -102,7 +115,54 @@ interface PylonTickingBlock {
         private fun onBreak(event: PylonBlockBreakEvent) {
             val block = event.pylonBlock
             if (block is PylonTickingBlock) {
-                tickingBlocks.remove(block)
+                tickingBlocks.remove(block)?.job?.cancel()
+            }
+        }
+
+        @EventHandler
+        private fun onPylonBlockPlace(event: PylonBlockPlaceEvent) {
+            val block = event.pylonBlock
+            if (block is PylonTickingBlock) {
+                startTicker(block)
+            }
+        }
+
+        @EventHandler
+        private fun onPylonBlockLoad(event: PylonBlockLoadEvent) {
+            val block = event.pylonBlock
+            if (block is PylonTickingBlock) {
+                startTicker(block)
+            }
+        }
+
+        /**
+         * Returns true if the block is still ticking, or false if the block does
+         * not exist, is not a ticking block, or has errored and been unloaded.
+         */
+        @JvmStatic
+        @ApiStatus.Internal
+        fun isTicking(block: PylonBlock?): Boolean {
+            return block is PylonTickingBlock && tickingBlocks[block]?.job?.isActive == true
+        }
+
+        @JvmSynthetic
+        internal fun stopTicking(block: PylonTickingBlock) {
+            tickingBlocks[block]?.job?.cancel()
+        }
+
+        private fun startTicker(tickingBlock: PylonTickingBlock) {
+            val dispatcher = if (tickingBlock.isAsync) PylonCore.asyncDispatcher else PylonCore.minecraftDispatcher
+            tickingBlocks[tickingBlock]?.job = PylonCore.launch(dispatcher) {
+                while (true) {
+                    delay(tickingBlock.tickInterval.ticks)
+                    try {
+                        tickingBlock.tick()
+                    } catch (e: Exception) {
+                        PylonCore.launch(PylonCore.minecraftDispatcher) {
+                            logEventHandleErr(null, e, tickingBlock as PylonBlock)
+                        }
+                    }
+                }
             }
         }
     }

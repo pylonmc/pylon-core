@@ -6,7 +6,6 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
-import io.github.pylonmc.pylon.core.entity.display.transform.TransformUtil.yawToCardinalDirection
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -39,12 +38,19 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import org.joml.Matrix3f
 import org.joml.RoundingMode
+import org.joml.Vector3d
 import org.joml.Vector3f
 import org.joml.Vector3i
+import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
+import xyz.xenondevs.invui.inventory.event.UpdateReason
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.util.function.Consumer
 import kotlin.math.absoluteValue
 import kotlin.math.max
+import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -81,6 +87,22 @@ fun vectorToBlockFace(vector: Vector3i): BlockFace {
 }
 
 /**
+ * Returns the yaw (in radians) that a face has, starting at NORTH and
+ * going counterclockwise.
+ *
+ * Only works for cardinal directions.
+ *
+ *  @throws IllegalStateException if [face] is not a cardinal direction
+ */
+fun faceToYaw(face: BlockFace) = when (face) {
+    BlockFace.NORTH -> 0.0
+    BlockFace.EAST -> -Math.PI / 2
+    BlockFace.SOUTH -> Math.PI
+    BlockFace.WEST -> Math.PI / 2
+    else -> throw IllegalArgumentException("$face is not a cardinal direction")
+}
+
+/**
  * Converts an orthogonal vector to a [BlockFace]
  *
  *  @return The face that the vector is facing
@@ -94,34 +116,23 @@ fun vectorToBlockFace(vector: Vector3f) = vectorToBlockFace(Vector3i(vector, Rou
  *  @return The face that the vector is facing
  *  @throws IllegalStateException if the vector is not pointing in a cardinal direction
  */
-// use toVector3f rather than toVector3i because toVector3i will floor components
-fun vectorToBlockFace(vector: Vector) = vectorToBlockFace(vector.toVector3f())
+fun vectorToBlockFace(vector: Vector3d) = vectorToBlockFace(Vector3i(vector, RoundingMode.HALF_DOWN))
 
 /**
- * Rotates a BlockFace to the [player]'s reference frame.
+ * Converts an orthogonal vector to a [BlockFace]
  *
- * @param player The player to act as the reference frame. Where the player is facing becomes NORTH.
- * @param face The face to rotate
- * @param allowVertical Whether we should include UP and DOWN
- * @return The block face rotated to the player's reference frame
+ *  @return The face that the vector is facing
+ *  @throws IllegalStateException if the vector is not pointing in a cardinal direction
  */
-fun rotateToPlayerFacing(player: Player, face: BlockFace, allowVertical: Boolean): BlockFace {
-    var vector = face.direction.clone().rotateAroundY(yawToCardinalDirection(player.eyeLocation.yaw).toDouble())
-    if (allowVertical) {
-        // never thought cross product would come in useful but here we go
-        val rightVector = vector.getCrossProduct(Vector(0.0, 1.0, 0.0))
-        vector =
-            vector.rotateAroundNonUnitAxis(rightVector, -yawToCardinalDirection(player.eyeLocation.pitch).toDouble())
-    }
-    return vectorToBlockFace(vector)
-}
+// use toVector3f rather than toVector3i because toVector3i will floor components
+fun vectorToBlockFace(vector: Vector) = vectorToBlockFace(vector.toVector3f())
 
 /**
  * Rotates [vector] to face a direction
  *
  * Assumes north to be the default direction (i.e. supplying north will result in no rotation)
  *
- * @param face Must be a horizontal cardinal direction (north, east, south, west)
+ * @param face Must be a immediate direction (north, east, south, west, up, down)
  * @return The rotated vector
  */
 fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
@@ -129,8 +140,42 @@ fun rotateVectorToFace(vector: Vector3i, face: BlockFace) = when (face) {
     BlockFace.EAST -> Vector3i(-vector.z, vector.y, vector.x)
     BlockFace.SOUTH -> Vector3i(-vector.x, vector.y, -vector.z)
     BlockFace.WEST -> Vector3i(vector.z, vector.y, -vector.x)
+    BlockFace.UP -> Vector3i(0, 1, 0)
+    BlockFace.DOWN -> Vector3i(0, -1, 0)
+    else -> throw IllegalArgumentException("$face is not a cardinal direction")
+}
+
+/**
+ * Rotates [vector] to face a direction
+ *
+ * Assumes north to be the default direction (i.e. supplying north will result in no rotation)
+ *
+ * @param face Must be a immediate direction (north, east, south, west, up, down)
+ * @return The rotated vector
+ */
+fun rotateVectorToFace(vector: Vector3d, face: BlockFace) = when (face) {
+    BlockFace.NORTH -> vector
+    BlockFace.EAST -> Vector3d(-vector.z, vector.y, vector.x)
+    BlockFace.SOUTH -> Vector3d(-vector.x, vector.y, -vector.z)
+    BlockFace.WEST -> Vector3d(vector.z, vector.y, -vector.x)
+    BlockFace.UP -> Vector3d(0.0, 1.0, 0.0)
+    BlockFace.DOWN -> Vector3d(0.0, -1.0, 0.0)
     else -> throw IllegalArgumentException("$face is not a horizontal cardinal direction")
 }
+
+/**
+ * Rotates [face] to be relative to [referenceFace].
+ *
+ * Assumes north to be the default direction (i.e. supplying north will result in no rotation)
+ *
+ * Think of this like changing the direction of North. For example, if you change North to
+ * point where East would be, then suddenly East in your coordinate system becomes South.
+ *
+ * @param face Must be a horizontal cardinal direction (north, east, south, west)
+ * @return The rotated vector
+ */
+fun rotateFaceToReference(referenceFace: BlockFace, face: BlockFace)
+    = vectorToBlockFace(rotateVectorToFace(face.direction.toVector3d(), referenceFace))
 
 /**
  * @return Whether [vector] is a cardinal direction
@@ -151,7 +196,7 @@ fun isCardinalDirection(vector: Vector3f)
  * @return The addon that [key] belongs to
  */
 fun getAddon(key: NamespacedKey): PylonAddon =
-    PylonRegistry.Companion.ADDONS.find { addon -> addon.key.namespace == key.namespace }
+    PylonRegistry.ADDONS.find { addon -> addon.key.namespace == key.namespace }
         ?: error("Key does not have a corresponding addon; does your addon call registerWithPylon()?")
 
 /**
@@ -220,6 +265,18 @@ val IMMEDIATE_FACES_WITH_DIAGONALS: Array<BlockFace> = arrayOf(
     BlockFace.SOUTH_WEST,
     BlockFace.EAST
 )
+
+/**
+ * Returns all the immediate faces that are perpendicular to the given [face]
+ *
+ * @see IMMEDIATE_FACES
+ */
+fun perpendicularImmediateFaces(face: BlockFace): List<BlockFace> {
+    val faces = IMMEDIATE_FACES.toMutableList()
+    faces.remove(face)
+    faces.remove(face.oppositeFace)
+    return faces
+}
 
 @JvmSynthetic
 internal fun pylonKey(key: String): NamespacedKey = NamespacedKey(PylonCore, key)
@@ -504,3 +561,26 @@ fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Materi
 @JvmOverloads
 fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot? = null, force: Boolean = false) =
     NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)
+
+
+/**
+ * A shorthand for a commonly used [VirtualInventory] handler which prevents players
+ * from removing items from it.
+ *
+ * Usage: Call [VirtualInventory.setPreUpdateHandler] and supply this function to it
+ */
+@JvmField
+val DISALLOW_PLAYERS_FROM_ADDING_ITEMS_HANDLER = Consumer<ItemPreUpdateEvent> { event: ItemPreUpdateEvent ->
+    if (!event.isRemove && event.updateReason is PlayerUpdateReason) {
+        event.isCancelled = true
+    }
+}
+
+/**
+ * Indicates a machine has updated an inventory slot.
+ */
+class MachineUpdateReason : UpdateReason
+
+// https://minecraft.wiki/w/Breaking#Calculation
+fun getBlockBreakTicks(tool: ItemStack, block: Block)
+    = round(100 * block.type.getHardness() / block.getDestroySpeed(tool, true))

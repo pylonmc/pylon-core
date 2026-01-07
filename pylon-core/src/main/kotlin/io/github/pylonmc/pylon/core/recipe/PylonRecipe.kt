@@ -41,5 +41,5 @@ interface PylonRecipe : Keyed {
         }
     }
 
-    fun display(): Gui
+    fun display(): Gui?
 }

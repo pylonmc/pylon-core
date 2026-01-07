@@ -90,7 +90,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * can actually see it.
      */
     open val blockTextureEntity: BlockTextureEntity? by lazy {
-        if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
+        if (!PylonConfig.BlockTextureConfig.ENABLED || disableBlockTextureEntity) {
             null
         } else {
             val entity = BlockTextureEntity(this)
@@ -130,6 +130,18 @@ open class PylonBlock internal constructor(val block: Block) {
      * instead of using the data in the load constructor.
      */
     protected open fun postLoad() {}
+
+    /**
+     * Called after both the create constructor and the load constructor.
+     *
+     * Use this to initialise stuff which must always be initialised, like creating logistics
+     * groups (see [io.github.pylonmc.pylon.core.block.base.PylonLogisticBlock]).
+     *
+     * Called before [postLoad], after [io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent],
+     * after [PylonBlockDeserializeEvent], and
+     * before [io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent]
+     */
+    open fun postInitialise() {}
 
     /**
      * Used to initialize [blockTextureEntity], if you need to modify the entity post-initialization,
@@ -203,10 +215,7 @@ open class PylonBlock internal constructor(val block: Block) {
     open fun getBlockTextureProperties(): MutableMap<String, Pair<String, Int>> {
         val properties = mutableMapOf<String, Pair<String, Int>>()
         if (this is PylonDirectionalBlock) {
-            val facing = getFacing()
-            if (facing != null) {
-                properties["facing"] = facing.name.lowercase() to IMMEDIATE_FACES.size
-            }
+            properties["facing"] = facing.name.lowercase() to IMMEDIATE_FACES.size
         }
         return properties
     }
@@ -387,6 +396,7 @@ open class PylonBlock internal constructor(val block: Block) {
                 val block = schema.load(position.block, pdc)
 
                 PylonBlockDeserializeEvent(block.block, block, pdc).callEvent()
+                block.postInitialise()
                 block.postLoad()
                 return block
             } catch (t: Throwable) {
