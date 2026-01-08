@@ -56,8 +56,7 @@ class LogisticGroup(
 
         @JvmStatic
         fun getVanillaLogisticSlots(block: Block?): Map<String, LogisticGroup> {
-            val blockData = block?.state
-            return when (blockData) {
+            return when (val blockData = block?.state) {
                 is Furnace -> mapOf<String, LogisticGroup>(
                     "input" to LogisticGroup(LogisticGroupType.INPUT, VanillaInventoryLogisticSlot(blockData.inventory, 0)),
                     "fuel" to LogisticGroup(LogisticGroupType.INPUT, FurnaceFuelLogisticSlot(blockData.inventory, 1)),
