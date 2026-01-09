@@ -12,7 +12,6 @@ import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
-import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
 import io.github.pylonmc.pylon.core.util.position.position
@@ -23,6 +22,7 @@ import io.papermc.paper.event.player.*
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Container
+import org.bukkit.block.Hopper
 import org.bukkit.entity.FallingBlock
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
@@ -898,6 +898,18 @@ internal object BlockListener : Listener {
         }
     }
 
+    @EventHandler
+    private fun onInventoryPickup(event: InventoryPickupItemEvent) {
+        val inv = event.inventory
+        val holder = inv.holder
+        if (holder is Hopper) {
+            val pyBlock = BlockStorage.get(holder.block) as? PylonHopper ?: return
+            pyBlock.onHopperPickUpItem(event)
+        }
+    }
+
+
+
     @JvmSynthetic
     internal fun logEventHandleErr(event: Event?, e: Exception, block: PylonBlock) {
         if (event != null) {
@@ -907,9 +919,11 @@ internal object BlockListener : Listener {
         }
         e.printStackTrace()
         blockErrMap[block] = blockErrMap[block]?.plus(1) ?: 1
-        if (blockErrMap[block]!! > PylonConfig.allowedBlockErrors) {
+        if (blockErrMap[block]!! > PylonConfig.ALLOWED_BLOCK_ERRORS) {
             BlockStorage.makePhantom(block)
-            TickManager.stopTicking(block)
+            if (block is PylonTickingBlock) {
+                PylonTickingBlock.stopTicking(block)
+            }
         }
     }
 }

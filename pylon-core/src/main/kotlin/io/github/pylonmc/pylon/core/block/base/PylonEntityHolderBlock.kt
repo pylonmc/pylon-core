@@ -1,6 +1,5 @@
 package io.github.pylonmc.pylon.core.block.base
 
-import io.github.pylonmc.pylon.core.block.context.BlockBreakContext
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PhantomBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
@@ -21,6 +20,7 @@ import org.bukkit.event.entity.EntityRemoveEvent
 import org.jetbrains.annotations.ApiStatus
 import java.util.IdentityHashMap
 import java.util.UUID
+import java.util.function.Consumer
 
 /**
  * A block that has one or more associated Pylon entities. For example, a pedestal that
@@ -83,6 +83,16 @@ interface PylonEntityHolderBlock {
             = EntityStorage.getAs(clazz, getHeldEntityUuidOrThrow(name))
         ?: throw IllegalArgumentException("Entity $name is not of type ${clazz.simpleName}")
 
+    @ApiStatus.NonExtendable
+    fun whenHeldPylonEntityLoads(name: String, consumer: Consumer<PylonEntity<*>>) {
+        EntityStorage.whenEntityLoads(getHeldEntityUuidOrThrow(name), consumer)
+    }
+
+    @ApiStatus.NonExtendable
+    fun <T: PylonEntity<*>> whenHeldPylonEntityLoads(clazz: Class<T>, name: String, consumer: Consumer<T>) {
+        EntityStorage.whenEntityLoads(getHeldEntityUuidOrThrow(name), clazz, consumer)
+    }
+
     /**
      * Returns false if the block holds no entity with the provided name, the entity is unloaded or does not
      * physically exist.
@@ -105,7 +115,8 @@ interface PylonEntityHolderBlock {
         @JvmStatic
         val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
 
-        private val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
+        @JvmSynthetic
+        internal val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
 
         @EventHandler
         private fun onDeserialize(event: PylonBlockDeserializeEvent) {
