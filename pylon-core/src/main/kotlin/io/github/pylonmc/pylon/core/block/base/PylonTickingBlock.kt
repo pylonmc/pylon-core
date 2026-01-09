@@ -30,7 +30,7 @@ interface PylonTickingBlock {
 
     private val tickingData: TickingBlockData
         get() = tickingBlocks.getOrPut(this) { TickingBlockData(
-            PylonConfig.defaultTickInterval,
+            PylonConfig.DEFAULT_TICK_INTERVAL,
             false,
             null
         )}

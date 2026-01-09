@@ -53,24 +53,24 @@ class Waila private constructor(private val player: Player, playerConfig: Player
 
     private val bossBar = BossBar.bossBar(
         Component.empty(),
-        PylonConfig.WailaConfig.defaultDisplay.progress,
-        PylonConfig.WailaConfig.defaultDisplay.color,
-        PylonConfig.WailaConfig.defaultDisplay.overlay
+        PylonConfig.WailaConfig.DEFAULT_DISPLAY.progress,
+        PylonConfig.WailaConfig.DEFAULT_DISPLAY.color,
+        PylonConfig.WailaConfig.DEFAULT_DISPLAY.overlay
     )
 
     private fun send(display: WailaDisplay) {
         when (config.type) {
             Type.BOSSBAR -> {
                 player.hideBossBar(bossBar)
-                val color = if (display.color in PylonConfig.WailaConfig.allowedBossBarColors) {
+                val color = if (display.color in PylonConfig.WailaConfig.ALLOWED_BOSS_BAR_COLORS) {
                     display.color
                 } else {
-                    PylonConfig.WailaConfig.defaultDisplay.color
+                    PylonConfig.WailaConfig.DEFAULT_DISPLAY.color
                 }
-                val overlay = if (display.overlay in PylonConfig.WailaConfig.allowedBossBarOverlays) {
+                val overlay = if (display.overlay in PylonConfig.WailaConfig.ALLOWED_BOSS_BAR_OVERLAYS) {
                     display.overlay
                 } else {
-                    PylonConfig.WailaConfig.defaultDisplay.overlay
+                    PylonConfig.WailaConfig.DEFAULT_DISPLAY.overlay
                 }
 
                 bossBar.name(display.text)
@@ -205,7 +205,7 @@ class Waila private constructor(private val player: Player, playerConfig: Player
                 val waila = wailas[player.uniqueId]!!
                 while (true) {
                     waila.updateDisplay()
-                    delay(PylonConfig.WailaConfig.tickInterval.ticks)
+                    delay(PylonConfig.WailaConfig.TICK_INTERVAL.ticks)
                 }
             })
         }
@@ -222,11 +222,11 @@ class Waila private constructor(private val player: Player, playerConfig: Player
         var Player.wailaConfig: PlayerWailaConfig
             get() = this.persistentDataContainer.getOrDefault(wailaKey, PylonSerializers.PLAYER_WAILA_CONFIG, PlayerWailaConfig()).apply {
                 player = this@wailaConfig
-                if (!PylonConfig.WailaConfig.enabledTypes.contains(type)) {
+                if (!PylonConfig.WailaConfig.ENABLED_TYPES.contains(type)) {
                     sendMessage(Component.translatable("pylon.pyloncore.message.waila.type-disabled").arguments(
                         PylonArgument.of("type", type.name.lowercase())
                     ))
-                    type = PylonConfig.WailaConfig.defaultType
+                    type = PylonConfig.WailaConfig.DEFAULT_TYPE
                 }
             }
             set(value) {

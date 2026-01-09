@@ -11,7 +11,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 
 object BlockTextureSettingsPage : PlayerSettingsPage(pylonKey("block_texture_settings")) {
     init {
-        if (!PylonConfig.BlockTextureConfig.forced) {
+        if (!PylonConfig.BlockTextureConfig.FORCED) {
             addSetting(
                 TogglePlayerSettingButton(
                     pylonKey("toggle-block-textures"),
@@ -22,7 +22,7 @@ object BlockTextureSettingsPage : PlayerSettingsPage(pylonKey("block_texture_set
         addSetting(
             CyclePlayerSettingButton(
                 pylonKey("cycle-culling-preset"),
-                PylonConfig.BlockTextureConfig.cullingPresets.values.sortedBy { it.index },
+                PylonConfig.BlockTextureConfig.CULLING_PRESETS.values.sortedBy { it.index },
                 identifier = { preset -> preset.id },
                 getter = { player -> player.cullingPreset },
                 setter = { player, preset -> player.cullingPreset = preset },

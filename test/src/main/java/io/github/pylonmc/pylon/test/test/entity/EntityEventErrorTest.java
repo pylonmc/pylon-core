@@ -19,7 +19,7 @@ public class EntityEventErrorTest extends GameTest {
                     EntityEventError entity = new EntityEventError(test.location());
                     EntityStorage.add(entity);
                     UUID entityUUID = entity.getUuid();
-                    for(int i = 0; i < PylonConfig.allowedEntityErrors + 1; i++){
+                    for(int i = 0; i < PylonConfig.ALLOWED_ENTITY_ERRORS + 1; i++){
                         // Yes, this is cursed, yes it works.
                         new PlayerInteractEntityEvent(null, entity.getEntity()).callEvent();
                     }
