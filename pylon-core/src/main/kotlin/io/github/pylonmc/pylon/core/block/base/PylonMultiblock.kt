@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.block.MultiblockCache
+import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.ChunkPosition
 import org.bukkit.block.Block
 import org.jetbrains.annotations.ApiStatus
