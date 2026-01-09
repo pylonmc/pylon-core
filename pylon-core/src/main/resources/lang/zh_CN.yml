@@ -1,0 +1,451 @@
+addon: 核心
+item:
+  error_item:
+    name: <red>错误物品
+    lore: |-
+      <red>这个物品从一个因某种原因加载失败的方块中掉落
+      <red>出错的方块:</red> <yellow>%block%
+  guide:
+    name: <white>Pylon指南
+    lore: <arrow> <insn>右键点击</insn> 打开
+  phantom_block:
+    name: <red>幻影方块 (%block%)
+  debug_waxed_weathered_cut_copper_stairs:
+    name: <red>调试涂蜡风化切制铜楼梯
+    lore: |-
+      <arrow> <insn>Shift左键点击</insn> 方块/实体来移除它
+      <arrow> <insn>右键点击</insn> 方块/实体来查看其Pylon数据
+  fluid_pipe_intersection_marker:
+    waila: '%pipe%'
+  fluid_pipe_section_marker:
+    waila: '%pipe%'
+fluid:
+  temperature:
+    display-text: <arrow> <attr>温度:</attr> %temperature%
+    cold: <#1cb3d8>寒冷
+    normal: <#c9d81c>正常
+    hot: <#d81c1c>炎热
+message:
+  debug:
+    not_a_block: <red>这不是一个Pylon方块
+    not_an_entity: <red>这不是一个Pylon实体
+    data: '<gold>数据: <white>%data%'
+    deleted_data: <red>已移除 <white>%type% <gray>(%location%)
+    key:
+      block: '<gold>Pylon方块键: <white>%key%'
+      entity: '<gold>Pylon实体键: <white>%key%'
+    ticking:
+      ticking: '<gold>运行中: <green>是'
+      errored: '<gold>运行中: <red>计数器出错'
+      not_ticking: '<gold>运行中: <red>否'
+  pipe:
+    connecting: <insn>右键点击</insn> <gray>来放置，<insn>取消选择管道物品</insn> <gray>来取消
+    cannot_place_here: <red>你不能在这里放置管道
+    not_enough_pipes: <red>管道不足
+    not_of_same_type: <red>管道类型不同
+  disabled:
+    message: <white>%item% <red>已被禁用
+    lore: <arrow> <#ff0000>已禁用 - 你仍然可以制作此物品但无法使用 它
+  research:
+    unknown: <red>你不知道如何使用 %item%。尝试思考 %research%
+    unlocked: <green>你发现了 %research%
+    click_to_research: <green>点击来研究 (%points% 点)
+  command:
+    error:
+      no_permission: <red>你没有使用此命令的权限
+      must_be_player: <red>你必须是一个玩家才能使用此命令
+    key:
+      hover: 点击复制到剪贴板
+      no_item: <red>你没有持有Pylon物品
+    waila:
+      enabled: <green>WAILA 已启用
+      disabled: <red>WAILA 已禁用
+    gametest:
+      started: 在 %location% 开始游戏测试 %test%
+      failed: '<red>游戏测试 %test% 失败: %reason%'
+      success: <green>游戏测试 %test% 成功
+    research:
+      added: 为玩家 %player% 添加研究 %research%
+      removed: 从玩家 %player% 移除研究 %research%
+      already_discovered: <red>你已经发现了 %research%
+      cannot_unlock: <red>你不能使用研究点数解锁 %research%
+      not_enough_points: <red>你还不知道足够的内容来发现 %research% (%points%/%cost% 点)
+      list:
+        none_self: <red>你没有发现任何研究
+        none_other: <red>%player% 没有发现任何研究
+        discovered_self: '你发现了 %count% 项研究: %list%'
+        discovered_other: '%player% 发现了 %count% 项研究: %list%'
+      points:
+        set: 将 %player% 的研究点数设置为 %points%
+        added: 为 %player% 添加 %points% 研究点数
+        removed: 从 %player% 移除 %points% 研究点数
+        query: '%player% 有 %points% 研究点数'
+    exposerecipe:
+      not-configurable: <red>此配方类型不可配置
+      warning: '<yellow>警告: 暴露配方配置将阻止它们自动更新 删除 %file% 来恢复'
+  waila:
+    type-disabled: <red>此服务器不再允许你之前设置的 %type% WAILA 显示类型，它已重置为默认
+gui:
+  time_left: '<arrow> 剩余时间: <#d6d1b3>%time%'
+  input: 输入
+  output: 输出
+  scroll:
+    up: 向上滚动
+    down: 向下滚动
+    left: 向左滚动
+    right: 向右滚动
+  page:
+    next: 下一页 (%current%/%total%)
+    previous: 上一页 (%current%/%total%)
+guide:
+  title: Pylon指南
+  button:
+    ingredient: <yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%
+    back:
+      name: <yellow>返回
+      lore: ''
+      hints: |-
+        <guidearrow> <guideinsn>点击</guideinsn>返回上一页
+        <guidearrow> <guideinsn>潜行左键</guideinsn>返回主菜单
+    search-specifiers:
+      name: 搜索指定符
+      lore: |-
+        <arrow:#3a293> 默认情况下，贪婪地搜索物品名称 ("铁锭" 搜索确切的 "铁锭" 而不是 "铁" 和 "锭")
+        <arrow:#3a293> 前缀 <light_purple>@</light_purple> 按 <light_purple>插件</light_purple> id 或显示名称搜索 (例如 "pylonbase" 或 "base")
+        <arrow:#3a293> 前缀 <aqua>$</aqua> 在 <aqua>描述</aqua> 中搜索
+        <arrow:#3a293> 前缀搜索仅适用于前缀后面的单词
+        <arrow:#3a293> 示例: <light_purple>@pylonbase <white>铁 <aqua>$温度 <white>浆料
+    research:
+      instructions: |-
+        <arrow:#3a293> <guideinsn>左键点击</guideinsn> 来研究
+        <arrow:#3a293> <guideinsn>右键点击</guideinsn> 来查看解锁的物品
+      unlocks-title: <u>解锁内容</u>
+      unlocks-item: <diamond> <white>%item%
+      more-researches: <diamond> <gray>还有 <aqua>%amount% <gray>更多 - <guideinsn>右 键点击</guideinsn> <gray>来查看全部
+      error: 研究加载失败
+      cost:
+        not-enough: <arrow> <attr>解锁成本:</attr> <#e23b28>%points%/%cost%
+        enough: <arrow> <attr>解锁成本:</attr> <#61ea38>%points%/%cost%
+        researched: <arrow> <attr>解锁成本:</attr> <#61ea38>%cost% (已研究)
+      hints:
+        research: |2-
+
+          <u>提示</u>
+          <guidearrow> <guideinsn>右键</guideinsn>查看已解锁的物品
+        unresearched: |2-
+
+          <u>提示</u>
+          <guidearrow> <guideinsn>左键</guideinsn>进行研究
+          <guidearrow> <guideinsn>右键</guideinsn>查看已解锁的物品
+    fluid:
+      name: '%fluid% <gray>(%amount%<gray>)'
+      error: <red>流体物品加载失败
+      hints: |2-
+      
+        <u>提示</u>
+        <guidearrow> <guideinsn>左键</guideinsn>查看配方
+        <guidearrow> <guideinsn>右键</guideinsn>查看用途
+    item:
+      not-researched: <red><u>尚未研究</u>
+      not-researched-with-name: <red><u>尚未研究 <gray>(%research_name%<gray>)
+      research-instructions: |-
+        <arrow:#3a2939> <guideinsn>Shift左键点击</guideinsn> 来研究
+        <arrow:#3a2939> <guideinsn>Shift右键点击</guideinsn> 来查看其他研究解锁
+      error: <red>物品加载失败
+      hints:
+        researched: |2-
+
+          <u>提示</u>
+          <guidearrow> <guideinsn>左键</guideinsn>查看配方
+          <guidearrow> <guideinsn>右键</guideinsn>查看用途
+        unresearched: |2-
+
+          <u>提示</u>
+          <guidearrow> <guideinsn>左键</guideinsn>查看配方
+          <guidearrow> <guideinsn>右键</guideinsn>查看用途
+          <guidearrow> <guideinsn>潜行左键</guideinsn>进行研究
+          <guidearrow> <guideinsn>潜行右键</guideinsn>查看其他研究解锁内容
+        admin: |-
+          <guidearrow> <guideinsn>按下 Q</guideinsn> 作弊获得一个物品 <#ff0000>(仅管理员)</#ff0000>
+          <guidearrow> <guideinsn>中键</guideinsn> 作弊获得一组物品 <#ff0000>(仅管理员)</#ff0000>
+    toggle-waila:
+      enabled:
+        name: '<white>WAILA: <green>已启用 <dark_gray>(点击切换)'
+        lore: <arrow:#3a2939> 是否显示你正在查看的Pylon方块/实体 的信息
+      disabled:
+        name: '<white>WAILA: <red>已禁用 <dark_gray>(点击切换)'
+        lore: <arrow:#3a2939> 是否显示你正在查看的Pylon方块/实体 的信息
+    toggle-vanilla-waila:
+      enabled:
+        name: '<white>原版 WAILA: <green>已启用 <dark_gray>(点击切换)'
+        lore: <arrow> 是否显示原版方块和实体的 WAILA
+      disabled:
+        name: '<white>原版 WAILA: <red>已禁用 <dark_gray>(点击切换)'
+        lore: <arrow> 是否显示原版方块和实体的 WAILA
+    cycle-waila-type:
+      bossbar:
+        name: '<white>WAILA 显示类型: <green>状态栏 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 你的 WAILA 是显示为操作栏还是状态栏
+          <arrow:#3a2939> <green>状态栏 <dark_gray>- <gray>在你屏幕的顶部
+          <arrow:#3a2939> <aqua>操作栏 <dark_gray>- <gray>在你屏幕的底部
+      actionbar:
+        name: '<white>WAILA 显示类型: <aqua>操作栏 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 你的 WAILA 是显示为操作栏还是状态栏
+          <arrow:#3a2939> <green>状态栏 <dark_gray>- <gray>在你屏幕的顶部
+          <arrow:#3a2939> <aqua>操作栏 <dark_gray>- <gray>在你屏幕的底部
+    intermediates:
+      name: <blue>↑ 输入材料 ↑
+      lore: <yellow>↓ 中间材料 ↓
+    main_product:
+      name: <blue>↑ 输入材料 ↑
+      lore: <gold>↓ 主要产品 ↓
+    toggle-block-textures:
+      enabled:
+        name: '<white>自定义方块纹理: <green>已启用 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 仅当你使用为Pylon方块添加纹理的资源包时启用
+          <arrow:#3a2939> <red>警告:</red> 这可能会对你游戏中大量Pylon方块的性能产生负面影响
+      disabled:
+        name: '<white>自定义方块纹理: <red>已禁用 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 仅当你使用为Pylon方块添加纹理的资源包时启用
+          <arrow:#3a2939> <red>警告:</red> 这可能会对你游戏中大量Pylon方块的性能产生负面影响
+    cycle-culling-preset:
+      disabled:
+        name: '<white>剔除预设: <aqua>无剔除 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 改变隐藏方块纹理实体的激进程度
+          <arrow:#3a2939> 更激进的剔除设置通常会提高你游戏的性能
+          <arrow:#3a2939> <aqua>(无剔除) <gray>你会看到视野距离内的所有方块纹理实体
+      low:
+        name: '<white>剔除预设: <green>低 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 改变隐藏方块纹理实体的激进程度
+          <arrow:#3a2939> 更激进的剔除设置通常会提高你游戏的性能
+          <arrow:#3a2939> <green>(低) <gray>你会看到 <yellow>%alwaysShowRadius% 格</yellow> 内的所有方块纹理实体
+          <arrow:#3a2939> <green>(低) <gray><yellow>%alwaysShowRadius% 到 %cullRadius% 格</yellow> 内的方块纹理实体将被保守剔除
+          <arrow:#3a2939> <green>(低) <gray>只有当你在方块纹理实体之间有超过 <yellow>%maxOccludingCount% 个方块</yellow> 时才会进行剔除
+      medium:
+        name: '<white>剔除预设: <yellow>中 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 改变隐藏方块纹理实体的激进程度
+          <arrow:#3a2939> 更激进的剔除设置通常会提高你游戏的性能
+          <arrow:#3a2939> <yellow>(中) <gray>你会看到 <yellow>%alwaysShowRadius% 格</yellow> 内的所有方块纹理实体
+          <arrow:#3a2939> <yellow>(中) <gray><yellow>%alwaysShowRadius% 到 %cullRadius% 格</yellow> 内的方块纹理实体将被适度剔除
+          <arrow:#3a2939> <yellow>(中) <gray>只有当你在方块纹理实体之间有超过 <yellow>%maxOccludingCount% 个方块</yellow> 时才会进行剔除
+      high:
+        name: '<white>剔除预设: <red>高 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 改变隐藏方块纹理实体的激进程度
+          <arrow:#3a2939> 更激进的剔除设置通常会提高你游戏的性能
+          <arrow:#3a2939> <red>(高) <gray>你会看到 <yellow>%alwaysShowRadius% 格</yellow> 内的所有方块纹理实体
+          <arrow:#3a2939> <red>(高) <gray><yellow>%alwaysShowRadius% 到 %cullRadius% 格</yellow> 内的方块纹理实体将被激进剔除
+          <arrow:#3a2939> <red>(高) <gray>只有当你在方块纹理实体之间有超过 <yellow>%maxOccludingCount% 个方块</yellow> 时才会进行剔除
+    toggle-armor-textures:
+      enabled:
+        name: '<white>自定义盔甲纹理: <green>已启用 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 仅当你使用添加自定义盔甲纹理的资源包时启用
+          <arrow:#3a2939> 此设置用于你 <bold>穿戴</bold> 盔甲时显示的纹理 - 不是你背包中显示的纹理
+      disabled:
+        name: '<white>自定义盔甲纹理: <red>已禁用 <dark_gray>(点击切换)'
+        lore: |-
+          <arrow:#3a2939> 仅当你使用添加自定义盔甲纹理的资源包时启用
+          <arrow:#3a2939> 此设置用于你 <bold>穿戴</bold> 盔甲时显示的纹理 - 不是你背包中显示的纹理
+    toggle-research-confetti:
+      enabled:
+        name: '<white>研究彩带: <green>已启用 <dark_gray>(点击切换)'
+        lore: <arrow> 是否在研究某项内容时显示彩带
+      disabled:
+        name: '<white>研究彩带: <red>已禁用 <dark_gray>(点击切换)'
+        lore: <arrow> 是否在研究某项内容时显示彩带
+    toggle-research-sounds:
+      enabled:
+        name: '<white>研究音效: <green>已启用 <dark_gray>(点击切换)'
+        lore: <arrow> 是否在研究某项内容时播放音效
+      disabled:
+        name: '<white>研究音效: <red>已禁用 <dark_gray>(点击切换)'
+        lore: <arrow> 是否在研究某项内容时播放音效
+    byproducts:
+      name: <blue>↑ 输入 ↑
+      lore: <yellow>↓ 副产品 ↓
+    toggle-guide-hints:
+      enabled:
+        name: '<white>指南提示: <green>开启 <dark_gray>(点击切换)'
+        lore: <guidearrow> 是否在指南中显示 <guideinsn>提示</guideinsn>
+      disabled:
+        name: '<white>指南提示: <red>关闭 <dark_gray>(点击切换)'
+        lore: <guidearrow> 是否在指南中显示 <guideinsn>提示</guideinsn>
+  recipe:
+    cooking: <attr>烹饪时间:</attr> %time%
+  page:
+    fluids: 流体
+    info: 信息
+    researches: 研究
+    research-items: 研究物品
+    root: Pylon指南
+    search: 搜索
+    settings: 设置
+    waila_settings: WAILA 设置
+    resource_pack_settings: 资源包设置
+    block_texture_settings: 方块纹理设置
+    item_recipes: 物品配方
+    fluid_recipes: 流体配方
+    item_usages: 物品用途
+    fluid_usages: 流体用途
+    item_ingredients: 材料分解
+unit:
+  prefix:
+    quetta:
+      name: 夸它
+      abbr: Q
+    ronna:
+      name: 若那
+      abbr: R
+    yotta:
+      name: 尧它
+      abbr: Y
+    zetta:
+      name: 泽它
+      abbr: Z
+    exa:
+      name: 艾可萨
+      abbr: E
+    peta:
+      name: 拍它
+      abbr: P
+    tera:
+      name: 太拉
+      abbr: T
+    giga:
+      name: 吉咖
+      abbr: G
+    mega:
+      name: 兆
+      abbr: M
+    kilo:
+      name: 千
+      abbr: k
+    hecto:
+      name: 百
+      abbr: h
+    deca:
+      name: 十
+      abbr: da
+    none:
+      name: ''
+      abbr: ''
+    deci:
+      name: 分
+      abbr: d
+    centi:
+      name: 厘
+      abbr: c
+    milli:
+      name: 毫
+      abbr: m
+    micro:
+      name: 微
+      abbr: μ
+    nano:
+      name: 纳
+      abbr: n
+    pico:
+      name: 皮
+      abbr: p
+    femto:
+      name: 飞
+      abbr: f
+    atto:
+      name: 阿
+      abbr: a
+    zepto:
+      name: 仄
+      abbr: z
+    yocto:
+      name: 幺
+      abbr: y
+    ronto:
+      name: 柔
+      abbr: r
+    quecto:
+      name: 亏
+      abbr: q
+  blocks:
+    singular: 方块
+    plural: 方块
+  blocks_per_second:
+    singular: 方块/秒
+    plural: 方块/秒
+    abbr: 方块/s
+  chunks:
+    singular: 区块
+    plural: 区块
+  hearts:
+    singular: 心
+    plural: 心
+    abbr: ❤
+  percent:
+    singular: 百分比
+    plural: 百分比
+    abbr: '%'
+  research_points:
+    singular: 研究点
+    plural: 研究点
+  celsius:
+    singular: 摄氏度
+    plural: 摄氏度
+    abbr: °C
+  buckets:
+    singular: 桶
+    plural: 桶
+    abbr: B
+  buckets_per_second:
+    singular: 桶/秒
+    plural: 桶/秒
+    abbr: B/s
+  days:
+    singular: 天
+    plural: 天
+    abbr: d
+  hours:
+    singular: 小时
+    plural: 小时
+    abbr: h
+  minutes:
+    singular: 分钟
+    plural: 分钟
+    abbr: m
+  seconds:
+    singular: 秒
+    plural: 秒
+    abbr: s
+  joules:
+    singular: 焦耳
+    plural: 焦耳
+    abbr: J
+  watts:
+    singular: 瓦特
+    plural: 瓦特
+    abbr: W
+  experience:
+    singular: 经验值
+    plural: 经验值
+    abbr: XP
+  experience_per_second:
+    singular: 经验值/秒
+    plural: 经验值/秒
+    abbr: XP/s
+  items:
+    singular: 物品
+    plural: 物品
+  items_per_second:
+    singular: 物品/秒
+    plural: 物品/秒
+    abbr: 物品/s
+  cycles_per_second:
+    singular: 周期/秒
+    plural: 周期/秒
+    abbr: 周期/s
