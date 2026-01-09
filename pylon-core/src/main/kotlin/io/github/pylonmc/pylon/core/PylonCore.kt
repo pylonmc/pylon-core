@@ -23,9 +23,6 @@ import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
-import io.github.pylonmc.pylon.core.guide.button.PageButton
-import io.github.pylonmc.pylon.core.guide.button.setting.TogglePlayerSettingButton
-import io.github.pylonmc.pylon.core.guide.pages.PlayerSettingsPage
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonInventoryTicker
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -39,10 +36,8 @@ import io.github.pylonmc.pylon.core.recipe.RecipeCompletion
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
-import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine.hasCustomArmorTextures
 import io.github.pylonmc.pylon.core.resourcepack.block.BlockTextureEngine
 import io.github.pylonmc.pylon.core.util.mergeGlobalConfig
-import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.Waila
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import io.papermc.paper.ServerBuildInfo
@@ -145,32 +140,16 @@ object PylonCore : JavaPlugin(), PylonAddon {
         pm.registerEvents(RecipeCompletion, this)
 
         if (PylonConfig.WailaConfig.enabled) {
-            PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.wailaSettings))
             pm.registerEvents(Waila, this)
         }
 
-        PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.resourcePackSettings))
-
         if (PylonConfig.ArmorTextureConfig.ENABLED) {
-            if (!PylonConfig.ArmorTextureConfig.FORCED) {
-                PlayerSettingsPage.resourcePackSettings.addSetting(TogglePlayerSettingButton(
-                    pylonKey("toggle-armor-textures"),
-                    toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
-                    isEnabled = { player -> player.hasCustomArmorTextures },
-                ))
-            }
             packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
         }
 
         if (PylonConfig.BlockTextureConfig.ENABLED) {
-            PlayerSettingsPage.resourcePackSettings.addSetting(PageButton(PlayerSettingsPage.blockTextureSettings))
             pm.registerEvents(BlockTextureEngine, this)
             BlockTextureEngine.updateOccludingCacheJob.start()
-        }
-
-        if (PylonConfig.RESEARCHES_ENABLED) {
-            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchConfetti)
-            PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchSounds)
         }
 
         Bukkit.getScheduler().runTaskTimer(

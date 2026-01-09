@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
-import io.github.pylonmc.pylon.core.guide.button.BackButton
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
@@ -29,10 +29,7 @@ import kotlin.math.max
  *
  * @author balugaq
  */
-open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
-    pylonKey("item_ingredients"),
-    Material.SCULK_SENSOR
-) {
+open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(pylonKey("item_ingredients")) {
     override fun getKey() = KEY
 
     // page is 0 based
@@ -78,7 +75,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         )
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', GuiItems.pagePrevious())
-        .addIngredient('b', BackButton())
+        .addIngredient('b', PylonGuide.backButton)
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
         .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
