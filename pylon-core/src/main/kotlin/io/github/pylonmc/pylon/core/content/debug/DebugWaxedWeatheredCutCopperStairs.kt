@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.content.debug
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
 import io.github.pylonmc.pylon.core.block.PylonBlock
-import io.github.pylonmc.pylon.core.block.TickManager
 import io.github.pylonmc.pylon.core.block.base.PylonTickingBlock
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityStorage
@@ -72,7 +71,7 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         )
         player.sendDebug(
             when (pylonBlock) {
-                is PylonTickingBlock -> if (TickManager.isTicking(pylonBlock)) {
+                is PylonTickingBlock -> if (PylonTickingBlock.isTicking(pylonBlock)) {
                     "ticking.ticking"
                 } else {
                     "ticking.error"

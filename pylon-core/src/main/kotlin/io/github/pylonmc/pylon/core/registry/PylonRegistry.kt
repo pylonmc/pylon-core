@@ -1,17 +1,32 @@
 package io.github.pylonmc.pylon.core.registry
 
 import io.github.pylonmc.pylon.core.addon.PylonAddon
+import io.github.pylonmc.pylon.core.block.PylonBlockSchema
+import io.github.pylonmc.pylon.core.entity.PylonEntitySchema
 import io.github.pylonmc.pylon.core.event.PylonRegisterEvent
 import io.github.pylonmc.pylon.core.event.PylonUnregisterEvent
+import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import io.github.pylonmc.pylon.core.gametest.GameTestConfig
+import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
+import io.github.pylonmc.pylon.core.item.PylonItemSchema
+import io.github.pylonmc.pylon.core.item.research.Research
+import io.github.pylonmc.pylon.core.recipe.RecipeType
+import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
-import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Stream
 
-class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
+/**
+ * Represents a list of things that can be registered and looked up by [NamespacedKey].
+ * This class is not thread safe and any concurrent access must be synchronized externally.
+ *
+ * @param T the type of the registered values
+ * @property key the key of this registry
+ */
+class PylonRegistry<T : Keyed>(val key: NamespacedKey) : Iterable<T> {
 
-    private val values: MutableMap<NamespacedKey, T> = ConcurrentHashMap()
+    private val values: MutableMap<NamespacedKey, T> = LinkedHashMap()
 
     fun register(vararg values: T) {
         for (value in values) {
@@ -86,27 +101,39 @@ class PylonRegistry<T : Keyed>(val key: PylonRegistryKey<T>) : Iterable<T> {
     override fun toString(): String = key.toString()
 
     companion object {
-        private val registries: MutableMap<PylonRegistryKey<*>, PylonRegistry<*>> = mutableMapOf()
+        private val registries: MutableMap<NamespacedKey, PylonRegistry<*>> = mutableMapOf()
 
         // @formatter:off
-        @JvmField val ITEMS = PylonRegistry(PylonRegistryKey.ITEMS).also(::addRegistry)
-        @JvmField val BLOCKS = PylonRegistry(PylonRegistryKey.BLOCKS).also(::addRegistry)
-        @JvmField val ENTITIES = PylonRegistry(PylonRegistryKey.ENTITIES).also(::addRegistry)
-        @JvmField val FLUIDS = PylonRegistry(PylonRegistryKey.FLUIDS).also(::addRegistry)
-        @JvmField val ADDONS = PylonRegistry(PylonRegistryKey.ADDONS).also(::addRegistry)
-        @JvmField val GAMETESTS = PylonRegistry(PylonRegistryKey.GAMETESTS).also(::addRegistry)
-        @JvmField val RECIPE_TYPES = PylonRegistry(PylonRegistryKey.RECIPE_TYPES).also(::addRegistry)
-        @JvmField val RESEARCHES = PylonRegistry(PylonRegistryKey.RESEARCHES).also(::addRegistry)
-        @JvmField val ITEM_TAGS = PylonRegistry(PylonRegistryKey.ITEM_TAGS).also(::addRegistry)
+        @JvmField val ITEMS_KEY = pylonKey("items")
+        @JvmField val BLOCKS_KEY = pylonKey("blocks")
+        @JvmField val ENTITIES_KEY = pylonKey("entities")
+        @JvmField val FLUIDS_KEY = pylonKey("fluids")
+        @JvmField val GAMETESTS_KEY = pylonKey("gametests")
+        @JvmField val ADDONS_KEY = pylonKey("addons")
+        @JvmField val RECIPE_TYPES_KEY = pylonKey("recipe_types")
+        @JvmField val RESEARCHES_KEY = pylonKey("researches")
+        @JvmField val ITEM_TAGS_KEY = pylonKey("tags")
+        // @formatter:on
+
+        // @formatter:off
+        @JvmField val ITEMS = PylonRegistry<PylonItemSchema>(ITEMS_KEY).also(::addRegistry)
+        @JvmField val BLOCKS = PylonRegistry<PylonBlockSchema>(BLOCKS_KEY).also(::addRegistry)
+        @JvmField val ENTITIES = PylonRegistry<PylonEntitySchema>(ENTITIES_KEY).also(::addRegistry)
+        @JvmField val FLUIDS = PylonRegistry<PylonFluid>(FLUIDS_KEY).also(::addRegistry)
+        @JvmField val ADDONS = PylonRegistry<PylonAddon>(ADDONS_KEY).also(::addRegistry)
+        @JvmField val GAMETESTS = PylonRegistry<GameTestConfig>(GAMETESTS_KEY).also(::addRegistry)
+        @JvmField val RECIPE_TYPES = PylonRegistry<RecipeType<*>>(RECIPE_TYPES_KEY).also(::addRegistry)
+        @JvmField val RESEARCHES = PylonRegistry<Research>(RESEARCHES_KEY).also(::addRegistry)
+        @JvmField val ITEM_TAGS = PylonRegistry<Tag<ItemTypeWrapper>>(ITEM_TAGS_KEY).also(::addRegistry)
         // @formatter:on
 
         @JvmStatic
-        fun <T : Keyed> getRegistry(key: PylonRegistryKey<T>): PylonRegistry<T> {
+        fun <T : Keyed> getRegistry(key: NamespacedKey): PylonRegistry<T> {
             return getRegistryOrNull(key) ?: throw IllegalArgumentException("Registry $key not found")
         }
 
         @JvmStatic
-        fun <T : Keyed> getRegistryOrNull(key: PylonRegistryKey<T>): PylonRegistry<T>? {
+        fun <T : Keyed> getRegistryOrNull(key: NamespacedKey): PylonRegistry<T>? {
             @Suppress("UNCHECKED_CAST")
             return registries[key] as? PylonRegistry<T>
         }
