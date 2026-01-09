@@ -72,6 +72,12 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         val hiddenItems: MutableSet<NamespacedKey> = mutableSetOf()
 
         /**
+         * Admin items do not show up in searches unless a player has the `pylon.guide.cheat` permission
+         */
+        @JvmStatic
+        val adminOnlyItems: MutableSet<NamespacedKey> = mutableSetOf()
+
+        /**
          * Hidden fluids do not show up in searches
          */
         @JvmStatic
@@ -86,7 +92,11 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         @JvmStatic
         val fluidsPage = object : SimpleDynamicGuidePage(
             pylonKey("fluids"),
-            { PylonRegistry.FLUIDS.map { FluidButton(it) }.toMutableList() }
+            {
+                PylonRegistry.FLUIDS.filter { it.key !in hiddenFluids }
+                    .map { FluidButton(it) }
+                    .toMutableList()
+            }
         ) {}
 
         @JvmStatic
@@ -154,6 +164,14 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         @JvmStatic
         fun hideItem(key: NamespacedKey) {
             hiddenItems.add(key)
+        }
+
+        /**
+         * Hide an item from showing up in searches unless a player has the `pylon.guide.cheat` permission
+         */
+        @JvmStatic
+        fun hideItemUnlessAdmin(key: NamespacedKey) {
+            adminOnlyItems.add(key)
         }
 
         /**

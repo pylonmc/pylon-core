@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.button.ResearchButton
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -31,6 +32,8 @@ open class SimpleStaticGuidePage @JvmOverloads constructor(
 
     open fun addButton(button: Item) = buttons.add(button)
     open fun addPage(material: Material, page: GuidePage) = addButton(PageButton(material, page))
+    open fun addPage(stack: ItemStack, page: GuidePage) = addButton(PageButton(stack.clone(), page))
+    open fun addPage(builder: ItemStackBuilder, page: GuidePage) = addButton(PageButton(builder.build().clone(), page))
     open fun addItem(item: ItemStack) = addButton(ItemButton(item))
     open fun addFluid(fluid: PylonFluid) = addButton(FluidButton(fluid))
     open fun addResearch(research: Research) = addButton(ResearchButton(research))

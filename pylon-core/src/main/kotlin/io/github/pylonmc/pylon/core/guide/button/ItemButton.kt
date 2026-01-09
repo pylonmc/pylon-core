@@ -11,6 +11,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.guideHints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -103,8 +104,17 @@ class ItemButton @JvmOverloads constructor(
                 } else {
                     builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
                 }
+            }
 
-                builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
+            if (player.guideHints) {
+                if (!player.canCraft(item)) {
+                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.hints.unresearched"))
+                } else {
+                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.hints.researched"))
+                }
+                if (player.hasPermission("pylon.guide.cheat")) {
+                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.hints.admin"))
+                }
             }
 
             return builder
@@ -163,7 +173,11 @@ class ItemButton @JvmOverloads constructor(
                     if (!player.hasPermission("pylon.guide.cheat")) return
                     val stack = getCheatItemStack(currentStack, event)
                     stack.amount = 1
-                    player.dropItem(stack)
+                    if (player.itemOnCursor.isEmpty) {
+                        player.setItemOnCursor(stack)
+                    } else if (player.itemOnCursor.isSimilar(stack)) {
+                        player.itemOnCursor.add()
+                    }
                 }
 
                 ClickType.CONTROL_DROP -> {
