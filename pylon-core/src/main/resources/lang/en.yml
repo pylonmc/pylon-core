@@ -178,10 +178,10 @@ guide:
           <arrow:#3a2939> Whether your WAILA is displayed as an actionbar or bossbar
           <arrow:#3a2939> <green>Bossbar <dark_gray>- <gray>at the top of your screen
           <arrow:#3a2939> <aqua>Actionbar <dark_gray>- <gray>at the bottom of your screen
-    intermediates:
+    byproducts:
       name: "<blue>↑ Inputs ↑"
       lore: |-
-        <yellow>↓ Intermediates ↓
+        <yellow>↓ Byproducts ↓
     main_product:
       name: "<blue>↑ Inputs ↑"
       lore: |-
