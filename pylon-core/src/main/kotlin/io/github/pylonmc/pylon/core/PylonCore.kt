@@ -9,6 +9,7 @@ import com.github.shynixn.mccoroutine.bukkit.ticks
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.block.*
 import io.github.pylonmc.pylon.core.block.base.*
+import io.github.pylonmc.pylon.core.block.base.PylonFallingBlock.PylonFallingBlockEntity
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND
 import io.github.pylonmc.pylon.core.command.ROOT_COMMAND_PY_ALIAS
 import io.github.pylonmc.pylon.core.config.Config
@@ -34,6 +35,7 @@ import io.github.pylonmc.pylon.core.logistics.CargoRoutes
 import io.github.pylonmc.pylon.core.metrics.PylonMetrics
 import io.github.pylonmc.pylon.core.recipe.ConfigurableRecipeType
 import io.github.pylonmc.pylon.core.recipe.PylonRecipeListener
+import io.github.pylonmc.pylon.core.recipe.RecipeCompletion
 import io.github.pylonmc.pylon.core.recipe.RecipeType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.resourcepack.armor.ArmorTextureEngine
@@ -55,6 +57,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Display
+import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -105,48 +108,51 @@ object PylonCore : JavaPlugin(), PylonAddon {
         // Add any keys that are missing from global config - saveDefaultConfig will not do anything if config already present
         mergeGlobalConfig(PylonCore, "config.yml", "config.yml")
 
-        Bukkit.getPluginManager().registerEvents(PylonTranslator, this)
-        Bukkit.getPluginManager().registerEvents(PylonAddon, this)
+        val pm = Bukkit.getPluginManager()
+        pm.registerEvents(PylonTranslator, this)
+        pm.registerEvents(PylonAddon, this)
 
         PylonMetrics // initialize metrics by referencing it
 
         // Anything that listens for addon registration must be above this line
         registerWithPylon()
 
-        Bukkit.getPluginManager().registerEvents(BlockStorage, this)
-        Bukkit.getPluginManager().registerEvents(BlockListener, this)
-        Bukkit.getPluginManager().registerEvents(PylonItemListener, this)
-        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.inventoryTickerBaseRate)
-        Bukkit.getPluginManager().registerEvents(MultiblockCache, this)
-        Bukkit.getPluginManager().registerEvents(EntityStorage, this)
-        Bukkit.getPluginManager().registerEvents(EntityListener, this)
-        Bukkit.getPluginManager().registerEvents(Research, this)
-        Bukkit.getPluginManager().registerEvents(PylonGuiBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonEntityHolderBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonSimpleMultiblock, this)
-        Bukkit.getPluginManager().registerEvents(PylonProcessor, this)
-        Bukkit.getPluginManager().registerEvents(PylonRecipeProcessor, this)
-        Bukkit.getPluginManager().registerEvents(PylonFluidBufferBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonFluidTank, this)
-        Bukkit.getPluginManager().registerEvents(PylonRecipeListener, this)
-        Bukkit.getPluginManager().registerEvents(PylonDirectionalBlock, this)
-        Bukkit.getPluginManager().registerEvents(FluidPipePlacementService, this)
-        Bukkit.getPluginManager().registerEvents(PylonTickingBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonGuide, this)
-        Bukkit.getPluginManager().registerEvents(PylonLogisticBlock, this)
-        Bukkit.getPluginManager().registerEvents(PylonCargoBlock, this)
-        Bukkit.getPluginManager().registerEvents(CargoRoutes, this)
-        Bukkit.getPluginManager().registerEvents(CargoDuct, this)
+        pm.registerEvents(BlockStorage, this)
+        pm.registerEvents(BlockListener, this)
+        pm.registerEvents(PylonCopperBlock, this)
+        pm.registerEvents(PylonItemListener, this)
+        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.INVENTORY_TICKER_BASE_RATE)
+        pm.registerEvents(MultiblockCache, this)
+        pm.registerEvents(EntityStorage, this)
+        pm.registerEvents(EntityListener, this)
+        pm.registerEvents(Research, this)
+        pm.registerEvents(PylonGuiBlock, this)
+        pm.registerEvents(PylonEntityHolderBlock, this)
+        pm.registerEvents(PylonSimpleMultiblock, this)
+        pm.registerEvents(PylonProcessor, this)
+        pm.registerEvents(PylonRecipeProcessor, this)
+        pm.registerEvents(PylonFluidBufferBlock, this)
+        pm.registerEvents(PylonFluidTank, this)
+        pm.registerEvents(PylonRecipeListener, this)
+        pm.registerEvents(PylonDirectionalBlock, this)
+        pm.registerEvents(FluidPipePlacementService, this)
+        pm.registerEvents(PylonTickingBlock, this)
+        pm.registerEvents(PylonGuide, this)
+        pm.registerEvents(PylonLogisticBlock, this)
+        pm.registerEvents(PylonCargoBlock, this)
+        pm.registerEvents(CargoRoutes, this)
+        pm.registerEvents(CargoDuct, this)
+        pm.registerEvents(RecipeCompletion, this)
 
         if (PylonConfig.WailaConfig.enabled) {
             PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.wailaSettings))
-            Bukkit.getPluginManager().registerEvents(Waila, this)
+            pm.registerEvents(Waila, this)
         }
 
         PylonGuide.settingsPage.addSetting(PageButton(PlayerSettingsPage.resourcePackSettings))
 
-        if (PylonConfig.ArmorTextureConfig.enabled) {
-            if (!PylonConfig.ArmorTextureConfig.forced) {
+        if (PylonConfig.ArmorTextureConfig.ENABLED) {
+            if (!PylonConfig.ArmorTextureConfig.FORCED) {
                 PlayerSettingsPage.resourcePackSettings.addSetting(TogglePlayerSettingButton(
                     pylonKey("toggle-armor-textures"),
                     toggle = { player -> player.hasCustomArmorTextures = !player.hasCustomArmorTextures },
@@ -156,13 +162,13 @@ object PylonCore : JavaPlugin(), PylonAddon {
             packetEvents.eventManager.registerListener(ArmorTextureEngine, PacketListenerPriority.HIGHEST)
         }
 
-        if (PylonConfig.BlockTextureConfig.enabled) {
+        if (PylonConfig.BlockTextureConfig.ENABLED) {
             PlayerSettingsPage.resourcePackSettings.addSetting(PageButton(PlayerSettingsPage.blockTextureSettings))
-            Bukkit.getPluginManager().registerEvents(BlockTextureEngine, this)
+            pm.registerEvents(BlockTextureEngine, this)
             BlockTextureEngine.updateOccludingCacheJob.start()
         }
 
-        if (PylonConfig.researchesEnabled) {
+        if (PylonConfig.RESEARCHES_ENABLED) {
             PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchConfetti)
             PylonGuide.settingsPage.addSetting(PlayerSettingsPage.researchSounds)
         }
@@ -200,6 +206,8 @@ object PylonCore : JavaPlugin(), PylonAddon {
         PylonEntity.register<ItemDisplay, FluidEndpointDisplay>(FluidEndpointDisplay.KEY)
         PylonEntity.register<ItemDisplay, FluidIntersectionDisplay>(FluidIntersectionDisplay.KEY)
         PylonEntity.register<ItemDisplay, FluidPipeDisplay>(FluidPipeDisplay.KEY)
+
+        PylonEntity.register<FallingBlock, PylonFallingBlockEntity>(PylonFallingBlock.KEY)
 
         PylonBlock.register<FluidSectionMarker>(FluidSectionMarker.KEY, Material.STRUCTURE_VOID)
         PylonBlock.register<FluidIntersectionMarker>(FluidIntersectionMarker.KEY, Material.STRUCTURE_VOID)

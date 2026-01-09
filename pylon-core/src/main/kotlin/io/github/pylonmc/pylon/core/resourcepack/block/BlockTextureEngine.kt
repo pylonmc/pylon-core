@@ -48,7 +48,7 @@ object BlockTextureEngine : Listener {
 
     /**
      * Periodically updates a share of the occluding cache, to ensure it stays up to date with changes in the world.
-     * Every [PylonConfig.BlockTextureConfig.occludingCacheRefreshInterval] ticks, it will refresh [PylonConfig.BlockTextureConfig.occludingCacheRefreshShare]
+     * Every [PylonConfig.BlockTextureConfig.OCCLUDING_CACHE_REFRESH_INTERVAL] ticks, it will refresh [PylonConfig.BlockTextureConfig.OCCLUDING_CACHE_REFRESH_SHARE]
      * percent of the cache, starting with the oldest entries.
      *
      * Normally, blocks occluding state is cached the first time its requested, and is only updated when placed or broken.
@@ -57,16 +57,16 @@ object BlockTextureEngine : Listener {
     @JvmSynthetic
     internal val updateOccludingCacheJob = PylonCore.launch(start = CoroutineStart.LAZY) {
         while (true) {
-            delay(PylonConfig.BlockTextureConfig.occludingCacheRefreshInterval.ticks)
+            delay(PylonConfig.BlockTextureConfig.OCCLUDING_CACHE_REFRESH_INTERVAL.ticks)
             val now = System.currentTimeMillis()
             var refreshed = 0
-            var toRefresh = ceil(occludingCache.size * PylonConfig.BlockTextureConfig.occludingCacheRefreshShare)
+            var toRefresh = ceil(occludingCache.size * PylonConfig.BlockTextureConfig.OCCLUDING_CACHE_REFRESH_SHARE)
             var entries = mutableListOf<Entry<ChunkPosition, ChunkData>>()
             entries.addAll(occludingCache.entries)
             entries.sortBy { it.value.timestamp }
 
             for ((pos, data) in entries) {
-                if (now - data.timestamp <= PylonConfig.BlockTextureConfig.occludingCacheRefreshInterval) continue
+                if (now - data.timestamp <= PylonConfig.BlockTextureConfig.OCCLUDING_CACHE_REFRESH_INTERVAL) continue
 
                 val world = pos.world ?: continue
                 if (world.isChunkLoaded(pos.x, pos.z)) {
@@ -86,25 +86,25 @@ object BlockTextureEngine : Listener {
 
     @JvmStatic
     var Player.hasCustomBlockTextures: Boolean
-        get() = (this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, PylonConfig.BlockTextureConfig.default) || PylonConfig.BlockTextureConfig.forced)
-        set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value || PylonConfig.BlockTextureConfig.forced)
+        get() = (this.persistentDataContainer.getOrDefault(customBlockTexturesKey, PersistentDataType.BOOLEAN, PylonConfig.BlockTextureConfig.DEFAULT) || PylonConfig.BlockTextureConfig.FORCED)
+        set(value) = this.persistentDataContainer.set(customBlockTexturesKey, PersistentDataType.BOOLEAN, value || PylonConfig.BlockTextureConfig.FORCED)
 
     @JvmStatic
     var Player.cullingPreset: CullingPreset
-        get() = PylonConfig.BlockTextureConfig.cullingPresets.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, PylonConfig.BlockTextureConfig.defaultCullingPreset.id)) {
-            PylonConfig.BlockTextureConfig.defaultCullingPreset
+        get() = PylonConfig.BlockTextureConfig.CULLING_PRESETS.getOrElse(this.persistentDataContainer.getOrDefault(presetKey, PersistentDataType.STRING, PylonConfig.BlockTextureConfig.DEFAULT_CULLING_PRESET.id)) {
+            PylonConfig.BlockTextureConfig.DEFAULT_CULLING_PRESET
         }
         set(value) = this.persistentDataContainer.set(presetKey, PersistentDataType.STRING, value.id)
 
     @JvmSynthetic
     internal fun insert(block: PylonBlock) {
-        if (!PylonConfig.BlockTextureConfig.enabled || block.disableBlockTextureEntity) return
+        if (!PylonConfig.BlockTextureConfig.ENABLED || block.disableBlockTextureEntity) return
         getOctree(block.block.world).insert(block)
     }
 
     @JvmSynthetic
     internal fun remove(block: PylonBlock) {
-        if (!PylonConfig.BlockTextureConfig.enabled || block.disableBlockTextureEntity) return
+        if (!PylonConfig.BlockTextureConfig.ENABLED || block.disableBlockTextureEntity) return
         getOctree(block.block.world).remove(block)
         block.blockTextureEntity?.let {
             for (viewer in it.viewers.toSet()) {
@@ -115,7 +115,7 @@ object BlockTextureEngine : Listener {
 
     @JvmSynthetic
     internal fun getOctree(world: World): Octree<PylonBlock> {
-        check(PylonConfig.BlockTextureConfig.enabled) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
+        check(PylonConfig.BlockTextureConfig.ENABLED) { "Tried to access BlockTextureEngine octree while custom block textures are disabled" }
 
         val border = world.worldBorder
         return octrees.getOrPut(world.uid) {
@@ -133,7 +133,7 @@ object BlockTextureEngine : Listener {
     @JvmSynthetic
     internal fun launchBlockTextureJob(player: Player) {
         val uuid = player.uniqueId
-        if (!PylonConfig.BlockTextureConfig.enabled || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
+        if (!PylonConfig.BlockTextureConfig.ENABLED || !player.hasCustomBlockTextures || jobs.containsKey(uuid)) return
 
         jobs[uuid] = PylonCore.launch(PylonCore.asyncDispatcher) {
             val visible = mutableSetOf<PylonBlock>()

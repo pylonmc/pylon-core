@@ -358,7 +358,7 @@ internal object FluidManager {
 
             // Use round-robin to compute how much fluid to take from each supplier
             // Done in-place using the info's 'blocks' map to reduce memory operations
-            totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * PylonConfig.fluidTickInterval / 20.0)
+            totalRequested = min(totalRequested, segments[segment]!!.fluidPerSecond * PylonConfig.FLUID_TICK_INTERVAL / 20.0)
             val suppliers = info.blocks
             var remainingFluidNeeded = totalRequested
             var totalFluidSupplied = 0.0;
@@ -428,7 +428,7 @@ internal object FluidManager {
         tickers[segment] = PylonCore.launch {
             var lastTickNanos = System.nanoTime()
             while (true) {
-                delay(PylonConfig.fluidTickInterval.ticks)
+                delay(PylonConfig.FLUID_TICK_INTERVAL.ticks)
                 val dt = (System.nanoTime() - lastTickNanos) / 1.0e9
                 lastTickNanos = System.nanoTime()
                 tick(segment)

@@ -90,7 +90,7 @@ open class PylonBlock internal constructor(val block: Block) {
      * can actually see it.
      */
     open val blockTextureEntity: BlockTextureEntity? by lazy {
-        if (!PylonConfig.BlockTextureConfig.enabled || disableBlockTextureEntity) {
+        if (!PylonConfig.BlockTextureConfig.ENABLED || disableBlockTextureEntity) {
             null
         } else {
             val entity = BlockTextureEntity(this)
@@ -315,8 +315,11 @@ open class PylonBlock internal constructor(val block: Block) {
         @JvmStatic
         val pylonBlockTextureEntityKey = pylonKey("pylon_block_texture_entity")
 
-        private val pylonBlockKeyKey = pylonKey("pylon_block_key")
-        private val pylonBlockPositionKey = pylonKey("position")
+        @JvmStatic
+        val pylonBlockKeyKey = pylonKey("pylon_block_key")
+
+        @JvmStatic
+        val pylonBlockPositionKey = pylonKey("position")
 
         @get:JvmStatic
         val Block.pylonBlock: PylonBlock?

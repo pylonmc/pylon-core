@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.util.gui.ProgressItem
 import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.jetbrains.annotations.ApiStatus
 import java.util.IdentityHashMap
 
 /**
@@ -23,6 +24,7 @@ import java.util.IdentityHashMap
  */
 interface PylonProcessor {
 
+    @ApiStatus.Internal
     data class ProcessorData(
         var processTimeTicks: Int?,
         var processTicksRemaining: Int?,
@@ -31,14 +33,16 @@ interface PylonProcessor {
     private val processorData: ProcessorData
         get() = processorBlocks.getOrPut(this) { ProcessorData(null, null, null)}
 
-
     val processTimeTicks: Int?
+        @ApiStatus.NonExtendable
         get() = processorData.processTimeTicks
 
     val processTicksRemaining: Int?
+        @ApiStatus.NonExtendable
         get() = processorData.processTicksRemaining
 
     val isProcessing: Boolean
+        @ApiStatus.NonExtendable
         get() = processTimeTicks != null
 
     var processProgressItem: ProgressItem
@@ -77,6 +81,7 @@ interface PylonProcessor {
     /**
      * Progresses the progress by [ticks] ticks
      */
+    @ApiStatus.Internal
     fun progressProcess(ticks: Int) {
         val data = processorData
         if (data.processTimeTicks == null) {
@@ -90,6 +95,7 @@ interface PylonProcessor {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         private val processorKey = pylonKey("processor_data")

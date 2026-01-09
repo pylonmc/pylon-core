@@ -76,7 +76,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
     var cargoTransferRate: Int
         /**
-         * Note that [cargoTransferRate] will be multiplied by [PylonConfig.cargoTransferRateMultiplier],
+         * Note that [cargoTransferRate] will be multiplied by [PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER],
          * and the result will be the maximum number of items that can be transferred
          * out of this block per cargo tick.
          *
@@ -161,7 +161,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
             }
 
             var wasTargetModified = false
-            var remainingAvailableTransfers = cargoBlockData.transferRate.toLong() * PylonConfig.cargoTransferRateMultiplier
+            var remainingAvailableTransfers = cargoBlockData.transferRate.toLong() * PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER
             for (targetSlot in targetGroup.slots) {
                 val sourceAmount = sourceSlot.getAmount()
                 val targetStack = targetSlot.getItemStack()
@@ -204,7 +204,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
 
         @JvmStatic
         fun cargoItemsTransferredPerSecond(cargoTransferRate: Int)
-            = (20 * cargoTransferRate * PylonConfig.cargoTransferRateMultiplier).toDouble() / PylonConfig.cargoTickInterval.toDouble()
+            = (20 * cargoTransferRate * PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER).toDouble() / PylonConfig.CARGO_TICK_INTERVAL.toDouble()
 
         internal data class CargoBlockData(
             var groups: MutableMap<BlockFace, String>,
@@ -219,7 +219,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
         private fun startTicker(block: PylonCargoBlock) {
             cargoTickers[block] = PylonCore.launch(PylonCore.minecraftDispatcher) {
                 while (true) {
-                    delay(PylonConfig.cargoTickInterval.ticks)
+                    delay(PylonConfig.CARGO_TICK_INTERVAL.ticks)
                     block.tickCargo()
                 }
             }
