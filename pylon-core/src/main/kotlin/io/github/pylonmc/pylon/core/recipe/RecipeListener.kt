@@ -4,6 +4,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.*
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.recipe.vanilla.CookingRecipeWrapper
+import io.github.pylonmc.pylon.core.recipe.vanilla.ShapedRecipeType
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -19,6 +20,8 @@ import org.bukkit.event.block.BlockCookEvent
 import org.bukkit.event.block.CrafterCraftEvent
 import org.bukkit.event.inventory.*
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.ShapedRecipe
+import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.inventory.StonecutterInventory
 
 internal object PylonRecipeListener : Listener {
@@ -94,9 +97,57 @@ internal object PylonRecipeListener : Listener {
         val inventory = crafterState.inventory
 
         val hasPylonItems = inventory.any { it.isPylonAndIsNot<VanillaCraftingItem>() }
+        if (!hasPylonItems) {
+            return
+        }
 
-        if (hasPylonItems) {
-            e.isCancelled = true
+        val crafter = e.block.state as Crafter
+
+        // TODO make this not horrible (both for performance and readability) - see https://github.com/pylonmc/pylon-core/issues/545
+        for (recipe in ShapedRecipeType.recipes) {
+            val craftingRecipe = recipe.craftingRecipe
+            if (craftingRecipe is ShapedRecipe) {
+                var i = 0
+                var isValid = true
+                recipeLoop@ for (row in craftingRecipe.shape) {
+                    for (index in row) {
+                        val ingredient = craftingRecipe.choiceMap[index]
+                        if (ingredient != null) {
+                            val actual = crafter.inventory.getItem(i)
+                            if (actual == null || !ingredient.test(actual)) {
+                                isValid = false
+                                break@recipeLoop
+                            }
+                        }
+                        i++
+                    }
+                }
+                if (isValid) {
+                    e.result = craftingRecipe.result
+                    return
+                }
+
+            } else if (craftingRecipe is ShapelessRecipe) {
+                val usedSlots = mutableSetOf<Int>()
+                for (ingredient in craftingRecipe.choiceList) {
+                    var isValid = false
+                    for (crafterIndex in 0..<crafter.inventory.size) {
+                        val actual = crafter.inventory.getItem(crafterIndex)
+                        if (crafterIndex in usedSlots || actual == null || !ingredient.test(actual)) {
+                            continue
+                        }
+                        isValid = true
+                        usedSlots.add(crafterIndex)
+                    }
+                    if (isValid) {
+                        e.result = craftingRecipe.result
+                        return
+                    }
+                }
+
+            } else {
+                e.isCancelled = true
+            }
         }
     }
 
