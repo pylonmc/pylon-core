@@ -20,7 +20,7 @@ import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.event.PylonCargoConnectEvent
 import io.github.pylonmc.pylon.core.event.PylonCargoDisconnectEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
-import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
+import io.github.pylonmc.pylon.core.logistics.LogisticGroupType
 import io.github.pylonmc.pylon.core.logistics.CargoRoutes
 import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -134,7 +134,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
     fun tickCargo() {
         for ((face, group) in cargoBlockData.groups) {
             val sourceGroup = getLogisticGroup(group)
-            if (sourceGroup == null || sourceGroup.slotType == LogisticSlotType.INPUT) {
+            if (sourceGroup == null || sourceGroup.slotType == LogisticGroupType.INPUT) {
                 continue
             }
 
@@ -144,7 +144,7 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
             }
 
             val targetGroup = target.block.getCargoLogisticGroup(target.face)
-            if (targetGroup == null || targetGroup.slotType == LogisticSlotType.OUTPUT) {
+            if (targetGroup == null || targetGroup.slotType == LogisticGroupType.OUTPUT) {
                 continue
             }
 
@@ -156,24 +156,25 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
     fun tickCargoFace(sourceGroup: LogisticGroup, targetGroup: LogisticGroup) {
         for (sourceSlot in sourceGroup.slots) {
             val sourceStack = sourceSlot.getItemStack()
-            val sourceAmount = sourceSlot.getAmount()
             if (sourceStack == null || (targetGroup.filter != null && !targetGroup.filter!!(sourceStack))) {
                 continue
             }
 
             var wasTargetModified = false
+            var remainingAvailableTransfers = cargoBlockData.transferRate.toLong() * PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER
             for (targetSlot in targetGroup.slots) {
+                val sourceAmount = sourceSlot.getAmount()
                 val targetStack = targetSlot.getItemStack()
                 val targetAmount = targetSlot.getAmount()
                 val targetMaxAmount = targetSlot.getMaxAmount(sourceStack)
 
-                if (targetAmount == targetMaxAmount || (targetStack != null && !sourceStack.isSimilar(targetStack))) {
+                if (targetAmount == targetMaxAmount || (targetStack != null && !targetStack.isEmpty && !sourceStack.isSimilar(targetStack))) {
                     continue
                 }
 
                 val toTransfer = min(
+                    remainingAvailableTransfers,
                     min(targetMaxAmount - targetAmount, sourceAmount),
-                    cargoBlockData.transferRate.toLong() * PylonConfig.CARGO_TRANSFER_RATE_MULTIPLIER
                 )
 
                 if (sourceAmount == toTransfer) {
@@ -183,7 +184,8 @@ interface PylonCargoBlock : PylonLogisticBlock, PylonEntityHolderBlock {
                 }
                 targetSlot.set(sourceStack, targetAmount + toTransfer)
 
-                if (sourceAmount == toTransfer) {
+                remainingAvailableTransfers -= toTransfer
+                if (remainingAvailableTransfers <= 0) {
                     return
                 }
 
