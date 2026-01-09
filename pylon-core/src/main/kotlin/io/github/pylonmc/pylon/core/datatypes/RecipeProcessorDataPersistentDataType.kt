@@ -8,7 +8,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 
-object RecipeProcessorDataPersistentDataType : PersistentDataType<PersistentDataContainer, PylonRecipeProcessor.RecipeProcessorData> {
+internal object RecipeProcessorDataPersistentDataType : PersistentDataType<PersistentDataContainer, PylonRecipeProcessor.RecipeProcessorData> {
 
     private val RECIPE_TYPE_KEY = pylonKey("recipe_type")
     private val CURRENT_RECIPE_KEY = pylonKey("current_recipe")

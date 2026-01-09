@@ -47,7 +47,7 @@ internal class FluidPipePlacementTask(
         PylonCore,
         Runnable { tick() },
         0,
-        PylonConfig.pipePlacementTaskIntervalTicks
+        PylonConfig.PIPE_PLACEMENT_TASK_INTERVAL_TICKS
     )
 
     private fun tick() {
@@ -67,7 +67,7 @@ internal class FluidPipePlacementTask(
         }
 
         // Check if player has moved too far away
-        if (player.location.distance(origin.position.location) > PylonConfig.pipePlacementCancelDistance) {
+        if (player.location.distance(origin.position.location) > PylonConfig.PIPE_PLACEMENT_CANCEL_DISTANCE) {
             FluidPipePlacementService.cancelConnection(player)
             return
         }
@@ -127,7 +127,7 @@ internal class FluidPipePlacementTask(
         val difference = target.position.vector3i.sub(previousTargetPosition.vector3i)
         if (isCardinalDirection(difference)) {
             display.interpolationDelay = 0
-            display.interpolationDuration = PylonConfig.pipePlacementTaskIntervalTicks.toInt()
+            display.interpolationDuration = PylonConfig.PIPE_PLACEMENT_TASK_INTERVAL_TICKS.toInt()
         }
     }
 
@@ -268,8 +268,8 @@ internal class FluidPipePlacementTask(
         val solution = findClosestPointBetweenSkewLines(playerLookPosition, playerLookDirection, originPosition, Vector3f(axis))
         val lambda = Math.clamp(
             solution.roundToLong(),
-            -PylonConfig.pipePlacementMaxLength,
-            PylonConfig.pipePlacementMaxLength
+            -PylonConfig.PIPE_PLACEMENT_MAX_LENGTH,
+            PylonConfig.PIPE_PLACEMENT_MAX_LENGTH
         )
         return Vector3i(axis).mul(lambda.toInt())
     }

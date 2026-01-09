@@ -27,6 +27,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataContainer
+import org.bukkit.persistence.PersistentDataType
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -61,7 +63,7 @@ import kotlin.random.Random
  */
 object BlockStorage : Listener {
 
-    private val pylonBlocksKey = pylonKey("blocks")
+    val pylonBlocksKey = pylonKey("blocks")
 
     // Access to blocks, blocksByChunk, blocksById fields must be synchronized
     // to prevent them briefly going out of sync
@@ -260,6 +262,47 @@ object BlockStorage : Listener {
         block.postInitialise()
 
         return block
+    }
+
+    /**
+     * Manually loads Pylon block data at a location from a persistent data container that contains the serialised block. Only call on the main thread.
+     *
+     * @return The block that was loaded, or null if the block loading was cancelled
+     *
+     * @throws IllegalArgumentException if the chunk of the given [blockPosition] is not
+     * loaded, the block already contains a Pylon block
+     */
+    @JvmStatic
+    fun loadBlock(
+        blockPosition: BlockPosition,
+        schema: PylonBlockSchema,
+        pdcData: PersistentDataContainer
+    ): PylonBlock? {
+        val context = BlockCreateContext.ManualLoading(blockPosition.block)
+        val block = blockPosition.block
+        pdcData.set(PylonBlock.pylonBlockPositionKey, PersistentDataType.LONG, blockPosition.asLong)
+
+        require(block.chunk.isLoaded) { "You can only place Pylon blocks in loaded chunks" }
+        require(!isPylonBlock(block)) { "You cannot place a new Pylon block in place of an existing Pylon blocks" }
+
+        if (!PrePylonBlockPlaceEvent(block, schema, context).callEvent()) return null
+        if (context.shouldSetType) {
+            block.type = schema.material
+        }
+
+        val pyBlock = PylonBlock.deserialize(block.world, pdcData)!!
+
+        lockBlockWrite {
+            check(blockPosition.chunk in blocksByChunk) { "Chunk '${blockPosition.chunk}' must be loaded" }
+            blocks[blockPosition] = pyBlock
+            blocksByKey.getOrPut(schema.key, ::mutableListOf).add(pyBlock)
+            blocksByChunk[blockPosition.chunk]!!.add(pyBlock)
+        }
+
+        BlockTextureEngine.insert(pyBlock)
+        PylonBlockPlaceEvent(block, pyBlock, context).callEvent()
+
+        return pyBlock
     }
 
     /**
@@ -465,7 +508,7 @@ object BlockStorage : Listener {
             chunkAutosaveTasks[event.chunk.position] = PylonCore.launch(PylonCore.minecraftDispatcher) {
 
                 // Wait a random delay before starting, this is to help smooth out lag from saving
-                delay(Random.nextLong(PylonConfig.blockDataAutosaveIntervalSeconds * 1000))
+                delay(Random.nextLong(PylonConfig.BLOCK_DATA_AUTOSAVE_INTERVAL_SECONDS * 1000))
 
                 while (true) {
                     lockBlockRead {
@@ -473,7 +516,7 @@ object BlockStorage : Listener {
                         check(blocksInChunk != null) { "Block autosave task was not cancelled properly" }
                         save(event.chunk, blocksInChunk)
                     }
-                    delay(PylonConfig.blockDataAutosaveIntervalSeconds * 1000)
+                    delay(PylonConfig.BLOCK_DATA_AUTOSAVE_INTERVAL_SECONDS * 1000)
                 }
             }
         }

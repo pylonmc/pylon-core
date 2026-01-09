@@ -13,7 +13,7 @@ object ResourcePackSettingsPage : PlayerSettingsPage(pylonKey("resource_pack_set
     val blockTextureSettingsButton = PageButton(Material.BOOKSHELF, BlockTextureSettingsPage)
 
     init {
-        if (PylonConfig.ArmorTextureConfig.enabled && !PylonConfig.ArmorTextureConfig.forced) {
+        if (PylonConfig.ArmorTextureConfig.ENABLED && !PylonConfig.ArmorTextureConfig.FORCED) {
             addSetting(
                 TogglePlayerSettingButton(
                     pylonKey("toggle-armor-textures"),
@@ -23,7 +23,7 @@ object ResourcePackSettingsPage : PlayerSettingsPage(pylonKey("resource_pack_set
             )
         }
 
-        if (PylonConfig.BlockTextureConfig.enabled) {
+        if (PylonConfig.BlockTextureConfig.ENABLED) {
             addSetting(blockTextureSettingsButton)
         }
     }

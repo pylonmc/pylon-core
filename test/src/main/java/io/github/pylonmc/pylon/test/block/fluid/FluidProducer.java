@@ -59,7 +59,7 @@ public class FluidProducer extends PylonBlock implements PylonFluidBlock, PylonU
     @Override
     public @NotNull Map<PylonFluid, Double> getSuppliedFluids() {
         return Map.of(
-                getFluidType(), FLUID_PER_SECOND * PylonConfig.fluidTickInterval / 20.0
+                getFluidType(), FLUID_PER_SECOND * PylonConfig.FLUID_TICK_INTERVAL / 20.0
         );
     }
 

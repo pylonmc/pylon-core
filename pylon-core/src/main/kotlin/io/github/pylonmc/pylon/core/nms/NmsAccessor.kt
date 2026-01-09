@@ -1,5 +1,6 @@
 package io.github.pylonmc.pylon.core.nms
 
+import com.destroystokyo.paper.event.player.PlayerRecipeBookClickEvent
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import net.kyori.adventure.text.Component
 import org.bukkit.block.Block
@@ -34,6 +35,8 @@ interface NmsAccessor {
     fun serializePdc(pdc: PersistentDataContainer): Component
 
     fun getStateProperties(block: Block, custom: Map<String, Pair<String, Int>> = mutableMapOf()): Map<String, String>
+
+    fun handleRecipeBookClick(event: PlayerRecipeBookClickEvent)
 
     companion object {
         val instance = Class.forName("io.github.pylonmc.pylon.core.nms.NmsAccessorImpl")

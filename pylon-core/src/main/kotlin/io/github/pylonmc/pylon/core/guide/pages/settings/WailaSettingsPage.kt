@@ -24,11 +24,11 @@ object WailaSettingsPage : PlayerSettingsPage(pylonKey("waila_settings")) {
                 },
                 isEnabled = { player -> player.wailaConfig.vanillaWailaEnabled }
             ))
-        if (PylonConfig.WailaConfig.enabledTypes.size > 1) {
+        if (PylonConfig.WailaConfig.ENABLED_TYPES.size > 1) {
             addSetting(
                 CyclePlayerSettingButton(
                     pylonKey("cycle-waila-type"),
-                    PylonConfig.WailaConfig.enabledTypes,
+                    PylonConfig.WailaConfig.ENABLED_TYPES,
                     identifier = { type -> type.name.lowercase() },
                     getter = { player -> player.wailaConfig.type },
                     setter = { player, type -> player.wailaConfig.type = type },

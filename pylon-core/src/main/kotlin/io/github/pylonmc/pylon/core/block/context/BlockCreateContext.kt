@@ -81,4 +81,13 @@ interface BlockCreateContext {
         override val item: ItemStack? = null,
         override val shouldSetType: Boolean = true
     ) : BlockCreateContext
+
+    @JvmRecord
+    data class ManualLoading @JvmOverloads constructor(
+        override val block: Block,
+        override val facing: BlockFace = BlockFace.NORTH,
+        override val facingVertical: BlockFace = BlockFace.NORTH,
+        override val item: ItemStack? = null,
+        override val shouldSetType: Boolean = true
+    ) : BlockCreateContext
 }

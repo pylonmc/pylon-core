@@ -137,7 +137,7 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
          */
         @EventHandler(priority = EventPriority.LOWEST)
         private fun join(event: PlayerJoinEvent) {
-            if (PylonConfig.pylonGuideOnFirstJoin && !event.player.hasPlayedBefore()) {
+            if (PylonConfig.PYLON_GUIDE_ON_FIRST_JOIN && !event.player.hasPlayedBefore()) {
                 event.player.give(STACK.clone())
             }
         }

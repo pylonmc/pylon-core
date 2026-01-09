@@ -37,7 +37,7 @@ object MainSettingsPage : PlayerSettingsPage(pylonKey("settings")) {
 
         addSetting(resourcePackSettingsButton)
 
-        if (PylonConfig.researchesEnabled) {
+        if (PylonConfig.RESEARCHES_ENABLED) {
             addSetting(researchConfettiButton)
             addSetting(researchSoundsButton)
         }

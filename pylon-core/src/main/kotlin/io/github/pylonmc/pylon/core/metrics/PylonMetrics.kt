@@ -41,14 +41,14 @@ internal object PylonMetrics {
 
         metrics.addCustomChart(AdvancedPie("disabled_items") {
             val values = mutableMapOf<String, Int>()
-            for (item in PylonConfig.disabledItems) {
+            for (item in PylonConfig.DISABLED_ITEMS) {
                 values.put(item.toString(), 1)
             }
             values
         })
 
         metrics.addCustomChart(SimplePie("researches_enabled") {
-            if (PylonConfig.researchesEnabled) { "yes" } else { "no" }
+            if (PylonConfig.RESEARCHES_ENABLED) { "yes" } else { "no" }
         })
 
         metrics.addCustomChart(AdvancedPie("researches_unlocked") {
@@ -65,7 +65,7 @@ internal object PylonMetrics {
             commandsRun
         })
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(PylonCore, Runnable { save() }, 0L, PylonConfig.metricsSaveIntervalTicks)
+        Bukkit.getScheduler().runTaskTimerAsynchronously(PylonCore, Runnable { save() }, 0L, PylonConfig.METRICS_SAVE_INTERVAL_TICKS)
     }
 
     fun save() {

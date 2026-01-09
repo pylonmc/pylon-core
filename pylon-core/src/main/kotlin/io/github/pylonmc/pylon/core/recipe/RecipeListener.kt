@@ -7,7 +7,6 @@ import io.github.pylonmc.pylon.core.recipe.vanilla.CookingRecipeWrapper
 import io.github.pylonmc.pylon.core.recipe.vanilla.ShapedRecipeType
 import io.github.pylonmc.pylon.core.recipe.vanilla.VanillaRecipeType
 import io.github.pylonmc.pylon.core.util.isPylonAndIsNot
-import io.github.pylonmc.pylon.core.util.isPylonSimilar
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.player.CartographyItemEvent
 import org.bukkit.Keyed
@@ -19,11 +18,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockCookEvent
 import org.bukkit.event.block.CrafterCraftEvent
-import org.bukkit.event.inventory.FurnaceBurnEvent
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.PrepareAnvilEvent
-import org.bukkit.event.inventory.PrepareItemCraftEvent
-import org.bukkit.event.inventory.PrepareSmithingEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.ShapedRecipe
 import org.bukkit.inventory.ShapelessRecipe
@@ -63,7 +58,7 @@ internal object PylonRecipeListener : Listener {
             }
             check(firstItem != null)
             check(secondItem != null)
-            if (firstItem.isPylonSimilar(secondItem)) {
+            if (firstItem.isSimilar(secondItem)) {
                 val pylonItem = PylonItem.fromStack(firstItem)!!
                 if (pylonItem !is PylonUnmergeable) {
                     val result = pylonItem.schema.getItemStack()

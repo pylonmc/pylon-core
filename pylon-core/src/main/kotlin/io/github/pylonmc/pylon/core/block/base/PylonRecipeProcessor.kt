@@ -25,6 +25,7 @@ import java.util.IdentityHashMap
  */
 interface PylonRecipeProcessor<T: PylonRecipe> {
 
+    @ApiStatus.Internal
     data class RecipeProcessorData(
         var recipeType: RecipeType<*>?,
         var currentRecipe: PylonRecipe?,
@@ -34,16 +35,20 @@ interface PylonRecipeProcessor<T: PylonRecipe> {
     )
 
     private val recipeProcessorData: RecipeProcessorData
+        @ApiStatus.NonExtendable
         get() = recipeProcessorBlocks.getOrPut(this) { RecipeProcessorData(null, null, null, null, null)}
 
     val currentRecipe: T?
+        @ApiStatus.NonExtendable
         // cast should always be safe due to type restriction when starting recipe
         get() = recipeProcessorData.currentRecipe as T?
 
     val recipeTicksRemaining: Int?
+        @ApiStatus.NonExtendable
         get() = recipeProcessorData.recipeTicksRemaining
 
     val isProcessingRecipe: Boolean
+        @ApiStatus.NonExtendable
         get() = currentRecipe != null
 
     var recipeProgressItem: ProgressItem
@@ -105,6 +110,7 @@ interface PylonRecipeProcessor<T: PylonRecipe> {
         }
     }
 
+    @ApiStatus.Internal
     companion object : Listener {
 
         private val recipeProcessorKey = pylonKey("recipe_processor_data")
