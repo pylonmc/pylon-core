@@ -6,6 +6,7 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
@@ -627,40 +628,20 @@ private val BLOCK_ITEM_FALLBACK = Map.of<Material?, Material?>(
 )
 
 fun itemFromKey(key: NamespacedKey): ItemStack {
-    return if (key.namespace == "minecraft") {
-        makeItemVanilla(key)
-    } else {
-        makeItemPylon(key)
-    }
-}
-
-fun makeItemVanilla(materialKey: NamespacedKey): ItemStack {
-    var material = Registry.MATERIAL.get(materialKey)
-    if (material == null) {
-        val stack = ItemStack(Material.BARRIER)
-        stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.text("ERROR: " + materialKey))
-        return stack
+    val wrapper = ItemTypeWrapper(key)
+    if (wrapper !is ItemTypeWrapper.Vanilla) {
+        return wrapper.createItemStack()
     }
 
-    if (material.isItem) {
-        return ItemStack(material)
+    val mat = wrapper.material
+    if (mat.isItem) return wrapper.createItemStack()
+
+    val fallback: Material = BLOCK_ITEM_FALLBACK[mat] ?: Material.BARRIER
+    val stack = ItemStack(fallback)
+
+    if (fallback == Material.BARRIER) {
+        stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.text("ERROR: $mat"))
     }
 
-    material = BLOCK_ITEM_FALLBACK.getOrDefault(material, Material.BARRIER)
-    val stack = ItemStack(material)
-    stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.translatable(material.translationKey()))
-    return stack
-}
-
-fun makeItemPylon(blockKey: NamespacedKey): ItemStack {
-    val item = PylonRegistry.ITEMS[blockKey]
-    if (item == null) {
-        val block = PylonRegistry.BLOCKS[blockKey]
-            ?: throw UnsupportedOperationException("Can't make pylon item, no block or item available for such key")
-        val stack = ItemStack(Material.BARRIER)
-        stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.text(block.getKey().toString()))
-        return stack
-    }
-
-    return item.getItemStack()
+    return ItemStack(fallback)
 }
