@@ -6,11 +6,13 @@ import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.addon.PylonAddon
 import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.ConfigSection
+import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.nms.NmsAccessor
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.papermc.paper.datacomponent.DataComponentType
+import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -48,6 +50,7 @@ import xyz.xenondevs.invui.inventory.event.UpdateReason
 import java.lang.Math
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
+import java.util.Map
 import java.util.function.Consumer
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -585,3 +588,27 @@ class MachineUpdateReason : UpdateReason
 // https://minecraft.wiki/w/Breaking#Calculation
 fun getBlockBreakTicks(tool: ItemStack, block: Block)
     = round(100 * block.type.getHardness() / block.getDestroySpeed(tool, true))
+
+private val BLOCK_ITEM_FALLBACK = Map.of<Material?, Material?>(
+    Material.FIRE, Material.FLINT_AND_STEEL,
+    Material.SOUL_FIRE, Material.FLINT_AND_STEEL
+)
+
+fun itemFromKey(key: NamespacedKey): ItemStack {
+    val wrapper = ItemTypeWrapper(key)
+    if (wrapper !is ItemTypeWrapper.Vanilla) {
+        return wrapper.createItemStack()
+    }
+
+    val mat = wrapper.material
+    if (mat.isItem) return wrapper.createItemStack()
+
+    val fallback: Material = BLOCK_ITEM_FALLBACK[mat] ?: Material.BARRIER
+    val stack = ItemStack(fallback)
+
+    if (fallback == Material.BARRIER) {
+        stack.setData<Component?>(DataComponentTypes.ITEM_NAME, Component.text("ERROR: $mat"))
+    }
+
+    return ItemStack(fallback)
+}
