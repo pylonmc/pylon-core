@@ -85,7 +85,7 @@ interface PylonTickingEntity {
         private val tickingEntities = IdentityHashMap<PylonTickingEntity, TickingEntityData>()
 
         @EventHandler
-        private fun onSerialize(event: PylonEntityAddEvent) { //todo serialize
+        private fun onAdd(event: PylonEntityAddEvent) { //todo serialize
             val entity = event.pylonEntity
             if (entity is PylonTickingEntity) {
                 entity.entity.persistentDataContainer.set(tickingEntityKey, PylonSerializers.TICKING_ENTITY_DATA, tickingEntities[entity]!!)
@@ -101,18 +101,19 @@ interface PylonTickingEntity {
         }
 
         @EventHandler
-        private fun onDeath(event: PylonEntityDeathEvent) {
+        private fun onLoad(event: PylonEntityLoadEvent) {
             val entity = event.pylonEntity
             if (entity is PylonTickingEntity) {
-                tickingEntities.remove(entity)?.job?.cancel()
+                tickingEntities[entity] = entity.entity.persistentDataContainer.get(tickingEntityKey, PylonSerializers.TICKING_ENTITY_DATA)
+                startTicker(entity)
             }
         }
 
         @EventHandler
-        private fun onEntityLoad(event: PylonEntityLoadEvent) {
+        private fun onDeath(event: PylonEntityDeathEvent) {
             val entity = event.pylonEntity
             if (entity is PylonTickingEntity) {
-                startTicker(entity)
+                tickingEntities.remove(entity)?.job?.cancel()
             }
         }
 
