@@ -9,10 +9,9 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.PylonEntity
-import io.github.pylonmc.pylon.core.event.PylonEntityAddEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
-import io.github.pylonmc.pylon.core.event.PylonEntityLoadEvent
-import io.github.pylonmc.pylon.core.event.PylonEntityUnloadEvent
+import io.github.pylonmc.pylon.core.event.PylonEntityDeserializeEvent
+import io.github.pylonmc.pylon.core.event.PylonEntitySerializeEvent
 import io.github.pylonmc.pylon.core.util.pylonKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -85,15 +84,7 @@ interface PylonTickingEntity {
         private val tickingEntities = IdentityHashMap<PylonTickingEntity, TickingEntityData>()
 
         @EventHandler
-        private fun onAdd(event: PylonEntityAddEvent) { //todo serialize
-            val entity = event.pylonEntity
-            if (entity is PylonTickingEntity) {
-                entity.entity.persistentDataContainer.set(tickingEntityKey, PylonSerializers.TICKING_ENTITY_DATA, tickingEntities[entity]!!)
-            }
-        }
-
-        @EventHandler
-        private fun onUnload(event: PylonEntityUnloadEvent) {
+        private fun onUnload(event: PylonEntitySerializeEvent) {
             val entity = event.pylonEntity
             if (entity is PylonTickingEntity) {
                 tickingEntities.remove(entity)?.job?.cancel()
@@ -101,7 +92,7 @@ interface PylonTickingEntity {
         }
 
         @EventHandler
-        private fun onLoad(event: PylonEntityLoadEvent) {
+        private fun onLoad(event: PylonEntityDeserializeEvent) {
             val entity = event.pylonEntity
             if (entity is PylonTickingEntity) {
                 tickingEntities[entity] = entity.entity.persistentDataContainer.get(tickingEntityKey, PylonSerializers.TICKING_ENTITY_DATA)

@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.PylonEntitySerializeEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.WailaDisplay
@@ -96,6 +97,7 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
         @JvmSynthetic
         internal fun serialize(pylonEntity: PylonEntity<*>) {
             pylonEntity.write(pylonEntity.entity.persistentDataContainer)
+            PylonEntitySerializeEvent(pylonEntity.entity, pylonEntity, pylonEntity.entity.persistentDataContainer).callEvent()
         }
 
         @JvmSynthetic
@@ -117,8 +119,9 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
                 }
 
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                return schema.loadConstructor.invoke(entity) as PylonEntity<*>
-
+                val pylonEntity = schema.loadConstructor.invoke(entity) as PylonEntity<*>
+                PylonEntitySerializeEvent(entity, pylonEntity, entity.persistentDataContainer).callEvent()
+                return pylonEntity
             } catch (t: Throwable) {
                 PylonCore.logger.severe("Error while loading entity $key with UUID ${entity.uniqueId}")
                 t.printStackTrace()
