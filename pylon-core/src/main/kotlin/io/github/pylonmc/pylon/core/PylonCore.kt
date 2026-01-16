@@ -121,7 +121,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         pm.registerEvents(EntityStorage, this)
         pm.registerEvents(EntityListener, this)
         pm.registerEvents(Research, this)
-        pm.registerEvents(PylonGuiBlock, this)
+        pm.registerEvents(PylonVirtualInventoryBlock, this)
         pm.registerEvents(PylonEntityHolderBlock, this)
         pm.registerEvents(PylonSimpleMultiblock, this)
         pm.registerEvents(PylonProcessor, this)
