@@ -1,8 +1,14 @@
 package io.github.pylonmc.pylon.core.block.base
 
 import io.github.pylonmc.pylon.core.block.PylonBlock
+import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockLoadEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockPlaceEvent
+import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import net.kyori.adventure.text.Component
 import org.bukkit.event.Event
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.jetbrains.annotations.MustBeInvokedByOverriders
@@ -10,6 +16,7 @@ import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.window.Window
+import java.util.*
 
 /**
  * A simple interface that opens a GUI when the block is right clicked
@@ -27,7 +34,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
     /**
      * Returns the block's GUI. Called when a block is created.
      */
-    fun getGui(): Gui
+    fun createGui(): Gui
 
     /**
      * The title of the GUI
@@ -49,10 +56,42 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
         event.setUseItemInHand(Event.Result.DENY)
 
         Window.single()
-            .setGui(getGui())
+            .setGui(guiBlocks[this]!!)
             .setTitle(AdventureComponentWrapper(guiTitle))
             .setViewer(event.player)
             .build()
             .open()
+    }
+
+    companion object : Listener {
+        private val guiBlocks = IdentityHashMap<PylonGuiBlock, Gui>()
+
+        @EventHandler
+        private fun onPlace(event: PylonBlockPlaceEvent) {
+            if (event.pylonBlock is PylonGuiBlock) {
+                guiBlocks[event.pylonBlock] = event.pylonBlock.createGui()
+            }
+        }
+
+        @EventHandler
+        private fun onLoad(event: PylonBlockLoadEvent) {
+            if (event.pylonBlock is PylonGuiBlock) {
+                guiBlocks[event.pylonBlock] = event.pylonBlock.createGui()
+            }
+        }
+
+        @EventHandler
+        private fun onBreak(event: PylonBlockBreakEvent) {
+            if (event.pylonBlock is PylonGuiBlock) {
+                guiBlocks.remove(event.pylonBlock)!!.closeForAllViewers()
+            }
+        }
+
+        @EventHandler
+        private fun onUnload(event: PylonBlockUnloadEvent) {
+            if (event.pylonBlock is PylonGuiBlock) {
+                guiBlocks.remove(event.pylonBlock)!!.closeForAllViewers()
+            }
+        }
     }
 }
