@@ -231,6 +231,7 @@ class PylonServerPlaceRecipe private constructor(
                 inputGridSlots
             )
 
+            @Suppress("UNCHECKED_CAST")
             serverPlaceRecipe.delegate = constructor.invokeExact(
                 serverPlaceRecipe as ServerPlaceRecipe.CraftingMenuAccess<CraftingRecipe>, // important for invokeExact
                 player.inventory,

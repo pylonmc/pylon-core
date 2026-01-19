@@ -1,4 +1,5 @@
 @file:JvmName("PylonUtils")
+@file:Suppress("UnstableApiUsage")
 
 package io.github.pylonmc.pylon.core.util
 
@@ -560,7 +561,7 @@ fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Materi
     NmsAccessor.instance.damageItem(itemStack, amount, world, onBreak, force)
 
 @JvmOverloads
-fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot? = null, force: Boolean = false) =
+fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot, force: Boolean = false) =
     NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)
 
 

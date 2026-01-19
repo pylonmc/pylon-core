@@ -29,20 +29,20 @@ dependencies {
 
     runtimeOnly(project(":nms"))
 
-    paperLibraryApi("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
-    paperLibraryApi("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
-    paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    paperLibraryApi("org.jetbrains.kotlin:kotlin-stdlib:${kotlin.coreLibrariesVersion}")
+    paperLibraryApi("org.jetbrains.kotlin:kotlin-reflect:${kotlin.coreLibrariesVersion}")
+    paperLibraryApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     compileOnly("io.papermc.paper:paper-api:$minecraftVersion-R0.1-SNAPSHOT")
 
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
-    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.47")
+    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.49")
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
-    paperLibrary("xyz.xenondevs.invui:inventory-access-r25:1.47:remapped-mojang")
-    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.46")
-    api("com.github.Tofaa2.EntityLib:spigot:2.4.11")
-    implementation("com.github.retrooper:packetevents-spigot:2.10.0")
+    paperLibrary("xyz.xenondevs.invui:inventory-access-r26:1.49:remapped-mojang")
+    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.49")
+    api("io.github.tofaa2:spigot:3.0.3-SNAPSHOT")
+    implementation("com.github.retrooper:packetevents-spigot:2.11.1")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.2.2")

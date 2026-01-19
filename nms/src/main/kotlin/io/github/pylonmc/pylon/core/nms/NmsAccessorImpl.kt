@@ -17,14 +17,14 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.inventory.AbstractCraftingMenu
 import net.minecraft.world.inventory.RecipeBookMenu.PostPlaceAction
 import net.minecraft.world.item.Item
+import net.minecraft.world.level.block.state.properties.Property
 import org.bukkit.Material
 import org.bukkit.World
+import org.bukkit.block.Block
 import org.bukkit.craftbukkit.CraftEquipmentSlot
 import org.bukkit.craftbukkit.CraftWorld
-import org.bukkit.craftbukkit.entity.CraftLivingEntity
-import net.minecraft.world.level.block.state.properties.Property
-import org.bukkit.block.Block
 import org.bukkit.craftbukkit.block.CraftBlock
+import org.bukkit.craftbukkit.entity.CraftLivingEntity
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.craftbukkit.inventory.CraftItemType
@@ -35,7 +35,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")
@@ -49,10 +49,8 @@ object NmsAccessorImpl : NmsAccessor {
         }, force)
     }
 
-    override fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot?, force: Boolean) {
-        val nmsSlot = slot?.let { CraftEquipmentSlot.getNMS(it) }
-        @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // slot can be null, the nms method parameter is annotated as such, but for some reason it still has a warning
-        (itemStack as CraftItemStack).handle.hurtAndBreak(amount, (entity as CraftLivingEntity).handle, nmsSlot, force)
+    override fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot, force: Boolean) {
+        (itemStack as CraftItemStack).handle.hurtAndBreak(amount, (entity as CraftLivingEntity).handle, CraftEquipmentSlot.getNMS(slot), force)
     }
 
     override fun registerTranslationHandler(player: Player, handler: PlayerTranslationHandler) {

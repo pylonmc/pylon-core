@@ -22,7 +22,7 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
         recipe: RecipeHolder<*>?,
         level: ServerLevel?,
     ): RecipeBookMenu.PostPlaceAction {
-        val recipeHolder = recipe as RecipeHolder<CraftingRecipe>
+        @Suppress("UNCHECKED_CAST") val recipeHolder = recipe as RecipeHolder<CraftingRecipe>
 
         init()
 
