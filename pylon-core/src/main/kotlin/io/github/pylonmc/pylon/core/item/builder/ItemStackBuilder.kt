@@ -6,23 +6,13 @@ import io.github.pylonmc.pylon.core.config.adapter.ConfigAdapter
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.PylonItemSchema
-import io.github.pylonmc.pylon.core.util.editData
-import io.github.pylonmc.pylon.core.util.editDataOrDefault
-import io.github.pylonmc.pylon.core.util.editDataOrSet
-import io.github.pylonmc.pylon.core.util.fromMiniMessage
+import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder.Companion.pylon
+import io.github.pylonmc.pylon.core.util.*
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
-import io.github.pylonmc.pylon.core.util.pickaxeMineable
-import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentBuilder
 import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.datacomponent.item.CustomModelData
-import io.papermc.paper.datacomponent.item.ItemAttributeModifiers
-import io.papermc.paper.datacomponent.item.ItemLore
-import io.papermc.paper.datacomponent.item.TooltipDisplay
-import io.papermc.paper.datacomponent.item.Tool
-import io.papermc.paper.datacomponent.item.UseCooldown
-import io.papermc.paper.datacomponent.item.Weapon
+import io.papermc.paper.datacomponent.item.*
 import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys
 import io.papermc.paper.registry.set.RegistryKeySet
 import net.kyori.adventure.key.Key
@@ -44,7 +34,6 @@ import org.jetbrains.annotations.ApiStatus
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import java.util.function.Consumer
-import kotlin.collections.forEach
 
 /**
  * Helper class for creating an [ItemStack] with various properties. Includes
@@ -388,7 +377,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         fun gui(stack: ItemStack, key: String): ItemStackBuilder {
             return ItemStackBuilder(stack)
                 .editPdc { it.set(GuiItems.pylonGuiItemKeyKey, PylonSerializers.STRING, key) }
-                .addCustomModelDataString(key.toString())
+                .addCustomModelDataString(key)
         }
 
         /**

@@ -23,6 +23,8 @@ import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
 import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
+import io.github.pylonmc.pylon.core.guide.pages.base.PagedGuidePage
+import io.github.pylonmc.pylon.core.guide.pages.base.TabbedGuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonInventoryTicker
 import io.github.pylonmc.pylon.core.item.PylonItem
@@ -116,7 +118,6 @@ object PylonCore : JavaPlugin(), PylonAddon {
         pm.registerEvents(BlockListener, this)
         pm.registerEvents(PylonCopperBlock, this)
         pm.registerEvents(PylonItemListener, this)
-        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.INVENTORY_TICKER_BASE_RATE)
         pm.registerEvents(MultiblockCache, this)
         pm.registerEvents(EntityStorage, this)
         pm.registerEvents(EntityListener, this)
@@ -138,6 +139,10 @@ object PylonCore : JavaPlugin(), PylonAddon {
         pm.registerEvents(CargoRoutes, this)
         pm.registerEvents(CargoDuct, this)
         pm.registerEvents(RecipeCompletion, this)
+        pm.registerEvents(PagedGuidePage, this)
+        pm.registerEvents(TabbedGuidePage, this)
+
+        Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.INVENTORY_TICKER_BASE_RATE)
 
         if (PylonConfig.WailaConfig.enabled) {
             pm.registerEvents(Waila, this)

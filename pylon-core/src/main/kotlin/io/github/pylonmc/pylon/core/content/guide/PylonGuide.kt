@@ -20,6 +20,7 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.base.PylonInteractor
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -153,10 +154,10 @@ class PylonGuide(stack: ItemStack) : PylonItem(stack), PylonInteractor {
         }
 
         @JvmStatic
-        fun ingredientsPage(stack: ItemStack) = ItemIngredientsPage(stack)
+        fun ingredientsPage(input: FluidOrItem) = ItemIngredientsPage(input)
 
         @JvmStatic
-        fun ingredientsButton(stack: ItemStack) = PageButton(Material.SCULK_SENSOR, ingredientsPage(stack))
+        fun ingredientsButton(input: FluidOrItem) = PageButton(Material.SCULK_SENSOR, ingredientsPage(input))
 
         /**
          * Hide an item from showing up in searches

@@ -1,16 +1,26 @@
 package io.github.pylonmc.pylon.core.recipe
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
+import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
+import org.bukkit.Keyed
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 
-sealed interface FluidOrItem {
+sealed interface FluidOrItem : Keyed {
+
+    fun matchesType(other: FluidOrItem): Boolean
 
     @JvmRecord
-    data class Item(val item: ItemStack) : FluidOrItem
+    data class Item(val item: ItemStack) : FluidOrItem {
+        override fun getKey() = ItemTypeWrapper(item).key
+        override fun matchesType(other: FluidOrItem) = other is Item && ItemTypeWrapper(this.item) == ItemTypeWrapper(other.item)
+    }
 
     @JvmRecord
-    data class Fluid(val fluid: PylonFluid, val amountMillibuckets: Double) : FluidOrItem
+    data class Fluid(val fluid: PylonFluid, val amountMillibuckets: Double) : FluidOrItem {
+        override fun getKey() = fluid.key
+        override fun matchesType(other: FluidOrItem) = other is Fluid && this.fluid == other.fluid
+    }
 
     companion object {
 
@@ -25,7 +35,7 @@ sealed interface FluidOrItem {
             = when (choice) {
                 is RecipeChoice.ExactChoice -> listOf(of(choice.itemStack))
                 is RecipeChoice.MaterialChoice -> listOf(of(choice.itemStack))
-                else -> emptyList()
+                else -> throw AssertionError()
             }
     }
 }

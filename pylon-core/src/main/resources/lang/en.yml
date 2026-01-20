@@ -182,6 +182,7 @@ guide:
           <guidearrow> <guideinsn>Press Q</guideinsn> to cheat in one item <#ff0000>(admin only)</#ff0000>
           <guidearrow> <guideinsn>Middle click</guideinsn> to cheat in a stack <#ff0000>(admin only)</#ff0000>
       error: "<red>Item failed to load"
+      amount: "%name%: <gray>%amount% (%stacks%x%stack-size% + %remainder%)"
     toggle-waila:
       enabled:
         name: "<white>WAILA: <green>Enabled <dark_gray>(Click to toggle)"
@@ -209,15 +210,6 @@ guide:
           <guidearrow> Whether your WAILA is displayed as an actionbar or bossbar
           <guidearrow> <green>Bossbar <dark_gray>- <gray>at the top of your screen
           <guidearrow> <aqua>Actionbar <dark_gray>- <gray>at the bottom of your screen
-    byproducts:
-      name: "<blue>↑ Inputs ↑"
-      lore: |-
-        <yellow>↓ Byproducts ↓
-    main_product:
-      name: "<blue>↑ Inputs ↑"
-      lore: |-
-        <gold>↓ Main product ↓
-    ingredient: "<yellow>%item_ingredients_page_amount%x <white>%item_ingredients_page_item%"
     toggle-block-textures:
       enabled:
         name: "<white>Custom block textures: <green>Enabled <dark_gray>(Click to toggle)"
@@ -313,6 +305,9 @@ guide:
     item_usages: "Item usages"
     fluid_usages: "Fluid usages"
     item_ingredients: "Ingredient breakdown"
+    tab:
+      ingredients: "Ingredients"
+      byproducts: "Byproducts"
 
 unit:
   prefix:
