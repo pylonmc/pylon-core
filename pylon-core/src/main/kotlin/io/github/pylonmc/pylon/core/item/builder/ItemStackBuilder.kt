@@ -126,6 +126,9 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
      */
     fun disableNameHacks() = editPdc { pdc -> pdc.set(disableNameHacksKey, PylonSerializers.BOOLEAN, true) }
 
+    fun lore(): ItemLore?
+        = stack.getData(DataComponentTypes.LORE)
+
     fun lore(loreToAdd: List<ComponentLike>) = apply {
         val lore = ItemLore.lore()
         stack.getData(DataComponentTypes.LORE)?.let { lore.addLines(it.lines()) }

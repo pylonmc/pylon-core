@@ -24,7 +24,6 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
-import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
@@ -32,6 +31,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.ItemStack
 import kotlin.math.min
 
 /**
@@ -43,21 +43,27 @@ import kotlin.math.min
  * @property cost If null, the research cannot be unlocked using points
  * @property unlocks The keys of the items that are unlocked by this research
  */
-@JvmRecord
-data class Research(
+class Research(
     private val key: NamespacedKey,
-    val material: Material,
+    private val itemTemplate: ItemStack,
     val name: Component,
     val cost: Long?,
     val unlocks: Set<NamespacedKey>
 ) : Keyed {
 
+    val item: ItemStack
+        get() {
+            val item = itemTemplate.clone()
+            item.lore(listOf())
+            return item
+        }
+
     /**
      * A constructor that sets the name to a default language file key.
      */
-    constructor(key: NamespacedKey, material: Material, cost: Long?, vararg unlocks: NamespacedKey) : this(
+    constructor(key: NamespacedKey, item: ItemStack, cost: Long?, vararg unlocks: NamespacedKey) : this(
         key,
-        material,
+        item,
         Component.translatable("pylon.${key.namespace}.research.${key.key}"),
         cost,
         unlocks.toSet()
@@ -298,12 +304,12 @@ data class Research(
         fun loadFromConfig(section: ConfigSection, key : NamespacedKey) : Research {
 
             try {
-                val material = section.getOrThrow("material", ConfigAdapter.MATERIAL)
+                val item = section.getOrThrow("item", ConfigAdapter.ITEM_STACK)
                 val name = section.get("name", ConfigAdapter.STRING) ?: "pylon.${key.namespace}.research.${key.key}"
                 val cost = section.get("cost", ConfigAdapter.LONG)
                 val unlocks = section.get("unlocks", ConfigAdapter.SET.from(ConfigAdapter.NAMESPACED_KEY)) ?: emptySet()
 
-                return Research(key, material, Component.translatable(name), cost, unlocks)
+                return Research(key, item, Component.translatable(name), cost, unlocks)
             } catch (e: Exception) {
                 throw IllegalArgumentException(
                     "Failed to load research '$key' from config",
