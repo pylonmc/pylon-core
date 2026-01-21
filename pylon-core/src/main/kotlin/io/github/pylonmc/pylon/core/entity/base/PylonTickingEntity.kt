@@ -9,6 +9,7 @@ import io.github.pylonmc.pylon.core.config.PylonConfig
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.PylonEntity
+import io.github.pylonmc.pylon.core.event.PylonEntityAddEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityDeathEvent
 import io.github.pylonmc.pylon.core.event.PylonEntityDeserializeEvent
 import io.github.pylonmc.pylon.core.event.PylonEntitySerializeEvent
@@ -84,19 +85,18 @@ interface PylonTickingEntity {
         private val tickingEntities = IdentityHashMap<PylonTickingEntity, TickingEntityData>()
 
         @EventHandler
-        private fun onUnload(event: PylonEntitySerializeEvent) {
+        private fun onAdded(event: PylonEntityAddEvent) {
             val entity = event.pylonEntity
             if (entity is PylonTickingEntity) {
-                tickingEntities.remove(entity)?.job?.cancel()
+                startTicker(entity)
             }
         }
 
         @EventHandler
-        private fun onLoad(event: PylonEntityDeserializeEvent) {
+        private fun onUnload(event: PylonEntitySerializeEvent) {
             val entity = event.pylonEntity
             if (entity is PylonTickingEntity) {
-                tickingEntities[entity] = entity.entity.persistentDataContainer.get(tickingEntityKey, PylonSerializers.TICKING_ENTITY_DATA)
-                startTicker(entity)
+                tickingEntities.remove(entity)?.job?.cancel()
             }
         }
 

@@ -83,14 +83,20 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
 
         private val pylonEntityKeyKey = pylonKey("pylon_entity_key")
 
+        @JvmOverloads
         @JvmStatic
-        fun register(key: NamespacedKey, entityClass: Class<*>, pylonEntityClass: Class<out PylonEntity<*>>) {
-            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, entityClass, pylonEntityClass))
+        fun register(
+            key: NamespacedKey,
+            entityClass: Class<*>,
+            pylonEntityClass: Class<out PylonEntity<*>>,
+            isPersistent: Boolean = true,
+        ) {
+            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, entityClass, pylonEntityClass, isPersistent))
         }
 
         @JvmSynthetic
-        inline fun <reified E: Entity, reified T: PylonEntity<E>> register(key: NamespacedKey) {
-            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, E::class.java, T::class.java))
+        inline fun <reified E: Entity, reified T: PylonEntity<E>> register(key: NamespacedKey, isPersistent: Boolean = true) {
+            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, E::class.java, T::class.java, isPersistent))
         }
 
         @JvmSynthetic
@@ -119,7 +125,7 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
                 val schema = PylonRegistry.ENTITIES[key]
                     ?: return null
 
-                if (!schema.entityClass.isInstance(entity)) {
+                if (!schema.entityClass.isInstance(entity) || schema.loadConstructor == null) {
                     return null
                 }
 
