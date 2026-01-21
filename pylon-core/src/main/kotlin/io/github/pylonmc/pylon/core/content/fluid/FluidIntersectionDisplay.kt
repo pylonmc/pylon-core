@@ -59,6 +59,10 @@ class FluidIntersectionDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, Flu
         FluidManager.remove(point)
     }
 
+    override fun onUnload() {
+        FluidManager.unload(point)
+    }
+
     companion object {
         @JvmStatic
         val KEY = pylonKey("fluid_pipe_intersection_display")

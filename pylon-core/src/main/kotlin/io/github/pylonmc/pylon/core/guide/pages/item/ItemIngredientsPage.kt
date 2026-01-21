@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
-import io.github.pylonmc.pylon.core.guide.button.BackButton
+import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
@@ -27,16 +27,9 @@ import kotlin.math.max
 /**
  * Displays a breakdown of the ingredients needed to craft an item.
  *
- * Magic numbers:
- * 27 -> 27 "i" in sub-page, which means input items/fluid
- * 9  -> 9  "o" in sub-page, which means intermediates
- *
  * @author balugaq
  */
-open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
-    pylonKey("item_ingredients"),
-    Material.SCULK_SENSOR
-) {
+open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(pylonKey("item_ingredients")) {
     override fun getKey() = KEY
 
     // page is 0 based
@@ -53,8 +46,8 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             .addIngredient('f', flatWithAmount(Container.of(stack, calculation.outputAmount.toInt())))
             .addIngredient('m', mainProductButton)
             .addIngredient(
-                'a', if (!calculation.intermediates.isEmpty()) {
-                    intermediatesButton
+                'a', if (!calculation.byproducts.isEmpty()) {
+                    byproductsButton
                 } else {
                     GuiItems.background()
                 }
@@ -66,7 +59,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
             }
             .addModifier {
                 for (i in 1..8) {
-                    it.setItem(36 + i, flatWithAmount(calculation.intermediates.getOrNull(8 * page + i - 1)))
+                    it.setItem(36 + i, flatWithAmount(calculation.byproducts.getOrNull(8 * page + i - 1)))
                 }
             }
             .build()
@@ -82,15 +75,15 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         )
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', GuiItems.pagePrevious())
-        .addIngredient('b', BackButton())
+        .addIngredient('b', PylonGuide.backButton)
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
         .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 
     override fun getGui(player: Player): Gui {
         val pages = mutableListOf<Gui>()
-        val calculation = IngredientCalculator.calculateFinal(stack).flat()
-        val maxPage = max(calculation.inputs.size / 27, calculation.intermediates.size / 8)
+        val calculation = IngredientCalculator.calculate(stack).flat()
+        val maxPage = max(calculation.inputs.size / 27, calculation.byproducts.size / 8)
         for (i in 0..maxPage) {
             pages += getSubPage(player, stack, calculation, i, maxPage)
         }
@@ -113,12 +106,12 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         if (container == null) return GuiItems.background()
 
         return when (container) {
-            is Container.Item -> ItemButton.from(container.item) { item: ItemStack, player: Player ->
+            is Container.Item -> ItemButton.from(container.stack) { item: ItemStack, player: Player ->
                 ItemStackBuilder.of(item).name(
                     GlobalTranslator.render(Component.translatable(
                         "pylon.pyloncore.guide.button.ingredient",
-                        PylonArgument.of("item_ingredients_page_amount", container.item.amount),
-                        PylonArgument.of("item_ingredients_page_item", getItemName(container.item))),
+                        PylonArgument.of("item_ingredients_page_amount", container.amount),
+                        PylonArgument.of("item_ingredients_page_item", getItemName(container.stack))),
                         player.locale())
                 ).build()
             }
@@ -127,11 +120,11 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(
         }
     }
 
-    val intermediatesButton: Item = SimpleItem(
+    val byproductsButton: Item = SimpleItem(
         ItemStackBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)
             .amount(1)
-            .name(Component.translatable("pylon.pyloncore.guide.button.intermediates.name"))
-            .lore(Component.translatable("pylon.pyloncore.guide.button.intermediates.lore"))
+            .name(Component.translatable("pylon.pyloncore.guide.button.byproducts.name"))
+            .lore(Component.translatable("pylon.pyloncore.guide.button.byproducts.lore"))
     )
 
     val mainProductButton: Item = SimpleItem(

@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.core.logistics
 
-enum class LogisticSlotType {
+enum class LogisticGroupType {
     /**
      * Input to the attached machine
      */

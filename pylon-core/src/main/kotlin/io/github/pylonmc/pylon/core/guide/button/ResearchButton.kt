@@ -4,9 +4,9 @@ import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.guideHints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.util.getAddon
-import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
@@ -35,7 +35,6 @@ open class ResearchButton(val research: Research) : AbstractItem() {
             }
         } else {
             addResearchCostLore(item, player, research)
-            item.lore(Component.translatable("pylon.pyloncore.guide.button.research.instructions"))
         }
 
         item.lore(Component.translatable("pylon.pyloncore.guide.button.research.unlocks-title"))
@@ -64,6 +63,12 @@ open class ResearchButton(val research: Research) : AbstractItem() {
             item.lore(Component.translatable(
                 "pylon.pyloncore.guide.button.research.more-researches",
                 PylonArgument.of("amount", research.unlocks.size - i)
+            ))
+        }
+
+        if (player.guideHints) {
+            item.lore(Component.translatable("pylon.pyloncore.guide.button.research.hints."
+                    + (if (playerHasResearch) "researched" else "unresearched")
             ))
         }
 

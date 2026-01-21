@@ -3,9 +3,9 @@ package io.github.pylonmc.pylon.core.block.base
 import io.github.pylonmc.pylon.core.event.PylonBlockBreakEvent
 import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent
 import io.github.pylonmc.pylon.core.logistics.LogisticGroup
-import io.github.pylonmc.pylon.core.logistics.LogisticSlot
-import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
-import io.github.pylonmc.pylon.core.logistics.VirtualInventoryLogisticSlot
+import io.github.pylonmc.pylon.core.logistics.slot.LogisticSlot
+import io.github.pylonmc.pylon.core.logistics.LogisticGroupType
+import io.github.pylonmc.pylon.core.logistics.slot.VirtualInventoryLogisticSlot
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -39,13 +39,13 @@ interface PylonLogisticBlock {
         logisticBlockData.put(groupName, group)
     }
 
-    fun createLogisticGroup(groupName: String, slotType: LogisticSlotType, vararg slots: LogisticSlot)
+    fun createLogisticGroup(groupName: String, slotType: LogisticGroupType, vararg slots: LogisticSlot)
         = createLogisticGroup(groupName, LogisticGroup(slotType, *slots))
 
-    fun createLogisticGroup(groupName: String, slotType: LogisticSlotType, slots: List<LogisticSlot>)
+    fun createLogisticGroup(groupName: String, slotType: LogisticGroupType, slots: List<LogisticSlot>)
         = createLogisticGroup(groupName, LogisticGroup(slotType, *slots.toTypedArray()))
 
-    fun createLogisticGroup(groupName: String, slotType: LogisticSlotType, inventory: VirtualInventory) {
+    fun createLogisticGroup(groupName: String, slotType: LogisticGroupType, inventory: VirtualInventory) {
         val slots = mutableListOf<LogisticSlot>()
         for (slot in 0..<inventory.size) {
             slots.add(VirtualInventoryLogisticSlot(inventory, slot))

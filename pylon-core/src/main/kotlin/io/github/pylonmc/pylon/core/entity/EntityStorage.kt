@@ -229,6 +229,7 @@ object EntityStorage : Listener {
 
         if (!event.entity.isDead) {
             PylonEntity.serialize(pylonEntity)
+            pylonEntity.onUnload()
             PylonEntityUnloadEvent(pylonEntity).callEvent()
         } else {
             PylonEntityDeathEvent(pylonEntity, event).callEvent()

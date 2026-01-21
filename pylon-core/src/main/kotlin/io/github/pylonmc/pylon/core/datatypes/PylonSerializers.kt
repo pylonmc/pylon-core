@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.fluid.PylonFluid
-import io.github.pylonmc.pylon.core.logistics.LogisticSlotType
+import io.github.pylonmc.pylon.core.logistics.LogisticGroupType
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.waila.Waila
 import org.bukkit.Material
@@ -115,7 +115,7 @@ object PylonSerializers {
     val FLUID_CONNECTION_POINT = FluidConnectionPointPersistentDataType
 
     @JvmField
-    val LOGISTIC_POINT_TYPE = EnumPersistentDataType(LogisticSlotType::class.java)
+    val LOGISTIC_POINT_TYPE = EnumPersistentDataType(LogisticGroupType::class.java)
 
     @JvmField
     val DURATION = DurationPersistentDataType
