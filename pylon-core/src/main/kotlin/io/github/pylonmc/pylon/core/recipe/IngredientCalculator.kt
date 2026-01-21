@@ -164,24 +164,31 @@ class IngredientCalculator private constructor() {
 
         private val baseRecipes = mutableSetOf<PylonRecipe>()
 
+        /**
+         * Indicates that this fluid should be treated as a base ingredient, meaning that the calculator will not attempt to
+         * break it down further.
+         */
         @JvmStatic
         fun addBaseIngredient(fluid: PylonFluid) {
             baseIngredients.add(FluidOrItem.Fluid(fluid, 1.0))
         }
 
+        /**
+         * Indicates that this item should be treated as a base ingredient, meaning that the calculator will not attempt to
+         * break it down further.
+         */
         @JvmStatic
         fun addBaseIngredient(item: ItemStack) {
             baseIngredients.add(FluidOrItem.Item(item.asOne()))
         }
 
+        /**
+         * Indicates that this recipe should be treated as a base recipe, meaning that the calculator will not attempt to
+         * break down its inputs further.
+         */
         @JvmStatic
         fun addBaseRecipe(recipe: PylonRecipe) {
             baseRecipes.add(recipe)
-        }
-
-        @JvmStatic
-        fun addBaseRecipeType(type: RecipeType<*>) {
-            baseRecipes.addAll(type.recipes)
         }
 
         @JvmStatic

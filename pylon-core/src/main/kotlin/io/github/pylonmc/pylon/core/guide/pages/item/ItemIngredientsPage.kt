@@ -62,7 +62,7 @@ open class ItemIngredientsPage(val input: FluidOrItem) : TabbedGuidePage {
         }
     }.map(::fluidOrItemButton))
 
-    private val byproductsItem = ItemStackBuilder.gui(Material.CHEST, "byproducts")
+    private val byproductsItem = ItemStackBuilder.gui(Material.BARREL, "byproducts")
         .name(Component.translatable("pylon.pyloncore.guide.page.tab.byproducts"))
 
     private val byproductsTab = ItemListDisplayTab(calculation.byproducts.sortedByDescending {
@@ -113,6 +113,7 @@ private fun fluidOrItemButton(fluidOrItem: FluidOrItem) = when (fluidOrItem) {
             pdc.set(AMOUNT_KEY, PylonSerializers.DOUBLE, fluidOrItem.amountMillibuckets)
         }
     }
+
     is FluidOrItem.Item -> ItemButton(fluidOrItem.item) { stack, _ ->
         ItemStackBuilder.of(stack)
             .name(
@@ -124,9 +125,19 @@ private fun fluidOrItemButton(fluidOrItem: FluidOrItem) = when (fluidOrItem) {
                         )!!
                     ),
                     PylonArgument.of("amount", stack.amount.toString()),
-                    PylonArgument.of("stacks", stack.amount / stack.maxStackSize),
-                    PylonArgument.of("stack-size", stack.maxStackSize),
-                    PylonArgument.of("remainder", stack.amount % stack.maxStackSize)
+                    PylonArgument.of(
+                        "breakdown",
+                        if (stack.amount > stack.maxStackSize) {
+                            Component.translatable(
+                                "pylon.pyloncore.guide.button.item.amount-breakdown",
+                                PylonArgument.of("stacks", fluidOrItem.item.amount / stack.maxStackSize),
+                                PylonArgument.of("stack-size", stack.maxStackSize),
+                                PylonArgument.of("remainder", fluidOrItem.item.amount % stack.maxStackSize)
+                            )
+                        } else {
+                            Component.empty()
+                        }
+                    )
                 )
             )
             .amount(1)
