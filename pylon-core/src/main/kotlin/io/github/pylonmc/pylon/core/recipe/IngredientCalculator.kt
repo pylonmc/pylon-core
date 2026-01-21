@@ -12,7 +12,7 @@ class IngredientCalculator private constructor() {
     private val ingredients = mutableSetOf<FluidOrItem>()
     private val byproducts = mutableSetOf<FluidOrItem>()
 
-    private val blacklistedRecipes = mutableSetOf<NamespacedKey>()
+    private val blacklistedRecipes = mutableSetOf<PylonRecipe>()
 
     private val calculationStack = ArrayDeque<NamespacedKey>()
 
@@ -66,9 +66,9 @@ class IngredientCalculator private constructor() {
             }
 
             if (recipe != null && recipe.key in calculationStack) {
-                blacklistedRecipes.add(recipe.key)
+                blacklistedRecipes.add(recipe)
             }
-        } while (recipe?.key in blacklistedRecipes)
+        } while (recipe in blacklistedRecipes)
 
         if (recipe == null) {
             addItem(ingredients, input)
@@ -156,81 +156,64 @@ class IngredientCalculator private constructor() {
         // 1. if there's a recipe with the same key as the item, use that
         PylonRegistry.RECIPE_TYPES
             .map { it.getRecipe(item.schema.key) }
-            .find { it != null && it.key !in blacklistedRecipes }
+            .find { it != null && it !in blacklistedRecipes }
             ?.let { return it }
 
         // 2. if there's a recipe which produces *only* that item, use that
         // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
-        var fallback: PylonRecipe? = null
         val singleOutputRecipes = PylonRegistry.RECIPE_TYPES
             .flatMap { it.recipes }
-            .filter { recipe -> recipe.key !in blacklistedRecipes && recipe.isOutput(item.stack) && recipe.results.size == 1 }
+            .filter { recipe -> recipe !in blacklistedRecipes && recipe.isOutput(item.stack) && recipe.results.size == 1 }
             .sortedBy { it.key }
 
         if (singleOutputRecipes.isNotEmpty()) {
-            findFluidInputOnlyRecipe(singleOutputRecipes)?.let { return it }
-            fallback = singleOutputRecipes.first()
+            return singleOutputRecipes.first()
         }
 
         // 4. if there's a recipe which produces the item *alongside* other things, use that
         // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
         val multiOutputRecipes = PylonRegistry.RECIPE_TYPES
             .flatMap { it.recipes }
-            .filter { recipe -> recipe.key !in blacklistedRecipes && recipe.isOutput(item.stack) && recipe.results.size > 1 }
+            .filter { recipe -> recipe !in blacklistedRecipes && recipe.isOutput(item.stack) && recipe.results.size > 1 }
             .sortedBy { it.key }
 
         if (multiOutputRecipes.isNotEmpty()) {
-            findFluidInputOnlyRecipe(multiOutputRecipes)?.let { return it }
-            if (fallback == null) {
-                fallback = multiOutputRecipes.first()
-            }
+            return multiOutputRecipes.first()
         }
 
-        return fallback
+        return null
     }
 
     private fun findRecipeFor(fluid: PylonFluid): PylonRecipe? {
-        var fallback: PylonRecipe? = null
-        // 1. if there's a recipe with the same key as the item, use that
-        val recipe = PylonRegistry.RECIPE_TYPES
+        // 1. if there's a recipe with the same key as the fluid, use that
+        PylonRegistry.RECIPE_TYPES
             .map { it.getRecipe(fluid.key) }
-            .find { it != null && it.key !in blacklistedRecipes }
+            .find { it != null && it !in blacklistedRecipes }
+            ?.let { return it }
 
-        if (recipe != null) {
-            if (recipe.inputs.all { it is RecipeInput.Fluid }) {
-                return recipe
-            }
-
-            fallback = recipe
-        }
-
-        // 2. if there's a recipe which produces *only* that item, use that
-        // 3. if there's multiple recipes which produce only that item, choose the *lowest* one lexographically
+        // 2. if there's a recipe which produces *only* that fluid, use that
+        // 3. if there's multiple recipes which produce only that fluid, choose the *lowest* one lexographically
         val singleOutputRecipes = PylonRegistry.RECIPE_TYPES
             .flatMap { it.recipes }
-            .filter { recipe -> recipe.key !in blacklistedRecipes && recipe.isOutput(fluid) && recipe.results.size == 1 }
+            .filter { recipe -> recipe !in blacklistedRecipes && recipe.isOutput(fluid) && recipe.results.size == 1 }
             .sortedBy { it.key }
 
         if (singleOutputRecipes.isNotEmpty()) {
-            findFluidInputOnlyRecipe(singleOutputRecipes)?.let { return it }
-            if (fallback == null) fallback = singleOutputRecipes.first()
+            return singleOutputRecipes.first()
         }
 
-        // 4. if there's a recipe which produces the item *alongside* other things, use that
-        // 5. if there's multiple recipes which produce the item alongside other things, choose the *lowest* one lexographically
+        // 4. if there's a recipe which produces the fluid *alongside* other things, use that
+        // 5. if there's multiple recipes which produce the fluid alongside other things, choose the *lowest* one lexographically
         val multiOutputRecipes = PylonRegistry.RECIPE_TYPES
             .flatMap { it.recipes }
-            .filter { recipe -> recipe.key !in blacklistedRecipes && recipe.isOutput(fluid) && recipe.results.size > 1 }
+            .filter { recipe -> recipe !in blacklistedRecipes && recipe.isOutput(fluid) && recipe.results.size > 1 }
             .sortedBy { it.key }
 
         if (multiOutputRecipes.isNotEmpty()) {
-            findFluidInputOnlyRecipe(multiOutputRecipes)?.let { return it }
-            if (fallback == null) {
-                fallback = multiOutputRecipes.first()
-            }
+            return multiOutputRecipes.first()
         }
 
-        return fallback
+        return null
     }
 
     companion object {
@@ -252,8 +235,6 @@ class IngredientCalculator private constructor() {
 }
 
 data class IngredientCalculation(val inputs: Set<FluidOrItem>, val byproducts: Set<FluidOrItem>)
-
-private class RecursiveRecipeException : Exception()
 
 private fun findFluidInputOnlyRecipe(list: List<PylonRecipe>): PylonRecipe? =
     list.firstOrNull { it.inputs.all { input -> input is RecipeInput.Fluid } }
