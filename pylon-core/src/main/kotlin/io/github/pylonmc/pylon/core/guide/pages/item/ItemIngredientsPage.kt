@@ -85,7 +85,13 @@ open class ItemIngredientsPage(val input: FluidOrItem) : TabbedGuidePage {
         .addIngredient('b', PylonGuide.backButton)
         .addIngredient('i', GuiItems.tab(ingredientsItem, 0))
         .addIngredient('y', GuiItems.tab(byproductsItem, 1))
-        .addIngredient('r', fluidOrItemButton(input))
+        .addIngredient(
+            'r',
+            when (input) {
+                is FluidOrItem.Fluid -> FluidButton(input.amountMillibuckets, input.fluid)
+                is FluidOrItem.Item -> ItemButton(input.item)
+            }
+        )
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
         .addTabChangeHandler { _, newTab -> saveCurrentTab(player, newTab) }
         .addTab(ingredientsTab.getGui(player))
