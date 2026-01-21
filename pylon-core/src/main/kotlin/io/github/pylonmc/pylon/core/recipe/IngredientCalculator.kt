@@ -15,7 +15,7 @@ class IngredientCalculator private constructor() {
     private val ingredients = mutableMapOf<FluidOrItem, Double>()
     private val byproducts = mutableMapOf<FluidOrItem, Double>()
 
-    private val blacklistedRecipes = baseRecipes.toMutableSet()
+    private val blacklistedRecipes = mutableSetOf<PylonRecipe>()
 
     private val calculationStack = ArrayDeque<NamespacedKey>()
 
@@ -76,7 +76,7 @@ class IngredientCalculator private constructor() {
             }
         } while (recipe in blacklistedRecipes)
 
-        if (recipe == null) {
+        if (recipe == null || recipe in baseRecipes) {
             ingredients.merge(oneInput, input.amount, Double::plus)
             return
         }
