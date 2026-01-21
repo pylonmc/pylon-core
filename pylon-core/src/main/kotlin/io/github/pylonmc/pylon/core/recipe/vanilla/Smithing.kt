@@ -23,7 +23,7 @@ sealed class SmithingRecipeWrapper(recipe: SmithingRecipe) : VanillaRecipeWrappe
     override val inputs: List<RecipeInput> = listOf(recipe.base.asRecipeInput(), recipe.addition.asRecipeInput())
     override val results: List<FluidOrItem> = listOf(FluidOrItem.of(recipe.result))
 
-    override fun display() = Gui.normal()
+    override fun display() = Gui.builder()
         .setStructure(
             "# # # # # # # # #",
             "# # # # # # # # #",

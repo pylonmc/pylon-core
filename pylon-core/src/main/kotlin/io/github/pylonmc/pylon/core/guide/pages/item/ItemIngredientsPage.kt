@@ -18,10 +18,9 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
-import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.math.max
 
 /**
@@ -34,7 +33,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(pyl
 
     // page is 0 based
     open fun getSubPage(player: Player, stack: ItemStack, calculation: IngredientCalculation, page: Int, maxPage: Int) =
-        PagedGui.guis()
+        PagedGui.guisBuilder()
             .setStructure(
                 "i i i i i i i i i",
                 "i i i i i i i i i",
@@ -64,7 +63,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(pyl
             }
             .build()
 
-    open fun getGuiHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
+    open fun getGuiHeader(player: Player, pages: List<Gui>) = PagedGui.guisBuilder()
         .setStructure(
             "< b # # # # # # >",
             "x x x x x x x x x",
@@ -89,9 +88,7 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(pyl
         }
 
         val gui = getGuiHeader(player, pages)
-        for (page in pages) {
-            gui.addContent(page)
-        }
+        gui.setContent(pages)
         return gui.build().apply { loadCurrentPage(player, this) }
     }
 
@@ -120,14 +117,14 @@ open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(pyl
         }
     }
 
-    val byproductsButton: Item = SimpleItem(
+    val byproductsButton: Item = Item.simple(
         ItemStackBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)
             .amount(1)
             .name(Component.translatable("pylon.pyloncore.guide.button.byproducts.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.byproducts.lore"))
     )
 
-    val mainProductButton: Item = SimpleItem(
+    val mainProductButton: Item = Item.simple(
         ItemStackBuilder.of(Material.GREEN_STAINED_GLASS_PANE)
             .amount(1)
             .name(Component.translatable("pylon.pyloncore.guide.button.main_product.name"))

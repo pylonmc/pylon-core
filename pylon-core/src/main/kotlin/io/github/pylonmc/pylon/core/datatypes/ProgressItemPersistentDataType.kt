@@ -1,10 +1,8 @@
 package io.github.pylonmc.pylon.core.datatypes
 
 import io.github.pylonmc.pylon.core.util.gui.ProgressItem
-import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.util.setNullable
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.world
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
@@ -33,7 +31,7 @@ object ProgressItemPersistentDataType : PersistentDataType<PersistentDataContain
 
     override fun toPrimitive(complex: ProgressItem, context: PersistentDataAdapterContext): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()
-        pdc.set(itemStackKey, PylonSerializers.ITEM_STACK, complex.itemStackBuilder.stack)
+        pdc.set(itemStackKey, PylonSerializers.ITEM_STACK, complex.lastDisplayedItem)
         pdc.set(countDownKey, PylonSerializers.BOOLEAN, complex.countDown)
         pdc.setNullable(totalTimeKey, PylonSerializers.DURATION, complex.totalTime)
         pdc.set(progressKey, PylonSerializers.DOUBLE, complex.progress)

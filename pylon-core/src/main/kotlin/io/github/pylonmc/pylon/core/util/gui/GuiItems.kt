@@ -10,14 +10,15 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.TooltipDisplay
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.inventory.ClickType
+import xyz.xenondevs.invui.Click
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.ScrollGui
+import xyz.xenondevs.invui.item.AbstractPagedGuiBoundItem
+import xyz.xenondevs.invui.item.AbstractScrollGuiBoundItem
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AutoCycleItem
-import xyz.xenondevs.invui.item.impl.SimpleItem
-import xyz.xenondevs.invui.item.impl.controlitem.PageItem
-import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem
 
 /**
  * A utility class containing items commonly used in GUIs.
@@ -30,7 +31,7 @@ object GuiItems {
      */
     @JvmStatic
     @JvmOverloads
-    fun background(name: String = ""): Item = SimpleItem(
+    fun background(name: String = ""): Item = Item.simple(
         ItemStackBuilder.gui(Material.GRAY_STAINED_GLASS_PANE, pylonKey("background"))
             .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
@@ -41,7 +42,7 @@ object GuiItems {
      */
     @JvmStatic
     @JvmOverloads
-    fun backgroundBlack(name: String = ""): Item = SimpleItem(
+    fun backgroundBlack(name: String = ""): Item = Item.simple(
         ItemStackBuilder.gui(Material.BLACK_STAINED_GLASS_PANE, pylonKey("background_black"))
             .name(name)
             .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true))
@@ -51,7 +52,7 @@ object GuiItems {
      * A lime glass pane named 'Input'
      */
     @JvmStatic
-    fun input(): Item = SimpleItem(
+    fun input(): Item = Item.simple(
         ItemStackBuilder.gui(Material.LIME_STAINED_GLASS_PANE, pylonKey("input"))
             .name(Component.translatable("pylon.pyloncore.gui.input"))
     )
@@ -60,7 +61,7 @@ object GuiItems {
      * An orange glass pane named 'Output'
      */
     @JvmStatic
-    fun output(): Item = SimpleItem(
+    fun output(): Item = Item.simple(
         ItemStackBuilder.gui(Material.ORANGE_STAINED_GLASS_PANE, pylonKey("output"))
             .name(Component.translatable("pylon.pyloncore.gui.output"))
     )
@@ -80,17 +81,20 @@ object GuiItems {
         val states: MutableList<ItemStackBuilder> = mutableListOf()
         var i = 0
         while (i < timeTicks) {
-            states.add(ItemStackBuilder.of(template.build().clone())
-                .set(DataComponentTypes.MAX_DAMAGE, timeTicks)
-                .set(DataComponentTypes.DAMAGE, i)
-                .set(
-                    DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay()
-                        .addHiddenComponents(DataComponentTypes.DAMAGE, DataComponentTypes.MAX_DAMAGE)
-                )
+            states.add(
+                ItemStackBuilder.of(template.build().clone())
+                    .set(DataComponentTypes.MAX_DAMAGE, timeTicks)
+                    .set(DataComponentTypes.DAMAGE, i)
+                    .set(
+                        DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay()
+                            .addHiddenComponents(DataComponentTypes.DAMAGE, DataComponentTypes.MAX_DAMAGE)
+                    )
             )
             i++
         }
-        return AutoCycleItem(1, *(states.toTypedArray()))
+        return Item.builder()
+            .setCyclingItemProvider(1, states)
+            .build()
     }
 
     /**
@@ -130,34 +134,44 @@ object GuiItems {
     fun pagePrevious(): Item = PylonPageItem(false)
 }
 
-private class PylonScrollItem(private val direction: Int, private val key: String?) : ScrollItem(direction) {
+private class PylonScrollItem(private val direction: Int, private val key: String) : AbstractScrollGuiBoundItem() {
     private val name = Component.translatable("pylon.pyloncore.gui.scroll.$key")
 
-    override fun getItemProvider(gui: ScrollGui<*>): ItemProvider {
-        val material =
-            if (gui.canScroll(direction)) Material.GREEN_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE
+    override fun getItemProvider(viewer: Player): ItemProvider {
+        val material = if (gui.canScroll) Material.GREEN_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE
         return ItemStackBuilder.gui(material, pylonKey("scroll_$key")).name(name)
     }
+
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
+        gui.line += direction
+    }
+
+    private val ScrollGui<*>.canScroll: Boolean
+        get() = if (direction > 0) line < maxLine else line > 0
 }
 
-private class PylonPageItem(private val forward: Boolean) : PageItem(forward) {
-    private val background = background().itemProvider
+private class PylonPageItem(private val forward: Boolean) : AbstractPagedGuiBoundItem() {
+    private val background = background()
     private val name = Component.translatable("pylon.pyloncore.gui.page.${if (forward) "next" else "previous"}")
 
-    override fun getItemProvider(gui: PagedGui<*>): ItemProvider {
-        if (gui.pageAmount < 2) return background
+    override fun getItemProvider(viewer: Player): ItemProvider {
+        if (gui.pageCount < 2) return background.getItemProvider(viewer)
 
         val material = if (gui.canPage) Material.GREEN_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE
         return ItemStackBuilder.gui(material, pylonKey("page_${if (forward) "next" else "previous"}"))
             .name(
                 name.arguments(
-                    PylonArgument.of("current", gui.currentPage + 1),
-                    PylonArgument.of("total", gui.pageAmount),
+                    PylonArgument.of("current", gui.page + 1),
+                    PylonArgument.of("total", gui.page),
                 )
             )
     }
 
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
+        if (forward) gui.page++ else gui.page--
+    }
+
     private val PagedGui<*>.canPage: Boolean
-        get() = if (forward) hasNextPage() else hasPreviousPage()
+        get() = if (forward) page < pageCount - 1 else page > 0
 }
 

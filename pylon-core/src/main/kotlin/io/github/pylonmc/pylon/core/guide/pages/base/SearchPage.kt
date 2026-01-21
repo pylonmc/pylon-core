@@ -13,13 +13,12 @@ import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
-import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.window.AnvilWindow
-import java.util.UUID
+import java.util.*
 
 /**
  * A page that allows a collection of things (specified by [getItemNamePairs] to be searched.
@@ -34,7 +33,7 @@ abstract class SearchPage(key: NamespacedKey) : SimpleStaticGuidePage(key) {
     override fun open(player: Player) {
         var firstRename = true
         val search = searches.getOrDefault(player.uniqueId, "")
-        val lowerGui = PagedGui.items()
+        val lowerGui = PagedGui.itemsBuilder()
             .setStructure(
                 "x x x x x x x x x",
                 "x x x x x x x x x",
@@ -49,7 +48,7 @@ abstract class SearchPage(key: NamespacedKey) : SimpleStaticGuidePage(key) {
             .setContent(getItems(player, search))
             .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
             .build()
-        val upperGui = Gui.normal()
+        val upperGui = Gui.builder()
             .setStructure("# S #")
             .addIngredient('S', searchSpecifiersStack)
             .addIngredient('#', GuiItems.background(search))
@@ -57,11 +56,11 @@ abstract class SearchPage(key: NamespacedKey) : SimpleStaticGuidePage(key) {
         loadCurrentPage(player, lowerGui)
 
         try {
-            AnvilWindow.split()
+            AnvilWindow.builder()
                 .setViewer(player)
                 .setUpperGui(upperGui)
                 .setLowerGui(lowerGui)
-                .setTitle(AdventureComponentWrapper(title))
+                .setTitle(title)
                 .addRenameHandler { search ->
                     if (firstRename) {
                         // The first rename happens immediately when the anvil is opened, we need to ignore it

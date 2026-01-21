@@ -7,10 +7,10 @@ import net.kyori.adventure.text.ComponentLike
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AbstractItem
 
 /**
  * A button for changing a numeric setting for a player. (e.g. volume, brightness, etc.)
@@ -55,7 +55,7 @@ data class NumericPlayerSettingButton<N : Number>(
         PylonArgument.of("value", Component.text(setting.toString()))
     ) }
 ) : AbstractItem() {
-    override fun getItemProvider(player: Player): ItemProvider? {
+    override fun getItemProvider(player: Player): ItemProvider {
         val setting = getter(player)
         val placeholders = placeholderProvider(player, setting)
         return ItemStackBuilder.of(decorator(player, setting))
@@ -63,7 +63,7 @@ data class NumericPlayerSettingButton<N : Number>(
             .lore(Component.translatable("pylon.${key.namespace}.guide.button.${key.key}.lore").arguments(placeholders))
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         var value = getter(player).toDouble()
         val step = if (clickType.isShiftClick) shiftStep.toDouble() else step.toDouble()
         value += if (clickType.isLeftClick) step else -step

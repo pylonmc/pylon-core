@@ -72,6 +72,9 @@ open class ProgressItem @JvmOverloads constructor(
             notifyWindows()
         }
 
+    var lastDisplayedItem: ItemStack = ItemStack.empty()
+        private set
+
     /**
      * Sets how far through the [totalTime] we are
      */
@@ -139,10 +142,12 @@ open class ProgressItem @JvmOverloads constructor(
             builder.lore(
                 Component.translatable(
                     "pylon.pyloncore.gui.time_left",
-                    PylonArgument.of("time", UnitFormat.formatDuration(remaining, true, false))
+                    PylonArgument.of("time", UnitFormat.formatDuration(remaining, abbreviate = true, useMillis = false))
                 )
             )
         }
+
+        lastDisplayedItem = builder.build()
 
         return builder
     }

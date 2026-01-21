@@ -8,10 +8,10 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AbstractItem
 
 /**
  * A button which toggles a boolean setting for a player.
@@ -38,7 +38,7 @@ data class TogglePlayerSettingButton(
     val decorator: (Player, Boolean) -> ItemStack = { _, toggled -> if (toggled) ItemStack(Material.LIME_CONCRETE) else ItemStack(Material.RED_CONCRETE) },
     val placeholderProvider: (Player, Boolean) -> MutableList<ComponentLike> = { _, _ -> mutableListOf<ComponentLike>() }
 ) : AbstractItem() {
-    override fun getItemProvider(player: Player) : ItemProvider? {
+    override fun getItemProvider(player: Player) : ItemProvider {
         val toggled = isEnabled(player)
         val identifier = if (toggled) "enabled" else "disabled"
         val placeholders = placeholderProvider(player, toggled)
@@ -48,7 +48,7 @@ data class TogglePlayerSettingButton(
             .addCustomModelDataString("${key}_${identifier}")
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         toggle(player)
         notifyWindows()
     }

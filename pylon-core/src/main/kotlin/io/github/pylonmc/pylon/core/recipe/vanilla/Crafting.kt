@@ -28,7 +28,7 @@ class ShapedRecipeWrapper(override val recipe: ShapedRecipe) : CraftingRecipeWra
             }
 
     override fun display(): Gui {
-        val gui = Gui.normal()
+        val gui = Gui.builder()
             .setStructure(
                 "# # # # # # # # #",
                 "# # # 0 1 2 # # #",
@@ -64,7 +64,7 @@ sealed class AShapelessRecipeWrapper(recipe: CraftingRecipe) : CraftingRecipeWra
 
     override val inputs: List<RecipeInput> by lazy { choiceList.filterNotNull().map(RecipeChoice::asRecipeInput) }
 
-    override fun display() = Gui.normal()
+    override fun display() = Gui.builder()
         .setStructure(
             "# # # # # # # # #",
             "# # # 0 1 2 # # #",

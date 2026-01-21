@@ -8,8 +8,8 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
-import xyz.xenondevs.invui.gui.structure.Markers
 
 /**
  * Displays all the recipes for the given fluid.
@@ -31,7 +31,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : PagedGuidePage {
 
     override fun getKey() = KEY
 
-    open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
+    open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guisBuilder()
         .setStructure(
             "< b # # g # # s >",
             "x x x x x x x x x",
@@ -51,9 +51,7 @@ open class FluidRecipesPage(fluidKey: NamespacedKey) : PagedGuidePage {
 
     override fun getGui(player: Player): Gui {
         val gui = getHeader(player, pages)
-        for (page in pages) {
-            gui.addContent(page)
-        }
+        gui.setContent(pages)
         return gui.build().apply { loadCurrentPage(player, this) }
     }
 
