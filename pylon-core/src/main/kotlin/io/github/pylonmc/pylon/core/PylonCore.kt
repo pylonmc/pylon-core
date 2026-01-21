@@ -58,6 +58,7 @@ import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import xyz.xenondevs.invui.InvUI
+import xyz.xenondevs.invui.i18n.Languages
 import java.util.*
 import kotlin.io.path.*
 
@@ -87,6 +88,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         }
 
         InvUI.getInstance().setPlugin(this)
+        Languages.getInstance().enableServerSideTranslations(false) // we do our own
 
         val packetEvents = PacketEvents.getAPI()
         packetEvents.init()

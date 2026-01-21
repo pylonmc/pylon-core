@@ -7,9 +7,9 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.invui.item.impl.AbstractItem
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 
 /**
  * A button that opens another page in the guide.
@@ -30,7 +30,7 @@ open class PageButton(val stack: ItemStack, val page: GuidePage) : AbstractItem(
         .clearLore()
         .lore(Component.translatable("pylon.${page.key.namespace}.guide.button.${page.key.key}", ""))
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         page.open(player)
     }
 }

@@ -21,13 +21,12 @@ import org.bukkit.Material
 import org.bukkit.Registry
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AbstractItem
-import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -125,7 +124,7 @@ class ItemButton @JvmOverloads constructor(
         }
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         try {
             when (clickType) {
                 ClickType.LEFT -> {
@@ -164,14 +163,14 @@ class ItemButton @JvmOverloads constructor(
 
                 ClickType.MIDDLE -> {
                     if (!player.hasPermission("pylon.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = stack.maxStackSize
                     player.setItemOnCursor(stack)
                 }
 
                 ClickType.DROP -> {
                     if (!player.hasPermission("pylon.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = 1
                     if (player.itemOnCursor.isEmpty) {
                         player.setItemOnCursor(stack)
@@ -182,14 +181,14 @@ class ItemButton @JvmOverloads constructor(
 
                 ClickType.CONTROL_DROP -> {
                     if (!player.hasPermission("pylon.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = stack.maxStackSize
                     player.dropItem(stack)
                 }
 
                 ClickType.SWAP_OFFHAND -> {
                     if (!player.hasPermission("pylon.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = 1
                     player.give(stack)
                 }
@@ -202,20 +201,20 @@ class ItemButton @JvmOverloads constructor(
     }
 
     companion object {
-        private fun getCheatItemStack(currentStack: ItemStack, event: InventoryClickEvent): ItemStack {
+        private fun getCheatItemStack(currentStack: ItemStack, click: Click): ItemStack {
             val clonedUnkown = currentStack.clone()
             val pylonItem = PylonItem.fromStack(clonedUnkown)
 
             if (pylonItem == null) {
                 // item is not pylon
                 val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
-                val amount = if (event.isShiftClick) { type.maxStackSize } else { 1 }
+                val amount = if (click.clickType.isShiftClick) { type.maxStackSize } else { 1 }
                 val clonedNotPylon = ItemStack(type, amount)
                 return clonedNotPylon
             } else {
                 // pylon item handling
                 val clonedPylon = pylonItem.schema.getItemStack()
-                clonedPylon.amount = if (event.isShiftClick) { clonedPylon.maxStackSize } else { 1 }
+                clonedPylon.amount = if (click.clickType.isShiftClick) { clonedPylon.maxStackSize } else { 1 }
                 return clonedPylon
             }
         }
@@ -223,7 +222,7 @@ class ItemButton @JvmOverloads constructor(
         @JvmStatic
         fun from(stack: ItemStack?): Item {
             if (stack == null) {
-                return SimpleItem(ItemStack(Material.AIR))
+                return EMPTY
             }
 
             return ItemButton(stack)
@@ -232,7 +231,7 @@ class ItemButton @JvmOverloads constructor(
         @JvmStatic
         fun from(stack: ItemStack?, preDisplayDecorator: (ItemStack, Player) -> ItemStack):  Item {
             if (stack == null) {
-                return SimpleItem(ItemStack(Material.AIR))
+                return EMPTY
             }
 
             return ItemButton(listOf(stack), preDisplayDecorator)
@@ -241,7 +240,7 @@ class ItemButton @JvmOverloads constructor(
         @JvmStatic
         fun from(input: RecipeInput.Item?): Item {
             if (input == null) {
-                return SimpleItem(ItemStack(Material.AIR))
+                return EMPTY
             }
 
             return ItemButton(*input.representativeItems.toTypedArray())
@@ -251,7 +250,7 @@ class ItemButton @JvmOverloads constructor(
         fun from(choice: RecipeChoice?): Item = when (choice) {
             is RecipeChoice.MaterialChoice -> ItemButton(choice.choices.map(::ItemStack))
             is RecipeChoice.ExactChoice -> ItemButton(choice.choices)
-            else -> SimpleItem(ItemStackBuilder.of(Material.AIR))
+            else -> EMPTY
         }
     }
 }

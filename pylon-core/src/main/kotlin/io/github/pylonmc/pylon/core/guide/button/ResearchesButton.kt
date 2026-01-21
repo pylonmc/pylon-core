@@ -5,8 +5,8 @@ import io.github.pylonmc.pylon.core.guide.pages.research.AddonResearchesPage
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
-import xyz.xenondevs.invui.item.impl.AbstractItem
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 
 /**
  * A button that opens the research page for a specific addon.
@@ -14,10 +14,10 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 class ResearchesButton(val addon: PylonAddon) : AbstractItem() {
     val page = AddonResearchesPage(addon)
 
-    override fun getItemProvider() = ItemStackBuilder.of(addon.material)
+    override fun getItemProvider(viewer: Player) = ItemStackBuilder.of(addon.material)
         .name(addon.displayName)
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         page.open(player)
     }
 }

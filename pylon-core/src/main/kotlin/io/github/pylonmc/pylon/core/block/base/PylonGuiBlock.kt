@@ -17,8 +17,6 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.MustBeInvokedByOverriders
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
-import xyz.xenondevs.invui.gui.AbstractGui
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.Inventory
 import xyz.xenondevs.invui.inventory.VirtualInventory
@@ -52,8 +50,8 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
      * The GUI associated with this block.
      */
     @get:ApiStatus.NonExtendable
-    val gui: AbstractGui
-        get() = guiBlocks.getOrPut(this) { createGui() as AbstractGui }
+    val gui: Gui
+        get() = guiBlocks.getOrPut(this) { createGui() }
 
     /**
      * A map of inventory names to inventories in the block's GUI
@@ -81,9 +79,9 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
         event.setUseInteractedBlock(Event.Result.DENY)
         event.setUseItemInHand(Event.Result.DENY)
 
-        Window.single()
-            .setGui(gui)
-            .setTitle(AdventureComponentWrapper(guiTitle))
+        Window.builder()
+            .setUpperGui(gui)
+            .setTitle(guiTitle)
             .setViewer(event.player)
             .build()
             .open()
@@ -126,7 +124,7 @@ interface PylonGuiBlock : PylonBreakHandler, PylonInteractBlock, PylonNoVanillaC
             PylonSerializers.LIST.listTypeFrom(PylonSerializers.ITEM_STACK)
         )
 
-        private val guiBlocks = IdentityHashMap<PylonGuiBlock, AbstractGui>()
+        private val guiBlocks = IdentityHashMap<PylonGuiBlock, Gui>()
         private val inventories = IdentityHashMap<PylonGuiBlock, Map<String, Inventory>>()
 
         @EventHandler

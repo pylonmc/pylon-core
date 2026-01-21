@@ -9,12 +9,13 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
-import xyz.xenondevs.invui.item.impl.AbstractItem
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 
 /**
  * Represents the back button in the guide.
  */
+@Suppress("UnstableApiUsage")
 class BackButton : AbstractItem() {
 
     override fun getItemProvider(player: Player): ItemStackBuilder {
@@ -27,7 +28,7 @@ class BackButton : AbstractItem() {
         return stack
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         val history = PylonGuide.history.getOrPut(player.uniqueId) { mutableListOf() }
 
         if (clickType.isShiftClick) {
