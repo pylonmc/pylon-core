@@ -1,6 +1,7 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
@@ -97,9 +98,15 @@ open class ItemIngredientsPage(val input: FluidOrItem) : TabbedGuidePage {
     }
 }
 
+private val AMOUNT_KEY = pylonKey("actual_amount")
+
 @Suppress("UnstableApiUsage")
 private fun fluidOrItemButton(fluidOrItem: FluidOrItem) = when (fluidOrItem) {
-    is FluidOrItem.Fluid -> FluidButton(fluidOrItem.amountMillibuckets, fluidOrItem.fluid)
+    is FluidOrItem.Fluid -> FluidButton(listOf(fluidOrItem.fluid), fluidOrItem.amountMillibuckets) { stack ->
+        stack.editPdc { pdc ->
+            pdc.set(AMOUNT_KEY, PylonSerializers.DOUBLE, fluidOrItem.amountMillibuckets)
+        }
+    }
     is FluidOrItem.Item -> ItemButton(fluidOrItem.item) { stack, _ ->
         ItemStackBuilder.of(stack)
             .name(
@@ -117,6 +124,9 @@ private fun fluidOrItemButton(fluidOrItem: FluidOrItem) = when (fluidOrItem) {
                 )
             )
             .amount(1)
+            .editPdc { pdc ->
+                pdc.set(AMOUNT_KEY, PylonSerializers.INTEGER, fluidOrItem.item.amount)
+            }
             .build()
     }
 }

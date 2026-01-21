@@ -5,56 +5,62 @@ import io.github.pylonmc.pylon.core.item.ItemTypeWrapper
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import org.bukkit.NamespacedKey
+import org.bukkit.inventory.ItemStack
 import kotlin.math.ceil
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 class IngredientCalculator private constructor() {
 
-    private val ingredients = mutableSetOf<FluidOrItem>()
-    private val byproducts = mutableSetOf<FluidOrItem>()
+    private val ingredients = mutableMapOf<FluidOrItem, Double>()
+    private val byproducts = mutableMapOf<FluidOrItem, Double>()
 
-    private val blacklistedRecipes = mutableSetOf<PylonRecipe>()
+    private val blacklistedRecipes = baseRecipes.toMutableSet()
 
     private val calculationStack = ArrayDeque<NamespacedKey>()
 
     private fun calculateFor(input: FluidOrItem) {
         var input = input
-        for (byproduct in byproducts.toList()) {
-            if (!byproduct.matchesType(input)) continue
-            byproducts.remove(byproduct)
-            when (byproduct) {
+        val oneInput = input.asOne()
+        val unusedByproduct = byproducts[oneInput]
+        if (unusedByproduct != null) {
+            when (input) {
                 is FluidOrItem.Fluid -> {
-                    input as FluidOrItem.Fluid
-                    val consumed = minOf(byproduct.amountMillibuckets, input.amountMillibuckets)
-                    val remainingByproduct = byproduct.amountMillibuckets - consumed
-                    val remainingInput = input.amountMillibuckets - consumed
-                    if (remainingByproduct > 0) {
-                        byproducts.add(byproduct.copy(amountMillibuckets = remainingByproduct))
-                    }
-                    if (remainingInput > 0) {
-                        input = input.copy(amountMillibuckets = remainingInput)
+                    val toRemove = min(unusedByproduct, input.amountMillibuckets)
+                    val remainingInput = input.amountMillibuckets - toRemove
+                    val remainingByproduct = unusedByproduct - toRemove
+                    if (remainingByproduct == 0.0) {
+                        byproducts.remove(oneInput)
                     } else {
+                        byproducts[oneInput] = remainingByproduct
+                    }
+                    if (remainingInput <= 0.0) {
                         return
+                    } else {
+                        input = input.copy(amountMillibuckets = remainingInput)
                     }
                 }
 
                 is FluidOrItem.Item -> {
-                    input as FluidOrItem.Item
-                    val consumed = minOf(byproduct.item.amount, input.item.amount)
-                    val remainingByproduct = byproduct.item.amount - consumed
-                    val remainingInput = input.item.amount - consumed
-                    if (remainingByproduct > 0) {
-                        byproducts.add(byproduct.copy(item = byproduct.item.asQuantity(remainingByproduct)))
-                    }
-                    if (remainingInput > 0) {
-                        input = input.copy(item = input.item.asQuantity(remainingInput))
+                    val toRemove = min(unusedByproduct.roundToInt(), input.item.amount)
+                    val remainingInput = input.item.amount - toRemove
+                    val remainingByproduct = unusedByproduct - toRemove
+                    if (remainingByproduct == 0.0) {
+                        byproducts.remove(oneInput)
                     } else {
+                        byproducts[oneInput] = remainingByproduct
+                    }
+                    if (remainingInput <= 0) {
                         return
+                    } else {
+                        input = input.copy(item = input.item.asQuantity(remainingInput))
                     }
                 }
             }
         }
-        if (input.key in baseIngredients || (input is FluidOrItem.Item && ItemTypeWrapper(input.item) is ItemTypeWrapper.Vanilla)) {
-            addItem(ingredients, input)
+
+        if (oneInput in baseIngredients || (input is FluidOrItem.Item && ItemTypeWrapper(input.item) is ItemTypeWrapper.Vanilla)) {
+            ingredients.merge(oneInput, input.amount, Double::plus)
             return
         }
 
@@ -71,13 +77,13 @@ class IngredientCalculator private constructor() {
         } while (recipe in blacklistedRecipes)
 
         if (recipe == null) {
-            addItem(ingredients, input)
+            ingredients.merge(oneInput, input.amount, Double::plus)
             return
         }
 
         val output = recipe.results.find { it.matchesType(input) }
         if (output == null) {
-            addItem(ingredients, input)
+            ingredients.merge(oneInput, input.amount, Double::plus)
             return
         }
 
@@ -102,7 +108,7 @@ class IngredientCalculator private constructor() {
             }
         }
         if (extra != null) {
-            addItem(byproducts, extra)
+            byproducts.merge(extra.asOne(), extra.amount, Double::plus)
         }
 
         for (recipeOutput in recipe.results) {
@@ -117,7 +123,7 @@ class IngredientCalculator private constructor() {
                     item = recipeOutput.item.asQuantity(recipeOutput.item.amount * outputMulti)
                 )
             }
-            addItem(byproducts, outputItem)
+            byproducts.merge(outputItem.asOne(), outputItem.amount, Double::plus)
         }
 
         for (recipeInput in recipe.inputs) {
@@ -135,21 +141,6 @@ class IngredientCalculator private constructor() {
         }
 
         calculationStack.removeLast()
-    }
-
-    private fun addItem(set: MutableSet<FluidOrItem>, item: FluidOrItem) {
-        for (existing in set.toList()) {
-            if (!existing.matchesType(item)) continue
-            set.remove(existing)
-            set.add(
-                when (existing) {
-                    is FluidOrItem.Fluid -> existing.copy(amountMillibuckets = existing.amountMillibuckets + (item as FluidOrItem.Fluid).amountMillibuckets)
-                    is FluidOrItem.Item -> existing.copy(item = existing.item.asQuantity(existing.item.amount + (item as FluidOrItem.Item).item.amount))
-                }
-            )
-            return
-        }
-        set.add(item)
     }
 
     private fun findRecipeFor(item: PylonItem): PylonRecipe? {
@@ -218,23 +209,68 @@ class IngredientCalculator private constructor() {
 
     companion object {
 
-        private val baseIngredients = mutableSetOf<NamespacedKey>()
+        private val baseIngredients = mutableSetOf<FluidOrItem>()
+
+        private val baseRecipes = mutableSetOf<PylonRecipe>()
 
         @JvmStatic
-        fun addBaseIngredient(key: NamespacedKey) {
-            baseIngredients.add(key)
+        fun addBaseIngredient(fluid: PylonFluid) {
+            baseIngredients.add(FluidOrItem.Fluid(fluid, 1.0))
+        }
+
+        @JvmStatic
+        fun addBaseIngredient(item: ItemStack) {
+            baseIngredients.add(FluidOrItem.Item(item.asOne()))
+        }
+
+        @JvmStatic
+        fun addBaseRecipe(recipe: PylonRecipe) {
+            baseRecipes.add(recipe)
+        }
+
+        @JvmStatic
+        fun addBaseRecipeType(type: RecipeType<*>) {
+            baseRecipes.addAll(type.recipes)
         }
 
         @JvmStatic
         fun calculateInputsAndByproducts(input: FluidOrItem): IngredientCalculation {
             val calculator = IngredientCalculator()
             calculator.calculateFor(input)
-            return IngredientCalculation(calculator.ingredients, calculator.byproducts)
+
+            fun transformEntry(entry: Map.Entry<FluidOrItem, Double>) = when (entry.key) {
+                is FluidOrItem.Fluid -> FluidOrItem.of(
+                    fluid = (entry.key as FluidOrItem.Fluid).fluid,
+                    amountMillibuckets = entry.value
+                )
+                is FluidOrItem.Item -> FluidOrItem.of(
+                    item = (entry.key as FluidOrItem.Item).item.asQuantity(entry.value.roundToInt())
+                )
+            }
+
+            return IngredientCalculation(
+                calculator.ingredients.map(::transformEntry),
+                calculator.byproducts.map(::transformEntry)
+            )
         }
     }
 }
 
-data class IngredientCalculation(val inputs: Set<FluidOrItem>, val byproducts: Set<FluidOrItem>)
+/**
+ * Stores the result of an ingredient breakdown.
+ *
+ * In the case of items, the resulting amount is stored in the [ItemStack]'s amount. This may lead to illegal stack sizes,
+ * so before putting the items into an inventory, make sure to split them into valid stack sizes, otherwise they will be reset.
+ */
+data class IngredientCalculation(val inputs: List<FluidOrItem>, val byproducts: List<FluidOrItem>)
 
-private fun findFluidInputOnlyRecipe(list: List<PylonRecipe>): PylonRecipe? =
-    list.firstOrNull { it.inputs.all { input -> input is RecipeInput.Fluid } }
+private fun FluidOrItem.asOne(): FluidOrItem = when (this) {
+    is FluidOrItem.Fluid -> this.copy(amountMillibuckets = 1.0)
+    is FluidOrItem.Item -> this.copy(item = this.item.asQuantity(1))
+}
+
+private val FluidOrItem.amount: Double
+    get() = when (this) {
+        is FluidOrItem.Fluid -> this.amountMillibuckets
+        is FluidOrItem.Item -> this.item.amount.toDouble()
+    }
