@@ -19,48 +19,24 @@ class IngredientCalculator private constructor() {
 
     private val calculationStack = ArrayDeque<NamespacedKey>()
 
-    private fun calculateFor(input: FluidOrItem) {
-        var input = input
-        val oneInput = input.asOne()
-        val unusedByproduct = byproducts[oneInput]
+    private fun calculate(input: FluidOrItem, amount: Double) {
+        var amount = amount
+        val unusedByproduct = byproducts[input]
         if (unusedByproduct != null) {
-            when (input) {
-                is FluidOrItem.Fluid -> {
-                    val toRemove = min(unusedByproduct, input.amountMillibuckets)
-                    val remainingInput = input.amountMillibuckets - toRemove
-                    val remainingByproduct = unusedByproduct - toRemove
-                    if (remainingByproduct == 0.0) {
-                        byproducts.remove(oneInput)
-                    } else {
-                        byproducts[oneInput] = remainingByproduct
-                    }
-                    if (remainingInput <= 0.0) {
-                        return
-                    } else {
-                        input = input.copy(amountMillibuckets = remainingInput)
-                    }
-                }
-
-                is FluidOrItem.Item -> {
-                    val toRemove = min(unusedByproduct.roundToInt(), input.item.amount)
-                    val remainingInput = input.item.amount - toRemove
-                    val remainingByproduct = unusedByproduct - toRemove
-                    if (remainingByproduct == 0.0) {
-                        byproducts.remove(oneInput)
-                    } else {
-                        byproducts[oneInput] = remainingByproduct
-                    }
-                    if (remainingInput <= 0) {
-                        return
-                    } else {
-                        input = input.copy(item = input.item.asQuantity(remainingInput))
-                    }
-                }
+            val toRemove = min(unusedByproduct, amount)
+            amount -= toRemove
+            if (toRemove >= unusedByproduct) {
+                byproducts.remove(input)
+            } else {
+                byproducts[input] = unusedByproduct - toRemove
+            }
+            if (amount <= 0) {
+                return
             }
         }
 
-        if (oneInput in baseIngredients || (input is FluidOrItem.Item && ItemTypeWrapper(input.item) is ItemTypeWrapper.Vanilla)) {
-            ingredients.merge(oneInput, input.amount, Double::plus)
+        if (input in baseIngredients || (input is FluidOrItem.Item && ItemTypeWrapper(input.item) is ItemTypeWrapper.Vanilla)) {
+            ingredients.merge(input, amount, Double::plus)
             return
         }
 
@@ -77,53 +53,28 @@ class IngredientCalculator private constructor() {
         } while (recipe in blacklistedRecipes)
 
         if (recipe == null || recipe in baseRecipes) {
-            ingredients.merge(oneInput, input.amount, Double::plus)
+            ingredients.merge(input, amount, Double::plus)
             return
         }
 
         val output = recipe.results.find { it.matchesType(input) }
         if (output == null) {
-            ingredients.merge(oneInput, input.amount, Double::plus)
+            ingredients.merge(input, amount, Double::plus)
             return
         }
 
         calculationStack.addLast(recipe.key)
 
-        val outputMulti = when (input) {
-            is FluidOrItem.Fluid -> ceil(input.amountMillibuckets / (output as FluidOrItem.Fluid).amountMillibuckets).toInt()
-            is FluidOrItem.Item -> Math.ceilDiv(input.item.amount, (output as FluidOrItem.Item).item.amount)
-        }
+        val outputMulti = ceil(amount / output.amount).toInt()
 
-        val extra = when (input) {
-            is FluidOrItem.Fluid -> {
-                val totalProduced = (output as FluidOrItem.Fluid).amountMillibuckets * outputMulti
-                val extraAmount = totalProduced - input.amountMillibuckets
-                if (extraAmount > 0) input.copy(amountMillibuckets = extraAmount) else null
-            }
-
-            is FluidOrItem.Item -> {
-                val totalProduced = (output as FluidOrItem.Item).item.amount * outputMulti
-                val extraAmount = totalProduced - input.item.amount
-                if (extraAmount > 0) input.copy(item = input.item.asQuantity(extraAmount)) else null
-            }
-        }
-        if (extra != null) {
-            byproducts.merge(extra.asOne(), extra.amount, Double::plus)
+        val extra = (output.amount * outputMulti) - amount
+        if (extra > 0) {
+            byproducts.merge(input, extra, Double::plus)
         }
 
         for (recipeOutput in recipe.results) {
             if (recipeOutput.matchesType(input)) continue
-            val outputItem = when (recipeOutput) {
-                is FluidOrItem.Fluid -> FluidOrItem.Fluid(
-                    fluid = recipeOutput.fluid,
-                    amountMillibuckets = recipeOutput.amountMillibuckets * outputMulti
-                )
-
-                is FluidOrItem.Item -> FluidOrItem.Item(
-                    item = recipeOutput.item.asQuantity(recipeOutput.item.amount * outputMulti)
-                )
-            }
-            byproducts.merge(outputItem.asOne(), outputItem.amount, Double::plus)
+            byproducts.merge(recipeOutput.asOne(), recipeOutput.amount * outputMulti, Double::plus)
         }
 
         for (recipeInput in recipe.inputs) {
@@ -137,7 +88,7 @@ class IngredientCalculator private constructor() {
                     item = recipeInput.representativeItem.asQuantity(recipeInput.amount * outputMulti)
                 )
             }
-            calculateFor(inputItem)
+            calculate(inputItem.asOne(), inputItem.amount)
         }
 
         calculationStack.removeLast()
@@ -236,13 +187,14 @@ class IngredientCalculator private constructor() {
         @JvmStatic
         fun calculateInputsAndByproducts(input: FluidOrItem): IngredientCalculation {
             val calculator = IngredientCalculator()
-            calculator.calculateFor(input)
+            calculator.calculate(input.asOne(), input.amount)
 
             fun transformEntry(entry: Map.Entry<FluidOrItem, Double>) = when (entry.key) {
                 is FluidOrItem.Fluid -> FluidOrItem.of(
                     fluid = (entry.key as FluidOrItem.Fluid).fluid,
                     amountMillibuckets = entry.value
                 )
+
                 is FluidOrItem.Item -> FluidOrItem.of(
                     item = (entry.key as FluidOrItem.Item).item.asQuantity(entry.value.roundToInt())
                 )
