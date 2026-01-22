@@ -12,12 +12,14 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.ScrollGui
+import xyz.xenondevs.invui.gui.TabGui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AutoCycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
 import xyz.xenondevs.invui.item.impl.controlitem.PageItem
 import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem
+import xyz.xenondevs.invui.item.impl.controlitem.TabItem
 
 /**
  * A utility class containing items commonly used in GUIs.
@@ -128,6 +130,12 @@ object GuiItems {
      */
     @JvmStatic
     fun pagePrevious(): Item = PylonPageItem(false)
+
+    /**
+     * A button that goes to the specified tab. This should only be used in a [TabGui]
+     */
+    @JvmStatic
+    fun tab(item: ItemStackBuilder, tab: Int): Item = PylonTabItem(item, tab)
 }
 
 private class PylonScrollItem(private val direction: Int, private val key: String?) : ScrollItem(direction) {
@@ -159,5 +167,15 @@ private class PylonPageItem(private val forward: Boolean) : PageItem(forward) {
 
     private val PagedGui<*>.canPage: Boolean
         get() = if (forward) hasNextPage() else hasPreviousPage()
+}
+
+private class PylonTabItem(private val item: ItemStackBuilder, private val tab: Int) : TabItem(tab) {
+    override fun getItemProvider(gui: TabGui): ItemProvider {
+        return if (gui.currentTab == tab) {
+            item.clone().set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
+        } else {
+            item
+        }
+    }
 }
 

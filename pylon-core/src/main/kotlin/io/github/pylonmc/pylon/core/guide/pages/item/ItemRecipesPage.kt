@@ -2,6 +2,7 @@ package io.github.pylonmc.pylon.core.guide.pages.item
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.guide.pages.base.PagedGuidePage
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -42,7 +43,7 @@ open class ItemRecipesPage(val stack: ItemStack) : PagedGuidePage {
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', GuiItems.pagePrevious())
         .addIngredient('b', PylonGuide.backButton)
-        .addIngredient('g', PylonGuide.ingredientsButton(stack))
+        .addIngredient('g', PylonGuide.ingredientsButton(FluidOrItem.of(stack)))
         .addIngredient('s', PylonGuide.searchItemsAndFluidsButton)
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)

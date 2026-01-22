@@ -1,142 +1,149 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
+import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.guide.button.ItemButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
+import io.github.pylonmc.pylon.core.guide.pages.base.TabbedGuidePage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
-import io.github.pylonmc.pylon.core.recipe.Container
-import io.github.pylonmc.pylon.core.recipe.IngredientCalculation
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.recipe.IngredientCalculator
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
+import xyz.xenondevs.invui.gui.TabGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.item.impl.SimpleItem
-import kotlin.math.max
 
 /**
  * Displays a breakdown of the ingredients needed to craft an item.
  *
  * @author balugaq
+ * @author Seggan
  */
-open class ItemIngredientsPage(val stack: ItemStack) : SimpleStaticGuidePage(pylonKey("item_ingredients")) {
+open class ItemIngredientsPage(val input: FluidOrItem) : TabbedGuidePage {
+
+    private val calculation by lazy { IngredientCalculator.calculateInputsAndByproducts(input) }
+
     override fun getKey() = KEY
 
-    // page is 0 based
-    open fun getSubPage(player: Player, stack: ItemStack, calculation: IngredientCalculation, page: Int, maxPage: Int) =
-        PagedGui.guis()
+    private class ItemListDisplayTab(private val items: List<Item>) : SimpleStaticGuidePage(pylonKey("unused")) {
+        override fun getGui(player: Player) = PagedGui.items()
             .setStructure(
-                "i i i i i i i i i",
-                "i i i i i i i i i",
-                "i i i i i i i i i",
-                "m a x x x x x x x",
-                "f o o o o o o o o",
+                "< # # # # # # # >",
+                "x x x x x x x x x",
+                "x x x x x x x x x",
             )
-            .addIngredient('x', GuiItems.background())
-            .addIngredient('f', flatWithAmount(Container.of(stack, calculation.outputAmount.toInt())))
-            .addIngredient('m', mainProductButton)
-            .addIngredient(
-                'a', if (!calculation.byproducts.isEmpty()) {
-                    byproductsButton
-                } else {
-                    GuiItems.background()
-                }
-            )
-            .addModifier {
-                for (i in 0..26) {
-                    it.setItem(i, flatWithAmount(calculation.inputs.getOrNull(27 * page + i)))
-                }
-            }
-            .addModifier {
-                for (i in 1..8) {
-                    it.setItem(36 + i, flatWithAmount(calculation.byproducts.getOrNull(8 * page + i - 1)))
-                }
-            }
+            .addIngredient('#', GuiItems.background())
+            .addIngredient('<', GuiItems.pagePrevious())
+            .addIngredient('>', GuiItems.pageNext())
+            .addIngredient('b', PylonGuide.backButton)
+            .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+            .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
+            .setContent(items)
             .build()
+            .apply { loadCurrentPage(player, this) }
+    }
 
-    open fun getGuiHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
+    private val ingredientsItem = ItemStackBuilder.gui(Material.CRAFTING_TABLE, "ingredients")
+        .name(Component.translatable("pylon.pyloncore.guide.page.tab.ingredients"))
+
+    private val ingredientsTab = ItemListDisplayTab(calculation.inputs.sortedByDescending {
+        when (it) {
+            is FluidOrItem.Fluid -> it.amountMillibuckets
+            is FluidOrItem.Item -> it.item.amount.toDouble()
+        }
+    }.map(::fluidOrItemButton))
+
+    private val byproductsItem = ItemStackBuilder.gui(Material.BARREL, "byproducts")
+        .name(Component.translatable("pylon.pyloncore.guide.page.tab.byproducts"))
+
+    private val byproductsTab = ItemListDisplayTab(calculation.byproducts.sortedByDescending {
+        when (it) {
+            is FluidOrItem.Fluid -> it.amountMillibuckets
+            is FluidOrItem.Item -> it.item.amount.toDouble()
+        }
+    }.map(::fluidOrItemButton))
+
+    override fun getGui(player: Player): Gui = TabGui.normal()
         .setStructure(
-            "< b # # # # # # >",
+            "# b # i # y # # #",
             "x x x x x x x x x",
             "x x x x x x x x x",
             "x x x x x x x x x",
-            "x x x x x x x x x",
-            "x x x x x x x x x",
+            "# # # # # # # # #",
+            "# # # # r # # # #",
         )
         .addIngredient('#', GuiItems.background())
-        .addIngredient('<', GuiItems.pagePrevious())
         .addIngredient('b', PylonGuide.backButton)
-        .addIngredient('>', GuiItems.pageNext())
+        .addIngredient('i', GuiItems.tab(ingredientsItem, 0))
+        .addIngredient('y', GuiItems.tab(byproductsItem, 1))
+        .addIngredient(
+            'r',
+            when (input) {
+                is FluidOrItem.Fluid -> FluidButton(input.amountMillibuckets, input.fluid)
+                is FluidOrItem.Item -> ItemButton(input.item)
+            }
+        )
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
-        .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
-
-    override fun getGui(player: Player): Gui {
-        val pages = mutableListOf<Gui>()
-        val calculation = IngredientCalculator.calculate(stack).flat()
-        val maxPage = max(calculation.inputs.size / 27, calculation.byproducts.size / 8)
-        for (i in 0..maxPage) {
-            pages += getSubPage(player, stack, calculation, i, maxPage)
-        }
-
-        val gui = getGuiHeader(player, pages)
-        for (page in pages) {
-            gui.addContent(page)
-        }
-        return gui.build().apply { loadCurrentPage(player, this) }
-    }
+        .addTabChangeHandler { _, newTab -> saveCurrentTab(player, newTab) }
+        .addTab(ingredientsTab.getGui(player))
+        .addTab(byproductsTab.getGui(player))
+        .build()
+        .apply { loadCurrentTab(player, this) }
 
     companion object {
         val KEY = pylonKey("item_ingredients")
     }
+}
 
-    /**
-     * Display amount in the input/intermediate stacks
-     */
-    fun flatWithAmount(container: Container?): Item {
-        if (container == null) return GuiItems.background()
+private val AMOUNT_KEY = pylonKey("actual_amount")
 
-        return when (container) {
-            is Container.Item -> ItemButton.from(container.stack) { item: ItemStack, player: Player ->
-                ItemStackBuilder.of(item).name(
-                    GlobalTranslator.render(Component.translatable(
-                        "pylon.pyloncore.guide.button.ingredient",
-                        PylonArgument.of("item_ingredients_page_amount", container.amount),
-                        PylonArgument.of("item_ingredients_page_item", getItemName(container.stack))),
-                        player.locale())
-                ).build()
-            }
-
-            is Container.Fluid -> FluidButton(container.amountMillibuckets, container.fluid)
+@Suppress("UnstableApiUsage")
+private fun fluidOrItemButton(fluidOrItem: FluidOrItem) = when (fluidOrItem) {
+    is FluidOrItem.Fluid -> FluidButton(listOf(fluidOrItem.fluid), fluidOrItem.amountMillibuckets) { stack ->
+        stack.editPdc { pdc ->
+            pdc.set(AMOUNT_KEY, PylonSerializers.DOUBLE, fluidOrItem.amountMillibuckets)
         }
     }
 
-    val byproductsButton: Item = SimpleItem(
-        ItemStackBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)
+    is FluidOrItem.Item -> ItemButton(fluidOrItem.item) { stack, _ ->
+        ItemStackBuilder.of(stack)
+            .name(
+                Component.translatable(
+                    "pylon.pyloncore.guide.button.item.amount",
+                    PylonArgument.of(
+                        "name", stack.getDataOrDefault(
+                            DataComponentTypes.ITEM_NAME, stack.type.getDefaultData(DataComponentTypes.ITEM_NAME)
+                        )!!
+                    ),
+                    PylonArgument.of("amount", stack.amount.toString()),
+                    PylonArgument.of(
+                        "breakdown",
+                        if (stack.amount > stack.maxStackSize) {
+                            Component.translatable(
+                                "pylon.pyloncore.guide.button.item.amount-breakdown",
+                                PylonArgument.of("stacks", fluidOrItem.item.amount / stack.maxStackSize),
+                                PylonArgument.of("stack-size", stack.maxStackSize),
+                                PylonArgument.of("remainder", fluidOrItem.item.amount % stack.maxStackSize)
+                            )
+                        } else {
+                            Component.empty()
+                        }
+                    )
+                )
+            )
             .amount(1)
-            .name(Component.translatable("pylon.pyloncore.guide.button.byproducts.name"))
-            .lore(Component.translatable("pylon.pyloncore.guide.button.byproducts.lore"))
-    )
-
-    val mainProductButton: Item = SimpleItem(
-        ItemStackBuilder.of(Material.GREEN_STAINED_GLASS_PANE)
-            .amount(1)
-            .name(Component.translatable("pylon.pyloncore.guide.button.main_product.name"))
-            .lore(Component.translatable("pylon.pyloncore.guide.button.main_product.lore"))
-    )
-
-    private fun getItemName(item: ItemStack): Component {
-        val name = item.getData(DataComponentTypes.ITEM_NAME)
-        if (name != null) return name
-        return Component.translatable(item.translationKey())
+            .editPdc { pdc ->
+                pdc.set(AMOUNT_KEY, PylonSerializers.INTEGER, fluidOrItem.item.amount)
+            }
+            .build()
     }
 }

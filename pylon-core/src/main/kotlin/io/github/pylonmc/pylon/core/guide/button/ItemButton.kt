@@ -81,10 +81,7 @@ class ItemButton @JvmOverloads constructor(
     override fun getItemProvider(player: Player): ItemProvider {
         try {
             val displayStack = preDisplayDecorator.invoke(currentStack.clone(), player)
-            val item = PylonItem.fromStack(displayStack)
-            if (item == null) {
-                return ItemStackBuilder.of(displayStack)
-            }
+            val item = PylonItem.fromStack(displayStack) ?: return ItemStackBuilder.of(displayStack)
 
             val builder = ItemStackBuilder.of(displayStack.clone())
             if (item.isDisabled) {
