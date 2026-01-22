@@ -6,13 +6,14 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.guideHints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
-import io.github.pylonmc.pylon.core.util.getAddon
+import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 
@@ -23,18 +24,28 @@ open class ResearchButton(val research: Research) : AbstractItem() {
 
     override fun getItemProvider(player: Player): ItemProvider = try {
         val playerHasResearch = Research.getResearches(player).contains(research)
-        val item = ItemStackBuilder.gui(if (playerHasResearch) Material.LIME_STAINED_GLASS_PANE else research.material, "${pylonKey("research")}:${research.key}:$playerHasResearch")
+        val item = ItemStackBuilder.gui(if (playerHasResearch) ItemStack(Material.LIME_STAINED_GLASS_PANE) else research.item, "${pylonKey("research")}:${research.key}:$playerHasResearch")
             .name(research.name)
 
         if (playerHasResearch) {
             if (research.cost != null) {
                 item.lore(Component.translatable(
                     "pylon.pyloncore.guide.button.research.cost.researched",
-                    PylonArgument.of("cost", research.cost),
+                    PylonArgument.of("unlock_cost", UnitFormat.RESEARCH_POINTS.format(research.cost)),
                 ))
             }
         } else {
-            addResearchCostLore(item, player, research)
+            if (research.cost == null) {
+                item.lore(Component.translatable("pylon.${research.key.namespace}.researches.${research.key.key}.unlock-instructions"))
+            } else {
+                val playerPoints = player.researchPoints
+                item.lore(Component.translatable(
+                    "pylon.pyloncore.guide.button.research.cost."
+                            + (if (research.cost > playerPoints) "not-enough" else "enough"),
+                    PylonArgument.of("player_points", playerPoints),
+                    PylonArgument.of("unlock_cost", UnitFormat.RESEARCH_POINTS.format(research.cost))
+                ))
+            }
         }
 
         item.lore(Component.translatable("pylon.pyloncore.guide.button.research.unlocks-title"))
@@ -72,8 +83,6 @@ open class ResearchButton(val research: Research) : AbstractItem() {
             ))
         }
 
-        item.lore(getAddon(research.key).displayName)
-
         item
     } catch (e: Exception) {
         e.printStackTrace()
@@ -105,20 +114,5 @@ open class ResearchButton(val research: Research) : AbstractItem() {
 
     companion object {
         const val MAX_UNLOCK_LIST_LINES = 10
-
-        @JvmSynthetic
-        internal fun addResearchCostLore(item: ItemStackBuilder, player: Player, research: Research) {
-            if (research.cost == null) {
-                item.lore(Component.translatable("pylon.${research.key.namespace}.researches.${research.key.key}.unlock-instructions"))
-            } else {
-                val playerPoints = player.researchPoints
-                item.lore(Component.translatable(
-                    "pylon.pyloncore.guide.button.research.cost."
-                            + (if (research.cost > playerPoints) "not-enough" else "enough"),
-                    PylonArgument.of("points", playerPoints),
-                    PylonArgument.of("cost", research.cost)
-                ))
-            }
-        }
     }
 }

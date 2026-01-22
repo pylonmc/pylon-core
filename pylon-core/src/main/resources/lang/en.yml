@@ -135,9 +135,9 @@ guide:
         <guidearrow> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature <white>slurry
     research:
       cost:
-        not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%points%/%cost%"
-        enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%points%/%cost%"
-        researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%cost% (researched)"
+        not-enough: "<arrow> <attr>Unlock cost:</attr> <#e23b28>%player_points%/%unlock_cost%"
+        enough: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%player_points%/%unlock_cost%"
+        researched: "<arrow> <attr>Unlock cost:</attr> <#61ea38>%unlock_cost% (researched)"
       hints:
         research: |-
           
@@ -163,8 +163,11 @@ guide:
           <guidearrow> <guideinsn>Left click</guideinsn> to see recipe
           <guidearrow> <guideinsn>Right click</guideinsn> to see usages
     item:
-      not-researched: "<red><u>Not researched yet</u>"
-      not-researched-with-name: "<red><u>Not researched yet <gray>(%research_name%<gray>)"
+      not-researched:
+        no-research-cost: "<guidearrow> <red>Unresearched"
+        enough-points: "<guidearrow> <red>Unresearched <gray>(%research_name% <gray>| <#61ea38>%player_points%/%unlock_cost%<gray>)"
+        not-enough-points: "<guidearrow> <red>Unresearched <gray>(%research_name% <gray>| <#e23b28>%player_points%/%unlock_cost%<gray>)"
+
       hints:
         researched: |-
           
