@@ -209,8 +209,8 @@ class PylonServerPlaceRecipe private constructor(
                     ServerPlaceRecipe.CraftingMenuAccess::class.java,
                     Inventory::class.java,
                     Boolean::class.javaPrimitiveType,  // boolean
-                    Integer::class.javaPrimitiveType,  // int
-                    Integer::class.javaPrimitiveType,  // int
+                    Int::class.javaPrimitiveType,  // int
+                    Int::class.javaPrimitiveType,  // int
                     List::class.java,
                     List::class.java
                 )
