@@ -5,6 +5,7 @@ import io.github.pylonmc.pylon.core.config.Config
 import io.github.pylonmc.pylon.core.config.Settings
 import io.github.pylonmc.pylon.core.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.pylon.core.datatypes.PylonSerializers
+import io.github.pylonmc.pylon.core.event.PylonEntitySerializeEvent
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.pylonKey
 import io.github.pylonmc.pylon.core.waila.WailaDisplay
@@ -82,14 +83,20 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
 
         private val pylonEntityKeyKey = pylonKey("pylon_entity_key")
 
+        @JvmOverloads
         @JvmStatic
-        fun register(key: NamespacedKey, entityClass: Class<*>, pylonEntityClass: Class<out PylonEntity<*>>) {
-            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, entityClass, pylonEntityClass))
+        fun register(
+            key: NamespacedKey,
+            entityClass: Class<*>,
+            pylonEntityClass: Class<out PylonEntity<*>>,
+            isPersistent: Boolean = true,
+        ) {
+            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, entityClass, pylonEntityClass, isPersistent))
         }
 
         @JvmSynthetic
-        inline fun <reified E: Entity, reified T: PylonEntity<E>> register(key: NamespacedKey) {
-            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, E::class.java, T::class.java))
+        inline fun <reified E: Entity, reified T: PylonEntity<E>> register(key: NamespacedKey, isPersistent: Boolean = true) {
+            PylonRegistry.ENTITIES.register(PylonEntitySchema(key, E::class.java, T::class.java, isPersistent))
         }
 
         @JvmSynthetic
@@ -101,6 +108,7 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
         @JvmSynthetic
         internal fun serialize(pylonEntity: PylonEntity<*>) {
             pylonEntity.write(pylonEntity.entity.persistentDataContainer)
+            PylonEntitySerializeEvent(pylonEntity.entity, pylonEntity, pylonEntity.entity.persistentDataContainer).callEvent()
         }
 
         @JvmSynthetic
@@ -117,13 +125,14 @@ abstract class PylonEntity<out E: Entity>(val entity: E) {
                 val schema = PylonRegistry.ENTITIES[key]
                     ?: return null
 
-                if (!schema.entityClass.isInstance(entity)) {
+                if (!schema.entityClass.isInstance(entity) || schema.loadConstructor == null) {
                     return null
                 }
 
                 @Suppress("UNCHECKED_CAST") // The cast will work - this is checked in the schema constructor
-                return schema.loadConstructor.invoke(entity) as PylonEntity<*>
-
+                val pylonEntity = schema.loadConstructor.invoke(entity) as PylonEntity<*>
+                PylonEntitySerializeEvent(entity, pylonEntity, entity.persistentDataContainer).callEvent()
+                return pylonEntity
             } catch (t: Throwable) {
                 PylonCore.logger.severe("Error while loading entity $key with UUID ${entity.uniqueId}")
                 t.printStackTrace()

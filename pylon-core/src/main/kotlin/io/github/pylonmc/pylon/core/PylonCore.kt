@@ -22,6 +22,7 @@ import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
+import io.github.pylonmc.pylon.core.entity.base.PylonTickingEntity
 import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
 import io.github.pylonmc.pylon.core.guide.pages.base.PagedGuidePage
 import io.github.pylonmc.pylon.core.guide.pages.base.TabbedGuidePage
@@ -122,6 +123,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         pm.registerEvents(EntityStorage, this)
         pm.registerEvents(EntityListener, this)
         pm.registerEvents(Research, this)
+        pm.registerEvents(PylonVirtualInventoryBlock, this)
         pm.registerEvents(PylonGuiBlock, this)
         pm.registerEvents(PylonEntityHolderBlock, this)
         pm.registerEvents(PylonSimpleMultiblock, this)
@@ -141,6 +143,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         pm.registerEvents(RecipeCompletion, this)
         pm.registerEvents(PagedGuidePage, this)
         pm.registerEvents(TabbedGuidePage, this)
+        pm.registerEvents(PylonTickingEntity, this)
 
         Bukkit.getScheduler().runTaskTimer(this, PylonInventoryTicker(), 0, PylonConfig.INVENTORY_TICKER_BASE_RATE)
 
