@@ -8,6 +8,7 @@ import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.plainText
+import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
@@ -141,7 +142,7 @@ abstract class SearchPage(key: NamespacedKey) : SimpleStaticGuidePage(key) {
     }
 
     companion object {
-        private val searchSpecifiersStack = ItemStackBuilder.of(Material.PAPER)
+        private val searchSpecifiersStack = ItemStackBuilder.gui(Material.PAPER, "guide_search_specifiers")
             .name(Component.translatable("pylon.pyloncore.guide.button.search-specifiers.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.search-specifiers.lore"))
 

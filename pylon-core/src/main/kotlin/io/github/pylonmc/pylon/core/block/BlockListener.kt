@@ -19,6 +19,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
+import org.bukkit.ExplosionResult
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Container
@@ -183,6 +184,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
+        if (event.explosionResult == ExplosionResult.TRIGGER_BLOCK || event.explosionResult == ExplosionResult.KEEP) {
+            return
+        }
+
         if (BlockStorage.isPylonBlock(event.block) && BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
             event.isCancelled = true
             return
@@ -199,6 +204,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
+        if (event.explosionResult == ExplosionResult.TRIGGER_BLOCK || event.explosionResult == ExplosionResult.KEEP) {
+            return
+        }
+
         val it = event.blockList().iterator()
         while (it.hasNext()) {
             val block = it.next()
