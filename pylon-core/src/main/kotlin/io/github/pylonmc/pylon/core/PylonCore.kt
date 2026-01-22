@@ -22,6 +22,7 @@ import io.github.pylonmc.pylon.core.content.guide.PylonGuide
 import io.github.pylonmc.pylon.core.entity.EntityListener
 import io.github.pylonmc.pylon.core.entity.EntityStorage
 import io.github.pylonmc.pylon.core.entity.PylonEntity
+import io.github.pylonmc.pylon.core.entity.base.PylonTickingEntity
 import io.github.pylonmc.pylon.core.fluid.placement.FluidPipePlacementService
 import io.github.pylonmc.pylon.core.i18n.PylonTranslator
 import io.github.pylonmc.pylon.core.item.PylonInventoryTicker
@@ -138,6 +139,7 @@ object PylonCore : JavaPlugin(), PylonAddon {
         pm.registerEvents(CargoRoutes, this)
         pm.registerEvents(CargoDuct, this)
         pm.registerEvents(RecipeCompletion, this)
+        pm.registerEvents(PylonTickingEntity, this)
 
         if (PylonConfig.WailaConfig.enabled) {
             pm.registerEvents(Waila, this)

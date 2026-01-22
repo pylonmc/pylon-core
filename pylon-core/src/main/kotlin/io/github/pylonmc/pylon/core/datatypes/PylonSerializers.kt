@@ -150,4 +150,7 @@ object PylonSerializers {
     @JvmSynthetic
     internal val TICKING_BLOCK_DATA = TickingBlockPersistentDataType
 
+    @JvmSynthetic
+    internal val TICKING_ENTITY_DATA = TickingEntityPersistentDataType
+
 }

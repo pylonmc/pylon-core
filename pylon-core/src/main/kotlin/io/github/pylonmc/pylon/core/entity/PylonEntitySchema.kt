@@ -15,11 +15,16 @@ class PylonEntitySchema(
     private val key: NamespacedKey,
     val entityClass: Class<*>,
     pylonEntityClass: Class<out PylonEntity<*>>,
+    isPersistent: Boolean,
 ) : Keyed {
 
     @JvmSynthetic
-    internal val loadConstructor: MethodHandle = pylonEntityClass.findConstructorMatching(entityClass)
-        ?: throw NoSuchMethodException("Entity '$key' (${pylonEntityClass.simpleName}) is missing a load constructor (${entityClass.simpleName})")
+    internal val loadConstructor: MethodHandle? = if (isPersistent) {
+        pylonEntityClass.findConstructorMatching(entityClass)
+            ?: throw NoSuchMethodException("Entity '$key' (${pylonEntityClass.simpleName}) is missing a load constructor (${entityClass.simpleName})")
+    } else {
+        null
+    }
 
     override fun getKey(): NamespacedKey = key
 
