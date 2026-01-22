@@ -46,10 +46,23 @@ open class ProgressItem @JvmOverloads constructor(
      * The item to be displayed
      */
     var item: Item = item
-        set(value) {
+        @JvmName("setItemInternal")
+        private set(value) {
             field = value
             notifyWindows()
         }
+
+    fun setItem(item: Item) {
+        this.item = item
+    }
+
+    fun setItem(stack: ItemStack) {
+        item = Item.simple(stack)
+    }
+
+    fun setItem(builder: ItemStackBuilder) {
+        item = Item.simple(builder)
+    }
 
     /**
      * The total time of whatever process this item is representing
@@ -113,6 +126,7 @@ open class ProgressItem @JvmOverloads constructor(
         }
 
         val builder = ItemStackBuilder.of(item.getItemProvider(viewer).get())
+            .clone()
             .set(DataComponentTypes.MAX_DAMAGE, MAX_DURABILITY)
 
         if (totalTime != null) {

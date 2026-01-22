@@ -1,17 +1,11 @@
 package io.github.pylonmc.pylon.core.fluid.placement
 
 import io.github.pylonmc.pylon.core.block.BlockStorage
-import io.github.pylonmc.pylon.core.content.fluid.FluidEndpointDisplay
-import io.github.pylonmc.pylon.core.content.fluid.FluidIntersectionDisplay
-import io.github.pylonmc.pylon.core.content.fluid.FluidIntersectionMarker
-import io.github.pylonmc.pylon.core.content.fluid.FluidPipeDisplay
-import io.github.pylonmc.pylon.core.content.fluid.FluidPointDisplay
-import io.github.pylonmc.pylon.core.content.fluid.FluidSectionMarker
+import io.github.pylonmc.pylon.core.content.fluid.*
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import org.bukkit.block.BlockFace
 import org.joml.Vector3f
-import java.lang.AssertionError
-import java.util.UUID
+import java.util.*
 
 internal sealed interface FluidPipePlacementPoint {
 
@@ -68,7 +62,7 @@ internal sealed interface FluidPipePlacementPoint {
 
         override val allowedFace = if (display is FluidEndpointDisplay) display.face else null
 
-        override fun stillActuallyExists(isOrigin: Boolean) = display.entity.isValid
+        override fun stillActuallyExists(isTarget: Boolean) = display.entity.isValid
 
         override fun create() = display
     }
@@ -84,7 +78,7 @@ internal sealed interface FluidPipePlacementPoint {
         // If stillActuallyExists returns false, pipe placement is cancelled, but we do not want this to happen for the target
         // (because if you dragged the pipe into a solid block, the placement would be cancelled rather than an error message
         // bein displayed)
-        override fun stillActuallyExists(isOrigin: Boolean) = !isOrigin || position.block.isEmpty || position.block.isReplaceable
+        override fun stillActuallyExists(isTarget: Boolean) = !isTarget || position.block.isEmpty || position.block.isReplaceable
 
         override fun create()
                 = (BlockStorage.placeBlock(position, FluidIntersectionMarker.KEY) as FluidIntersectionMarker).fluidIntersectionDisplay
@@ -101,7 +95,7 @@ internal sealed interface FluidPipePlacementPoint {
 
         override val allowedFace = null
 
-        override fun stillActuallyExists(isOrigin: Boolean) = BlockStorage.get(marker.block) is FluidSectionMarker
+        override fun stillActuallyExists(isTarget: Boolean) = BlockStorage.get(marker.block) is FluidSectionMarker
 
         override fun create(): FluidIntersectionDisplay {
             val pipeDisplay = marker.pipeDisplay!!

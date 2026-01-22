@@ -12,7 +12,7 @@ import io.github.pylonmc.pylon.core.util.pylonKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
-import java.util.IdentityHashMap
+import java.util.*
 
 /**
  * An interface that stores and progresses a recipe.
@@ -39,6 +39,7 @@ interface PylonRecipeProcessor<T: PylonRecipe> {
         get() = recipeProcessorBlocks.getOrPut(this) { RecipeProcessorData(null, null, null, null, null)}
 
     val currentRecipe: T?
+        @Suppress("UNCHECKED_CAST")
         @ApiStatus.NonExtendable
         // cast should always be safe due to type restriction when starting recipe
         get() = recipeProcessorData.currentRecipe as T?
