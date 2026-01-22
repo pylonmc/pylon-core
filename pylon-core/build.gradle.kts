@@ -44,7 +44,7 @@ dependencies {
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
     paperLibrary("xyz.xenondevs.invui:inventory-access-r26:1.49:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.49")
-    api("io.github.tofaa2:spigot:3.0.3-SNAPSHOT")
+    api("io.github.tofaa2:spigot:master-d9aae45571d0536107860d66c37318dc63311e77")
     implementation("com.github.retrooper:packetevents-spigot:2.11.1")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
