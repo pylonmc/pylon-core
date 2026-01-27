@@ -4,8 +4,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "pylon-core/src/main/resources/lang/en.yml"
-      - "pylon-core/src/main/resources/lang/enws.yml"
+      - "rebar/src/main/resources/lang/en.yml"
+      - "rebar/src/main/resources/lang/enws.yml"
   workflow_dispatch:
 
 jobs:
@@ -18,11 +18,11 @@ jobs:
 
       - name: Extract all keys from en.yml
         run: |
-          yq eval '.. | select(. == "*") | (path | join("."))' pylon-core/src/main/resources/lang/en.yml | sort > en_keys.txt
+          yq eval '.. | select(. == "*") | (path | join("."))' rebar/src/main/resources/lang/en.yml | sort > en_keys.txt
 
       - name: Extract all keys from enws.yml
         run: |
-          yq eval '.. | select(. == "*") | (path | join("."))' pylon-core/src/main/resources/lang/enws.yml | sort > enws_keys.txt
+          yq eval '.. | select(. == "*") | (path | join("."))' rebar/src/main/resources/lang/enws.yml | sort > enws_keys.txt
 
       - name: Compare keys
         id: compare

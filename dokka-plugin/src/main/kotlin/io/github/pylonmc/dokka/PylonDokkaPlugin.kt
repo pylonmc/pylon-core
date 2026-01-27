@@ -5,7 +5,7 @@ import org.jetbrains.dokka.plugability.DokkaPlugin
 import org.jetbrains.dokka.plugability.DokkaPluginApiPreview
 import org.jetbrains.dokka.plugability.PluginApiPreviewAcknowledgement
 
-class PylonDokkaPlugin : DokkaPlugin() {
+class RebarDokkaPlugin : DokkaPlugin() {
 
     val hideInternalApi by extending {
         plugin<DokkaBase>().preMergeDocumentableTransformer providing ::HideInternalApiTransformer
