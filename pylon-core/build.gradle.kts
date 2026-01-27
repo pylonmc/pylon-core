@@ -44,7 +44,7 @@ dependencies {
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
     paperLibrary("xyz.xenondevs.invui:inventory-access-r26:1.49:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.49")
-    api("io.github.tofaa2:spigot:master-d9aae45571d0536107860d66c37318dc63311e77")
+    api("io.github.tofaa2:spigot:3.0.3-SNAPSHOT")
     implementation("com.github.retrooper:packetevents-spigot:2.11.1")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
@@ -146,21 +146,21 @@ tasks.shadowJar {
     exclude("org/intellij/lang/annotations/**")
     exclude("org/jetbrains/annotations/**")
 
-    relocate("com.github.retrooper.packetevents", "io.github.pylonmc.pylon.core.packetevents")
-    relocate("me.tofaa.entitylib", "io.github.pylonmc.pylon.core.entitylib")
-    relocate("org.bstats", "io.github.pylonmc.pylon.core.bstats")
+    relocate("com.github.retrooper.packetevents", "io.github.pylonmc.rebar.packetevents")
+    relocate("me.tofaa.entitylib", "io.github.pylonmc.rebar.entitylib")
+    relocate("org.bstats", "io.github.pylonmc.rebar.bstats")
 
-    archiveBaseName = "pylon-core"
+    archiveBaseName = "rebar"
     archiveClassifier = null
 }
 
 paper {
     generateLibrariesJson = true
 
-    name = "PylonCore"
-    loader = "io.github.pylonmc.pylon.core.PylonLoader"
-    bootstrapper = "io.github.pylonmc.pylon.core.PylonBootstrapper"
-    main = "io.github.pylonmc.pylon.core.PylonCore"
+    name = "Rebar"
+    loader = "io.github.pylonmc.rebar.RebarLoader"
+    bootstrapper = "io.github.pylonmc.rebar.RebarBootstrapper"
+    main = "io.github.pylonmc.rebar.Rebar"
     version = project.version.toString()
     authors = listOf("Pylon team")
     apiVersion = minecraftVersion
@@ -174,7 +174,7 @@ tasks.withType<Jar> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifactId = "pylon-core"
+            artifactId = "rebar"
 
             artifact(tasks.jar)
             artifact(tasks.kotlinSourcesJar)
@@ -182,7 +182,7 @@ publishing {
 
             pom {
                 name = artifactId
-                description = "The core library for Pylon addons."
+                description = "The core library for Rebar addons."
                 url = "https://github.com/pylonmc/pylon-core"
                 licenses {
                     license {

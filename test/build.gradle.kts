@@ -32,7 +32,7 @@ bukkit {
     main = "io.github.pylonmc.pylon.test.PylonTest"
     version = project.version.toString()
     apiVersion = minecraftVersion
-    depend = listOf("PylonCore")
+    depend = listOf("Rebar")
     load = BukkitPluginDescription.PluginLoadOrder.STARTUP
 }
 

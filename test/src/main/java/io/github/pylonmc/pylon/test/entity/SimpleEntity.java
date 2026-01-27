@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.entity;
 
-import io.github.pylonmc.pylon.core.entity.PylonEntity;
+import io.github.pylonmc.rebar.entity.PylonEntity;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;

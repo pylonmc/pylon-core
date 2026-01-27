@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.test.entity;
 
-import io.github.pylonmc.pylon.core.entity.EntityStorage;
+import io.github.pylonmc.rebar.entity.EntityStorage;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import io.github.pylonmc.pylon.test.entity.SimpleEntity;
 import io.github.pylonmc.pylon.test.util.TestUtil;

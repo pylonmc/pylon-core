@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.test.recipe;
 
-import io.github.pylonmc.pylon.core.recipe.RecipeType;
-import io.github.pylonmc.pylon.core.gametest.GameTestConfig;
+import io.github.pylonmc.rebar.recipe.RecipeType;
+import io.github.pylonmc.rebar.gametest.GameTestConfig;
 import io.github.pylonmc.pylon.test.PylonTest;
 import io.github.pylonmc.pylon.test.base.GameTest;
 import io.github.pylonmc.pylon.test.item.Items;

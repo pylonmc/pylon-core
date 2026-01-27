@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.util;
 
-import io.github.pylonmc.pylon.core.util.position.ChunkPosition;
+import io.github.pylonmc.rebar.util.position.ChunkPosition;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;

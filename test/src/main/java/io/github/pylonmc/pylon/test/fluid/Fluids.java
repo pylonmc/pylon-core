@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.fluid;
 
-import io.github.pylonmc.pylon.core.fluid.PylonFluid;
+import io.github.pylonmc.rebar.fluid.PylonFluid;
 import io.github.pylonmc.pylon.test.PylonTest;
 import org.bukkit.Material;
 

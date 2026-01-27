@@ -1,8 +1,8 @@
 package io.github.pylonmc.pylon.test.test.misc;
 
-import io.github.pylonmc.pylon.core.i18n.PylonTranslator;
-import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapEncoder;
-import io.github.pylonmc.pylon.core.i18n.wrapping.LineWrapRepresentation;
+import io.github.pylonmc.rebar.i18n.PylonTranslator;
+import io.github.pylonmc.rebar.i18n.wrapping.LineWrapEncoder;
+import io.github.pylonmc.rebar.i18n.wrapping.LineWrapRepresentation;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;

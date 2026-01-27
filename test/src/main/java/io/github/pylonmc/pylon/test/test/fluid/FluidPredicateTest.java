@@ -1,7 +1,7 @@
 package io.github.pylonmc.pylon.test.test.fluid;
 
-import io.github.pylonmc.pylon.core.block.BlockStorage;
-import io.github.pylonmc.pylon.core.fluid.FluidManager;
+import io.github.pylonmc.rebar.block.BlockStorage;
+import io.github.pylonmc.rebar.fluid.FluidManager;
 import io.github.pylonmc.pylon.test.base.AsyncTest;
 import io.github.pylonmc.pylon.test.block.fluid.FluidConsumer;
 import io.github.pylonmc.pylon.test.block.fluid.FluidProducer;

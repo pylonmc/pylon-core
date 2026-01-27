@@ -1,15 +1,15 @@
 package io.github.pylonmc.pylon.test.block.fluid;
 
-import io.github.pylonmc.pylon.core.block.PylonBlock;
-import io.github.pylonmc.pylon.core.block.base.PylonFluidTank;
-import io.github.pylonmc.pylon.core.block.base.PylonUnloadBlock;
-import io.github.pylonmc.pylon.core.block.context.BlockCreateContext;
-import io.github.pylonmc.pylon.core.datatypes.PylonSerializers;
-import io.github.pylonmc.pylon.core.event.PylonBlockUnloadEvent;
-import io.github.pylonmc.pylon.core.fluid.FluidManager;
-import io.github.pylonmc.pylon.core.fluid.FluidPointType;
-import io.github.pylonmc.pylon.core.fluid.PylonFluid;
-import io.github.pylonmc.pylon.core.fluid.VirtualFluidPoint;
+import io.github.pylonmc.rebar.block.PylonBlock;
+import io.github.pylonmc.rebar.block.base.PylonFluidTank;
+import io.github.pylonmc.rebar.block.base.PylonUnloadBlock;
+import io.github.pylonmc.rebar.block.context.BlockCreateContext;
+import io.github.pylonmc.rebar.datatypes.PylonSerializers;
+import io.github.pylonmc.rebar.event.PylonBlockUnloadEvent;
+import io.github.pylonmc.rebar.fluid.FluidManager;
+import io.github.pylonmc.rebar.fluid.FluidPointType;
+import io.github.pylonmc.rebar.fluid.PylonFluid;
+import io.github.pylonmc.rebar.fluid.VirtualFluidPoint;
 import io.github.pylonmc.pylon.test.PylonTest;
 import lombok.Getter;
 import org.bukkit.NamespacedKey;

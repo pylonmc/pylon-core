@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test.fluid;
 
-import io.github.pylonmc.pylon.core.fluid.PylonFluidTag;
+import io.github.pylonmc.rebar.fluid.PylonFluidTag;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 

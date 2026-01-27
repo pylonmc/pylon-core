@@ -1,6 +1,6 @@
 package io.github.pylonmc.pylon.test;
 
-import io.github.pylonmc.pylon.core.addon.PylonAddon;
+import io.github.pylonmc.rebar.addon.PylonAddon;
 import io.github.pylonmc.pylon.test.base.Test;
 import io.github.pylonmc.pylon.test.base.TestResult;
 import io.github.pylonmc.pylon.test.block.Blocks;
