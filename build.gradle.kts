@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.1.10" apply false
+    kotlin("jvm") version "2.3.0" apply false
     id("com.gradleup.shadow") version "9.0.0" apply false
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0" apply false
     id("com.gradleup.nmcp.aggregation") version "1.1.0"
@@ -19,6 +19,9 @@ allprojects {
         }
         maven("https://repo.codemc.io/repository/maven-releases/") {
             name = "CodeMC"
+        }
+        maven("https://maven.pvphub.me/tofaa") {
+            name = "EntityLib"
         }
     }
 }

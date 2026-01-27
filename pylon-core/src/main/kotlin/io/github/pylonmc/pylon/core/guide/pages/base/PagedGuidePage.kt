@@ -1,9 +1,11 @@
 package io.github.pylonmc.pylon.core.guide.pages.base
 
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerQuitEvent
 import xyz.xenondevs.invui.gui.PagedGui
-import java.util.UUID
-import java.util.WeakHashMap
+import java.util.*
 
 /**
  * Represents a GuidePage with multiple pages
@@ -23,14 +25,22 @@ import java.util.WeakHashMap
  */
 interface PagedGuidePage : GuidePage {
     fun loadCurrentPage(player: Player, gui: PagedGui<*>) {
-        gui.setPage(pageNumbers.getOrPut(this) { mutableMapOf() }.getOrDefault(player.uniqueId, 0))
+        gui.setPage(pageNumbers.getOrPut(this, ::mutableMapOf).getOrDefault(player.uniqueId, 0))
     }
 
     fun saveCurrentPage(player: Player, page: Int) {
-        pageNumbers.getOrPut(this) { mutableMapOf() }[player.uniqueId] = page
+        pageNumbers.getOrPut(this, ::mutableMapOf)[player.uniqueId] = page
     }
 
-    companion object {
+    companion object : Listener {
         val pageNumbers = WeakHashMap<GuidePage, MutableMap<UUID, Int>>()
+
+        @EventHandler
+        private fun onPlayerQuit(event: PlayerQuitEvent) {
+            val uuid = event.player.uniqueId
+            for (map in pageNumbers.values) {
+                map.remove(uuid)
+            }
+        }
     }
 }

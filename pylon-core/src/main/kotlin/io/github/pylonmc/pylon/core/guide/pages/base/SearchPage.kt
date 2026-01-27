@@ -2,13 +2,13 @@ package io.github.pylonmc.pylon.core.guide.pages.base
 
 import info.debatty.java.stringsimilarity.JaroWinkler
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
-import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.FluidButton
 import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.plainText
+import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Material
@@ -28,7 +28,7 @@ import java.util.UUID
  * @param key A key that uniquely identifies this page. Used to generate translation keys for
  * this page
  */
-abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStaticGuidePage(key, material) {
+abstract class SearchPage(key: NamespacedKey) : SimpleStaticGuidePage(key) {
 
     abstract fun getItemNamePairs(player: Player, search: String): List<Pair<Item, String>>
 
@@ -44,7 +44,7 @@ abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStatic
             )
             .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('#', GuiItems.background())
-            .addIngredient('B', BackButton())
+            .addIngredient('B', PylonGuide.backButton)
             .addIngredient('<', GuiItems.pagePrevious())
             .addIngredient('>', GuiItems.pageNext())
             .setContent(getItems(player, search))
@@ -142,7 +142,7 @@ abstract class SearchPage(key: NamespacedKey, material: Material) : SimpleStatic
     }
 
     companion object {
-        private val searchSpecifiersStack = ItemStackBuilder.of(Material.PAPER)
+        private val searchSpecifiersStack = ItemStackBuilder.gui(Material.PAPER, "guide_search_specifiers")
             .name(Component.translatable("pylon.pyloncore.guide.button.search-specifiers.name"))
             .lore(Component.translatable("pylon.pyloncore.guide.button.search-specifiers.lore"))
 

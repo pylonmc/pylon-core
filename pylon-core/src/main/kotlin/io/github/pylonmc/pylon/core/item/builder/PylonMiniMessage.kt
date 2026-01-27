@@ -35,6 +35,7 @@ val customMiniMessage = MiniMessage.builder()
     .tags(TagResolver.standard())
     .editTags {
         it.tag("arrow", ::arrow)
+        it.tag("guidearrow", ::guidearrow)
         it.tag("diamond", ::diamond)
         it.tag("star", ::star)
         it.tag(setOf("instruction", "insn")) { _, _ -> Tag.styling(TextColor.color(0xf9d104)) }
@@ -49,6 +50,11 @@ val customMiniMessage = MiniMessage.builder()
 
 private fun arrow(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
     val color = args.peek()?.value()?.let(::parseColor) ?: TextColor.color(0x666666)
+    return Tag.selfClosingInserting(Component.text("\u2192").color(color))
+}
+
+private fun guidearrow(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
+    val color = args.peek()?.value()?.let(::parseColor) ?: TextColor.color(0x3a293)
     return Tag.selfClosingInserting(Component.text("\u2192").color(color))
 }
 

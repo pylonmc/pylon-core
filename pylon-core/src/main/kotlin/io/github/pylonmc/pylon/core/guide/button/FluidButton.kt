@@ -7,6 +7,7 @@ import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.fluid.FluidUsagesPage
 import io.github.pylonmc.pylon.core.i18n.PylonArgument
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.guideHints
 import io.github.pylonmc.pylon.core.recipe.RecipeInput
 import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.papermc.paper.datacomponent.DataComponentTypes
@@ -73,8 +74,8 @@ open class FluidButton(
         }
     }
 
-    override fun getItemProvider() = try {
-        if (amount == null) {
+    override fun getItemProvider(player: Player) = try {
+        val stack = if (amount == null) {
             preDisplayDecorator.invoke(ItemStackBuilder.of(currentFluid.item))
         } else {
             preDisplayDecorator.invoke(ItemStackBuilder.of(currentFluid.item))
@@ -86,6 +87,10 @@ open class FluidButton(
                     )
                 )
         }
+        if (player.guideHints) {
+            stack.lore(Component.translatable("pylon.pyloncore.guide.button.fluid.hints"))
+        }
+        stack
     } catch (e: Exception) {
         e.printStackTrace()
         ItemStackBuilder.of(Material.BARRIER)

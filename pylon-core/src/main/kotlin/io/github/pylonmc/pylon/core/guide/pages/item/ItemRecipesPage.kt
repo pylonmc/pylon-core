@@ -1,10 +1,8 @@
 package io.github.pylonmc.pylon.core.guide.pages.item
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
-import io.github.pylonmc.pylon.core.guide.button.BackButton
-import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.PagedGuidePage
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
+import io.github.pylonmc.pylon.core.recipe.FluidOrItem
 import io.github.pylonmc.pylon.core.registry.PylonRegistry
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
@@ -13,7 +11,6 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
-import xyz.xenondevs.invui.item.ItemProvider
 
 /**
  * Displays all the recipes for the given [stack].
@@ -32,9 +29,6 @@ open class ItemRecipesPage(val stack: ItemStack) : PagedGuidePage {
         }
     }
 
-    override val item: ItemProvider
-        get() = ItemStackBuilder.of(stack)
-
     override fun getKey() = KEY
 
     open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
@@ -48,9 +42,9 @@ open class ItemRecipesPage(val stack: ItemStack) : PagedGuidePage {
         )
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', GuiItems.pagePrevious())
-        .addIngredient('b', BackButton())
-        .addIngredient('g', PageButton(PylonGuide.ingredientsPage(stack)))
-        .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
+        .addIngredient('b', PylonGuide.backButton)
+        .addIngredient('g', PylonGuide.ingredientsButton(FluidOrItem.of(stack)))
+        .addIngredient('s', PylonGuide.searchItemsAndFluidsButton)
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
         .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }

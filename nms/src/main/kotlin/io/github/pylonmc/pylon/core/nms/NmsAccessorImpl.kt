@@ -1,29 +1,41 @@
 package io.github.pylonmc.pylon.core.nms
 
+import com.destroystokyo.paper.event.player.PlayerRecipeBookClickEvent
+import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
+import com.github.shynixn.mccoroutine.bukkit.launch
+import io.github.pylonmc.pylon.core.PylonCore
 import io.github.pylonmc.pylon.core.i18n.PlayerTranslationHandler
 import io.github.pylonmc.pylon.core.i18n.packet.PlayerPacketHandler
+import io.github.pylonmc.pylon.core.nms.recipe.HandlerRecipeBookClick
 import io.papermc.paper.adventure.PaperAdventure
 import net.kyori.adventure.text.Component
+import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.TextComponentTagVisitor
+import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket
+import net.minecraft.resources.ResourceKey
+import net.minecraft.server.MinecraftServer
+import net.minecraft.world.inventory.AbstractCraftingMenu
+import net.minecraft.world.inventory.RecipeBookMenu.PostPlaceAction
 import net.minecraft.world.item.Item
+import net.minecraft.world.level.block.state.properties.Property
 import org.bukkit.Material
 import org.bukkit.World
+import org.bukkit.block.Block
 import org.bukkit.craftbukkit.CraftEquipmentSlot
 import org.bukkit.craftbukkit.CraftWorld
-import org.bukkit.craftbukkit.entity.CraftLivingEntity
-import net.minecraft.world.level.block.state.properties.Property
-import org.bukkit.block.Block
 import org.bukkit.craftbukkit.block.CraftBlock
+import org.bukkit.craftbukkit.entity.CraftLivingEntity
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.craftbukkit.inventory.CraftItemType
 import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer
+import org.bukkit.craftbukkit.util.CraftNamespacedKey
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("unused")
@@ -37,10 +49,8 @@ object NmsAccessorImpl : NmsAccessor {
         }, force)
     }
 
-    override fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot?, force: Boolean) {
-        val nmsSlot = slot?.let { CraftEquipmentSlot.getNMS(it) }
-        @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // slot can be null, the nms method parameter is annotated as such, but for some reason it still has a warning
-        (itemStack as CraftItemStack).handle.hurtAndBreak(amount, (entity as CraftLivingEntity).handle, nmsSlot, force)
+    override fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot, force: Boolean) {
+        (itemStack as CraftItemStack).handle.hurtAndBreak(amount, (entity as CraftLivingEntity).handle, CraftEquipmentSlot.getNMS(slot), force)
     }
 
     override fun registerTranslationHandler(player: Player, handler: PlayerTranslationHandler) {
@@ -87,5 +97,43 @@ object NmsAccessorImpl : NmsAccessor {
             possibleValues[name] = pair.second
         }
         return map.toSortedMap().toSortedMap(compareBy<String> { possibleValues[it] ?: 0 }.reversed())
+    }
+
+    override fun handleRecipeBookClick(event: PlayerRecipeBookClickEvent) {
+        val serverPlayer = (event.player as CraftPlayer).handle
+        val menu = serverPlayer.containerMenu
+
+        if (menu !is AbstractCraftingMenu) return
+        val server = MinecraftServer.getServer()
+        val recipeName = event.recipe
+        val recipeHolder = server.recipeManager
+            .byKey(ResourceKey.create(
+                Registries.RECIPE, CraftNamespacedKey.toMinecraft(recipeName)
+            ))
+            .orElse(null) ?: return
+
+        val postPlaceAction = HandlerRecipeBookClick(serverPlayer).handlePylonItemPlacement(
+            menu,
+            event.isMakeAll,
+            recipeHolder,
+            serverPlayer.level(),
+        )
+
+
+        val displayRecipes = recipeHolder.value().display()
+        event.isCancelled = true
+        if (postPlaceAction != PostPlaceAction.PLACE_GHOST_RECIPE || displayRecipes.isEmpty()) return
+
+        PylonCore.javaPlugin.launch(PylonCore.asyncDispatcher) {
+            val max = displayRecipes.size
+            for (i in 0..<max) {
+                serverPlayer.connection.send(
+                    ClientboundPlaceGhostRecipePacket(
+                        serverPlayer.containerMenu.containerId,
+                        displayRecipes[i]
+                    )
+                )
+            }
+        }
     }
 }

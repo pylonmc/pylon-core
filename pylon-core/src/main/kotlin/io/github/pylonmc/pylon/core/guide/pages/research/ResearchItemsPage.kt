@@ -14,7 +14,6 @@ import xyz.xenondevs.invui.item.Item
  */
 class ResearchItemsPage(research: Research) : SimpleStaticGuidePage(
     KEY,
-    research.material,
     research.unlocks.map {
         ItemButton(PylonRegistry.ITEMS[it]!!.getItemStack())
     }.toMutableList()

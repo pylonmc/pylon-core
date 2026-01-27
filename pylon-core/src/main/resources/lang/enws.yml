@@ -137,7 +137,7 @@ guide:
         <arrow:#3a293> Place afore <aqua>$</aqua> to seek in <aqua>lore</aqua>
         <arrow:#3a293> Searches thus prefixed do apply only to the word that followeth straight after the mark
         <arrow:#3a293> Example: <light_purple>@pylonbase <white>iron <aqua>$temperature <white>slurry
-    intermediates:
+    byproducts:
       name: "<blue>↑ Ingredients ↑"
       lore: |-
         <yellow>↓ Midway Works ↓

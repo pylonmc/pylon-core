@@ -1,4 +1,4 @@
-package io.github.pylonmc.pylon.core.logistics
+package io.github.pylonmc.pylon.core.logistics.slot
 
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.inventory.VirtualInventory

@@ -1,4 +1,5 @@
 @file:JvmName("PylonUtils")
+@file:Suppress("UnstableApiUsage")
 
 package io.github.pylonmc.pylon.core.util
 
@@ -20,9 +21,9 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.attribute.Attribute
 import org.bukkit.Registry
 import org.bukkit.World
+import org.bukkit.attribute.Attribute
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.configuration.file.YamlConfiguration
@@ -46,6 +47,7 @@ import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
 import xyz.xenondevs.invui.inventory.event.UpdateReason
+import java.lang.Math
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.util.function.Consumer
@@ -323,39 +325,6 @@ fun findPylonItemInInventory(inventory: Inventory, targetItem: PylonItem): Int? 
     return null
 }
 
-/**
- * Compares two Pylon items to check if they have the same Pylon ID. If
- * neither item is a Pylon item, the material will be compared instead.
- *
- * @return Whether the items are the same.
- */
-fun ItemStack?.isPylonSimilar(item2: ItemStack?): Boolean {
-    // Both items null
-    if (this == null && item2 == null) {
-        return true
-    }
-
-    // One item null, one not null
-    if (!(this != null && item2 != null)) {
-        return false
-    }
-
-    val pylonItem1 = PylonItem.fromStack(this)
-    val pylonItem2 = PylonItem.fromStack(item2)
-
-    // Both pylon items null
-    if (pylonItem1 == null && pylonItem2 == null) {
-        return this.isSimilar(item2)
-    }
-
-    // One pylon item null, one not null
-    if (!(pylonItem1 != null && pylonItem2 != null)) {
-        return false
-    }
-
-    return pylonItem1.schema.key == pylonItem2.schema.key
-}
-
 @JvmSynthetic
 inline fun <reified T> ItemStack?.isPylonAndIsNot(): Boolean {
     val pylonItem = PylonItem.fromStack(this)
@@ -593,7 +562,7 @@ fun damageItem(itemStack: ItemStack, amount: Int, world: World, onBreak: (Materi
     NmsAccessor.instance.damageItem(itemStack, amount, world, onBreak, force)
 
 @JvmOverloads
-fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot? = null, force: Boolean = false) =
+fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: EquipmentSlot, force: Boolean = false) =
     NmsAccessor.instance.damageItem(itemStack, amount, entity, slot, force)
 
 

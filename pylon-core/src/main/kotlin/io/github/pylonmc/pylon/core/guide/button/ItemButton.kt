@@ -2,7 +2,6 @@ package io.github.pylonmc.pylon.core.guide.button
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import io.github.pylonmc.pylon.core.PylonCore
-import io.github.pylonmc.pylon.core.guide.button.ResearchButton.Companion.addResearchCostLore
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemRecipesPage
 import io.github.pylonmc.pylon.core.guide.pages.item.ItemUsagesPage
 import io.github.pylonmc.pylon.core.guide.pages.research.ResearchItemsPage
@@ -11,12 +10,14 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canCraft
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
+import io.github.pylonmc.pylon.core.item.research.Research.Companion.guideHints
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.researchPoints
 import io.github.pylonmc.pylon.core.recipe.RecipeInput
+import io.github.pylonmc.pylon.core.util.gui.unit.UnitFormat
 import io.papermc.paper.datacomponent.DataComponentTypes
 import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
+import net.kyori.adventure.text.ComponentLike
 import org.bukkit.Material
 import org.bukkit.Registry
 import org.bukkit.entity.Player
@@ -80,10 +81,7 @@ class ItemButton @JvmOverloads constructor(
     override fun getItemProvider(player: Player): ItemProvider {
         try {
             val displayStack = preDisplayDecorator.invoke(currentStack.clone(), player)
-            val item = PylonItem.fromStack(displayStack)
-            if (item == null) {
-                return ItemStackBuilder.of(displayStack)
-            }
+            val item = PylonItem.fromStack(displayStack) ?: return ItemStackBuilder.of(displayStack)
 
             val builder = ItemStackBuilder.of(displayStack.clone())
             if (item.isDisabled) {
@@ -94,18 +92,37 @@ class ItemButton @JvmOverloads constructor(
                 builder.set(DataComponentTypes.ITEM_MODEL, Material.BARRIER.key)
                     .set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false)
 
-                if (item.research != null) {
-                    builder.lore("")
-                    builder.lore(Component.translatable(
-                            "pylon.pyloncore.guide.button.item.not-researched-with-name",
-                            PylonArgument.of("research_name", item.research!!.name)
-                    ))
-                    addResearchCostLore(builder, player, item.research!!)
-                } else {
-                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.not-researched"))
-                }
+                val research = item.research
+                if (research != null) {
+                    val loreLine = if (research.cost != null) {
+                        val playerPoints = player.researchPoints
+                        Component.translatable(
+                            "pylon.pyloncore.guide.button.item.not-researched."
+                                    + (if (research.cost > playerPoints) "not-enough-points" else "enough-points"),
+                            PylonArgument.of("research_name", research.name),
+                            PylonArgument.of("player_points", playerPoints),
+                            PylonArgument.of("unlock_cost", UnitFormat.RESEARCH_POINTS.format(research.cost))
+                        )
+                    } else {
+                        Component.translatable("pylon.pyloncore.guide.button.item.not-researched")
+                    }
 
-                builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.research-instructions"))
+                    val lore = builder.lore()?.lines()?.toMutableList() ?: mutableListOf()
+                    lore.add(0, loreLine)
+                    builder.clearLore()
+                    builder.lore(lore)
+                }
+            }
+
+            if (player.guideHints) {
+                if (!player.canCraft(item)) {
+                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.hints.unresearched"))
+                } else {
+                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.hints.researched"))
+                }
+                if (player.hasPermission("pylon.guide.cheat")) {
+                    builder.lore(Component.translatable("pylon.pyloncore.guide.button.item.hints.admin"))
+                }
             }
 
             return builder
@@ -164,7 +181,11 @@ class ItemButton @JvmOverloads constructor(
                     if (!player.hasPermission("pylon.guide.cheat")) return
                     val stack = getCheatItemStack(currentStack, event)
                     stack.amount = 1
-                    player.dropItem(stack)
+                    if (player.itemOnCursor.isEmpty) {
+                        player.setItemOnCursor(stack)
+                    } else if (player.itemOnCursor.isSimilar(stack)) {
+                        player.itemOnCursor.add()
+                    }
                 }
 
                 ClickType.CONTROL_DROP -> {

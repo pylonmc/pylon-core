@@ -78,6 +78,10 @@ class FluidEndpointDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, FluidPo
         FluidManager.remove(point)
     }
 
+    override fun onUnload() {
+        FluidManager.unload(point)
+    }
+
     companion object {
         const val POINT_SIZE: Float = 0.12f
 
@@ -94,14 +98,14 @@ class FluidEndpointDisplay : PylonEntity<ItemDisplay>, PylonDeathEntity, FluidPo
 
         private fun makeEntity(block: Block, type: FluidPointType, face: BlockFace, radius: Float = 0.5F): ItemDisplay {
             return ItemDisplayBuilder()
-                .brightness(7)
                 .transformation(TransformBuilder()
                     .scale(POINT_SIZE)
                 )
                 .itemStack(ItemStackBuilder.of(type.material)
                     .addCustomModelDataString("fluid_point_display:${type.name.lowercase()}")
                 )
-                .build(block.location.toCenterLocation().add(face.direction.multiply(radius)))
+                // add a little bit to ensure the point is not obscured by the block itself
+                .build(block.location.toCenterLocation().add(face.direction.multiply(radius + 0.001)))
         }
     }
 }

@@ -9,20 +9,16 @@ import io.github.pylonmc.pylon.core.util.plainText
 import io.github.pylonmc.pylon.core.util.pylonKey
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.translation.GlobalTranslator
-import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.item.Item
 
 /**
  * Allows you to search all items and fluids by hijacking the anvil GUI.
  */
-class SearchItemsAndFluidsPage : SearchPage(
-    pylonKey("search"),
-    Material.OAK_SIGN
-) {
+class SearchItemsAndFluidsPage : SearchPage(pylonKey("search")) {
 
     fun getItemButtons(player: Player): MutableList<Pair<Item, String>> = PylonRegistry.ITEMS.filter {
-        it.key !in PylonGuide.hiddenItems
+        it.key !in PylonGuide.hiddenItems || (it.key in PylonGuide.adminOnlyItems && player.hasPermission("pylon.guide.cheat"))
     }.map { item ->
         val name = GlobalTranslator.render(Component.translatable("pylon.${item.key.namespace}.item.${item.key.key}.name"), player.locale())
         ItemButton(item.getItemStack()) to name.plainText.lowercase(player.locale())

@@ -14,15 +14,17 @@ import io.github.pylonmc.pylon.core.item.PylonItem
 import io.github.pylonmc.pylon.core.item.research.Research.Companion.canUse
 import io.github.pylonmc.pylon.core.util.damageItem
 import io.github.pylonmc.pylon.core.util.isFakeEvent
+import io.github.pylonmc.pylon.core.util.position.position
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.event.block.*
 import io.papermc.paper.event.entity.EntityCompostItemEvent
 import io.papermc.paper.event.player.*
+import org.bukkit.ExplosionResult
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Container
 import org.bukkit.block.Hopper
-import org.bukkit.entity.minecart.HopperMinecart
+import org.bukkit.entity.FallingBlock
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -31,13 +33,11 @@ import org.bukkit.event.block.*
 import org.bukkit.event.block.BellRingEvent
 import org.bukkit.event.enchantment.EnchantItemEvent
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent
+import org.bukkit.event.entity.EntityChangeBlockEvent
+import org.bukkit.event.entity.EntityDropItemEvent
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.inventory.BrewingStandFuelEvent
-import org.bukkit.event.inventory.FurnaceBurnEvent
-import org.bukkit.event.inventory.FurnaceExtractEvent
-import org.bukkit.event.inventory.InventoryMoveItemEvent
-import org.bukkit.event.inventory.InventoryOpenEvent
-import org.bukkit.event.inventory.InventoryPickupItemEvent
+import org.bukkit.event.entity.EntityRemoveEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTakeLecternBookEvent
@@ -95,6 +95,68 @@ internal object BlockListener : Listener {
         }
     }
 
+    private val fallMap = HashMap<UUID, Pair<PylonFallingBlock, PylonFallingBlock.PylonFallingBlockEntity>>();
+
+    @EventHandler(ignoreCancelled = true)
+    private fun entityBlockChange(event: EntityChangeBlockEvent) {
+        val entity = event.entity
+
+        if (entity !is FallingBlock) return
+
+        val block = event.block
+        if (!entity.isInWorld) {
+            val pylonBlock = BlockStorage.get(block) ?: return
+            val pylonFallingBlock = pylonBlock as? PylonFallingBlock
+            if (pylonFallingBlock == null) {
+                event.isCancelled = true
+                return
+            }
+
+            val blockPdc = PylonBlock.serialize(pylonBlock, block.chunk.persistentDataContainer.adapterContext)
+            val fallingEntity = PylonFallingBlock.PylonFallingBlockEntity(pylonBlock.schema, blockPdc, block.position, entity)
+            pylonFallingBlock.onFallStart(event, fallingEntity)
+            if (!event.isCancelled) {
+                BlockStorage.deleteBlock(block.position)
+                EntityStorage.add(fallingEntity)
+                // save this here as the entity storage is going to nuke it if the item drops
+                fallMap[entity.uniqueId] = Pair(pylonFallingBlock, fallingEntity)
+            }
+        } else {
+            val pylonEntity = EntityStorage.get(entity) as? PylonFallingBlock.PylonFallingBlockEntity ?: return
+            val pylonBlock = BlockStorage.loadBlock(block.position, pylonEntity.blockSchema, pylonEntity.blockData) as PylonFallingBlock
+
+            pylonBlock.onFallStop(event, pylonEntity)
+        }
+    }
+
+    @EventHandler
+    private fun entityDespawn(event: EntityRemoveEvent) {
+        // DESPAWN = Fell and created block ; OUT_OF_WORLD = Fell and dropped item
+        if (event.cause != EntityRemoveEvent.Cause.DESPAWN) return
+        val entity = event.entity
+        if (entity !is FallingBlock) return
+        fallMap.remove(entity.uniqueId)
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private fun fallingBlockDrop(event: EntityDropItemEvent) {
+        val entity = event.entity
+
+        if (entity !is FallingBlock) return
+
+        val (pylonFallingBlock, pylonFallingEntity) = fallMap[entity.uniqueId] ?: return
+        fallMap.remove(entity.uniqueId)
+
+        val relativeItem = pylonFallingBlock.onItemDrop(event, pylonFallingEntity)
+        if (event.isCancelled) return
+        if (relativeItem == null) {
+            event.isCancelled = true
+            return
+        }
+
+        event.itemDrop.itemStack = relativeItem
+    }
+
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockBreakEvent) {
         if (BlockStorage.isPylonBlock(event.block)) {
@@ -122,6 +184,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: BlockExplodeEvent) {
+        if (event.explosionResult == ExplosionResult.TRIGGER_BLOCK || event.explosionResult == ExplosionResult.KEEP) {
+            return
+        }
+
         if (BlockStorage.isPylonBlock(event.block) && BlockStorage.breakBlock(event.block, BlockBreakContext.BlockExplosionOrigin(event)) == null) {
             event.isCancelled = true
             return
@@ -138,6 +204,10 @@ internal object BlockListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     private fun blockRemove(event: EntityExplodeEvent) {
+        if (event.explosionResult == ExplosionResult.TRIGGER_BLOCK || event.explosionResult == ExplosionResult.KEEP) {
+            return
+        }
+
         val it = event.blockList().iterator()
         while (it.hasNext()) {
             val block = it.next()

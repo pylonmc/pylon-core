@@ -1,20 +1,14 @@
 package io.github.pylonmc.pylon.core.guide.pages.base
 
 import io.github.pylonmc.pylon.core.content.guide.PylonGuide
-import io.github.pylonmc.pylon.core.guide.button.BackButton
 import io.github.pylonmc.pylon.core.guide.button.PageButton
-import io.github.pylonmc.pylon.core.item.builder.ItemStackBuilder
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
-import io.github.pylonmc.pylon.core.util.pylonKey
-import net.kyori.adventure.text.Component
-import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.item.impl.controlitem.PageItem
 import java.util.function.Supplier
 
 /**
@@ -22,18 +16,15 @@ import java.util.function.Supplier
  * For example, the research page just displays all the researches for a given
  * addon, with next/previous page buttons and a header.
  *
+ * The title of the page will be `pylon.<youraddon>.guide.page.<key>`
+ *
  * Next/previous buttons are only shown if there are multiple pages.
  */
 open class SimpleDynamicGuidePage(
     /**
-     * A key that uniquely identifies this page. Used to get the translation keys for this page.
+     * A key that uniquely identifies this page. Used to get the translation key for the title of this page.
      */
     private val key: NamespacedKey,
-
-    /**
-     * The material representing this page. Used for [PageButton]s that point to this page.
-     */
-    val material: Material,
 
     /**
      * Supplies the buttons to be displayed on this page.
@@ -42,9 +33,6 @@ open class SimpleDynamicGuidePage(
 ) : PagedGuidePage {
 
     override fun getKey() = key
-
-    override val item = ItemStackBuilder.gui(material, "${pylonKey("guide_page")}:$key")
-        .name(Component.translatable("pylon.${key.namespace}.guide.page.${key.key}"))
 
     /**
      * Returns a page containing the header (the top row of the page) and a section
@@ -61,8 +49,8 @@ open class SimpleDynamicGuidePage(
         )
         .addIngredient('#', GuiItems.background())
         .addIngredient('<', GuiItems.pagePrevious())
-        .addIngredient('b', BackButton())
-        .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
+        .addIngredient('b', PylonGuide.backButton)
+        .addIngredient('s', PylonGuide.searchItemsAndFluidsButton)
         .addIngredient('>', GuiItems.pageNext())
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
         .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }

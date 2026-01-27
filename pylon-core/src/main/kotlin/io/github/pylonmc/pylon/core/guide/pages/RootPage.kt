@@ -5,7 +5,6 @@ import io.github.pylonmc.pylon.core.guide.button.PageButton
 import io.github.pylonmc.pylon.core.guide.pages.base.SimpleStaticGuidePage
 import io.github.pylonmc.pylon.core.util.gui.GuiItems
 import io.github.pylonmc.pylon.core.util.pylonKey
-import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
@@ -18,12 +17,7 @@ import xyz.xenondevs.invui.window.Window
  */
 class RootPage() : SimpleStaticGuidePage(
     pylonKey("root"),
-    Material.ENCHANTED_BOOK,
-    mutableListOf(
-        PageButton(PylonGuide.infoPage),
-        PageButton(PylonGuide.researchesPage),
-        PageButton(PylonGuide.fluidsPage),
-    )
+    mutableListOf(PylonGuide.infoButton, PylonGuide.researchesButton, PylonGuide.fluidsButton)
 ) {
 
     override fun getGui(player: Player): Gui {
@@ -38,8 +32,8 @@ class RootPage() : SimpleStaticGuidePage(
                 "x x x x x x x x x",
             )
             .addIngredient('#', GuiItems.background())
-            .addIngredient('e', PageButton(PylonGuide.settingsPage))
-            .addIngredient('s', PageButton(PylonGuide.searchItemsAndFluidsPage))
+            .addIngredient('e', PylonGuide.mainSettingsButton)
+            .addIngredient('s', PylonGuide.searchItemsAndFluidsButton)
             .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addPageChangeHandler { _, newPage -> saveCurrentPage(player, newPage) }
 

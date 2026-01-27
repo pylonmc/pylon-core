@@ -44,6 +44,18 @@ interface PylonEntityHolderBlock {
     fun addEntity(name: String, entity: PylonEntity<*>)
         = addEntity(name, entity.entity)
 
+    fun tryRemoveEntity(name: String) {
+        val uuid = heldEntities[name] ?: return
+        Bukkit.getEntity(uuid)?.remove()
+    }
+
+    fun tryRemoveAllEntities() {
+        val list = heldEntities.values.toList()
+        list.forEach {
+            Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
+        }
+    }
+
     @ApiStatus.NonExtendable
     fun getHeldEntityUuid(name: String) = heldEntities[name]
 
@@ -108,9 +120,12 @@ interface PylonEntityHolderBlock {
 
     @ApiStatus.Internal
     companion object : Listener {
-        private val entityKey = pylonKey("entity_holder_entity_uuids")
-        private val blockKey = pylonKey("entity_holder_block")
-        private val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
+        @JvmStatic
+        val entityKey = pylonKey("entity_holder_entity_uuids")
+        @JvmStatic
+        val blockKey = pylonKey("entity_holder_block")
+        @JvmStatic
+        val entityType = PylonSerializers.MAP.mapTypeFrom(PylonSerializers.STRING, PylonSerializers.UUID)
 
         @JvmSynthetic
         internal val holders = IdentityHashMap<PylonEntityHolderBlock, MutableMap<String, UUID>>()
@@ -142,9 +157,7 @@ interface PylonEntityHolderBlock {
             val block = event.pylonBlock
             if (block is PylonEntityHolderBlock) {
                 // Best-effort removal; unlikely to cause issues
-                block.heldEntities.values.forEach {
-                    Bukkit.getEntity(it)?.let { if (it.isValid) it.remove() }
-                }
+                block.tryRemoveAllEntities()
                 holders.remove(block)
             } else if (block is PhantomBlock) {
                 block.pdc.get(entityKey, entityType)?.values?.forEach {
