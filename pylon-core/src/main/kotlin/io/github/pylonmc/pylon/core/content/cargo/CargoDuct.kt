@@ -20,6 +20,7 @@ import io.github.pylonmc.pylon.core.util.IMMEDIATE_FACES
 import io.github.pylonmc.pylon.core.util.position.BlockPosition
 import io.github.pylonmc.pylon.core.util.position.position
 import io.github.pylonmc.pylon.core.util.pylonKey
+import io.github.pylonmc.pylon.core.util.scheduleRemove
 import io.github.pylonmc.pylon.core.util.setNullable
 import org.bukkit.Location
 import org.bukkit.Material
@@ -140,14 +141,14 @@ class CargoDuct : PylonBlock, PylonBreakHandler, PylonEntityHolderBlock, PylonGr
         // display that continues the same direction as any of the connected faces)
         for (face in connectedFaces) {
             (connectedBlock(face) as? CargoDuct)?.let {
-                it.getHeldEntity(ductDisplayName(face))?.remove()
-                it.getHeldEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME)?.remove()
+                it.getHeldEntity(ductDisplayName(face))?.scheduleRemove()
+                it.getHeldEntity(NOT_CONNECTED_DUCT_DISPLAY_NAME)?.scheduleRemove()
                 it.faceGroups.remove(face)
                 it.faceGroups.remove(BlockFace.SELF)
             }
         }
         for (entity in heldEntities.keys.toList()) { // clone to prevent concurrent modification exception
-            getHeldEntity(entity)?.remove()
+            getHeldEntity(entity)?.scheduleRemove()
         }
         faceGroups.clear()
 

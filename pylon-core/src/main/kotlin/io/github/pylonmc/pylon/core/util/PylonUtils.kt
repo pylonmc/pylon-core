@@ -17,6 +17,7 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.TranslationArgumentLike
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
@@ -617,3 +618,6 @@ class MachineUpdateReason : UpdateReason
 // https://minecraft.wiki/w/Breaking#Calculation
 fun getBlockBreakTicks(tool: ItemStack, block: Block)
     = round(100 * block.type.getHardness() / block.getDestroySpeed(tool, true))
+
+
+fun Entity.scheduleRemove() = Bukkit.getScheduler().runTask(PylonCore, this::remove)
