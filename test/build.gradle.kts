@@ -19,7 +19,7 @@ val minecraftVersion = property("minecraft.version").toString()
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:$minecraftVersion-R0.1-SNAPSHOT")
-    compileOnly(project(":pylon-core"))
+    compileOnly(project(":rebar"))
     implementation("org.assertj:assertj-core:3.27.2")
 }
 
@@ -28,8 +28,8 @@ java {
 }
 
 bukkit {
-    name = "PylonTest"
-    main = "io.github.pylonmc.pylon.test.PylonTest"
+    name = "RebarTest"
+    main = "io.github.pylonmc.rebar.test.RebarTest"
     version = project.version.toString()
     apiVersion = minecraftVersion
     depend = listOf("Rebar")
@@ -37,7 +37,7 @@ bukkit {
 }
 
 tasks.runServer {
-    dependsOn(project(":pylon-core").tasks.shadowJar)
+    dependsOn(project(":rebar").tasks.shadowJar)
     val runFolder = project.projectDir.resolve("run")
     val testsFailedFile = runFolder.resolve("tests-failed")
     doFirst {
@@ -48,7 +48,7 @@ tasks.runServer {
 
         val pluginFolder = runFolder.resolve("plugins")
         pluginFolder.mkdirs()
-        val archive = project(":pylon-core").tasks.shadowJar.map { it.archiveFile }.get().get().asFile
+        val archive = project(":rebar").tasks.shadowJar.map { it.archiveFile }.get().get().asFile
         archive.copyTo(pluginFolder.resolve(archive.name), overwrite = true)
     }
     maxHeapSize = "4G"

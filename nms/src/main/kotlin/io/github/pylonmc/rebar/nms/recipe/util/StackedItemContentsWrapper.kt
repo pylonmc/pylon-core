@@ -1,6 +1,6 @@
 package io.github.pylonmc.rebar.nms.recipe.util
 
-import io.github.pylonmc.rebar.item.PylonItem
+import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.nms.recipe.util.StackedItemContentsWrapper.rawGetter
 import io.papermc.paper.inventory.recipe.ItemOrExact
 import net.minecraft.world.entity.player.StackedContents
@@ -27,20 +27,20 @@ fun StackedItemContents.getRaw(): StackedContents<ItemOrExact> = rawGetter.invok
 
 /**
  *
- * Behaves like the StackedItemContents#accountStack, however for pylon items we instead
+ * Behaves like the StackedItemContents#accountStack, however for Rebar items we instead
  * account them as ItemOrExact#Exact when added to the StackedContents that handles crafting,
  * so that only exact picks, and not material pick, will show up as valid
  *
  * @param stack stack to add
  * @param maxStackSize max stack size of the itemstack, by default obtained with DataComponents#MAX_STACK_SIZE
  */
-fun StackedItemContents.accountStackPylon(stack: ItemStack, maxStackSize: Int = stack.maxStackSize) {
+fun StackedItemContents.accountStackRebar(stack: ItemStack, maxStackSize: Int = stack.maxStackSize) {
     if (stack.isEmpty) return
 
     val min = min(maxStackSize, stack.count)
 
-    // Determine if this is a Pylon item
-    if (PylonItem.isPylonItem(stack.bukkitStack)) {
+    // Determine if this is a Rebar item
+    if (RebarItem.isRebarItem(stack.bukkitStack)) {
         val r = ItemOrExact.Exact(stack.copy())
         this.getRaw().account(r, min)
         return

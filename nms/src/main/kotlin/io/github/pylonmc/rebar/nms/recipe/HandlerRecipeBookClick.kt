@@ -14,9 +14,9 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
 
     /**
      * Mimics AbstractCraftingMenu#handlePlacement, but instead we are using our own
-     * PylonServerPlaceRecipe#placeRecipe to handle the crafting, in order to handle pylon items
+     * RebarServerPlaceRecipe#placeRecipe to handle the crafting, in order to handle Rebar items
      */
-    fun handlePylonItemPlacement(
+    fun handleRebarItemPlacement(
         menu: AbstractCraftingMenu,
         useMaxItems: Boolean,
         recipe: RecipeHolder<*>?,
@@ -30,7 +30,7 @@ class HandlerRecipeBookClick(val player: ServerPlayer) {
         var postPlaceAction: RecipeBookMenu.PostPlaceAction
         try {
             val inputGridSlots = menu.inputGridSlots
-            postPlaceAction = PylonServerPlaceRecipe.placeRecipe(
+            postPlaceAction = RebarServerPlaceRecipe.placeRecipe(
                 menu,
                 player,
                 inputGridSlots,

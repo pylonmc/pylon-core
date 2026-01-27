@@ -112,7 +112,7 @@ object NmsAccessorImpl : NmsAccessor {
             ))
             .orElse(null) ?: return
 
-        val postPlaceAction = HandlerRecipeBookClick(serverPlayer).handlePylonItemPlacement(
+        val postPlaceAction = HandlerRecipeBookClick(serverPlayer).handleRebarItemPlacement(
             menu,
             event.isMakeAll,
             recipeHolder,

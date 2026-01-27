@@ -14,7 +14,7 @@ val minecraftVersion = property("minecraft.version").toString()
 
 dependencies {
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
-    compileOnly(project(":pylon-core"))
+    compileOnly(project(":rebar"))
 }
 
 kotlin {
