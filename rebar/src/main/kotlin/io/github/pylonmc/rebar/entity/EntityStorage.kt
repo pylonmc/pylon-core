@@ -226,21 +226,17 @@ object EntityStorage : Listener {
     // is broken (lol), hence the lack of an entity death listener
     @EventHandler
     private fun onEntityUnload(event: EntityRemoveFromWorldEvent) {
-        Bukkit.getLogger().severe { "0 " + event.entity.uniqueId }
         val rebarEntity = get(event.entity.uniqueId) ?: return
 
         if (!event.entity.isDead) {
-            Bukkit.getLogger().severe { "1" }
             RebarEntity.serialize(rebarEntity)
             rebarEntity.onUnload()
             RebarEntityUnloadEvent(rebarEntity).callEvent()
         } else {
-            Bukkit.getLogger().severe { "2" }
             RebarEntityDeathEvent(rebarEntity, event).callEvent()
         }
 
         lockEntityWrite {
-            Bukkit.getLogger().severe { "3" }
             entities.remove(rebarEntity.uuid)
             entitiesByKey[rebarEntity.schema.key]!!.remove(rebarEntity)
             if (entitiesByKey[rebarEntity.schema.key]!!.isEmpty()) {
