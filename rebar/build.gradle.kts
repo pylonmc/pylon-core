@@ -17,8 +17,8 @@ repositories {
     maven("https://repo.xenondevs.xyz/releases") {
         name = "InvUI"
     }
-    maven("https://maven.pvphub.me/tofaa") {
-        name = "EntityLib"
+    maven("https://jitpack.io") {
+        name = "JitPack"
     }
 }
 
@@ -44,7 +44,7 @@ dependencies {
     // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
     paperLibrary("xyz.xenondevs.invui:inventory-access-r26:1.49:remapped-mojang")
     paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.49")
-    api("io.github.tofaa2:spigot:3.0.3-SNAPSHOT")
+    implementation("com.github.Tofaa2.EntityLib:spigot:a5184b3bdc")
     implementation("com.github.retrooper:packetevents-spigot:2.11.1")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
