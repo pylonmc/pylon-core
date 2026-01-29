@@ -8,8 +8,8 @@ import io.github.pylonmc.rebar.util.gui.GuiItems
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
-import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
 
 /**
@@ -18,7 +18,7 @@ import xyz.xenondevs.invui.item.Item
 open class PlayerSettingsPage(key: NamespacedKey) : SimpleStaticGuidePage(key, mutableListOf()) {
     override fun getGui(player: Player): Gui {
         val buttons = buttonSupplier.get()
-        val gui = PagedGui.items()
+        val gui = PagedGui.itemsBuilder()
             .setStructure(
                 "# b # # # # # s #",
                 "# # # # # # # # #",

@@ -12,7 +12,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import java.util.IdentityHashMap
-import kotlin.collections.set
 
 /**
  * Represents a block that has a specific facing direction.

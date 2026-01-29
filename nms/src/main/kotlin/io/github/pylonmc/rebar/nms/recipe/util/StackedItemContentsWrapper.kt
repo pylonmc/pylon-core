@@ -23,6 +23,7 @@ object StackedItemContentsWrapper {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 fun StackedItemContents.getRaw(): StackedContents<ItemOrExact> = rawGetter.invokeExact(this) as StackedContents<ItemOrExact>
 
 /**

@@ -3,15 +3,15 @@ package io.github.pylonmc.rebar.block.base
 import io.github.pylonmc.rebar.event.RebarBlockBreakEvent
 import io.github.pylonmc.rebar.event.RebarBlockUnloadEvent
 import io.github.pylonmc.rebar.logistics.LogisticGroup
-import io.github.pylonmc.rebar.logistics.slot.LogisticSlot
 import io.github.pylonmc.rebar.logistics.LogisticGroupType
+import io.github.pylonmc.rebar.logistics.slot.LogisticSlot
 import io.github.pylonmc.rebar.logistics.slot.VirtualInventoryLogisticSlot
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import xyz.xenondevs.invui.inventory.VirtualInventory
-import java.util.*
+import java.util.IdentityHashMap
 
 /**
  * A block which can have items removed or added via a logistics system.

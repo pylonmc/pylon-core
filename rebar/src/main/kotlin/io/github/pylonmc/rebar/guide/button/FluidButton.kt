@@ -16,8 +16,8 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
-import xyz.xenondevs.invui.item.impl.AbstractItem
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -97,7 +97,7 @@ open class FluidButton(
             .name(Component.translatable("rebar.guide.button.fluid.error"))
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         try {
             if (clickType.isLeftClick) {
                 val page = FluidRecipesPage(currentFluid.key)

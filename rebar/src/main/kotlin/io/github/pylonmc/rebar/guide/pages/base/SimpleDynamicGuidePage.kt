@@ -6,8 +6,8 @@ import io.github.pylonmc.rebar.util.gui.GuiItems
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
-import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
 import java.util.function.Supplier
 
@@ -38,7 +38,7 @@ open class SimpleDynamicGuidePage(
      * Returns a page containing the header (the top row of the page) and a section
      * for the items to go.
      */
-    open fun getHeader(player: Player, buttons: List<Item>) = PagedGui.items()
+    open fun getHeader(player: Player, buttons: List<Item>) = PagedGui.itemsBuilder()
         .setStructure(
             "< b # # # # # s >",
             "x x x x x x x x x",
@@ -59,15 +59,17 @@ open class SimpleDynamicGuidePage(
         val buttons = buttonSupplier.get()
         val gui = getHeader(player, buttons)
 
-        for (button in buttons) {
-            if (button is PageButton) {
-                if (button.page.shouldDisplay(player)) {
-                    gui.addContent(button)
+        gui.setContent(buildList {
+            for (button in buttons) {
+                if (button is PageButton) {
+                    if (button.page.shouldDisplay(player)) {
+                        add(button)
+                    }
+                } else {
+                    add(button)
                 }
-            } else {
-                gui.addContent(button)
             }
-        }
+        })
 
         return gui.build().apply { loadCurrentPage(player, this) }
     }

@@ -41,7 +41,8 @@ import org.bukkit.util.Vector
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.MustBeInvokedByOverriders
 import org.joml.Vector3i
-import java.util.*
+import java.util.IdentityHashMap
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds

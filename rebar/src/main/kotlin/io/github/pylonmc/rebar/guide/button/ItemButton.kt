@@ -21,13 +21,14 @@ import org.bukkit.Material
 import org.bukkit.Registry
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.gui.SlotElement
+import xyz.xenondevs.invui.gui.get
+import xyz.xenondevs.invui.item.AbstractBoundItem
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AbstractItem
-import xyz.xenondevs.invui.item.impl.SimpleItem
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -43,7 +44,7 @@ class ItemButton @JvmOverloads constructor(
      * A function to apply to the button item after creating it.
      */
     val preDisplayDecorator: (ItemStack, Player) -> ItemStack = { stack, _ -> stack }
-) : AbstractItem() {
+) : AbstractBoundItem() {
 
     /**
      * @param stacks The items to display. If multiple are provided, the button will automatically
@@ -132,7 +133,7 @@ class ItemButton @JvmOverloads constructor(
         }
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         try {
             when (clickType) {
                 ClickType.LEFT -> {
@@ -151,7 +152,12 @@ class ItemButton @JvmOverloads constructor(
                         }
                         research.addTo(player, false)
                         player.researchPoints -= research.cost
-                        notifyWindows()
+                        for (slot in 0 until gui.size) {
+                            val item = gui[slot] as? SlotElement.Item ?: continue
+                            if (item.item is ItemButton) {
+                                item.item.notifyWindows()
+                            }
+                        }
                     }
                 }
 
@@ -171,14 +177,14 @@ class ItemButton @JvmOverloads constructor(
 
                 ClickType.MIDDLE -> {
                     if (!player.hasPermission("rebar.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = stack.maxStackSize
                     player.setItemOnCursor(stack)
                 }
 
                 ClickType.DROP -> {
                     if (!player.hasPermission("rebar.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = 1
                     if (player.itemOnCursor.isEmpty) {
                         player.setItemOnCursor(stack)
@@ -189,14 +195,14 @@ class ItemButton @JvmOverloads constructor(
 
                 ClickType.CONTROL_DROP -> {
                     if (!player.hasPermission("rebar.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = stack.maxStackSize
                     player.dropItem(stack)
                 }
 
                 ClickType.SWAP_OFFHAND -> {
                     if (!player.hasPermission("rebar.guide.cheat")) return
-                    val stack = getCheatItemStack(currentStack, event)
+                    val stack = getCheatItemStack(currentStack, click)
                     stack.amount = 1
                     player.give(stack)
                 }
@@ -209,20 +215,20 @@ class ItemButton @JvmOverloads constructor(
     }
 
     companion object {
-        private fun getCheatItemStack(currentStack: ItemStack, event: InventoryClickEvent): ItemStack {
+        private fun getCheatItemStack(currentStack: ItemStack, click: Click): ItemStack {
             val clonedUnkown = currentStack.clone()
             val rebarItem = RebarItem.fromStack(clonedUnkown)
 
             if (rebarItem == null) {
                 // Item is not Rebar
                 val type = Registry.MATERIAL.get(clonedUnkown.type.key)!!
-                val amount = if (event.isShiftClick) { type.maxStackSize } else { 1 }
+                val amount = if (click.clickType.isShiftClick) { type.maxStackSize } else { 1 }
                 val clonedNotRebar = ItemStack(type, amount)
                 return clonedNotRebar
             } else {
                 // Rebar item handling
                 val clonedRebar = rebarItem.schema.getItemStack()
-                clonedRebar.amount = if (event.isShiftClick) { clonedRebar.maxStackSize } else { 1 }
+                clonedRebar.amount = if (click.clickType.isShiftClick) { clonedRebar.maxStackSize } else { 1 }
                 return clonedRebar
             }
         }
@@ -230,7 +236,7 @@ class ItemButton @JvmOverloads constructor(
         @JvmStatic
         fun from(stack: ItemStack?): Item {
             if (stack == null) {
-                return SimpleItem(ItemStack(Material.AIR))
+                return EMPTY
             }
 
             return ItemButton(stack)
@@ -239,7 +245,7 @@ class ItemButton @JvmOverloads constructor(
         @JvmStatic
         fun from(stack: ItemStack?, preDisplayDecorator: (ItemStack, Player) -> ItemStack):  Item {
             if (stack == null) {
-                return SimpleItem(ItemStack(Material.AIR))
+                return EMPTY
             }
 
             return ItemButton(listOf(stack), preDisplayDecorator)
@@ -248,7 +254,7 @@ class ItemButton @JvmOverloads constructor(
         @JvmStatic
         fun from(input: RecipeInput.Item?): Item {
             if (input == null) {
-                return SimpleItem(ItemStack(Material.AIR))
+                return EMPTY
             }
 
             return ItemButton(*input.representativeItems.toTypedArray())
@@ -258,7 +264,7 @@ class ItemButton @JvmOverloads constructor(
         fun from(choice: RecipeChoice?): Item = when (choice) {
             is RecipeChoice.MaterialChoice -> ItemButton(choice.choices.map(::ItemStack))
             is RecipeChoice.ExactChoice -> ItemButton(choice.choices)
-            else -> SimpleItem(ItemStackBuilder.of(Material.AIR))
+            else -> EMPTY
         }
     }
 }

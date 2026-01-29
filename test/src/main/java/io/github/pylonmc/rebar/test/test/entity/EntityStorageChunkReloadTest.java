@@ -20,9 +20,9 @@ public class EntityStorageChunkReloadTest extends AsyncTest {
         Chunk chunk = TestUtil.getRandomChunk(false).join();
         Location location = chunk.getBlock(5, 100, 5).getLocation();
         UUID uuid = TestUtil.runSync(() -> {
-            SimpleEntity pylonEntity = new SimpleEntity(location);
-            EntityStorage.add(pylonEntity);
-            return pylonEntity.getUuid();
+            SimpleEntity rebarEntity = new SimpleEntity(location);
+            EntityStorage.add(rebarEntity);
+            return rebarEntity.getUuid();
         }).join();
 
         assertThat(EntityStorage.isRebarEntity(uuid))

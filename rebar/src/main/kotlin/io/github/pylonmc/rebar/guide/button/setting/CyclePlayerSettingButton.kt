@@ -8,10 +8,10 @@ import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AbstractItem
 
 /**
  * A button which cycles through a fixed set of values for a player setting. (Think enums for example.)
@@ -47,7 +47,7 @@ data class CyclePlayerSettingButton<S> (
     val decorator: (Player, S) -> ItemStack,
     val placeholderProvider: (Player, S) -> MutableList<ComponentLike> = { _, _ -> mutableListOf<ComponentLike>() }
 ) : AbstractItem() {
-    override fun getItemProvider(player: Player): ItemProvider? {
+    override fun getItemProvider(player: Player): ItemProvider {
         val setting = getter(player)
         val identifier = identifier(setting)
         val placeholders = placeholderProvider(player, setting)
@@ -56,7 +56,7 @@ data class CyclePlayerSettingButton<S> (
             .lore(Component.translatable("${key.namespace}.guide.button.${key.key}.${identifier}.lore").arguments(placeholders))
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         val currentIndex = sortedValues.indexOfFirst { identifier(it) == identifier(getter(player)) }
         val nextIndex = (currentIndex + (if (clickType.isLeftClick) 1 else -1)) % sortedValues.size
         setter(player, sortedValues[nextIndex])

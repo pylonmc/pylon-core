@@ -13,7 +13,7 @@ object FluidOrItemConfigAdapter : ConfigAdapter<FluidOrItem> {
             FluidOrItem.of(item)
         } else when (value) {
             is Pair<*, *> -> {
-                val fluid = ConfigAdapter.PYLON_FLUID.convert(value.first!!)
+                val fluid = ConfigAdapter.REBAR_FLUID.convert(value.first!!)
                 val amount = ConfigAdapter.DOUBLE.convert(value.second!!)
                 FluidOrItem.of(fluid, amount)
             }

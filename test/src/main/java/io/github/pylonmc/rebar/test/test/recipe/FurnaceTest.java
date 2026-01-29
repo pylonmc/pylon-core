@@ -1,7 +1,7 @@
 package io.github.pylonmc.rebar.test.test.recipe;
 
-import io.github.pylonmc.rebar.recipe.RecipeType;
 import io.github.pylonmc.rebar.gametest.GameTestConfig;
+import io.github.pylonmc.rebar.recipe.RecipeType;
 import io.github.pylonmc.rebar.test.RebarTest;
 import io.github.pylonmc.rebar.test.base.GameTest;
 import io.github.pylonmc.rebar.test.item.Items;

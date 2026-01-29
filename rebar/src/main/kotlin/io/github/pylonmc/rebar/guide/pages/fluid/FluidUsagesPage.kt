@@ -8,8 +8,8 @@ import io.github.pylonmc.rebar.util.gui.GuiItems
 import io.github.pylonmc.rebar.util.rebarKey
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
-import xyz.xenondevs.invui.gui.structure.Markers
 
 /**
  * Displays all the recipes that use the given [fluid].
@@ -30,7 +30,7 @@ open class FluidUsagesPage(val fluid: RebarFluid) : PagedGuidePage {
 
     override fun getKey() = KEY
 
-    open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
+    open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guisBuilder()
         .setStructure(
             "< b # # # # # s >",
             "x x x x x x x x x",
@@ -49,9 +49,7 @@ open class FluidUsagesPage(val fluid: RebarFluid) : PagedGuidePage {
 
     override fun getGui(player: Player): Gui {
         val gui = getHeader(player, pages)
-        for (page in pages) {
-            gui.addContent(page)
-        }
+        gui.setContent(pages)
         return gui.build().apply { loadCurrentPage(player, this) }
     }
 

@@ -40,10 +40,8 @@ dependencies {
 
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
     paperLibraryApi("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
-    paperLibraryApi("xyz.xenondevs.invui:invui-core:1.49")
-    // see https://github.com/NichtStudioCode/InvUI/blob/main/inventoryaccess/inventory-access/src/main/java/xyz/xenondevs/inventoryaccess/version/InventoryAccessRevision.java
-    paperLibrary("xyz.xenondevs.invui:inventory-access-r26:1.49:remapped-mojang")
-    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:1.49")
+    paperLibraryApi("xyz.xenondevs.invui:invui:2.0.0-beta.1")
+    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:2.0.0-beta.1")
     implementation("com.github.Tofaa2.EntityLib:spigot:a5184b3bdc")
     implementation("com.github.retrooper:packetevents-spigot:2.11.1")
     implementation("info.debatty:java-string-similarity:2.0.0")

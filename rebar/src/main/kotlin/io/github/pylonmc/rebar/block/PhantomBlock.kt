@@ -9,8 +9,8 @@ import io.github.pylonmc.rebar.i18n.RebarArgument
 import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.item.builder.ItemStackBuilder
 import io.github.pylonmc.rebar.util.rebarKey
-import io.papermc.paper.datacomponent.DataComponentTypes
 import io.github.pylonmc.rebar.waila.WailaDisplay
+import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.bossbar.BossBar
 import org.bukkit.Color
 import org.bukkit.Material

@@ -1,7 +1,6 @@
 package io.github.pylonmc.rebar.logistics.slot
 
 import org.bukkit.entity.ItemDisplay
-import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 open class ItemDisplayLogisticSlot(val display: ItemDisplay) : LogisticSlot {

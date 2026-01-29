@@ -9,11 +9,11 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AbstractItem
 import java.time.Duration
 import kotlin.math.min
 
@@ -31,25 +31,38 @@ import kotlin.math.min
  * @param countDown If true, the progress bar will be inverted, meaning that 0.0 is full and 1.0 is empty.
  */
 open class ProgressItem @JvmOverloads constructor(
-    builder: ItemStackBuilder,
+    item: Item,
     @JvmSynthetic
     internal val countDown: Boolean = true
 ) : AbstractItem() {
+
+    @JvmOverloads constructor(builder: ItemStackBuilder, inverse: Boolean = true) : this(Item.simple(builder), inverse)
 
     @JvmOverloads constructor(material: Material, inverse: Boolean = true) : this(ItemStackBuilder.of(material), inverse)
 
     @JvmOverloads constructor(stack: ItemStack, inverse: Boolean = true) : this(ItemStackBuilder.of(stack), inverse)
 
-    @JvmOverloads constructor(item: Item, inverse: Boolean = true) : this(ItemStackBuilder.of(item), inverse)
-
     /**
      * The item to be displayed
      */
-    var itemStackBuilder: ItemStackBuilder = builder
-        set(value) {
+    var item: Item = item
+        @JvmName("setItemInternal")
+        private set(value) {
             field = value
             notifyWindows()
         }
+
+    fun setItem(item: Item) {
+        this.item = item
+    }
+
+    fun setItem(stack: ItemStack) {
+        item = Item.simple(stack)
+    }
+
+    fun setItem(builder: ItemStackBuilder) {
+        item = Item.simple(builder)
+    }
 
     /**
      * The total time of whatever process this item is representing
@@ -64,13 +77,16 @@ open class ProgressItem @JvmOverloads constructor(
         }
 
     /**
-     * How far through the [totalTime] we are
+     * How far through the [totalTime] we are, between 0.0 and 1.0
      */
     var progress: Double = 0.0
         set(value) {
             field = value.coerceIn(0.0, 1.0)
             notifyWindows()
         }
+
+    var lastDisplayedItem: ItemStack = ItemStack.empty()
+        private set
 
     /**
      * Sets how far through the [totalTime] we are
@@ -103,13 +119,13 @@ open class ProgressItem @JvmOverloads constructor(
     }
 
     @Suppress("UnstableApiUsage")
-    override fun getItemProvider(): ItemProvider {
+    override fun getItemProvider(viewer: Player): ItemProvider {
         var progressValue = progress
         if (!countDown) {
             progressValue = 1 - progressValue
         }
 
-        val builder = itemStackBuilder
+        val builder = ItemStackBuilder.of(item.getItemProvider(viewer).get())
             .clone()
             .set(DataComponentTypes.MAX_DAMAGE, MAX_DURABILITY)
 
@@ -140,15 +156,17 @@ open class ProgressItem @JvmOverloads constructor(
             builder.lore(
                 Component.translatable(
                     "rebar.gui.time_left",
-                    RebarArgument.of("time", UnitFormat.formatDuration(remaining, true, false))
+                    RebarArgument.of("time", UnitFormat.formatDuration(remaining, abbreviate = true, useMillis = false))
                 )
             )
         }
 
+        lastDisplayedItem = builder.build()
+
         return builder
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {}
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {}
 
     companion object {
         private const val MAX_DURABILITY = 1000

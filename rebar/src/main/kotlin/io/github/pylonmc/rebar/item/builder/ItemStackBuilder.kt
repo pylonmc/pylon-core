@@ -31,8 +31,8 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.ApiStatus
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
+import java.util.Locale
 import java.util.function.Consumer
 
 /**
@@ -41,7 +41,7 @@ import java.util.function.Consumer
  *
  * Implements InvUI's [ItemProvider], so can be used instead of an [ItemStack] in GUIs.
  */
-@Suppress("UnstableApiUsage")
+@Suppress("UnstableApiUsage", "unused")
 open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemProvider {
     fun amount(amount: Int) = apply {
         stack.amount = amount
@@ -326,7 +326,13 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
      * Ignore this method; InvUI item provider implementation.
      */
     @ApiStatus.Internal
-    override fun get(lang: String?) = build()
+    override fun get() = build()
+
+    /**
+     * Ignore this method; InvUI item provider implementation.
+     */
+    @ApiStatus.Internal
+    override fun get(locale: Locale) = build()
 
     companion object {
 
@@ -365,11 +371,6 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
         @JvmStatic
         fun of(material: Material): ItemStackBuilder {
             return of(ItemStack(material))
-        }
-
-        @JvmStatic
-        fun of(item: Item): ItemStackBuilder {
-            return of(ItemStack(item.itemProvider.get()))
         }
 
         /**
@@ -480,7 +481,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonHelmet(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.HEAD, hasDurability)
+        fun rebarHelmet(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = rebarArmor(stack, key, EquipmentSlotGroup.HEAD, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the [helmet][EquipmentSlotGroup.HEAD] slot.
@@ -497,7 +498,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonHelmet(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonHelmet(ItemStack(material), key, hasDurability)
+        fun rebarHelmet(material: Material, key: NamespacedKey, hasDurability: Boolean) = rebarHelmet(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the [chestplate][EquipmentSlotGroup.CHEST] slot.
@@ -514,7 +515,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonChestplate(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.CHEST, hasDurability)
+        fun rebarChestplate(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = rebarArmor(stack, key, EquipmentSlotGroup.CHEST, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the [chestplate][EquipmentSlotGroup.CHEST] slot.
@@ -531,7 +532,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonChestplate(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonChestplate(ItemStack(material), key, hasDurability)
+        fun rebarChestplate(material: Material, key: NamespacedKey, hasDurability: Boolean) = rebarChestplate(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the [leggings][EquipmentSlotGroup.LEGS] slot.
@@ -548,7 +549,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonLeggings(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.LEGS, hasDurability)
+        fun rebarLeggings(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = rebarArmor(stack, key, EquipmentSlotGroup.LEGS, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the [leggings][EquipmentSlotGroup.LEGS] slot.
@@ -565,7 +566,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonLeggings(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonLeggings(ItemStack(material), key, hasDurability)
+        fun rebarLeggings(material: Material, key: NamespacedKey, hasDurability: Boolean) = rebarLeggings(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the [boots][EquipmentSlotGroup.FEET] slot.
@@ -582,7 +583,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonBoots(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = pylonArmor(stack, key, EquipmentSlotGroup.FEET, hasDurability)
+        fun rebarBoots(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean) = rebarArmor(stack, key, EquipmentSlotGroup.FEET, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the [boots][EquipmentSlotGroup.FEET] slot.
@@ -599,7 +600,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonBoots(material: Material, key: NamespacedKey, hasDurability: Boolean) = pylonBoots(ItemStack(material), key, hasDurability)
+        fun rebarBoots(material: Material, key: NamespacedKey, hasDurability: Boolean) = rebarBoots(ItemStack(material), key, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be worn in the specified [slot].
@@ -616,7 +617,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonArmor(stack: ItemStack, key: NamespacedKey, slot: EquipmentSlotGroup, hasDurability: Boolean) = rebar(stack, key) { builder, settings ->
+        fun rebarArmor(stack: ItemStack, key: NamespacedKey, slot: EquipmentSlotGroup, hasDurability: Boolean) = rebar(stack, key) { builder, settings ->
             builder.armor(
                 slot,
                 settings.getOrThrow("armor", ConfigAdapter.DOUBLE),
@@ -645,8 +646,8 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonArmor(material: Material, key: NamespacedKey, slot: EquipmentSlotGroup, hasDurability: Boolean)
-                = pylonArmor(ItemStack(material), key, slot, hasDurability)
+        fun rebarArmor(material: Material, key: NamespacedKey, slot: EquipmentSlotGroup, hasDurability: Boolean)
+                = rebarArmor(ItemStack(material), key, slot, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be used as a tool for the [mineable] blocks. (See [pickaxeMineable]
@@ -663,7 +664,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonTool(stack: ItemStack, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean) = rebar(stack, key) { builder, settings ->
+        fun rebarTool(stack: ItemStack, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean) = rebar(stack, key) { builder, settings ->
             builder.tool(
                 mineable,
                 settings.getOrThrow("mining-speed", ConfigAdapter.FLOAT),
@@ -692,8 +693,8 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonTool(material: Material, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean)
-                = pylonTool(ItemStack(material), key, mineable, hasDurability)
+        fun rebarTool(material: Material, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean)
+                = rebarTool(ItemStack(material), key, mineable, hasDurability)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be used as a weapon.
@@ -719,7 +720,7 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonWeapon(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean) = rebar(stack, key) { builder, settings ->
+        fun rebarWeapon(stack: ItemStack, key: NamespacedKey, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean) = rebar(stack, key) { builder, settings ->
             builder.weapon(
                 settings.getOrThrow("attack-damage", ConfigAdapter.DOUBLE),
                 settings.getOrThrow("attack-speed", ConfigAdapter.DOUBLE),
@@ -764,8 +765,8 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonWeapon(material: Material, key: NamespacedKey, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean)
-                = pylonWeapon(ItemStack(material), key, hasDurability, hasKnockback, disablesShield)
+        fun rebarWeapon(material: Material, key: NamespacedKey, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean)
+                = rebarWeapon(ItemStack(material), key, hasDurability, hasKnockback, disablesShield)
 
         /**
          * Creates a new [ItemStack] for a [RebarItem] that can be used as a weapon and tool for the [mineable] blocks. (See [pickaxeMineable] and related for basic tools)
@@ -796,9 +797,9 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonToolWeapon(stack: ItemStack, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean): ItemStackBuilder {
+        fun rebarToolWeapon(stack: ItemStack, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean): ItemStackBuilder {
             val settings = Settings.get(key)
-            return pylonWeapon(stack, key, hasDurability, hasKnockback, disablesShield).tool(
+            return rebarWeapon(stack, key, hasDurability, hasKnockback, disablesShield).tool(
                 mineable,
                 settings.getOrThrow("mining-speed", ConfigAdapter.FLOAT),
                 settings.getOrThrow("mining-durability-damage", ConfigAdapter.INT)
@@ -834,8 +835,8 @@ open class ItemStackBuilder internal constructor(val stack: ItemStack) : ItemPro
          * ```
          */
         @JvmStatic
-        fun pylonToolWeapon(material: Material, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean)
-                = pylonToolWeapon(ItemStack(material), key, mineable, hasDurability, hasKnockback, disablesShield)
+        fun rebarToolWeapon(material: Material, key: NamespacedKey, mineable: RegistryKeySet<BlockType>, hasDurability: Boolean, hasKnockback: Boolean, disablesShield: Boolean)
+                = rebarToolWeapon(ItemStack(material), key, mineable, hasDurability, hasKnockback, disablesShield)
 
         fun ItemAttributeModifiers.Builder.copy(modifiers: List<ItemAttributeModifiers.Entry>?) : ItemAttributeModifiers.Builder {
             modifiers?.forEach { entry ->

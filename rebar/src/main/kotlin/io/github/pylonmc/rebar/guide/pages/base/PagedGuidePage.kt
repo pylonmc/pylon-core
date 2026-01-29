@@ -5,7 +5,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import xyz.xenondevs.invui.gui.PagedGui
-import java.util.*
+import java.util.UUID
+import java.util.WeakHashMap
 
 /**
  * Represents a GuidePage with multiple pages

@@ -1,7 +1,7 @@
 package io.github.pylonmc.rebar.item.base
 
-import net.kyori.adventure.key.Key
 import io.github.pylonmc.rebar.item.RebarItem
+import net.kyori.adventure.key.Key
 
 /**
  * Represents a [RebarItem] that is wearable piece of armor.

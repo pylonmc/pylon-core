@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Loads the necessary libraries for Rebar Core to run - internal.
+ * Loads the necessary libraries for Rebar to run - internal.
  */
 @ApiStatus.Internal
 @SuppressWarnings({"UnstableApiUsage", "unused"})

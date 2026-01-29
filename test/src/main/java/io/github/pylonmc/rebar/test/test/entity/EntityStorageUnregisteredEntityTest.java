@@ -43,9 +43,9 @@ public class EntityStorageUnregisteredEntityTest extends AsyncTest {
         Chunk chunk = TestUtil.getRandomChunk(false).join();
         Location location = chunk.getBlock(5, 100, 5).getLocation();
         UUID uuid = TestUtil.runSync(() -> {
-            UnregisteredEntity pylonEntity = new UnregisteredEntity(location);
-            EntityStorage.add(pylonEntity);
-            return pylonEntity.getUuid();
+            UnregisteredEntity rebarEntity = new UnregisteredEntity(location);
+            EntityStorage.add(rebarEntity);
+            return rebarEntity.getUuid();
         }).join();
 
         assertThat(EntityStorage.isRebarEntity(uuid))

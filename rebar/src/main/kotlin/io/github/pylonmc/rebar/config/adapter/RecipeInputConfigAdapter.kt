@@ -56,7 +56,7 @@ object RecipeInputFluidAdapter : ConfigAdapter<RecipeInput.Fluid> {
             )
 
             is Pair<*, *> -> {
-                val fluid = ConfigAdapter.PYLON_FLUID.convert(value.first!!)
+                val fluid = ConfigAdapter.REBAR_FLUID.convert(value.first!!)
                 val amount = ConfigAdapter.DOUBLE.convert(value.second!!)
                 RecipeInput.of(fluid, amount)
             }

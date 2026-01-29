@@ -1,26 +1,7 @@
 package io.github.pylonmc.rebar.logistics
 
-import io.github.pylonmc.rebar.logistics.slot.BrewingStandFuelLogisticSlot
-import io.github.pylonmc.rebar.logistics.slot.BrewingStandPotionLogisticSlot
-import io.github.pylonmc.rebar.logistics.slot.ChiseledBookshelfFuelLogisticSlot
-import io.github.pylonmc.rebar.logistics.slot.FurnaceFuelLogisticSlot
-import io.github.pylonmc.rebar.logistics.slot.JukeboxLogisticSlot
-import io.github.pylonmc.rebar.logistics.slot.LogisticSlot
-import io.github.pylonmc.rebar.logistics.slot.VanillaInventoryLogisticSlot
-import org.bukkit.block.Barrel
-import org.bukkit.block.Block
-import org.bukkit.block.BrewingStand
-import org.bukkit.block.Chest
-import org.bukkit.block.ChiseledBookshelf
-import org.bukkit.block.Crafter
-import org.bukkit.block.Dispenser
-import org.bukkit.block.DoubleChest
-import org.bukkit.block.Dropper
-import org.bukkit.block.Furnace
-import org.bukkit.block.Hopper
-import org.bukkit.block.Jukebox
-import org.bukkit.block.Shelf
-import org.bukkit.block.ShulkerBox
+import io.github.pylonmc.rebar.logistics.slot.*
+import org.bukkit.block.*
 import org.bukkit.inventory.ItemStack
 
 /**

@@ -12,6 +12,7 @@ import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
+import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.HashOps
@@ -51,83 +52,90 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
 
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
-            var packet = packet
-            when (packet) {
-                is ClientboundContainerSetContentPacket -> {
-                    packet.items.forEach(::translate)
-                    translate(packet.carriedItem)
-                }
-
-                is ClientboundContainerSetSlotPacket -> translate(packet.item)
-                is ClientboundSetCursorItemPacket -> translate(packet.contents)
-                is ClientboundRecipeBookAddPacket -> {
-                    // This requires a full copy for some reason
-                    packet = ClientboundRecipeBookAddPacket(
-                        packet.entries.map {
-                            ClientboundRecipeBookAddPacket.Entry(
-                                RecipeDisplayEntry(
-                                    it.contents.id,
-                                    handleRecipeDisplay(it.contents.display),
-                                    it.contents.group,
-                                    it.contents.category,
-                                    it.contents.craftingRequirements
-                                ),
-                                it.flags
-                            )
-                        },
-                        packet.replace
-                    )
-                }
-                is ClientboundMerchantOffersPacket -> {
-                    for (offer in packet.offers) {
-                        translate(offer.baseCostA.itemStack)
-                        offer.costB.ifPresent {
-                            translate(it.itemStack)
-                        }
-                        translate(offer.result)
-                    }
-                }
-
-                is ClientboundPlaceGhostRecipePacket -> {
-                    packet = ClientboundPlaceGhostRecipePacket(
-                        packet.containerId,
-                        handleRecipeDisplay(packet.recipeDisplay)
-                    )
-                }
-            }
-            super.write(ctx, packet, promise)
+            @Suppress("UNCHECKED_CAST")
+            super.write(ctx, handleOutgoingPacket(packet as Packet<in ClientGamePacketListener>), promise)
         }
 
         override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
-            var packet = packet
-            packet = when (packet) {
-                is ServerboundContainerClickPacket -> ServerboundContainerClickPacket(
-                    packet.containerId,
-                    packet.stateId,
-                    packet.slotNum,
-                    packet.buttonNum,
-                    packet.clickType,
-                    packet.changedSlots,
-                    if (packet.changedSlots.size == 1) {
-                        HashedStack.create(
-                            player.containerMenu.getSlot(packet.changedSlots.keys.single()).item,
-                            hashGenerator
-                        )
-                    } else {
-                        HashedStack.create(player.containerMenu.carried, hashGenerator)
-                    }
-                )
-
-                is ServerboundSetCreativeModeSlotPacket -> ServerboundSetCreativeModeSlotPacket(
-                    packet.slotNum,
-                    reset(packet.itemStack)
-                )
-
-                else -> packet
-            }
-            super.channelRead(ctx, packet)
+            @Suppress("UNCHECKED_CAST")
+            super.channelRead(ctx, handleIncomingPacket(packet as Packet<in ServerGamePacketListener>))
         }
     }
+
+    private fun handleOutgoingPacket(packet: Packet<in ClientGamePacketListener>): Packet<in ClientGamePacketListener> =
+        when (packet) {
+            is ClientboundBundlePacket -> ClientboundBundlePacket(packet.subPackets().map(::handleOutgoingPacket))
+
+            is ClientboundContainerSetContentPacket -> packet.apply {
+                items.forEach(::translate)
+                translate(packet.carriedItem)
+            }
+
+            is ClientboundContainerSetSlotPacket -> packet.apply { translate(item) }
+            is ClientboundSetCursorItemPacket -> packet.apply { translate(contents) }
+            is ClientboundRecipeBookAddPacket -> ClientboundRecipeBookAddPacket(
+                packet.entries.map {
+                    ClientboundRecipeBookAddPacket.Entry(
+                        RecipeDisplayEntry(
+                            it.contents.id,
+                            handleRecipeDisplay(it.contents.display),
+                            it.contents.group,
+                            it.contents.category,
+                            it.contents.craftingRequirements
+                        ),
+                        it.flags
+                    )
+                },
+                packet.replace
+            )
+
+            is ClientboundMerchantOffersPacket -> packet.apply {
+                for (offer in offers) {
+                    translate(offer.baseCostA.itemStack)
+                    offer.costB.ifPresent {
+                        translate(it.itemStack)
+                    }
+                    translate(offer.result)
+                }
+            }
+
+            is ClientboundPlaceGhostRecipePacket -> ClientboundPlaceGhostRecipePacket(
+                packet.containerId,
+                handleRecipeDisplay(packet.recipeDisplay)
+            )
+
+            else -> packet
+        }
+
+    private fun handleIncomingPacket(packet: Packet<in ServerGamePacketListener>): Packet<in ServerGamePacketListener> =
+        when (packet) {
+            is ServerboundContainerClickPacket -> ServerboundContainerClickPacket(
+                packet.containerId,
+                packet.stateId,
+                packet.slotNum,
+                packet.buttonNum,
+                packet.clickType,
+                packet.changedSlots,
+                if (packet.changedSlots.size == 1) {
+                    val slot = packet.changedSlots.keys.single()
+                    val menu = player.containerMenu
+                    if (menu.isValidSlotIndex(slot)) {
+                        HashedStack.create(menu.getSlot(slot).item, hashGenerator)
+                    } else {
+                        HashedStack.EMPTY
+                    }
+                } else {
+                    HashedStack.create(player.containerMenu.carried, hashGenerator)
+                }
+            )
+
+            is ServerboundSetCreativeModeSlotPacket -> ServerboundSetCreativeModeSlotPacket(
+                packet.slotNum,
+                reset(packet.itemStack)
+            )
+
+            else -> packet
+        }
 
     private fun handleRecipeDisplay(display: RecipeDisplay): RecipeDisplay {
         return when (display) {
@@ -242,6 +250,6 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     }
 
     companion object {
-        private const val HANDLER_NAME = "pylon_packet_handler"
+        private const val HANDLER_NAME = "rebar_packet_handler"
     }
 }

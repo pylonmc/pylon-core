@@ -44,9 +44,9 @@ object ItemTagConfigAdapter : ConfigAdapter<Tag<ItemTypeWrapper>> {
         }
 
         // Check our own tags
-        val pylonTag = RebarRegistry.ITEM_TAGS[tagKey]
-        if (pylonTag != null) {
-            return pylonTag
+        val rebarTag = RebarRegistry.ITEM_TAGS[tagKey]
+        if (rebarTag != null) {
+            return rebarTag
         }
 
         throw IllegalArgumentException("Item tag not found: $value")

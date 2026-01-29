@@ -12,11 +12,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.jetbrains.annotations.MustBeInvokedByOverriders
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.window.Window
-import java.util.*
+import java.util.IdentityHashMap
 
 /**
  * A simple interface that opens a GUI when the block is right clicked
@@ -55,9 +54,9 @@ interface RebarGuiBlock : RebarBreakHandler, RebarInteractBlock, RebarNoVanillaC
         event.setUseInteractedBlock(Event.Result.DENY)
         event.setUseItemInHand(Event.Result.DENY)
 
-        Window.single()
-            .setGui(guiBlocks[this]!!)
-            .setTitle(AdventureComponentWrapper(guiTitle))
+        Window.builder()
+            .setUpperGui(guiBlocks[this]!!)
+            .setTitle(guiTitle)
             .setViewer(event.player)
             .build()
             .open()

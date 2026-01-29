@@ -24,7 +24,7 @@ sealed class CookingRecipeWrapper(final override val recipe: CookingRecipe<*>) :
 
     protected abstract val displayBlock: Material
 
-    override fun display(): Gui = Gui.normal()
+    override fun display(): Gui = Gui.builder()
         .setStructure(
             "# # # # # # # # #",
             "# # # # # # # # #",

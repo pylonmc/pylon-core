@@ -4,7 +4,6 @@ import io.github.pylonmc.rebar.content.guide.RebarGuide
 import net.kyori.adventure.text.Component
 import org.bukkit.Keyed
 import org.bukkit.entity.Player
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.window.Window
 
@@ -37,9 +36,9 @@ interface GuidePage : Keyed {
      */
     fun open(player: Player) {
         try {
-            Window.single()
-                .setGui(getGui(player))
-                .setTitle(AdventureComponentWrapper(title))
+            Window.builder()
+                .setUpperGui(getGui(player))
+                .setTitle(title)
                 .open(player)
             RebarGuide.history.getOrPut(player.uniqueId) { mutableListOf() }.add(this)
         } catch (t: Throwable) {

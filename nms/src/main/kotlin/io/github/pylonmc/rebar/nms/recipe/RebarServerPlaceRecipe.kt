@@ -209,8 +209,8 @@ class RebarServerPlaceRecipe private constructor(
                     ServerPlaceRecipe.CraftingMenuAccess::class.java,
                     Inventory::class.java,
                     Boolean::class.javaPrimitiveType,
-                    Integer::class.javaPrimitiveType,
-                    Integer::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType,
                     List::class.java,
                     List::class.java
                 )

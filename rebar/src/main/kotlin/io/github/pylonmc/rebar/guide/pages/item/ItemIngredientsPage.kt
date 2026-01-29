@@ -17,9 +17,9 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.TabGui
-import xyz.xenondevs.invui.gui.structure.Markers
 import xyz.xenondevs.invui.item.Item
 
 /**
@@ -35,7 +35,7 @@ open class ItemIngredientsPage(val input: FluidOrItem) : TabbedGuidePage {
     override fun getKey() = KEY
 
     private class ItemListDisplayTab(private val items: List<Item>) : SimpleStaticGuidePage(rebarKey("unused")) {
-        override fun getGui(player: Player) = PagedGui.items()
+        override fun getGui(player: Player) = PagedGui.itemsBuilder()
             .setStructure(
                 "< # # # # # # # >",
                 "x x x x x x x x x",
@@ -72,7 +72,7 @@ open class ItemIngredientsPage(val input: FluidOrItem) : TabbedGuidePage {
         }
     }.map(::fluidOrItemButton))
 
-    override fun getGui(player: Player): Gui = TabGui.normal()
+    override fun getGui(player: Player): Gui = TabGui.builder()
         .setStructure(
             "# b # i # y # # #",
             "x x x x x x x x x",
@@ -94,8 +94,7 @@ open class ItemIngredientsPage(val input: FluidOrItem) : TabbedGuidePage {
         )
         .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
         .addTabChangeHandler { _, newTab -> saveCurrentTab(player, newTab) }
-        .addTab(ingredientsTab.getGui(player))
-        .addTab(byproductsTab.getGui(player))
+        .setTabs(listOf(ingredientsTab.getGui(player), byproductsTab.getGui(player)))
         .build()
         .apply { loadCurrentTab(player, this) }
 

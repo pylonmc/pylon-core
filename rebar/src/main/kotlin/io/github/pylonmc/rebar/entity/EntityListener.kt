@@ -4,9 +4,6 @@ import com.destroystokyo.paper.event.entity.*
 import io.github.pylonmc.rebar.Rebar
 import io.github.pylonmc.rebar.block.base.RebarHopper
 import io.github.pylonmc.rebar.config.RebarConfig
-import io.github.pylonmc.rebar.entity.base.RebarDeathEntity
-import io.github.pylonmc.rebar.entity.base.RebarInteractEntity
-import io.github.pylonmc.rebar.entity.base.RebarUnloadEntity
 import io.github.pylonmc.rebar.entity.base.*
 import io.github.pylonmc.rebar.event.RebarEntityDeathEvent
 import io.github.pylonmc.rebar.event.RebarEntityUnloadEvent
@@ -26,7 +23,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.*
 import org.bukkit.event.inventory.InventoryPickupItemEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
-import java.util.*
+import java.util.UUID
 
 internal object EntityListener : Listener {
     private val entityErrMap: MutableMap<UUID, Int> = mutableMapOf()

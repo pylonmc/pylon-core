@@ -40,6 +40,7 @@ interface RebarRecipeProcessor<T: RebarRecipe> {
 
     @Suppress("UNCHECKED_CAST")
     val currentRecipe: T?
+        @Suppress("UNCHECKED_CAST")
         @ApiStatus.NonExtendable
         // cast should always be safe due to type restriction when starting recipe
         get() = recipeProcessorData.currentRecipe as T?

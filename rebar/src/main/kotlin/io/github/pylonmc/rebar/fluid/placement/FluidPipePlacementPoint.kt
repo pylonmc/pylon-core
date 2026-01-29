@@ -1,11 +1,7 @@
 package io.github.pylonmc.rebar.fluid.placement
 
 import io.github.pylonmc.rebar.block.BlockStorage
-import io.github.pylonmc.rebar.content.fluid.FluidEndpointDisplay
-import io.github.pylonmc.rebar.content.fluid.FluidIntersectionDisplay
-import io.github.pylonmc.rebar.content.fluid.FluidIntersectionMarker
-import io.github.pylonmc.rebar.content.fluid.FluidPointDisplay
-import io.github.pylonmc.rebar.content.fluid.FluidSectionMarker
+import io.github.pylonmc.rebar.content.fluid.*
 import io.github.pylonmc.rebar.util.position.BlockPosition
 import org.bukkit.block.BlockFace
 import org.joml.Vector3f

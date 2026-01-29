@@ -22,11 +22,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import io.papermc.paper.datacomponent.item.ResolvableProfile
 import net.kyori.adventure.key.Key
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextReplacementConfig
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.TranslationArgumentLike
-import net.kyori.adventure.text.VirtualComponent
+import net.kyori.adventure.text.*
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration

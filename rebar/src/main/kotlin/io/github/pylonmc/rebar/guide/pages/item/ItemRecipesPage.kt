@@ -9,8 +9,8 @@ import io.github.pylonmc.rebar.util.rebarKey
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
-import xyz.xenondevs.invui.gui.structure.Markers
 
 /**
  * Displays all the recipes for the given [stack].
@@ -31,7 +31,7 @@ open class ItemRecipesPage(val stack: ItemStack) : PagedGuidePage {
 
     override fun getKey() = KEY
 
-    open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guis()
+    open fun getHeader(player: Player, pages: List<Gui>) = PagedGui.guisBuilder()
         .setStructure(
             "< b # # g # # s >",
             "x x x x x x x x x",
@@ -51,9 +51,7 @@ open class ItemRecipesPage(val stack: ItemStack) : PagedGuidePage {
 
     override fun getGui(player: Player): Gui {
         val gui = getHeader(player, pages)
-        for (page in pages) {
-            gui.addContent(page)
-        }
+        gui.setContent(pages)
         return gui.build().apply { loadCurrentPage(player, this) }
     }
 

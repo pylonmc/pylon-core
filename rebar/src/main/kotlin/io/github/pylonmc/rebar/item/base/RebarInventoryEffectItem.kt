@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scheduler.BukkitTask
 import org.jetbrains.annotations.MustBeInvokedByOverriders
-import java.util.*
+import java.util.UUID
 
 interface RebarInventoryEffectItem : RebarInventoryTicker {
     @MustBeInvokedByOverriders

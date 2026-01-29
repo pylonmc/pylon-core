@@ -1,7 +1,7 @@
 package io.github.pylonmc.rebar.test.util;
 
-import io.github.pylonmc.rebar.util.position.ChunkPosition;
 import io.github.pylonmc.rebar.test.RebarTest;
+import io.github.pylonmc.rebar.util.position.ChunkPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.jetbrains.annotations.CheckReturnValue;

@@ -569,7 +569,7 @@ fun damageItem(itemStack: ItemStack, amount: Int, entity: LivingEntity, slot: Eq
  * A shorthand for a commonly used [VirtualInventory] handler which prevents players
  * from removing items from it.
  *
- * Usage: Call [VirtualInventory.setPreUpdateHandler] and supply this function to it
+ * Usage: Call [VirtualInventory.addPreUpdateHandler] and supply this function to it
  */
 @JvmField
 val DISALLOW_PLAYERS_FROM_ADDING_ITEMS_HANDLER = Consumer<ItemPreUpdateEvent> { event: ItemPreUpdateEvent ->

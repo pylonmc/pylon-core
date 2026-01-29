@@ -12,15 +12,17 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.gui.SlotElement
+import xyz.xenondevs.invui.gui.get
+import xyz.xenondevs.invui.item.AbstractBoundItem
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.AbstractItem
 
 /**
  * A button that shows a research.
  */
-open class ResearchButton(val research: Research) : AbstractItem() {
+open class ResearchButton(val research: Research) : AbstractBoundItem() {
 
     override fun getItemProvider(player: Player): ItemProvider = try {
         val playerHasResearch = Research.getResearches(player).contains(research)
@@ -51,7 +53,7 @@ open class ResearchButton(val research: Research) : AbstractItem() {
         item.lore(Component.translatable("rebar.guide.button.research.unlocks-title"))
 
         val shouldCutOff = research.unlocks.size > MAX_UNLOCK_LIST_LINES
-        var itemListCount = if (shouldCutOff) {
+        val itemListCount = if (shouldCutOff) {
             MAX_UNLOCK_LIST_LINES - 1
         } else {
             research.unlocks.size
@@ -90,7 +92,7 @@ open class ResearchButton(val research: Research) : AbstractItem() {
             .name(Component.translatable("rebar.guide.button.fluid.error"))
     }
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         try {
             if (clickType.isLeftClick) {
                 if (research.isResearchedBy(player) || research.cost == null || research.cost > player.researchPoints) {
@@ -98,7 +100,12 @@ open class ResearchButton(val research: Research) : AbstractItem() {
                 }
                 research.addTo(player)
                 player.researchPoints -= research.cost
-                windows.forEach { it.close(); it.open() } // TODO refresh windows when we've updated to 2.0.0
+                for (slot in 0 until gui.size) {
+                    val item = gui[slot] as? SlotElement.Item ?: continue
+                    if (item.item is ResearchButton) {
+                        item.item.notifyWindows()
+                    }
+                }
             } else if (clickType.isRightClick) {
                 ResearchItemsPage(research).open(player)
             } else if (clickType == ClickType.MIDDLE) {

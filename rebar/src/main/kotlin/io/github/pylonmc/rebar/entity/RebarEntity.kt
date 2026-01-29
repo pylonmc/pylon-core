@@ -5,6 +5,7 @@ import io.github.pylonmc.rebar.config.Config
 import io.github.pylonmc.rebar.config.Settings
 import io.github.pylonmc.rebar.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.rebar.datatypes.RebarSerializers
+import io.github.pylonmc.rebar.entity.RebarEntity.Companion.register
 import io.github.pylonmc.rebar.event.RebarEntitySerializeEvent
 import io.github.pylonmc.rebar.registry.RebarRegistry
 import io.github.pylonmc.rebar.util.rebarKey

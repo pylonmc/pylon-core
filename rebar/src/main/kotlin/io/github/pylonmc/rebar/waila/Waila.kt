@@ -15,6 +15,7 @@ import io.github.pylonmc.rebar.i18n.RebarArgument
 import io.github.pylonmc.rebar.util.position.BlockPosition
 import io.github.pylonmc.rebar.util.position.position
 import io.github.pylonmc.rebar.util.rebarKey
+import io.github.pylonmc.rebar.waila.Waila.Companion.addWailaOverride
 import io.papermc.paper.raytracing.RayTraceTarget
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

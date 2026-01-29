@@ -7,9 +7,10 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.invui.item.impl.AbstractItem
+import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.item.AbstractItem
+import xyz.xenondevs.invui.item.ItemProvider
 
 /**
  * A button that opens another page in the guide.
@@ -25,12 +26,12 @@ open class PageButton(val stack: ItemStack, val page: GuidePage) : AbstractItem(
 
     constructor(material: Material, page: GuidePage) : this(ItemStack(material), page)
 
-    override fun getItemProvider(viewer: Player?) = ItemStackBuilder.gui(stack, "${rebarKey("guide_page")}:${page.key}")
+    override fun getItemProvider(viewer: Player): ItemProvider = ItemStackBuilder.gui(stack, "${rebarKey("guide_page")}:${page.key}")
         .name(Component.translatable("${page.key.namespace}.guide.page.${page.key.key}"))
         .clearLore()
         .lore(Component.translatable("${page.key.namespace}.guide.button.${page.key.key}", ""))
 
-    override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
         page.open(player)
     }
 }
