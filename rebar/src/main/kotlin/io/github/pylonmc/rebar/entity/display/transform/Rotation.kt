@@ -1,10 +1,6 @@
 package io.github.pylonmc.rebar.entity.display.transform
 
-import org.joml.Matrix4f
-import org.joml.Quaterniond
-import org.joml.Quaternionf
-import org.joml.Vector3d
-import org.joml.Vector3f
+import org.joml.*
 
 open class Rotation private constructor(
     protected val vector: Vector3f?,

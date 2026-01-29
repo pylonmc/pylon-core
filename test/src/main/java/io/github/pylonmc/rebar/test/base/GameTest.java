@@ -2,9 +2,9 @@ package io.github.pylonmc.rebar.test.base;
 
 import io.github.pylonmc.rebar.gametest.GameTestConfig;
 import io.github.pylonmc.rebar.gametest.GameTestFailException;
-import io.github.pylonmc.rebar.util.position.BlockPosition;
 import io.github.pylonmc.rebar.test.RebarTest;
 import io.github.pylonmc.rebar.test.util.TestUtil;
+import io.github.pylonmc.rebar.util.position.BlockPosition;
 import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 

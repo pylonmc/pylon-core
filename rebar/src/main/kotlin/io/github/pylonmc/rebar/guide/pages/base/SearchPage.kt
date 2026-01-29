@@ -18,7 +18,7 @@ import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.window.AnvilWindow
-import java.util.*
+import java.util.UUID
 
 /**
  * A page that allows a collection of things (specified by [getItemNamePairs] to be searched.

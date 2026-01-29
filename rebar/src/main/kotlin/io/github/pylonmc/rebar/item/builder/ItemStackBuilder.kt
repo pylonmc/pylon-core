@@ -32,7 +32,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.ApiStatus
 import xyz.xenondevs.invui.item.ItemProvider
-import java.util.*
+import java.util.Locale
 import java.util.function.Consumer
 
 /**

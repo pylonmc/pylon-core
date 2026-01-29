@@ -12,7 +12,7 @@ import io.github.pylonmc.rebar.util.rebarKey
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
+import java.util.IdentityHashMap
 
 /**
  * An interface that stores and progresses a recipe.

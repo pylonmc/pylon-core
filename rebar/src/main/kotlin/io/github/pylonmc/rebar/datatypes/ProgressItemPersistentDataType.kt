@@ -31,7 +31,7 @@ object ProgressItemPersistentDataType : PersistentDataType<PersistentDataContain
 
     override fun toPrimitive(complex: ProgressItem, context: PersistentDataAdapterContext): PersistentDataContainer {
         val pdc = context.newPersistentDataContainer()
-        pdc.set(itemStackKey, RebarSerializers.ITEM_STACK, complex.itemStackBuilder.stack)
+        pdc.set(itemStackKey, RebarSerializers.ITEM_STACK, complex.lastDisplayedItem)
         pdc.set(countDownKey, RebarSerializers.BOOLEAN, complex.countDown)
         pdc.setNullable(totalTimeKey, RebarSerializers.DURATION, complex.totalTime)
         pdc.set(progressKey, RebarSerializers.DOUBLE, complex.progress)

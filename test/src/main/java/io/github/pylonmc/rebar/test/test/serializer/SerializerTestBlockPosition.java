@@ -1,8 +1,8 @@
 package io.github.pylonmc.rebar.test.test.serializer;
 
 import io.github.pylonmc.rebar.datatypes.RebarSerializers;
-import io.github.pylonmc.rebar.util.position.BlockPosition;
 import io.github.pylonmc.rebar.test.RebarTest;
+import io.github.pylonmc.rebar.util.position.BlockPosition;
 
 
 public class SerializerTestBlockPosition extends SerializerTest<BlockPosition> {

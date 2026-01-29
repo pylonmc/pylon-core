@@ -1,15 +1,11 @@
 package io.github.pylonmc.rebar.fluid.placement
 
 import io.github.pylonmc.rebar.block.BlockStorage
-import io.github.pylonmc.rebar.content.fluid.FluidEndpointDisplay
-import io.github.pylonmc.rebar.content.fluid.FluidIntersectionDisplay
-import io.github.pylonmc.rebar.content.fluid.FluidIntersectionMarker
-import io.github.pylonmc.rebar.content.fluid.FluidPointDisplay
-import io.github.pylonmc.rebar.content.fluid.FluidSectionMarker
+import io.github.pylonmc.rebar.content.fluid.*
 import io.github.pylonmc.rebar.util.position.BlockPosition
 import org.bukkit.block.BlockFace
 import org.joml.Vector3f
-import java.util.*
+import java.util.UUID
 
 internal sealed interface FluidPipePlacementPoint {
 
@@ -66,7 +62,7 @@ internal sealed interface FluidPipePlacementPoint {
 
         override val allowedFace = if (display is FluidEndpointDisplay) display.face else null
 
-        override fun stillActuallyExists(isTarget: Boolean) = display.entity.isValid
+        override fun stillActuallyExists(isOrigin: Boolean) = display.entity.isValid
 
         override fun create() = display
     }
@@ -82,7 +78,7 @@ internal sealed interface FluidPipePlacementPoint {
         // If stillActuallyExists returns false, pipe placement is cancelled, but we do not want this to happen for the target
         // (because if you dragged the pipe into a solid block, the placement would be cancelled rather than an error message
         // bein displayed)
-        override fun stillActuallyExists(isTarget: Boolean) = !isTarget || position.block.isEmpty || position.block.isReplaceable
+        override fun stillActuallyExists(isOrigin: Boolean) = !isOrigin || position.block.isEmpty || position.block.isReplaceable
 
         override fun create()
                 = (BlockStorage.placeBlock(position, FluidIntersectionMarker.KEY) as FluidIntersectionMarker).fluidIntersectionDisplay
@@ -99,7 +95,7 @@ internal sealed interface FluidPipePlacementPoint {
 
         override val allowedFace = null
 
-        override fun stillActuallyExists(isTarget: Boolean) = BlockStorage.get(marker.block) is FluidSectionMarker
+        override fun stillActuallyExists(isOrigin: Boolean) = BlockStorage.get(marker.block) is FluidSectionMarker
 
         override fun create(): FluidIntersectionDisplay {
             val pipeDisplay = marker.pipeDisplay!!

@@ -12,7 +12,7 @@ import org.bukkit.util.Vector
 import org.joml.AxisAngle4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import java.util.*
+import java.util.Random
 import java.util.function.Consumer
 
 class ConfettiParticle {

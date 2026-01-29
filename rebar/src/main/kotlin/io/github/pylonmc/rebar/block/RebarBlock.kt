@@ -3,6 +3,8 @@ package io.github.pylonmc.rebar.block
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3f
 import io.github.pylonmc.rebar.Rebar
+import io.github.pylonmc.rebar.block.RebarBlock.Companion.rebarBlockTextureEntityKey
+import io.github.pylonmc.rebar.block.RebarBlock.Companion.register
 import io.github.pylonmc.rebar.block.base.RebarDirectionalBlock
 import io.github.pylonmc.rebar.block.base.RebarEntityHolderBlock
 import io.github.pylonmc.rebar.block.base.RebarGuiBlock

@@ -17,7 +17,7 @@ import kotlinx.coroutines.delay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
+import java.util.IdentityHashMap
 
 /**
  * Represents an entity that 'ticks' (does something at a fixed time interval).

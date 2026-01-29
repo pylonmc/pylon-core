@@ -45,7 +45,8 @@ import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.event.world.StructureGrowEvent
 import org.bukkit.inventory.BlockInventoryHolder
 import org.bukkit.inventory.EquipmentSlot
-import java.util.*
+import java.util.UUID
+import java.util.WeakHashMap
 
 
 /**

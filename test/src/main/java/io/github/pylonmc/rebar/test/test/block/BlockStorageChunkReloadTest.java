@@ -3,10 +3,10 @@ package io.github.pylonmc.rebar.test.test.block;
 import io.github.pylonmc.rebar.block.BlockStorage;
 import io.github.pylonmc.rebar.block.RebarBlock;
 import io.github.pylonmc.rebar.block.RebarBlockSchema;
-import io.github.pylonmc.rebar.util.position.ChunkPosition;
 import io.github.pylonmc.rebar.test.base.AsyncTest;
 import io.github.pylonmc.rebar.test.block.BlockWithField;
 import io.github.pylonmc.rebar.test.util.TestUtil;
+import io.github.pylonmc.rebar.util.position.ChunkPosition;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 

@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
+import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.Click
 import xyz.xenondevs.invui.item.AbstractItem
 import xyz.xenondevs.invui.item.ItemProvider
@@ -50,7 +51,7 @@ open class ResearchButton(val research: Research) : AbstractItem() {
         item.lore(Component.translatable("rebar.guide.button.research.unlocks-title"))
 
         val shouldCutOff = research.unlocks.size > MAX_UNLOCK_LIST_LINES
-        var itemListCount = if (shouldCutOff) {
+        val itemListCount = if (shouldCutOff) {
             MAX_UNLOCK_LIST_LINES - 1
         } else {
             research.unlocks.size

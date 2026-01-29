@@ -15,14 +15,13 @@ import org.bukkit.event.inventory.ClickType
 import xyz.xenondevs.invui.Click
 import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.gui.ScrollGui
-import xyz.xenondevs.invui.item.AbstractPagedGuiBoundItem
-import xyz.xenondevs.invui.item.AbstractScrollGuiBoundItem
-import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.gui.TabGui
+import xyz.xenondevs.invui.item.*
 
 /**
  * A utility class containing items commonly used in GUIs.
  */
+@Suppress("unused")
 object GuiItems {
     val rebarGuiItemKeyKey = rebarKey("gui_item_key")
 
@@ -181,13 +180,18 @@ private class RebarPageItem(private val forward: Boolean) : AbstractPagedGuiBoun
         get() = if (forward) page < pageCount - 1 else page > 0
 }
 
-private class RebarTabItem(private val item: ItemStackBuilder, private val tab: Int) : TabItem(tab) {
-    override fun getItemProvider(gui: TabGui): ItemProvider {
-        return if (gui.currentTab == tab) {
+private class RebarTabItem(private val item: ItemStackBuilder, private val tab: Int) : AbstractTabGuiBoundItem() {
+
+    override fun getItemProvider(viewer: Player): ItemProvider {
+        return if (gui.tab == tab) {
             item.clone().set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
         } else {
             item
         }
+    }
+
+    override fun handleClick(clickType: ClickType, player: Player, click: Click) {
+        gui.tab = tab
     }
 }
 

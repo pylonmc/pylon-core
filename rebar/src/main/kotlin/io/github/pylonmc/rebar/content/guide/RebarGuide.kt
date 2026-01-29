@@ -34,7 +34,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
-import java.util.*
+import java.util.UUID
 
 /**
  * The one and only Rebar guide.
