@@ -35,10 +35,10 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: pylonmc/dokka
-          ref: pylon
+          ref: rebar
 
       - name: Publish Dokka to Maven local
-        run: ./gradlew publishToMavenLocal -Pversion=2.1.0-pylon-SNAPSHOT
+        run: ./gradlew publishToMavenLocal -Pversion=2.1.0-rebar-SNAPSHOT
 
       - name: Checkout
         uses: actions/checkout@v5
@@ -47,12 +47,12 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Build docs
-        run: ./gradlew :pylon-core:dokkaGenerate -PusePylonDokka=true
+        run: ./gradlew :rebar:dokkaGenerate -PuseRebarDokka=true
 
       - name: Upload docs
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'pylon-core/build/dokka'
+          path: 'rebar/build/dokka'
 
       - name: Deploy to GitHub Pages
         id: deployment

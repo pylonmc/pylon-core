@@ -1,0 +1,8 @@
+package io.github.pylonmc.rebar.entity.base
+
+import org.bukkit.event.entity.EntityCombustEvent
+
+interface RebarCombustibleEntity {
+    /* Could either be a EntityCombustByBlock or a EntityCombustByEntity event */
+    fun onCombust(event: EntityCombustEvent)
+}

@@ -1,19 +1,17 @@
-## What is Pylon?
-Pylon is an upcoming Minecraft Java plugin that will hugely expand vanilla gameplay with new content, including electric machines, huge multiblocks, a fully-fledged fluid system, a complex smelting system, extensive automation options and much, an (actually good) research system, and much more. It is intended to supersede Slimefun.
+## What is Rebar?
+Rebar is an upcoming Minecraft Java plugin that allows vanilla gameplay to be expanded with new blocks, items, mechanics, and more. It includes a research system, an in-game guide, fluid pipe system, first-class translation support, multiblocks, support for custom logistics, and much more - all behind an intuitive API. Rebar differentiates itself from Nexo, ItemsAdder, and similar plugins by focusing solely on plugin developers and allowing them to implement significantly more complex mechanics.
 
-Pylon uses an addon system, meaning anyone can add content to Pylon by writing an addon for it! It also comes with a number of really useful features, such as:
-- First-class translation support, meaning each player can select their own language.
-- Extensive configuration options, including per-machine configuration. 
-- An intuitive and user-friendly guide to help players figure out the plugin.
+Rebar is the framework behind our Pylon plugin (https://github.com/pylonmc/pylon).
 
 ## Find out more
 Join our Discord: https://discord.gg/4tMAnBAacW  
 Visit our website: https://pylonmc.github.io/
 
 ## Warning
-PYLON IS CURRENTLY EXPERIMENTAL. ONLY RUN IT ON A TEST SERVER THAT YOU ARE WILLING TO DELETE. THE NEXT PYLON VERSION WILL PROBABLY NOT BE COMPATIBLE WITH THE PREVIOUS ONE. IF YOU INSTALL PYLON SOMEWHERE YOU SHOULDN'T AND END UP LOSING DATA, WE WILL POINT AND LAUGH AT YOU.
+> [!CAUTION]
+> REBAR IS CURRENTLY EXPERIMENTAL. ONLY RUN IT ON A TEST SERVER THAT YOU ARE WILLING TO DELETE. THE NEXT PYLON VERSION WILL PROBABLY NOT BE COMPATIBLE WITH THE PREVIOUS ONE. IF YOU INSTALL REBAR SOMEWHERE YOU SHOULDN'T AND END UP LOSING DATA, WE WILL POINT AND LAUGH AT YOU
 
-## Pylon in pictures
+## Rebar in pictures
 <img width="250" alt="using-smeltery" src="https://github.com/user-attachments/assets/b8a7ba3c-9103-46a5-ab43-f31de08dd492" /> 
 <img width="250" alt="using-magic-altar" src="https://github.com/user-attachments/assets/fd1d4ed9-3f1e-491a-ac73-2be9bb172e53" />
 <img width="250" alt="using-grindstone-turner" src="https://github.com/user-attachments/assets/ee947130-ce57-4af0-a5f9-b2eaf0480036" />
