@@ -167,11 +167,11 @@ internal object RebarRecipeListener : Listener {
     private fun onCook(e: BlockCookEvent) {
         if (RebarItem.fromStack(e.source) == null) return
 
-        var pylonRecipe: CookingRecipeWrapper? = null
+        var rebarRecipe: CookingRecipeWrapper? = null
         for (recipe in RecipeType.vanillaCookingRecipes()) {
             if (recipe.key !in VanillaRecipeType.nonRebarRecipes && recipe.recipe.inputChoice.test(e.source)) {
                 e.result = recipe.recipe.result.clone()
-                pylonRecipe = recipe
+                rebarRecipe = recipe
                 break
             }
         }
@@ -187,16 +187,16 @@ internal object RebarRecipeListener : Listener {
         val furnace = (e.block.state as Furnace)
         val input = furnace.inventory.smelting
         if (input != null && input.isRebarAndIsNot<VanillaCookingItem>()) {
-            var pylonRecipe: CookingRecipeWrapper? = null
+            var rebarRecipe: CookingRecipeWrapper? = null
             for (recipe in RecipeType.vanillaCookingRecipes()) {
                 if (recipe.key !in VanillaRecipeType.nonRebarRecipes && recipe.recipe.inputChoice.test(input)) {
-                    pylonRecipe = recipe
+                    rebarRecipe = recipe
                     break
                 }
             }
-            val isFurnaceOutputValidToPutRecipeResultIn = pylonRecipe != null
-                    && (furnace.inventory.result == null || pylonRecipe.isOutput(furnace.inventory.result!!))
-            if (pylonRecipe == null || !isFurnaceOutputValidToPutRecipeResultIn) {
+            val isFurnaceOutputValidToPutRecipeResultIn = rebarRecipe != null
+                    && (furnace.inventory.result == null || rebarRecipe.isOutput(furnace.inventory.result!!))
+            if (rebarRecipe == null || !isFurnaceOutputValidToPutRecipeResultIn) {
                 e.isCancelled = true
             }
         }

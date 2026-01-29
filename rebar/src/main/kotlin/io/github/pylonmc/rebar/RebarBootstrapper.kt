@@ -7,7 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.annotations.ApiStatus
 
 /**
- * Bootstraps Rebar Core - internal.
+ * Bootstraps Rebar - internal.
  */
 @ApiStatus.Internal
 @Suppress("UnstableApiUsage", "unused")

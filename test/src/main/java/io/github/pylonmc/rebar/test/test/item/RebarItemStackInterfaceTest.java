@@ -13,7 +13,7 @@ import org.bukkit.event.inventory.BrewingStandFuelEvent;
 public class RebarItemStackInterfaceTest extends GameTest {
 
     public RebarItemStackInterfaceTest() {
-        super(new GameTestConfig.Builder(RebarTest.key("pylon_item_stack_interface_test"))
+        super(new GameTestConfig.Builder(RebarTest.key("rebar_item_stack_interface_test"))
                 .size(0)
                 .timeoutTicks(100)
                 .setUp((test) -> {

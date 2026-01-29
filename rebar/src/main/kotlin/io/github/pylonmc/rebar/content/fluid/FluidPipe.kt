@@ -99,12 +99,12 @@ open class FluidPipe(stack: ItemStack) : RebarItem(stack), RebarInteractor {
     }
 
     private fun tryStartConnection(player: Player, block: Block): Boolean {
-        val pylonBlock = BlockStorage.get(block)
+        val rebarBlock = BlockStorage.get(block)
 
-        if (pylonBlock is FluidIntersectionMarker) {
-            if (pylonBlock.pipe == this) {
+        if (rebarBlock is FluidIntersectionMarker) {
+            if (rebarBlock.pipe == this) {
                 // This pipe matches the pipe we right clicked; start a connection
-                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(pylonBlock.fluidIntersectionDisplay), this)
+                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.PointDisplay(rebarBlock.fluidIntersectionDisplay), this)
             } else {
                 // This pipe does not match the pipe we right clicked
                 player.sendActionBar(Component.translatable("rebar.message.pipe.not_of_same_type"))
@@ -112,10 +112,10 @@ open class FluidPipe(stack: ItemStack) : RebarItem(stack), RebarInteractor {
             return true
         }
 
-        if (pylonBlock is FluidSectionMarker) {
-            if (pylonBlock.pipeDisplay!!.pipe == this) {
+        if (rebarBlock is FluidSectionMarker) {
+            if (rebarBlock.pipeDisplay!!.pipe == this) {
                 // This pipe matches the pipe we right clicked; start a connection
-                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.Section(pylonBlock), this)
+                FluidPipePlacementService.startConnection(player, FluidPipePlacementPoint.Section(rebarBlock), this)
             } else {
                 // This pipe does not match the pipe we right clicked
                 player.sendActionBar(Component.translatable("rebar.message.pipe.not_of_same_type"))

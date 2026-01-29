@@ -10,7 +10,6 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
-import net.minecraft.network.Connection
 import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.Packet
@@ -251,6 +250,6 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
     }
 
     companion object {
-        private const val HANDLER_NAME = "pylon_packet_handler"
+        private const val HANDLER_NAME = "rebar_packet_handler"
     }
 }

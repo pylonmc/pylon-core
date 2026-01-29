@@ -18,6 +18,7 @@ interface ConfigAdapter<T> {
      */
     fun convert(value: Any): T
 
+    @Suppress("unused")
     companion object {
         // @formatter:off
         @JvmField val BYTE = ConfigAdapter { if (it is String) it.toByte() else (it as Number).toByte() }
@@ -85,7 +86,7 @@ interface ConfigAdapter<T> {
          */
         @JvmField val RANDOMIZED_SOUND = RandomizedSoundConfigAdapter
 
-        @JvmField val PYLON_FLUID = KEYED.fromRegistry(RebarRegistry.FLUIDS)
+        @JvmField val REBAR_FLUID = KEYED.fromRegistry(RebarRegistry.FLUIDS)
         @JvmField val FLUID_TEMPERATURE = ENUM.from<FluidTemperature>()
         @JvmField val FLUID_OR_ITEM = FluidOrItemConfigAdapter
         @JvmField val RECIPE_INPUT = RecipeInputConfigAdapter

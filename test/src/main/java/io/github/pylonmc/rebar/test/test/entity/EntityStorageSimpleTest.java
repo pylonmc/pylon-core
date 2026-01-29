@@ -18,9 +18,9 @@ public class EntityStorageSimpleTest extends GameTest {
         super(new GameTestConfig.Builder(new NamespacedKey(RebarTest.instance(), "entity_storage_add_test"))
                 .size(1)
                 .setUp((test) -> {
-                    SimpleEntity pylonEntity = new SimpleEntity(test.location());
-                    UUID uuid = pylonEntity.getEntity().getUniqueId();
-                    EntityStorage.add(pylonEntity);
+                    SimpleEntity rebarEntity = new SimpleEntity(test.location());
+                    UUID uuid = rebarEntity.getEntity().getUniqueId();
+                    EntityStorage.add(rebarEntity);
 
                     assertThat(EntityStorage.isRebarEntity(uuid))
                             .isTrue();
@@ -31,10 +31,10 @@ public class EntityStorageSimpleTest extends GameTest {
                             .isNotNull()
                             .extracting(SimpleEntity::getSomeQuantity)
                             .isEqualTo(69);
-                    assertThat(pylonEntity.getEntity().hasAI())
+                    assertThat(rebarEntity.getEntity().hasAI())
                             .isFalse();
 
-                    pylonEntity.getEntity().remove();
+                    rebarEntity.getEntity().remove();
 
                     assertThat(EntityStorage.isRebarEntity(uuid))
                             .isFalse();

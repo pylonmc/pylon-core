@@ -38,17 +38,17 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
         if (event.action == Action.PHYSICAL) return
 
         val block = event.clickedBlock ?: return
-        val pylonBlock = BlockStorage.get(block)
+        val rebarBlock = BlockStorage.get(block)
         val player = event.player
-        if (pylonBlock == null) {
+        if (rebarBlock == null) {
             player.sendDebugActionBar("not_a_block")
             return
         }
 
         if (event.action.isLeftClick) {
-            onUsedToLeftClickBlock(player, block, pylonBlock)
+            onUsedToLeftClickBlock(player, block, rebarBlock)
         } else if (event.action.isRightClick) {
-            onUsedToRightClickBlock(player, block, pylonBlock)
+            onUsedToRightClickBlock(player, block, rebarBlock)
         }
     }
 
@@ -106,18 +106,18 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
     override fun onUsedToDamageEntity(event: EntityDamageByEntityEvent) {
         event.isCancelled = true
         val player = event.damager as? Player ?: return
-        val pylonEntity = EntityStorage.get(event.entity)
-        if (pylonEntity == null) {
+        val rebarEntity = EntityStorage.get(event.entity)
+        if (rebarEntity == null) {
             player.sendDebugActionBar("not_an_entity")
             return
         }
 
         if (player.currentInput.isSneak) {
-            pylonEntity.entity.remove()
+            rebarEntity.entity.remove()
             player.sendDebug(
                 "deleted_data",
-                RebarArgument.of("type", pylonEntity.schema.key.toString()),
-                RebarArgument.of("location", pylonEntity.entity.uniqueId.toString())
+                RebarArgument.of("type", rebarEntity.schema.key.toString()),
+                RebarArgument.of("location", rebarEntity.entity.uniqueId.toString())
             )
             return
         }
@@ -125,22 +125,22 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
 
     override fun onUsedToRightClickEntity(event: PlayerInteractEntityEvent) {
         event.isCancelled = true
-        val pylonEntity = EntityStorage.get(event.rightClicked)
+        val rebarEntity = EntityStorage.get(event.rightClicked)
         val player = event.player
-        if (pylonEntity == null) {
+        if (rebarEntity == null) {
             player.sendDebugActionBar("not_an_entity")
             return
         }
 
         player.sendDebug(
             "key.entity",
-            RebarArgument.of("key", pylonEntity.schema.key.toString())
+            RebarArgument.of("key", rebarEntity.schema.key.toString())
         )
 
         // TODO implement this once entities can tick
 //            event.player.sendMessage(
 //                MiniMessage.miniMessage().deserialize(
-//                    when (pylonEntity) {
+//                    when (rebarEntity) {
 //                        is RebarTickingBlock -> if (false) {
 //                            "<gold>Ticking: <green>Yes"
 //                        } else {
@@ -151,8 +151,8 @@ internal class DebugWaxedWeatheredCutCopperStairs(stack: ItemStack)
 //                    }
 //                )
 //            )
-        pylonEntity.writeDebugInfo(pylonEntity.entity.persistentDataContainer)
-        val serialized = NmsAccessor.instance.serializePdc(pylonEntity.entity.persistentDataContainer)
+        rebarEntity.writeDebugInfo(rebarEntity.entity.persistentDataContainer)
+        val serialized = NmsAccessor.instance.serializePdc(rebarEntity.entity.persistentDataContainer)
         player.sendDebug(
             "data",
             RebarArgument.of("data", serialized)

@@ -386,8 +386,8 @@ internal object RebarItemListener : Listener {
     private fun handle(event: PlayerPickItemEvent) {
         val reachDistance = event.player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE)?.value ?: 4.5
         val block = event.player.getTargetBlockExact(ceil(reachDistance).toInt()) ?: return
-        val pylonBlock = BlockStorage.get(block) ?: return
-        val blockItem = pylonBlock.getPickItem() ?: return
+        val rebarBlock = BlockStorage.get(block) ?: return
+        val blockItem = rebarBlock.getPickItem() ?: return
         val blockRebarItem = RebarItem.fromStack(blockItem) ?: return
 
         val sourceSlot = event.sourceSlot
