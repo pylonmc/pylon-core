@@ -10,6 +10,7 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import io.papermc.paper.datacomponent.DataComponentTypes
+import net.minecraft.network.Connection
 import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.Packet
@@ -117,10 +118,13 @@ class PlayerPacketHandler(private val player: ServerPlayer, private val handler:
                 packet.clickType,
                 packet.changedSlots,
                 if (packet.changedSlots.size == 1) {
-                    HashedStack.create(
-                        player.containerMenu.getSlot(packet.changedSlots.keys.single()).item,
-                        hashGenerator
-                    )
+                    val slot = packet.changedSlots.keys.single()
+                    val menu = player.containerMenu
+                    if (menu.isValidSlotIndex(slot)) {
+                        HashedStack.create(menu.getSlot(slot).item, hashGenerator)
+                    } else {
+                        HashedStack.EMPTY
+                    }
                 } else {
                     HashedStack.create(player.containerMenu.carried, hashGenerator)
                 }
