@@ -14,13 +14,14 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.Click
-import xyz.xenondevs.invui.item.AbstractItem
+import xyz.xenondevs.invui.gui.get
+import xyz.xenondevs.invui.item.AbstractBoundItem
 import xyz.xenondevs.invui.item.ItemProvider
 
 /**
  * A button that shows a research.
  */
-open class ResearchButton(val research: Research) : AbstractItem() {
+open class ResearchButton(val research: Research) : AbstractBoundItem() {
 
     override fun getItemProvider(player: Player): ItemProvider = try {
         val playerHasResearch = Research.getResearches(player).contains(research)
@@ -98,7 +99,12 @@ open class ResearchButton(val research: Research) : AbstractItem() {
                 }
                 research.addTo(player)
                 player.researchPoints -= research.cost
-                notifyWindows()
+                for (slot in 0 until gui.size) {
+                    val item = gui[slot] ?: continue
+                    if (item is ResearchButton) {
+                        item.notifyWindows()
+                    }
+                }
             } else if (clickType.isRightClick) {
                 ResearchItemsPage(research).open(player)
             } else if (clickType == ClickType.MIDDLE) {
