@@ -14,6 +14,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.Click
+import xyz.xenondevs.invui.gui.SlotElement
 import xyz.xenondevs.invui.gui.get
 import xyz.xenondevs.invui.item.AbstractBoundItem
 import xyz.xenondevs.invui.item.ItemProvider
@@ -100,9 +101,9 @@ open class ResearchButton(val research: Research) : AbstractBoundItem() {
                 research.addTo(player)
                 player.researchPoints -= research.cost
                 for (slot in 0 until gui.size) {
-                    val item = gui[slot] ?: continue
-                    if (item is ResearchButton) {
-                        item.notifyWindows()
+                    val item = gui[slot] as? SlotElement.Item ?: continue
+                    if (item.item is ResearchButton) {
+                        item.item.notifyWindows()
                     }
                 }
             } else if (clickType.isRightClick) {

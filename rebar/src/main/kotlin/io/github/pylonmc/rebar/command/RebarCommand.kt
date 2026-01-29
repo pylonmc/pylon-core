@@ -307,7 +307,7 @@ private val researchPointsSet = buildCommand("set") {
                 for (player in getArgument<List<Player>>("players")) {
                     player.researchPoints = points
                     sender.sendFeedback(
-                        "research.points.modify",
+                        "research.points.set",
                         RebarArgument.of("player", player.name),
                         RebarArgument.of("points", points)
                     )

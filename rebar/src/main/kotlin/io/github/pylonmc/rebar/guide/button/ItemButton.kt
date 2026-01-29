@@ -24,7 +24,9 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import xyz.xenondevs.invui.Click
-import xyz.xenondevs.invui.item.AbstractItem
+import xyz.xenondevs.invui.gui.SlotElement
+import xyz.xenondevs.invui.gui.get
+import xyz.xenondevs.invui.item.AbstractBoundItem
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import kotlin.time.Duration.Companion.seconds
@@ -42,7 +44,7 @@ class ItemButton @JvmOverloads constructor(
      * A function to apply to the button item after creating it.
      */
     val preDisplayDecorator: (ItemStack, Player) -> ItemStack = { stack, _ -> stack }
-) : AbstractItem() {
+) : AbstractBoundItem() {
 
     /**
      * @param stacks The items to display. If multiple are provided, the button will automatically
@@ -150,7 +152,12 @@ class ItemButton @JvmOverloads constructor(
                         }
                         research.addTo(player, false)
                         player.researchPoints -= research.cost
-                        notifyWindows()
+                        for (slot in 0 until gui.size) {
+                            val item = gui[slot] as? SlotElement.Item ?: continue
+                            if (item.item is ItemButton) {
+                                item.item.notifyWindows()
+                            }
+                        }
                     }
                 }
 
