@@ -103,7 +103,9 @@ class RebarTranslator private constructor(private val addon: RebarAddon) : Trans
 
     private fun getRawTranslation(translationKey: String, locale: Locale, warn: Boolean): Component? {
         return translationCache.getOrPut(locale to translationKey) {
-            val (addon, key) = translationKey.split('.', limit = 2)
+            val parts = translationKey.split('.', limit = 2)
+            if (parts.size < 2) return null
+            val (addon, key) = parts
             if (addon != addonNamespace) return null
             val translations = findCommonLocale(locale)?.let(this.translations::get)
             if (translations == null) {
