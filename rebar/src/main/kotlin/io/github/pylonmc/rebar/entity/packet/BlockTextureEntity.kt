@@ -61,6 +61,6 @@ open class BlockTextureEntity(
     companion object {
         const val SCALE_INDEX = 12
         const val SCALE_DISTANCE_INCREASE = 0.0005f
-        const val BLOCK_OVERLAP_SCALE = 1.00035f
+        const val BLOCK_OVERLAP_SCALE = 1.0004f
     }
 }
