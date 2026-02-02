@@ -82,12 +82,11 @@ object NmsAccessorImpl : NmsAccessor {
     override fun serializePdc(pdc: PersistentDataContainer): Component
         = PaperAdventure.asAdventure(TextComponentTagVisitor("  ").visit((pdc as CraftPersistentDataContainer).toTagCompound()))
 
-    override fun getStateProperties(block: Block, includeDefault: Boolean, custom: Map<String, Pair<String, Int>>): Map<String, String> {
+    override fun getStateProperties(block: Block, custom: Map<String, Pair<String, Int>>): Map<String, String> {
         val state = (block as CraftBlock).nms
         val map = mutableMapOf<String, String>()
         val possibleValues = mutableMapOf<String, Int>()
-        val properties = if (includeDefault) state.block.stateDefinition.properties else state.properties
-        for (property in properties) {
+        for (property in state.block.stateDefinition.properties) {
             @Suppress("UNCHECKED_CAST")
             property as Property<Comparable<Any>>
             map[property.name] = state.getOptionalValue(property).map(property::getName).orElse("none")
@@ -97,7 +96,7 @@ object NmsAccessorImpl : NmsAccessor {
             map[name] = pair.first
             possibleValues[name] = pair.second
         }
-        return map.toSortedMap().toSortedMap(compareBy<String> { possibleValues[it] ?: 0 }.reversed())
+        return map.toSortedMap(compareByDescending<String> { possibleValues[it] ?: 0 }.thenBy { it })
     }
 
     override fun handleRecipeBookClick(event: PlayerRecipeBookClickEvent) {

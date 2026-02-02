@@ -239,7 +239,7 @@ open class RebarBlock internal constructor(val block: Block) {
      */
     open fun getBlockTextureItem() = defaultItem?.getItemStack()?.let { ItemStackBuilder(it) }?.apply {
         editPdc { it.set(rebarBlockTextureEntityKey, RebarSerializers.BOOLEAN, true) }
-        val properties = NmsAccessor.instance.getStateProperties(block, true, getBlockTextureProperties())
+        val properties = NmsAccessor.instance.getStateProperties(block, getBlockTextureProperties())
         for ((property, value) in properties) {
             addCustomModelDataString("$property=$value")
         }
