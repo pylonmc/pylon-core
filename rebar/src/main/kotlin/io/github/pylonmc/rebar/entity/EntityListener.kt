@@ -2,6 +2,7 @@ package io.github.pylonmc.rebar.entity
 
 import com.destroystokyo.paper.event.entity.*
 import io.github.pylonmc.rebar.Rebar
+import io.github.pylonmc.rebar.block.BlockListener
 import io.github.pylonmc.rebar.block.base.RebarHopper
 import io.github.pylonmc.rebar.config.RebarConfig
 import io.github.pylonmc.rebar.entity.base.*
@@ -90,7 +91,7 @@ internal object EntityListener : Listener {
         val holder = inv.holder
         if (holder is HopperMinecart) {
             val pyEntity = EntityStorage.get(holder.entity) as? RebarHopper ?: return
-            pyEntity.onHopperPickUpItem(event)
+            pyEntity.onHopperPickUpItem(event, EventPriority.NORMAL)
         }
     }
 

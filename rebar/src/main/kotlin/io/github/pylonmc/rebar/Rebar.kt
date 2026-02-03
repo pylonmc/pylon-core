@@ -23,6 +23,7 @@ import io.github.pylonmc.rebar.entity.EntityListener
 import io.github.pylonmc.rebar.entity.EntityStorage
 import io.github.pylonmc.rebar.entity.RebarEntity
 import io.github.pylonmc.rebar.entity.base.RebarTickingEntity
+import io.github.pylonmc.rebar.event.api.MultiListener
 import io.github.pylonmc.rebar.fluid.placement.FluidPipePlacementService
 import io.github.pylonmc.rebar.guide.pages.base.PagedGuidePage
 import io.github.pylonmc.rebar.guide.pages.base.TabbedGuidePage
@@ -119,7 +120,6 @@ object Rebar : JavaPlugin(), RebarAddon {
 
         pm.registerEvents(BlockStorage, this)
         pm.registerEvents(BlockListener, this)
-        pm.registerEvents(RebarCopperBlock, this)
         pm.registerEvents(RebarItemListener, this)
         pm.registerEvents(MultiblockCache, this)
         pm.registerEvents(EntityStorage, this)
@@ -139,13 +139,46 @@ object Rebar : JavaPlugin(), RebarAddon {
         pm.registerEvents(RebarTickingBlock, this)
         pm.registerEvents(RebarGuide, this)
         pm.registerEvents(RebarLogisticBlock, this)
-        pm.registerEvents(RebarCargoBlock, this)
         pm.registerEvents(CargoRoutes, this)
         pm.registerEvents(CargoDuct, this)
         pm.registerEvents(RecipeCompletion, this)
         pm.registerEvents(PagedGuidePage, this)
         pm.registerEvents(TabbedGuidePage, this)
         pm.registerEvents(RebarTickingEntity, this)
+
+        // Rebar Base Blocks
+        RebarBeacon.register(this, pm)
+        RebarBell.register(this, pm)
+        RebarTNT.register(this, pm)
+        RebarNoteBlock.register(this, pm)
+        RebarCrafter.register(this, pm)
+        RebarSponge.register(this, pm)
+        RebarFurnace.register(this, pm)
+        RebarCampfire.register(this, pm)
+        RebarBrewingStand.register(this, pm)
+        RebarDispenser.register(this, pm)
+        RebarGrowable.register(this, pm)
+        RebarCauldron.register(this, pm)
+        RebarSign.register(this, pm)
+        RebarTrialVault.register(this, pm)
+        RebarLeaf.register(this, pm)
+        RebarTargetBlock.register(this, pm)
+        RebarComposter.register(this, pm)
+        RebarShearable.register(this, pm)
+        RebarLectern.register(this, pm)
+        RebarPiston.register(this, pm)
+        RebarEnchantingTable.register(this, pm)
+        RebarRedstoneBlock.register(this, pm)
+        RebarInteractBlock.register(this, pm)
+        RebarSneakableBlock.register(this, pm)
+        RebarJumpBlock.register(this, pm)
+        RebarUnloadBlock.register(this, pm)
+        RebarFlowerPot.register(this, pm)
+        RebarVanillaContainerBlock.register(this, pm)
+        RebarHopper.register(this, pm)
+        RebarCargoBlock.register(this, pm)
+        RebarCopperBlock.register(this, pm)
+        RebarEntityChangedBlock.register(this, pm)
 
         Bukkit.getScheduler().runTaskTimer(this, RebarInventoryTicker(), 0, RebarConfig.INVENTORY_TICKER_BASE_RATE)
 
