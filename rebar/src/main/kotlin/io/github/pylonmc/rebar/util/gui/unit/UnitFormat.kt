@@ -240,17 +240,17 @@ class UnitFormat @JvmOverloads constructor(
             var unit = Component.empty().style(unitStyle)
             unit = if (abbreviate && abbreviation != null) {
                 unit
+                    .append(if (noSpace) Component.empty() else Component.text(" "))
                     .append(usedPrefix.abbreviationKey)
                     .append(abbreviation)
             } else {
                 unit
+                    .append(Component.text(" "))
                     .append(usedPrefix.translationKey)
                     .append(if (usedValue == BigDecimal.ONE) singular else plural)
             }
 
-            return number
-                .append(if (noSpace) Component.empty() else Component.text(" "))
-                .append(unit)
+            return number.append(unit)
         }
 
         /**
