@@ -2,14 +2,13 @@ package io.github.pylonmc.rebar.util.gui.unit
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.Duration
-import java.util.EnumSet
+import java.util.*
 
 /**
  * Handles formatting of a specific unit. Call [format] to format a value using this unit.
@@ -130,6 +129,11 @@ class UnitFormat @JvmOverloads constructor(
          * Sets what prefixes should not be used.
          */
         fun ignorePrefixes(vararg prefixes: MetricPrefix) = apply { badPrefixes.addAll(prefixes) }
+
+        /**
+         * Ignores the prefixes in [MetricPrefix.COMMONLY_UNUSED_PREFIXES]
+         */
+        fun ignoreCommonlyUnusedPrefixes() = ignorePrefixes(MetricPrefix.COMMONLY_UNUSED_PREFIXES)
 
         /**
          * Sets whether the prefix should be automatically selected instead of using the default
@@ -345,7 +349,8 @@ class UnitFormat @JvmOverloads constructor(
          * Helper function that automatically formats a duration into days:hours:minutes:seconds
          */
         @JvmStatic
-        @JvmOverloads fun formatDuration(duration: Duration, abbreviate: Boolean = true, useMillis: Boolean = false): Component {
+        @JvmOverloads
+        fun formatDuration(duration: Duration, abbreviate: Boolean = true, useMillis: Boolean = false): Component {
             var component = Component.text()
             var isEmpty = true
 
