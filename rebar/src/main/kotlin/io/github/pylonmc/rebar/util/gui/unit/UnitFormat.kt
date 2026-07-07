@@ -20,6 +20,7 @@ import java.util.*
  * @param singular A component representing the long singular form of this unit (kilogram, meter, liter, etc)
  * @param plural A component representing the long plural form of this unit (kilograms, meters, liters, etc)
  * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc). May be null to indicate that the unit does not have an abbreviation
+ * @param noSpace whether there should not be a space between the value and the abbreviated version of the unit (e.g. "100%" not "100 %")
  * @param defaultPrefix The prefix (kilo, nano, etc) used for this unit unless specified while formatting.
  * For example, if you create a 'grams' unit and specify [MetricPrefix.KILO] as the default prefix, calling
  * [format] with 100 will return '100 kilograms'
@@ -29,6 +30,7 @@ class UnitFormat @JvmOverloads constructor(
     val singular: Component,
     val plural: Component,
     val abbreviation: Component? = null,
+    val noSpace: Boolean = false,
     val defaultPrefix: MetricPrefix = MetricPrefix.NONE,
     val defaultStyle: Style = Style.empty()
 ) {
@@ -44,12 +46,12 @@ class UnitFormat @JvmOverloads constructor(
     /**
      * Returns a **new** [UnitFormat] with the same parameters as this one but with a different default prefix
      */
-    fun withDefaultPrefix(prefix: MetricPrefix) = UnitFormat(singular, plural, abbreviation, prefix, defaultStyle)
+    fun withDefaultPrefix(prefix: MetricPrefix) = UnitFormat(singular, plural, abbreviation, noSpace, prefix, defaultStyle)
 
     /**
      * Returns a **new** [UnitFormat] with the same parameters as this one but with a different default style
      */
-    fun withDefaultStyle(style: Style) = UnitFormat(singular, plural, abbreviation, defaultPrefix, style)
+    fun withDefaultStyle(style: Style) = UnitFormat(singular, plural, abbreviation, noSpace, defaultPrefix, style)
 
     /**
      * Returns a new [UnitFormat] that combines this and [other] over multiplication. For example,
@@ -81,7 +83,7 @@ class UnitFormat @JvmOverloads constructor(
             null
         }
         val style = this.defaultStyle.merge(other.defaultStyle)
-        return UnitFormat(singular, plural, abbr, defaultPrefix, style)
+        return UnitFormat(singular, plural, abbr, noSpace, defaultPrefix, style)
     }
 
     /**
@@ -114,7 +116,7 @@ class UnitFormat @JvmOverloads constructor(
             null
         }
         val style = this.defaultStyle.merge(other.defaultStyle)
-        return UnitFormat(singular, plural, abbr, defaultPrefix, style)
+        return UnitFormat(singular, plural, abbr, noSpace, defaultPrefix, style)
     }
 
     fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
@@ -247,7 +249,7 @@ class UnitFormat @JvmOverloads constructor(
             }
 
             return number
-                .append(Component.text(" "))
+                .append(if (noSpace) Component.empty() else Component.text(" "))
                 .append(unit)
         }
 
@@ -269,8 +271,9 @@ class UnitFormat @JvmOverloads constructor(
 
         private fun rebar(
             name: String,
-            color: TextColor,
+            style: Style,
             prefix: MetricPrefix = MetricPrefix.NONE,
+            noSpace: Boolean = false,
         ): UnitFormat {
             val singular = Component.translatable("rebar.unit.$name.singular")
             val abbrKey = "rebar.unit.$name.abbr"
@@ -281,114 +284,116 @@ class UnitFormat @JvmOverloads constructor(
                 singular = singular,
                 plural = Component.translatable("rebar.unit.$name.plural"),
                 abbreviation = abbr,
+                noSpace = noSpace,
                 defaultPrefix = prefix,
-                defaultStyle = Style.style(color),
+                defaultStyle = style,
             ).allowUseInUnitTag(name)
         }
 
         @JvmField
         val BLOCKS = rebar(
             "blocks",
-            TextColor.color(0x1eaa56)
+            Style.style(TextColor.color(0x1eaa56))
         )
 
         @JvmField
         val CHUNKS = rebar(
             "chunks",
-            TextColor.color(0x136D37)
+            Style.style(TextColor.color(0x136D37))
         )
 
         @JvmField
         val HEARTS = rebar(
             "hearts",
-            TextColor.color(0xdb3b43)
+            Style.style(TextColor.color(0xdb3b43))
         )
 
         @JvmField
         val PERCENT = rebar(
             "percent",
-            TextColor.color(0xa6dd58)
+            Style.empty(),
+            noSpace = true
         )
 
         @JvmField
         val RESEARCH_POINTS = rebar(
             "research_points",
-            TextColor.color(0x70da65)
+            Style.style(TextColor.color(0x70da65))
         )
 
         @JvmField
         val CELSIUS = rebar(
             "celsius",
-            TextColor.color(0xe27f41)
+            Style.style(TextColor.color(0xe27f41))
         )
 
         @JvmField
         val MILLIBUCKETS = rebar(
             "buckets",
-            TextColor.color(0xe3835f2),
+            Style.style(TextColor.color(0xe3835f2)),
             prefix = MetricPrefix.MILLI
         )
 
         @JvmField
         val DAYS = rebar(
             "days",
-            TextColor.color(0xc9c786)
+            Style.style(TextColor.color(0xc9c786))
         )
 
         @JvmField
         val HOURS = rebar(
             "hours",
-            TextColor.color(0xc9c786)
+            Style.style(TextColor.color(0xc9c786))
         )
 
         @JvmField
         val MINUTES = rebar(
             "minutes",
-            TextColor.color(0xc9c786)
+            Style.style(TextColor.color(0xc9c786))
         )
 
         @JvmField
         val SECONDS = rebar(
             "seconds",
-            TextColor.color(0xc9c786),
+            Style.style(TextColor.color(0xc9c786)),
         )
 
         @JvmField
         val JOULES = rebar(
             "joules",
-            TextColor.color(0xF2A900),
+            Style.style(TextColor.color(0xF2A900)),
             prefix = MetricPrefix.NONE
         )
 
         @JvmField
         val WATTS = rebar(
             "watts",
-            TextColor.color(0xF2A900),
+            Style.style(TextColor.color(0xF2A900)),
             prefix = MetricPrefix.NONE
         )
 
         @JvmField
         val EXPERIENCE = rebar(
             "experience",
-            TextColor.color(0xb2e01a)
+            Style.style(TextColor.color(0xb2e01a))
         )
 
         @JvmField
         val ITEMS = rebar(
             "items",
-            TextColor.color(0x09e2c2)
+            Style.style(TextColor.color(0x09e2c2))
         )
 
         @JvmField
         val STACKS = rebar(
             "stacks",
-            TextColor.color(0x44d2e2)
+            Style.style(TextColor.color(0x44d2e2))
         )
 
         @JvmField
         val CYCLES = rebar(
             "cycles",
-            TextColor.color(0xb672bf),
+            Style.style(TextColor.color(0xb672bf)),
             prefix = MetricPrefix.NONE
         )
 
