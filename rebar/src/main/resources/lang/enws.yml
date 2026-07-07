@@ -263,13 +263,17 @@ unit:
       name: "quecto"
       abbr: "q"
 
+  separator:
+    multiply:
+      full: "-"
+      abbr: "*"
+    divide:
+      full: " per "
+      abbr: "/"
+
   blocks:
     singular: "block"
     plural: "blocks"
-  blocks_per_second:
-    singular: "block per second"
-    plural: "blocks per second"
-    abbr: "b/s"
   chunks:
     singular: "chunk"
     plural: "chunks"
@@ -292,10 +296,6 @@ unit:
     singular: "bucket"
     plural: "buckets"
     abbr: "B"
-  buckets_per_second:
-    singular: "bucket per second"
-    plural: "buckets per second"
-    abbr: "B/s"
   days:
     singular: "day"
     plural: "days"

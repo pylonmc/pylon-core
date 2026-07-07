@@ -51,6 +51,72 @@ class UnitFormat @JvmOverloads constructor(
      */
     fun withDefaultStyle(style: Style) = UnitFormat(singular, plural, abbreviation, defaultPrefix, style)
 
+    /**
+     * Returns a new [UnitFormat] that combines this and [other] over multiplication. For example,
+     * combining "watt" and "hour" will give you "watt-hour".
+     *
+     * The default prefix for [other] will be baked into the unit (e.x. "watt" * "kilohour" = "watt-kilohour"),
+     * and the new unit will use the default prefix/prefix behavior of the first unit. If you wish to change the
+     * prefix for the second unit, use [withDefaultPrefix].
+     *
+     * The default style will be equivalent to `this.defaultStyle.merge(other.defaultStyle)`.
+     *
+     * The new unit will only have an abbreviation if both input units have an abbreviation.
+     */
+    fun multiply(other: UnitFormat): UnitFormat {
+        val singular = this.singular
+            .append(MULTIPLICATION_FULL)
+            .append(other.defaultPrefix.translationKey)
+            .append(other.singular)
+        val plural = this.singular
+            .append(MULTIPLICATION_FULL)
+            .append(other.defaultPrefix.translationKey)
+            .append(other.plural)
+        val abbr = if (this.abbreviation != null && other.abbreviation != null) {
+            this.abbreviation
+                .append(MULTIPLICATION_ABBR)
+                .append(other.defaultPrefix.abbreviationKey)
+                .append(other.abbreviation)
+        } else {
+            null
+        }
+        val style = this.defaultStyle.merge(other.defaultStyle)
+        return UnitFormat(singular, plural, abbr, defaultPrefix, style)
+    }
+
+    /**
+     * Returns a new [UnitFormat] that combines this and [other] over division. For example,
+     * combining "watt" and "hour" will give you "watt per hour".
+     *
+     * The default prefix for [other] will be baked into the unit (e.x. "watt" / "kilohour" = "watt per kilohour"),
+     * and the new unit will use the default prefix/prefix behavior of the first unit. If you wish to change the
+     * prefix for the second unit, use [withDefaultPrefix].
+     *
+     * The default style will be equivalent to `this.defaultStyle.merge(other.defaultStyle)`.
+     *
+     * The new unit will only have an abbreviation if both input units have an abbreviation.
+     */
+    fun divide(other: UnitFormat): UnitFormat {
+        val singular = this.singular
+            .append(DIVISION_FULL)
+            .append(other.defaultPrefix.translationKey)
+            .append(other.singular)
+        val plural = this.plural
+            .append(DIVISION_FULL)
+            .append(other.defaultPrefix.translationKey)
+            .append(other.singular)
+        val abbr = if (this.abbreviation != null && other.abbreviation != null) {
+            this.abbreviation
+                .append(DIVISION_ABBR)
+                .append(other.defaultPrefix.abbreviationKey)
+                .append(other.abbreviation)
+        } else {
+            null
+        }
+        val style = this.defaultStyle.merge(other.defaultStyle)
+        return UnitFormat(singular, plural, abbr, defaultPrefix, style)
+    }
+
     fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
 
     fun format(value: Int) = format(value.toLong())
@@ -172,11 +238,11 @@ class UnitFormat @JvmOverloads constructor(
             var unit = Component.empty().style(unitStyle)
             unit = if (abbreviate && abbreviation != null) {
                 unit
-                    .append(usedPrefix.abbreviation)
+                    .append(usedPrefix.abbreviationKey)
                     .append(abbreviation)
             } else {
                 unit
-                    .append(usedPrefix.fullName)
+                    .append(usedPrefix.translationKey)
                     .append(if (usedValue == BigDecimal.ONE) singular else plural)
             }
 
@@ -192,6 +258,11 @@ class UnitFormat @JvmOverloads constructor(
     }
 
     companion object {
+
+        private val MULTIPLICATION_FULL = Component.translatable("rebar.unit.separator.multiply.full")
+        private val MULTIPLICATION_ABBR = Component.translatable("rebar.unit.separator.multiply.abbr")
+        private val DIVISION_FULL = Component.translatable("rebar.unit.separator.divide.full")
+        private val DIVISION_ABBR = Component.translatable("rebar.unit.separator.divide.abbr")
 
         @JvmSynthetic
         internal val namedUnits = mutableMapOf<String, UnitFormat>()
@@ -219,13 +290,6 @@ class UnitFormat @JvmOverloads constructor(
         val BLOCKS = rebar(
             "blocks",
             TextColor.color(0x1eaa56)
-        )
-
-        @JvmField
-        val BLOCKS_PER_SECOND = rebar(
-            "blocks_per_second",
-            TextColor.color(0x0ae256),
-            prefix = MetricPrefix.NONE
         )
 
         @JvmField
@@ -261,20 +325,6 @@ class UnitFormat @JvmOverloads constructor(
         @JvmField
         val MILLIBUCKETS = rebar(
             "buckets",
-            TextColor.color(0xe3835f2),
-            prefix = MetricPrefix.MILLI
-        )
-
-        @JvmField
-        val MILLIBUCKETS_PER_SECOND = rebar(
-            "buckets_per_second",
-            TextColor.color(0xe3835f2),
-            prefix = MetricPrefix.MILLI
-        )
-
-        @JvmField
-        val MILLIBUCKETS_PER_ITEM = rebar(
-            "buckets_per_item",
             TextColor.color(0xe3835f2),
             prefix = MetricPrefix.MILLI
         )
@@ -324,22 +374,9 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
-        val EXPERIENCE_PER_SECOND = rebar(
-            "experience_per_second",
-            TextColor.color(0xb2e01a)
-        )
-
-        @JvmField
         val ITEMS = rebar(
             "items",
             TextColor.color(0x09e2c2)
-        )
-
-        @JvmField
-        val ITEMS_PER_SECOND = rebar(
-            "items_per_second",
-            TextColor.color(0x09e2c2),
-            prefix = MetricPrefix.NONE
         )
 
         @JvmField
@@ -349,11 +386,29 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
-        val CYCLES_PER_SECOND = rebar(
-            "cycles_per_second",
+        val CYCLES = rebar(
+            "cycles",
             TextColor.color(0xb672bf),
             prefix = MetricPrefix.NONE
         )
+
+        @JvmField
+        val CYCLES_PER_SECOND = CYCLES.divide(SECONDS)
+
+        @JvmField
+        val BLOCKS_PER_SECOND = BLOCKS.divide(SECONDS)
+
+        @JvmField
+        val ITEMS_PER_SECOND = ITEMS.divide(SECONDS)
+
+        @JvmField
+        val EXPERIENCE_PER_SECOND = EXPERIENCE.divide(SECONDS)
+
+        @JvmField
+        val MILLIBUCKETS_PER_SECOND = MILLIBUCKETS.divide(SECONDS)
+
+        @JvmField
+        val MILLIBUCKETS_PER_ITEM = MILLIBUCKETS.divide(ITEMS)
 
         /**
          * Helper function that automatically formats a duration into `<days> <hours> <minutes> <seconds> <milliseconds>?`,

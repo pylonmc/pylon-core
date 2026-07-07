@@ -40,8 +40,8 @@ enum class MetricPrefix(
     QUECTO(-30)
     ;
 
-    val fullName: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.name")
-    val abbreviation: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.abbr")
+    val translationKey: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.name")
+    val abbreviationKey: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.abbr")
 
     companion object {
         /**

@@ -545,13 +545,17 @@ unit:
       name: "quecto"
       abbr: "q"
 
+  separator:
+    multiply:
+      full: "-"
+      abbr: "*"
+    divide:
+      full: " per "
+      abbr: "/"
+
   blocks:
     singular: "block"
     plural: "blocks"
-  blocks_per_second:
-    singular: "block per second"
-    plural: "blocks per second"
-    abbr: "blocks/s"
   chunks:
     singular: "chunk"
     plural: "chunks"
@@ -574,14 +578,6 @@ unit:
     singular: "bucket"
     plural: "buckets"
     abbr: "B"
-  buckets_per_second:
-    singular: "bucket per second"
-    plural: "buckets per second"
-    abbr: "B/s"
-  buckets_per_item:
-    singular: "bucket per item"
-    plural: "buckets per item"
-    abbr: "B/item"
   days:
     singular: "day"
     plural: "days"
@@ -610,21 +606,12 @@ unit:
     singular: "experience point"
     plural: "experience points"
     abbr: "XP"
-  experience_per_second:
-    singular: "experience point per second"
-    plural: "experience points per second"
-    abbr: "XP/s"
   items:
     singular: "item"
     plural: "items"
-  items_per_second:
-    singular: "item per second"
-    plural: "items per second"
-    abbr: "items/s"
   stacks:
     singular: "stack"
     plural: "stacks"
-  cycles_per_second:
-    singular: "cycle per second"
-    plural: "cycles per second"
-    abbr: "cycles/s"
+  cycles:
+    singular: "cycle"
+    plural: "cycles"
