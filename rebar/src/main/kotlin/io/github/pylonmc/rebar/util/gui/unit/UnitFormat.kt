@@ -230,7 +230,7 @@ class UnitFormat @JvmOverloads constructor(
                 val exponent = value.precision() - value.scale() - if (value.signum() == 0) 0 else 1
                 val prefix = MetricPrefix.entries.firstOrNull { it.scale <= exponent && it !in badPrefixes }
                     ?: defaultPrefix
-                usedValue = usedValue.movePointRight(prefix.scale)
+                usedValue = usedValue.movePointLeft(prefix.scale)
                 prefix
             } else {
                 prefix!!
