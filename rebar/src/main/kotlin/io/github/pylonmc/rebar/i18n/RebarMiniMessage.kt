@@ -105,7 +105,7 @@ private fun unit(args: ArgumentQueue, @Suppress("unused") ctx: Context): Tag {
         1 -> null to args[0].value()
         else -> throw ctx.newException("Expected 1 or 2 arguments, got ${args.size}")
     }
-    val unit = UnitFormat.allUnits[unitName]
+    val unit = UnitFormat.namedUnits[unitName]
         ?: throw ctx.newException("No such unit: $unitName")
     return Replacing {
         val content = PlainTextComponentSerializer.plainText().serialize(it).trim()
