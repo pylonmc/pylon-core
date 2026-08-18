@@ -4,7 +4,9 @@ import io.github.pylonmc.rebar.Rebar
 import io.github.pylonmc.rebar.block.BlockStorage
 import io.github.pylonmc.rebar.entity.EntityStorage
 import io.github.pylonmc.rebar.i18n.RebarTranslator.Companion.translator
+import io.github.pylonmc.rebar.recipe.RecipeType
 import io.github.pylonmc.rebar.registry.RebarRegistry
+import io.papermc.paper.event.server.ServerResourcesReloadedEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -91,6 +93,16 @@ interface RebarAddon : Keyed {
 
     @ApiStatus.Internal
     companion object : Listener {
+        @EventHandler
+        private fun onServerResourcesReloaded(event: ServerResourcesReloadedEvent) {
+            val restored = RecipeType.restoreDynamicRecipesAfterResourceReload()
+            if (restored > 0) {
+                Rebar.logger.info(
+                    "Restored $restored Rebar/Pylon recipe registrations after server resource reload (${event.cause})."
+                )
+            }
+        }
+
         @EventHandler
         private fun onPluginDisable(event: PluginDisableEvent) {
             val plugin = event.plugin
