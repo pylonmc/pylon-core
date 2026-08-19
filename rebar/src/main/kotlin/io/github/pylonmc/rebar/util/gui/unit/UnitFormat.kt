@@ -155,7 +155,7 @@ class UnitFormat @JvmOverloads constructor(
 
         /**
          * Sets the number of significant figures. Uses [RoundingMode.HALF_UP] for rounding.
-         * For example, if this is set to `3`, then a value of `0.472894` will be shown as `0.473`.
+         * For example, if this is set to `3`, then a value of `3.755` will be shown as `3.76`.
          */
         fun significantFigures(sigFigs: Int) = apply { this.sigFigs = sigFigs }
 
