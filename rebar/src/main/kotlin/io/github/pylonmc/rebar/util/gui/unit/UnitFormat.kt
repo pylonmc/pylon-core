@@ -6,6 +6,7 @@ import io.github.pylonmc.rebar.Rebar
 import io.github.pylonmc.rebar.i18n.RebarTranslator.Companion.translator
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
+import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import java.math.BigDecimal
@@ -20,7 +21,11 @@ import java.util.*
  * @param singular A component representing the long singular form of this unit (kilogram, meter, liter, etc)
  * @param plural A component representing the long plural form of this unit (kilograms, meters, liters, etc)
  * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc). May be null to indicate that the unit does not have an abbreviation
- * @param noSpace whether there should not be a space between the value and the abbreviated version of the unit (e.g. "100%" not "100 %")
+ * @param format the format string that is used as the base into which the value and unit are substituted. The string has 2 placeholders:
+ * `v`, which is replaced with the value, and `u`, with is replaced with the unabbreviated unit name. For example, the default format string is `"v u"`.
+ * `v` is replaced with the value (ex 3 to make `"3 u"`), and `u` is replaced with the unit (ex `"3 seggans"`)
+ * @param abbrFormat same as [format] but `u` is replaced with the abbreviated unit instead. Separate from [format] in order to allow things
+ * like dollars (`$3`, using format string `"uv"`) or percent (`3%`, using format string `"vu"`). Default is `"v u"``.
  * @param defaultPrefix The prefix (kilo, nano, etc) used for this unit unless specified while formatting.
  * For example, if you create a 'grams' unit and specify [MetricPrefix.KILO] as the default prefix, calling
  * [format] with 100 will return '100 kilograms'
@@ -30,7 +35,8 @@ class UnitFormat @JvmOverloads constructor(
     val singular: Component,
     val plural: Component,
     val abbreviation: Component? = null,
-    val noSpace: Boolean = false,
+    val format: String = "v u",
+    val abbrFormat: String = "v u",
     val defaultPrefix: MetricPrefix = MetricPrefix.NONE,
     val defaultStyle: Style = Style.empty()
 ) {
@@ -46,12 +52,22 @@ class UnitFormat @JvmOverloads constructor(
     /**
      * Returns a **new** [UnitFormat] with the same parameters as this one but with a different default prefix
      */
-    fun withDefaultPrefix(prefix: MetricPrefix) = UnitFormat(singular, plural, abbreviation, noSpace, prefix, defaultStyle)
+    fun withDefaultPrefix(prefix: MetricPrefix) = copy(defaultPrefix = prefix)
 
     /**
      * Returns a **new** [UnitFormat] with the same parameters as this one but with a different default style
      */
-    fun withDefaultStyle(style: Style) = UnitFormat(singular, plural, abbreviation, noSpace, defaultPrefix, style)
+    fun withDefaultStyle(style: Style) = copy(defaultStyle = style)
+
+    private fun copy(
+        singular: Component = this.singular,
+        plural: Component = this.plural,
+        abbreviation: Component? = this.abbreviation,
+        format: String = this.format,
+        abbrFormat: String = this.abbrFormat,
+        defaultPrefix: MetricPrefix = this.defaultPrefix,
+        defaultStyle: Style = this.defaultStyle
+    ) = UnitFormat(singular, plural, abbreviation, format, abbrFormat, defaultPrefix, defaultStyle)
 
     /**
      * Returns a new [UnitFormat] that combines this and [other] over multiplication. For example,
@@ -83,7 +99,7 @@ class UnitFormat @JvmOverloads constructor(
             null
         }
         val style = this.defaultStyle.merge(other.defaultStyle)
-        return UnitFormat(singular, plural, abbr, noSpace, defaultPrefix, style)
+        return copy(singular = singular, plural = plural, abbreviation = abbr, defaultStyle = style)
     }
 
     /**
@@ -116,7 +132,7 @@ class UnitFormat @JvmOverloads constructor(
             null
         }
         val style = this.defaultStyle.merge(other.defaultStyle)
-        return UnitFormat(singular, plural, abbr, noSpace, defaultPrefix, style)
+        return copy(singular = singular, plural = plural, abbreviation = abbr, defaultStyle = style)
     }
 
     fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
@@ -237,20 +253,27 @@ class UnitFormat @JvmOverloads constructor(
             }
 
             val number = Component.text(usedValue.toPlainString()).style(valueStyle)
-            var unit = Component.empty().style(unitStyle)
-            unit = if (abbreviate && abbreviation != null) {
-                unit
-                    .append(if (noSpace) Component.empty() else Component.text(" "))
+            val unit = if (abbreviate && abbreviation != null) {
+                Component.empty().style(unitStyle)
                     .append(usedPrefix.abbreviationKey)
                     .append(abbreviation)
             } else {
-                unit
-                    .append(Component.text(" "))
+                Component.empty().style(unitStyle)
                     .append(usedPrefix.translationKey)
                     .append(if (usedValue == BigDecimal.ONE) singular else plural)
             }
 
-            return number.append(unit)
+            val configU = TextReplacementConfig.builder()
+                .match("u")
+                .replacement(unit)
+                .build()
+            val configV = TextReplacementConfig.builder()
+                .match("v")
+                .replacement(number)
+                .build()
+            return Component.text(if (abbreviate && abbreviation != null) abbrFormat else format)
+                .replaceText(configU)
+                .replaceText(configV)
         }
 
         /**
@@ -272,8 +295,8 @@ class UnitFormat @JvmOverloads constructor(
         private fun rebar(
             name: String,
             style: Style,
+            abbrFormat: String = "v u",
             prefix: MetricPrefix = MetricPrefix.NONE,
-            noSpace: Boolean = false,
         ): UnitFormat {
             val singular = Component.translatable("rebar.unit.$name.singular")
             val abbrKey = "rebar.unit.$name.abbr"
@@ -284,7 +307,7 @@ class UnitFormat @JvmOverloads constructor(
                 singular = singular,
                 plural = Component.translatable("rebar.unit.$name.plural"),
                 abbreviation = abbr,
-                noSpace = noSpace,
+                abbrFormat = abbrFormat,
                 defaultPrefix = prefix,
                 defaultStyle = style,
             ).allowUseInUnitTag(name)
@@ -312,7 +335,7 @@ class UnitFormat @JvmOverloads constructor(
         val PERCENT = rebar(
             "percent",
             Style.empty(),
-            noSpace = true
+            abbrFormat = "vu"
         )
 
         @JvmField
