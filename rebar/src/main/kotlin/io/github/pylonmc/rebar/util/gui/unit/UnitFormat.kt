@@ -2,13 +2,17 @@
 
 package io.github.pylonmc.rebar.util.gui.unit
 
+import com.ibm.icu.number.NumberFormatter
+import com.ibm.icu.text.PluralRules
 import io.github.pylonmc.rebar.Rebar
+import io.github.pylonmc.rebar.i18n.LocaleDependentComponentRenderer
 import io.github.pylonmc.rebar.i18n.RebarTranslator.Companion.translator
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.translation.GlobalTranslator
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -18,13 +22,12 @@ import java.util.*
 /**
  * Handles formatting of a specific unit. Call [format] to format a value using this unit.
  *
- * @param singular A component representing the long singular form of this unit (kilogram, meter, liter, etc)
- * @param plural A component representing the long plural form of this unit (kilograms, meters, liters, etc)
- * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc). May be null to indicate that the unit does not have an abbreviation
- * @param format the format string that is used as the base into which the value and unit are substituted. The string has 2 placeholders:
+ * @param forms A map of [PluralForm]s to components for each plural form that represent this unit as per [CLDR](https://www.unicode.org/cldr/charts/42/supplemental/language_plural_rules.html).
+ * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc). May be null to indicate that the unit does not have an abbreviation.
+ * @param format The format string that is used as the base into which the value and unit are substituted. The string has 2 placeholders:
  * `v`, which is replaced with the value, and `u`, with is replaced with the unabbreviated unit name. For example, the default format string is `"v u"`.
  * `v` is replaced with the value (ex 3 to make `"3 u"`), and `u` is replaced with the unit (ex `"3 seggans"`)
- * @param abbrFormat same as [format] but `u` is replaced with the abbreviated unit instead. Separate from [format] in order to allow things
+ * @param abbrFormat Same as [format] but `u` is replaced with the abbreviated unit instead. Separate from [format] in order to allow things
  * like dollars (`$3`, using format string `"uv"`) or percent (`3%`, using format string `"vu"`). Default is `"v u"``.
  * @param defaultPrefix The prefix (kilo, nano, etc) used for this unit unless specified while formatting.
  * For example, if you create a 'grams' unit and specify [MetricPrefix.KILO] as the default prefix, calling
@@ -32,14 +35,43 @@ import java.util.*
  * @param defaultStyle The style to apply to the unit (not the value) to the output.
  */
 class UnitFormat @JvmOverloads constructor(
-    val singular: Component,
-    val plural: Component,
+    val forms: Map<PluralForm, Component>,
     val abbreviation: Component? = null,
     val format: String = "v u",
     val abbrFormat: String = "v u",
     val defaultPrefix: MetricPrefix = MetricPrefix.NONE,
     val defaultStyle: Style = Style.empty()
 ) {
+
+    /**
+     * @param base The base translation key for this unit. Proper plural forms will be constructed as `base + "." + plural_keyword` (see [PluralForm.keyword]).
+     * @param hasAbbreviation If true, the unit will have an abbreviation with the translation key `base + ".abbr"`.
+     * @param format The format string that is used as the base into which the value and unit are substituted. The string has 2 placeholders:
+     * `v`, which is replaced with the value, and `u`, with is replaced with the unabbreviated unit name. For example, the default format string is `"v u"`.
+     * `v` is replaced with the value (ex 3 to make `"3 u"`), and `u` is replaced with the unit (ex `"3 seggans"`)
+     * @param abbrFormat Same as [format] but `u` is replaced with the abbreviated unit instead. Separate from [format] in order to allow things
+     * like dollars (`$3`, using format string `"uv"`) or percent (`3%`, using format string `"vu"`). Default is `"v u"``.
+     * @param defaultPrefix The prefix (kilo, nano, etc) used for this unit unless specified while formatting.
+     * For example, if you create a 'grams' unit and specify [MetricPrefix.KILO] as the default prefix, calling
+     * [format] with 100 will return '100 kilograms'
+     * @param defaultStyle The style to apply to the unit (not the value) to the output.
+     */
+    @JvmOverloads
+    constructor(
+        base: String,
+        hasAbbreviation: Boolean,
+        format: String = "v u",
+        abbrFormat: String = "v u",
+        defaultPrefix: MetricPrefix = MetricPrefix.NONE,
+        defaultStyle: Style = Style.empty()
+    ) : this(
+        forms = PluralForm.entries.associateWith { Component.translatable("$base.${it.keyword}") },
+        abbreviation = Component.translatable("$base.abbr").takeIf { hasAbbreviation },
+        format = format,
+        abbrFormat = abbrFormat,
+        defaultPrefix = defaultPrefix,
+        defaultStyle = defaultStyle
+    )
 
     /**
      * Enables the use of this unit in the custom `<unit:[name]>` tag in [Rebar's custom MiniMessage parser][io.github.pylonmc.rebar.i18n.customMiniMessage]
@@ -60,80 +92,13 @@ class UnitFormat @JvmOverloads constructor(
     fun withDefaultStyle(style: Style) = copy(defaultStyle = style)
 
     private fun copy(
-        singular: Component = this.singular,
-        plural: Component = this.plural,
+        forms: Map<PluralForm, Component> = this.forms,
         abbreviation: Component? = this.abbreviation,
         format: String = this.format,
         abbrFormat: String = this.abbrFormat,
         defaultPrefix: MetricPrefix = this.defaultPrefix,
         defaultStyle: Style = this.defaultStyle
-    ) = UnitFormat(singular, plural, abbreviation, format, abbrFormat, defaultPrefix, defaultStyle)
-
-    /**
-     * Returns a new [UnitFormat] that combines this and [other] over multiplication. For example,
-     * combining "watt" and "hour" will give you "watt-hour".
-     *
-     * The default prefix for [other] will be baked into the unit (e.x. "watt" * "kilohour" = "watt-kilohour"),
-     * and the new unit will use the default prefix/prefix behavior of the first unit. If you wish to change the
-     * prefix for the second unit, use [withDefaultPrefix].
-     *
-     * The default style will be equivalent to `this.defaultStyle.merge(other.defaultStyle)`.
-     *
-     * The new unit will only have an abbreviation if both input units have an abbreviation.
-     */
-    fun multiply(other: UnitFormat): UnitFormat {
-        val singular = this.singular
-            .append(MULTIPLICATION_FULL)
-            .append(other.defaultPrefix.translationKey)
-            .append(other.singular)
-        val plural = this.singular
-            .append(MULTIPLICATION_FULL)
-            .append(other.defaultPrefix.translationKey)
-            .append(other.plural)
-        val abbr = if (this.abbreviation != null && other.abbreviation != null) {
-            this.abbreviation
-                .append(MULTIPLICATION_ABBR)
-                .append(other.defaultPrefix.abbreviationKey)
-                .append(other.abbreviation)
-        } else {
-            null
-        }
-        val style = this.defaultStyle.merge(other.defaultStyle)
-        return copy(singular = singular, plural = plural, abbreviation = abbr, defaultStyle = style)
-    }
-
-    /**
-     * Returns a new [UnitFormat] that combines this and [other] over division. For example,
-     * combining "watt" and "hour" will give you "watt per hour".
-     *
-     * The default prefix for [other] will be baked into the unit (e.x. "watt" / "kilohour" = "watt per kilohour"),
-     * and the new unit will use the default prefix/prefix behavior of the first unit. If you wish to change the
-     * prefix for the second unit, use [withDefaultPrefix].
-     *
-     * The default style will be equivalent to `this.defaultStyle.merge(other.defaultStyle)`.
-     *
-     * The new unit will only have an abbreviation if both input units have an abbreviation.
-     */
-    fun divide(other: UnitFormat): UnitFormat {
-        val singular = this.singular
-            .append(DIVISION_FULL)
-            .append(other.defaultPrefix.translationKey)
-            .append(other.singular)
-        val plural = this.plural
-            .append(DIVISION_FULL)
-            .append(other.defaultPrefix.translationKey)
-            .append(other.singular)
-        val abbr = if (this.abbreviation != null && other.abbreviation != null) {
-            this.abbreviation
-                .append(DIVISION_ABBR)
-                .append(other.defaultPrefix.abbreviationKey)
-                .append(other.abbreviation)
-        } else {
-            null
-        }
-        val style = this.defaultStyle.merge(other.defaultStyle)
-        return copy(singular = singular, plural = plural, abbreviation = abbr, defaultStyle = style)
-    }
+    ) = UnitFormat(forms, abbreviation, format, abbrFormat, defaultPrefix, defaultStyle)
 
     fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
 
@@ -252,34 +217,82 @@ class UnitFormat @JvmOverloads constructor(
                 prefix!!
             }
 
-            val number = Component.text(usedValue.toPlainString()).style(valueStyle)
-            val unit = if (abbreviate && abbreviation != null) {
-                Component.empty().style(unitStyle)
-                    .append(usedPrefix.abbreviationKey)
-                    .append(abbreviation)
-            } else {
-                Component.empty().style(unitStyle)
-                    .append(usedPrefix.translationKey)
-                    .append(if (usedValue == BigDecimal.ONE) singular else plural)
-            }
+            return LocaleDependentComponentRenderer { lang ->
+                val formatted = NumberFormatter.withLocale(lang).format(usedValue)
+                val number = Component.text(formatted.toString()).style(valueStyle)
+                val unit = if (abbreviate && abbreviation != null) {
+                    Component.empty().style(unitStyle)
+                        .append(usedPrefix.abbreviationKey)
+                        .append(abbreviation)
+                } else {
+                    val keyword = PluralRules.forLocale(lang).select(formatted)
+                    val plural = PluralForm.entries.first { it.keyword == keyword }
+                    Component.empty().style(unitStyle)
+                        .append(usedPrefix.translationKey)
+                        .append(forms[plural] ?: error("Missing plural form $keyword for $lang"))
+                }
 
-            val configU = TextReplacementConfig.builder()
-                .match("u")
-                .replacement(unit)
-                .build()
-            val configV = TextReplacementConfig.builder()
-                .match("v")
-                .replacement(number)
-                .build()
-            return Component.text(if (abbreviate && abbreviation != null) abbrFormat else format)
-                .replaceText(configU)
-                .replaceText(configV)
+                val configU = TextReplacementConfig.builder()
+                    .matchLiteral("u")
+                    .replacement(unit)
+                    .build()
+                val configV = TextReplacementConfig.builder()
+                    .matchLiteral("v")
+                    .replacement(number)
+                    .build()
+
+                val final = Component.text(if (abbreviate && abbreviation != null) abbrFormat else format)
+                    .replaceText(configU)
+                    .replaceText(configV)
+
+                GlobalTranslator.render(final, lang)
+            }.asComponent()
         }
 
         /**
          * Alias for [build]
          */
         override fun asComponent() = build()
+    }
+
+    /**
+     * Plural forms as found in the [Unicode CLDR](https://www.unicode.org/cldr/charts/42/supplemental/language_plural_rules.html)
+     */
+    enum class PluralForm(
+        /**
+         * The CLDR keyword for this plural form
+         */
+        val keyword: String
+    ) {
+        /**
+         * CLDR keyword: `zero`
+         */
+        ZERO(PluralRules.KEYWORD_ZERO),
+
+        /**
+         * CLDR keyword: `one`
+         */
+        ONE(PluralRules.KEYWORD_ONE),
+
+        /**
+         * CLDR keyword: `two`
+         */
+        TWO(PluralRules.KEYWORD_TWO),
+
+        /**
+         * CLDR keyword: `few`
+         */
+        FEW(PluralRules.KEYWORD_FEW),
+
+        /**
+         * CLDR keyword: `many`
+         */
+        MANY(PluralRules.KEYWORD_MANY),
+
+        /**
+         * CLDR keyword: `other`
+         */
+        OTHER(PluralRules.KEYWORD_OTHER),
     }
 
     companion object {
@@ -298,14 +311,12 @@ class UnitFormat @JvmOverloads constructor(
             abbrFormat: String = "v u",
             prefix: MetricPrefix = MetricPrefix.NONE,
         ): UnitFormat {
-            val singular = Component.translatable("rebar.unit.$name.singular")
             val abbrKey = "rebar.unit.$name.abbr"
             val abbr = Component.translatable(abbrKey).takeIf {
                 Rebar.translator.canTranslate(abbrKey, Rebar.defaultLanguage)
             }
             return UnitFormat(
-                singular = singular,
-                plural = Component.translatable("rebar.unit.$name.plural"),
+                forms = PluralForm.entries.associateWith { Component.text("rebar.unit.$name.$it") },
                 abbreviation = abbr,
                 abbrFormat = abbrFormat,
                 defaultPrefix = prefix,
@@ -316,6 +327,12 @@ class UnitFormat @JvmOverloads constructor(
         @JvmField
         val BLOCKS = rebar(
             "blocks",
+            Style.style(TextColor.color(0x1eaa56))
+        )
+
+        @JvmField
+        val BLOCKS_PER_SECOND = rebar(
+            "blocks_per_second",
             Style.style(TextColor.color(0x1eaa56))
         )
 
@@ -353,6 +370,20 @@ class UnitFormat @JvmOverloads constructor(
         @JvmField
         val MILLIBUCKETS = rebar(
             "buckets",
+            Style.style(TextColor.color(0xe3835f2)),
+            prefix = MetricPrefix.MILLI
+        )
+
+        @JvmField
+        val MILLIBUCKETS_PER_SECOND = rebar(
+            "buckets_per_second",
+            Style.style(TextColor.color(0xe3835f2)),
+            prefix = MetricPrefix.MILLI
+        )
+
+        @JvmField
+        val MILLIBUCKETS_PER_ITEM = rebar(
+            "buckets_per_item",
             Style.style(TextColor.color(0xe3835f2)),
             prefix = MetricPrefix.MILLI
         )
@@ -402,8 +433,20 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
+        val EXPERIENCE_PER_SECOND = rebar(
+            "experience_per_second",
+            Style.style(TextColor.color(0xb2e01a))
+        )
+
+        @JvmField
         val ITEMS = rebar(
             "items",
+            Style.style(TextColor.color(0x09e2c2))
+        )
+
+        @JvmField
+        val ITEMS_PER_SECOND = rebar(
+            "items_per_second",
             Style.style(TextColor.color(0x09e2c2))
         )
 
@@ -421,22 +464,11 @@ class UnitFormat @JvmOverloads constructor(
         )
 
         @JvmField
-        val CYCLES_PER_SECOND = CYCLES.divide(SECONDS)
-
-        @JvmField
-        val BLOCKS_PER_SECOND = BLOCKS.divide(SECONDS)
-
-        @JvmField
-        val ITEMS_PER_SECOND = ITEMS.divide(SECONDS)
-
-        @JvmField
-        val EXPERIENCE_PER_SECOND = EXPERIENCE.divide(SECONDS)
-
-        @JvmField
-        val MILLIBUCKETS_PER_SECOND = MILLIBUCKETS.divide(SECONDS)
-
-        @JvmField
-        val MILLIBUCKETS_PER_ITEM = MILLIBUCKETS.divide(ITEMS)
+        val CYCLES_PER_SECOND = rebar(
+            "cycles_per_second",
+            Style.style(TextColor.color(0xb672bf)),
+            prefix = MetricPrefix.NONE
+        )
 
         /**
          * Helper function that automatically formats a duration into `<days> <hours> <minutes> <seconds> <milliseconds>?`,
