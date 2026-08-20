@@ -7,17 +7,13 @@ import io.github.pylonmc.rebar.config.adapter.ConfigAdapter
 import io.github.pylonmc.rebar.datatypes.RebarSerializers
 import io.github.pylonmc.rebar.event.RebarRegisterEvent
 import io.github.pylonmc.rebar.event.RebarUnregisterEvent
+import io.github.pylonmc.rebar.i18n.RebarTranslator.Companion.translate
 import io.github.pylonmc.rebar.i18n.RebarTranslator.Companion.translator
 import io.github.pylonmc.rebar.item.RebarItemSchema
 import io.github.pylonmc.rebar.item.builder.ItemStackBuilder
 import io.github.pylonmc.rebar.nms.NmsAccessor
 import io.github.pylonmc.rebar.registry.RebarRegistry
-import io.github.pylonmc.rebar.util.editData
-import io.github.pylonmc.rebar.util.mergeResource
-import io.github.pylonmc.rebar.util.persistentData
-import io.github.pylonmc.rebar.util.plainText
-import io.github.pylonmc.rebar.util.rebarKey
-import io.github.pylonmc.rebar.util.withArguments
+import io.github.pylonmc.rebar.util.*
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemLore
 import io.papermc.paper.datacomponent.item.ResolvableProfile
@@ -120,7 +116,7 @@ class RebarTranslator private constructor(private val addon: RebarAddon) : Trans
             val renderer = componentArg.renderer()
             if (renderer !is RebarArgument) continue
             val replacer = TextReplacementConfig.builder()
-                .match("%${renderer.name}%")
+                .matchLiteral("%${renderer.name}%")
                 .replacement(GlobalTranslator.render(renderer.value.asComponent(), locale))
                 .build()
             translation = translation.replaceText(replacer)

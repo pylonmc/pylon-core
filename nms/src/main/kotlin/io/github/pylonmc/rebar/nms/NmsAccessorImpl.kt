@@ -328,7 +328,7 @@ object NmsAccessorImpl : NmsAccessor {
         } else {
             val nmsPos = (block as CraftBlock).position
             val nmsDirection = CraftBlock.blockFaceToNotch(blockFace) ?: throw IllegalArgumentException("Invalid block face $blockFace")
-            val nmsLoc = nmsPos.center.add(nmsDirection.unitVec3.scale(0.5))
+            val nmsLoc = Vec3.atCenterOf(nmsPos).add(nmsDirection.unitVec3.scale(0.5))
             nmsPlayer.gameMode.useItemOn(nmsPlayer, level, nmsStack, nmsHand, BlockHitResult(nmsLoc, nmsDirection, nmsPos, false))
         }
     }

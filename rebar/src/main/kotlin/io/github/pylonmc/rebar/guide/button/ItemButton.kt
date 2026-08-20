@@ -246,6 +246,9 @@ class ItemButton private constructor(
         }
 
         @JvmStatic
+        fun of(stack: ItemStackBuilder) = of(stack.stack)
+
+        @JvmStatic
         @JvmOverloads
         fun of(choice: ItemChoice?, preDisplayDecorator: Decorator? = null) = of(choice?.representativeItems, preDisplayDecorator)
 

@@ -13,7 +13,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.Click
-import xyz.xenondevs.invui.item.AbstractItem
 import xyz.xenondevs.invui.item.ItemProvider
 
 /**
@@ -34,7 +33,7 @@ open class PageButton(val stack: ItemStack, val page: GuidePage) : GuideButton()
 
     @Suppress("UnstableApiUsage")
     override fun getItemProvider(viewer: Player): ItemProvider = ItemStackBuilder.gui(stack.clone(), "${rebarKey("guide_page")}:${page.key}")
-        .name(Component.translatable("${page.key.namespace}.guide.page.${page.key.key}"))
+        .name(page.title)
         .clearLore()
         .lore(Component.translatable("${page.key.namespace}.guide.button.${page.key.key}.lore", ""))
         .set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(hiddenComponents))

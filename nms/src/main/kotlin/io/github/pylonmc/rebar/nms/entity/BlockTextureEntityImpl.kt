@@ -24,6 +24,7 @@ import net.minecraft.util.LightCoordsUtil
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.Pose
 import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.item.ItemDisplayContext
@@ -122,7 +123,7 @@ class BlockTextureEntityImpl : BlockTextureEntity, SyncedDataHolder {
     constructor(block: RebarBlock) {
         this.block = block
         this.neighborPositions = IMMEDIATE_FACES.map { BlockPosition.asLong(block.block.getRelative(it)) }
-        this.id = Bukkit.getUnsafe().nextEntityId()
+        this.id = Bukkit.getUnsafe().nextEntityId(block.block.world)
         this.uuid = Mth.createInsecureUUID(Entity.SHARED_RANDOM)
         this.entityData = EntityDataAccess.fakedDataBuilder(this, NmsDisplay.ItemDisplay::class.java).apply {
             // An ItemDisplay's class hierarchy is Entity -> Display -> ItemDisplay, so to fake it we need to define all the data parameters for all 3 classes identically
@@ -256,7 +257,7 @@ class BlockTextureEntityImpl : BlockTextureEntity, SyncedDataHolder {
     private fun addViewer(playerId: UUID, distanceSquared: Double) {
         sendPacket(playerId, ClientboundAddEntityPacket(
             id, uuid, position.x, position.y, position.z, 0f, 0f,
-            EntityType.ITEM_DISPLAY, 0, Vec3(0.0, 0.0, 0.0), 0.0
+            EntityTypes.ITEM_DISPLAY, 0, Vec3(0.0, 0.0, 0.0), 0.0
         ))
 
         val dataValues = entityData.nonDefaultValues ?: mutableListOf()

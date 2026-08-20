@@ -95,7 +95,11 @@ object Rebar : JavaPlugin(), RebarAddon {
 
         val expectedVersion = pluginMeta.apiVersion
         val actualVersion = ServerBuildInfo.buildInfo().minecraftVersionId()
-        if (actualVersion != expectedVersion) {
+
+        val expectedVersionParts = (expectedVersion ?: "").split(".").mapNotNull { it.toIntOrNull() }.dropLastWhile { it == 0 }
+        val actualVersionParts = actualVersion.split(".").mapNotNull { it.toIntOrNull() }.dropLastWhile { it == 0 }
+
+        if (expectedVersionParts != actualVersionParts) {
             logger.severe("!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!")
             logger.severe("You are running Rebar on Minecraft version $actualVersion")
             logger.severe("This build of Rebar expects Minecraft version $expectedVersion")
