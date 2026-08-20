@@ -1,5 +1,6 @@
 package io.github.pylonmc.rebar.recipe
 
+import io.github.pylonmc.rebar.nms.NmsAccessor
 import io.github.pylonmc.rebar.recipe.vanilla.*
 import io.github.pylonmc.rebar.registry.RebarRegistry
 import org.bukkit.Bukkit
@@ -152,6 +153,57 @@ open class RecipeType<T : RebarRecipe>(private val key: NamespacedKey) : Keyed, 
         fun isDummyRecipe(key: NamespacedKey) = DUMMY_CRAFTING.hasRecipe(key)
                 || DUMMY_COOKING.hasRecipe(key)
                 || DUMMY_SMITHING.hasRecipe(key)
+
+        /**
+         * Paper rebuilds the live recipe registry when server resources/datapacks are reloaded.
+         * Rebar's configurable recipes are registered dynamically after that registry is built, so
+         * a later reload would otherwise remove every Rebar/Pylon Bukkit recipe while leaving the
+         * in-memory Rebar recipe objects intact.
+         *
+         * Re-register only recipes that are missing from Paper's live registry. Vanilla recipes
+         * captured during startup are deliberately skipped, while Rebar's dummy recipes are safe
+         * to restore because they are only created for dynamically registered Rebar recipes.
+         *
+         * @return number of Bukkit recipes queued for restoration
+         */
+        @JvmSynthetic
+        internal fun restoreDynamicRecipesAfterResourceReload(): Int {
+            var restored = 0
+
+            fun queueIfMissing(recipe: BukkitRebarRecipe) {
+                if (!NmsAccessor.instance.hasRecipe(recipe.key)) {
+                    NmsAccessor.queueRegisterRecipe(recipe.bukkitRecipe)
+                    restored++
+                }
+            }
+
+            fun queueDynamic(recipes: Collection<out BukkitRebarRecipe>) {
+                for (recipe in recipes) {
+                    if (recipe.key !in VanillaRecipeType.nonRebarRecipes) {
+                        queueIfMissing(recipe)
+                    }
+                }
+            }
+
+            queueDynamic(VANILLA_BLASTING.recipes)
+            queueDynamic(VANILLA_CAMPFIRE.recipes)
+            queueDynamic(VANILLA_SMELTING.recipes)
+            queueDynamic(VANILLA_SHAPED.recipes)
+            queueDynamic(VANILLA_SHAPELESS.recipes)
+            queueDynamic(VANILLA_SMITHING_TRANSFORM.recipes)
+            queueDynamic(VANILLA_SMITHING_TRIM.recipes)
+            queueDynamic(VANILLA_SMOKING.recipes)
+
+            for (recipe in DUMMY_CRAFTING.recipes) queueIfMissing(recipe)
+            for (recipe in DUMMY_COOKING.recipes) queueIfMissing(recipe)
+            for (recipe in DUMMY_SMITHING.recipes) queueIfMissing(recipe)
+
+            if (restored > 0) {
+                NmsAccessor.processRecipeQueue()
+            }
+
+            return restored
+        }
 
         @JvmSynthetic
         internal fun addVanillaRecipes() {
