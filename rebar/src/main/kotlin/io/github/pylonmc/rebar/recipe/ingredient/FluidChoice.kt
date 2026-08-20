@@ -45,6 +45,6 @@ class FluidChoice private constructor(val fluids: Set<RebarFluid>, val amount: D
          * Creates a [FluidChoice] which accepts at least the given amount of the given fluid
          */
         @JvmStatic
-        fun of(fluidWithAmount: FluidWithAmount) = of(fluidWithAmount.fluid, fluidWithAmount.amountMillibuckets)
+        fun of(fluidWithAmount: FluidWithAmount) = of(fluidWithAmount.fluid, fluidWithAmount.amount)
     }
 }

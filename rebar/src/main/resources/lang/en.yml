@@ -549,14 +549,6 @@ unit:
       name: "quecto"
       abbr: "q"
 
-  separator:
-    multiply:
-      full: "-"
-      abbr: "*"
-    divide:
-      full: " per "
-      abbr: "/"
-
   blocks:
     one: "block"
     other: "blocks"
