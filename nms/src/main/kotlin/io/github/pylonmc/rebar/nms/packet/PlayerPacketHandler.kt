@@ -29,6 +29,7 @@ import net.minecraft.world.item.trading.ItemCost
 import net.minecraft.world.item.trading.MerchantOffer
 import net.minecraft.world.item.trading.MerchantOffers
 import org.bukkit.craftbukkit.inventory.CraftItemStack
+import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 
 
@@ -51,32 +52,81 @@ class PlayerPacketHandler(private val player: ServerPlayer, val handler: PlayerT
     }
 
     fun register() {
-        channel.pipeline().addBefore("packet_handler", HANDLER_NAME, PacketHandler())
+        val pipeline = channel.pipeline()
+        if (pipeline.get(HANDLER_NAME) == null) {
+            pipeline.addBefore("packet_handler", HANDLER_NAME, PacketHandler())
+        }
     }
 
     fun unregister() {
         channel.eventLoop().submit {
-            channel.pipeline().remove(HANDLER_NAME)
+            val pipeline = channel.pipeline()
+            if (pipeline.get(HANDLER_NAME) != null) {
+                pipeline.remove(HANDLER_NAME)
+            }
         }
     }
 
     private inner class PacketHandler : ChannelDuplexHandler() {
         override fun write(ctx: ChannelHandlerContext, packet: Any, promise: ChannelPromise) {
             @Suppress("UNCHECKED_CAST")
-            val packet = packet as? Packet<in ClientGamePacketListener> ?: return super.write(ctx, packet, promise)
-            super.write(ctx, handleOutgoingPacket(packet), promise)
+            val typedPacket = packet as? Packet<in ClientGamePacketListener>
+                ?: return super.write(ctx, packet, promise)
+            super.write(ctx, handleOutgoingPacketSafely(typedPacket), promise)
         }
 
         override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
             @Suppress("UNCHECKED_CAST")
-            val packet = packet as? Packet<in ServerGamePacketListener> ?: return super.channelRead(ctx, packet)
-            super.channelRead(ctx, handleIncomingPacket(packet))
+            val typedPacket = packet as? Packet<in ServerGamePacketListener>
+                ?: return super.channelRead(ctx, packet)
+            super.channelRead(ctx, handleIncomingPacketSafely(typedPacket))
         }
+    }
+
+    /**
+     * Rebar is intentionally fail-open at the Netty boundary. A Minecraft update can change an
+     * internal packet implementation without changing the public Paper API; if one translation
+     * path breaks, vanilla inventory, merchant, and recipe packets must still reach the client.
+     */
+    private fun handleOutgoingPacketSafely(packet: Packet<in ClientGamePacketListener>): Packet<in ClientGamePacketListener> {
+        return try {
+            handleOutgoingPacket(packet)
+        } catch (e: Exception) {
+            reportPacketFailure("outgoing", packet, e)
+            packet
+        } catch (e: LinkageError) {
+            reportPacketFailure("outgoing", packet, e)
+            packet
+        }
+    }
+
+    private fun handleIncomingPacketSafely(packet: Packet<in ServerGamePacketListener>): Packet<in ServerGamePacketListener> {
+        return try {
+            handleIncomingPacket(packet)
+        } catch (e: Exception) {
+            reportPacketFailure("incoming", packet, e)
+            packet
+        } catch (e: LinkageError) {
+            reportPacketFailure("incoming", packet, e)
+            packet
+        }
+    }
+
+    private fun reportPacketFailure(direction: String, packet: Any, throwable: Throwable) {
+        val key = "$direction:${packet.javaClass.name}"
+        if (!REPORTED_PACKET_FAILURES.add(key)) return
+
+        Rebar.logger.log(
+            Level.WARNING,
+            "Failed to translate $direction ${packet.javaClass.simpleName}; " +
+                "the original packet will be passed through. This packet type will only be logged once.",
+            throwable
+        )
     }
 
     private fun handleOutgoingPacket(packet: Packet<in ClientGamePacketListener>): Packet<in ClientGamePacketListener> =
         when (packet) {
-            is ClientboundBundlePacket -> ClientboundBundlePacket(packet.subPackets().map(::handleOutgoingPacket))
+            is ClientboundBundlePacket -> ClientboundBundlePacket(packet.subPackets().map(::handleOutgoingPacketSafely))
 
             is ClientboundContainerSetContentPacket -> packet.apply {
                 items.forEach(::translate)
@@ -111,17 +161,17 @@ class PlayerPacketHandler(private val player: ServerPlayer, val handler: PlayerT
                 packet.containerId,
                 MerchantOffers().apply { addAll(packet.offers.map { offer ->
                     MerchantOffer(
-                        translate(offer.baseCostA),
-                        offer.costB.map(::translate),
-                        translate(offer.result.copy()),
-                        offer.uses,
-                        offer.maxUses,
-                        offer.xp,
-                        offer.priceMultiplier,
-                        offer.demand
+                        translate(offer.getItemCostA()),
+                        offer.getItemCostB().map(::translate),
+                        translate(offer.getResult().copy()),
+                        offer.getUses(),
+                        offer.getMaxUses(),
+                        offer.getXp(),
+                        offer.getPriceMultiplier(),
+                        offer.getDemand()
                     ).apply {
-                        rewardExp = offer.rewardExp
-                        specialPriceDiff = offer.specialPriceDiff
+                        rewardExp = offer.shouldRewardExp()
+                        setSpecialPriceDiff(offer.getSpecialPriceDiff())
                         ignoreDiscounts = offer.ignoreDiscounts
                     }
                 }) },
@@ -271,7 +321,7 @@ class PlayerPacketHandler(private val player: ServerPlayer, val handler: PlayerT
             )
 
             is StonecutterRecipeDisplay -> display
-            else -> throw IllegalArgumentException("Unknown recipe display type: ${display::class.simpleName}")
+            else -> display
         }
     }
 
@@ -312,13 +362,18 @@ class PlayerPacketHandler(private val player: ServerPlayer, val handler: PlayerT
                 handleSlotDisplay(display.target)
             )
 
-            else -> throw IllegalArgumentException("Unknown slot display type: ${display::class.simpleName}")
+            else -> display
         }
     }
 
     private fun translate(itemCost: ItemCost): ItemCost {
-        val costStack = translate(itemCost.itemStack)
-        val costPredicate = DataComponentExactPredicate.allOf(PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, costStack.componentsPatch))
+        // Build a client-only cost from a translated copy. The predicate must describe the same
+        // translated stack sent to the client or merchant selection/click validation can desync.
+        // The live server MerchantOffer remains untouched because itemStack is copied first.
+        val costStack = translate(itemCost.itemStack.copy())
+        val costPredicate = DataComponentExactPredicate.allOf(
+            PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, costStack.componentsPatch)
+        )
         return ItemCost(costStack.typeHolder(), costStack.count, costPredicate, costStack)
     }
 
@@ -340,5 +395,6 @@ class PlayerPacketHandler(private val player: ServerPlayer, val handler: PlayerT
 
     companion object {
         private const val HANDLER_NAME = "rebar_packet_handler"
+        private val REPORTED_PACKET_FAILURES = ConcurrentHashMap.newKeySet<String>()
     }
 }
