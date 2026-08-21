@@ -16,6 +16,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityRemoveEvent
 import kotlin.math.PI
 
+// aka ActuallyTwoEntitiesInATrenchcoat
 class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler {
 
     constructor(block: Block, port: ElectricPort) : super(
@@ -29,7 +30,7 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler {
             .transformation(
                 TransformBuilder()
                     .rotate(port.face.direction.toVector3d(), PI / 4)
-                    .translate(port.face.direction.multiply(port.radius * -0.01).add(port.offset).toVector3d())
+                    .translate(port.face.direction.multiply(port.radius * -0.01 - SCALE / 2 * 0.99).add(port.offset).toVector3d())
                     .scale(SCALE)
             )
             .build(block.location.toCenterLocation().add(port.face.direction.multiply(port.radius * 1.01)))
