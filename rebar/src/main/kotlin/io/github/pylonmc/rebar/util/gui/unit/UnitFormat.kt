@@ -297,11 +297,6 @@ class UnitFormat @JvmOverloads constructor(
 
     companion object {
 
-        private val MULTIPLICATION_FULL = Component.translatable("rebar.unit.separator.multiply.full")
-        private val MULTIPLICATION_ABBR = Component.translatable("rebar.unit.separator.multiply.abbr")
-        private val DIVISION_FULL = Component.translatable("rebar.unit.separator.divide.full")
-        private val DIVISION_ABBR = Component.translatable("rebar.unit.separator.divide.abbr")
-
         @JvmSynthetic
         internal val namedUnits = mutableMapOf<String, UnitFormat>()
 
