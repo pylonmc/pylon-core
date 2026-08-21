@@ -17,7 +17,7 @@ import io.github.pylonmc.rebar.content.debug.DebugWaxedWeatheredCutCopperStairs
 import io.github.pylonmc.rebar.content.fluid.*
 import io.github.pylonmc.rebar.content.guide.RebarGuide
 import io.github.pylonmc.rebar.culling.BlockCullingEngine
-import io.github.pylonmc.rebar.electricity.WireConnectionService
+import io.github.pylonmc.rebar.electricity.nodes.ElectricPortEntity
 import io.github.pylonmc.rebar.entity.ConfettiCreeperListener
 import io.github.pylonmc.rebar.entity.EntityListener
 import io.github.pylonmc.rebar.entity.EntityStorage
@@ -155,7 +155,6 @@ object Rebar : JavaPlugin(), RebarAddon {
         pm.registerEvents(TabbedGuidePage, this)
 
         pm.registerEvents(FluidPipePlacementService, this)
-        pm.registerEvents(WireConnectionService, this)
 
         pm.registerEvents(CargoRoutes, this)
         pm.registerEvents(CargoDuct, this)
@@ -329,10 +328,12 @@ object Rebar : JavaPlugin(), RebarAddon {
         RebarEntity.register<ItemDisplay, FluidIntersectionDisplay>(FluidIntersectionDisplay.KEY)
         RebarEntity.register<ItemDisplay, FluidPipeDisplay>(FluidPipeDisplay.KEY)
 
-        RebarEntity.register<FallingBlock, FallingRebarBlockHandler.RebarFallingBlockEntity>(FallingRebarBlockHandler.KEY)
-
         RebarBlock.register<FluidSectionMarker>(FluidSectionMarker.KEY, Material.STRUCTURE_VOID)
         RebarBlock.register<FluidIntersectionMarker>(FluidIntersectionMarker.KEY, Material.STRUCTURE_VOID)
+
+        RebarEntity.register<FallingBlock, FallingRebarBlockHandler.RebarFallingBlockEntity>(FallingRebarBlockHandler.KEY)
+
+        RebarEntity.register<Interaction, ElectricPortEntity>(ElectricPortEntity.KEY)
 
         RecipeType.addVanillaRecipes()
 
