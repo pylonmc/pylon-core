@@ -1,11 +1,14 @@
 package io.github.pylonmc.rebar.electricity.nodes
 
 import io.github.pylonmc.rebar.datatypes.RebarSerializers
+import io.github.pylonmc.rebar.electricity.ElectricityManager
+import io.github.pylonmc.rebar.electricity.WireConnectionService
 import io.github.pylonmc.rebar.entity.EntityStorage
 import io.github.pylonmc.rebar.entity.RebarEntity
 import io.github.pylonmc.rebar.entity.display.InteractionBuilder
 import io.github.pylonmc.rebar.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.rebar.entity.display.transform.TransformBuilder
+import io.github.pylonmc.rebar.entity.interfaces.InteractRebarEntityHandler
 import io.github.pylonmc.rebar.entity.interfaces.RemoveRebarEntityHandler
 import io.github.pylonmc.rebar.item.builder.ItemStackBuilder
 import io.github.pylonmc.rebar.util.rebarKey
@@ -14,10 +17,13 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Interaction
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityRemoveEvent
+import org.bukkit.event.player.PlayerInteractEntityEvent
 import kotlin.math.PI
 
 // aka ActuallyTwoEntitiesInATrenchcoat
-class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler {
+class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, InteractRebarEntityHandler {
+
+    val node: ElectricNode
 
     constructor(block: Block, port: ElectricPort) : super(
         KEY,
@@ -30,6 +36,9 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler {
             .transformation(
                 TransformBuilder()
                     .rotate(port.face.direction.toVector3d(), PI / 4)
+                    // why all the math? well the port itself needs to exist slightly outside the radius
+                    // to get proper lighting, so we spawn it there and offset it back.
+                    // everything after the - is just offsetting it back further so it won't stick out
                     .translate(port.face.direction.multiply(port.radius * -0.01 - SCALE / 2 * 0.99).add(port.offset).toVector3d())
                     .scale(SCALE)
             )
@@ -37,18 +46,38 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler {
 
         entity.persistentDataContainer.set(displayKey, RebarSerializers.UUID, display.uniqueId)
 
+        node = port.node
+        entity.persistentDataContainer.set(nodeKey, RebarSerializers.UUID, node.id)
+
         EntityStorage.add(this)
     }
 
-    constructor(entity: Interaction) : super(entity)
+    @Suppress("unused")
+    constructor(entity: Interaction) : super(entity) {
+        node = ElectricityManager.getNodeById(entity.persistentDataContainer.get(nodeKey, RebarSerializers.UUID)!!)!!
+    }
 
     override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
         Bukkit.getEntity(entity.persistentDataContainer.get(displayKey, RebarSerializers.UUID)!!)!!.remove()
     }
 
+    override fun onInteractedWith(event: PlayerInteractEntityEvent, priority: EventPriority) {
+        val player = event.player
+        val wire = WireConnectionService.getWirePlayerIsConnecting(player)
+
+        if (wire == null) {
+            TODO("start connecting")
+        } else if (wire.port.first == node) {
+            WireConnectionService.stopConnectingWire(player)
+        } else {
+            TODO("connect")
+        }
+    }
+
     companion object {
 
         private val displayKey = rebarKey("display")
+        private val nodeKey = rebarKey("node")
 
         @JvmField
         val KEY = rebarKey("electric_port")

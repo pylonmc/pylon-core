@@ -86,6 +86,10 @@ abstract class RebarEntity<out E: Entity>(val entity: E) : WailaSupplier, Keyed 
      */
     open fun onUnload() {}
 
+    fun remove() {
+        entity.remove()
+    }
+
     /**
      * Returns settings associated with the entity.
      *
