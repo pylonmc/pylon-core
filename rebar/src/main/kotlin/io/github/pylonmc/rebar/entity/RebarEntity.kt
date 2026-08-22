@@ -30,18 +30,16 @@ import org.bukkit.persistence.PersistentDataContainer
  * Rebar blocks. This is because it doesn't make sense for Rebar to manage spawning entities. However, your
  * entity must still have a load constructor that takes a single parameter of type [E].
  */
-abstract class RebarEntity<out E: Entity>(private val key: NamespacedKey, val entity: E) : WailaSupplier, Keyed {
+abstract class RebarEntity<out E: Entity>(val entity: E) : WailaSupplier, Keyed {
 
+    private val key = entity.persistentDataContainer.get(rebarEntityKeyKey, RebarSerializers.NAMESPACED_KEY)
+        ?: throw IllegalStateException("Entity did not have a Rebar key; did you mean to call RebarEntity(NamespacedKey, Entity) instead of RebarEntity(Entity)?")
     val schema = RebarRegistry.ENTITIES.getOrThrow(key)
     val uuid = entity.uniqueId
 
     override fun getKey() = key
 
-    constructor(entity: E) : this(
-        entity.persistentDataContainer.get(rebarEntityKeyKey, RebarSerializers.NAMESPACED_KEY)
-            ?: throw IllegalStateException("Entity did not have a Rebar key; did you mean to call RebarEntity(NamespacedKey, Entity) instead of RebarEntity(Entity)?"),
-        entity
-    )
+    constructor(key: NamespacedKey, entity: E): this(initialiseRebarEntity<E>(key, entity))
 
     /**
      * WAILA is the text that shows up when looking at a block to tell you what the block is. It
@@ -138,6 +136,12 @@ abstract class RebarEntity<out E: Entity>(private val key: NamespacedKey, val en
         @JvmSynthetic
         inline fun <reified E: Entity, reified T: RebarEntity<E>> register(key: NamespacedKey, isPersistent: Boolean = true) {
             RebarRegistry.ENTITIES.register(RebarEntitySchema(key, E::class.java, T::class.java, isPersistent))
+        }
+
+        @JvmSynthetic
+        internal fun <E: Entity> initialiseRebarEntity(key: NamespacedKey, entity: E): E {
+            entity.persistentDataContainer.set(rebarEntityKeyKey, RebarSerializers.NAMESPACED_KEY, key)
+            return entity
         }
 
         @JvmSynthetic
