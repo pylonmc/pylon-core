@@ -12,16 +12,25 @@ object WireConnectionService : Listener {
 
     private val connecting = mutableMapOf<UUID, WireEntity>()
 
+    @JvmStatic
     fun getWirePlayerIsConnecting(player: Player) = connecting[player.uniqueId]
 
-    fun stopConnectingWire(player: Player) {
-        connecting.remove(player.uniqueId)?.remove()
+    @JvmStatic
+    @JvmOverloads
+    fun stopConnectingWire(player: Player, delete: Boolean = true) {
+        val wire = connecting.remove(player.uniqueId)
+        if (delete) wire?.remove()
+    }
+
+    @JvmStatic
+    fun startConnectingWire(player: Player, wire: WireEntity) {
+        connecting[player.uniqueId] = wire
     }
 
     @EventHandler
     private fun onPlayerMove(event: PlayerMoveEvent) {
         if (!event.hasChangedPosition()) return
-        getWirePlayerIsConnecting(event.player)?.updateTransformation()
+        getWirePlayerIsConnecting(event.player)?.update()
     }
 
     @EventHandler

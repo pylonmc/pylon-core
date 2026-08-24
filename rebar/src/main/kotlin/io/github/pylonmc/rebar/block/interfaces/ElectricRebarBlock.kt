@@ -63,8 +63,6 @@ interface ElectricRebarBlock : EntityHolderRebarBlock {
 
         const val PORT_SCALE = 0.19f
 
-        private val NODE_KEY = rebarKey("node")
-
         private val NODES_KEY = rebarKey("nodes")
         private val NODES_TYPE = RebarSerializers.LIST.listTypeFrom(ElectricNode.PDC_TYPE)
 

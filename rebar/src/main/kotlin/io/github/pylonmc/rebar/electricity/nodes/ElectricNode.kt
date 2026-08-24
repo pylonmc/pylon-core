@@ -37,6 +37,8 @@ sealed class ElectricNode(
     protected var onDisconnect = ConnectDisconnectHandler { _, _ -> }
 
     fun connect(other: ElectricNode) {
+        if (other == this) return
+
         internalConnections.add(other.id)
         other.internalConnections.add(this.id)
 
@@ -51,6 +53,8 @@ sealed class ElectricNode(
     fun isConnectedTo(other: ElectricNode) = other.id in internalConnections
 
     fun disconnectFrom(other: ElectricNode) {
+        if (!isConnectedTo(other)) return
+
         ElectricNetwork.Edge(this, other).clearData()
         ElectricNetwork.Edge(other, this).clearData()
 

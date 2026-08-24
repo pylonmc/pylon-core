@@ -3,6 +3,7 @@ package io.github.pylonmc.rebar.electricity.nodes
 import io.github.pylonmc.rebar.datatypes.RebarSerializers
 import io.github.pylonmc.rebar.electricity.ElectricityManager
 import io.github.pylonmc.rebar.electricity.WireConnectionService
+import io.github.pylonmc.rebar.electricity.WireEntity
 import io.github.pylonmc.rebar.entity.EntityStorage
 import io.github.pylonmc.rebar.entity.RebarEntity
 import io.github.pylonmc.rebar.entity.display.InteractionBuilder
@@ -11,6 +12,7 @@ import io.github.pylonmc.rebar.entity.display.transform.TransformBuilder
 import io.github.pylonmc.rebar.entity.interfaces.InteractRebarEntityHandler
 import io.github.pylonmc.rebar.entity.interfaces.RemoveRebarEntityHandler
 import io.github.pylonmc.rebar.item.builder.ItemStackBuilder
+import io.github.pylonmc.rebar.util.Either
 import io.github.pylonmc.rebar.util.rebarKey
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
@@ -58,6 +60,12 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
     }
 
     override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
+        @Suppress("UNCHECKED_CAST")
+        for (wire in EntityStorage.getByKey(WireEntity.KEY) as Collection<WireEntity>) {
+            if (wire.port.first == node || (wire.otherEnd as? Either.Right)?.value?.first == node) {
+                wire.remove()
+            }
+        }
         Bukkit.getEntity(entity.persistentDataContainer.get(displayKey, RebarSerializers.UUID)!!)!!.remove()
     }
 
@@ -66,11 +74,20 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
         val wire = WireConnectionService.getWirePlayerIsConnecting(player)
 
         if (wire == null) {
-            TODO("start connecting")
+            @Suppress("UNCHECKED_CAST")
+            val wires = EntityStorage.getByKey(WireEntity.KEY) as Collection<WireEntity>
+            val existingWire = wires
+                .filter { it.port.first == node || (it.otherEnd as? Either.Right)?.value?.first == node }
+                .maxByOrNull { it.length }
+            val wire = existingWire ?: WireEntity(node to entity.location.add(0.0, SCALE / 2, 0.0), Either.Left(player))
+            wire.giveToPlayer(player, node)
+            WireConnectionService.startConnectingWire(player, wire)
         } else if (wire.port.first == node) {
             WireConnectionService.stopConnectingWire(player)
         } else {
-            TODO("connect")
+            val otherPort = wire.port
+            wire.connect(otherPort, node to entity.location.add(0.0, SCALE / 2, 0.0))
+            WireConnectionService.stopConnectingWire(player, delete = false)
         }
     }
 
@@ -82,6 +99,6 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
         @JvmField
         val KEY = rebarKey("electric_port")
 
-        const val SCALE = 0.19f
+        const val SCALE = 0.19
     }
 }
