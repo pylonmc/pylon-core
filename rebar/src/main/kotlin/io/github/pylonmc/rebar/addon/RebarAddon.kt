@@ -82,7 +82,7 @@ interface RebarAddon : Keyed {
         RebarRegistry.ADDONS.register(this)
         if (!suppressAddonNameWarning) {
             for (locale in translator.languages) {
-                if (!translator.canTranslate("${key.namespace}.addon", locale)) {
+                if (!translator.canTranslateExact("${key.namespace}.addon", locale)) {
                     Rebar.logger.warning("${key.namespace} is missing the 'addon' translation key for ${locale.displayName}")
                 }
             }

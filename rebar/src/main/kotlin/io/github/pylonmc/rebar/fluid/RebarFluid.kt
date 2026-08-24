@@ -64,7 +64,7 @@ open class RebarFluid(
         if (key !in nameWarningsSuppressed) {
             for (locale in addon.translator.languages) {
                 val translationKey = "${key.namespace}.fluid.${key.key}"
-                if (!addon.translator.canTranslate(translationKey, locale)) {
+                if (!addon.translator.canTranslateExact(translationKey, locale)) {
                     Rebar.logger.warning("${key.namespace} is missing a translation key for fluid ${key.key} (locale: ${locale.displayName} | expected translation key: $translationKey)")
                 }
             }

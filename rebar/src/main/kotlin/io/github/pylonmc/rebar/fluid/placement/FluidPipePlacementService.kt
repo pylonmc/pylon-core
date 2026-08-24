@@ -36,10 +36,10 @@ internal object FluidPipePlacementService : Listener {
      */
     private val playersWhoFinishedConnectionInLastTick = mutableSetOf<Player>()
 
-    fun startConnection(player: Player, startPoint: FluidPipePlacementPoint, pipe: FluidPipe) {
+    fun startConnection(player: Player, startPoint: FluidPipePlacementPoint) {
         check(!connectionsInProgress.containsKey(player))
         // Clone to prevent the RebarItem instance being shared between player's hotbar and the pipe itself
-        connectionsInProgress.put(player, FluidPipePlacementTask(player, startPoint, FluidPipe(pipe.stack.clone())))
+        connectionsInProgress.put(player, FluidPipePlacementTask(player, startPoint))
     }
 
     @JvmStatic

@@ -24,6 +24,7 @@ import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.translation.GlobalTranslator
 import net.kyori.adventure.translation.Translator
 import org.apache.commons.lang3.LocaleUtils
+import org.jetbrains.annotations.ApiStatus
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -101,6 +102,18 @@ class RebarTranslator private constructor(private val addon: RebarAddon) : Trans
         return getRawTranslation(key, locale) != null
     }
 
+    /**
+     * Whether [key] is present in the language file matching [locale], without
+     * falling back to the addon's default language. Used by missing-translation
+     * warnings; player-facing lookups should use [canTranslate] instead.
+     */
+    @ApiStatus.Internal
+    fun canTranslateExact(key: String, locale: Locale): Boolean {
+        val parts = key.split('.', limit = 2)
+        if (parts.size < 2 || parts[0] != addonNamespace) return false
+        return findTranslations(locale)?.get(parts[1], ConfigAdapter.STRING) != null
+    }
+
     override fun translate(component: TranslatableComponent, locale: Locale): Component? {
         var translation = getRawTranslation(component.key(), locale) ?: return null
         for (arg in component.arguments()) {
@@ -133,8 +146,9 @@ class RebarTranslator private constructor(private val addon: RebarAddon) : Trans
             if (parts.size < 2) return null
             val (addon, key) = parts
             if (addon != addonNamespace) return null
-            val translations = findTranslations(locale) ?: findTranslations(this.addon.defaultLanguage) ?: return null
-            val translation = translations.get(key, ConfigAdapter.STRING) ?: return null
+            val translation = findTranslations(locale)?.get(key, ConfigAdapter.STRING)
+                ?: findTranslations(this.addon.defaultLanguage)?.get(key, ConfigAdapter.STRING)
+                ?: return null
             customMiniMessage.deserialize(translation)
         }
     }

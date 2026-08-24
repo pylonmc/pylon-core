@@ -25,8 +25,7 @@ import kotlin.math.roundToLong
 
 internal class FluidPipePlacementTask(
     val player: Player,
-    val origin: FluidPipePlacementPoint,
-    val pipe: FluidPipe
+    val origin: FluidPipePlacementPoint
 ) {
 
     class Result (val to: FluidPointDisplay, val pipesUsed: Int)
@@ -62,6 +61,12 @@ internal class FluidPipePlacementTask(
 
         // Check if origin and target points still exist
         if (!origin.stillActuallyExists(true) || !target.stillActuallyExists(false)) {
+            FluidPipePlacementService.cancelConnection(player)
+            return
+        }
+
+        // Check if player goes to other worlds
+        if (player.world != origin.position.world) {
             FluidPipePlacementService.cancelConnection(player)
             return
         }
@@ -138,6 +143,11 @@ internal class FluidPipePlacementTask(
         player.sendActionBar(Component.empty())
     }
 
+    fun getPipe(): FluidPipe? {
+        val item = player.inventory.itemInMainHand
+        return RebarItem.fromStack(item, FluidPipe::class.java)
+    }
+
     fun finish(): Result? {
         if (!isValid) {
             return null
@@ -147,6 +157,7 @@ internal class FluidPipePlacementTask(
         display.remove()
         player.sendActionBar(Component.empty())
 
+        val pipe = getPipe() ?: return null;
         val pipeDisplay = FluidPipePlacementService.connect(origin, target, pipe)
         return Result(pipeDisplay.getTo(), pipesUsed(origin.position, target.position))
     }
@@ -213,6 +224,7 @@ internal class FluidPipePlacementTask(
 
     private val isPipeTypeValid: Boolean
         get() {
+            val pipe = getPipe() ?: return false
             val clonedTo = target // kotlin complains if no clone
             return when (clonedTo) {
                 is FluidPipePlacementPoint.Section -> clonedTo.marker.pipeDisplay!!.pipe == pipe
