@@ -15,6 +15,7 @@ import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.translation.GlobalTranslator
+import org.jetbrains.annotations.ApiStatus
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -137,32 +138,40 @@ class UnitFormat @JvmOverloads constructor(
         defaultStyle: Style = this.defaultStyle
     ) = UnitFormat(name, forms, abbreviation, format, abbrFormat, defaultPrefix, defaultStyle)
 
-    fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
+    fun format(value: BigDecimal) = Formatted(FormattedValue.Number(value.stripTrailingZeros()))
 
     fun format(value: Int) = format(value.toLong())
 
     fun format(value: Long) = format(value.toBigDecimal())
 
-    /**
-     * NaN and infinity are not supported
-     */
     fun format(value: Float) = format(value.toDouble())
 
-    /**
-     * NaN and infinity are not supported
-     */
     fun format(value: Double): Formatted {
-        require(!value.isNaN() && !value.isInfinite()) { "Cannot format NaN or infinite values" }
-        return format(value.toBigDecimal())
+        return Formatted(
+            when {
+                value.isInfinite() && value > 0 -> FormattedValue.Infinity
+                value.isInfinite() && value < 0 -> FormattedValue.NegativeInfinity
+                value.isNaN() -> FormattedValue.NaN
+                else -> FormattedValue.Number(value.toBigDecimal())
+            }
+        )
+    }
+
+    @ApiStatus.Internal
+    internal sealed interface FormattedValue {
+        data class Number(val value: BigDecimal) : FormattedValue
+        data object NaN : FormattedValue
+        data object Infinity : FormattedValue
+        data object NegativeInfinity : FormattedValue
     }
 
     /**
      * Represents a value that has already been formatted.
      * You can use this class to override how an already-formatted value is displayed.
      */
-    inner class Formatted internal constructor(private val value: BigDecimal) : ComponentLike {
-        private var sigFigs = value.precision()
-        private var decimalPlaces = value.scale()
+    inner class Formatted @ApiStatus.Internal internal constructor(private val value: FormattedValue) : ComponentLike {
+        private var sigFigs: Int? = null
+        private var decimalPlaces: Int? = null
         private var forceDecimalPlaces = false
         private var abbreviate = true
         private var unitStyle = defaultStyle
@@ -243,54 +252,80 @@ class UnitFormat @JvmOverloads constructor(
         /**
          * Builds a component representing the value and unit.
          */
-        fun build(): Component {
-            var usedValue = value.round(MathContext(sigFigs, RoundingMode.HALF_UP))
-            usedValue = usedValue.setScale(decimalPlaces, RoundingMode.HALF_UP)
-            if (!forceDecimalPlaces) {
-                usedValue = usedValue.stripTrailingZeros()
-            }
+        fun build() = LocaleDependentComponentRenderer { lang ->
+            val number: Component
+            val prefix: MetricPrefix
+            val plural: PluralForm
+            when (value) {
+                is FormattedValue.Number -> {
+                    val value = value.value
+                    var usedValue = value.round(MathContext(sigFigs ?: value.precision(), RoundingMode.HALF_UP))
+                    usedValue = usedValue.setScale(decimalPlaces ?: value.scale(), RoundingMode.HALF_UP)
+                    if (!forceDecimalPlaces) {
+                        usedValue = usedValue.stripTrailingZeros()
+                    }
 
-            val usedPrefix = if (prefix == null) {
-                val exponent = value.precision() - value.scale() - if (value.signum() == 0) 0 else 1
-                val prefix = MetricPrefix.entries.firstOrNull { it.scale <= exponent && it !in badPrefixes }
-                    ?: defaultPrefix
-                usedValue = usedValue.movePointLeft(prefix.scale)
-                prefix
-            } else {
-                prefix!!
-            }
+                    prefix = if (this.prefix == null) {
+                        val exponent = value.precision() - value.scale() - if (value.signum() == 0) 0 else 1
+                        val prefix = MetricPrefix.entries.firstOrNull { it.scale <= exponent && it !in badPrefixes }
+                            ?: defaultPrefix
+                        usedValue = usedValue.movePointLeft(prefix.scale)
+                        prefix
+                    } else {
+                        this.prefix!!
+                    }
 
-            return LocaleDependentComponentRenderer { lang ->
-                val formatted = NumberFormatter.withLocale(lang).format(usedValue)
-                val number = Component.text(formatted.toString()).style(valueStyle)
-                val unit = if (abbreviate && abbreviation != null) {
-                    Component.empty().style(unitStyle)
-                        .append(usedPrefix.abbreviationKey)
-                        .append(abbreviation)
-                } else {
+                    val formatted = NumberFormatter.withLocale(lang).format(usedValue)
+                    number = Component.text(formatted.toString())
+
                     val keyword = PluralRules.forLocale(lang).select(formatted)
-                    val plural = PluralForm.entries.first { it.keyword == keyword }
-                    Component.empty().style(unitStyle)
-                        .append(usedPrefix.translationKey)
-                        .append(forms[plural] ?: error("Missing plural form $keyword for $lang"))
+                    plural = PluralForm.entries.first { it.keyword == keyword }
                 }
 
-                val configU = TextReplacementConfig.builder()
-                    .matchLiteral("u")
-                    .replacement(unit)
-                    .build()
-                val configV = TextReplacementConfig.builder()
-                    .matchLiteral("v")
-                    .replacement(number)
-                    .build()
+                FormattedValue.Infinity -> {
+                    number = Component.text("Infinity")
+                    prefix = MetricPrefix.NONE
+                    plural = PluralForm.OTHER
+                }
 
-                val final = Component.text(if (abbreviate && abbreviation != null) abbrFormat else format)
-                    .replaceText(configU)
-                    .replaceText(configV)
+                FormattedValue.NegativeInfinity -> {
+                    number = Component.text("-Infinity")
+                    prefix = MetricPrefix.NONE
+                    plural = PluralForm.OTHER
+                }
 
-                GlobalTranslator.render(final, lang)
-            }.asComponent()
-        }
+                FormattedValue.NaN -> {
+                    number = Component.text("NaN")
+                    prefix = MetricPrefix.NONE
+                    plural = PluralForm.OTHER
+                }
+            }
+
+            val unit = if (abbreviate && abbreviation != null) {
+                Component.empty().style(unitStyle)
+                    .append(prefix.abbreviationKey)
+                    .append(abbreviation)
+            } else {
+                Component.empty().style(unitStyle)
+                    .append(prefix.translationKey)
+                    .append(forms[plural] ?: error("Missing plural form ${plural.keyword} for $lang"))
+            }
+
+            val configU = TextReplacementConfig.builder()
+                .matchLiteral("u")
+                .replacement(unit)
+                .build()
+            val configV = TextReplacementConfig.builder()
+                .matchLiteral("v")
+                .replacement(number.style(valueStyle))
+                .build()
+
+            val final = Component.text(if (abbreviate && abbreviation != null) abbrFormat else format)
+                .replaceText(configU)
+                .replaceText(configV)
+
+            GlobalTranslator.render(final, lang)
+        }.asComponent()
 
         /**
          * Alias for [build]
