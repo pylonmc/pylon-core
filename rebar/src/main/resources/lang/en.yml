@@ -115,9 +115,11 @@ message:
     reloadlang:
       success: "<green>Language entries reloaded"
 
-  electricity:
-    wiring: "<insn>Right click a port</insn> to connect, <insn>stop holding a wire</insn> to cancel <gray>(%wires%/%total%)"
+  wiring:
+    instructions: "<insn>Right click a port</insn> to connect, <insn>stop holding a wire</insn> or <insn>right click the original port</insn> to cancel"
+    wiring: "This will require %wires% wires (you have %total% wires)"
     need_wire: "<red>You need to be holding a wire"
+    too_long: "<red>Wires cannot be any longer than %blocks% blocks"
 
 gui:
   scroll:

@@ -55,6 +55,9 @@ object RebarConfig {
     val PIPE_PLACEMENT_CANCEL_DISTANCE = config.getOrThrow("pipe-placement.cancel-distance", ConfigAdapter.INTEGER)
 
     @JvmField
+    val MAX_WIRE_LENGTH = config.getOrThrow("max-wire-length", ConfigAdapter.INTEGER)
+
+    @JvmField
     val TRANSLATION_WRAP_LIMIT = config.getOrThrow("translation-wrap-limit", ConfigAdapter.INTEGER)
 
     @JvmField

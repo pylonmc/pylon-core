@@ -1,5 +1,6 @@
 package io.github.pylonmc.rebar.electricity
 
+import io.github.pylonmc.rebar.config.RebarConfig
 import io.github.pylonmc.rebar.datatypes.RebarSerializers
 import io.github.pylonmc.rebar.electricity.nodes.ElectricNode
 import io.github.pylonmc.rebar.entity.EntityStorage
@@ -7,10 +8,12 @@ import io.github.pylonmc.rebar.entity.RebarEntity
 import io.github.pylonmc.rebar.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.rebar.entity.display.transform.LineBuilder
 import io.github.pylonmc.rebar.entity.interfaces.RemoveRebarEntityHandler
+import io.github.pylonmc.rebar.i18n.RebarArgument
 import io.github.pylonmc.rebar.item.builder.ItemStackBuilder
 import io.github.pylonmc.rebar.util.Either
 import io.github.pylonmc.rebar.util.minus
 import io.github.pylonmc.rebar.util.rebarKey
+import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ItemDisplay
@@ -82,6 +85,17 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         entity.teleportAsync(midpoint.toLocation(loc1.world))
 
         length = loc1.distance(loc2)
+
+        val player = (otherEnd as? Either.Left)?.value
+        if (player != null && length > RebarConfig.MAX_WIRE_LENGTH) {
+            player.sendMessage(
+                Component.translatable(
+                    "rebar.message.wiring.too_long",
+                    RebarArgument.of("blocks", RebarConfig.MAX_WIRE_LENGTH)
+                )
+            )
+            remove()
+        }
     }
 
     /**
@@ -113,14 +127,18 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
     override fun onUnload() {
         val otherEnd = (this.otherEnd as? Either.Right)?.value
-            ?: throw IllegalStateException("Wire should not be unloaded while connected to player")
 
-        val pdc = entity.persistentDataContainer
-        pdc.set(portKey, RebarSerializers.UUID, port.first.id)
-        pdc.set(portLocKey, RebarSerializers.LOCATION, port.second)
+        if (otherEnd != null) {
+            val pdc = entity.persistentDataContainer
+            pdc.set(portKey, RebarSerializers.UUID, port.first.id)
+            pdc.set(portLocKey, RebarSerializers.LOCATION, port.second)
 
-        pdc.set(otherEndKey, RebarSerializers.UUID, otherEnd.first.id)
-        pdc.set(otherEndLocKey, RebarSerializers.LOCATION, otherEnd.second)
+            pdc.set(otherEndKey, RebarSerializers.UUID, otherEnd.first.id)
+            pdc.set(otherEndLocKey, RebarSerializers.LOCATION, otherEnd.second)
+        } else {
+            // probably server shutdown
+            remove()
+        }
     }
 
     override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {

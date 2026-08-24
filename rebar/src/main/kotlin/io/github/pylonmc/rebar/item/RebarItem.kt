@@ -18,6 +18,8 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.jetbrains.annotations.Contract
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 /**
  * RebarItems are wrappers around ItemStacks that allow you to easily add extra functionality.
@@ -98,6 +100,7 @@ open class RebarItem(val stack: ItemStack) : Keyed {
      */
     open fun place(context: BlockCreateContext): RebarBlock? = schema.place(context)
 
+    @OptIn(ExperimentalContracts::class)
     companion object {
 
         private val nameWarningsSuppressed: MutableSet<NamespacedKey> = mutableSetOf()
@@ -180,7 +183,10 @@ open class RebarItem(val stack: ItemStack) : Keyed {
          * Returns null if the [ItemStack] is not a Rebar item or is not of the specified class
          */
         @JvmSynthetic
-        inline fun <reified T> fromStack(stack: ItemStack?): T? = fromStack(stack, T::class.java)
+        inline fun <reified T> fromStack(stack: ItemStack?): T? {
+            contract { returnsNotNull() implies (stack != null) }
+            return fromStack(stack, T::class.java)
+        }
 
         /**
          * Checks if [stack] is a Rebar item.
@@ -188,6 +194,7 @@ open class RebarItem(val stack: ItemStack) : Keyed {
         @JvmStatic
         @Contract("null -> false")
         fun isRebarItem(stack: ItemStack?): Boolean {
+            contract { returns(true) implies (stack != null) }
             return stack != null && stack.persistentDataContainer.has(RebarItemSchema.rebarItemKeyKey)
         }
 
@@ -197,6 +204,7 @@ open class RebarItem(val stack: ItemStack) : Keyed {
         @JvmStatic
         @Contract("null, _ -> false")
         fun isRebarItem(stack: ItemStack?, clazz: Class<*>): Boolean {
+            contract { returns(true) implies (stack != null) }
             val schema = RebarItemSchema.fromStack(stack) ?: return false
             return schema.isType(clazz)
         }
@@ -206,7 +214,10 @@ open class RebarItem(val stack: ItemStack) : Keyed {
          */
         @JvmSynthetic
         @JvmName("isRebarItemReified")
-        inline fun <reified T> isRebarItem(stack: ItemStack?): Boolean = isRebarItem(stack, T::class.java)
+        inline fun <reified T> isRebarItem(stack: ItemStack?): Boolean {
+            contract { returns(true) implies (stack != null) }
+            return isRebarItem(stack, T::class.java)
+        }
 
         /**
          * Checks if [stack] is a Rebar item with the id [key].
