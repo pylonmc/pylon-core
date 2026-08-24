@@ -118,16 +118,9 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
             val otherPort = wire.port
             val wires = when (val connection = WireEntity.canConnect(otherPort.second, entity.location)) {
                 is Either.Left -> connection.value
-                is Either.Right -> when (connection.value) {
-                    WireEntity.ConnectionFailureReason.OBSTRUCTION -> {
-                        player.sendMessage(Component.translatable("rebar.message.wiring.obstructed"))
-                        return
-                    }
-
-                    WireEntity.ConnectionFailureReason.TOO_LONG -> {
-                        player.sendMessage(Component.translatable("rebar.message.wiring.too_long"))
-                        return
-                    }
+                is Either.Right -> {
+                    player.sendMessage(connection.value.errorMessage)
+                    return
                 }
             }
 

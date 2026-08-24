@@ -224,9 +224,9 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         }
     }
 
-    enum class ConnectionFailureReason {
-        OBSTRUCTION,
-        TOO_LONG
+    enum class ConnectionFailureReason(val errorMessage: Component) {
+        OBSTRUCTION(Component.translatable("rebar.message.wiring.obstructed")),
+        TOO_LONG(Component.translatable("rebar.message.wiring.too_long", RebarArgument.of("blocks", RebarConfig.MAX_WIRE_LENGTH)))
     }
 }
 
