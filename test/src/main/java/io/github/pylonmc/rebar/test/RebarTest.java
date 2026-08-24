@@ -14,6 +14,7 @@ import io.github.pylonmc.rebar.test.test.entity.EntityStorageChunkReloadTest;
 import io.github.pylonmc.rebar.test.test.entity.EntityStorageSimpleTest;
 import io.github.pylonmc.rebar.test.test.entity.EntityStorageUnregisteredEntityTest;
 import io.github.pylonmc.rebar.test.test.fluid.*;
+import io.github.pylonmc.rebar.test.test.i18n.TranslationFallbackTest;
 import io.github.pylonmc.rebar.test.test.item.RebarItemStackInterfaceTest;
 import io.github.pylonmc.rebar.test.test.misc.GametestTest;
 import io.github.pylonmc.rebar.test.test.recipe.CraftingTest;
@@ -61,6 +62,7 @@ public class RebarTest extends JavaPlugin implements RebarAddon {
         tests.add(new RebarItemStackInterfaceTest());
 
         tests.add(new GametestTest());
+        tests.add(new TranslationFallbackTest());
 
         tests.add(new SerializerTestBlockPosition());
         tests.add(new SerializerTestBlockPositionNoWorld());
@@ -210,6 +212,6 @@ public class RebarTest extends JavaPlugin implements RebarAddon {
 
     @Override
     public @NotNull Locale getDefaultLanguage() {
-        return Locale.of("none");
+        return Locale.ENGLISH;
     }
 }

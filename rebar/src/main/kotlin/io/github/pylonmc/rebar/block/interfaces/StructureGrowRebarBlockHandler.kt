@@ -24,7 +24,7 @@ interface StructureGrowRebarBlockHandler {
                 } catch (e: Exception) {
                     BlockListener.logEventHandleErr(event, e, rebarBlock)
                 }
-            } else if (priority == EventPriority.LOWEST) {
+            } else if (rebarBlock != null && priority == EventPriority.LOWEST) {
                 event.isCancelled = true
             }
         }

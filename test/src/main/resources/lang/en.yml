@@ -1,0 +1,16 @@
+addon: "RebarTest"
+
+item:
+  simple_block:
+    name: "Simple Block"
+  simple_multiblock:
+    name: "Simple Multiblock"
+
+fluid:
+  water: "Water"
+  lava: "Lava"
+
+test:
+  translation:
+    present_both: "English value"
+    default_only: "English fallback value"
