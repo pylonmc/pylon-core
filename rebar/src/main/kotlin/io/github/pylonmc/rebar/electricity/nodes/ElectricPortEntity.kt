@@ -31,7 +31,7 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
         KEY,
         InteractionBuilder()
             .size(SCALE)
-            .build(block.location.toCenterLocation().add(port.face.direction.multiply(port.radius)).add(port.offset))
+            .build(block.location.toCenterLocation().add(port.face.direction.multiply(port.radius * 1.01)).add(port.offset))
     ) {
         val display = ItemDisplayBuilder()
             .itemStack(ItemStackBuilder.of(port.material).addCustomModelDataString("electric_port"))

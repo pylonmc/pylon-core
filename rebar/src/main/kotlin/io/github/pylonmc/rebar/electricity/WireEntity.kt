@@ -20,6 +20,7 @@ import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityRemoveEvent
+import org.joml.Matrix4f
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.ceil
 
@@ -42,13 +43,12 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         KEY,
         ItemDisplayBuilder()
             .itemStack(ItemStackBuilder.of(Material.COPPER_BLOCK))
-            .build(otherEnd.location)
+            .transformation(getTransform(port.second, otherEnd.location))
+            .build(port.second)
     ) {
         this.port = port
         this.otherEnd = otherEnd
         EntityStorage.add(this)
-
-        update()
     }
 
     @Suppress("unused")
@@ -73,16 +73,12 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         val loc1 = port.second
         val loc2 = otherEnd.location
 
-        val midpoint = loc1.toVector().midpoint(loc2.toVector())
-        entity.setTransformationMatrix(
-            LineBuilder()
-                .from(loc1.toVector() - midpoint)
-                .to(loc2.toVector() - midpoint)
-                .thickness(THICKNESS + 0.01f * ThreadLocalRandom.current().nextFloat())
-                .build()
-                .buildForItemDisplay()
-        )
-        entity.teleportAsync(midpoint.toLocation(loc1.world))
+        entity.setTransformationMatrix(getTransform(loc1, loc2))
+        entity.interpolationDelay = 0
+        entity.interpolationDuration = 1
+        if (entity.location != loc1) {
+            entity.teleportAsync(loc1) // in case port was flipped
+        }
 
         length = loc1.distance(loc2)
 
@@ -159,6 +155,15 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         val KEY = rebarKey("wire")
 
         const val THICKNESS = 0.05f
+
+        private fun getTransform(start: Location, end: Location): Matrix4f {
+            return LineBuilder()
+                .from(start.toVector() - start.toVector())
+                .to(end.toVector() - start.toVector())
+                .thickness(THICKNESS + 0.01f * ThreadLocalRandom.current().nextFloat())
+                .build()
+                .buildForItemDisplay()
+        }
     }
 }
 
