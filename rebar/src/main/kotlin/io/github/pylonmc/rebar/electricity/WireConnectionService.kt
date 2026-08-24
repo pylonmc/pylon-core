@@ -5,6 +5,7 @@ import io.github.pylonmc.rebar.i18n.RebarArgument
 import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.item.interfaces.WireRebarItem
 import io.github.pylonmc.rebar.util.delayTicks
+import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
@@ -13,7 +14,9 @@ import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
+import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
@@ -28,15 +31,21 @@ object WireConnectionService : Listener {
         connecting[player.uniqueId] = wire
         jobs[player.uniqueId] = Rebar.scope.launch {
             while (true) {
-                val total = player.inventory.sumOf { if (RebarItem.isRebarItem<WireRebarItem>(it)) it.amount else 0 }
-                val color = if (player.gameMode == GameMode.SURVIVAL && wire.wireCount > total) NamedTextColor.RED else NamedTextColor.GREEN
-                player.sendActionBar(
-                    Component.translatable(
-                        "rebar.message.wiring.wiring",
-                        RebarArgument.of("wires", wire.wireCount),
-                        RebarArgument.of("total", total)
-                    ).color(color)
-                )
+                if (wire.isObstructed) {
+                    player.sendActionBar(Component.translatable("rebar.message.wiring.obstructed"))
+                } else {
+                    val mainHandItem = player.inventory.itemInMainHand
+                    val total = if (RebarItem.isRebarItem<WireRebarItem>(mainHandItem)) mainHandItem.amount else 0
+                    val color =
+                        if (player.gameMode != GameMode.CREATIVE && wire.wireCount > total) NamedTextColor.RED else NamedTextColor.GREEN
+                    player.sendActionBar(
+                        Component.translatable(
+                            "rebar.message.wiring.wiring",
+                            RebarArgument.of("wires", wire.wireCount),
+                            RebarArgument.of("total", total)
+                        ).color(color)
+                    )
+                }
                 delayTicks(10)
             }
         }
@@ -67,7 +76,36 @@ object WireConnectionService : Listener {
     }
 
     @EventHandler
+    private fun onPlayerDeath(event: PlayerDeathEvent) {
+        stopConnectingWire(event.player)
+    }
+
+    @EventHandler
     private fun onPlayerChangeWorld(event: PlayerChangedWorldEvent) {
         stopConnectingWire(event.player)
+    }
+
+    @EventHandler
+    private fun onPlayerSlotChange(event: PlayerInventorySlotChangeEvent) {
+        val player = event.player
+        val wire = getWirePlayerIsConnecting(player) ?: return
+        val wireItem = RebarItem.fromStack<WireRebarItem>(event.newItemStack)
+        if (wireItem == null) {
+            stopConnectingWire(player)
+        } else {
+            wire.setWireItem(wireItem)
+        }
+    }
+
+    @EventHandler
+    private fun onPlayerScroll(event: PlayerItemHeldEvent) {
+        val player = event.player
+        val wire = getWirePlayerIsConnecting(player) ?: return
+        val wireItem = RebarItem.fromStack<WireRebarItem>(player.inventory.getItem(event.newSlot))
+        if (wireItem == null) {
+            stopConnectingWire(player)
+        } else {
+            wire.setWireItem(wireItem)
+        }
     }
 }

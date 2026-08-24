@@ -9,13 +9,17 @@ import io.github.pylonmc.rebar.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.rebar.entity.display.transform.LineBuilder
 import io.github.pylonmc.rebar.entity.interfaces.RemoveRebarEntityHandler
 import io.github.pylonmc.rebar.i18n.RebarArgument
+import io.github.pylonmc.rebar.item.RebarItem
+import io.github.pylonmc.rebar.item.RebarItemSchema
 import io.github.pylonmc.rebar.item.builder.ItemStackBuilder
+import io.github.pylonmc.rebar.item.interfaces.WireRebarItem
+import io.github.pylonmc.rebar.registry.RebarRegistry
 import io.github.pylonmc.rebar.util.Either
 import io.github.pylonmc.rebar.util.minus
 import io.github.pylonmc.rebar.util.rebarKey
 import net.kyori.adventure.text.Component
+import org.bukkit.FluidCollisionMode
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
@@ -37,18 +41,23 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
     var length: Double = 0.0
         private set
 
-    val wireCount: Int get() = ceil(length).toInt()
+    val wireCount: Int get() = wiresRequired(length)
 
-    constructor(port: Port, otherEnd: Either<Player, Port>) : super(
+    var wire: RebarItemSchema
+        private set
+
+    constructor(port: Port, otherEnd: Either<Player, Port>, wireItem: WireRebarItem) : super(
         KEY,
         ItemDisplayBuilder()
-            .itemStack(ItemStackBuilder.of(Material.COPPER_BLOCK))
             .transformation(getTransform(port.second, otherEnd.location))
             .build(port.second)
     ) {
         this.port = port
         this.otherEnd = otherEnd
+        this.wire = (wireItem as RebarItem).schema
+        this.length = port.second.distance(otherEnd.location)
         EntityStorage.add(this)
+        setWireItem(wireItem)
     }
 
     @Suppress("unused")
@@ -61,10 +70,21 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
         val node2 = ElectricityManager.getNodeById(pdc.get(otherEndKey, RebarSerializers.UUID)!!)!!
         val loc2 = pdc.get(otherEndLocKey, RebarSerializers.LOCATION)!!
-        otherEnd = Either.Right(node to loc2)
+        otherEnd = Either.Right(node2 to loc2)
+
+        wire = pdc.get(itemKey, itemType)!!
 
         length = loc1.distance(loc2)
     }
+
+    fun setWireItem(wireItem: WireRebarItem) {
+        this.wire = (wireItem as RebarItem).schema
+        entity.setItemStack(ItemStackBuilder.of(wireItem.displayMaterial).addCustomModelDataString("wire").build())
+    }
+
+    val isHeldByPlayer: Boolean get() = otherEnd is Either.Left
+
+    val isObstructed: Boolean get() = isObstructed(port.second, otherEnd.location, length)
 
     /**
      * Updates the state and visuals of the wire
@@ -111,7 +131,15 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         update()
     }
 
-    fun connect(port1: Port, port2: Port) {
+    /**
+     * Connects the wire between the two ports. Returns the failure reason if failed
+     */
+    fun connect(port1: Port, port2: Port): ConnectionFailureReason? {
+        val connection = canConnect(port1.second, port2.second)
+        if (connection is Either.Right) {
+            return connection.value
+        }
+
         (otherEnd as? Either.Right)?.value?.first?.disconnectFrom(port.first)
         port = port1
         otherEnd = Either.Right(port2)
@@ -119,6 +147,8 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         port1.first.connect(port2.first)
 
         update()
+
+        return null
     }
 
     override fun onUnload() {
@@ -131,6 +161,8 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
             pdc.set(otherEndKey, RebarSerializers.UUID, otherEnd.first.id)
             pdc.set(otherEndLocKey, RebarSerializers.LOCATION, otherEnd.second)
+
+            pdc.set(itemKey, itemType, wire)
         } else {
             // probably server shutdown
             remove()
@@ -150,6 +182,8 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         private val portLocKey = rebarKey("port_loc")
         private val otherEndKey = rebarKey("other_end")
         private val otherEndLocKey = rebarKey("other_end_loc")
+        private val itemKey = rebarKey("item")
+        private val itemType = RebarSerializers.KEYED.fromRegistry(RebarRegistry.ITEMS)
 
         @JvmField
         val KEY = rebarKey("wire")
@@ -164,6 +198,35 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
                 .build()
                 .buildForItemDisplay()
         }
+
+        private fun wiresRequired(length: Double) = ceil(length).toInt()
+
+        private fun isObstructed(start: Location, end: Location, distance: Double) = start.world.rayTraceBlocks(
+            start,
+            end.toVector() - start.toVector(),
+            distance,
+            FluidCollisionMode.ALWAYS,
+            true
+        ) != null
+
+        /**
+         * Returns the number of wires needed if a wire could connect between these two locations.
+         * Otherwise, returns a [ConnectionFailureReason] detailing why it couldn't connect
+         */
+        @JvmStatic
+        fun canConnect(start: Location, end: Location): Either<Int, ConnectionFailureReason> {
+            val dist = start.distance(end)
+            return when {
+                dist > RebarConfig.MAX_WIRE_LENGTH -> Either.Right(ConnectionFailureReason.TOO_LONG)
+                isObstructed(start, end, dist) -> Either.Right(ConnectionFailureReason.OBSTRUCTION)
+                else -> Either.Left(wiresRequired(dist))
+            }
+        }
+    }
+
+    enum class ConnectionFailureReason {
+        OBSTRUCTION,
+        TOO_LONG
     }
 }
 

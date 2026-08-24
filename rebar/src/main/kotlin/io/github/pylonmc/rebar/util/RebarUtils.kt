@@ -34,9 +34,6 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
-import org.bukkit.entity.Entity
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
 import org.bukkit.entity.*
 import org.bukkit.event.Event
 import org.bukkit.inventory.EquipmentSlot
@@ -921,6 +918,12 @@ fun ItemStack.isBroken(): Boolean {
     val maxDamage = getData(DataComponentTypes.MAX_DAMAGE) ?: return false
     val damage = getData(DataComponentTypes.DAMAGE) ?: return false
     return damage >= maxDamage && !hasData(DataComponentTypes.UNBREAKABLE);
+}
+
+fun Player.addToInventoryOrDrop(vararg items: ItemStack) {
+    for (item in inventory.addItem(*items).values) {
+        location.world.dropItemNaturally(location, item)
+    }
 }
 
 const val FLUID_EPSILON = 1.0e-6
