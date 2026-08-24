@@ -5,7 +5,9 @@ package io.github.pylonmc.rebar.util.gui.unit
 import com.ibm.icu.number.NumberFormatter
 import com.ibm.icu.text.PluralRules
 import io.github.pylonmc.rebar.Rebar
+import io.github.pylonmc.rebar.addon.RebarAddon
 import io.github.pylonmc.rebar.i18n.LocaleDependentComponentRenderer
+import io.github.pylonmc.rebar.i18n.RebarTranslator
 import io.github.pylonmc.rebar.i18n.RebarTranslator.Companion.translator
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
@@ -22,6 +24,7 @@ import java.util.*
 /**
  * Handles formatting of a specific unit. Call [format] to format a value using this unit.
  *
+ * @param name The base English name of the unit, preferably plural (ex "meters")
  * @param forms A map of [PluralForm]s to components for each plural form that represent this unit as per [CLDR](https://www.unicode.org/cldr/charts/42/supplemental/language_plural_rules.html).
  * @param abbreviation A component representing the abbreviated form of this unit (kg, m, L, etc). May be null to indicate that the unit does not have an abbreviation.
  * @param format The format string that is used as the base into which the value and unit are substituted. The string has 2 placeholders:
@@ -35,6 +38,7 @@ import java.util.*
  * @param defaultStyle The style to apply to the unit (not the value) to the output.
  */
 class UnitFormat @JvmOverloads constructor(
+    val name: String,
     val forms: Map<PluralForm, Component>,
     val abbreviation: Component? = null,
     val format: String = "v u",
@@ -44,8 +48,9 @@ class UnitFormat @JvmOverloads constructor(
 ) {
 
     /**
-     * @param base The base translation key for this unit. Proper plural forms will be constructed as `base + "." + plural_keyword` (see [PluralForm.keyword]).
-     * @param hasAbbreviation If true, the unit will have an abbreviation with the translation key `base + ".abbr"`.
+     * @param addon The addon this unit is tied to.
+     * @param name The name of this unit. Proper plural forms will be constructed as `<addon>.unit.<name>.<plural_keyword>` (see [PluralForm.keyword]).
+     * The unit will have an abbreviation if the [addon]'s [RebarTranslator] can translate `<addon>.unit.<name>.abbr` in the addon's default language.
      * @param format The format string that is used as the base into which the value and unit are substituted. The string has 2 placeholders:
      * `v`, which is replaced with the value, and `u`, with is replaced with the unabbreviated unit name. For example, the default format string is `"v u"`.
      * `v` is replaced with the value (ex 3 to make `"3 u"`), and `u` is replaced with the unit (ex `"3 seggans"`)
@@ -58,28 +63,33 @@ class UnitFormat @JvmOverloads constructor(
      */
     @JvmOverloads
     constructor(
-        base: String,
-        hasAbbreviation: Boolean,
+        addon: RebarAddon,
+        name: String,
         format: String = "v u",
         abbrFormat: String = "v u",
         defaultPrefix: MetricPrefix = MetricPrefix.NONE,
         defaultStyle: Style = Style.empty()
     ) : this(
-        forms = PluralForm.entries.associateWith { Component.translatable("$base.${it.keyword}") },
-        abbreviation = Component.translatable("$base.abbr").takeIf { hasAbbreviation },
+        name = name,
+        forms = PluralForm.entries.associateWith { Component.translatable("${addon.key.namespace}.unit.$name.${it.keyword}") },
+        abbreviation = Component.translatable("${addon.key.namespace}.unit.$name.abbr")
+            .takeIf { addon.translator.canTranslate(it.key(), addon.defaultLanguage) },
         format = format,
         abbrFormat = abbrFormat,
         defaultPrefix = defaultPrefix,
         defaultStyle = defaultStyle
     )
 
+    init {
+        namedUnits[name] = this
+    }
+
     /**
-     * Enables the use of this unit in the custom `<unit:[name]>` tag in [Rebar's custom MiniMessage parser][io.github.pylonmc.rebar.i18n.customMiniMessage]
+     * Disables the use of this unit in the custom `<unit:[name]>` tag in [Rebar's custom MiniMessage parser][io.github.pylonmc.rebar.i18n.customMiniMessage]
      *
-     * @param name the name to be used in the tag
      * @return this [UnitFormat]
      */
-    fun allowUseInUnitTag(name: String) = apply { namedUnits[name] = this }
+    fun disallowUseInUnitTag() = apply { namedUnits.remove(name) }
 
     /**
      * Returns a **new** [UnitFormat] with the same parameters as this one but with a different default prefix
@@ -92,13 +102,14 @@ class UnitFormat @JvmOverloads constructor(
     fun withDefaultStyle(style: Style) = copy(defaultStyle = style)
 
     private fun copy(
+        name: String = this.name,
         forms: Map<PluralForm, Component> = this.forms,
         abbreviation: Component? = this.abbreviation,
         format: String = this.format,
         abbrFormat: String = this.abbrFormat,
         defaultPrefix: MetricPrefix = this.defaultPrefix,
         defaultStyle: Style = this.defaultStyle
-    ) = UnitFormat(forms, abbreviation, format, abbrFormat, defaultPrefix, defaultStyle)
+    ) = UnitFormat(name, forms, abbreviation, format, abbrFormat, defaultPrefix, defaultStyle)
 
     fun format(value: BigDecimal) = Formatted(value.stripTrailingZeros())
 
@@ -306,169 +317,173 @@ class UnitFormat @JvmOverloads constructor(
         @JvmSynthetic
         internal val namedUnits = mutableMapOf<String, UnitFormat>()
 
-        private fun rebar(
-            name: String,
-            style: Style,
-            abbrFormat: String = "v u",
-            prefix: MetricPrefix = MetricPrefix.NONE,
-        ): UnitFormat {
-            val abbrKey = "rebar.unit.$name.abbr"
-            val abbr = Component.translatable(abbrKey).takeIf {
-                Rebar.translator.canTranslate(abbrKey, Rebar.defaultLanguage)
-            }
-            return UnitFormat(
-                forms = PluralForm.entries.associateWith { Component.text("rebar.unit.$name.$it") },
-                abbreviation = abbr,
-                abbrFormat = abbrFormat,
-                defaultPrefix = prefix,
-                defaultStyle = style,
-            ).allowUseInUnitTag(name)
-        }
-
         @JvmField
-        val BLOCKS = rebar(
+        val BLOCKS = UnitFormat(
+            Rebar,
             "blocks",
-            Style.style(TextColor.color(0x1eaa56))
+            defaultStyle = Style.style(TextColor.color(0x1eaa56))
         )
 
         @JvmField
-        val BLOCKS_PER_SECOND = rebar(
+        val BLOCKS_PER_SECOND = UnitFormat(
+            Rebar,
             "blocks_per_second",
-            Style.style(TextColor.color(0x1eaa56))
+            defaultStyle = Style.style(TextColor.color(0x1eaa56))
         )
 
         @JvmField
-        val CHUNKS = rebar(
+        val CHUNKS = UnitFormat(
+            Rebar,
             "chunks",
-            Style.style(TextColor.color(0x136D37))
+            defaultStyle = Style.style(TextColor.color(0x136D37))
         )
 
         @JvmField
-        val HEARTS = rebar(
+        val HEARTS = UnitFormat(
+            Rebar,
             "hearts",
-            Style.style(TextColor.color(0xdb3b43))
+            defaultStyle = Style.style(TextColor.color(0xdb3b43))
         )
 
         @JvmField
-        val PERCENT = rebar(
+        val PERCENT = UnitFormat(
+            Rebar,
             "percent",
-            Style.empty(),
+            defaultStyle = Style.empty(),
             abbrFormat = "vu"
         )
 
         @JvmField
-        val RESEARCH_POINTS = rebar(
+        val RESEARCH_POINTS = UnitFormat(
+            Rebar,
             "research_points",
-            Style.style(TextColor.color(0x70da65))
+            defaultStyle = Style.style(TextColor.color(0x70da65))
         )
 
         @JvmField
-        val CELSIUS = rebar(
+        val CELSIUS = UnitFormat(
+            Rebar,
             "celsius",
-            Style.style(TextColor.color(0xe27f41))
+            defaultStyle = Style.style(TextColor.color(0xe27f41))
         )
 
         @JvmField
-        val MILLIBUCKETS = rebar(
+        val MILLIBUCKETS = UnitFormat(
+            Rebar,
             "buckets",
-            Style.style(TextColor.color(0xe3835f2)),
-            prefix = MetricPrefix.MILLI
+            defaultStyle = Style.style(TextColor.color(0xe3835f2)),
+            defaultPrefix = MetricPrefix.MILLI
         )
 
         @JvmField
-        val MILLIBUCKETS_PER_SECOND = rebar(
+        val MILLIBUCKETS_PER_SECOND = UnitFormat(
+            Rebar,
             "buckets_per_second",
-            Style.style(TextColor.color(0xe3835f2)),
-            prefix = MetricPrefix.MILLI
+            defaultStyle = Style.style(TextColor.color(0xe3835f2)),
+            defaultPrefix = MetricPrefix.MILLI
         )
 
         @JvmField
-        val MILLIBUCKETS_PER_ITEM = rebar(
+        val MILLIBUCKETS_PER_ITEM = UnitFormat(
+            Rebar,
             "buckets_per_item",
-            Style.style(TextColor.color(0xe3835f2)),
-            prefix = MetricPrefix.MILLI
+            defaultStyle = Style.style(TextColor.color(0xe3835f2)),
+            defaultPrefix = MetricPrefix.MILLI
         )
 
         @JvmField
-        val DAYS = rebar(
+        val DAYS = UnitFormat(
+            Rebar,
             "days",
-            Style.style(TextColor.color(0xc9c786))
+            defaultStyle = Style.style(TextColor.color(0xc9c786))
         )
 
         @JvmField
-        val HOURS = rebar(
+        val HOURS = UnitFormat(
+            Rebar,
             "hours",
-            Style.style(TextColor.color(0xc9c786))
+            defaultStyle = Style.style(TextColor.color(0xc9c786))
         )
 
         @JvmField
-        val MINUTES = rebar(
+        val MINUTES = UnitFormat(
+            Rebar,
             "minutes",
-            Style.style(TextColor.color(0xc9c786))
+            defaultStyle = Style.style(TextColor.color(0xc9c786))
         )
 
         @JvmField
-        val SECONDS = rebar(
+        val SECONDS = UnitFormat(
+            Rebar,
             "seconds",
-            Style.style(TextColor.color(0xc9c786)),
+            defaultStyle = Style.style(TextColor.color(0xc9c786)),
         )
 
         @JvmField
-        val JOULES = rebar(
+        val JOULES = UnitFormat(
+            Rebar,
             "joules",
-            Style.style(TextColor.color(0xF2A900)),
-            prefix = MetricPrefix.NONE
+            defaultStyle = Style.style(TextColor.color(0xF2A900)),
+            defaultPrefix = MetricPrefix.NONE
         )
 
         @JvmField
-        val WATTS = rebar(
+        val WATTS = UnitFormat(
+            Rebar,
             "watts",
-            Style.style(TextColor.color(0xF2A900)),
-            prefix = MetricPrefix.NONE
+            defaultStyle = Style.style(TextColor.color(0xF2A900)),
+            defaultPrefix = MetricPrefix.NONE
         )
 
         @JvmField
-        val EXPERIENCE = rebar(
+        val EXPERIENCE = UnitFormat(
+            Rebar,
             "experience",
-            Style.style(TextColor.color(0xb2e01a))
+            defaultStyle = Style.style(TextColor.color(0xb2e01a))
         )
 
         @JvmField
-        val EXPERIENCE_PER_SECOND = rebar(
+        val EXPERIENCE_PER_SECOND = UnitFormat(
+            Rebar,
             "experience_per_second",
-            Style.style(TextColor.color(0xb2e01a))
+            defaultStyle = Style.style(TextColor.color(0xb2e01a))
         )
 
         @JvmField
-        val ITEMS = rebar(
+        val ITEMS = UnitFormat(
+            Rebar,
             "items",
-            Style.style(TextColor.color(0x09e2c2))
+            defaultStyle = Style.style(TextColor.color(0x09e2c2))
         )
 
         @JvmField
-        val ITEMS_PER_SECOND = rebar(
+        val ITEMS_PER_SECOND = UnitFormat(
+            Rebar,
             "items_per_second",
-            Style.style(TextColor.color(0x09e2c2))
+            defaultStyle = Style.style(TextColor.color(0x09e2c2))
         )
 
         @JvmField
-        val STACKS = rebar(
+        val STACKS = UnitFormat(
+            Rebar,
             "stacks",
-            Style.style(TextColor.color(0x44d2e2))
+            defaultStyle = Style.style(TextColor.color(0x44d2e2))
         )
 
         @JvmField
-        val CYCLES = rebar(
+        val CYCLES = UnitFormat(
+            Rebar,
             "cycles",
-            Style.style(TextColor.color(0xb672bf)),
-            prefix = MetricPrefix.NONE
+            defaultStyle = Style.style(TextColor.color(0xb672bf)),
+            defaultPrefix = MetricPrefix.NONE
         )
 
         @JvmField
-        val CYCLES_PER_SECOND = rebar(
+        val CYCLES_PER_SECOND = UnitFormat(
+            Rebar,
             "cycles_per_second",
-            Style.style(TextColor.color(0xb672bf)),
-            prefix = MetricPrefix.NONE
+            defaultStyle = Style.style(TextColor.color(0xb672bf)),
+            defaultPrefix = MetricPrefix.NONE
         )
 
         /**
