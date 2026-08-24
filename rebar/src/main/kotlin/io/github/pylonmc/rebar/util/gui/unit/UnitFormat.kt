@@ -121,7 +121,6 @@ class UnitFormat @JvmOverloads constructor(
 
     /**
      * Represents a value that has already been formatted.
-     *
      * You can use this class to override how an already-formatted value is displayed.
      */
     inner class Formatted internal constructor(private val value: BigDecimal) : ComponentLike {
@@ -187,15 +186,22 @@ class UnitFormat @JvmOverloads constructor(
         fun ignorePrefixes(vararg prefixes: MetricPrefix) = apply { badPrefixes.addAll(prefixes) }
 
         /**
-         * Same as [ignorePrefixes] but for [MetricPrefix.COMMONLY_UNUSED_PREFIXES]
+         * Automatically selects an appropriate prefix based on the value and rescales the value accordingly.
+         * **Default prefix is ignored when using this method.**
+         *
+         * @param ignoreCommonlyUnusedPrefixes if true, ignores the prefixes in [MetricPrefix.COMMONLY_UNUSED_PREFIXES]
          */
-        fun ignoreCommonlyUnusedPrefixes() = ignorePrefixes(MetricPrefix.COMMONLY_UNUSED_PREFIXES)
+        fun selectPrefixAndRescale(ignoreCommonlyUnusedPrefixes: Boolean) = apply {
+            prefix = null
+            if (ignoreCommonlyUnusedPrefixes) ignorePrefixes(MetricPrefix.COMMONLY_UNUSED_PREFIXES)
+        }
 
         /**
          * Automatically selects an appropriate prefix based on the value and rescales the value accordingly.
          * **Default prefix is ignored when using this method.**
+         * Ignores the prefixes in [MetricPrefix.COMMONLY_UNUSED_PREFIXES].
          */
-        fun selectPrefixAndRescale() = apply { prefix = null }
+        fun selectPrefixAndRescale() = selectPrefixAndRescale(true)
 
         /**
          * Builds a component representing the value and unit.
