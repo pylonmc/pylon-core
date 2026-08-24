@@ -92,16 +92,42 @@ class UnitFormat @JvmOverloads constructor(
     fun disallowUseInUnitTag() = apply { namedUnits.remove(name) }
 
     /**
-     * Returns a **new** [UnitFormat] with the same parameters as this one but with a different default prefix
+     * Returns a **new** [UnitFormat] with the same parameters as this one but with a [name]
+     */
+    fun withName(name: String) = copy(name = name)
+
+    /**
+     * Returns a **new** [UnitFormat] with the same parameters as this one but with different [forms]
+     */
+    fun withForms(forms: Map<PluralForm, Component>) = copy(forms = forms)
+
+    /**
+     * Returns a **new** [UnitFormat] with the same parameters as this one but with a different [abbreviation]
+     */
+    fun withAbbreviation(abbreviation: Component?) = copy(abbreviation = abbreviation)
+
+    /**
+     * Returns a **new** [UnitFormat] with the same parameters as this one but with a different [format]
+     */
+    fun withFormat(format: String) = copy(format = format)
+
+    /**
+     * Returns a **new** [UnitFormat] with the same parameters as this one but with a different [abbrFormat]
+     */
+    fun withAbbrFormat(abbrFormat: String) = copy(abbrFormat = abbrFormat)
+
+    /**
+     * Returns a **new** [UnitFormat] with the same parameters as this one but with a different [defaultPrefix]
      */
     fun withDefaultPrefix(prefix: MetricPrefix) = copy(defaultPrefix = prefix)
 
     /**
-     * Returns a **new** [UnitFormat] with the same parameters as this one but with a different default style
+     * Returns a **new** [UnitFormat] with the same parameters as this one but with a different [defaultStyle]
      */
     fun withDefaultStyle(style: Style) = copy(defaultStyle = style)
 
-    private fun copy(
+    @JvmSynthetic
+    fun copy(
         name: String = this.name,
         forms: Map<PluralForm, Component> = this.forms,
         abbreviation: Component? = this.abbreviation,
