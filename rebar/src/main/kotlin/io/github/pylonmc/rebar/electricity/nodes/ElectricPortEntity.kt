@@ -79,14 +79,14 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
             val existingWire = wires
                 .filter { it.port.first == node || (it.otherEnd as? Either.Right)?.value?.first == node }
                 .maxByOrNull { it.length }
-            val wire = existingWire ?: WireEntity(node to entity.location.add(0.0, SCALE / 2, 0.0), Either.Left(player))
+            val wire = existingWire ?: WireEntity(node to entity.location, Either.Left(player))
             wire.giveToPlayer(player, node)
             WireConnectionService.startConnectingWire(player, wire)
         } else if (wire.port.first == node) {
             WireConnectionService.stopConnectingWire(player)
         } else {
             val otherPort = wire.port
-            wire.connect(otherPort, node to entity.location.add(0.0, SCALE / 2, 0.0))
+            wire.connect(otherPort, node to entity.location)
             WireConnectionService.stopConnectingWire(player, delete = false)
         }
     }

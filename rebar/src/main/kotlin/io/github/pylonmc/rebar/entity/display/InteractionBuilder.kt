@@ -25,12 +25,7 @@ open class InteractionBuilder() {
     fun size(size: Double): InteractionBuilder = size(size.toFloat())
 
     open fun build(location: Location): Interaction {
-        val finalLocation = location.clone()
-        // Account for Mojang deciding to center the entity on Y but not X and Z for some reason
-        if (height != null) {
-            finalLocation.subtract(0.0, height!! / 2.0, 0.0)
-        }
-        return location.getWorld().spawn(finalLocation, Interaction::class.java, this::update)
+        return location.getWorld().spawn(location, Interaction::class.java, this::update)
     }
 
     open fun update(interaction: Interaction) {
