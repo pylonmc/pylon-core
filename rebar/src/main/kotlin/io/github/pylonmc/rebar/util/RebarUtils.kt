@@ -13,9 +13,9 @@ import io.github.pylonmc.rebar.config.adapter.ConfigAdapter
 import io.github.pylonmc.rebar.datatypes.RebarSerializers
 import io.github.pylonmc.rebar.i18n.customMiniMessage
 import io.github.pylonmc.rebar.item.ItemTypeWrapper
+import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.item.RebarItemSchema
 import io.github.pylonmc.rebar.item.interfaces.ProjectileRebarItemHandler
-import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.nms.NmsAccessor
 import io.github.pylonmc.rebar.registry.RebarRegistry
 import io.github.pylonmc.rebar.util.position.BlockPosition
@@ -35,9 +35,6 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
-import org.bukkit.entity.Entity
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
 import org.bukkit.entity.*
 import org.bukkit.event.Event
 import org.bukkit.inventory.EquipmentSlot
@@ -411,7 +408,7 @@ inline fun <T : Any> ItemStack.editDataOrSet(
  *
  * @param value The value to set. If this is null, the key will be removed from the container
  */
-fun <P, C> PersistentDataContainer.setNullable(key: NamespacedKey, type: PersistentDataType<P, C>, value: C?) {
+fun <P, C : Any> PersistentDataContainer.setNullable(key: NamespacedKey, type: PersistentDataType<P, C>, value: C?) {
     if (value != null) {
         set(key, type, value)
     } else {
@@ -559,7 +556,7 @@ fun blocksBetween(from: BlockPosition, to: BlockPosition): List<Block> = NmsAcce
  */
 fun blocksOnPath(from: BlockPosition, to: BlockPosition): List<Block> {
     val originBlock = from.block
-    val offset = to.location
+    val offset = to.toLocation()
         .subtract(originBlock.location)
         .toVector().toVector3i()
 
@@ -941,6 +938,12 @@ fun ItemStack.hasOneDurabilityLeft(): Boolean {
     val maxDamage = getData(DataComponentTypes.MAX_DAMAGE) ?: return false
     val damage = getData(DataComponentTypes.DAMAGE) ?: return false
     return !hasData(DataComponentTypes.UNBREAKABLE) && damage == maxDamage - 1
+}
+
+fun Player.addToInventoryOrDrop(vararg items: ItemStack) {
+    for (item in inventory.addItem(*items).values) {
+        location.world.dropItemNaturally(location, item)
+    }
 }
 
 const val FLUID_EPSILON = 1.0e-6
