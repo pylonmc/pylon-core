@@ -125,7 +125,7 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
             }
 
             val mainHandItem = player.inventory.itemInMainHand
-            if (wires > mainHandItem.amount) {
+            if (wires > mainHandItem.amount && player.gameMode != GameMode.CREATIVE) {
                 player.sendMessage(
                     Component.translatable(
                         "rebar.message.wiring.more_wires",
