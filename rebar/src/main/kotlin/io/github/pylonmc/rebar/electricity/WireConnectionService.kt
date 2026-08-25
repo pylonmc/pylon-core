@@ -117,7 +117,7 @@ object WireConnectionService : Listener {
             delayTicks(1)
             @Suppress("UNCHECKED_CAST")
             for (wire in EntityStorage.getByKey(WireEntity.KEY) as Collection<WireEntity>) {
-                if (wire.isObstructed) {
+                if (wire.isObstructed && !wire.isHeldByPlayer) {
                     val loc = wire.port.second
                     loc.world.dropItemNaturally(loc, wire.wire.createNewItemStack(wire.wireCount))
                     wire.remove()
