@@ -6,7 +6,7 @@ import org.bukkit.block.BlockFace
 import org.jetbrains.annotations.ApiStatus
 
 /**
- * In a [SimpleElectricRebarBlock], all electric nodes created are connected to each other. This allows the abstraction of the concept
+ * In a [SimpleElectricRebarBlock], all electric nodes created are connected to a central "master" connector node. This allows the abstraction of the concept
  * of "nodes" into a general "electric block" that can have any number of connectors, producers, and consumers without needing to worry
  * about full interactions, while also providing simple utility methods for interacting with the electricity system.
  *
@@ -49,6 +49,7 @@ interface SimpleElectricRebarBlock : ElectricRebarBlock {
         }
         addElectricPort(ElectricPort(node, face, radius = radius))
     }
+
     /**
      * Creates a port of the given [type], on the given [face]
      */
@@ -58,28 +59,28 @@ interface SimpleElectricRebarBlock : ElectricRebarBlock {
     @ApiStatus.NonExtendable
     override fun <T : ElectricNode> addElectricNode(node: T): T {
         val node = super.addElectricNode(node)
-        for (otherNode in electricNodes) {
-            if (otherNode != node) {
-                node.connect(otherNode)
-            }
-        }
+        val masterNode = getElectricNode<ElectricConnectorNode>(MASTER)
+            ?: super.addElectricNode(ElectricConnectorNode(MASTER, block.position))
+        node.connect(masterNode)
         return node
     }
 
+    val hasConsumerNodes: Boolean
+        get() = getElectricNode(DEFAULT_CONSUMER) != null
+
+    val hasProducerNodes: Boolean
+        get() = getElectricNode(DEFAULT_PRODUCER) != null
+
     var requiredPower: Double
         /**
-         * @throws IllegalStateException if this block does not have a consumer node
+         * Returns 0 if this block does not have a consumer node
          */
-        get() {
-            val node = getElectricNode<ElectricConsumerNode>("consumer_0")
-                ?: throw IllegalStateException("Block at ${block.position} does not have a consumer node")
-            return node.requiredPower
-        }
+        get() = getElectricNode<ElectricConsumerNode>(DEFAULT_CONSUMER)?.requiredPower ?: 0.0
         /**
          * @throws IllegalStateException if this block does not have a consumer node
          */
         set(value) {
-            val node = getElectricNode<ElectricConsumerNode>("consumer_0")
+            val node = getElectricNode<ElectricConsumerNode>(DEFAULT_CONSUMER)
                 ?: throw IllegalStateException("Block at ${block.position} does not have a consumer node")
             node.requiredPower = value
         }
@@ -89,26 +90,28 @@ interface SimpleElectricRebarBlock : ElectricRebarBlock {
          * @throws IllegalStateException if this block does not have a consumer node
          */
         get() {
-            val node = getElectricNode<ElectricConsumerNode>("consumer_0")
+            val node = getElectricNode<ElectricConsumerNode>(DEFAULT_CONSUMER)
                 ?: throw IllegalStateException("Block at ${block.position} does not have a consumer node")
             return node.isPowered
         }
 
     var powerProduced: Double
         /**
-         * @throws IllegalStateException if this block does not have a producer node
+         * Returns 0 if this block does not have a producer node
          */
-        get() {
-            val node = getElectricNode<ElectricProducerNode>("producer_0")
-                ?: throw IllegalStateException("Block at ${block.position} does not have a producer node")
-            return node.power
-        }
+        get() = getElectricNode<ElectricProducerNode>(DEFAULT_PRODUCER)?.power ?: 0.0
         /**
          * @throws IllegalStateException if this block does not have a producer node
          */
         set(value) {
-            val node = getElectricNode<ElectricProducerNode>("producer_0")
+            val node = getElectricNode<ElectricProducerNode>(DEFAULT_PRODUCER)
                 ?: throw IllegalStateException("Block at ${block.position} does not have a producer node")
             node.power = value
         }
+
+    companion object {
+        private const val DEFAULT_PRODUCER = "producer_0"
+        private const val DEFAULT_CONSUMER = "consumer_0"
+        private const val MASTER = "master"
+    }
 }

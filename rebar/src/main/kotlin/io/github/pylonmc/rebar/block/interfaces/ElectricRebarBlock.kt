@@ -17,6 +17,10 @@ import org.bukkit.event.Listener
 import org.jetbrains.annotations.ApiStatus
 import java.util.*
 
+/**
+ * A block that holds [ElectricNode]s and can have electric ports. Prefer using [SimpleElectricRebarBlock] unless that doesn't fit your needs.
+ */
+
 interface ElectricRebarBlock : EntityHolderRebarBlock {
 
     @ApiStatus.NonExtendable

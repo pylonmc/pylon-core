@@ -38,6 +38,8 @@ import kotlin.math.min
  * If you need something more flexible, see [RebarMultiblock]. For example,
  * the smeltery in Pylon uses [RebarMultiblock] instead of this interface.
  *
+ * As this implements [DirectionalRebarBlock] you must set [DirectionalRebarBlock.facing] in your create constructor.
+ *
  * @see RebarMultiblock
  */
 interface SimpleRebarMultiblock : RebarMultiblock, GhostBlockHolderRebarBlock, EntityCulledRebarBlock, DirectionalRebarBlock {
