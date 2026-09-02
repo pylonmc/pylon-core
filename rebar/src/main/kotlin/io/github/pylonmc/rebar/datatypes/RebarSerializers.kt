@@ -68,12 +68,6 @@ object RebarSerializers {
     @JvmField
     val PAIR = PairPersistentDataType
 
-    /**
-     * @see [PolymorphicPersistentDataType]
-     */
-    @JvmField
-    val POLYMORPHIC = PolymorphicPersistentDataType
-
     @JvmField
     val NAMESPACED_KEY = NamespacedKeyPersistentDataType
 
