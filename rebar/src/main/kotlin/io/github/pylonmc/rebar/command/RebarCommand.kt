@@ -70,7 +70,7 @@ import io.papermc.paper.math.BlockPosition as PaperBlockPosition
 
 // IF MODIFYING COMMANDS, PLEASE ENSURE YOU UPDATE https://pylonmc.github.io/home/commands-and-permissions/ ACCORDINGLY
 
-private val ERROR_NO_PLAYERS = SimpleCommandExceptionType(MessageComponentSerializer.message().serialize(Component.translatable("argument.player.unknown")))
+private val ERROR_NO_PLAYERS = SimpleCommandExceptionType(MessageComponentSerializer.message().serialize(Component.translatable("argument.entity.notfound.player")))
 
 private val guide = buildCommand("guide") {
     permission("rebar.command.guide")
