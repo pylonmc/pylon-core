@@ -90,8 +90,6 @@ object Rebar : JavaPlugin(), RebarAddon {
     @get:ApiStatus.Internal
     val scope by lazy { CoroutineScope(SupervisorJob() + mainThreadDispatcher) }
 
-    var debugMode = false
-
     override fun onEnable() {
         val start = System.currentTimeMillis()
 

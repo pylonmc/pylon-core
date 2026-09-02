@@ -1,7 +1,7 @@
 package io.github.pylonmc.rebar.test;
 
-import io.github.pylonmc.rebar.Rebar;
 import io.github.pylonmc.rebar.addon.RebarAddon;
+import io.github.pylonmc.rebar.electricity.ElectricityManager;
 import io.github.pylonmc.rebar.test.base.Test;
 import io.github.pylonmc.rebar.test.base.TestResult;
 import io.github.pylonmc.rebar.test.block.TestBlocks;
@@ -208,7 +208,7 @@ public class RebarTest extends JavaPlugin implements RebarAddon {
             return;
         }
 
-        Rebar.INSTANCE.setDebugMode(true);
+        ElectricityManager.dontAutoTickNetworks(true);
 
         TestUtil.runAsync(RebarTest::run, 1);
     }

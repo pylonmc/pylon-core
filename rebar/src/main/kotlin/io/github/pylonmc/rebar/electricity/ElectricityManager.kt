@@ -14,10 +14,15 @@ object ElectricityManager {
 
     private val nodes = mutableMapOf<UUID, ElectricNode>()
 
+    @JvmStatic
+    @get:JvmName("dontAutoTickNetworks")
+    @set:JvmName("dontAutoTickNetworks")
+    var dontAutoTickNetworks = false
+
     init {
         Rebar.scope.launch {
             while (true) {
-                if (!Rebar.debugMode) {
+                if (!dontAutoTickNetworks) {
                     @Suppress("DEPRECATION")
                     tick()
                 }
