@@ -16,7 +16,7 @@ public class TickingBlockTest extends GameTest {
                 .setUp((test) -> {
                     BlockStorage.placeBlock(test.location(), TickingBlock.KEY);
 
-                    test.succeedWhen(() -> BlockStorage.getAs(TickingBlock.class, test.location()).ticks >= 5);
+                    test.succeedWhen(() -> BlockStorage.getAs(test.location(), TickingBlock.class).ticks >= 5);
                 })
                 .cleanup(test -> BlockStorage.breakBlock(test.location()))
                 .build());

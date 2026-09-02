@@ -53,7 +53,7 @@ public class FluidPartialReloadTest extends AsyncTest {
 
         // When the chunk is reloaded, all should have the same segment again
         TestUtil.loadChunk(connectorChunk).join();
-        FluidConnector reloadedConnector = BlockStorage.getAs(FluidConnector.class, connectorBlock);
+        FluidConnector reloadedConnector = BlockStorage.getAs(connectorBlock, FluidConnector.class);
         assertThat(consumer.getPoint().getSegment())
                 .isEqualTo(reloadedConnector.getPoint().getSegment())
                 .isEqualTo(producer.getPoint().getSegment());

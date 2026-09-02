@@ -71,7 +71,7 @@ class FluidIntersectionDisplay : RebarEntity<ItemDisplay>, RemoveRebarEntityHand
     fun updateItemDisplay() {
         if (connectedPipeDisplays.isEmpty()) return
 
-        val marker = BlockStorage.getAs(FluidIntersectionMarker::class.java, entity.location.block) ?: return
+        val marker = BlockStorage.getAs(entity.location.block, FluidIntersectionMarker::class.java) ?: return
         val modelData = CustomModelData.customModelData().addString("fluid_point_intersection:${marker.pipe.key}")
 
         val from = this.entity.location

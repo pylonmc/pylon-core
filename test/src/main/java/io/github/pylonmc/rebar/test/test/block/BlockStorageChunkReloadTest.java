@@ -53,7 +53,7 @@ public class BlockStorageChunkReloadTest extends AsyncTest {
                         .extracting(RebarBlock::getSchema)
                         .isInstanceOf(RebarBlockSchema.class);
 
-                assertThat(BlockStorage.getAs(BlockWithField.class, block))
+                assertThat(BlockStorage.getAs(block, BlockWithField.class))
                         .isNotNull()
                         .extracting(BlockWithField::getProgress)
                         .isEqualTo(130);

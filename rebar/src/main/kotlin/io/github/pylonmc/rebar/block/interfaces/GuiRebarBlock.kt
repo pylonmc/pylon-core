@@ -101,7 +101,7 @@ interface GuiRebarBlock : NoVanillaInventoryRebarBlock {
 
         @EventHandler(priority = EventPriority.HIGHEST)
         private fun onInteract(event: PlayerInteractEvent) {
-            val guiBlock = BlockStorage.getAs(GuiRebarBlock::class.java, event.clickedBlock ?: return) ?: return
+            val guiBlock = BlockStorage.getAs(event.clickedBlock ?: return, GuiRebarBlock::class.java) ?: return
 
             if (!event.action.isRightClick
                 || (event.player.isSneaking && event.isBlockInHand)

@@ -24,7 +24,7 @@ public class BlockStorageAddTest extends GameTest {
                             .isNotNull()
                             .isInstanceOf(RebarBlock.class);
 
-                    assertThat(BlockStorage.getAs(RebarBlock.class, test.location()))
+                    assertThat(BlockStorage.getAs(test.location(), RebarBlock.class))
                             .isNotNull();
 
                     BlockStorage.breakBlock(test.location());

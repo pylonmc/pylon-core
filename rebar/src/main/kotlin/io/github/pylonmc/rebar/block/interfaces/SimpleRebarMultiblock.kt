@@ -247,7 +247,7 @@ interface SimpleRebarMultiblock : RebarMultiblock, GhostBlockHolderRebarBlock, E
         BlockStorage.get(getMultiblockBlock(position))
 
     fun <T> getMultiblockComponent(clazz: Class<T>, position: Vector3i) =
-        BlockStorage.getAs(clazz, getMultiblockBlock(position))
+        BlockStorage.getAs(getMultiblockBlock(position), clazz)
 
     fun getMultiblockComponentOrThrow(position: Vector3i) =
         getMultiblockComponent(position) ?: throw IllegalStateException("There is no Rebar block at $position")

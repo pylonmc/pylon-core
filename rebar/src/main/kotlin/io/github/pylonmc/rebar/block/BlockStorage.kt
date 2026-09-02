@@ -129,7 +129,7 @@ object BlockStorage : Listener {
      * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     @JvmStatic
-    fun <T> getAs(clazz: Class<T>, blockPosition: BlockPosition?): T? {
+    fun <T> getAs(blockPosition: BlockPosition?, clazz: Class<T>): T? {
         val block = get(blockPosition) ?: return null
         if (!clazz.isInstance(block)) {
             return null
@@ -144,7 +144,7 @@ object BlockStorage : Listener {
      * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     @JvmStatic
-    fun <T> getAs(clazz: Class<T>, block: Block?): T? = block?.let { getAs(clazz, it.position) }
+    fun <T> getAs(block: Block?, clazz: Class<T>): T? = block?.let { getAs(it.position, clazz) }
 
     /**
      * Returns the Rebar block (of type [T]) at the given [location], or null if the block
@@ -153,7 +153,7 @@ object BlockStorage : Listener {
      * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     @JvmStatic
-    fun <T> getAs(clazz: Class<T>, location: Location?): T? = location?.let { getAs(clazz, BlockPosition(it)) }
+    fun <T> getAs(location: Location?, clazz: Class<T>): T? = location?.let { getAs(BlockPosition(it), clazz) }
 
     /**
      * Gets the Rebar block (of type [T]) at the given [blockPosition].
@@ -163,7 +163,7 @@ object BlockStorage : Listener {
      * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
     inline fun <reified T> getAs(blockPosition: BlockPosition?): T? =
-        getAs(T::class.java, blockPosition)
+        getAs(blockPosition, T::class.java)
 
     /**
      * Returns the Rebar block (of type [T]) at the given [block].
@@ -172,7 +172,7 @@ object BlockStorage : Listener {
      *
      * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
-    inline fun <reified T> getAs(block: Block?): T? = getAs(T::class.java, block)
+    inline fun <reified T> getAs(block: Block?): T? = getAs(block, T::class.java)
 
     /**
      * Returns the Rebar block (of type [T]) at the given [location].
@@ -181,7 +181,7 @@ object BlockStorage : Listener {
      *
      * @throws IllegalArgumentException if the chunk containing the block is not loaded
      */
-    inline fun <reified T> getAs(location: Location?): T? = getAs(T::class.java, location)
+    inline fun <reified T> getAs(location: Location?): T? = getAs(location, T::class.java)
 
     /**
      * Returns all the Rebar blocks in the chunk at [chunkPosition].
