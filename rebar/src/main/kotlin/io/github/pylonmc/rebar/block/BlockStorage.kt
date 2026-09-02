@@ -137,6 +137,13 @@ object BlockStorage : Listener {
         return clazz.cast(block)
     }
 
+    @Deprecated(
+        message = "Use getAs(blockPosition, clazz) instead",
+        replaceWith = ReplaceWith("getAs(blockPosition, clazz)")
+    )
+    @JvmStatic
+    fun <T> getAs(clazz: Class<T>, blockPosition: BlockPosition?): T? = getAs(blockPosition, clazz)
+
     /**
      * Returns the Rebar block (of type [T]) at the given [block], or null if the block
      * does not exist or is not of the expected class.
@@ -146,6 +153,13 @@ object BlockStorage : Listener {
     @JvmStatic
     fun <T> getAs(block: Block?, clazz: Class<T>): T? = block?.let { getAs(it.position, clazz) }
 
+    @Deprecated(
+        message = "Use getAs(block, clazz) instead",
+        replaceWith = ReplaceWith("getAs(block, clazz)")
+    )
+    @JvmStatic
+    fun <T> getAs(clazz: Class<T>, block: Block?): T? = getAs(block, clazz)
+
     /**
      * Returns the Rebar block (of type [T]) at the given [location], or null if the block
      * does not exist or is not of the expected class.
@@ -154,6 +168,13 @@ object BlockStorage : Listener {
      */
     @JvmStatic
     fun <T> getAs(location: Location?, clazz: Class<T>): T? = location?.let { getAs(BlockPosition(it), clazz) }
+
+    @Deprecated(
+        message = "Use getAs(location, clazz) instead",
+        replaceWith = ReplaceWith("getAs(location, clazz)")
+    )
+    @JvmStatic
+    fun <T> getAs(clazz: Class<T>, location: Location?): T? = getAs(location, clazz)
 
     /**
      * Gets the Rebar block (of type [T]) at the given [blockPosition].
