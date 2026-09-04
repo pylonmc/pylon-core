@@ -4,6 +4,7 @@ import io.github.pylonmc.rebar.block.BlockStorage
 import io.github.pylonmc.rebar.block.RebarBlock
 import io.github.pylonmc.rebar.block.context.BlockCreateContext
 import io.github.pylonmc.rebar.event.RebarBlockPlaceEvent
+import io.github.pylonmc.rebar.util.CARDINAL_FACES
 import io.github.pylonmc.rebar.util.getRelative
 import io.github.pylonmc.rebar.util.position.ChunkPosition
 import io.github.pylonmc.rebar.util.position.position
@@ -221,6 +222,7 @@ interface SimpleRebarMultiblock : RebarMultiblock, GhostBlockHolderRebarBlock, E
         }
 
     override fun checkFormed(): Boolean {
+        check(facing in CARDINAL_FACES) { "Multiblock's facing must be NORTH, SOUTH, EAST, or WEST" }
         // Actual formed checking logic
         val formed = rotateComponentsToFace(components, facing).all {
             it.value.matches(block.location.add(Vector.fromJOML(it.key)).block)
