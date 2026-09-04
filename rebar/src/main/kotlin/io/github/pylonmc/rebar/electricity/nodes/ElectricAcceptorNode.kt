@@ -16,7 +16,7 @@ class ElectricAcceptorNode private constructor(
         block: BlockPosition
     ) : this(UUID.randomUUID(), name, block, mutableSetOf())
 
-    override val type = Type.ACCEPTOR
+    override val type = ElectricNodeType.ACCEPTOR
 
     @get:JvmSynthetic
     @set:JvmSynthetic
@@ -24,7 +24,7 @@ class ElectricAcceptorNode private constructor(
 
 
     /**
-     * Registers a handler, which is called with surplus power provided by the network.
+     * Registers a handler, which is called with surplus power provided by the network. Previous handlers are overwritten.
      */
     fun onAccept(handler: AcceptorHandler) {
         this.handler = handler
@@ -41,6 +41,7 @@ class ElectricAcceptorNode private constructor(
     }
 
     override fun serialize(pdc: PersistentDataContainer) {
+        // Nothing to serialize
     }
 
     companion object {

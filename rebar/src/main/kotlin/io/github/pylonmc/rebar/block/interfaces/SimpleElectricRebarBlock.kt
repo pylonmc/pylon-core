@@ -23,26 +23,26 @@ interface SimpleElectricRebarBlock : ElectricRebarBlock {
      * If you wish to customize the port further, create an [ElectricNode] and call [addElectricPort] directly instead.
      */
     @ApiStatus.NonExtendable
-    fun createSimpleElectricPort(type: ElectricNode.Type, face: BlockFace, radius: Double) {
+    fun createSimpleElectricPort(type: ElectricNodeType, face: BlockFace, radius: Double) {
         val node = when (type) {
-            ElectricNode.Type.CONNECTOR -> ElectricConnectorNode(
+            ElectricNodeType.CONNECTOR -> ElectricConnectorNode(
                 "connector_${electricNodes.count { it is ElectricConnectorNode }}",
                 block.position
             )
 
-            ElectricNode.Type.PRODUCER -> ElectricProducerNode(
+            ElectricNodeType.PRODUCER -> ElectricProducerNode(
                 "producer_${electricNodes.count { it is ElectricProducerNode }}",
                 block.position,
                 0.0
             )
 
-            ElectricNode.Type.CONSUMER -> ElectricConsumerNode(
+            ElectricNodeType.CONSUMER -> ElectricConsumerNode(
                 "consumer_${electricNodes.count { it is ElectricConsumerNode }}",
                 block.position,
                 0.0
             )
 
-            ElectricNode.Type.ACCEPTOR -> ElectricAcceptorNode(
+            ElectricNodeType.ACCEPTOR -> ElectricAcceptorNode(
                 "acceptor_${electricNodes.count { it is ElectricAcceptorNode }}",
                 block.position,
             )
@@ -54,7 +54,7 @@ interface SimpleElectricRebarBlock : ElectricRebarBlock {
      * Creates a port of the given [type], on the given [face]
      */
     @ApiStatus.NonExtendable
-    fun createSimpleElectricPort(type: ElectricNode.Type, face: BlockFace) = createSimpleElectricPort(type, face, 0.5)
+    fun createSimpleElectricPort(type: ElectricNodeType, face: BlockFace) = createSimpleElectricPort(type, face, 0.5)
 
     @ApiStatus.NonExtendable
     override fun <T : ElectricNode> addElectricNode(node: T): T {

@@ -12,6 +12,13 @@ import java.util.*
 
 /**
  * Represents a node in an electric network. This can be a producer, consumer, connector, or acceptor of power.
+ * This is only a virtual representation of a node and does not interact with the world, or even Rebar outside
+ * electric networks at all. See https://pylonmc.github.io/documentation/internals/electricity/#electric-nodes for more.
+ *
+ * @see ElectricAcceptorNode
+ * @see ElectricConnectorNode
+ * @see ElectricConsumerNode
+ * @see ElectricProducerNode
  */
 sealed class ElectricNode(
     val id: UUID,
@@ -31,7 +38,7 @@ sealed class ElectricNode(
      */
     val network: ElectricNetwork get() = ElectricityManager.getNodeNetwork(this)
 
-    abstract val type: Type
+    abstract val type: ElectricNodeType
 
     protected var onConnect = ConnectDisconnectHandler { _, _ -> }
     protected var onDisconnect = ConnectDisconnectHandler { _, _ -> }
@@ -123,7 +130,7 @@ sealed class ElectricNode(
     companion object {
 
         private val TYPE_KEY = rebarKey("type")
-        private val TYPE_TYPE = RebarSerializers.ENUM.enumTypeFrom<Type>()
+        private val TYPE_TYPE = RebarSerializers.ENUM.enumTypeFrom<ElectricNodeType>()
         private val ID_KEY = rebarKey("id")
         private val NAME_KEY = rebarKey("name")
         private val BLOCK_KEY = rebarKey("block")
@@ -162,19 +169,13 @@ sealed class ElectricNode(
                 val connections = primitive.get(CONNECTIONS_KEY, CONNECTIONS_TYPE)!!.toMutableSet()
 
                 return when (primitive.get(TYPE_KEY, TYPE_TYPE)!!) {
-                    Type.PRODUCER -> ElectricProducerNode.deserialize(id, name, block, connections, primitive)
-                    Type.CONSUMER -> ElectricConsumerNode.deserialize(id, name, block, connections, primitive)
-                    Type.CONNECTOR -> ElectricConnectorNode.deserialize(id, name, block, connections)
-                    Type.ACCEPTOR -> ElectricAcceptorNode.deserialize(id, name, block, connections)
+                    ElectricNodeType.PRODUCER -> ElectricProducerNode.deserialize(id, name, block, connections, primitive)
+                    ElectricNodeType.CONSUMER -> ElectricConsumerNode.deserialize(id, name, block, connections, primitive)
+                    ElectricNodeType.CONNECTOR -> ElectricConnectorNode.deserialize(id, name, block, connections)
+                    ElectricNodeType.ACCEPTOR -> ElectricAcceptorNode.deserialize(id, name, block, connections)
                 }
             }
         }
     }
 
-    enum class Type {
-        CONNECTOR,
-        PRODUCER,
-        CONSUMER,
-        ACCEPTOR
-    }
 }

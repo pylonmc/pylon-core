@@ -21,7 +21,7 @@ class ElectricConsumerNode private constructor(
         requiredPower: Double
     ) : this(UUID.randomUUID(), name, block, mutableSetOf(), requiredPower)
 
-    override val type = Type.CONSUMER
+    override val type = ElectricNodeType.CONSUMER
 
     /**
      * The amount of power that this consumer requires, measured in watts. Should the network not be able to provide this
@@ -48,7 +48,7 @@ class ElectricConsumerNode private constructor(
     private var whenPowerChanges = BooleanConsumer {}
 
     /**
-     * Called with the new state of [isPowered] whenever it changes
+     * Called with the new state of [isPowered] whenever it changes. Previous handlers are overwritten.
      */
     fun onPowerChange(action: BooleanConsumer) {
         whenPowerChanges = action

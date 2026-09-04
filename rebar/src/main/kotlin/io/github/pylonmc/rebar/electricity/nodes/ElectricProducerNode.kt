@@ -24,7 +24,7 @@ class ElectricProducerNode private constructor(
         priority: Int = 0
     ) : this(UUID.randomUUID(), name, block, mutableSetOf(), power, priority)
 
-    override val type = Type.PRODUCER
+    override val type = ElectricNodeType.PRODUCER
 
     /**
      * The amount of power that this producer produces, measured in watts.
@@ -52,6 +52,9 @@ class ElectricProducerNode private constructor(
     @set:JvmSynthetic
     internal var powerTakeHandler = Consumer<Double> { }
 
+    /**
+     * Called with the amount of power taken every network tick. Previous handlers are overwritten.
+     */
     fun onPowerTake(handler: Consumer<Double>) {
         powerTakeHandler = handler
     }
