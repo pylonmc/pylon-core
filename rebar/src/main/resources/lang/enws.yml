@@ -264,67 +264,86 @@ unit:
       abbr: "q"
 
   blocks:
-    singular: "block"
-    plural: "blocks"
+    one: "block"
+    other: "blocks"
   blocks_per_second:
-    singular: "block per second"
-    plural: "blocks per second"
-    abbr: "b/s"
+    one: "block per second"
+    other: "blocks per second"
   chunks:
-    singular: "chunk"
-    plural: "chunks"
+    one: "chunk"
+    other: "chunks"
   hearts:
-    singular: "heart"
-    plural: "hearts"
+    one: "heart"
+    other: "hearts"
     abbr: "❤"
   percent:
-    singular: "percent"
-    plural: "percent"
+    one: "percent"
+    other: "percent"
     abbr: "%"
   research_points:
-    singular: "mark of revelation"
-    plural: "marks of revelation"
+    one: "mark of revelation"
+    other: "marks of revelation"
   celsius:
-    singular: "degree Celsius"
-    plural: "degrees Celsius"
+    one: "degree Celsius"
+    other: "degrees Celsius"
     abbr: "°C"
   buckets:
-    singular: "bucket"
-    plural: "buckets"
+    one: "bucket"
+    other: "buckets"
     abbr: "B"
   buckets_per_second:
-    singular: "bucket per second"
-    plural: "buckets per second"
+    one: "bucket per second"
+    other: "buckets per second"
     abbr: "B/s"
+  buckets_per_item:
+    one: "bucket per item"
+    other: "buckets per item"
+    abbr: "B/item"
   days:
-    singular: "day"
-    plural: "days"
+    one: "day"
+    other: "days"
     abbr: "d"
   hours:
-    singular: "hour"
-    plural: "hours"
+    one: "hour"
+    other: "hours"
     abbr: "h"
   minutes:
-    singular: "minute"
-    plural: "minutes"
+    one: "minute"
+    other: "minutes"
     abbr: "m"
   seconds:
-    singular: "second"
-    plural: "seconds"
+    one: "second"
+    other: "seconds"
     abbr: "s"
   joules:
-    singular: "joule"
-    plural: "joules"
+    one: "joule"
+    other: "joules"
     abbr: "J"
   watts:
-    singular: "watt"
-    plural: "watts"
+    one: "watt"
+    other: "watts"
     abbr: "W"
   experience:
-    singular: "experience point"
-    plural: "experience points"
+    one: "experience point"
+    other: "experience points"
     abbr: "XP"
   experience_per_second:
-    singular: "experience point per second"
-    plural: "experience points per second"
+    one: "experience point per second"
+    other: "experience points per second"
     abbr: "XP/s"
+  items:
+    one: "item"
+    other: "items"
+  items_per_second:
+    one: "item per second"
+    other: "items per second"
+    abbr: "items/s"
+  stacks:
+    one: "stack"
+    other: "stacks"
+  cycles:
+    one: "cycle"
+    other: "cycles"
+  cycles_per_second:
+    one: "cycle per second"
+    other: "cycles per second"
