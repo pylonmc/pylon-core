@@ -7,7 +7,12 @@ import net.kyori.adventure.text.Component
  *
  * Enum order is guaranteed to be the same as the SI unit prefixes, from largest to smallest.
  */
-enum class MetricPrefix(val scale: Int) {
+enum class MetricPrefix(
+    /**
+     * Scale, where `10^scale` is the multiplier of the unit. For example, for kilo, scale is 3, because 1 kilogram is 10^3 grams.
+     */
+    val scale: Int
+) {
     QUETTA(30),
     RONNA(27),
     YOTTA(24),
@@ -35,6 +40,15 @@ enum class MetricPrefix(val scale: Int) {
     QUECTO(-30)
     ;
 
-    val fullName: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.name")
-    val abbreviation: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.abbr")
+    val translationKey: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.name")
+    val abbreviationKey: Component = Component.translatable("rebar.unit.prefix.${name.lowercase()}.abbr")
+
+    companion object {
+        /**
+         * [HECTO], [DECA], and [DECI] are rarely seen in practical contexts. They are provided here as a convenience both
+         * for the API consumer and for [UnitFormat.Formatted.ignoreCommonlyUnusedPrefixes]
+         */
+        @JvmField
+        val COMMONLY_UNUSED_PREFIXES = setOf(HECTO, DECA, DECI)
+    }
 }
