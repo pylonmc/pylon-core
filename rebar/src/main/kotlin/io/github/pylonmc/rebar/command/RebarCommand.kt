@@ -70,7 +70,18 @@ import io.papermc.paper.math.BlockPosition as PaperBlockPosition
 
 // IF MODIFYING COMMANDS, PLEASE ENSURE YOU UPDATE https://pylonmc.github.io/home/commands-and-permissions/ ACCORDINGLY
 
-private val ERROR_NO_PLAYERS = SimpleCommandExceptionType(MessageComponentSerializer.message().serialize(Component.translatable("argument.entity.notfound.player")))
+private val ERROR_UNKNOWN_PLAYER = SimpleCommandExceptionType(MessageComponentSerializer.message().serialize(Component.translatable("argument.player.unknown")))
+
+private fun CommandContext<CommandSourceStack>.isSelectorArgument(name: String): Boolean {
+    var context: CommandContext<CommandSourceStack>? = this
+    while (context != null) {
+        context.nodes.firstOrNull { it.node.name == name }?.let {
+            return context.input.getOrNull(it.range.start) == '@'
+        }
+        context = context.child
+    }
+    return false
+}
 
 private val guide = buildCommand("guide") {
     permission("rebar.command.guide")
@@ -83,7 +94,7 @@ private val guide = buildCommand("guide") {
         executes {
             RebarMetrics.onCommandRun("/rb guide")
             val players = getArgument<List<Player>>("players")
-            if (players.isEmpty()) throw ERROR_NO_PLAYERS.create()
+            if (players.isEmpty() && !isSelectorArgument("players")) throw ERROR_UNKNOWN_PLAYER.create()
             for (player in players) {
                 player.inventory.addItem(RebarGuide.STACK)
             }
@@ -107,7 +118,7 @@ private val give = buildCommand("give") {
             fun givePlayers(context: CommandContext<CommandSourceStack>, amount: Int) {
                 val item = context.getArgument<ItemTypeWrapper>("item").createItemStack()
                 val players = context.getArgument<List<Player>>("players")
-                if (players.isEmpty()) throw ERROR_NO_PLAYERS.create()
+                if (players.isEmpty() && !context.isSelectorArgument("players")) throw ERROR_UNKNOWN_PLAYER.create()
                 val singular = players.size == 1
                 for (player in players) {
                     var remaining = amount
@@ -313,7 +324,7 @@ private val researchAdd = buildCommand("add") {
     argument("players", ArgumentTypes.players()) {
         fun addResearches(context: CommandContext<CommandSourceStack>, researches: List<Research>, confetti: Boolean = true) {
             val players = context.getArgument<List<Player>>("players")
-            if (players.isEmpty()) throw ERROR_NO_PLAYERS.create()
+            if (players.isEmpty() && !context.isSelectorArgument("players")) throw ERROR_UNKNOWN_PLAYER.create()
             for (player in players) {
                 for (res in researches) {
                     player.addResearch(res, false, confetti)
@@ -376,7 +387,7 @@ private val researchRemove = buildCommand("remove") {
     argument("players", ArgumentTypes.players()) {
         fun removeResearches(context: CommandContext<CommandSourceStack>, researches: List<Research>) {
             val players = context.getArgument<List<Player>>("players")
-            if (players.isEmpty()) throw ERROR_NO_PLAYERS.create()
+            if (players.isEmpty() && !context.isSelectorArgument("players")) throw ERROR_UNKNOWN_PLAYER.create()
             for (player in players) {
                 for (res in researches) {
                     if (player.hasResearch(res)) {
@@ -418,7 +429,7 @@ private val researchPointsSet = buildCommand("set") {
                 RebarMetrics.onCommandRun("/rb research points set")
                 val points = getArgument<Long>("points")
                 val players = getArgument<List<Player>>("players")
-                if (players.isEmpty()) throw ERROR_NO_PLAYERS.create()
+                if (players.isEmpty() && !isSelectorArgument("players")) throw ERROR_UNKNOWN_PLAYER.create()
                 for (player in players) {
                     player.researchPoints = points
                     sender.sendFeedback(
@@ -440,7 +451,7 @@ private val researchPointsAdd = buildCommand("add") {
                 RebarMetrics.onCommandRun("/rb research points add")
                 val points = getArgument<Long>("points")
                 val players = getArgument<List<Player>>("players")
-                if (players.isEmpty()) throw ERROR_NO_PLAYERS.create()
+                if (players.isEmpty() && !isSelectorArgument("players")) throw ERROR_UNKNOWN_PLAYER.create()
                 for (player in players) {
                     player.researchPoints += points
                     sender.sendFeedback(
@@ -462,7 +473,7 @@ private val researchPointsSubtract = buildCommand("subtract") {
                 RebarMetrics.onCommandRun("/rb research points subtract")
                 val points = getArgument<Long>("points")
                 val players = getArgument<List<Player>>("players")
-                if (players.isEmpty()) throw ERROR_NO_PLAYERS.create()
+                if (players.isEmpty() && !isSelectorArgument("players")) throw ERROR_UNKNOWN_PLAYER.create()
                 for (player in players) {
                     player.researchPoints -= points
                     sender.sendFeedback(
