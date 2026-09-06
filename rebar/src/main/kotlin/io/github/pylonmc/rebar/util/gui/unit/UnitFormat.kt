@@ -146,6 +146,10 @@ class UnitFormat @JvmOverloads constructor(
 
     fun format(value: Float) = format(value.toDouble())
 
+    /**
+     * Formats a [Double] value. Unless rounding is configured with [Formatted.decimalPlaces] or
+     * [Formatted.significantFigures], the value defaults to at most 2 decimal places.
+     */
     fun format(value: Double): Formatted {
         return Formatted(
             when {
@@ -153,7 +157,8 @@ class UnitFormat @JvmOverloads constructor(
                 value.isInfinite() && value < 0 -> FormattedValue.NegativeInfinity
                 value.isNaN() -> FormattedValue.NaN
                 else -> FormattedValue.Number(value.toBigDecimal())
-            }
+            },
+            defaultDecimalPlaces = 2
         )
     }
 
@@ -169,7 +174,10 @@ class UnitFormat @JvmOverloads constructor(
      * Represents a value that has already been formatted.
      * You can use this class to override how an already-formatted value is displayed.
      */
-    inner class Formatted @ApiStatus.Internal internal constructor(private val value: FormattedValue) : ComponentLike {
+    inner class Formatted @ApiStatus.Internal internal constructor(
+        private val value: FormattedValue,
+        private val defaultDecimalPlaces: Int? = null
+    ) : ComponentLike {
         private var sigFigs: Int? = null
         private var decimalPlaces: Int? = null
         private var forceDecimalPlaces = false
@@ -182,6 +190,7 @@ class UnitFormat @JvmOverloads constructor(
         /**
          * Sets the number of significant figures. Uses [RoundingMode.HALF_UP] for rounding.
          * For example, if this is set to `3`, then a value of `3.755` will be shown as `3.76`.
+         * This overrides the automatic decimal-place default for `Float`/`Double` values.
          */
         fun significantFigures(sigFigs: Int) = apply { this.sigFigs = sigFigs }
 
@@ -259,8 +268,14 @@ class UnitFormat @JvmOverloads constructor(
             when (value) {
                 is FormattedValue.Number -> {
                     val value = value.value
-                    var usedValue = value.round(MathContext(sigFigs ?: value.precision(), RoundingMode.HALF_UP))
-                    usedValue = usedValue.setScale(decimalPlaces ?: value.scale(), RoundingMode.HALF_UP)
+                    val decimalPlaces = decimalPlaces
+                    val sigFigs = sigFigs
+                    var usedValue = when {
+                        decimalPlaces != null -> value.setScale(decimalPlaces, RoundingMode.HALF_UP)
+                        sigFigs != null -> value.round(MathContext(sigFigs, RoundingMode.HALF_UP))
+                        defaultDecimalPlaces != null -> value.setScale(defaultDecimalPlaces, RoundingMode.HALF_UP)
+                        else -> value
+                    }
                     if (!forceDecimalPlaces) {
                         usedValue = usedValue.stripTrailingZeros()
                     }
