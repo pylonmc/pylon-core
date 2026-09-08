@@ -607,7 +607,7 @@ fun findClosestPointToOtherPointOnLine(p: Vector3f, p1: Vector3f, d1: Vector3f):
  * @param p1 The starting point of the line
  * @param d1 The direction of the line
  *
- * @see <a href="https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d">
+ * @see <a href="https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d">https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d</a>
  */
 fun findClosestDistanceBetweenLineAndPoint(p: Vector3f, p1: Vector3f, d1: Vector3f): Float {
     val t = max(0.0F, findClosestPointToOtherPointOnLine(p, p1, d1))
@@ -615,12 +615,19 @@ fun findClosestDistanceBetweenLineAndPoint(p: Vector3f, p1: Vector3f, d1: Vector
     return (Vector3f(closestPoint).sub(p)).length()
 }
 
-@JvmSynthetic
-internal fun getTargetEntity(player: Player, maxDistanceBetweenRayAndEntity: Float): Entity? {
-    val range = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)!!.value
-    val entities = player.getNearbyEntities(range, range, range)
-    val eyeLocation = player.eyeLocation.toVector().toVector3f()
-    val eyeDirection = player.eyeLocation.getDirection().toVector3f()
+/**
+ * Returns the entity the player is "looking" at if the entity's location is within [maxDistanceBetweenRayAndEntity]
+ * of a ray extending from the player's eyes, going in the direction the player is looking at, and terminating at the
+ * player's entity interaction range.
+ *
+ * This is useful for determining interaction with relatively symmetrical display entities, as those don't have
+ * hitboxes and thus aren't targetable by methods like [Player.getTargetEntity].
+ */
+fun Player.getTargetEntityByLocation(maxDistanceBetweenRayAndEntity: Float): Entity? {
+    val range = getAttribute(Attribute.ENTITY_INTERACTION_RANGE)!!.value
+    val entities = getNearbyEntities(range, range, range)
+    val eyeLocation = this.eyeLocation.toVector().toVector3f()
+    val eyeDirection = this.eyeLocation.getDirection().toVector3f()
 
     for (entity in entities) {
         val distance = findClosestDistanceBetweenLineAndPoint(

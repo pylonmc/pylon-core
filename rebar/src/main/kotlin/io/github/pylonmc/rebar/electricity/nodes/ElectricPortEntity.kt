@@ -7,10 +7,8 @@ import io.github.pylonmc.rebar.electricity.WireConnectionService
 import io.github.pylonmc.rebar.electricity.WireEntity
 import io.github.pylonmc.rebar.entity.EntityStorage
 import io.github.pylonmc.rebar.entity.RebarEntity
-import io.github.pylonmc.rebar.entity.display.InteractionBuilder
 import io.github.pylonmc.rebar.entity.display.ItemDisplayBuilder
 import io.github.pylonmc.rebar.entity.display.transform.TransformBuilder
-import io.github.pylonmc.rebar.entity.interfaces.InteractRebarEntityHandler
 import io.github.pylonmc.rebar.entity.interfaces.RemoveRebarEntityHandler
 import io.github.pylonmc.rebar.i18n.RebarArgument
 import io.github.pylonmc.rebar.item.RebarItem
@@ -20,29 +18,21 @@ import io.github.pylonmc.rebar.util.Either
 import io.github.pylonmc.rebar.util.addToInventoryOrDrop
 import io.github.pylonmc.rebar.util.rebarKey
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.block.Block
-import org.bukkit.entity.Interaction
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityRemoveEvent
-import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import kotlin.math.PI
 
-// aka ActuallyTwoEntitiesInATrenchcoat
-class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, InteractRebarEntityHandler {
+class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
     val node: ElectricNode
 
-    constructor(block: Block, port: ElectricPort) : super(
+    constructor(block: Block, port: ElectricPortSpec) : super(
         KEY,
-        InteractionBuilder()
-            .size(SCALE)
-            .build(
-                block.location.toCenterLocation().add(port.face.direction.multiply(port.radius * 1.01)).add(port.offset)
-            )
-    ) {
-        val display = ItemDisplayBuilder()
+        ItemDisplayBuilder()
             .itemStack(ItemStackBuilder.of(port.material).addCustomModelDataString("electric_port"))
             .transformation(
                 TransformBuilder()
@@ -57,9 +47,7 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
                     .scale(SCALE)
             )
             .build(block.location.toCenterLocation().add(port.face.direction.multiply(port.radius * 1.01)))
-
-        entity.persistentDataContainer.set(displayKey, RebarSerializers.UUID, display.uniqueId)
-
+    ) {
         node = port.node
         entity.persistentDataContainer.set(nodeKey, RebarSerializers.UUID, node.id)
 
@@ -67,13 +55,12 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
     }
 
     @Suppress("unused")
-    constructor(entity: Interaction) : super(entity) {
+    constructor(entity: ItemDisplay) : super(entity) {
         node = ElectricityManager.getNodeById(entity.persistentDataContainer.get(nodeKey, RebarSerializers.UUID)!!)!!
     }
 
     override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
-        @Suppress("UNCHECKED_CAST")
-        for (wire in EntityStorage.getByKey(WireEntity.KEY) as Collection<WireEntity>) {
+        for (wire in WireEntity.loadedWires) {
             if (wire.port.first == node || (wire.otherEnd as? Either.Right)?.value?.first == node) {
                 if (!wire.isHeldByPlayer) {
                     entity.location.world.dropItemNaturally(
@@ -84,17 +71,14 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
                 wire.remove()
             }
         }
-        Bukkit.getEntity(entity.persistentDataContainer.get(displayKey, RebarSerializers.UUID)!!)!!.remove()
     }
 
-    override fun onInteractedWith(event: PlayerInteractEntityEvent, priority: EventPriority) {
+    fun onInteractedWith(event: PlayerInteractEvent) {
         val player = event.player
         val wire = WireConnectionService.getWirePlayerIsConnecting(player)
 
         if (wire == null) {
-            @Suppress("UNCHECKED_CAST")
-            val wires = EntityStorage.getByKey(WireEntity.KEY) as Collection<WireEntity>
-            val existingWire = wires
+            val existingWire = WireEntity.loadedWires
                 .filter { it.port.first == node || (it.otherEnd as? Either.Right)?.value?.first == node }
                 .maxByOrNull { it.length }
             val wire = if (existingWire != null) {
@@ -150,8 +134,6 @@ class ElectricPortEntity : RebarEntity<Interaction>, RemoveRebarEntityHandler, I
     }
 
     companion object {
-
-        private val displayKey = rebarKey("display")
         private val nodeKey = rebarKey("node")
 
         @JvmField

@@ -3,8 +3,8 @@ package io.github.pylonmc.rebar.block.interfaces
 import io.github.pylonmc.rebar.datatypes.RebarSerializers
 import io.github.pylonmc.rebar.electricity.ElectricityManager
 import io.github.pylonmc.rebar.electricity.nodes.ElectricNode
-import io.github.pylonmc.rebar.electricity.nodes.ElectricPort
 import io.github.pylonmc.rebar.electricity.nodes.ElectricPortEntity
+import io.github.pylonmc.rebar.electricity.nodes.ElectricPortSpec
 import io.github.pylonmc.rebar.event.RebarBlockBreakEvent
 import io.github.pylonmc.rebar.event.RebarBlockDeserializeEvent
 import io.github.pylonmc.rebar.event.RebarBlockSerializeEvent
@@ -56,7 +56,7 @@ interface ElectricRebarBlock : EntityHolderRebarBlock {
      * Adds an electric node to this block that has a physical presence in the form of several display entities.
      */
     @ApiStatus.NonExtendable
-    fun addElectricPort(port: ElectricPort) {
+    fun addElectricPort(port: ElectricPortSpec) {
         val node = port.node
         addEntity("port_${node.id}", ElectricPortEntity(block, port))
         addElectricNode(node)

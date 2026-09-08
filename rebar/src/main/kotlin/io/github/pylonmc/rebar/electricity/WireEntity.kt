@@ -222,6 +222,10 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
                 else -> Either.Left(wiresRequired(dist))
             }
         }
+
+        @Suppress("UNCHECKED_CAST")
+        @JvmStatic
+        val loadedWires: Collection<WireEntity> get() = EntityStorage.getByKey(KEY) as Collection<WireEntity>
     }
 
     enum class ConnectionFailureReason(val errorMessage: Component) {

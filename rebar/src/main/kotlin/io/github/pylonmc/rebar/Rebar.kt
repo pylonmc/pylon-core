@@ -334,7 +334,7 @@ object Rebar : JavaPlugin(), RebarAddon {
 
         RebarEntity.register<FallingBlock, FallingRebarBlockHandler.RebarFallingBlockEntity>(FallingRebarBlockHandler.KEY)
 
-        RebarEntity.register<Interaction, ElectricPortEntity>(ElectricPortEntity.KEY)
+        RebarEntity.register<ItemDisplay, ElectricPortEntity>(ElectricPortEntity.KEY)
         RebarEntity.register<ItemDisplay, WireEntity>(WireEntity.KEY)
 
         RecipeType.addVanillaRecipes()

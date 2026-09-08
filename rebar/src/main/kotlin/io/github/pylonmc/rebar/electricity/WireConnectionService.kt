@@ -1,11 +1,13 @@
 package io.github.pylonmc.rebar.electricity
 
 import io.github.pylonmc.rebar.Rebar
+import io.github.pylonmc.rebar.electricity.nodes.ElectricPortEntity
 import io.github.pylonmc.rebar.entity.EntityStorage
 import io.github.pylonmc.rebar.i18n.RebarArgument
 import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.item.interfaces.WireRebarItem
 import io.github.pylonmc.rebar.util.delayTicks
+import io.github.pylonmc.rebar.util.getTargetEntityByLocation
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -13,14 +15,14 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.PlayerChangedWorldEvent
-import org.bukkit.event.player.PlayerItemHeldEvent
-import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
+import org.bukkit.inventory.EquipmentSlot
 import java.util.*
 
 object WireConnectionService : Listener {
@@ -115,8 +117,7 @@ object WireConnectionService : Listener {
     private fun onBlockPlace(@Suppress("unused") unused: BlockPlaceEvent) {
         Rebar.scope.launch {
             delayTicks(1)
-            @Suppress("UNCHECKED_CAST")
-            for (wire in EntityStorage.getByKey(WireEntity.KEY) as Collection<WireEntity>) {
+            for (wire in WireEntity.loadedWires) {
                 if (wire.isObstructed && !wire.isHeldByPlayer) {
                     val loc = wire.port.second
                     loc.world.dropItemNaturally(loc, wire.wire.createNewItemStack(wire.wireCount))
@@ -124,5 +125,15 @@ object WireConnectionService : Listener {
                 }
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private fun onPlayerInteract(event: PlayerInteractEvent) {
+        if (event.hand != EquipmentSlot.HAND || !event.action.isRightClick) return
+        val target = event.player.getTargetEntityByLocation(ElectricPortEntity.SCALE.toFloat()) ?: return
+        val port = EntityStorage.getAs<ElectricPortEntity>(target) ?: return
+        port.onInteractedWith(event)
+        event.setUseInteractedBlock(Event.Result.DENY)
+        event.setUseItemInHand(Event.Result.DENY)
     }
 }

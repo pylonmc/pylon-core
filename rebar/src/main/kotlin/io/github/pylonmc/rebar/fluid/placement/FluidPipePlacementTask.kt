@@ -170,7 +170,7 @@ internal class FluidPipePlacementTask(
      */
     private fun recalculateTarget() {
         // If the player is looking at a fluid point, we should set that as the target
-        val targetEntity = getTargetEntity(player, 1.5F * FluidEndpointDisplay.distanceFromFluidPointCenterToCorner)
+        val targetEntity = player.getTargetEntityByLocation(1.5F * FluidEndpointDisplay.distanceFromFluidPointCenterToCorner)
         if (targetEntity != null) {
             val fluidPoint = EntityStorage.get(targetEntity)
             if (fluidPoint is FluidPointDisplay) {

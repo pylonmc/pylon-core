@@ -47,7 +47,7 @@ interface SimpleElectricRebarBlock : ElectricRebarBlock {
                 block.position,
             )
         }
-        addElectricPort(ElectricPort(node, face, radius = radius))
+        addElectricPort(ElectricPortSpec(node, face, radius = radius))
     }
 
     /**

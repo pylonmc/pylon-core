@@ -4,8 +4,11 @@ import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.util.Vector
 
+/**
+ * Holds information for constructing an [ElectricPortEntity]
+ */
 @JvmRecord
-data class ElectricPort @JvmOverloads constructor(
+data class ElectricPortSpec @JvmOverloads constructor(
     val node: ElectricNode,
     val face: BlockFace,
     val radius: Double = 0.5,
