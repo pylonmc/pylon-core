@@ -18,6 +18,9 @@ import kotlin.math.min
 
 /**
  * A set of nodes where each node has at least one connection to another node in the set.
+ *
+ * See https://pylonmc.github.io/documentation/internals/electricity/#electric-networks for a much more comprehensive
+ * technical documentation.
  */
 class ElectricNetwork {
 
@@ -31,7 +34,7 @@ class ElectricNetwork {
     /**
      * A map of heuristics based on distance to consumers.
      */
-    private var heuristics: Map<ElectricNode, Map<ElectricNode, Int>>? = null
+    private var distances: Map<ElectricNode, Map<ElectricNode, Int>>? = null
 
     private var snapshot: ConsumerSnapshot? = null
 
@@ -43,7 +46,7 @@ class ElectricNetwork {
             is ElectricAcceptorNode -> acceptors.add(node)
             is ElectricConnectorNode -> {}
         }
-        heuristics = null
+        distances = null
     }
 
     fun removeNode(node: ElectricNode) {
@@ -51,7 +54,7 @@ class ElectricNetwork {
         producers.remove(node)
         consumers.remove(node)
         acceptors.remove(node)
-        heuristics = null
+        distances = null
     }
 
     fun isPartOfNetwork(node: ElectricNode): Boolean = node.id in nodeMap
@@ -78,16 +81,19 @@ class ElectricNetwork {
      * with the amount of power produced/accepted.
      */
     fun tick() {
+        // consumer tick
         if (snapshot == null) {
             distributePowerToConsumers()
         }
 
+        // acceptor tick
         val remainingPower = snapshot!!.remainingPower.map { ObjectDoubleMutablePair(it.key(), it.valueDouble()) }
         val disconnectedEdges = snapshot!!.disconnectedEdges.toMutableSet()
         val edgeLoads = snapshot!!.edgeLoads
 
         distributePowerToAcceptors(remainingPower, disconnectedEdges, edgeLoads)
 
+        // producer tick
         for ((producer, remaining) in remainingPower) {
             val taken = producer.power * POWER_ADJUSTMENT - remaining
             producer.powerTakeHandler.accept(taken)
@@ -178,6 +184,7 @@ class ElectricNetwork {
         )
     }
 
+    // see https://pylonmc.github.io/documentation/internals/electricity/#consumer-snapshots
     private data class ConsumerSnapshot(
         val remainingPower: List<ObjectDoublePair<ElectricProducerNode>>,
         val disconnectedEdges: Set<Edge>,
@@ -247,9 +254,9 @@ class ElectricNetwork {
         consumer: ElectricNode,
         disconnectedEdges: Set<Edge>,
     ): List<Edge>? {
-        if (heuristics == null) heuristics = calculateDistanceHeuristics()
+        if (distances == null) distances = calculateDistanceHeuristics()
         val heuristic =
-            heuristics!![consumer] ?: throw IllegalArgumentException("Target node is not a consumer in this network")
+            distances!![consumer] ?: throw IllegalArgumentException("Target node is not a consumer in this network")
         val visited = mutableSetOf<ElectricNode>()
         val queue = PriorityQueue<ElectricNode>(compareBy { heuristic[it]!! })
         queue.add(producer)
@@ -367,6 +374,9 @@ class ElectricNetwork {
 
         private val POWER_ADJUSTMENT = RebarConfig.ELECTRICITY_TICK_INTERVAL / 20.0
 
+        /**
+         * @return the merged network if [network1] and [network2] are connected by at least one edge, or null otherwise
+         */
         fun tryMerge(network1: ElectricNetwork, network2: ElectricNetwork): ElectricNetwork? {
             if (network1.nodeMap.size > network2.nodeMap.size) {
                 return tryMerge(network2, network1)
@@ -394,6 +404,3 @@ private infix fun Double.roughlyEquals(other: Double): Boolean = abs(this - othe
 
 private operator fun <K> ObjectDoublePair<K>.component1(): K = this.key()
 private operator fun ObjectDoublePair<*>.component2(): Double = this.valueDouble()
-
-private operator fun <K> Object2DoubleMap.Entry<K>.component1(): K = this.key
-private operator fun Object2DoubleMap.Entry<*>.component2(): Double = this.doubleValue

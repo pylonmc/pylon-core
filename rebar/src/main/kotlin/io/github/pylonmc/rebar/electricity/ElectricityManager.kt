@@ -84,6 +84,11 @@ object ElectricityManager {
         mergeNetworks(candidates)
     }
 
+    /**
+     * Attempts to merge any mergeable networks in [candidates]. All [candidates] are removed from the network list first,
+     * then are attempted to be merged. Any merged results are added back into the network list, with the leftovers also
+     * being re-added.
+     */
     @JvmSynthetic
     internal fun mergeNetworks(candidates: Collection<ElectricNetwork>) {
         val candidates = ArrayDeque(candidates)
