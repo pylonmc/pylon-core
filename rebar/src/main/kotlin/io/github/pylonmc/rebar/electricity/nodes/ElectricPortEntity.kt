@@ -87,11 +87,7 @@ class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
                 player.addToInventoryOrDrop(mainHandItem)
                 existingWire
             } else {
-                val wireItem = RebarItem.fromStack<WireRebarItem>(player.inventory.itemInMainHand)
-                if (wireItem == null) {
-                    player.sendMessage(Component.translatable("rebar.message.wiring.need_wire"))
-                    return
-                }
+                val wireItem = RebarItem.fromStack<WireRebarItem>(player.inventory.itemInMainHand) ?: return
                 WireEntity(node to entity.location, Either.Left(player), wireItem)
             }
             wire.giveToPlayer(player, node)
@@ -121,9 +117,11 @@ class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
             }
 
             WireConnectionService.stopConnectingWire(player, delete = false)
+            val wireItem = RebarItem.fromStack<WireRebarItem>(mainHandItem)!!
+
+            wire.setWireItem(wireItem)
             wire.connect(otherPort, node to entity.location)
 
-            val wireItem = RebarItem.fromStack<WireRebarItem>(mainHandItem)!!
             ElectricNetwork.Edge(wire.port.first, node).powerLimit = wireItem.maxPower
             ElectricNetwork.Edge(node, wire.port.first).powerLimit = wireItem.maxPower
 

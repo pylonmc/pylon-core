@@ -170,8 +170,11 @@ pipe-placement:
   # placement will be cancelled
   cancel-distance: 32
 
-# If a player attempts to make a wire longer than this, the wire placement will be cancelled
-max-wire-length: 32
+wiring:
+  # The interval (in Minecraft ticks) between wire placement message update task ticks
+  tick-interval: 10
+  # If a player attempts to make a wire longer than this, the wire placement will be cancelled
+  max-length: 32
 
 # How many characters a line can be before it is split into a new line when translating
 translation-wrap-limit: 64

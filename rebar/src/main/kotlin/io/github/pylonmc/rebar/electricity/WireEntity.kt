@@ -86,6 +86,8 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
     val isObstructed: Boolean get() = isObstructed(port.second, otherEnd.location, length)
 
+    fun canConnect() = canConnect(port.second, otherEnd.location)
+
     /**
      * Updates the state and visuals of the wire
      */
@@ -101,17 +103,6 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         }
 
         length = loc1.distance(loc2)
-
-        val player = (otherEnd as? Either.Left)?.value
-        if (player != null && length > RebarConfig.MAX_WIRE_LENGTH) {
-            player.sendMessage(
-                Component.translatable(
-                    "rebar.message.wiring.too_long",
-                    RebarArgument.of("blocks", RebarConfig.MAX_WIRE_LENGTH)
-                )
-            )
-            remove()
-        }
     }
 
     /**
@@ -217,7 +208,7 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         fun canConnect(start: Location, end: Location): Either<Int, ConnectionFailureReason> {
             val dist = start.distance(end)
             return when {
-                dist > RebarConfig.MAX_WIRE_LENGTH -> Either.Right(ConnectionFailureReason.TOO_LONG)
+                dist > RebarConfig.WIRING_MAX_LENGTH -> Either.Right(ConnectionFailureReason.TOO_LONG)
                 isObstructed(start, end, dist) -> Either.Right(ConnectionFailureReason.OBSTRUCTION)
                 else -> Either.Left(wiresRequired(dist))
             }
@@ -230,7 +221,7 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
     enum class ConnectionFailureReason(val errorMessage: Component) {
         OBSTRUCTION(Component.translatable("rebar.message.wiring.obstructed")),
-        TOO_LONG(Component.translatable("rebar.message.wiring.too_long", RebarArgument.of("blocks", RebarConfig.MAX_WIRE_LENGTH)))
+        TOO_LONG(Component.translatable("rebar.message.wiring.too_long", RebarArgument.of("blocks", RebarConfig.WIRING_MAX_LENGTH)))
     }
 }
 

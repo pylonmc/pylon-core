@@ -1,11 +1,13 @@
 package io.github.pylonmc.rebar.electricity
 
 import io.github.pylonmc.rebar.Rebar
+import io.github.pylonmc.rebar.config.RebarConfig
 import io.github.pylonmc.rebar.electricity.nodes.ElectricPortEntity
 import io.github.pylonmc.rebar.entity.EntityStorage
 import io.github.pylonmc.rebar.i18n.RebarArgument
 import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.item.interfaces.WireRebarItem
+import io.github.pylonmc.rebar.util.Either
 import io.github.pylonmc.rebar.util.delayTicks
 import io.github.pylonmc.rebar.util.getTargetEntityByLocation
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent
@@ -35,22 +37,25 @@ object WireConnectionService : Listener {
         connecting[player.uniqueId] = wire
         jobs[player.uniqueId] = Rebar.scope.launch {
             while (true) {
-                if (wire.isObstructed) {
-                    player.sendActionBar(Component.translatable("rebar.message.wiring.obstructed"))
-                } else {
-                    val mainHandItem = player.inventory.itemInMainHand
-                    val total = if (RebarItem.isRebarItem<WireRebarItem>(mainHandItem)) mainHandItem.amount else 0
-                    val color =
-                        if (player.gameMode != GameMode.CREATIVE && wire.wireCount > total) NamedTextColor.RED else NamedTextColor.GREEN
-                    player.sendActionBar(
-                        Component.translatable(
-                            "rebar.message.wiring.wiring",
-                            RebarArgument.of("wires", wire.wireCount),
-                            RebarArgument.of("total", total)
-                        ).color(color)
-                    )
+                when (val connection = wire.canConnect()) {
+                    is Either.Left -> {
+                        val needed = connection.value
+                        val mainHandItem = player.inventory.itemInMainHand
+                        val total = if (RebarItem.isRebarItem<WireRebarItem>(mainHandItem)) mainHandItem.amount else 0
+                        val color =
+                            if (player.gameMode != GameMode.CREATIVE && needed > total) NamedTextColor.RED else NamedTextColor.GREEN
+                        player.sendActionBar(
+                            Component.translatable(
+                                "rebar.message.wiring.wiring",
+                                RebarArgument.of("wires", needed),
+                                RebarArgument.of("total", total)
+                            ).color(color)
+                        )
+                    }
+
+                    is Either.Right -> player.sendActionBar(connection.value.errorMessage)
                 }
-                delayTicks(10)
+                delayTicks(RebarConfig.WIRING_TICK_INTERVAL.toLong())
             }
         }
         player.sendMessage(Component.translatable("rebar.message.wiring.instructions"))
