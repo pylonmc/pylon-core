@@ -45,8 +45,11 @@ import org.bukkit.persistence.PersistentDataHolder
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
+import org.joml.Intersectionf
 import org.joml.Matrix3f
+import org.joml.Quaternionf
 import org.joml.RoundingMode
+import org.joml.Vector2f
 import org.joml.Vector3d
 import org.joml.Vector3f
 import org.joml.Vector3i
@@ -592,7 +595,7 @@ fun findClosestPointBetweenSkewLines(p1: Vector3f, d1: Vector3f, p2: Vector3f, d
  *
  * @return Supposing the equation of the line is p1 + t*d1, returns the t representing the closest point
  *
- * @see <a href="https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d">
+ * @see <a href="https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d">https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d</a>
  */
 fun findClosestPointToOtherPointOnLine(p: Vector3f, p1: Vector3f, d1: Vector3f): Float {
     val v = Vector3f(p).sub(p1)
@@ -641,6 +644,47 @@ fun Player.getTargetEntityByLocation(maxDistanceBetweenRayAndEntity: Float): Ent
     }
 
     return null
+}
+
+/**
+ * Returns the closest intersection of a line and a cylinder, if it exists.
+ * Also returns null if the line is parallel to the cylinder.
+ *
+ * @param cyPos position of cylinder's origin
+ * @param cyVec vector of cylinder (with length being cylinder length)
+ * @param cyRad radius of cylinder
+ * @param linPos position of line's origin
+ * @param linVec vector of line (with length being line length)
+ *
+ * @see <a href="https://math.stackexchange.com/a/2613826/1291722">https://math.stackexchange.com/a/2613826/1291722</a>
+ */
+fun intersectionOfLineAndCylinder(cyPos: Vector3f, cyVec: Vector3f, cyRad: Float, linPos: Vector3f, linVec: Vector3f): Vector3f? {
+    val linPosOffset = linPos - cyPos
+
+    // rotate coordinate system such that the problem becomes a line-circle intersection problem in 2d
+    val cyAxis = cyVec.normalize(Vector3f())
+    val cyRotation = Quaternionf().rotationTo(cyAxis, Vector3f(0f, 0f, 1f))
+
+    val rotLinPosOffset = linPosOffset.rotate(cyRotation, Vector3f())
+    val rotLinVec = linVec.rotate(cyRotation, Vector3f())
+    if (rotLinVec.x == 0f && rotLinVec.y == 0f) return null
+
+    // project to 2d
+    val rotLinPosOffset2d = Vector2f(rotLinPosOffset.x(), rotLinPosOffset.y())
+    val linDir2d = Vector2f(rotLinVec.x, rotLinVec.y).normalize()
+
+    val result = Vector2f()
+    if (!Intersectionf.intersectRayCircle(rotLinPosOffset2d, linDir2d, Vector2f(0f, 0f), cyRad * cyRad, result)) return null
+    val closestT = result.x
+    // intersection is outside our line segment
+    if (closestT < 0 || closestT * closestT > rotLinVec.lengthSquared()) return null
+
+    // reproject to 3d
+    val intersection3d = (rotLinPosOffset + rotLinVec.normalize(Vector3f()) * closestT).rotate(cyRotation.conjugate())
+    val z = intersection3d.dot(cyAxis)
+    if (z < 0 || z > cyVec.length()) return null
+
+    return intersection3d + cyPos
 }
 
 fun pickaxeMineable() = Registry.BLOCK.getTag(BlockTypeTagKeys.MINEABLE_PICKAXE)

@@ -25,17 +25,17 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityRemoveEvent
 import org.joml.Matrix4f
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.ceil
-
-private typealias Port = Pair<ElectricNode, Location>
+import kotlin.math.min
 
 class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
-    var port: Port
+    var port: ConnectedPort
         private set
 
-    var otherEnd: Either<Player, Port>
+    var otherEnd: Either<Player, ConnectedPort>
         private set
 
     var length: Double = 0.0
@@ -46,16 +46,16 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
     var wire: RebarItemSchema
         private set
 
-    constructor(port: Port, otherEnd: Either<Player, Port>, wireItem: WireRebarItem) : super(
+    constructor(port: ConnectedPort, otherEnd: Either<Player, ConnectedPort>, wireItem: WireRebarItem) : super(
         KEY,
         ItemDisplayBuilder()
-            .transformation(getTransform(port.second, otherEnd.location))
-            .build(port.second)
+            .transformation(getTransform(port.location, otherEnd.location))
+            .build(port.location)
     ) {
         this.port = port
         this.otherEnd = otherEnd
         this.wire = (wireItem as RebarItem).schema
-        this.length = port.second.distance(otherEnd.location)
+        this.length = port.location.distance(otherEnd.location)
         EntityStorage.add(this)
         setWireItem(wireItem)
     }
@@ -64,13 +64,13 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
     constructor(entity: ItemDisplay) : super(entity) {
         val pdc = entity.persistentDataContainer
 
-        val node = ElectricityManager.getNodeById(pdc.get(portKey, RebarSerializers.UUID)!!)!!
+        val node = pdc.get(portKey, RebarSerializers.UUID)!!
         val loc1 = pdc.get(portLocKey, RebarSerializers.LOCATION)!!
-        port = node to loc1
+        port = ConnectedPort(node, loc1)
 
-        val node2 = ElectricityManager.getNodeById(pdc.get(otherEndKey, RebarSerializers.UUID)!!)!!
+        val node2 = pdc.get(otherEndKey, RebarSerializers.UUID)!!
         val loc2 = pdc.get(otherEndLocKey, RebarSerializers.LOCATION)!!
-        otherEnd = Either.Right(node2 to loc2)
+        otherEnd = Either.Right(ConnectedPort(node2, loc2))
 
         wire = pdc.get(itemKey, itemType)!!
 
@@ -84,15 +84,15 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
     val isHeldByPlayer: Boolean get() = otherEnd is Either.Left
 
-    val isObstructed: Boolean get() = isObstructed(port.second, otherEnd.location, length)
+    val isObstructed: Boolean get() = isObstructed(port.location, otherEnd.location, length)
 
-    fun canConnect() = canConnect(port.second, otherEnd.location)
+    fun canConnect() = canConnect(port.location, otherEnd.location)
 
     /**
      * Updates the state and visuals of the wire
      */
     fun update() {
-        val loc1 = port.second
+        val loc1 = port.location
         val loc2 = otherEnd.location
 
         entity.setTransformationMatrix(getTransform(loc1, loc2))
@@ -111,9 +111,9 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
      */
     fun giveToPlayer(player: Player, disconnecting: ElectricNode) {
         val otherEnd = (this.otherEnd as? Either.Right)?.value ?: return
-        otherEnd.first.disconnectFrom(port.first)
+        otherEnd.node.disconnectFrom(port.node)
 
-        if (disconnecting == port.first) {
+        if (disconnecting == port.node) {
             port = otherEnd
         }
 
@@ -125,21 +125,34 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
     /**
      * Connects the wire between the two ports. Returns the failure reason if failed
      */
-    fun connect(port1: Port, port2: Port): ConnectionFailureReason? {
-        val connection = canConnect(port1.second, port2.second)
+    fun connect(port1: ConnectedPort, port2: ConnectedPort): ConnectionFailureReason? {
+        val connection = canConnect(port1.location, port2.location)
         if (connection is Either.Right) {
             return connection.value
         }
 
-        (otherEnd as? Either.Right)?.value?.first?.disconnectFrom(port.first)
+        (otherEnd as? Either.Right)?.value?.node?.disconnectFrom(port.node)
         port = port1
         otherEnd = Either.Right(port2)
 
-        port1.first.connect(port2.first)
+        port1.node.connect(port2.node)
 
         update()
 
         return null
+    }
+
+    fun dropItemsAt(location: Location) {
+        var amount = wireCount
+        val item = wire.createNewItemStack()
+        while (amount > 0) {
+            val toDrop = min(amount, item.maxStackSize)
+            amount -= toDrop
+            location.world.dropItemNaturally(
+                location,
+                item.asQuantity(toDrop)
+            )
+        }
     }
 
     override fun onUnload() {
@@ -147,11 +160,11 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
         if (otherEnd != null) {
             val pdc = entity.persistentDataContainer
-            pdc.set(portKey, RebarSerializers.UUID, port.first.id)
-            pdc.set(portLocKey, RebarSerializers.LOCATION, port.second)
+            pdc.set(portKey, RebarSerializers.UUID, port.node.id)
+            pdc.set(portLocKey, RebarSerializers.LOCATION, port.location)
 
-            pdc.set(otherEndKey, RebarSerializers.UUID, otherEnd.first.id)
-            pdc.set(otherEndLocKey, RebarSerializers.LOCATION, otherEnd.second)
+            pdc.set(otherEndKey, RebarSerializers.UUID, otherEnd.node.id)
+            pdc.set(otherEndLocKey, RebarSerializers.LOCATION, otherEnd.location)
 
             pdc.set(itemKey, itemType, wire)
         } else {
@@ -163,7 +176,7 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
     override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
         when (val otherEnd = otherEnd) {
             is Either.Left -> WireConnectionService.stopConnectingWire(otherEnd.value, delete = false)
-            is Either.Right -> otherEnd.value.first.disconnectFrom(port.first)
+            is Either.Right -> otherEnd.value.node.disconnectFrom(port.node)
         }
     }
 
@@ -223,10 +236,15 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         OBSTRUCTION(Component.translatable("rebar.message.wiring.obstructed")),
         TOO_LONG(Component.translatable("rebar.message.wiring.too_long", RebarArgument.of("blocks", RebarConfig.WIRING_MAX_LENGTH)))
     }
+
+    class ConnectedPort(private val nodeId: UUID, val location: Location) {
+        constructor(node: ElectricNode, location: Location) : this(node.id, location)
+        val node by lazy { ElectricityManager.getNodeById(nodeId)!! }
+    }
 }
 
-private val Either<Player, Port>.location
+private val Either<Player, WireEntity.ConnectedPort>.location
     get() = when (this) {
         is Either.Left -> value.eyeLocation.subtract(0.0, 0.5, 0.0)
-        is Either.Right -> value.second
+        is Either.Right -> value.location
     }

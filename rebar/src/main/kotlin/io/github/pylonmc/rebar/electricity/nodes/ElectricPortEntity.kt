@@ -15,7 +15,6 @@ import io.github.pylonmc.rebar.item.RebarItem
 import io.github.pylonmc.rebar.item.builder.ItemStackBuilder
 import io.github.pylonmc.rebar.item.interfaces.WireRebarItem
 import io.github.pylonmc.rebar.util.Either
-import io.github.pylonmc.rebar.util.addToInventoryOrDrop
 import io.github.pylonmc.rebar.util.rebarKey
 import net.kyori.adventure.text.Component
 import org.bukkit.GameMode
@@ -28,7 +27,7 @@ import kotlin.math.PI
 
 class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
-    val node: ElectricNode
+    val node: ElectricNode by lazy { ElectricityManager.getNodeById(entity.persistentDataContainer.get(nodeKey, RebarSerializers.UUID)!!)!! }
 
     constructor(block: Block, port: ElectricPortSpec) : super(
         KEY,
@@ -48,55 +47,51 @@ class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
             )
             .build(block.location.toCenterLocation().add(port.face.direction.multiply(port.radius * 1.01)))
     ) {
-        node = port.node
-        entity.persistentDataContainer.set(nodeKey, RebarSerializers.UUID, node.id)
+        entity.persistentDataContainer.set(nodeKey, RebarSerializers.UUID, port.node.id)
 
         EntityStorage.add(this)
     }
 
     @Suppress("unused")
-    constructor(entity: ItemDisplay) : super(entity) {
-        node = ElectricityManager.getNodeById(entity.persistentDataContainer.get(nodeKey, RebarSerializers.UUID)!!)!!
-    }
+    constructor(entity: ItemDisplay) : super(entity)
 
-    override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
-        for (wire in WireEntity.loadedWires) {
-            if (wire.port.first == node || (wire.otherEnd as? Either.Right)?.value?.first == node) {
-                if (!wire.isHeldByPlayer) {
-                    entity.location.world.dropItemNaturally(
-                        entity.location,
-                        wire.wire.createNewItemStack(wire.wireCount)
-                    )
-                }
-                wire.remove()
-            }
+    val connectedWires: List<WireEntity>
+        get() = WireEntity.loadedWires.filter { wire -> wire.port.node == node || (wire.otherEnd as? Either.Right)?.value?.node == node }
+
+    private fun dropConnectedWires() {
+        for (wire in connectedWires) {
+            if (wire.isHeldByPlayer) continue
+            wire.dropItemsAt(entity.location)
+            wire.remove()
         }
     }
 
+    override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
+        dropConnectedWires()
+    }
+
     fun onInteractedWith(event: PlayerInteractEvent) {
+        if (event.action.isRightClick) {
+            handleWireConnection(event)
+        } else if (RebarItem.isRebarItem<WireRebarItem>(event.player.inventory.itemInMainHand)) {
+            dropConnectedWires()
+        }
+    }
+
+    private fun handleWireConnection(event: PlayerInteractEvent) {
         val player = event.player
         val wire = WireConnectionService.getWirePlayerIsConnecting(player)
 
         if (wire == null) {
-            val existingWire = WireEntity.loadedWires
-                .filter { it.port.first == node || (it.otherEnd as? Either.Right)?.value?.first == node }
-                .maxByOrNull { it.length }
-            val wire = if (existingWire != null) {
-                val mainHandItem = player.inventory.itemInMainHand
-                player.inventory.setItemInMainHand(existingWire.wire.createNewItemStack(existingWire.wireCount))
-                player.addToInventoryOrDrop(mainHandItem)
-                existingWire
-            } else {
-                val wireItem = RebarItem.fromStack<WireRebarItem>(player.inventory.itemInMainHand) ?: return
-                WireEntity(node to entity.location, Either.Left(player), wireItem)
-            }
+            val wireItem = RebarItem.fromStack<WireRebarItem>(player.inventory.itemInMainHand) ?: return
+            val wire = WireEntity(WireEntity.ConnectedPort(node, entity.location), Either.Left(player), wireItem)
             wire.giveToPlayer(player, node)
             WireConnectionService.startConnectingWire(player, wire)
-        } else if (wire.port.first == node) {
+        } else if (wire.port.node == node || wire.port.node.isConnectedTo(node)) {
             WireConnectionService.stopConnectingWire(player)
         } else {
             val otherPort = wire.port
-            val wires = when (val connection = WireEntity.canConnect(otherPort.second, entity.location)) {
+            val wires = when (val connection = WireEntity.canConnect(otherPort.location, entity.location)) {
                 is Either.Left -> connection.value
                 is Either.Right -> {
                     player.sendMessage(connection.value.errorMessage)
@@ -120,10 +115,10 @@ class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
             val wireItem = RebarItem.fromStack<WireRebarItem>(mainHandItem)!!
 
             wire.setWireItem(wireItem)
-            wire.connect(otherPort, node to entity.location)
+            wire.connect(otherPort, WireEntity.ConnectedPort(node, entity.location))
 
-            ElectricNetwork.Edge(wire.port.first, node).powerLimit = wireItem.maxPower
-            ElectricNetwork.Edge(node, wire.port.first).powerLimit = wireItem.maxPower
+            ElectricNetwork.Edge(wire.port.node, node).powerLimit = wireItem.maxPower
+            ElectricNetwork.Edge(node, wire.port.node).powerLimit = wireItem.maxPower
 
             if (player.gameMode != GameMode.CREATIVE) {
                 player.inventory.setItemInMainHand(mainHandItem.subtract(wires))
